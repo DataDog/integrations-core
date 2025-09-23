@@ -1,757 +1,1191 @@
 {
-    "title": "Tomcat - Overview",
-    "author_name": "Datadog",
-    "description": "## Tomcat Integration\n\nThe Tomcat overview dashboard provides a high-level view and insight into your Tomcat server activity, including performance, utilization, and errors.\n\nFor more information on setup and monitoring, check out the following:\n\n- [Tomcat integration docs](https://docs.datadoghq.com/integrations/tomcat/)\n- [Blog post on key metrics for monitoring Tomcat](https://www.datadoghq.com/blog/tomcat-architecture-and-performance/)\n- [Blog post on collecting metrics with Tomcat monitoring tools](https://www.datadoghq.com/blog/tomcat-monitoring-tools/)\n- [Blog post on analyzing Tomcat logs and metrics](https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog/)",
-    "widgets": [
-      {
-        "id": 6506668793177520,
-        "definition": {
-          "title": "About Tomcat",
-          "title_align": "left",
-          "type": "group",
-          "banner_img": "/static/images/integration_dashboard/tomcat_hero_2.png",
-          "show_title": false,
-          "layout_type": "ordered",
-          "widgets": [
-            {
-              "id": 4119169358060222,
-              "definition": {
-                "type": "note",
-                "content": "Using this dashboard, you can get a high-level view and understanding of your Tomcat server activity, including performance, utilization, and errors.",
-                "background_color": "transparent",
-                "font_size": "16",
-                "text_align": "left",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left"
-              },
-              "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
+  "title": "Tomcat - Overview",
+  "description": "## Tomcat Integration\n\nThe Tomcat overview dashboard provides a high-level view and insight into your Tomcat server activity, including performance, utilization, and errors.\n\nFor more information on setup and monitoring, check out the following:\n\n- [Tomcat integration docs](https://docs.datadoghq.com/integrations/tomcat/)\n- [Blog post on key metrics for monitoring Tomcat](https://www.datadoghq.com/blog/tomcat-architecture-and-performance/)\n- [Blog post on collecting metrics with Tomcat monitoring tools](https://www.datadoghq.com/blog/tomcat-monitoring-tools/)\n- [Blog post on analyzing Tomcat logs and metrics](https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog/)",
+  "widgets": [
+    {
+      "id": 6506668793177520,
+      "definition": {
+        "title": "About Tomcat",
+        "title_align": "left",
+        "banner_img": "/static/images/integration_dashboard/tomcat_hero_2.png",
+        "show_title": false,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4119169358060222,
+            "definition": {
+              "type": "note",
+              "content": "This is a high-level overview of your Tomcat server activity, including performance, utilization, and errors.\n\n##### [**Datadog Tomcat integration docs&nbsp;↗**](https://docs.datadoghq.com/integrations/tomcat/)",
+              "background_color": "transparent",
+              "font_size": "16",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
             },
-            {
-              "id": 2136547723220728,
-              "definition": {
-                "type": "note",
-                "content": "**For more information on setup and monitoring, check out the following**\n\n- [Tomcat integration docs&nbsp;↗](https://docs.datadoghq.com/integrations/tomcat/)\n- [Blog post on key metrics for monitoring Tomcat&nbsp;↗](https://www.datadoghq.com/blog/tomcat-architecture-and-performance/)\n- [Blog post on collecting metrics with Tomcat monitoring tools&nbsp;↗](https://www.datadoghq.com/blog/tomcat-monitoring-tools/)\n- [Blog post on analyzing Tomcat logs and metrics&nbsp;↗](https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog/)",
-                "background_color": "transparent",
-                "font_size": "14",
-                "text_align": "left",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left"
-              },
-              "layout": { "x": 4, "y": 0, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
             }
-          ]
-        },
-        "layout": { "x": 0, "y": 0, "width": 8, "height": 5 }
+          },
+          {
+            "id": 2136547723220728,
+            "definition": {
+              "type": "note",
+              "content": "**Tomcat monitoring guides**\n\n\n- [Key metrics for monitoring Tomcat&nbsp;↗](https://www.datadoghq.com/blog/tomcat-architecture-and-performance/)\n- [Collecting metrics with Tomcat monitoring tools&nbsp;↗](https://www.datadoghq.com/blog/tomcat-monitoring-tools/)\n- [Analyzing Tomcat logs and metrics with Datadog&nbsp;↗](https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog/)",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left"
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
       },
-      {
-        "id": 1051748789667920,
-        "definition": {
-          "title": "Overview",
-          "title_align": "center",
-          "type": "group",
-          "background_color": "vivid_purple",
-          "layout_type": "ordered",
-          "widgets": [
-            {
-              "id": 6207700556953864,
-              "definition": {
-                "title": "Server can connect",
-                "title_size": "16",
-                "title_align": "center",
-                "type": "check_status",
-                "check": "tomcat.can_connect",
-                "grouping": "cluster",
-                "group": "$host",
-                "group_by": ["host"],
-                "tags": ["$host"]
-              },
-              "layout": { "x": 0, "y": 0, "width": 2, "height": 2 }
-            },
-            {
-              "id": 4926734957335396,
-              "definition": {
-                "title": "% of max heap",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_value",
-                "requests": [
-                  {
-                    "q": "(sum:jvm.heap_memory{*}/sum:jvm.heap_memory_max{*})*100",
-                    "aggregator": "last",
-                    "conditional_formats": [
-                      {
-                        "comparator": ">",
-                        "palette": "white_on_red",
-                        "value": 80
-                      },
-                      {
-                        "comparator": ">=",
-                        "palette": "white_on_yellow",
-                        "value": 51
-                      },
-                      {
-                        "comparator": "<",
-                        "palette": "white_on_green",
-                        "value": 50
-                      }
-                    ]
-                  }
-                ],
-                "autoscale": true,
-                "custom_unit": "%",
-                "precision": 0
-              },
-              "layout": { "x": 2, "y": 0, "width": 2, "height": 2 }
-            },
-            {
-              "id": 5833900934884076,
-              "definition": {
-                "title": "% of max threads",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_value",
-                "requests": [
-                  {
-                    "q": "(sum:tomcat.threads.busy{*}/sum:tomcat.threads.max{*})*100",
-                    "aggregator": "last",
-                    "conditional_formats": [
-                      {
-                        "comparator": ">",
-                        "palette": "white_on_red",
-                        "value": 80
-                      },
-                      {
-                        "comparator": ">=",
-                        "palette": "white_on_yellow",
-                        "value": 50
-                      },
-                      {
-                        "comparator": "<",
-                        "palette": "white_on_green",
-                        "value": 49
-                      }
-                    ]
-                  }
-                ],
-                "autoscale": true,
-                "custom_unit": "%",
-                "precision": 0
-              },
-              "layout": { "x": 0, "y": 2, "width": 2, "height": 2 }
-            },
-            {
-              "id": 1941945703480454,
-              "definition": {
-                "type": "note",
-                "content": "Percentage of threads in use calculated from the set max threads.\n\n🔴 **Red** if > 80%\n\n🟡 **Yellow** if >= 50%\n\n🟢 **Green** if < 49%\n",
-                "background_color": "white",
-                "font_size": "12",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-              },
-              "layout": { "x": 2, "y": 2, "width": 2, "height": 2 }
-            }
-          ]
-        },
-        "layout": { "x": 8, "y": 0, "width": 4, "height": 5 }
-      },
-      {
-        "id": 8872961254373240,
-        "definition": {
-          "title": "Performance",
-          "title_align": "center",
-          "type": "group",
-          "background_color": "vivid_purple",
-          "layout_type": "ordered",
-          "widgets": [
-            {
-              "id": 667414087165830,
-              "definition": {
-                "title": "Requests per second",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_layout": "auto",
-                "legend_columns": ["avg", "min", "max", "value", "sum"],
-                "type": "timeseries",
-                "requests": [
-                  {
-                    "formulas": [
-                      { "formula": "per_second(query1)", "alias": "Requests" }
-                    ],
-                    "response_format": "timeseries",
-                    "on_right_yaxis": false,
-                    "queries": [
-                      {
-                        "query": "sum:tomcat.request_count{$host,$scope}",
-                        "data_source": "metrics",
-                        "name": "query1"
-                      }
-                    ],
-                    "style": {
-                      "palette": "purple",
-                      "line_type": "solid",
-                      "line_width": "normal"
-                    },
-                    "display_type": "line"
-                  }
-                ],
-                "yaxis": {
-                  "scale": "linear",
-                  "label": "",
-                  "include_zero": true,
-                  "min": "auto",
-                  "max": "auto"
-                },
-                "markers": []
-              },
-              "layout": { "x": 0, "y": 0, "width": 7, "height": 2 }
-            },
-            {
-              "id": 4016470968177076,
-              "definition": {
-                "type": "note",
-                "content": "The number of client requests hitting your server. Request counts provide a baseline for understanding the levels of traffic to your server throughout the day.",
-                "background_color": "purple",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-              },
-              "layout": { "x": 7, "y": 0, "width": 5, "height": 2 }
-            },
-            {
-              "id": 3401039036815182,
-              "definition": {
-                "title": "Request processing time",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_layout": "auto",
-                "legend_columns": ["avg", "min", "max", "value", "sum"],
-                "type": "timeseries",
-                "requests": [
-                  {
-                    "formulas": [
-                      { "formula": "query1", "alias": "Processing Time" }
-                    ],
-                    "response_format": "timeseries",
-                    "queries": [
-                      {
-                        "query": "sum:tomcat.processing_time{$host,$scope}",
-                        "data_source": "metrics",
-                        "name": "query1"
-                      }
-                    ],
-                    "style": {
-                      "palette": "purple",
-                      "line_type": "solid",
-                      "line_width": "normal"
-                    },
-                    "display_type": "bars"
-                  }
-                ],
-                "yaxis": {
-                  "scale": "linear",
-                  "label": "",
-                  "include_zero": true,
-                  "min": "auto",
-                  "max": "auto"
-                },
-                "markers": []
-              },
-              "layout": { "x": 0, "y": 2, "width": 7, "height": 2 }
-            },
-            {
-              "id": 8536291398921956,
-              "definition": {
-                "type": "note",
-                "content": "The sum of request processing times across all requests handled by the request processors (in milliseconds) per second.",
-                "background_color": "purple",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-              },
-              "layout": { "x": 7, "y": 2, "width": 5, "height": 2 }
-            },
-            {
-              "id": 8026466688776692,
-              "definition": {
-                "title": "Bytes sent and received rate (per sec)",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "horizontal",
-                "legend_columns": ["avg", "min", "max", "value", "sum"],
-                "type": "timeseries",
-                "requests": [
-                  {
-                    "formulas": [{ "formula": "query1", "alias": "Bytes Sent" }],
-                    "response_format": "timeseries",
-                    "on_right_yaxis": false,
-                    "queries": [
-                      {
-                        "query": "sum:tomcat.bytes_sent{$scope}",
-                        "data_source": "metrics",
-                        "name": "query1"
-                      }
-                    ],
-                    "style": {
-                      "palette": "purple",
-                      "line_type": "solid",
-                      "line_width": "normal"
-                    },
-                    "display_type": "line"
-                  },
-                  {
-                    "formulas": [
-                      { "formula": "-query1", "alias": "Bytes Received" }
-                    ],
-                    "response_format": "timeseries",
-                    "on_right_yaxis": false,
-                    "queries": [
-                      {
-                        "query": "sum:tomcat.bytes_rcvd{$scope}",
-                        "data_source": "metrics",
-                        "name": "query1"
-                      }
-                    ],
-                    "style": {
-                      "palette": "purple",
-                      "line_type": "solid",
-                      "line_width": "normal"
-                    },
-                    "display_type": "line"
-                  }
-                ],
-                "yaxis": {
-                  "scale": "linear",
-                  "label": "",
-                  "include_zero": true,
-                  "min": "auto",
-                  "max": "auto"
-                },
-                "markers": []
-              },
-              "layout": { "x": 0, "y": 4, "width": 6, "height": 2 }
-            },
-            {
-              "id": 3591743959569616,
-              "definition": {
-                "title": "Average processing time",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_layout": "auto",
-                "legend_columns": ["avg", "min", "max", "value", "sum"],
-                "type": "timeseries",
-                "requests": [
-                  {
-                    "formulas": [
-                      { "formula": "query1", "alias": "Processing Time" }
-                    ],
-                    "response_format": "timeseries",
-                    "on_right_yaxis": false,
-                    "queries": [
-                      {
-                        "query": "avg:tomcat.processing_time{$scope}",
-                        "data_source": "metrics",
-                        "name": "query1"
-                      }
-                    ],
-                    "style": {
-                      "palette": "purple",
-                      "line_type": "solid",
-                      "line_width": "normal"
-                    },
-                    "display_type": "line"
-                  }
-                ],
-                "yaxis": {
-                  "scale": "linear",
-                  "label": "",
-                  "include_zero": true,
-                  "min": "auto",
-                  "max": "auto"
-                },
-                "markers": []
-              },
-              "layout": { "x": 6, "y": 4, "width": 6, "height": 2 }
-            }
-          ]
-        }
-      },
-      {
-        "id": 1968977262088606,
-        "definition": {
-          "title": "Utilization",
-          "title_align": "center",
-          "type": "group",
-          "background_color": "vivid_yellow",
-          "layout_type": "ordered",
-          "widgets": [
-            {
-              "id": 5555195778155078,
-              "definition": {
-                "title": "Busy vs. idle worker threads",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "horizontal",
-                "legend_columns": ["avg", "min", "max", "value", "sum"],
-                "type": "timeseries",
-                "requests": [
-                  {
-                    "formulas": [
-                      { "formula": "query1", "alias": "Max" },
-                      { "formula": "query2", "alias": "Busy" },
-                      { "formula": "query3", "alias": "Total" }
-                    ],
-                    "response_format": "timeseries",
-                    "on_right_yaxis": false,
-                    "queries": [
-                      {
-                        "query": "sum:tomcat.threads.max{$host,$scope}",
-                        "data_source": "metrics",
-                        "name": "query1"
-                      },
-                      {
-                        "query": "sum:tomcat.threads.busy{$host,$scope}",
-                        "data_source": "metrics",
-                        "name": "query2"
-                      },
-                      {
-                        "query": "sum:tomcat.threads.count{$host,$scope}",
-                        "data_source": "metrics",
-                        "name": "query3"
-                      }
-                    ],
-                    "style": {
-                      "palette": "dog_classic",
-                      "line_type": "solid",
-                      "line_width": "normal"
-                    },
-                    "display_type": "line"
-                  }
-                ],
-                "yaxis": {
-                  "scale": "linear",
-                  "label": "",
-                  "include_zero": true,
-                  "min": "auto",
-                  "max": "auto"
-                },
-                "markers": []
-              },
-              "layout": { "x": 0, "y": 0, "width": 6, "height": 2 }
-            },
-            {
-              "id": 1351434063096280,
-              "definition": {
-                "title": "Request rate per host",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "toplist",
-                "requests": [
-                  {
-                    "formulas": [
-                      {
-                        "formula": "query1",
-                        "limit": { "count": 10, "order": "desc" }
-                      }
-                    ],
-                    "conditional_formats": [
-                      {
-                        "custom_bg_color": "#ffffcc",
-                        "comparator": ">",
-                        "palette": "white_on_yellow",
-                        "value": 0
-                      }
-                    ],
-                    "response_format": "scalar",
-                    "queries": [
-                      {
-                        "query": "avg:tomcat.request_count{$host,$scope} by {host}",
-                        "data_source": "metrics",
-                        "name": "query1",
-                        "aggregator": "avg"
-                      }
-                    ]
-                  }
-                ]
-              },
-              "layout": { "x": 6, "y": 0, "width": 3, "height": 4 }
-            },
-            {
-              "id": 2030035462462136,
-              "definition": {
-                "title": "Max processing time per host",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "toplist",
-                "requests": [
-                  {
-                    "formulas": [
-                      {
-                        "formula": "query1",
-                        "limit": { "count": 10, "order": "desc" }
-                      }
-                    ],
-                    "conditional_formats": [
-                      {
-                        "custom_bg_color": "#ffffcc",
-                        "comparator": ">",
-                        "palette": "white_on_yellow",
-                        "value": 0
-                      }
-                    ],
-                    "response_format": "scalar",
-                    "queries": [
-                      {
-                        "query": "max:tomcat.max_time{$host,$scope} by {host}",
-                        "data_source": "metrics",
-                        "name": "query1",
-                        "aggregator": "max"
-                      }
-                    ]
-                  }
-                ]
-              },
-              "layout": { "x": 9, "y": 0, "width": 3, "height": 4 }
-            },
-            {
-              "id": 6763098129941914,
-              "definition": {
-                "type": "note",
-                "content": "Since the number of available threads directly affects how efficiently Tomcat can process requests, monitoring thread usage is important for understanding request throughput and processing times for the server.",
-                "background_color": "yellow",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "top",
-                "has_padding": true
-              },
-              "layout": { "x": 0, "y": 2, "width": 6, "height": 2 }
-            }
-          ]
-        },
-        "layout": {
-          "x": 0,
-          "y": 12,
-          "width": 12,
-          "height": 5,
-          "is_column_break": true
-        }
-      },
-      {
-        "id": 273973929660372,
-        "definition": {
-          "title": "JVM Memory Usage",
-          "title_align": "center",
-          "type": "group",
-          "background_color": "vivid_yellow",
-          "layout_type": "ordered",
-          "widgets": [
-            {
-              "id": 1080161188772122,
-              "definition": {
-                "title": "Heap memory usage",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_layout": "auto",
-                "legend_columns": ["avg", "min", "max", "value", "sum"],
-                "type": "timeseries",
-                "requests": [
-                  {
-                    "formulas": [
-                      { "formula": "query1", "alias": "Total Memory" },
-                      { "formula": "query2", "alias": "Memory Used" }
-                    ],
-                    "response_format": "timeseries",
-                    "on_right_yaxis": false,
-                    "queries": [
-                      {
-                        "query": "avg:jvm.heap_memory_max{$host,$scope}",
-                        "data_source": "metrics",
-                        "name": "query1"
-                      },
-                      {
-                        "query": "avg:jvm.heap_memory{$host,$scope}",
-                        "data_source": "metrics",
-                        "name": "query2"
-                      }
-                    ],
-                    "style": {
-                      "palette": "warm",
-                      "line_type": "solid",
-                      "line_width": "normal"
-                    },
-                    "display_type": "line"
-                  }
-                ],
-                "yaxis": {
-                  "scale": "linear",
-                  "label": "",
-                  "include_zero": true,
-                  "min": "auto",
-                  "max": "auto"
-                },
-                "markers": []
-              },
-              "layout": { "x": 0, "y": 0, "width": 6, "height": 2 }
-            },
-            {
-              "id": 6304689615169788,
-              "definition": {
-                "title": "GC count per minute",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_layout": "auto",
-                "legend_columns": ["avg", "min", "max", "value", "sum"],
-                "type": "timeseries",
-                "requests": [
-                  {
-                    "formulas": [
-                      { "formula": "per_minute(query1)", "alias": "GC Count" }
-                    ],
-                    "response_format": "timeseries",
-                    "on_right_yaxis": false,
-                    "queries": [
-                      {
-                        "query": "sum:jvm.gc.cms.count{$host,$scope}",
-                        "data_source": "metrics",
-                        "name": "query1"
-                      }
-                    ],
-                    "style": {
-                      "palette": "orange",
-                      "line_type": "solid",
-                      "line_width": "normal"
-                    },
-                    "display_type": "area"
-                  }
-                ],
-                "yaxis": {
-                  "scale": "linear",
-                  "label": "",
-                  "include_zero": true,
-                  "min": "auto",
-                  "max": "auto"
-                },
-                "markers": []
-              },
-              "layout": { "x": 6, "y": 0, "width": 6, "height": 2 }
-            },
-            {
-              "id": 6827582318948558,
-              "definition": {
-                "type": "note",
-                "content": "Tomcat (and your servlets) rely on having enough available memory to operate efficiently, so it’s important to also keep track of the memory usage of your JVM.",
-                "background_color": "transparent",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": false
-              },
-              "layout": { "x": 0, "y": 2, "width": 6, "height": 1 }
-            },
-            {
-              "id": 190293842360772,
-              "definition": {
-                "type": "note",
-                "content": "A sudden spike in garbage collection count could indicate a memory leak.",
-                "background_color": "transparent",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": false
-              },
-              "layout": { "x": 6, "y": 2, "width": 6, "height": 1 }
-            }
-          ]
-        }
-      },
-      {
-        "id": 1394157946923980,
-        "definition": {
-          "title": "Errors",
-          "type": "group",
-          "layout_type": "ordered",
-          "widgets": [
-            {
-              "id": 1614105163128656,
-              "definition": {
-                "title": "Error rate",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_layout": "auto",
-                "legend_columns": ["avg", "min", "max", "value", "sum"],
-                "type": "timeseries",
-                "requests": [
-                  {
-                    "formulas": [{ "formula": "query1", "alias": "Errors" }],
-                    "response_format": "timeseries",
-                    "queries": [
-                      {
-                        "query": "sum:tomcat.error_count{$host,$scope}",
-                        "data_source": "metrics",
-                        "name": "query1"
-                      }
-                    ],
-                    "style": {
-                      "palette": "warm",
-                      "line_type": "solid",
-                      "line_width": "normal"
-                    },
-                    "display_type": "line"
-                  }
-                ],
-                "yaxis": {
-                  "scale": "linear",
-                  "label": "",
-                  "include_zero": true,
-                  "min": "auto",
-                  "max": "auto"
-                },
-                "markers": []
-              },
-              "layout": { "x": 0, "y": 0, "width": 12, "height": 2 }
-            }
-          ]
-        }
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 5
       }
-    ],
-    "template_variables": [
-      { "name": "host", "default": "*", "prefix": "host" },
-      { "name": "scope", "default": "*", "prefix": "scope" }
-    ],
-    "layout_type": "ordered",
-    "is_read_only": false,
-    "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "ge2-uba-mu8"
-  }
+    },
+    {
+      "id": 8872961254373240,
+      "definition": {
+        "title": "Performance",
+        "title_align": "center",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 667414087165830,
+            "definition": {
+              "title": "Requests per second",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "per_second(query1)",
+                      "alias": "Requests"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:tomcat.request_count{$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 9,
+              "height": 2
+            }
+          },
+          {
+            "id": 4016470968177076,
+            "definition": {
+              "type": "note",
+              "content": "The number of client requests hitting your server. Request counts provide a baseline for understanding the levels of traffic to your server throughout the day.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3401039036815182,
+            "definition": {
+              "title": "Request processing time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Processing Time"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:tomcat.processing_time{$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 9,
+              "height": 2
+            }
+          },
+          {
+            "id": 8536291398921956,
+            "definition": {
+              "type": "note",
+              "content": "The sum of request processing times across all requests handled by the request processors per second.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 9,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 8026466688776692,
+            "definition": {
+              "title": "Bytes sent and received rate (per sec)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Bytes Sent"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:tomcat.bytes_sent{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "formula": "-query1",
+                      "alias": "Bytes Received"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:tomcat.bytes_rcvd{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 3591743959569616,
+            "definition": {
+              "title": "Average processing time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Processing Time"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:tomcat.processing_time{$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "id": 2600799677110580,
+      "definition": {
+        "title": "JDBC Connection Pool",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6944675951680114,
+            "definition": {
+              "title": "JDBC Connection Pool Size",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Active",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Max Active",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Idle",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Min Idle",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Max Idle",
+                      "formula": "query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:tomcat.jdbc.connection_pool.active{*}.weighted()",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:tomcat.jdbc.connection_pool.max_active{*}.weighted()",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:tomcat.jdbc.connection_pool.idle{*}.weighted()",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    },
+                    {
+                      "query": "sum:tomcat.jdbc.connection_pool.min_idle{*}.weighted()",
+                      "data_source": "metrics",
+                      "name": "query4"
+                    },
+                    {
+                      "query": "sum:tomcat.jdbc.connection_pool.max_idle{*}.weighted()",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 1394157946923980,
+      "definition": {
+        "title": "Errors",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1614105163128656,
+            "definition": {
+              "title": "Error rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Errors"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:tomcat.error_count{$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 9,
+              "height": 2
+            }
+          },
+          {
+            "id": 6021367050336996,
+            "definition": {
+              "type": "note",
+              "content": "An increase in the error rate could indicate a problem in your application or with your clients.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 15,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 1051748789667920,
+      "definition": {
+        "title": "Overview",
+        "title_align": "center",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6207700556953864,
+            "definition": {
+              "title": "Server can connect",
+              "title_size": "16",
+              "title_align": "center",
+              "type": "check_status",
+              "check": "tomcat.can_connect",
+              "grouping": "cluster",
+              "group": "$host",
+              "group_by": [
+                "host"
+              ],
+              "tags": [
+                "$host"
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 4926734957335396,
+            "definition": {
+              "title": "% of max heap",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 80
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_yellow",
+                      "value": 51
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_green",
+                      "value": 50
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:jvm.heap_memory{*}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:jvm.heap_memory_max{*}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "%",
+              "precision": 0
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 4290138695908850,
+            "definition": {
+              "title": "Monitors",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "query": "tomcat",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 5833900934884076,
+            "definition": {
+              "title": "% of max threads",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 80
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_green",
+                      "value": 49
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:tomcat.threads.busy{*}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:tomcat.threads.max{*}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_unit": "%",
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 1941945703480454,
+            "definition": {
+              "type": "note",
+              "content": "Percentage of threads in use calculated from the set max threads.\n\n🔴 **Red** if > 80%\n\n🟡 **Yellow** if >= 50%\n\n🟢 **Green** if < 49%\n",
+              "background_color": "white",
+              "font_size": "12",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 5,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 1968977262088606,
+      "definition": {
+        "title": "Utilization",
+        "title_align": "center",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5555195778155078,
+            "definition": {
+              "title": "Busy vs. idle worker threads",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Max"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Busy"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Total"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:tomcat.threads.max{$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:tomcat.threads.busy{$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:tomcat.threads.count{$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1351434063096280,
+            "definition": {
+              "title": "Request rate per host",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#ffffcc",
+                      "comparator": ">",
+                      "palette": "white_on_yellow",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:tomcat.request_count{$host,$scope} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 5
+            }
+          },
+          {
+            "id": 2030035462462136,
+            "definition": {
+              "title": "Max processing time per host",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#ffffcc",
+                      "comparator": ">",
+                      "palette": "white_on_yellow",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "max:tomcat.max_time{$host,$scope} by {host}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "max"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 5
+            }
+          },
+          {
+            "id": 6763098129941914,
+            "definition": {
+              "type": "note",
+              "content": "Since the number of available threads directly affects how efficiently Tomcat can process requests, monitoring thread usage is important for understanding request throughput and processing times for the server.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 6
+      }
+    },
+    {
+      "id": 273973929660372,
+      "definition": {
+        "title": "JVM Memory Usage",
+        "title_align": "center",
+        "background_color": "orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1080161188772122,
+            "definition": {
+              "title": "Heap memory usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Total Memory"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Memory Used"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "avg:jvm.heap_memory_max{$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:jvm.heap_memory{$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 6304689615169788,
+            "definition": {
+              "title": "GC count per minute",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "per_minute(query1)",
+                      "alias": "GC Count"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "on_right_yaxis": false,
+                  "queries": [
+                    {
+                      "query": "sum:jvm.gc.cms.count{$host,$scope}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "label": "",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 6827582318948558,
+            "definition": {
+              "type": "note",
+              "content": "Tomcat (and your servlets) rely on having enough available memory to operate efficiently, so it’s important to also keep track of the memory usage of your JVM.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 190293842360772,
+            "definition": {
+              "type": "note",
+              "content": "A sudden spike in garbage collection count could indicate a memory leak.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 12,
+        "height": 4
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "host",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "scope",
+      "prefix": "scope",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

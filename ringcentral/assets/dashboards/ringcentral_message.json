@@ -1,0 +1,907 @@
+{
+  "title": "RingCentral Message",
+  "description": "The Message Dashboard delivers an in-depth look at A2P SMS metrics within RingCentral, focusing on performance, costs, and message delivery status. It provides valuable insights, to help you make effective decision and improve operational efficiency.",
+  "widgets": [
+    {
+      "id": 1098312735089554,
+      "definition": {
+        "type": "image",
+        "url": "https://www.jenne.com/media/1024/ringcentral.png",
+        "url_dark_theme": "https://www.jenne.com/media/1024/ringcentral.png",
+        "sizing": "fill",
+        "has_background": false,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 5,
+        "height": 1
+      }
+    },
+    {
+      "id": 3467094000519634,
+      "definition": {
+        "title": "SMS Monitors Summary",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6103602941817638,
+            "definition": {
+              "title": "SMS Monitors Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:ringcentral)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 7,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 7,
+        "height": 5
+      }
+    },
+    {
+      "id": 1183794838763428,
+      "definition": {
+        "type": "note",
+        "content": "**Dashboard Overview**\n\nThe Message Dashboard delivers an in-depth look at A2P SMS  metrics within RingCentral, focusing on performance, costs, and message delivery status and provides valuable insights,  aiding in effective decision-making and operational efficiency.\n\nFor more information, see the [RingCentral Integration Documentation](https://docs.datadoghq.com/integrations/ringcentral).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 1,
+        "width": 5,
+        "height": 4
+      }
+    },
+    {
+      "id": 1354438272141958,
+      "definition": {
+        "title": "Message Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6749798258044494,
+            "definition": {
+              "title": "Total Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.total_messages{$AccountId,$Direction}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_green",
+                      "custom_bg_color": "#e1f0fa"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 1
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 5,
+              "height": 5
+            }
+          },
+          {
+            "id": 805763509201790,
+            "definition": {
+              "title": "Message by Direction",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:ringcentral.message.total_messages{$AccountId,$Direction} by {direction}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 5,
+              "y": 0,
+              "width": 7,
+              "height": 5
+            }
+          },
+          {
+            "id": 4637114014020790,
+            "definition": {
+              "title": "Sent Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.sent_messages{$AccountId,$Direction}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 7448304232428118,
+            "definition": {
+              "title": "Queued Messages ",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "type": "live",
+                "unit": "day",
+                "value": 1
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.queued_messages{$AccountId,$Direction}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 5,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 6258634474642316,
+            "definition": {
+              "title": "Delivered Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.delivered_messages{$AccountId,$Direction}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 5,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 1655079203516784,
+            "definition": {
+              "title": "Messages Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.total_messages{$AccountId,$Direction}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "cool",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 14
+      }
+    },
+    {
+      "id": 7053038689443074,
+      "definition": {
+        "title": "Cost Breakdown",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2129613024777588,
+            "definition": {
+              "title": "Total Cost",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.cost_total{$AccountId,$Direction}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_green",
+                      "custom_bg_color": "#e6e6fa"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 1,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 981649751684142,
+            "definition": {
+              "title": "Cost by Message Status",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      },
+                      "formula": "query1 + query2 + query3 + query4 + query5"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:ringcentral.message.queued_cost{$AccountId,$Direction} by {messagestatus}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "query": "sum:ringcentral.message.delivered_cost{$AccountId,$Direction} by {messagestatus}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "query": "sum:ringcentral.message.delivery_failed_cost{$AccountId,$Direction} by {messagestatus}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "query": "sum:ringcentral.message.sending_failed_cost{$AccountId,$Direction} by {messagestatus}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "query": "sum:ringcentral.message.sent_cost{$AccountId,$Direction} by {messagestatus}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 8,
+              "height": 6
+            }
+          },
+          {
+            "id": 2729028664585858,
+            "definition": {
+              "title": "Average Cost per Message",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.cost_total{$AccountId,$Direction}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.total_messages{$AccountId,$Direction}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      },
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_green",
+                      "custom_bg_color": "#e6e6fa"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 19,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "id": 1285360102800516,
+      "definition": {
+        "title": "Failures and Errors",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4164423135813118,
+            "definition": {
+              "title": "Total Errors",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.delivery_failed_error_code{$AccountId,$Direction}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.sending_failed_error_code{$AccountId,$Direction}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 + query2"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 8150038489836508,
+            "definition": {
+              "title": "Delivery Failed Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.delivery_failed_messages{$AccountId,$Direction}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 5819016213405378,
+            "definition": {
+              "title": "Sending Failed Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:ringcentral.message.sending_failed_messages{$AccountId,$Direction}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 8470755112862582,
+            "definition": {
+              "type": "note",
+              "content": "In case of message sending or delivery failure, please refer to this [link](https://developers.ringcentral.com/guide/messaging/sms/high-volume/handling-errors#common-errors) for a detailed description of the error codes.",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 5
+            }
+          },
+          {
+            "id": 4148315245837032,
+            "definition": {
+              "title": "Delivery Failed Error by Error Code",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:ringcentral.message.delivery_failed_error_code{$AccountId,$Direction} by {errorcode}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              },
+              "custom_links": []
+            },
+            "layout": {
+              "x": 2,
+              "y": 3,
+              "width": 5,
+              "height": 5
+            }
+          },
+          {
+            "id": 1967938469950472,
+            "definition": {
+              "title": "Sending Failed Error by Error Code",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:ringcentral.message.sending_failed_error_code{$AccountId,$Direction} by {errorcode}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 7,
+              "y": 3,
+              "width": 5,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 26,
+        "width": 12,
+        "height": 9
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "AccountId",
+      "prefix": "accountid",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Direction",
+      "prefix": "direction",
+      "available_values": [
+        "inbound",
+        "outbound"
+      ],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

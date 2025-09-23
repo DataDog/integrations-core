@@ -28,7 +28,7 @@ instances:
     #
     port: <PORT>
 
-    ## @param timeout - integer - optional - default: 10
+    ## @param timeout - number - optional - default: 10
     ## Timeout of the TCP query in second.
     #
     # timeout: 10

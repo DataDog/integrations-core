@@ -2,6 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import re
+
+from kubeutil import get_connection_info
+
 from datadog_checks.base.utils.tagging import tagger
 
 try:
@@ -10,8 +14,7 @@ except ImportError:
     # Don't fail on < 6.2
     import logging
 
-    log = logging.getLogger(__name__)
-    log.info('Agent does not provide filtering logic, disabling container filtering')
+    logging.getLogger(__name__).info('Agent does not provide filtering logic, disabling container filtering')
 
     def c_is_excluded(name, image, namespace=""):
         return False
@@ -102,6 +105,18 @@ def get_container_label(labels, l_name):
         return labels[l_name]
 
 
+def get_prometheus_url(default_url):
+    """
+    Use to retrieve the prometheus URL configuration from the get_connection_info()
+    :param default_url: the default prometheus URL
+    :rtype: (string, error)
+    :return: a tuple (the prometheus url, possible get_connection_info() call error )
+    """
+    kubelet_conn_info = get_connection_info()
+    kubelet_conn_info = {} if kubelet_conn_info is None else kubelet_conn_info
+    return kubelet_conn_info.get("url", default_url), kubelet_conn_info.get("err")
+
+
 class PodListUtils(object):
     """
     Queries the podlist and the agent6's filtering logic to determine whether to
@@ -139,13 +154,14 @@ class PodListUtils(object):
             if is_static_pending_pod(pod):
                 self.static_pod_uids.add(uid)
 
-            for ctr in pod.get('status', {}).get('containerStatuses', []):
-                cid = ctr.get('containerID')
-                if not cid:
-                    continue
-                self.containers[cid] = ctr
-                self.container_id_by_name_tuple[(namespace, pod_name, ctr.get('name'))] = cid
-                self.container_id_to_namespace[cid] = namespace
+            for field in ['containerStatuses', 'initContainerStatuses']:
+                for ctr in pod.get('status', {}).get(field, []):
+                    cid = ctr.get('containerID')
+                    if not cid:
+                        continue
+                    self.containers[cid] = ctr
+                    self.container_id_by_name_tuple[(namespace, pod_name, ctr.get('name'))] = cid
+                    self.container_id_to_namespace[cid] = namespace
 
     def get_uid_by_name_tuple(self, name_tuple):
         """
@@ -197,7 +213,17 @@ class PodListUtils(object):
             self.cache[cid] = True
             return True
 
-        excluded = c_is_excluded(ctr.get("name"), ctr.get("image"), self.container_id_to_namespace.get(cid, ""))
+        # Image cannot be always used as-is as it may be a sha256, like:
+        # image: sha256:86700713f90f670eefce301d0bada81d3e44f16917fe5da072c34d8814cc1f09
+        # imageID: gcr.io/foo@sha256:2babda8ec819e24d5a6342095e8f8a25a67b44eb7231ae253ecc2c448632f07e
+        # If we identify a sha256, we'll fallback to `imageID` as we, at least, get the image path.
+        # Image and ImageID are populated by Kubelet from CRI API:
+        # https://github.com/kubernetes/kubernetes/blob/8c33d3ef7b2f099c7bb81f340f332dbf3a959548/pkg/kubelet/kuberuntime/kuberuntime_container.go#L586C6-L622
+        image = ctr.get("image")
+        if image.startswith("sha256:") and len(image) == 71:  # 7 + 64
+            image = re.sub(r"^[a-z-]+://", "", ctr.get("imageID"))
+
+        excluded = c_is_excluded(ctr.get("name"), image, self.container_id_to_namespace.get(cid, ""))
         self.cache[cid] = excluded
         return excluded
 
@@ -237,4 +263,13 @@ class PodListUtils(object):
             pod_name = get_container_label(labels, "pod_name")
         if not container_name:
             container_name = get_container_label(labels, "container_name")
-        return self.get_cid_by_name_tuple((namespace, pod_name, container_name))
+        cid = self.get_cid_by_name_tuple((namespace, pod_name, container_name))
+        if cid is None:
+            # in k8s v1.25+, a change was introduced which removed the suffix from the pod name in the "pod_name"
+            # label, breaking the existing functionality. To get around this, we can try to get the pod itself by
+            # the pod_uid label, and then parse the name from the pod metadata ourselves.
+            # See: https://github.com/kubernetes/kubernetes/issues/115766
+            pod_uid = get_container_label(labels, "pod_uid")
+            pod_name = self.pods.get(pod_uid, {}).get("metadata", {}).get("name")
+            cid = self.get_cid_by_name_tuple((namespace, pod_name, container_name))
+        return cid

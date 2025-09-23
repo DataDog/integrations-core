@@ -5,19 +5,18 @@ import os
 import re
 from copy import deepcopy
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_here
 from datadog_checks.dev.ci import running_on_ci
-from datadog_checks.dev.utils import get_active_env
 
 HERE = get_here()
 CHECK_NAME = 'teradata'
-ACTIVE_ENV = get_active_env()
 ON_CI = running_on_ci()
 
 TERADATA_SERVER = os.environ.get('TERADATA_SERVER')
 TERADATA_DD_USER = os.environ.get('TERADATA_DD_USER')
 TERADATA_DD_PW = os.environ.get('TERADATA_DD_PW')
-USE_TD_SANDBOX = os.environ.get('USE_TD_SANDBOX')
+USE_TD_SANDBOX = is_affirmative(os.environ.get('USE_TD_SANDBOX'))
 
 TABLE_EXTRACTION_PATTERN = re.compile(r'SELECT .* FROM \w+\.(\w+)')
 

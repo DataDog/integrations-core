@@ -53,22 +53,6 @@ init_config:
     #     metric_tags:
     #     - TCP
 
-    ## @param profiles - mapping - optional
-    ## Specify profiles to be able to reference a set of metrics by name.
-    ## Either `definition_file` or `definition` must be defined.
-    ## `definition_file` points to a file with a profile, and `definition` inlines
-    ## it directly.
-    ## When using a profile present on the profiles directory of the
-    ## configuration, you can directly pass the filename.
-    ## By default, if the file doesn't start with an underscore, it loads all of the profiles
-    ## installed in the python package and in the configuration directory.
-    #
-    # profiles:
-    #   f5-big-ip:
-    #     definition_file: f5-big-ip.yaml
-    #   router:
-    #     definition_file: generic-router.yaml
-
     ## @param refresh_oids_cache_interval - integer - optional - default: 0
     ## Note: Beta feature, only available using python SNMP integration.
     ## Set this option to enable caching of OIDs. The value is the number of seconds before the
@@ -106,12 +90,60 @@ init_config:
     #
     # ignore_nonincreasing_oid: false
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ## Configure ICMP pings.
+    ## The network device is pinged with these settings each time the SNMP
+    ## check is run.
     ##
-    ## Additionally, this sets the default `service` for every log source.
+    ## By default, we try to use an unprivileged UDP socket to send ICMP
+    ## pings, but some Linux systems require using a raw socket.
+    ##
+    ## If `linux.use_raw_socket` is set, you MUST enable the `ping` module
+    ## of the system-probe for elevated privileges. See
+    ## system-probe.yaml.example for details.
+    ##
+    ## Example:
+    ## ping:
+    ##   enabled: true             # disabled by default
+    ##   timeout: 3000             # timeout in milliseconds
+    ##   count: 2                  # number of ping packets to send per check run
+    ##   interval: 20              # time between sending pings (up to `count` packets) in milliseconds
+    ##   linux:                    # linux specific configuration
+    ##     use_raw_socket: true    # send pings in a privileged fashion using a raw socket
     #
-    # service: <SERVICE>
+    # ping:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enables/Disables pinging devices
+        #
+        # enabled: true
+
+        ## @param count - integer - optional - default: 2
+        ## Number of pings to send per check run
+        #
+        # count: 2
+
+        ## @param timeout - integer - optional - default: 3000
+        ## Timeout for all pings to execute in milliseconds
+        #
+        # timeout: 3000
+
+        ## @param interval - integer - optional - default: 20
+        ## Interval between sending pings in milliseconds
+        #
+        # interval: 20
+
+        ## Linux-specific configuration
+        #
+        # linux:
+
+            ## @param use_raw_socket - boolean - optional - default: false
+            ## This may be required if your system doesn't support
+            ## sending pings in an unprivileged fashion (using a UDP socket)
+            ## If `use_raw_socket` is set to true, you MUST also enable the
+            ## system-probe which has elevated privileges, see system-probe.yaml.example
+            ## to enable it.
+            #
+            # use_raw_socket: true
 
 ## Every instance is scheduled independently of the others.
 #
@@ -332,6 +364,93 @@ instances:
     #
     # refresh_oids_cache_interval: 3600
 
+    ## @param collect_topology - boolean - optional - default: true
+    ## Enable the collection of topology (LLDP/CDP) data
+    #
+    # collect_topology: true
+
+    ## @param interface_configs - list of mappings - optional
+    ## This option is used to override interface inbound/outbound speed and add interface tags.
+    ## Example:
+    ## interface_configs:
+    ##   - match_field: "name"  # (required) the field to match, can be `name` (interface name) or `index` (ifIndex)
+    ##     match_value: "eth0"  # (required, case sensitive) the value to match
+    ##     in_speed: 50         # (optional) inbound speed value in bits per sec, no value or 0 means no override
+    ##     out_speed: 25        # (optional) outbound speed value in bits per sec, no value or 0 means no override
+    ##     tags:                # (optional) interface level tags
+    ##       - "testTagKey:testTagValue"
+    ##       - "tagKey2:tagValue2"
+    #
+    # interface_configs:
+    #   - match_field: name
+    #     match_value: eth0
+    #     in_speed: 50
+    #     out_speed: 25
+    #   - match_field: index
+    #     match_value: '10'
+    #     in_speed: 50
+    #     out_speed: 25
+    #   - match_field: name
+    #     match_value: eth4
+    #     tags:
+    #     - monitored:true
+    #     - customKey:customValue
+
+    ## Configure ICMP pings for all hosts in SNMP autodiscovery
+    ## Each device is pinged with these settings each time the SNMP
+    ## check is run.
+    ##
+    ## By default, we try to use an unprivileged UDP socket to send ICMP
+    ## pings, but some Linux systems require using a raw socket.
+    ##
+    ## If `linux.use_raw_socket` is set, you MUST enable the `ping` module
+    ## of the system-probe for elevated privileges. See
+    ## system-probe.yaml.example for details.
+    ##
+    ## Example:
+    ## ping:
+    ##   enabled: true             # disabled by default
+    ##   timeout: 3000             # timeout in milliseconds
+    ##   count: 2                  # number of ping packets to send per check run
+    ##   interval: 20              # time between sending pings (up to `count` packets) in milliseconds
+    ##   linux:                    # linux specific configuration
+    ##     use_raw_socket: true    # send pings in a privileged fashion using a raw socket
+    #
+    # ping:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enables/Disables pinging devices
+        #
+        # enabled: true
+
+        ## @param count - integer - optional - default: 2
+        ## Number of pings to send per check run
+        #
+        # count: 2
+
+        ## @param timeout - integer - optional - default: 3000
+        ## Timeout for all pings to execute in milliseconds
+        #
+        # timeout: 3000
+
+        ## @param interval - integer - optional - default: 20
+        ## Interval between sending pings in milliseconds
+        #
+        # interval: 20
+
+        ## Linux-specific configuration
+        #
+        # linux:
+
+            ## @param use_raw_socket - boolean - optional - default: false
+            ## This may be required if your system doesn't support
+            ## sending pings in an unprivileged fashion (using a UDP socket)
+            ## If `use_raw_socket` is set to true, you MUST also enable the
+            ## system-probe which has elevated privileges, see system-probe.yaml.example
+            ## to enable it.
+            #
+            # use_raw_socket: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -340,13 +459,6 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
-
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Overrides any `service` defined in the `init_config` section.
-    #
-    # service: <SERVICE>
 
     ## @param min_collection_interval - number - optional - default: 15
     ## This changes the collection interval of the check. For more information, see:
@@ -360,14 +472,3 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param metric_patterns - mapping - optional
-    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
-    ##
-    ## Metrics defined in `exclude` will take precedence in case of overlap.
-    #
-    # metric_patterns:
-    #   include:
-    #   - <INCLUDE_REGEX>
-    #   exclude:
-    #   - <EXCLUDE_REGEX>

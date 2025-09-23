@@ -1,0 +1,12 @@
+{
+    "Id": "ProjectGroups-1",
+    "Name": "Default Project Group",
+    "Description": "",
+    "EnvironmentIds": [],
+    "RetentionPolicyId": null,
+    "SpaceId": "Spaces-1",
+    "Links": {
+      "Self": "/api/Spaces-1/projectgroups/ProjectGroups-1",
+      "Projects": "/api/Spaces-1/projectgroups/ProjectGroups-1/projects"
+    }
+}

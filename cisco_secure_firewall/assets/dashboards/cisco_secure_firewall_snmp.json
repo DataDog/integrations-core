@@ -1,0 +1,1015 @@
+{
+    "title": "Cisco Secure Firewall - SNMP",
+    "description": "- This dashboard provides insights into SNMP logs.",
+    "widgets": [
+        {
+            "id": 726972367425018,
+            "definition": {
+                "type": "image",
+                "url": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2F3.bp.blogspot.com%2F-zO5McOTnG10%2FVWY-VxCCKMI%2FAAAAAAAADc8%2FON3fAeUlPUQ%2Fs1600%2FCisco_logo.svg.png&f=1&nofb=1&ipt=7c7c79c2963ca2a0f694a7b1704d207d6e7b7c18078bebc66d6b87f864698569&ipo=images",
+                "sizing": "contain",
+                "margin": "lg",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 7887049007388648,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard provides insights into SNMP logs.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3453352347169644,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n\n1. Events by Severity \n2. SNMP Channel Errors by Interface Number \n3. SNMP Trap Channel Errors by Interface Number \n4. SNMP Request Failure by Interface \n5. SNMP Response Failure by Interface \n6. Failed SNMP Response Over Time \n7. Failed SNMP Response by IP Address, Port \n8. Discarded Incoming SNMP Request Over Time \n9. Top Discarded Incoming SNMP Request by Interface \n10. SNMP Group Configuration Failures \n11. Top Reason for Dropped SNMP Request \n12. SNMP Config Failure by Host, Reason \n13. Top Failure Reason for SNMP Group Configuration \n14. SNMP Config Failure Reason by User ",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 1078667475694688,
+            "definition": {
+                "title": "Events by Severity",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "status",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212* $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "semantic"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 4789978707635190,
+            "definition": {
+                "title": "SNMP Channel Errors by Interface Number",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 100,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@error_message",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@interface_number",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212001 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 785768626355416,
+            "definition": {
+                "title": "SNMP Trap Channel Errors by Interface Number",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@error_message",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@interface_number",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212002 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 6801199079503016,
+            "definition": {
+                "title": "SNMP Request Failure by Interface",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@error_message",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@interface_number",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212003 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 8951999225081930,
+            "definition": {
+                "title": "SNMP Response Failure by Interface",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@error_message",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@interface_number",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212004 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 18,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 7298971386815224,
+            "definition": {
+                "title": "Failed SNMP Response Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Failed SNMP Response",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212004 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "semantic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 4719147697213472,
+            "definition": {
+                "title": "Failed SNMP Response by IP Address, Port",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@snmp_ip_address",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@port",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212004 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "semantic"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 22,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6388070828056088,
+            "definition": {
+                "title": "Discarded Incoming SNMP Request Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Discarded SNMP Request",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212005 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "semantic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 26,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 474552590197022,
+            "definition": {
+                "title": "Top Discarded Incoming SNMP Request by Interface",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@interface_name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212005 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "none"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 26,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6341001156233726,
+            "definition": {
+                "title": "SNMP Group Configuration Failures",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@groupname",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@snmp_failure_reason",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212009 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Count",
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 1000,
+                                    "order": "desc"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 30,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 8339009459535384,
+            "definition": {
+                "title": "Top Reason for Dropped SNMP Request",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@snmp_drop_reason",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212006 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "none"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 30,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 5835488980640956,
+            "definition": {
+                "title": "SNMP Config Failure by Host, Reason",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@snmp_host",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@snmp_failure_reason",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212010 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 34,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 458278906107396,
+            "definition": {
+                "title": "Top Failure Reason for SNMP Group Configuration ",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@snmp_failure_reason",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212009 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "none"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 34,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 4427500454570360,
+            "definition": {
+                "title": "SNMP Config Failure Reason by User",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@snmp_failure_reason",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:212010 $Device-ID $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 38,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Device-ID",
+            "prefix": "@device_id",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

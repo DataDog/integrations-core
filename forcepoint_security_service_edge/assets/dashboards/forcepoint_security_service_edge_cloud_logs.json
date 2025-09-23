@@ -1,0 +1,2275 @@
+{
+  "title": "Forcepoint Security Service Edge - Cloud Logs",
+  "description": "This dashboard provides detailed insights into the cloud audit logs and cloud activity summaries from Forcepoint Security Service Edge, including file scanning results, file status, user details, and more.",
+  "widgets": [
+    {
+      "id": 7156284275888334,
+      "definition": {
+        "type": "image",
+        "url": "https://live-forcepoint-drupal.pantheonsite.io/sites/default/files/forcepoint.svg",
+        "url_dark_theme": "https://images.contentstack.io/v3/assets/blt36c2e63521272fdc/blt96f6ceb1b44d0e83/637242a8fa033a109b5d57e8/Forcepoint-Logo-2C-RGB-Rev-for-screen.png",
+        "sizing": "contain",
+        "margin": "sm",
+        "has_background": true,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 3528762163732732,
+      "definition": {
+        "type": "note",
+        "content": "**Dashboard Overview**\n\nThis dashboard provides detailed insights into the cloud audit logs and cloud activity summaries from Forcepoint Security Service Edge, including file scanning results, file status, user details, and more.\n\nFor more information, see the [Forcepoint Security Service Edge Integration Documentation](https://docs.datadoghq.com/integrations/forcepoint_security_service_edge/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 7057757165704782,
+      "definition": {
+        "title": "Cloud Logs Overview",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7022199348920408,
+            "definition": {
+              "title": "Total Cloud Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloud* $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 2975987992327552,
+            "definition": {
+              "title": "Cloud Logs Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "LOG COUNT",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloud* $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "service",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 4
+            }
+          },
+          {
+            "id": 1307718372957156,
+            "definition": {
+              "title": "Cloud Logs by Type",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloud* $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "service",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 12,
+        "height": 10
+      }
+    },
+    {
+      "id": 4093038630954022,
+      "definition": {
+        "title": "Cloud Summary Logs Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8002309824873084,
+            "definition": {
+              "title": "Total Cloud Summary Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 5009924837883552,
+            "definition": {
+              "title": "Cloud Summary Logs Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "LOG COUNT",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 4
+            }
+          },
+          {
+            "id": 1977302657828592,
+            "definition": {
+              "title": "File Status Details",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary -(@filename:\"\" AND @status:\"\") $Actor_IP $UserName $Action $Status",
+                    "indexes": [
+                      "*"
+                    ],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "fileid",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "filename",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@status",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 7454168745988786,
+            "definition": {
+              "title": "Logs by File Status",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary -@status:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@status",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 4106281875912480,
+            "definition": {
+              "title": "Top 10 Enterprises",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary -@enterprisename:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@enterprisename",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 14,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8852704629025358,
+            "definition": {
+              "title": "Top 10 Users with Shared Resources",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary -@sharedwith:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@sharedwith",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 14,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8327397796718236,
+            "definition": {
+              "title": "Top 10 Applications",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary -@application:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@application",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 18,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7106875713109876,
+            "definition": {
+              "title": "Top 10 Classify Labels",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary -@classifylabels:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@classifylabels",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 18,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 1823498504936176,
+            "definition": {
+              "title": "Quarantine File Details",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary -@quarantinefilename:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@quarantinefilename",
+                          "limit": 100,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@originalfolder",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@patterns",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10000,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "LOG COUNT",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 22,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 4807597361093878,
+            "definition": {
+              "title": "File Details",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary -@filename:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@filename",
+                          "limit": 50,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@folder",
+                          "limit": 2,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@usr.name",
+                          "limit": 2,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@application",
+                          "limit": 2,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@status",
+                          "limit": 5,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@createdtime",
+                          "limit": 2,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@modifiedtime",
+                          "limit": 2,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 8000,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "LOG COUNT",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 27,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 1981990222029970,
+            "definition": {
+              "title": "DLP Patterns found in Files",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary -@patterns:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@filename",
+                          "limit": 100,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@patterns",
+                          "limit": 100,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10000,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "LOG COUNT",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 32,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 3123933536315858,
+            "definition": {
+              "title": "Cloud Summary Log Details",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudsummary $Actor_IP $UserName $Action $Status",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "syslog.hostname",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "fileid",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "filename",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "filelink",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "status",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@usr.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "sharedwith",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "attachments",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "application",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 37,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 14,
+        "width": 12,
+        "height": 43
+      }
+    },
+    {
+      "id": 2399064362971312,
+      "definition": {
+        "title": "Cloud Audit Logs Overview",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3081721373521506,
+            "definition": {
+              "title": "Cloud Audit Logs Overview",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 6857317673463450,
+            "definition": {
+              "title": "Cloud Audit Logs Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "LOG COUNT",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 4
+            }
+          },
+          {
+            "id": 3990590225048990,
+            "definition": {
+              "title": "File Status and Action Details",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -(@filename:\"\" AND @status:\"\" AND @action:\"\") $Actor_IP $UserName $Action $Status",
+                    "indexes": [
+                      "*"
+                    ],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "fileid",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "filename",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@status",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "action",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 7956667196820538,
+            "definition": {
+              "title": "Logs by File Status",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -@status:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@status",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 8359822672074620,
+            "definition": {
+              "title": "Top 10 Actors",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -@usr.name:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7568673865773404,
+            "definition": {
+              "title": "Top 10 Enterprises",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -@enterprisename:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@enterprisename",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 13,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 2178313820991258,
+            "definition": {
+              "title": "Top 10 Applications",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -@application:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@application",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16",
+                "scaling": "absolute"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 17,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 5666739172628206,
+            "definition": {
+              "title": "Top 10 Actions",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -@action:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@action",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16",
+                "scaling": "absolute"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 17,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8529491629509594,
+            "definition": {
+              "title": "Top 10 Users with Shared Resources",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -@sharedwith:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@sharedwith",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 21,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8626772691584988,
+            "definition": {
+              "title": "Top 10 Policy IDs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -@policyid:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@policyid",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 21,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 3840298715160544,
+            "definition": {
+              "title": "Top List of Actors and IP Address",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -(@usr.name:\"\" AND @network.client.ip:\"\") $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@network.client.ip",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "flat"
+                },
+                "palette": "datadog16",
+                "scaling": "absolute"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 25,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 4140949458688040,
+            "definition": {
+              "title": "DLP Patterns by Files",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -@patterns:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@patterns",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@filename",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "LOG COUNT",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 30,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 7371971473784692,
+            "definition": {
+              "title": "File Details",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit -@filename:\"\" $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@filename",
+                          "limit": 50,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@folder",
+                          "limit": 5,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@owner",
+                          "limit": 2,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@application",
+                          "limit": 2,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@status",
+                          "limit": 2,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@createdtime",
+                          "limit": 2,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "@modifiedtime",
+                          "limit": 2,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 8000,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "LOG COUNT",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 35,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 3834127633500378,
+            "definition": {
+              "title": "Geo Distribution of Actor IPs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit $Actor_IP $UserName $Action $Status"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 250,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 40,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 1420737631527634,
+            "definition": {
+              "title": "Cloud Audit Log Details",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:forcepoint-security-service-edge service:forcepoint-sse-cloudaudit $Actor_IP $UserName $Action $Status",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "syslog.hostname",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "fileid",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "filename",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "filelink",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "status",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "action",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "owner",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@usr.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "sharedwith",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "attachments",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "application",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 45,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 57,
+        "width": 12,
+        "height": 51,
+        "is_column_break": true
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "Action",
+      "prefix": "@action",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Actor_IP",
+      "prefix": "@network.client.ip",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Status",
+      "prefix": "@status",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "UserName",
+      "prefix": "@usr.name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

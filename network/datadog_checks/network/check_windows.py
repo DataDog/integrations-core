@@ -1,15 +1,40 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import socket
 from collections import defaultdict
+from ctypes import Structure, byref, windll
+from ctypes.wintypes import DWORD
 
 import psutil
-from six import PY3, iteritems
 
 from . import Network
 
-if PY3:
-    long = int
+Iphlpapi = windll.Iphlpapi
+
+
+class TCPSTATS(Structure):
+    """
+    https://learn.microsoft.com/en-us/windows/win32/api/tcpmib/ns-tcpmib-mib_tcpstats_lh
+    """
+
+    _fields_ = [
+        ("dwRtoAlgorithm", DWORD),
+        ("dwRtoMin", DWORD),
+        ("dwRtoMax", DWORD),
+        ("dwMaxConn", DWORD),
+        ("dwActiveOpens", DWORD),
+        ("dwPassiveOpens", DWORD),
+        ("dwAttemptFails", DWORD),
+        ("dwEstabResets", DWORD),
+        ("dwCurrEstab", DWORD),
+        ("dwInSegs", DWORD),
+        ("dwOutSegs", DWORD),
+        ("dwRetransSegs", DWORD),
+        ("dwInErrs", DWORD),
+        ("dwOutRsts", DWORD),
+        ("dwNumConns", DWORD),
+    ]
 
 
 class WindowsNetwork(Network):
@@ -25,6 +50,7 @@ class WindowsNetwork(Network):
         custom_tags = self.instance.get('tags', [])
         if self._collect_cx_state:
             self._cx_state_psutil(tags=custom_tags)
+        self._tcp_stats(tags=custom_tags)
 
         self._cx_counters_psutil(tags=custom_tags)
 
@@ -53,7 +79,7 @@ class WindowsNetwork(Network):
             else:
                 metrics[metric] += 1
 
-        for metric, value in iteritems(metrics):
+        for metric, value in metrics.items():
             self.gauge(metric, value, tags=tags)
 
     def _cx_counters_psutil(self, tags=None):
@@ -61,7 +87,7 @@ class WindowsNetwork(Network):
         Collect metrics about interfaces counters using psutil
         """
         tags = [] if tags is None else tags
-        for iface, counters in iteritems(psutil.net_io_counters(pernic=True)):
+        for iface, counters in psutil.net_io_counters(pernic=True).items():
             metrics = {
                 'bytes_rcvd': counters.bytes_recv,
                 'bytes_sent': counters.bytes_sent,
@@ -73,6 +99,65 @@ class WindowsNetwork(Network):
                 'packets_out.error': counters.errout,
             }
             self.submit_devicemetrics(iface, metrics, tags)
+
+    def _get_tcp_stats(self, inet):
+        stats = TCPSTATS()
+        try:
+            Iphlpapi.GetTcpStatisticsEx(byref(stats), inet)
+        except OSError as e:
+            self.log.error("OSError: %s", e)
+            return None
+        return stats
+
+    def _tcp_stats(self, tags):
+        """
+        Collect metrics from Microsoft's TCPSTATS
+        """
+        tags = [] if tags is None else tags
+
+        tcpstats_dict = {
+            'dwActiveOpens': '.active_opens',
+            'dwPassiveOpens': '.passive_opens',
+            'dwAttemptFails': '.attempt_fails',
+            'dwEstabResets': '.established_resets',
+            'dwCurrEstab': '.current_established',
+            'dwInSegs': '.in_segs',
+            'dwOutSegs': '.out_segs',
+            'dwRetransSegs': '.retrans_segs',
+            'dwInErrs': '.in_errors',
+            'dwOutRsts': '.out_resets',
+            'dwNumConns': '.connections',
+        }
+        # similar to the linux check
+        nstat_metrics_gauge_names = [
+            '.connections',
+            '.current_established',
+        ]
+
+        proto_dict = {}
+        tcp4stats = self._get_tcp_stats(socket.AF_INET)
+        if tcp4stats:
+            proto_dict["tcp4"] = tcp4stats
+        tcp6stats = self._get_tcp_stats(socket.AF_INET6)
+        if tcp6stats:
+            proto_dict["tcp6"] = tcp6stats
+
+        tcpAllstats = TCPSTATS()
+        # Create tcp metrics that are a sum of tcp4 and tcp6 metrics
+        if 'tcp4' in proto_dict and 'tcp6' in proto_dict:
+            for fieldname, _ in tcpAllstats._fields_:
+                tcp_sum = getattr(proto_dict['tcp4'], fieldname) + getattr(proto_dict['tcp6'], fieldname)
+                setattr(tcpAllstats, fieldname, tcp_sum)
+            proto_dict["tcp"] = tcpAllstats
+
+        for proto, stats in proto_dict.items():
+            for fieldname in tcpstats_dict:
+                fieldvalue = getattr(stats, fieldname)
+                metric_name = "system.net." + str(proto) + tcpstats_dict[fieldname]
+                if tcpstats_dict[fieldname] in nstat_metrics_gauge_names:
+                    self._submit_netmetric_gauge(metric_name, fieldvalue, tags)
+                else:
+                    self.submit_netmetric(metric_name, fieldvalue, tags)
 
     def _parse_protocol_psutil(self, conn):
         """

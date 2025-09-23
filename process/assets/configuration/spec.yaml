@@ -27,6 +27,14 @@ files:
         value:
           type: integer
           example: 120
+      - name: reset_cache_on_process_changes
+        description: |
+          When set to true, the shared process list cache is reset (forced to refresh) when a process disappears 
+          during scanning or when no matching processes are found for an instance. This ensures fresh process data 
+          but may impact performance on systems with frequent process changes.
+        value:
+          type: boolean
+          example: true
       - name: procfs_path
         description: |
           Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
@@ -75,8 +83,13 @@ files:
           type: string
       - name: exact_match
         description: |
-          Matches your search_string on proc.name().
-          If you want to match on a substring within proc.cmdline(), set this to false
+          If you want to match your `search_string` on a substring within the list of process names, 
+          set this to true. This is equivalent to running `ps -e` on Linux or `Get-Process` on Windows.
+
+          If you want to match your `search_string` on a substring within the list of process names
+          and the command line, set this to false. This is equivalent to running `ps -ef` on Linux or
+          `Get-CimInstance Win32_Process | select name,commandline` on Windows.
+
           Regex is also supported when this flag is set to `false`.
 
           Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have access to the full
@@ -127,4 +140,19 @@ files:
         value:
           type: boolean
           example: false
+      - name: pid_cache_duration
+        description: |
+          Changes the check refresh rate of the matching pid list every X seconds except if it
+          detects a change before. You might want to set it low if you want to
+          alert on process service checks.
+        value:
+          type: integer
+          example: 120
+      - name: use_oneshot
+        description: |
+          If set to `true`, the check uses `psutil.Process().oneshot()` to collect and cache process metrics. 
+          This can help speed up the check completion.
+        value:
+          type: boolean
+          example: true
       - template: instances/default

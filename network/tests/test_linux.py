@@ -7,36 +7,21 @@ import os
 
 import mock
 import pytest
-from six import PY3, iteritems
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.network.check_linux import LinuxNetwork
 
 from . import common
-
-if PY3:
-    long = int
-    ESCAPE_ENCODING = 'unicode-escape'
-
-    def decode_string(s):
-        return s.decode(ESCAPE_ENCODING)
-
-else:
-    ESCAPE_ENCODING = 'string-escape'
-
-    def decode_string(s):
-        s.decode(ESCAPE_ENCODING)
-        return s.decode("utf-8")
-
-
-FIXTURE_DIR = os.path.join(common.HERE, 'fixtures')
+from .common import FIXTURE_DIR, decode_string
 
 LINUX_SYS_NET_STATS = {
     'system.net.iface.mtu': (65536, 9001),
     'system.net.iface.tx_queue_len': (1000, 1000),
     'system.net.iface.num_rx_queues': (1, 2),
     'system.net.iface.num_tx_queues': (1, 3),
+    'system.net.iface.up': (1, 1),
 }
 
 CX_STATE_GAUGES_VALUES = {
@@ -178,13 +163,19 @@ def read_int_file_mock(location):
         return 65536
     elif location == '/sys/class/net/lo/tx_queue_len':
         return 1000
+    elif location == '/sys/class/net/lo/carrier':
+        return 1
     elif location == '/sys/class/net/ens5/mtu':
         return 9001
     elif location == '/sys/class/net/ens5/tx_queue_len':
         return 1000
+    elif location == '/sys/class/net/ens5/carrier':
+        return 1
     elif location == '/sys/class/net/invalid/mtu':
         return None
     elif location == '/sys/class/net/invalid/tx_queue_len':
+        return None
+    elif location == '/sys/class/net/invalid/carrier':
         return None
 
 
@@ -203,8 +194,11 @@ def test_collect_cx_queues(check, aggregator):
 
     check_instance.check({})
 
-    for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS:
+    for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS + common.EXPECTED_WINDOWS_LINUX_METRICS:
         aggregator.assert_metric(metric)
+
+    # TODO Add this assert back when `assert_metrics_using_metadata` properly handles histograms
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason="Only works on Linux systems")
@@ -217,8 +211,11 @@ def test_collect_cx_queues_when_ss_fails(check, aggregator):
         out.side_effect = ss_subprocess_mock_fails
         check_instance.check({})
 
-    for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS:
+    for metric in CONNECTION_QUEUES_METRICS + common.EXPECTED_METRICS + common.EXPECTED_WINDOWS_LINUX_METRICS:
         aggregator.assert_metric(metric)
+
+    # TODO Add this assert back when `assert_metrics_using_metadata` properly handles histograms
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(Platform.is_windows(), reason="Only runs on Unix systems")
@@ -230,14 +227,16 @@ def test_cx_state(aggregator):
     with mock.patch('datadog_checks.network.check_linux.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
         check_instance.check(instance)
-        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+        for metric, value in CX_STATE_GAUGES_VALUES.items():
             aggregator.assert_metric(metric, value=value)
         aggregator.reset()
 
         out.side_effect = netstat_subprocess_mock
         check_instance.check(instance)
-        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+        for metric, value in CX_STATE_GAUGES_VALUES.items():
             aggregator.assert_metric(metric, value=value)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(Platform.is_windows(), reason="Only runs on Unix systems")
@@ -249,10 +248,11 @@ def test_linux_sys_net(listdir, read_int_file, aggregator):
 
     check_instance.check({})
 
-    for metric, value in iteritems(LINUX_SYS_NET_STATS):
+    for metric, value in LINUX_SYS_NET_STATS.items():
         aggregator.assert_metric(metric, value=value[0], tags=['iface:lo'])
         aggregator.assert_metric(metric, value=value[1], tags=['iface:ens5'])
-    aggregator.reset()
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_cx_state_mocked(aggregator):
@@ -261,19 +261,20 @@ def test_cx_state_mocked(aggregator):
     check_instance = LinuxNetwork('network', {}, [instance])
     with mock.patch('datadog_checks.network.check_linux.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
-        check_instance._get_linux_sys_net = lambda x: True
         check_instance.is_collect_cx_state_runnable = lambda x: True
         check_instance.get_net_proc_base_location = lambda x: FIXTURE_DIR
 
         check_instance.check({})
-        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+        for metric, value in CX_STATE_GAUGES_VALUES.items():
             aggregator.assert_metric(metric, value=value)
 
         aggregator.reset()
         out.side_effect = netstat_subprocess_mock
         check_instance.check({})
-        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+        for metric, value in CX_STATE_GAUGES_VALUES.items():
             aggregator.assert_metric(metric, value=value)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_add_conntrack_stats_metrics(aggregator):
@@ -288,12 +289,13 @@ def test_add_conntrack_stats_metrics(aggregator):
         subprocess.return_value = mocked_conntrack_stats, None, None
         check_instance._add_conntrack_stats_metrics(None, None, ['foo:bar'])
 
-        for metric, value in iteritems(CONNTRACK_STATS):
+        for metric, value in CONNTRACK_STATS.items():
             aggregator.assert_metric(metric, value=value[0], tags=['foo:bar', 'cpu:0'])
             aggregator.assert_metric(metric, value=value[1], tags=['foo:bar', 'cpu:1'])
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
-@pytest.mark.skipif(not PY3, reason="mock builtins only works on Python 3")
+
 def test_proc_permissions_error(aggregator, caplog):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = False
@@ -309,12 +311,11 @@ def test_proc_permissions_error(aggregator, caplog):
         assert 'Unable to read /proc/net/snmp.' in caplog.text
 
 
-@mock.patch('distutils.spawn.find_executable', return_value='/bin/ss')
+@mock.patch('datadog_checks.network.network.find_executable', return_value='/bin/ss')
 def test_ss_with_custom_procfs(aggregator):
     instance = copy.deepcopy(common.INSTANCE)
     instance['collect_connection_state'] = True
     check_instance = LinuxNetwork('network', {}, [instance])
-    check_instance._get_linux_sys_net = lambda x: True
     with mock.patch(
         'datadog_checks.network.check_linux.get_subprocess_output', side_effect=ss_subprocess_mock
     ) as get_subprocess_output:
@@ -334,5 +335,7 @@ def test_proc_net_metrics(aggregator):
     check_instance.get_net_proc_base_location = lambda x: FIXTURE_DIR
 
     check_instance.check({})
-    for metric, value in iteritems(PROC_NET_STATS):
+    for metric, value in PROC_NET_STATS.items():
         aggregator.assert_metric(metric, value=value)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

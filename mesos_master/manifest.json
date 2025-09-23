@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "fe4b70df-c13c-4469-b698-a404955b33ad",
   "app_id": "mesos-master",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -17,7 +18,14 @@
       "Category::Configuration & Deployment",
       "Category::Containers",
       "Category::Orchestration",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/deploy-datadog-dcos"
+      }
     ]
   },
   "author": {
@@ -26,7 +34,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Mesos Master",
@@ -47,7 +54,9 @@
       "process_signatures": [
         "mesos-master.sh",
         "mesos-agent.sh"
-      ]
+      ],
+      "source_type_id": 10156,
+      "auto_install": true
     },
     "saved_views": {
       "mesos-master_processes": "assets/saved_views/mesos-master_processes.json"

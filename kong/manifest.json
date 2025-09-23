@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "41e7a8cb-07b6-46cc-a087-53e87736b5c7",
   "app_id": "kong",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,17 @@
     "title": "Kong",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Web",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-kong-datadog"
+      }
     ]
   },
   "author": {
@@ -26,7 +32,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Kong",
@@ -41,14 +46,20 @@
       },
       "metrics": {
         "prefix": "kong.",
-        "check": "kong.total_requests",
+        "check": [
+          "kong.total_requests",
+          "kong.nginx.requests.total"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 141,
+      "auto_install": true
     },
     "dashboards": {
+      "Kong Overview Openmetrics v3+": "assets/dashboards/kong_overview_openmetrics_v3",
       "Kong Overview OpenMetrics": "assets/dashboards/kong_overview_openmetrics.json",
       "Kong Overview": "assets/dashboards/kong_overview.json",
       "Kong API": "assets/dashboards/kong_api.json"
@@ -59,9 +70,6 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "kong_processes": "assets/saved_views/kong_processes.json"
-    },
-    "logs": {
-      "source": "kong"
     }
   }
 }

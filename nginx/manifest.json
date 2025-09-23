@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b98a5a97-1d65-4f74-9d1a-b2c1be85a470",
   "app_id": "nginx",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,26 @@
     "title": "Nginx",
     "media": [],
     "classifier_tags": [
+      "Category::Configuration & Deployment",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Web",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-monitor-nginx"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html"
+      }
     ]
   },
   "author": {
@@ -25,7 +41,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Nginx",
@@ -48,7 +63,9 @@
       },
       "process_signatures": [
         "nginx: master process"
-      ]
+      ],
+      "source_type_id": 31,
+      "auto_install": true
     },
     "dashboards": {
       "NGINX Plus base overview": "assets/dashboards/plus_overview.json",
@@ -56,9 +73,9 @@
       "NGINX-Overview": "assets/dashboards/NGINX-Overview_dashboard.json"
     },
     "monitors": {
-      "[NGINX] Upstream peers fails": "assets/monitors/upstream_peer_fails.json",
-      "[NGINX] 4xx Errors higher than usual": "assets/monitors/4xx.json",
-      "[NGINX] 5xx Errors higher than usual": "assets/monitors/5xx.json"
+      "Upstream peers are failing": "assets/monitors/upstream_peer_fails.json",
+      "Upstream 4xx errors are high": "assets/monitors/4xx.json",
+      "Upstream 5xx errors are high": "assets/monitors/5xx.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
@@ -66,9 +83,6 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "nginx_processes": "assets/saved_views/nginx_processes.json"
-    },
-    "logs": {
-      "source": "nginx"
     }
   }
 }

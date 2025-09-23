@@ -29,6 +29,10 @@ class InitializeDB(LazyFunction):
             # Trigger an audit
             cur.execute('SELECT AUDIT_LICENSE_SIZE()')
 
+            # Enable load balance policy
+            # https://docs.vertica.com/12.0.x/en/admin/managing-client-connections/connection-load-balancing/
+            cur.execute("SELECT SET_LOAD_BALANCE_POLICY('ROUNDROBIN')")
+
 
 @pytest.fixture(scope='session')
 def dd_environment():

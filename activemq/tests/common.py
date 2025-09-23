@@ -77,6 +77,10 @@ ARTEMIS_E2E_METRICS = [
     "activemq.artemis.total_messages_added",
 ]
 
+OPTIONAL_ARTEMIS_E2E_METRICS = {
+    "activemq.artemis.address.number_of_messages",
+}
+
 ACTIVEMQ_E2E_JVM_METRICS = list(JVM_E2E_METRICS)
 ACTIVEMQ_E2E_JVM_METRICS.remove('jvm.gc.cms.count')
 ACTIVEMQ_E2E_JVM_METRICS.remove('jvm.gc.parnew.time')

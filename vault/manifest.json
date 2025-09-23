@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "450e17a2-3ca0-4dc5-800c-99c5db736073",
   "app_id": "vault",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,13 +13,30 @@
     "title": "Vault",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Security",
-      "Category::Configuration & Deployment",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Security",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-hashicorp-vault-with-datadog"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-vault-metrics-and-logs/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/vault-monitoring-tools"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/vault-monitoring-with-datadog"
+      }
     ]
   },
   "author": {
@@ -27,7 +45,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Vault",
@@ -44,22 +61,24 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "vault server"
+      ],
+      "source_type_id": 10059,
+      "auto_install": true
     },
     "dashboards": {
       "Vault - Overview": "assets/dashboards/vault_overview_legacy.json",
       "Vault - Overview (OpenMetricsV2)": "assets/dashboards/vault_overview.json"
     },
     "monitors": {
-      "[Vault] S3 time to access secrets is high": "assets/monitors/vault_S3_time_high.json"
+      "Time to access secrets is high": "assets/monitors/vault_S3_time_high.json"
     },
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",
       "service_name_overview": "assets/saved_views/service_name_overview.json",
       "vault_patern": "assets/saved_views/vault_patern.json"
-    },
-    "logs": {
-      "source": "vault"
     }
   }
 }

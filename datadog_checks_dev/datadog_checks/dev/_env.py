@@ -5,8 +5,6 @@ import json
 import os
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 
-from six import iteritems
-
 DDTRACE_OPTIONS_LIST = [
     'DD_TAGS',
     'DD_TRACE*',
@@ -19,7 +17,8 @@ E2E_PREFIX = 'DDEV_E2E'
 E2E_ENV_VAR_PREFIX = '{}_ENV_'.format(E2E_PREFIX)
 E2E_SET_UP = '{}_UP'.format(E2E_PREFIX)
 E2E_TEAR_DOWN = '{}_DOWN'.format(E2E_PREFIX)
-E2E_PARENT_PYTHON = '{}_PYTHON_PATH'.format(E2E_PREFIX)
+E2E_PARENT_PYTHON = '{}_PARENT_PYTHON'.format(E2E_PREFIX)
+E2E_RESULT_FILE = '{}_RESULT_FILE'.format(E2E_PREFIX)
 
 E2E_FIXTURE_NAME = 'dd_environment'
 TESTING_PLUGIN = 'DDEV_TESTING_PLUGIN'
@@ -55,7 +54,7 @@ def e2e_testing():
 
 
 def set_env_vars(env_vars):
-    for key, value in iteritems(env_vars):
+    for key, value in env_vars.items():
         key = '{}{}'.format(E2E_ENV_VAR_PREFIX, key)
         os.environ[key] = value
 
@@ -67,11 +66,11 @@ def remove_env_vars(env_vars):
 
 def get_env_vars(raw=False):
     if raw:
-        return {key: value for key, value in iteritems(os.environ) if key.startswith(E2E_ENV_VAR_PREFIX)}
+        return {key: value for key, value in os.environ.items() if key.startswith(E2E_ENV_VAR_PREFIX)}
     else:
         env_vars = {}
 
-        for key, value in iteritems(os.environ):
+        for key, value in os.environ.items():
             _, found, ev = key.partition(E2E_ENV_VAR_PREFIX)
             if found:
                 # Normalize casing for Windows
@@ -130,6 +129,10 @@ def replay_check_run(agent_collector, stub_aggregator, stub_agent):
                 if data.get('source_type_name') == 'JMX':
                     raw_metric_type = JMX_TO_INAPP_TYPES.get(raw_metric_type, raw_metric_type)
                 metric_type = stub_aggregator.METRIC_ENUM_MAP[raw_metric_type]
+
+                if not data['metric']:
+                    print(data)
+
                 stub_aggregator.submit_metric_e2e(
                     # device is only present when replaying e2e tests. In integration tests it will be a tag
                     check_name,
@@ -178,8 +181,7 @@ def serialize_data(data):
     # 1. Printing to stdout won't fail
     # 2. Easy parsing since there are no spaces
     #
-    # TODO: Remove str() when we drop Python 2
-    return str(urlsafe_b64encode(data.encode('utf-8')).decode('utf-8'))
+    return urlsafe_b64encode(data.encode('utf-8')).decode('utf-8')
 
 
 def deserialize_data(data):

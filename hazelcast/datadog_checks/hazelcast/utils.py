@@ -3,13 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.constants import ServiceCheck
 
-# https://docs.hazelcast.org/docs/management-center/latest/manual/html/index.html#cluster-state
+# Cluster state is not reflected here, this check is purely for Management Center.
 MC_CLUSTER_STATES = {
-    'Active': ServiceCheck.OK,
-    'No Migration': ServiceCheck.WARNING,
-    'Frozen': ServiceCheck.CRITICAL,
-    'Passive': ServiceCheck.CRITICAL,
-    'In Transition': ServiceCheck.WARNING,
+    # hazelcast 5:
+    'UP': ServiceCheck.OK,
+    # hazelcast 4:
+    'ACTIVE': ServiceCheck.OK,
 }
 
 

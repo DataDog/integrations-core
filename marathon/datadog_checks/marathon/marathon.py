@@ -2,16 +2,14 @@
 # (C)  graemej <graeme.johnson@jadedpixel.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from urllib.parse import urljoin
 
 import requests
-from six import iteritems
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
 
 
 class Marathon(AgentCheck):
-
     DEFAULT_TIMEOUT = 5
     SERVICE_CHECK_NAME = 'marathon.can_connect'
     ACS_TOKEN = None
@@ -217,7 +215,7 @@ class Marathon(AgentCheck):
 
             queued.add(queue['app']['id'])
 
-            for m_type, sub_metric in iteritems(self.QUEUE_METRICS):
+            for m_type, sub_metric in self.QUEUE_METRICS.items():
                 if isinstance(sub_metric, list):
                     for attr, name in sub_metric:
                         try:

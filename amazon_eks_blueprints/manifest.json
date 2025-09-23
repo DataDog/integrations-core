@@ -12,12 +12,14 @@
     "title": "Datadog Blueprints Add-on",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::AWS",
+      "Category::Configuration & Deployment",
       "Category::Containers",
-      "Category::Orchestration"
+      "Category::Orchestration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "amazon_eks_blueprints",
@@ -36,7 +37,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10268,
+      "auto_install": true
     }
   }
 }

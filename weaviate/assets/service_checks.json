@@ -1,0 +1,48 @@
+[
+    {
+        "agent_version": "7.47.0",
+        "integration": "Weaviate",
+        "check": "weaviate.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Weaviate OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Weaviate OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.47.0",
+        "integration": "Weaviate",
+        "check": "weaviate.node.status",
+        "statuses": [
+            "ok",
+            "warning",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "weaviate_node"
+        ],
+        "name": "Health Status of Weaviate nodes",
+        "description": "Returns `CRITICAL` if the node is `UNAVAILABLE`, `WARNING` if `UNHEALTHY` and `OK` if `HEALTHY`."
+    },
+    {
+        "agent_version": "7.47.0",
+        "integration": "Weaviate",
+        "check": "weaviate.liveness.status",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "weaviate_liveness_url"
+        ],
+        "name": "Weaviate liveness HTTP check",
+        "description": "Returns `OK` if liveness endpoint returns a 200 response, otherwise returns `CRITICAL`."
+    }
+]

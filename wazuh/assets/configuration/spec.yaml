@@ -1,0 +1,10 @@
+name: Wazuh
+files:
+- name: wazuh.yaml
+  options:
+  - template: logs
+    example:
+    - type: udp
+      port: <PORT>
+      source: wazuh
+      service: wazuh

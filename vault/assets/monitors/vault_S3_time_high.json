@@ -1,27 +1,34 @@
 {
-	"name": "[Vault] S3 time to access secrets is high",
-	"type": "query alert",
-	"query": "avg(last_1m):avg:vault.vault.s3.get.quantile{*} > 50",
-	"message": "S3 time to access secrets is high in the past 1 minute.",
-	"tags": [
-		"integration:vault"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 50
-		}
+  "version": 2,
+  "created_at": "2021-03-08",
+  "last_updated_at": "2021-03-08",
+  "title": "Time to access secrets is high",
+  "tags": [
+    "integration:vault"
+  ],
+  "description": "Vault is a tool designed for secrets management that can be integrated with various backend storage systems for storing secrets securely. This monitor tracks the time it takes an AWS S3 backend to access secrets, to identify performance issues.",
+  "definition": {
+    "message": "S3 time to access secrets is high in the past 1 minute.",
+    "name": "[Vault] S3 time to access secrets is high",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 50
+      },
+      "timeout_h": 0
     },
-    "recommended_monitor_metadata": {
-        "description": "Notify your team when the time for S3 to access secrets is too high"
-    }
+    "query": "avg(last_1m):avg:vault.vault.s3.get.quantile{*} > 50",
+    "tags": [
+      "integration:vault"
+    ],
+    "type": "query alert"
+  }
 }

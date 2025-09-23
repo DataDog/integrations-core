@@ -7,17 +7,28 @@ Collects metrics from the gunicorn web server.
 
 http://gunicorn.org/
 """
+
 import re
+import subprocess
 import time
 
 import psutil
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+
+
+def get_gunicorn_version(cmd):
+    """
+    Adapter around a subprocess call to gunicorn.
+    """
+    # Splitting cmd by whitespace is "Good Enough"(tm):
+    # - shex.split is not available on Windows
+    # - passing shell=True exposes us to shell injection vulnerabilities since we get cmd from user config
+    res = subprocess.run(cmd.split(), capture_output=True, text=True)
+    return res.stdout, res.stderr, res.returncode
 
 
 class GUnicornCheck(AgentCheck):
-
     # Config
     PROC_NAME = 'proc_name'
 
@@ -138,9 +149,11 @@ class GUnicornCheck(AgentCheck):
         master_procs = []
         for p in psutil.process_iter():
             try:
-                if p.cmdline()[0] == master_name:
+                if len(p.cmdline()) > 0 and p.cmdline()[0] == master_name:
                     master_procs.append(p)
-            except (IndexError, psutil.Error) as e:
+            except psutil.NoSuchProcess:
+                self.log.debug("Process %s disappeared while scanning", p.name())
+            except psutil.Error as e:
                 self.log.debug("Cannot read information from process %s: %s", p.name(), e, exc_info=True)
         self.log.debug("There are %s master process(es) with the name %s", len(master_procs), name)
         return master_procs
@@ -166,7 +179,7 @@ class GUnicornCheck(AgentCheck):
         """Get version from `gunicorn --version`"""
         cmd = '{} --version'.format(self.gunicorn_cmd)
         try:
-            pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)
+            pc_out, pc_err, _ = get_gunicorn_version(cmd)
         except OSError:
             self.log.debug("Error collecting gunicorn version.")
             return None

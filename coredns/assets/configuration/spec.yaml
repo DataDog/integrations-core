@@ -13,13 +13,7 @@ files:
         openmetrics_endpoint.enabled: true
         openmetrics_endpoint.display_priority: 3
         openmetrics_endpoint.value.example: http://%%host%%:9153/metrics
-        openmetrics_endpoint.description: |
-          To enable CoreDNS metrics using OpenMetricsBaseCheckV2 you must specify the openmetrics endpoint url
-          and enable the plugin within coredns.
-          See: https://coredns.io/plugins/metrics/
-
-          Either `prometheus_url` or `openmetrics_url` must be specified.
-          See documentation: https://docs.datadoghq.com/integrations/coredns
+        openmetrics_endpoint.description: The URL where CoreDNS exposes Prometheus metrics.
         tags.display_priority: 1
         tags.value.example:
           - "dns-pod:%%host%%"
@@ -32,15 +26,6 @@ files:
       overrides:
         prometheus_url.required: false
         prometheus_url.hidden: false
-        prometheus_url.display_priority: 2
-        prometheus_url.value.example: http://%%host%%:9153/metrics
-        prometheus_url.description: |
-          To enable CoreDNS metrics using the legacy OpenMetricsBaseCheckV1 you must specify the prometheus url
-          and enable the plugin within coredns.
-          See: https://coredns.io/plugins/metrics/
-
-          Either `prometheus_url` or `openmetrics_url` must be specified.
-          See documentation: https://docs.datadoghq.com/integrations/coredns
 - name: auto_conf.yaml
   options:
   - template: ad_identifiers
@@ -57,7 +42,7 @@ files:
         and enable the plugin within coredns.
         See: https://coredns.io/plugins/metrics/
 
-        Either `prometheus_url` or `openmetrics_url` must be specified.
+        Either `prometheus_url` or `openmetrics_endpoint` must be specified.
         See documentation: https://docs.datadoghq.com/integrations/coredns
 
       enabled: true
@@ -108,7 +93,7 @@ files:
         and enable the plugin within coredns.
         See: https://coredns.io/plugins/metrics/
 
-        Either `prometheus_url` or `openmetrics_url` must be specified.
+        Either `prometheus_url` or `openmetrics_endpoint` must be specified.
         See documentation: https://docs.datadoghq.com/integrations/coredns
       value:
         type: string

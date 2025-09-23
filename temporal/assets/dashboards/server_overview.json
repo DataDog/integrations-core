@@ -1,0 +1,1719 @@
+{
+    "author_name": "Datadog",
+    "description": "This is a high-level overview of your Temporal cluster, helping you keep track of its global as well as service-wise health.\n\n##### [**Datadog Temporal integration docs&nbsp;\u2197**](https://docs.datadoghq.com/integrations/temporal/)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "namespace",
+            "prefix": "namespace"
+        }
+    ],
+    "title": "Temporal Server Overview",
+    "widgets": [
+        {
+            "definition": {
+                "banner_img": "/static/images/logos/temporal_large.svg",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "This is a high-level overview of your Temporal cluster, helping you keep track of its global as well as service-wise health.\n\n##### [**Datadog Temporal integration docs&nbsp;\u2197**](https://docs.datadoghq.com/integrations/temporal/)",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note"
+                        },
+                        "id": 3088992460770358,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 5841402970586654,
+            "layout": {
+                "height": 6,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 100
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 1000
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 1000
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.service.latency.sum{!operation:poll*,$namespace,service_name:frontend}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.service.latency.count{!operation:poll*,$namespace,service_name:frontend}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "Frontend Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 5286183804474456,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 100
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 1000
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 1000
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.persistence.latency.sum{$namespace}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.persistence.latency.count{$namespace}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "Persistence Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3958345104519500,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 100
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 1000
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 1000
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.lock.latency.sum{operation:shardinfo,$namespace}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.lock.latency.count{operation:shardinfo,$namespace}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "Shard Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 579246293110120,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "custom_unit": "%",
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_green",
+                                            "value": 80
+                                        },
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_yellow",
+                                            "value": 50
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "palette": "white_on_red",
+                                            "value": 50
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.poll.success_sync.count{$namespace}.as_rate()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.poll.success.count{$namespace}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "Sync Match Rate",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 8587998999947204,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 100
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 1000
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 1000
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.cache.latency.sum{operation:historycachegetorcreate,$namespace}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.cache.latency.count{operation:historycachegetorcreate,$namespace}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "History Cache Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 7116490608964426,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_green",
+                                            "value": 100
+                                        },
+                                        {
+                                            "comparator": "<=",
+                                            "palette": "white_on_yellow",
+                                            "value": 1000
+                                        },
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 1000
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.task.latency.sum{operation:visibilitytask*,service_name:history,$namespace}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.task.latency.count{operation:visibilitytask*,service_name:history,$namespace}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "title": "Visibility Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6104184930203012,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 4,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "These metrics provide a quick overview of the cluster's current status. They are expanded with more detail and with explanations further below.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 6664920597645504,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 3059652270969856,
+            "layout": {
+                "height": 6,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "gray",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Latencies",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "Latencies experienced by all Temporal clients (including workers, CLI tools and anything that uses the Temporal API) for different operations.\n\n`Poll` operations are excluded as they can be caused by no work being available and they time out after 1 minute.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "right",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8859936409751990,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.service.latency.sum{!operation:poll*,$namespace} by {operation}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.service.latency.count{!operation:poll*,$namespace} by {operation}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "title": "Average Frontend Latency by Operation",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 8644412359036364,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Frontend latency",
+                                            "formula": "autosmooth(query1 / query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.service.latency.sum{!operation:poll*,$namespace,service_name:frontend} by {operation}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.service.latency.count{!operation:poll*,$namespace,service_name:frontend} by {operation}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Average Frontend Latency by Operation (excluding poll operations)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2169880286703202,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "Latency introduced by operations against the database, split by operations.\n\nThe database in a Temporal Cluster persists the Task Queues and Workflow Executions, among other data.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "right",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 7611873784497000,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.persistence.latency.sum{$namespace} by {operation}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.persistence.latency.count{$namespace} by {operation}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "title": "Average Persistence Latency by Operation",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 4024759452321276,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 3,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Persistence latency",
+                                            "formula": "autosmooth(query1 / query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.persistence.latency.sum{$namespace} by {operation}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.persistence.latency.count{$namespace} by {operation}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Average Persistence Latency by Operation",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8395886377472554,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "A high history cache latency might mean there are workflows starting too many activities or child workflows at the same time which could require restructuring.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8119931121935024,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "This metric measures shard contention. [History shards](https://docs.temporal.io/clusters#history-shard) are critical for Workflow Execution throughput. A high value for this metric might mean that the number of shards needs to be scaled up.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8347705435328040,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "gray",
+                            "content": "Latency for indexing Workflow Executions in the Visibility backend. This is an indication of the time it takes for a workflow to show up in places like the UI and list filters.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 1296678725031694,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Cache latency",
+                                            "formula": "default_zero(query1 / query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.cache.latency.sum{operation:historycachegetorcreate,$namespace}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.cache.latency.count{operation:historycachegetorcreate,$namespace}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {},
+                            "title": "Average History Cache Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5774474517142672,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Shard latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.lock.latency.sum{operation:shardinfo,$namespace}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.lock.latency.count{operation:shardinfo,$namespace}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Average Shard Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 43492724107422,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Visibility latency",
+                                            "formula": "default_zero(query1 / query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.task.latency.sum{operation:visibilitytask*,service_name:history,$namespace} by {operation}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.task.latency.count{operation:visibilitytask*,service_name:history,$namespace} by {operation}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "time": {},
+                            "title": "Average Visibility Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2823144235071874,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 8
+                        }
+                    }
+                ]
+            },
+            "id": 2816922315594016,
+            "layout": {
+                "height": 12,
+                "width": 12,
+                "x": 0,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "background_color": "blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Sync matching",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "When a new task is added in Temporal, one of two possible matching flows might occur, depending on whether there is already a worker waiting for tasks on the queue it is being added to.\n\nIf a worker is already waiting, then a *sync match* occurs and the task is sent directly to the worker without needing to persist it to the Task Queue. Otherwise, the task will be stored in the Task Queue and retrieved later when a worker polls for a new task.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4451197166214416,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "These metrics present two complementary views into this process.\n\nThe Sync Match Rate is the percentage of matches that go through the *sync* workflow. A low value might indicate that adding more workers could be beneficial.\n\nThe amount of task creation requests reflect the number of tasks that follow the normal workflow and get persisted.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 8654107361584298,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2 * 100",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "asc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.poll.success_sync.count{$namespace} by {taskqueue}.as_rate()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.poll.success.count{$namespace} by {taskqueue}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {
+                                "live_span": "5m"
+                            },
+                            "title": "Sync Match Rate (%) by Task Queue",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 8491411777441728,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Task creation",
+                                            "formula": "autosmooth(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.persistence.requests.count{operation:createtasks,$namespace}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Persistence Task Creation Request Rate",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4681063577363464,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "alias": "Sync match",
+                                            "formula": "query1 / query2 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.poll.success_sync.count{$namespace}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.poll.success.count{$namespace}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Sync Match Rate (%)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4053053364505978,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 5524473896093710,
+            "layout": {
+                "height": 7,
+                "width": 12,
+                "x": 0,
+                "y": 18
+            }
+        },
+        {
+            "definition": {
+                "background_color": "yellow",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Requests and Errors",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Request rate",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Error rate",
+                                            "formula": "query2",
+                                            "style": {
+                                                "palette": "red"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.service.requests.count{$namespace,service_name:frontend}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.service.error_with_type.count{$namespace,service_name:frontend} by {error_type}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "Frontend",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 716131960253898,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Request rate",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Error rate",
+                                            "formula": "query2",
+                                            "style": {
+                                                "palette": "red"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.service.requests.count{$namespace,service_name:history}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.service.error_with_type.count{$namespace,service_name:history} by {error_type}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "History Service",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3941707998470626,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Exhausted resources",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.service.errors.resource_exhausted{$namespace} by {operation,resource_exhausted_cause}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Resource Exhausted",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5887550792480324,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Request rate",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Error rate",
+                                            "formula": "query2",
+                                            "style": {
+                                                "palette": "red"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.persistence.requests.count{$namespace}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.persistence.error_with_type.count{$namespace} by {error_type}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Persistence",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2385401648063962,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Request rate",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Error rate",
+                                            "formula": "query2",
+                                            "style": {
+                                                "palette": "red"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:temporal.server.service.requests.count{$namespace,service_name:matching}.as_rate()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:temporal.server.service.error_with_type.count{$namespace,service_name:matching} by {error_type}.as_rate()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "time": {},
+                            "title": "Matching Service",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 950684109487582,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "\"Resource Exhausted\" errors can indicate that the system is hitting RPS or QPS limits.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "top",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 3281921218483188,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 1776700993343694,
+            "layout": {
+                "height": 7,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 25
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:temporal service:temporal-frontend",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "Frontend",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 1782436342276602,
+                        "layout": {
+                            "height": 5,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:temporal service:temporal-matching",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "Matching",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 1080425407727706,
+                        "layout": {
+                            "height": 5,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:temporal service:temporal-history",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "History",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 2241127656777578,
+                        "layout": {
+                            "height": 5,
+                            "width": 6,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:temporal service:temporal",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "Other Logs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 500087732880284,
+                        "layout": {
+                            "height": 5,
+                            "width": 6,
+                            "x": 6,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 5736737803723290,
+            "layout": {
+                "height": 11,
+                "width": 12,
+                "x": 0,
+                "y": 32
+            }
+        }
+    ]
+}

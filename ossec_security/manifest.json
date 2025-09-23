@@ -1,0 +1,102 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "595fcf0f-a306-43bf-a282-a729764961fa",
+  "app_id": "ossec-security",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into OSSEC alerts.",
+    "title": "ossec-security",
+    "media": [
+      {
+        "caption": "OSSEC - Audit Internal",
+        "image_url": "images/ossec_audit_internal.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "OSSEC - Firewall",
+        "image_url": "images/ossec_firewall.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "OSSEC - Overview",
+        "image_url": "images/ossec_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "OSSEC - PAM",
+        "image_url": "images/ossec_pam.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "OSSEC - SSHD",
+        "image_url": "images/ossec_sshd.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "OSSEC - Syslog",
+        "image_url": "images/ossec_syslog.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "OSSEC - Web",
+        "image_url": "images/ossec_web.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "OSSEC - Windows",
+        "image_url": "images/ossec_windows.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Alerting",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 19889856,
+      "source_type_name": "ossec-security",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "OSSEC - Overview": "assets/dashboards/ossec_overview.json",
+      "OSSEC - Audit/Internal": "assets/dashboards/ossec_audit_internal.json",
+      "OSSEC - Syslog": "assets/dashboards/ossec_syslog.json",
+      "OSSEC - SSHD": "assets/dashboards/ossec_sshd.json",
+      "OSSEC - PAM": "assets/dashboards/ossec_pam.json",
+      "OSSEC - Firewall": "assets/dashboards/ossec_firewall.json",
+      "OSSEC - FTPD": "assets/dashboards/ossec_ftpd.json",
+      "OSSEC - Windows": "assets/dashboards/ossec_windows.json",
+      "OSSEC - Web": "assets/dashboards/ossec_web.json"
+    },
+    "logs": {
+      "source": "ossec-security"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

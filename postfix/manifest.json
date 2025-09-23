@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "76293d0a-1cde-4f25-ae72-c3e6ef352273",
   "app_id": "postfix",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,10 +13,16 @@
     "title": "Postfix",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::Collaboration",
-      "Category::Log Collection"
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-postfix-queues"
+      }
     ]
   },
   "author": {
@@ -24,7 +31,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Postfix",
@@ -45,16 +51,15 @@
       "process_signatures": [
         "postfix start",
         "sendmail -bd"
-      ]
+      ],
+      "source_type_id": 66,
+      "auto_install": true
     },
     "dashboards": {
       "postfix": "assets/dashboards/postfix_dashboard.json"
     },
     "saved_views": {
       "postfix_processes": "assets/saved_views/postfix_processes.json"
-    },
-    "logs": {
-      "source": "postfix"
     }
   }
 }

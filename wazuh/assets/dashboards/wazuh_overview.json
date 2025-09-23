@@ -1,0 +1,1249 @@
+{
+    "title": "Wazuh - Overview",
+    "description": "Wazuh provides a comprehensive security solution that detects, analyzes, and responds to threats across multiple IT infrastructure layers. Wazuh collects telemetry from endpoints, network devices, cloud workloads, third-party APIs, and other sources for unified security monitoring and protection.",
+    "widgets": [
+        {
+            "id": 6348446344076584,
+            "definition": {
+                "type": "image",
+                "url": "https://wazuh.com/brand-assets/Wazuh-Logo.png",
+                "url_dark_theme": "https://wazuh.com/wp-content/themes/wazuh-v3/assets/images/trademark-and-brand-policy/Wazuh-logo-dark-backgroud.png",
+                "sizing": "cover",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 5,
+                "height": 3
+            }
+        },
+        {
+            "id": 1853977853681626,
+            "definition": {
+                "title": "Event Logs Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7958987691224374,
+                        "definition": {
+                            "title": "Events Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:wazuh $Agent_Name $Manager_Name $Level $Service $Group"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 546713173439682,
+                        "definition": {
+                            "title": "Total Event Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:wazuh $Agent_Name $Manager_Name $Level $Service $Group"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8618808784283546,
+                        "definition": {
+                            "title": "Event Count by Service",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "service",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:wazuh $Agent_Name $Manager_Name $Level $Service $Group"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 5,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 7
+            }
+        },
+        {
+            "id": 1331273711921418,
+            "definition": {
+                "type": "note",
+                "content": "\nWazuh provides a comprehensive security solution that detects, analyzes, and responds to threats across multiple IT infrastructure layers. Wazuh collects telemetry from endpoints, network devices, cloud workloads, third-party APIs, and other sources for unified security monitoring and protection.\n\nFor more information, see the [Wazuh Integration Documentation](https://docs.datadoghq.com/integrations/wazuh/).\n\nTips:\n - Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 5,
+                "height": 4
+            }
+        },
+        {
+            "id": 8103558959830770,
+            "definition": {
+                "type": "note",
+                "content": "| Level | Title | Description |\n| ---------- | ---------- | ----------|\n| 00 | Ignored | No action taken. Used to avoid false positives. These rules are scanned before all the others, include events with no security relevance and do not appear in the security event dashboard. |\n| 02 | System low priority notification | System notification or status messages. These have no security relevance and do not appear in the security event dashboard. |\n| 03 | System low priority notification | These include successful login attempts, firewall allow events, etc. |\n| 04 | System low priority error | Errors related to bad configurations or unused devices/applications. These have no security relevance and are usually caused by default installations or software testing. |\n| 05 | User generated error | These include missed passwords, denied actions, etc. By themselves, these have no security relevance. |\n|06 | Low relevance attack |  These indicate a worm or a virus that has no effect on the system (like code red for Apache servers, etc). These also include frequent IDS events and frequent errors. |\n| 07 | \"Bad word\" matching | These include words like \"bad\", \"error\", etc. These events are most of the time unclassified and may have some security relevance. |\n| 08 | First time seen | Include first time seen events. First time an IDS event is fired or the first time a user logs in. It also includes security relevant actions such as the activation of a sniffer or similar activities. |\n| 09 | Error from invalid source | Include attempts to login as an unknown user or from an invalid source. May have security relevance (especially if repeated). These also include errors regarding the \"admin\" (root) account. |\n| 10 | Multiple user generated errors | These include multiple bad passwords, multiple failed logins, etc. These may indicate an attack or simply signal that a user has forgotten their credentials. |\n| 11 | Integrity checking warning | These include messages regarding the modification of binaries or the presence of rootkits (by Rootcheck). These may indicate a successful attack. Also included IDS events that will be ignored (high number of repetitions). |\n| 12 | High importance event | These include error or warning messages from the system, kernel, etc. These may indicate an attack against a specific application. |\n| 13 | Unusual error (high importance) | It matches a common attack pattern most of the time. |\n| 14 | High importance security event | It is triggered with correlation most of the time, and it indicates an attack. |\n| 15 | Severe attack | No chances of false positives. Immediate attention is necessary. |\n\nReference Link: https://documentation.wazuh.com/current/user-manual/ruleset/rules/rules-classification.html\n",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 5,
+                "height": 5
+            }
+        },
+        {
+            "id": 6646248707273296,
+            "definition": {
+                "title": "Events Level Distribution (Level > 3)",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@rule.level",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:wazuh @rule.level:>3 $Agent_Name $Manager_Name $Level $Service $Group"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "count",
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "never"
+            },
+            "layout": {
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 5
+            }
+        },
+        {
+            "id": 5829340058908242,
+            "definition": {
+                "title": "Error or Critical Events Count",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:wazuh status:(error OR critical) $Agent_Name $Manager_Name $Level $Service $Group"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_red"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 6741392378103126,
+            "definition": {
+                "title": "Total Authentication Success Events",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:wazuh @rule.groups:authentication_success $Agent_Name $Manager_Name $Level $Service $Group"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 4,
+                "y": 5,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 3265693880274044,
+            "definition": {
+                "title": "Total Authentication Failed Events",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:wazuh @rule.groups:authentication_failed $Agent_Name $Manager_Name $Level $Service $Group"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_red"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 8,
+                "y": 5,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 587442089219928,
+            "definition": {
+                "title": "Top 10 Rules",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@rule.description",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:wazuh $Agent_Name $Manager_Name $Level $Service $Group"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 5622536135026798,
+            "definition": {
+                "title": "Top 10 Agents",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@agent.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:wazuh $Agent_Name $Manager_Name $Level $Service $Group"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 8,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 4384564956599440,
+            "definition": {
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:wazuh $Agent_Name $Manager_Name $Level $Service $Group",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "service",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "agent.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "rule.level",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "rule.id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "rule.groups",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "full"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 4185348993152106,
+            "definition": {
+                "title": "Datadog Cloud SIEM",
+                "title_align": "center",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4623916271966642,
+                        "definition": {
+                            "type": "note",
+                            "content": "\nDatadog Cloud SIEM analyzes and correlates Wazuh logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
+                            "background_color": "purple",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1460345638454502,
+                        "definition": {
+                            "title": "CRITICALs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#bc303c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:wazuh status:critical $Agent_Name $Manager_Name $Level $Service $Group"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5476757533653882,
+                        "definition": {
+                            "title": "HIGHs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#d33043",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:wazuh status:high $Agent_Name $Manager_Name $Level $Service $Group"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1379476249905458,
+                        "definition": {
+                            "title": "Critical Security Signals",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#bc303c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:wazuh status:critical $Agent_Name $Manager_Name $Level $Service $Group"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related Security Signals",
+                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
+                                }
+                            ],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2880232965900544,
+                        "definition": {
+                            "title": "MEDIUMs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#e5a21c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:wazuh status:medium $Agent_Name $Manager_Name $Level $Service $Group"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3273472547821490,
+                        "definition": {
+                            "title": "LOWs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#ffb52b",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:wazuh status:low $Agent_Name $Manager_Name $Level $Service $Group"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3890991967630338,
+                        "definition": {
+                            "title": "INFOs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#84c1e0",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:wazuh status:info $Agent_Name $Manager_Name $Level $Service $Group"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 4,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 317314577134156,
+                        "definition": {
+                            "title": "High Security Signals",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#d33043",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:wazuh status:high $Agent_Name $Manager_Name $Level $Service $Group"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related Security Signals",
+                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
+                                }
+                            ],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 514638455017102,
+                        "definition": {
+                            "title": "Medium Security Signals",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#e5a21c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:wazuh status:medium $Agent_Name $Manager_Name $Level $Service $Group"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [
+                                {
+                                    "label": "View related Security Signals",
+                                    "link": "/security?query=@workflow.rule.name:{{@workflow.rule.name.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
+                                }
+                            ],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 24,
+                "width": 12,
+                "height": 10
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Agent_Name",
+            "prefix": "@agent.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Manager_Name",
+            "prefix": "@manager.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Level",
+            "prefix": "@rule.level",
+            "available_values": [
+                "0",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15"
+            ],
+            "default": "*"
+        },
+        {
+            "name": "Service",
+            "prefix": "service",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Group",
+            "prefix": "@rule.groups",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

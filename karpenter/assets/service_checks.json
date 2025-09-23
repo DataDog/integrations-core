@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.50.0",
+        "integration": "Karpenter",
+        "check": "karpenter.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Karpenter OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Karpenter OpenMetrics endpoint, otherwise returns `OK`."
+    }
+]

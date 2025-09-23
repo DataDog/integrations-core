@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4ad5a2e9-106b-43a2-820a-f146c7effffe",
   "app_id": "jboss-wildfly",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,11 @@
     "title": "JBoss/WildFly",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Web",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "JBoss/WildFly",
@@ -43,13 +42,15 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "java jboss-modules.jar"
+      ],
+      "source_type_id": 10060,
+      "auto_install": true
     },
     "dashboards": {
       "JBoss WildFly": "assets/dashboards/jboss_wildfly.json"
-    },
-    "logs": {
-      "source": "jboss_wildfly"
     }
   }
 }

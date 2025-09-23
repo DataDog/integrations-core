@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e6b3c5ec-b293-4a22-9145-277a12a9abd4",
   "app_id": "postgres",
+  "owner": "database-monitoring",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,36 @@
     "title": "Postgres",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Notifications",
+      "Category::Tracing",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/postgresql-monitoring"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/postgresql-monitoring-tools"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog"
+      }
     ]
   },
   "author": {
@@ -26,7 +51,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Postgres",
@@ -51,15 +75,17 @@
         "postgres -D",
         "pg_ctl start -l logfile",
         "postgres -c 'pg_ctl start -D -l"
-      ]
+      ],
+      "source_type_id": 28,
+      "auto_install": true
     },
     "dashboards": {
       "postgresql": "assets/dashboards/postgresql_dashboard.json",
       "postgresql_screenboard": "assets/dashboards/postgresql_screenboard_dashboard.json"
     },
     "monitors": {
-      "percent_usage_connections": "assets/monitors/percent_usage_connections.json",
-      "replication_delay": "assets/monitors/replication_delay.json"
+      "Connection pool is reaching saturation point": "assets/monitors/percent_usage_connections.json",
+      "Replication delay is high": "assets/monitors/replication_delay.json"
     },
     "saved_views": {
       "operations": "assets/saved_views/operations.json",
@@ -67,9 +93,6 @@
       "postgres_pattern": "assets/saved_views/postgres_pattern.json",
       "sessions_by_host": "assets/saved_views/sessions_by_host.json",
       "postgres_processes": "assets/saved_views/postgres_processes.json"
-    },
-    "logs": {
-      "source": "postgresql"
     }
   }
 }

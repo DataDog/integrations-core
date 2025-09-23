@@ -1,0 +1,52 @@
+{
+    "loadbalancers": [
+        {
+            "id": "4bb7bfb1-83c2-45e8-b0e1-ed3022329115",
+            "name": "loadbalancer-1",
+            "description": "",
+            "provisioning_status": "ACTIVE",
+            "operating_status": "ERROR",
+            "admin_state_up": true,
+            "project_id": "966af9e5e65f4744840da2a01e48d72a",
+            "created_at": "2023-10-25T17:16:59",
+            "updated_at": "2024-03-07T15:51:28",
+            "vip_address": "10.0.0.24",
+            "vip_port_id": "f8093ae7-4bad-4e29-a5ae-933699596e80",
+            "vip_subnet_id": "3743c59e-25a9-4923-b7ff-cadcc0287025",
+            "vip_network_id": "75c7cbad-2c7a-45a4-8d3a-515475143c2a",
+            "additional_vips": [],
+            "listeners": [
+                {
+                  "id": "9da03992-77a4-4b65-b39a-0e106961f577"
+                },
+                {
+                  "id": "de81cbdc-8207-4253-8f21-3eea9870e7a9"
+                }
+            ],
+            "pools": [
+                {
+                    "id": "6dccbec7-b404-47ed-821e-aa15d16a7b4c"
+                },
+                {
+                    "id": "d654d850-eacb-4c58-bd11-afbdf1f64d13"
+                }
+            ],
+            "provider": "amphora",
+            "flavor_id": null,
+            "vip_qos_policy_id": null,
+            "tags": [],
+            "availability_zone": null,
+            "tenant_id": "966af9e5e65f4744840da2a01e48d72a"
+        }
+    ],
+    "loadbalancers_links": [
+        {
+            "href": "http://35.204.143.7/load-balancer/v2/lbaas/loadbalancers?limit=1&marker=4bb7bfb1-83c2-45e8-b0e1-ed3022329115&page_reverse=True",
+            "rel": "previous"
+        },
+        {
+            "href": "http://35.204.143.7/load-balancer/v2/lbaas/loadbalancers?limit=1&marker=4bb7bfb1-83c2-45e8-b0e1-ed3022329115",
+            "rel": "next"
+        }
+    ]
+}

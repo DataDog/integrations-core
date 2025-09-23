@@ -1,0 +1,7 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+langchain.request.duration,gauge,10,nanosecond,,Request duration distribution.,0,langchain,langchain,
+langchain.request.error,count,10,error,,Number of errors.,0,langchain,langchain,
+langchain.tokens.completion,gauge,10,token,request,Number of tokens used in the completion of a response.,0,langchain,langchain,
+langchain.tokens.prompt,gauge,10,token,request,Number of tokens used in the prompt of a request.,0,langchain,langchain,
+langchain.tokens.total,gauge,10,token,request,Total number of tokens used in a request and response.,0,langchain,langchain,
+langchain.tokens.total_cost,count,10,dollar,,Estimated cost in USD based on token usage.,0,langchain,langchain,

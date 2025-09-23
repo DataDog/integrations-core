@@ -3,9 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
-from six import string_types
-
-from .. import ensure_unicode
+from datadog_checks.base import ensure_unicode
 
 try:
     from _util import SubprocessOutputEmptyError  # noqa
@@ -13,7 +11,7 @@ try:
 except ImportError:
     # No agent
     from ..stubs._util import SubprocessOutputEmptyError  # noqa
-    from ..stubs._util import subprocess_output
+    from datadog_checks.base.stubs._util import subprocess_output
 
 
 log = logging.getLogger(__name__)
@@ -42,7 +40,7 @@ def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=Tr
     """
 
     cmd_args = []
-    if isinstance(command, string_types):
+    if isinstance(command, str):
         for arg in command.split():
             cmd_args.append(arg)
     elif hasattr(type(command), '__iter__'):

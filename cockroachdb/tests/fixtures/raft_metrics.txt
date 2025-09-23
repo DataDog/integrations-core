@@ -1,0 +1,998 @@
+# HELP raft_rcvd_queued_bytes Number of bytes in messages currently waiting for raft processing
+# TYPE raft_rcvd_queued_bytes gauge
+raft_rcvd_queued_bytes{store="1",node_id="1"} 0
+# HELP raft_transport_send_queue_bytes The total byte size of pending outgoing messages in the queue.\n\nThe queue is composed of multiple bounded channels associated with different\npeers. A size higher than the average baseline could indicate issues streaming\nmessages to at least one peer. Use this metric together with send-queue-size, to\nhave a fuller picture.
+# TYPE raft_transport_send_queue_bytes gauge
+raft_transport_send_queue_bytes{node_id="1"} 0
+# HELP raft_transport_rcvd Number of Raft messages received by the Raft Transport
+# TYPE raft_transport_rcvd counter
+raft_transport_rcvd{node_id="1"} 0
+# HELP raft_rcvd_vote Number of MsgVote messages received by this store
+# TYPE raft_rcvd_vote counter
+raft_rcvd_vote{store="1",node_id="1"} 0
+# HELP raft_entrycache_bytes Aggregate size of all Raft entries in the Raft entry cache
+# TYPE raft_entrycache_bytes gauge
+raft_entrycache_bytes{store="1",node_id="1"} 630884
+# HELP raft_entrycache_size Number of Raft entries in the Raft entry cache
+# TYPE raft_entrycache_size gauge
+raft_entrycache_size{store="1",node_id="1"} 528
+# HELP raft_rcvd_cross_zone_bytes Number of bytes received by this store for cross zone, same region\n		Raft messages (when region and zone tiers are configured). If region tiers\n		are not configured, this count may include data sent between different\n		regions. To ensure accurate monitoring of transmitted data, it is important\n		to set up a consistent locality configuration across nodes. Note that this\n		does not include raft snapshot received.
+# TYPE raft_rcvd_cross_zone_bytes counter
+raft_rcvd_cross_zone_bytes{store="1",node_id="1"} 0
+# HELP raft_process_workingnanos Nanoseconds spent in store.processRaft() working.\n\nThis is the sum of the measurements passed to the raft.process.handleready.latency\nhistogram.\n
+# TYPE raft_process_workingnanos counter
+raft_process_workingnanos{store="1",node_id="1"} 1.4951782e+08
+# HELP raft_rcvd_transferleader Number of MsgTransferLeader messages received by this store
+# TYPE raft_rcvd_transferleader counter
+raft_rcvd_transferleader{store="1",node_id="1"} 0
+# HELP raft_entrycache_read_bytes Counter of bytes in entries returned from the Raft entry cache
+# TYPE raft_entrycache_read_bytes counter
+raft_entrycache_read_bytes{store="1",node_id="1"} 3.550887e+06
+# HELP raft_timeoutcampaign Number of Raft replicas campaigning after missed heartbeats from leader
+# TYPE raft_timeoutcampaign counter
+raft_timeoutcampaign{store="1",node_id="1"} 0
+# HELP raft_transport_reverse_sent Messages sent in the reverse direction of a stream.\n\nThese messages should be rare. They are mostly informational, and are not actual\nresponses to Raft messages. Responses are sent over another stream.
+# TYPE raft_transport_reverse_sent counter
+raft_transport_reverse_sent{node_id="1"} 0
+# HELP raft_rcvd_dropped_bytes Bytes of dropped incoming Raft messages
+# TYPE raft_rcvd_dropped_bytes counter
+raft_rcvd_dropped_bytes{store="1",node_id="1"} 0
+# HELP raft_process_logcommit_latency Latency histogram for committing Raft log entries to stable storage\n\nThis measures the latency of durably committing a group of newly received Raft\nentries as well as the HardState entry to disk. This excludes any data\nprocessing, i.e. we measure purely the commit latency of the resulting Engine\nwrite. Homogeneous bands of p50-p99 latencies (in the presence of regular Raft\ntraffic), make it likely that the storage layer is healthy. Spikes in the\nlatency bands can either hint at the presence of large sets of Raft entries\nbeing received, or at performance issues at the storage layer.\n
+# TYPE raft_process_logcommit_latency histogram
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="10000"} 22
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="12638.482029342978"} 25
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="15973.122800602541"} 25
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="20187.602546790382"} 25
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="25514.065200312878"} 26
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="32245.90545296394"} 27
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="40753.92965871775"} 28
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="51506.78076168121"} 29
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="65096.75230458167"} 29
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="82272.41341700466"} 30
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="103979.84184814895"} 34
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="131414.73626117557"} 37
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="166088.27826277143"} 42
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="209910.3720108553"} 46
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="265294.8464431894"} 49
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="335292.41492495546"} 79
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="423758.7160604059"} 215
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="535566.6917706894"} 435
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="676875.0009458527"} 656
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="855467.2535565672"} 888
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.0811807510766068e+06"} 1025
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.3664483492953242e+06"} 1090
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.7269832906594332e+06"} 1133
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="2.182644728397485e+06"} 1169
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="2.7585316176291797e+06"} 1191
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="3.4863652276780806e+06"} 1202
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="4.406236427773566e+06"} 1208
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="5.568813990945262e+06"} 1213
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="7.038135554931545e+06"} 1217
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="8.89513497310822e+06"} 1224
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.1242100350620849e+07"} 1226
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.4208308325339198e+07"} 1226
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.795714494371637e+07"} 1228
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="2.269510536694665e+07"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="2.868316813342006e+07"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="3.625117049988527e+07"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="4.581597669054482e+07"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="5.790443980602476e+07"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="7.318242219076161e+07"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="9.249147277217315e+07"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.1689518164985757e+08"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.4773776525985083e+08"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.8671810912919158e+08"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="2.359833466782189e+08"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="2.9824712862168837e+08"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="3.769390975388353e+08"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="4.7639380104013294e+08"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="6.020894493336115e+08"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="7.609496685459859e+08"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="9.61724871115294e+08"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.2154742500762835e+09"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.5361749466718242e+09"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="1.941491945743876e+09"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="2.453751106639811e+09"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="3.10116892657477e+09"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="3.919406774847209e+09"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="4.953535208959157e+09"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="6.260516572014802e+09"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="7.912342618981298e+09"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="9.99999999999997e+09"} 1230
+raft_process_logcommit_latency_bucket{store="1",node_id="1",le="+Inf"} 1230
+raft_process_logcommit_latency_sum{store="1",node_id="1"} 1.134262162e+09
+raft_process_logcommit_latency_count{store="1",node_id="1"} 1230
+# HELP raft_dropped_leader Number of Raft proposals dropped by a Replica that believes itself to be the leader; each update also increments `raft.dropped` (this counts individial raftpb.Entry, not raftpb.MsgProp)
+# TYPE raft_dropped_leader counter
+raft_dropped_leader{store="1",node_id="1"} 0
+# HELP raft_transport_flow_token_dispatches_dropped Number of flow token dispatches dropped by the Raft Transport
+# TYPE raft_transport_flow_token_dispatches_dropped counter
+raft_transport_flow_token_dispatches_dropped{node_id="1"} 0
+# HELP raft_commands_reproposed_new_lai Number of Raft commands re-proposed with a newer LAI.\n\nThe number of Raft commands that leaseholders re-proposed with a modified LAI.\nSuch re-proposals happen for commands that are committed to Raft out of intended\norder, and hence can not be applied as is.
+# TYPE raft_commands_reproposed_new_lai counter
+raft_commands_reproposed_new_lai{store="1",node_id="1"} 0
+# HELP raft_heartbeats_pending Number of pending heartbeats and responses waiting to be coalesced
+# TYPE raft_heartbeats_pending gauge
+raft_heartbeats_pending{store="1",node_id="1"} 0
+# HELP raft_entrycache_accesses Number of cache lookups in the Raft entry cache
+# TYPE raft_entrycache_accesses counter
+raft_entrycache_accesses{store="1",node_id="1"} 979
+# HELP raft_rcvd_prevote Number of MsgPreVote messages received by this store
+# TYPE raft_rcvd_prevote counter
+raft_rcvd_prevote{store="1",node_id="1"} 0
+# HELP raft_rcvd_bytes Number of bytes in Raft messages received by this store. Note\n		that this does not include raft snapshot received.
+# TYPE raft_rcvd_bytes counter
+raft_rcvd_bytes{store="1",node_id="1"} 0
+# HELP raft_ticks Number of Raft ticks queued
+# TYPE raft_ticks counter
+raft_ticks{store="1",node_id="1"} 114
+# HELP raft_rcvd_timeoutnow Number of MsgTimeoutNow messages received by this store
+# TYPE raft_rcvd_timeoutnow counter
+raft_rcvd_timeoutnow{store="1",node_id="1"} 0
+# HELP raft_rcvd_dropped Number of incoming Raft messages dropped (due to queue length or size)
+# TYPE raft_rcvd_dropped counter
+raft_rcvd_dropped{store="1",node_id="1"} 0
+# HELP raft_transport_sends_dropped Number of Raft message sends dropped by the Raft Transport
+# TYPE raft_transport_sends_dropped counter
+raft_transport_sends_dropped{node_id="1"} 0
+# HELP raft_sent_cross_zone_bytes Number of bytes sent by this store for cross zone, same region Raft\n		messages (when region and zone tiers are configured). If region tiers are\n		not configured, this count may include data sent between different regions.\n		To ensure accurate monitoring of transmitted data, it is important to set up\n		a consistent locality configuration across nodes. Note that this does not\n		include raft snapshot sent.
+# TYPE raft_sent_cross_zone_bytes counter
+raft_sent_cross_zone_bytes{store="1",node_id="1"} 0
+# HELP raft_sent_bytes Number of bytes in Raft messages sent by this store. Note that\n		this does not include raft snapshot sent.
+# TYPE raft_sent_bytes counter
+raft_sent_bytes{store="1",node_id="1"} 0
+# HELP raft_entrycache_hits Number of successful cache lookups in the Raft entry cache
+# TYPE raft_entrycache_hits counter
+raft_entrycache_hits{store="1",node_id="1"} 912
+# HELP raft_rcvd_prop Number of MsgProp messages received by this store
+# TYPE raft_rcvd_prop counter
+raft_rcvd_prop{store="1",node_id="1"} 0
+# HELP raft_process_tickingnanos Nanoseconds spent in store.processRaft() processing replica.Tick()
+# TYPE raft_process_tickingnanos counter
+raft_process_tickingnanos{store="1",node_id="1"} 1.0539725e+07
+# HELP raft_rcvd_heartbeatresp Number of (coalesced, if enabled) MsgHeartbeatResp messages received by this store
+# TYPE raft_rcvd_heartbeatresp counter
+raft_rcvd_heartbeatresp{store="1",node_id="1"} 0
+# HELP raft_scheduler_latency Queueing durations for ranges waiting to be processed by the Raft scheduler.\n\nThis histogram measures the delay from when a range is registered with the scheduler\nfor processing to when it is actually processed. This does not include the duration\nof processing.\n
+# TYPE raft_scheduler_latency histogram
+raft_scheduler_latency_bucket{store="1",node_id="1",le="10000"} 1357
+raft_scheduler_latency_bucket{store="1",node_id="1",le="12638.482029342978"} 1552
+raft_scheduler_latency_bucket{store="1",node_id="1",le="15973.122800602541"} 1713
+raft_scheduler_latency_bucket{store="1",node_id="1",le="20187.602546790382"} 1801
+raft_scheduler_latency_bucket{store="1",node_id="1",le="25514.065200312878"} 1893
+raft_scheduler_latency_bucket{store="1",node_id="1",le="32245.90545296394"} 2009
+raft_scheduler_latency_bucket{store="1",node_id="1",le="40753.92965871775"} 2137
+raft_scheduler_latency_bucket{store="1",node_id="1",le="51506.78076168121"} 2266
+raft_scheduler_latency_bucket{store="1",node_id="1",le="65096.75230458167"} 2403
+raft_scheduler_latency_bucket{store="1",node_id="1",le="82272.41341700466"} 2575
+raft_scheduler_latency_bucket{store="1",node_id="1",le="103979.84184814895"} 2811
+raft_scheduler_latency_bucket{store="1",node_id="1",le="131414.73626117557"} 3035
+raft_scheduler_latency_bucket{store="1",node_id="1",le="166088.27826277143"} 3173
+raft_scheduler_latency_bucket{store="1",node_id="1",le="209910.3720108553"} 3250
+raft_scheduler_latency_bucket{store="1",node_id="1",le="265294.8464431894"} 3284
+raft_scheduler_latency_bucket{store="1",node_id="1",le="335292.41492495546"} 3313
+raft_scheduler_latency_bucket{store="1",node_id="1",le="423758.7160604059"} 3337
+raft_scheduler_latency_bucket{store="1",node_id="1",le="535566.6917706894"} 3347
+raft_scheduler_latency_bucket{store="1",node_id="1",le="676875.0009458527"} 3355
+raft_scheduler_latency_bucket{store="1",node_id="1",le="855467.2535565672"} 3356
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.0811807510766068e+06"} 3356
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.3664483492953242e+06"} 3357
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.7269832906594332e+06"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="2.182644728397485e+06"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="2.7585316176291797e+06"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="3.4863652276780806e+06"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="4.406236427773566e+06"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="5.568813990945262e+06"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="7.038135554931545e+06"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="8.89513497310822e+06"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.1242100350620849e+07"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.4208308325339198e+07"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.795714494371637e+07"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="2.269510536694665e+07"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="2.868316813342006e+07"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="3.625117049988527e+07"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="4.581597669054482e+07"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="5.790443980602476e+07"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="7.318242219076161e+07"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="9.249147277217315e+07"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.1689518164985757e+08"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.4773776525985083e+08"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.8671810912919158e+08"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="2.359833466782189e+08"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="2.9824712862168837e+08"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="3.769390975388353e+08"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="4.7639380104013294e+08"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="6.020894493336115e+08"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="7.609496685459859e+08"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="9.61724871115294e+08"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.2154742500762835e+09"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.5361749466718242e+09"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="1.941491945743876e+09"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="2.453751106639811e+09"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="3.10116892657477e+09"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="3.919406774847209e+09"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="4.953535208959157e+09"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="6.260516572014802e+09"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="7.912342618981298e+09"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="9.99999999999997e+09"} 3366
+raft_scheduler_latency_bucket{store="1",node_id="1",le="+Inf"} 3366
+raft_scheduler_latency_sum{store="1",node_id="1"} 1.81737571e+08
+raft_scheduler_latency_count{store="1",node_id="1"} 3366
+# HELP raft_commands_proposed Number of Raft commands proposed.\n\nThe number of proposals and all kinds of reproposals made by leaseholders. This\nmetric approximates the number of commands submitted through Raft.
+# TYPE raft_commands_proposed counter
+raft_commands_proposed{store="1",node_id="1"} 940
+# HELP raft_transport_reverse_rcvd Messages received from the reverse direction of a stream.\n\nThese messages should be rare. They are mostly informational, and are not actual\nresponses to Raft messages. Responses are received over another stream.
+# TYPE raft_transport_reverse_rcvd counter
+raft_transport_reverse_rcvd{node_id="1"} 0
+# HELP raft_process_applycommitted_latency Latency histogram for applying all committed Raft commands in a Raft ready.\n\nThis measures the end-to-end latency of applying all commands in a Raft ready. Note that\nthis closes over possibly multiple measurements of the 'raft.process.commandcommit.latency'\nmetric, which receives datapoints for each sub-batch processed in the process.
+# TYPE raft_process_applycommitted_latency histogram
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="10000"} 1111
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="12638.482029342978"} 1129
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="15973.122800602541"} 1161
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="20187.602546790382"} 1243
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="25514.065200312878"} 1345
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="32245.90545296394"} 1463
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="40753.92965871775"} 1608
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="51506.78076168121"} 1718
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="65096.75230458167"} 1805
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="82272.41341700466"} 1845
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="103979.84184814895"} 1881
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="131414.73626117557"} 1920
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="166088.27826277143"} 1933
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="209910.3720108553"} 1951
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="265294.8464431894"} 1967
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="335292.41492495546"} 1980
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="423758.7160604059"} 1986
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="535566.6917706894"} 1992
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="676875.0009458527"} 1992
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="855467.2535565672"} 1992
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.0811807510766068e+06"} 1993
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.3664483492953242e+06"} 1994
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.7269832906594332e+06"} 1994
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="2.182644728397485e+06"} 1996
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="2.7585316176291797e+06"} 1998
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="3.4863652276780806e+06"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="4.406236427773566e+06"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="5.568813990945262e+06"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="7.038135554931545e+06"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="8.89513497310822e+06"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.1242100350620849e+07"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.4208308325339198e+07"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.795714494371637e+07"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="2.269510536694665e+07"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="2.868316813342006e+07"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="3.625117049988527e+07"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="4.581597669054482e+07"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="5.790443980602476e+07"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="7.318242219076161e+07"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="9.249147277217315e+07"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.1689518164985757e+08"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.4773776525985083e+08"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.8671810912919158e+08"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="2.359833466782189e+08"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="2.9824712862168837e+08"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="3.769390975388353e+08"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="4.7639380104013294e+08"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="6.020894493336115e+08"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="7.609496685459859e+08"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="9.61724871115294e+08"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.2154742500762835e+09"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.5361749466718242e+09"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="1.941491945743876e+09"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="2.453751106639811e+09"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="3.10116892657477e+09"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="3.919406774847209e+09"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="4.953535208959157e+09"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="6.260516572014802e+09"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="7.912342618981298e+09"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="9.99999999999997e+09"} 2000
+raft_process_applycommitted_latency_bucket{store="1",node_id="1",le="+Inf"} 2000
+raft_process_applycommitted_latency_sum{store="1",node_id="1"} 6.9279385e+07
+raft_process_applycommitted_latency_count{store="1",node_id="1"} 2000
+# HELP raft_commands_reproposed_unchanged Number of Raft commands re-proposed without modification.\n\nThe number of Raft commands that leaseholders re-proposed without modification.\nSuch re-proposals happen for commands that are not committed/applied within a\ntimeout, and have a high chance of being dropped.
+# TYPE raft_commands_reproposed_unchanged counter
+raft_commands_reproposed_unchanged{store="1",node_id="1"} 62
+# HELP raft_transport_send_queue_size Number of pending outgoing messages in the Raft Transport queue.\n\nThe queue is composed of multiple bounded channels associated with different\npeers. The overall size of tens of thousands could indicate issues streaming\nmessages to at least one peer. Use this metric in conjunction with\nsend-queue-bytes.
+# TYPE raft_transport_send_queue_size gauge
+raft_transport_send_queue_size{node_id="1"} 0
+# HELP raft_rcvd_voteresp Number of MsgVoteResp messages received by this store
+# TYPE raft_rcvd_voteresp counter
+raft_rcvd_voteresp{store="1",node_id="1"} 0
+# HELP raft_rcvd_heartbeat Number of (coalesced, if enabled) MsgHeartbeat messages received by this store
+# TYPE raft_rcvd_heartbeat counter
+raft_rcvd_heartbeat{store="1",node_id="1"} 0
+# HELP raft_process_commandcommit_latency Latency histogram for applying a batch of Raft commands to the state machine.\n\nThis metric is misnamed: it measures the latency for *applying* a batch of\ncommitted Raft commands to a Replica state machine. This requires only\nnon-durable I/O (except for replication configuration changes).\n\nNote that a "batch" in this context is really a sub-batch of the batch received\nfor application during raft ready handling. The\n'raft.process.applycommitted.latency' histogram is likely more suitable in most\ncases, as it measures the total latency across all sub-batches (i.e. the sum of\ncommandcommit.latency for a complete batch).\n
+# TYPE raft_process_commandcommit_latency histogram
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="10000"} 237
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="12638.482029342978"} 341
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="15973.122800602541"} 462
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="20187.602546790382"} 567
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="25514.065200312878"} 635
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="32245.90545296394"} 722
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="40753.92965871775"} 788
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="51506.78076168121"} 838
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="65096.75230458167"} 861
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="82272.41341700466"} 878
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="103979.84184814895"} 900
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="131414.73626117557"} 910
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="166088.27826277143"} 916
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="209910.3720108553"} 918
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="265294.8464431894"} 919
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="335292.41492495546"} 920
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="423758.7160604059"} 923
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="535566.6917706894"} 923
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="676875.0009458527"} 923
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="855467.2535565672"} 923
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.0811807510766068e+06"} 924
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.3664483492953242e+06"} 925
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.7269832906594332e+06"} 926
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="2.182644728397485e+06"} 929
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="2.7585316176291797e+06"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="3.4863652276780806e+06"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="4.406236427773566e+06"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="5.568813990945262e+06"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="7.038135554931545e+06"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="8.89513497310822e+06"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.1242100350620849e+07"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.4208308325339198e+07"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.795714494371637e+07"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="2.269510536694665e+07"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="2.868316813342006e+07"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="3.625117049988527e+07"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="4.581597669054482e+07"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="5.790443980602476e+07"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="7.318242219076161e+07"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="9.249147277217315e+07"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.1689518164985757e+08"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.4773776525985083e+08"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.8671810912919158e+08"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="2.359833466782189e+08"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="2.9824712862168837e+08"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="3.769390975388353e+08"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="4.7639380104013294e+08"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="6.020894493336115e+08"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="7.609496685459859e+08"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="9.61724871115294e+08"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.2154742500762835e+09"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.5361749466718242e+09"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="1.941491945743876e+09"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="2.453751106639811e+09"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="3.10116892657477e+09"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="3.919406774847209e+09"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="4.953535208959157e+09"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="6.260516572014802e+09"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="7.912342618981298e+09"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="9.99999999999997e+09"} 931
+raft_process_commandcommit_latency_bucket{store="1",node_id="1",le="+Inf"} 931
+raft_process_commandcommit_latency_sum{store="1",node_id="1"} 3.8930868e+07
+raft_process_commandcommit_latency_count{store="1",node_id="1"} 931
+# HELP raft_replication_latency The duration elapsed between having evaluated a BatchRequest and it being\nreflected in the proposer's state machine (i.e. having applied fully).\n\nThis encompasses time spent in the quota pool, in replication (including\nreproposals), and application, but notably *not* sequencing latency (i.e.\ncontention and latch acquisition).\n\nNo measurement is recorded for read-only commands as well as read-write commands\nwhich end up not writing (such as a DeleteRange on an empty span). Commands that\nresult in 'above-replication' errors (i.e. txn retries, etc) are similarly\nexcluded. Errors that arise while waiting for the in-flight replication result\nor result from application of the command are included.\n\nNote also that usually, clients are signalled at beginning of application, but\nthe recorded measurement captures the entirety of log application.\n\nThe duration is always measured on the proposer, even if the Raft leader and\nleaseholder are not colocated, or the request is proposed from a follower.\n\nCommands that use async consensus will still cause a measurement that reflects\nthe actual replication latency, despite returning early to the client.
+# TYPE raft_replication_latency histogram
+raft_replication_latency_bucket{store="1",node_id="1",le="10000"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="12638.482029342978"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="15973.122800602541"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="20187.602546790382"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="25514.065200312878"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="32245.90545296394"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="40753.92965871775"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="51506.78076168121"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="65096.75230458167"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="82272.41341700466"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="103979.84184814895"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="131414.73626117557"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="166088.27826277143"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="209910.3720108553"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="265294.8464431894"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="335292.41492495546"} 0
+raft_replication_latency_bucket{store="1",node_id="1",le="423758.7160604059"} 11
+raft_replication_latency_bucket{store="1",node_id="1",le="535566.6917706894"} 109
+raft_replication_latency_bucket{store="1",node_id="1",le="676875.0009458527"} 323
+raft_replication_latency_bucket{store="1",node_id="1",le="855467.2535565672"} 538
+raft_replication_latency_bucket{store="1",node_id="1",le="1.0811807510766068e+06"} 659
+raft_replication_latency_bucket{store="1",node_id="1",le="1.3664483492953242e+06"} 739
+raft_replication_latency_bucket{store="1",node_id="1",le="1.7269832906594332e+06"} 792
+raft_replication_latency_bucket{store="1",node_id="1",le="2.182644728397485e+06"} 841
+raft_replication_latency_bucket{store="1",node_id="1",le="2.7585316176291797e+06"} 882
+raft_replication_latency_bucket{store="1",node_id="1",le="3.4863652276780806e+06"} 900
+raft_replication_latency_bucket{store="1",node_id="1",le="4.406236427773566e+06"} 914
+raft_replication_latency_bucket{store="1",node_id="1",le="5.568813990945262e+06"} 921
+raft_replication_latency_bucket{store="1",node_id="1",le="7.038135554931545e+06"} 927
+raft_replication_latency_bucket{store="1",node_id="1",le="8.89513497310822e+06"} 932
+raft_replication_latency_bucket{store="1",node_id="1",le="1.1242100350620849e+07"} 936
+raft_replication_latency_bucket{store="1",node_id="1",le="1.4208308325339198e+07"} 936
+raft_replication_latency_bucket{store="1",node_id="1",le="1.795714494371637e+07"} 938
+raft_replication_latency_bucket{store="1",node_id="1",le="2.269510536694665e+07"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="2.868316813342006e+07"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="3.625117049988527e+07"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="4.581597669054482e+07"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="5.790443980602476e+07"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="7.318242219076161e+07"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="9.249147277217315e+07"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="1.1689518164985757e+08"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="1.4773776525985083e+08"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="1.8671810912919158e+08"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="2.359833466782189e+08"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="2.9824712862168837e+08"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="3.769390975388353e+08"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="4.7639380104013294e+08"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="6.020894493336115e+08"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="7.609496685459859e+08"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="9.61724871115294e+08"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="1.2154742500762835e+09"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="1.5361749466718242e+09"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="1.941491945743876e+09"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="2.453751106639811e+09"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="3.10116892657477e+09"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="3.919406774847209e+09"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="4.953535208959157e+09"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="6.260516572014802e+09"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="7.912342618981298e+09"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="9.99999999999997e+09"} 940
+raft_replication_latency_bucket{store="1",node_id="1",le="+Inf"} 940
+raft_replication_latency_sum{store="1",node_id="1"} 1.171083744e+09
+raft_replication_latency_count{store="1",node_id="1"} 940
+# HELP raft_rcvd_stepped_bytes Number of bytes in messages processed by Raft.\n\nMessages reflected here have been handed to Raft (via RawNode.Step). This does not imply that the\nmessages are no longer held in memory or that IO has been performed. Raft delegates IO activity to\nRaft ready handling, which occurs asynchronously. Since handing messages to Raft serializes with\nRaft ready handling and size the size of an entry is dominated by the contained pebble WriteBatch,\non average the rate at which this metric increases is a good proxy for the rate at which Raft ready\nhandling consumes writes.\n
+# TYPE raft_rcvd_stepped_bytes counter
+raft_rcvd_stepped_bytes{store="1",node_id="1"} 0
+# HELP raft_rcvd_cross_region_bytes Number of bytes received by this store for cross region Raft messages\n		(when region tiers are configured). Note that this does not include raft\n		snapshot received.
+# TYPE raft_rcvd_cross_region_bytes counter
+raft_rcvd_cross_region_bytes{store="1",node_id="1"} 0
+# HELP raft_quota_pool_percent_used Histogram of proposal quota pool utilization (0-100) per leaseholder per metrics interval
+# TYPE raft_quota_pool_percent_used histogram
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="0"} 354
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="10"} 354
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="20"} 354
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="30"} 354
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="40"} 354
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="50"} 354
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="60"} 354
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="70"} 354
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="80"} 354
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="90"} 354
+raft_quota_pool_percent_used_bucket{store="1",node_id="1",le="+Inf"} 354
+raft_quota_pool_percent_used_sum{store="1",node_id="1"} 0
+raft_quota_pool_percent_used_count{store="1",node_id="1"} 354
+# HELP raft_storage_read_bytes Counter of raftpb.Entry.Size() read from pebble for raft log entries.\n\nThese are the bytes returned from the (raft.Storage).Entries method that were not\nreturned via the raft entry cache. This metric plus the raft.entrycache.read_bytes\nmetric represent the total bytes returned from the Entries method.\n\nSince pebble might serve these entries from the block cache, only a fraction of this\nthroughput might manifest in disk metrics.\n\nEntries tracked in this metric incur an unmarshalling-related CPU and memory\noverhead that would not be incurred would the entries be served from the raft\nentry cache.\n\nThe bytes returned here do not correspond 1:1 to bytes read from pebble. This\nmetric measures the in-memory size of the raftpb.Entry, whereas we read its\nencoded representation from pebble. As there is no compression involved, these\nwill generally be comparable.\n\nA common reason for elevated measurements on this metric is that a store is\nfalling behind on raft log application. The raft entry cache generally tracks\nentries that were recently appended, so if log application falls behind the\ncache will already have moved on to newer entries.\n
+# TYPE raft_storage_read_bytes counter
+raft_storage_read_bytes{store="1",node_id="1"} 0
+# HELP raft_rcvd_appresp Number of MsgAppResp messages received by this store
+# TYPE raft_rcvd_appresp counter
+raft_rcvd_appresp{store="1",node_id="1"} 0
+# HELP raft_sent_cross_region_bytes Number of bytes sent by this store for cross region Raft messages\n		(when region tiers are configured). Note that this does not include raft\n		snapshot sent.
+# TYPE raft_sent_cross_region_bytes counter
+raft_sent_cross_region_bytes{store="1",node_id="1"} 0
+# HELP raft_rcvd_app Number of MsgApp messages received by this store
+# TYPE raft_rcvd_app counter
+raft_rcvd_app{store="1",node_id="1"} 0
+# HELP raft_commandsapplied Number of Raft commands applied.\n\nThis measurement is taken on the Raft apply loops of all Replicas (leaders and\nfollowers alike), meaning that it does not measure the number of Raft commands\n*proposed* (in the hypothetical extreme case, all Replicas may apply all commands\nthrough snapshots, thus not increasing this metric at all).\nInstead, it is a proxy for how much work is being done advancing the Replica\nstate machines on this node.
+# TYPE raft_commandsapplied counter
+raft_commandsapplied{store="1",node_id="1"} 1007
+# HELP raft_dropped Number of Raft proposals dropped (this counts individial raftpb.Entry, not raftpb.MsgProp)
+# TYPE raft_dropped counter
+raft_dropped{store="1",node_id="1"} 62
+# HELP raft_process_handleready_latency Latency histogram for handling a Raft ready.\n\nThis measures the end-to-end-latency of the Raft state advancement loop, including:\n- snapshot application\n- SST ingestion\n- durably appending to the Raft log (i.e. includes fsync)\n- entry application (incl. replicated side effects, notably log truncation)\n\nThese include work measured in 'raft.process.commandcommit.latency' and\n'raft.process.applycommitted.latency'. However, matching percentiles of these\nmetrics may be *higher* than handleready, since not every handleready cycle\nleads to an update of the others. For example, under tpcc-100 on a single node,\nthe handleready count is approximately twice the logcommit count (and logcommit\ncount tracks closely with applycommitted count).\n\nHigh percentile outliers can be caused by individual large Raft commands or\nstorage layer blips. Lower percentile (e.g. 50th) increases are often driven by\nCPU exhaustion or storage layer slowdowns.\n
+# TYPE raft_process_handleready_latency histogram
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="10000"} 1258
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="12638.482029342978"} 1420
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="15973.122800602541"} 1568
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="20187.602546790382"} 1727
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="25514.065200312878"} 1884
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="32245.90545296394"} 2027
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="40753.92965871775"} 2214
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="51506.78076168121"} 2416
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="65096.75230458167"} 2625
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="82272.41341700466"} 2811
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="103979.84184814895"} 2939
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="131414.73626117557"} 3003
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="166088.27826277143"} 3057
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="209910.3720108553"} 3093
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="265294.8464431894"} 3118
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="335292.41492495546"} 3149
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="423758.7160604059"} 3168
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="535566.6917706894"} 3178
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="676875.0009458527"} 3185
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="855467.2535565672"} 3186
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.0811807510766068e+06"} 3189
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.3664483492953242e+06"} 3190
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.7269832906594332e+06"} 3190
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="2.182644728397485e+06"} 3192
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="2.7585316176291797e+06"} 3196
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="3.4863652276780806e+06"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="4.406236427773566e+06"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="5.568813990945262e+06"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="7.038135554931545e+06"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="8.89513497310822e+06"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.1242100350620849e+07"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.4208308325339198e+07"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.795714494371637e+07"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="2.269510536694665e+07"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="2.868316813342006e+07"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="3.625117049988527e+07"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="4.581597669054482e+07"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="5.790443980602476e+07"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="7.318242219076161e+07"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="9.249147277217315e+07"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.1689518164985757e+08"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.4773776525985083e+08"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.8671810912919158e+08"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="2.359833466782189e+08"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="2.9824712862168837e+08"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="3.769390975388353e+08"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="4.7639380104013294e+08"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="6.020894493336115e+08"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="7.609496685459859e+08"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="9.61724871115294e+08"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.2154742500762835e+09"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.5361749466718242e+09"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="1.941491945743876e+09"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="2.453751106639811e+09"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="3.10116892657477e+09"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="3.919406774847209e+09"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="4.953535208959157e+09"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="6.260516572014802e+09"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="7.912342618981298e+09"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="9.99999999999997e+09"} 3198
+raft_process_handleready_latency_bucket{store="1",node_id="1",le="+Inf"} 3198
+raft_process_handleready_latency_sum{store="1",node_id="1"} 1.4951782e+08
+raft_process_handleready_latency_count{store="1",node_id="1"} 3198
+# HELP raft_transport_sent Number of Raft messages sent by the Raft Transport
+# TYPE raft_transport_sent counter
+raft_transport_sent{node_id="1"} 0
+# HELP raft_rcvd_snap Number of MsgSnap messages received by this store
+# TYPE raft_rcvd_snap counter
+raft_rcvd_snap{store="1",node_id="1"} 0
+# HELP raft_rcvd_prevoteresp Number of MsgPreVoteResp messages received by this store
+# TYPE raft_rcvd_prevoteresp counter
+raft_rcvd_prevoteresp{store="1",node_id="1"} 0
+# HELP range_merges Number of range merges
+# TYPE range_merges counter
+range_merges{store="1",node_id="1"} 0
+# HELP range_snapshots_delegate_failures Number of snapshots that were delegated to a different node and\nresulted in failure on that delegate. There are numerous reasons a failure can\noccur on a delegate such as timeout, the delegate Raft log being too far behind\nor the delegate being too busy to send.\n
+# TYPE range_snapshots_delegate_failures counter
+range_snapshots_delegate_failures{store="1",node_id="1"} 0
+# HELP range_adds Number of range additions
+# TYPE range_adds counter
+range_adds{store="1",node_id="1"} 0
+# HELP range_snapshots_recv_failed Number of range snapshot initialization messages that errored out on the recipient, typically before any data is transferred
+# TYPE range_snapshots_recv_failed counter
+range_snapshots_recv_failed{store="1",node_id="1"} 0
+# HELP range_snapshots_cross_region_sent_bytes Number of snapshot bytes sent cross region
+# TYPE range_snapshots_cross_region_sent_bytes counter
+range_snapshots_cross_region_sent_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_recv_total_in_progress Number of total snapshots being received
+# TYPE range_snapshots_recv_total_in_progress gauge
+range_snapshots_recv_total_in_progress{store="1",node_id="1"} 0
+# HELP range_snapshots_cross_zone_rcvd_bytes Number of snapshot bytes received cross zone within same region or if\n		region tiers are not configured. This count increases for each snapshot\n		received between different zones within the same region. However, if the\n		region tiers are not configured, this count may also include snapshot data\n		received between different regions. Ensuring consistent configuration of\n		region and zone tiers across nodes helps to accurately monitor the data\n		transmitted.
+# TYPE range_snapshots_cross_zone_rcvd_bytes counter
+range_snapshots_cross_zone_rcvd_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_applied_non_voter Number of snapshots applied by non-voter replicas
+# TYPE range_snapshots_applied_non_voter counter
+range_snapshots_applied_non_voter{store="1",node_id="1"} 0
+# HELP range_snapshots_delegate_successes Number of snapshots that were delegated to a different node and\nresulted in success on that delegate. This does not count self delegated snapshots.\n
+# TYPE range_snapshots_delegate_successes counter
+range_snapshots_delegate_successes{store="1",node_id="1"} 0
+# HELP range_snapshots_recv_in_progress Number of non-empty snapshots being received
+# TYPE range_snapshots_recv_in_progress gauge
+range_snapshots_recv_in_progress{store="1",node_id="1"} 0
+# HELP range_snapshots_unknown_rcvd_bytes Number of unknown snapshot bytes received
+# TYPE range_snapshots_unknown_rcvd_bytes counter
+range_snapshots_unknown_rcvd_bytes{store="1",node_id="1"} 0
+# HELP range_raftleaderremovals Number of times the current Raft leader was removed from a range
+# TYPE range_raftleaderremovals counter
+range_raftleaderremovals{store="1",node_id="1"} 0
+# HELP range_snapshots_applied_initial Number of snapshots applied for initial upreplication
+# TYPE range_snapshots_applied_initial counter
+range_snapshots_applied_initial{store="1",node_id="1"} 0
+# HELP range_snapshots_send_in_progress Number of non-empty snapshots being sent
+# TYPE range_snapshots_send_in_progress gauge
+range_snapshots_send_in_progress{store="1",node_id="1"} 0
+# HELP range_snapshots_recv_queue Number of snapshots queued to receive
+# TYPE range_snapshots_recv_queue gauge
+range_snapshots_recv_queue{store="1",node_id="1"} 0
+# HELP range_raftleadertransfers Number of raft leader transfers
+# TYPE range_raftleadertransfers counter
+range_raftleadertransfers{store="1",node_id="1"} 0
+# HELP range_snapshots_rebalancing_sent_bytes Number of rebalancing snapshot bytes sent
+# TYPE range_snapshots_rebalancing_sent_bytes counter
+range_snapshots_rebalancing_sent_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_generated Number of generated snapshots
+# TYPE range_snapshots_generated counter
+range_snapshots_generated{store="1",node_id="1"} 0
+# HELP range_snapshots_send_queue_bytes Total size of all snapshots in the snapshot send queue
+# TYPE range_snapshots_send_queue_bytes gauge
+range_snapshots_send_queue_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_recovery_rcvd_bytes Number of recovery snapshot bytes received
+# TYPE range_snapshots_recovery_rcvd_bytes counter
+range_snapshots_recovery_rcvd_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_rcvd_bytes Number of snapshot bytes received
+# TYPE range_snapshots_rcvd_bytes counter
+range_snapshots_rcvd_bytes{store="1",node_id="1"} 0
+# HELP range_recoveries Count of offline loss of quorum recovery operations performed on ranges.\n\nThis count increments for every range recovered in offline loss of quorum\nrecovery operation. Metric is updated when node on which survivor replica\nis located starts following the recovery.
+# TYPE range_recoveries counter
+range_recoveries{store="1",node_id="1"} 0
+# HELP range_snapshots_rebalancing_rcvd_bytes Number of rebalancing snapshot bytes received
+# TYPE range_snapshots_rebalancing_rcvd_bytes counter
+range_snapshots_rebalancing_rcvd_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_recv_unusable Number of range snapshot that were fully transmitted but determined to be unnecessary or unusable
+# TYPE range_snapshots_recv_unusable counter
+range_snapshots_recv_unusable{store="1",node_id="1"} 0
+# HELP range_snapshots_delegate_sent_bytes Bytes sent using a delegate.\n\nThe number of bytes sent as a result of a delegate snapshot request\nthat was originated from a different node. This metric is useful in\nevaluating the network savings of not sending cross region traffic.\n
+# TYPE range_snapshots_delegate_sent_bytes counter
+range_snapshots_delegate_sent_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_send_queue Number of snapshots queued to send
+# TYPE range_snapshots_send_queue gauge
+range_snapshots_send_queue{store="1",node_id="1"} 0
+# HELP range_snapshots_cross_region_rcvd_bytes Number of snapshot bytes received cross region
+# TYPE range_snapshots_cross_region_rcvd_bytes counter
+range_snapshots_cross_region_rcvd_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_delegate_in_progress Number of delegated snapshots that are currently in-flight.
+# TYPE range_snapshots_delegate_in_progress gauge
+range_snapshots_delegate_in_progress{store="1",node_id="1"} 0
+# HELP range_snapshots_send_total_in_progress Number of total snapshots being sent
+# TYPE range_snapshots_send_total_in_progress gauge
+range_snapshots_send_total_in_progress{store="1",node_id="1"} 0
+# HELP range_removes Number of range removals
+# TYPE range_removes counter
+range_removes{store="1",node_id="1"} 0
+# HELP range_snapshots_unknown_sent_bytes Number of unknown snapshot bytes sent
+# TYPE range_snapshots_unknown_sent_bytes counter
+range_snapshots_unknown_sent_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_sent_bytes Number of snapshot bytes sent
+# TYPE range_snapshots_sent_bytes counter
+range_snapshots_sent_bytes{store="1",node_id="1"} 0
+# HELP range_splits Number of range splits
+# TYPE range_splits counter
+range_splits{store="1",node_id="1"} 0
+# HELP range_snapshots_cross_zone_sent_bytes Number of snapshot bytes sent cross zone within same region or if\n		region tiers are not configured. This count increases for each snapshot sent\n		between different zones within the same region. However, if the region tiers\n		are not configured, this count may also include snapshot data sent between\n		different regions. Ensuring consistent configuration of region and zone\n		tiers across nodes helps to accurately monitor the data transmitted.
+# TYPE range_snapshots_cross_zone_sent_bytes counter
+range_snapshots_cross_zone_sent_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_recovery_sent_bytes Number of recovery snapshot bytes sent
+# TYPE range_snapshots_recovery_sent_bytes counter
+range_snapshots_recovery_sent_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_recv_queue_bytes Total size of all snapshots in the snapshot receive queue
+# TYPE range_snapshots_recv_queue_bytes gauge
+range_snapshots_recv_queue_bytes{store="1",node_id="1"} 0
+# HELP range_snapshots_applied_voter Number of snapshots applied by voter replicas
+# TYPE range_snapshots_applied_voter counter
+range_snapshots_applied_voter{store="1",node_id="1"} 0
+# HELP rebalancing_cpunanospersecond Average CPU nanoseconds spent on processing replica operations in the last 30 minutes.
+# TYPE rebalancing_cpunanospersecond gauge
+rebalancing_cpunanospersecond{store="1",node_id="1"} 6.029965865427919e+06
+# HELP rebalancing_state_imbalanced_overfull_options_exhausted Number of occurrences where this store was overfull but failed to shed load after exhausting available rebalance options
+# TYPE rebalancing_state_imbalanced_overfull_options_exhausted counter
+rebalancing_state_imbalanced_overfull_options_exhausted{store="1",node_id="1"} 0
+# HELP rebalancing_readspersecond Number of keys read recently per second, considering the last 30 minutes.
+# TYPE rebalancing_readspersecond gauge
+rebalancing_readspersecond{store="1",node_id="1"} 41.879236843736656
+# HELP rebalancing_writebytespersecond Number of bytes written recently per second, considering the last 30 minutes.
+# TYPE rebalancing_writebytespersecond gauge
+rebalancing_writebytespersecond{store="1",node_id="1"} 49973.281249049825
+# HELP rebalancing_replicas_cpunanospersecond Histogram of average CPU nanoseconds spent on processing replica operations in the last 30 minutes.
+# TYPE rebalancing_replicas_cpunanospersecond histogram
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="500000"} 380
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="811888.3695943608"} 385
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="1.3183254493651788e+06"} 395
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="2.1406661993596964e+06"} 399
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="3.4759639808878014e+06"} 400
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="5.644189458423442e+06"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="9.164903554162173e+06"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="1.4881757208156578e+07"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="2.416465119285874e+07"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="3.923799851757302e+07"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="6.371374928515661e+07"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="1.0345690405573934e+08"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="1.6799091431418887e+08"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="2.7277973905842555e+08"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="4.429333952050405e+08"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="7.192249441438301e+08"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="1.167860734545059e+09"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="1.896345095366121e+09"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="3.0792410553301253e+09"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="4.9999999999999895e+09"} 402
+rebalancing_replicas_cpunanospersecond_bucket{store="1",node_id="1",le="+Inf"} 402
+rebalancing_replicas_cpunanospersecond_sum{store="1",node_id="1"} 4.803390779439245e+07
+rebalancing_replicas_cpunanospersecond_count{store="1",node_id="1"} 402
+# HELP rebalancing_requestspersecond Number of requests received recently per second, considering the last 30 minutes.
+# TYPE rebalancing_requestspersecond gauge
+rebalancing_requestspersecond{store="1",node_id="1"} 282.7370401263614
+# HELP rebalancing_queriespersecond Number of kv-level requests received per second by the store, considering the last 30 minutes, as used in rebalancing decisions.
+# TYPE rebalancing_queriespersecond gauge
+rebalancing_queriespersecond{store="1",node_id="1"} 38.92429616581501
+# HELP rebalancing_replicas_queriespersecond Histogram of average kv-level requests received per second by replicas on the store in the last 30 minutes.
+# TYPE rebalancing_replicas_queriespersecond histogram
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="1"} 352
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="1.6644450915558393"} 360
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="2.7703774628043263"} 375
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="4.611141169721581"} 384
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="7.674991286414136"} 386
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="12.774601574405846"} 394
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="21.26262288710131"} 399
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="35.39046829803862"} 400
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="58.90549124653292"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="98.04495577097717"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="163.1904453848123"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="271.62153580956215"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="452.09913203908434"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="752.4941812191092"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="1252.4852463544767"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="2084.6929205408146"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="3469.8568989953665"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="5775.386283934004"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="9612.813352132871"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="15999.99999999999"} 402
+rebalancing_replicas_queriespersecond_bucket{store="1",node_id="1",le="+Inf"} 402
+rebalancing_replicas_queriespersecond_sum{store="1",node_id="1"} 398.73136181362077
+rebalancing_replicas_queriespersecond_count{store="1",node_id="1"} 402
+# HELP rebalancing_writespersecond Number of keys written (i.e. applied by raft) per second to the store, considering the last 30 minutes.
+# TYPE rebalancing_writespersecond gauge
+rebalancing_writespersecond{store="1",node_id="1"} 311.4806814101776
+# HELP rebalancing_lease_transfers Number of lease transfers motivated by store-level load imbalances
+# TYPE rebalancing_lease_transfers counter
+rebalancing_lease_transfers{store="1",node_id="1"} 0
+# HELP rebalancing_range_rebalances Number of range rebalance operations motivated by store-level load imbalances
+# TYPE rebalancing_range_rebalances counter
+rebalancing_range_rebalances{store="1",node_id="1"} 0
+# HELP rebalancing_readbytespersecond Number of bytes read recently per second, considering the last 30 minutes.
+# TYPE rebalancing_readbytespersecond gauge
+rebalancing_readbytespersecond{store="1",node_id="1"} 23156.280787870637
+# HELP replicas_quiescent Number of quiesced replicas
+# TYPE replicas_quiescent gauge
+replicas_quiescent{store="1",node_id="1"} 62
+# HELP replicas_leaders_not_leaseholders Number of replicas that are Raft leaders whose range lease is held by another store
+# TYPE replicas_leaders_not_leaseholders gauge
+replicas_leaders_not_leaseholders{store="1",node_id="1"} 0
+# HELP replicas_uninitialized Number of uninitialized replicas, this does not include uninitialized replicas that can lie dormant in a persistent state.
+# TYPE replicas_uninitialized gauge
+replicas_uninitialized{store="1",node_id="1"} 0
+# HELP replicas_leaders_invalid_lease Number of replicas that are Raft leaders whose lease is invalid
+# TYPE replicas_leaders_invalid_lease gauge
+replicas_leaders_invalid_lease{store="1",node_id="1"} 0
+# HELP replicas_leaders Number of raft leaders
+# TYPE replicas_leaders gauge
+replicas_leaders{store="1",node_id="1"} 67
+# HELP replicas_reserved Number of replicas reserved for snapshots
+# TYPE replicas_reserved gauge
+replicas_reserved{store="1",node_id="1"} 0
+# HELP replicas_leaseholders Number of lease holders
+# TYPE replicas_leaseholders gauge
+replicas_leaseholders{store="1",node_id="1"} 67
+# HELP rocksdb_compactions Number of table compactions
+# TYPE rocksdb_compactions gauge
+rocksdb_compactions{store="1",node_id="1"} 0
+# HELP rocksdb_compacted_bytes_read Bytes read during compaction
+# TYPE rocksdb_compacted_bytes_read gauge
+rocksdb_compacted_bytes_read{store="1",node_id="1"} 0
+# HELP rocksdb_ingested_bytes Bytes ingested
+# TYPE rocksdb_ingested_bytes gauge
+rocksdb_ingested_bytes{store="1",node_id="1"} 0
+# HELP rocksdb_block_cache_hits Count of block cache hits
+# TYPE rocksdb_block_cache_hits gauge
+rocksdb_block_cache_hits{store="1",node_id="1"} 0
+# HELP rocksdb_bloom_filter_prefix_useful Number of times the bloom filter helped avoid iterator creation
+# TYPE rocksdb_bloom_filter_prefix_useful gauge
+rocksdb_bloom_filter_prefix_useful{store="1",node_id="1"} 0
+# HELP rocksdb_flushed_bytes Bytes written during flush
+# TYPE rocksdb_flushed_bytes gauge
+rocksdb_flushed_bytes{store="1",node_id="1"} 0
+# HELP rocksdb_compacted_bytes_written Bytes written during compaction
+# TYPE rocksdb_compacted_bytes_written gauge
+rocksdb_compacted_bytes_written{store="1",node_id="1"} 0
+# HELP rocksdb_encryption_algorithm Algorithm in use for encryption-at-rest, see ccl/storageccl/engineccl/enginepbccl/key_registry.proto
+# TYPE rocksdb_encryption_algorithm gauge
+rocksdb_encryption_algorithm{store="1",node_id="1"} 0
+# HELP rocksdb_block_cache_usage Bytes used by the block cache
+# TYPE rocksdb_block_cache_usage gauge
+rocksdb_block_cache_usage{store="1",node_id="1"} 0
+# HELP rocksdb_block_cache_misses Count of block cache misses
+# TYPE rocksdb_block_cache_misses gauge
+rocksdb_block_cache_misses{store="1",node_id="1"} 0
+# HELP rocksdb_table_readers_mem_estimate Memory used by index and filter blocks
+# TYPE rocksdb_table_readers_mem_estimate gauge
+rocksdb_table_readers_mem_estimate{store="1",node_id="1"} 0
+# HELP rocksdb_estimated_pending_compaction Estimated pending compaction bytes
+# TYPE rocksdb_estimated_pending_compaction gauge
+rocksdb_estimated_pending_compaction{store="1",node_id="1"} 0
+# HELP rocksdb_bloom_filter_prefix_checked Number of times the bloom filter was checked
+# TYPE rocksdb_bloom_filter_prefix_checked gauge
+rocksdb_bloom_filter_prefix_checked{store="1",node_id="1"} 0
+# HELP rocksdb_flushes Number of table flushes
+# TYPE rocksdb_flushes gauge
+rocksdb_flushes{store="1",node_id="1"} 0
+# HELP rocksdb_memtable_total_size Current size of memtable in bytes
+# TYPE rocksdb_memtable_total_size gauge
+rocksdb_memtable_total_size{store="1",node_id="1"} 8.126464e+06
+# HELP rocksdb_num_sstables Number of storage engine SSTables
+# TYPE rocksdb_num_sstables gauge
+rocksdb_num_sstables{store="1",node_id="1"} 0
+# HELP rocksdb_read_amplification Number of disk reads per query
+# TYPE rocksdb_read_amplification gauge
+rocksdb_read_amplification{store="1",node_id="1"} 0
+# HELP requests_slow_latch Number of requests that have been stuck for a long time acquiring latches.\n\nLatches moderate access to the KV keyspace for the purpose of evaluating and\nreplicating commands. A slow latch acquisition attempt is often caused by\nanother request holding and not releasing its latches in a timely manner. This\nin turn can either be caused by a long delay in evaluation (for example, under\nsevere system overload) or by delays at the replication layer.\n\nThis gauge registering a nonzero value usually indicates a serious problem and\nshould be investigated.\n
+# TYPE requests_slow_latch gauge
+requests_slow_latch{store="1",node_id="1"} 0
+# HELP rpc_method_resolveintentrange_recv Number of ResolveIntentRange requests processed
+# TYPE rpc_method_resolveintentrange_recv counter
+rpc_method_resolveintentrange_recv{node_id="1"} 109
+# HELP rpc_method_requestlease_recv Number of RequestLease requests processed
+# TYPE rpc_method_requestlease_recv counter
+rpc_method_requestlease_recv{node_id="1"} 0
+# HELP rpc_method_migrate_recv Number of Migrate requests processed
+# TYPE rpc_method_migrate_recv counter
+rpc_method_migrate_recv{node_id="1"} 0
+# HELP rpc_method_adminrelocaterange_recv Number of AdminRelocateRange requests processed
+# TYPE rpc_method_adminrelocaterange_recv counter
+rpc_method_adminrelocaterange_recv{node_id="1"} 0
+# HELP rpc_method_rangestats_recv Number of RangeStats requests processed
+# TYPE rpc_method_rangestats_recv counter
+rpc_method_rangestats_recv{node_id="1"} 13
+# HELP rpc_method_truncatelog_recv Number of TruncateLog requests processed
+# TYPE rpc_method_truncatelog_recv counter
+rpc_method_truncatelog_recv{node_id="1"} 19
+# HELP rpc_method_querytxn_recv Number of QueryTxn requests processed
+# TYPE rpc_method_querytxn_recv counter
+rpc_method_querytxn_recv{node_id="1"} 0
+# HELP rpc_method_leaseinfo_recv Number of LeaseInfo requests processed
+# TYPE rpc_method_leaseinfo_recv counter
+rpc_method_leaseinfo_recv{node_id="1"} 1
+# HELP rpc_method_conditionalput_recv Number of ConditionalPut requests processed
+# TYPE rpc_method_conditionalput_recv counter
+rpc_method_conditionalput_recv{node_id="1"} 408
+# HELP rpc_method_initput_recv Number of InitPut requests processed
+# TYPE rpc_method_initput_recv counter
+rpc_method_initput_recv{node_id="1"} 102
+# HELP rpc_method_recomputestats_recv Number of RecomputeStats requests processed
+# TYPE rpc_method_recomputestats_recv counter
+rpc_method_recomputestats_recv{node_id="1"} 1
+# HELP rpc_streams_rangefeed_recv Total number of RangeFeed streams
+# TYPE rpc_streams_rangefeed_recv counter
+rpc_streams_rangefeed_recv{node_id="1"} 13
+# HELP rpc_streams_mux_rangefeed_active Number of currently running MuxRangeFeed streams
+# TYPE rpc_streams_mux_rangefeed_active gauge
+rpc_streams_mux_rangefeed_active{node_id="1"} 0
+# HELP rpc_method_probe_recv Number of Probe requests processed
+# TYPE rpc_method_probe_recv counter
+rpc_method_probe_recv{node_id="1"} 0
+# HELP rpc_method_writebatch_recv Number of WriteBatch requests processed
+# TYPE rpc_method_writebatch_recv counter
+rpc_method_writebatch_recv{node_id="1"} 0
+# HELP rpc_method_deleterange_recv Number of DeleteRange requests processed
+# TYPE rpc_method_deleterange_recv counter
+rpc_method_deleterange_recv{node_id="1"} 105
+# HELP rpc_connection_healthy Gauge of current connections in a healthy state (i.e. bidirectionally connected and heartbeating)
+# TYPE rpc_connection_healthy gauge
+rpc_connection_healthy{node_id="1"} 2
+# HELP rpc_method_barrier_recv Number of Barrier requests processed
+# TYPE rpc_method_barrier_recv counter
+rpc_method_barrier_recv{node_id="1"} 0
+# HELP rpc_method_queryresolvedtimestamp_recv Number of QueryResolvedTimestamp requests processed
+# TYPE rpc_method_queryresolvedtimestamp_recv counter
+rpc_method_queryresolvedtimestamp_recv{node_id="1"} 0
+# HELP rpc_method_reversescan_recv Number of ReverseScan requests processed
+# TYPE rpc_method_reversescan_recv counter
+rpc_method_reversescan_recv{node_id="1"} 6
+# HELP rpc_method_recovertxn_recv Number of RecoverTxn requests processed
+# TYPE rpc_method_recovertxn_recv counter
+rpc_method_recovertxn_recv{node_id="1"} 0
+# HELP rpc_method_scan_recv Number of Scan requests processed
+# TYPE rpc_method_scan_recv counter
+rpc_method_scan_recv{node_id="1"} 1379
+# HELP rpc_method_refresh_recv Number of Refresh requests processed
+# TYPE rpc_method_refresh_recv counter
+rpc_method_refresh_recv{node_id="1"} 0
+# HELP rpc_method_resolveintent_recv Number of ResolveIntent requests processed
+# TYPE rpc_method_resolveintent_recv counter
+rpc_method_resolveintent_recv{node_id="1"} 8
+# HELP rpc_method_refreshrange_recv Number of RefreshRange requests processed
+# TYPE rpc_method_refreshrange_recv counter
+rpc_method_refreshrange_recv{node_id="1"} 13
+# HELP rpc_connection_healthy_nanos Gauge of nanoseconds of healthy connection time\n\nOn the prometheus endpoint scraped with the cluster setting 'server.child_metrics.enabled' set,\nthe constituent parts of this metric are available on a per-peer basis and one can read off\nfor how long a given peer has been connected
+# TYPE rpc_connection_healthy_nanos gauge
+rpc_connection_healthy_nanos{node_id="1"} 1.12121992762e+11
+# HELP rpc_method_increment_recv Number of Increment requests processed
+# TYPE rpc_method_increment_recv counter
+rpc_method_increment_recv{node_id="1"} 4
+# HELP rpc_method_isspanempty_recv Number of IsSpanEmpty requests processed
+# TYPE rpc_method_isspanempty_recv counter
+rpc_method_isspanempty_recv{node_id="1"} 0
+# HELP rpc_method_revertrange_recv Number of RevertRange requests processed
+# TYPE rpc_method_revertrange_recv counter
+rpc_method_revertrange_recv{node_id="1"} 0
+# HELP rpc_method_put_recv Number of Put requests processed
+# TYPE rpc_method_put_recv counter
+rpc_method_put_recv{node_id="1"} 273
+# HELP rpc_method_adminunsplit_recv Number of AdminUnsplit requests processed
+# TYPE rpc_method_adminunsplit_recv counter
+rpc_method_adminunsplit_recv{node_id="1"} 0
+# HELP rpc_method_merge_recv Number of Merge requests processed
+# TYPE rpc_method_merge_recv counter
+rpc_method_merge_recv{node_id="1"} 17675
+# HELP rpc_connection_inactive Gauge of current connections in an inactive state and pending deletion; these are not healthy but are not tracked as unhealthy either because there is reason to believe that the connection is no longer relevant,for example if the node has since been seen under a new address
+# TYPE rpc_connection_inactive gauge
+rpc_connection_inactive{node_id="1"} 0
+# HELP rpc_connection_unhealthy_nanos Gauge of nanoseconds of unhealthy connection time.\n\nOn the prometheus endpoint scraped with the cluster setting 'server.child_metrics.enabled' set,\nthe constituent parts of this metric are available on a per-peer basis and one can read off\nfor how long a given peer has been unreachable
+# TYPE rpc_connection_unhealthy_nanos gauge
+rpc_connection_unhealthy_nanos{node_id="1"} 0
+# HELP rpc_method_querylocks_recv Number of QueryLocks requests processed
+# TYPE rpc_method_querylocks_recv counter
+rpc_method_querylocks_recv{node_id="1"} 0
+# HELP rpc_method_transferlease_recv Number of TransferLease requests processed
+# TYPE rpc_method_transferlease_recv counter
+rpc_method_transferlease_recv{node_id="1"} 0
+# HELP rpc_batches_recv Number of batches processed
+# TYPE rpc_batches_recv counter
+rpc_batches_recv{node_id="1"} 1973
+# HELP rpc_method_adminverifyprotectedtimestamp_recv Number of AdminVerifyProtectedTimestamp requests processed
+# TYPE rpc_method_adminverifyprotectedtimestamp_recv counter
+rpc_method_adminverifyprotectedtimestamp_recv{node_id="1"} 0
+# HELP rpc_streams_mux_rangefeed_recv Total number of MuxRangeFeed streams
+# TYPE rpc_streams_mux_rangefeed_recv counter
+rpc_streams_mux_rangefeed_recv{node_id="1"} 0
+# HELP rpc_method_gc_recv Number of GC requests processed
+# TYPE rpc_method_gc_recv counter
+rpc_method_gc_recv{node_id="1"} 78
+# HELP rpc_method_adminchangereplicas_recv Number of AdminChangeReplicas requests processed
+# TYPE rpc_method_adminchangereplicas_recv counter
+rpc_method_adminchangereplicas_recv{node_id="1"} 0
+# HELP rpc_method_pushtxn_recv Number of PushTxn requests processed
+# TYPE rpc_method_pushtxn_recv counter
+rpc_method_pushtxn_recv{node_id="1"} 1
+# HELP rpc_method_queryintent_recv Number of QueryIntent requests processed
+# TYPE rpc_method_queryintent_recv counter
+rpc_method_queryintent_recv{node_id="1"} 762
+# HELP rpc_method_get_recv Number of Get requests processed
+# TYPE rpc_method_get_recv counter
+rpc_method_get_recv{node_id="1"} 214
+# HELP rpc_method_admintransferlease_recv Number of AdminTransferLease requests processed
+# TYPE rpc_method_admintransferlease_recv counter
+rpc_method_admintransferlease_recv{node_id="1"} 0
+# HELP rpc_method_checkconsistency_recv Number of CheckConsistency requests processed
+# TYPE rpc_method_checkconsistency_recv counter
+rpc_method_checkconsistency_recv{node_id="1"} 0
+# HELP rpc_method_adminmerge_recv Number of AdminMerge requests processed
+# TYPE rpc_method_adminmerge_recv counter
+rpc_method_adminmerge_recv{node_id="1"} 0
+# HELP rpc_method_adminscatter_recv Number of AdminScatter requests processed
+# TYPE rpc_method_adminscatter_recv counter
+rpc_method_adminscatter_recv{node_id="1"} 0
+# HELP rpc_method_delete_recv Number of Delete requests processed
+# TYPE rpc_method_delete_recv counter
+rpc_method_delete_recv{node_id="1"} 112
+# HELP rpc_method_clearrange_recv Number of ClearRange requests processed
+# TYPE rpc_method_clearrange_recv counter
+rpc_method_clearrange_recv{node_id="1"} 0
+# HELP rpc_method_heartbeattxn_recv Number of HeartbeatTxn requests processed
+# TYPE rpc_method_heartbeattxn_recv counter
+rpc_method_heartbeattxn_recv{node_id="1"} 0
+# HELP rpc_method_subsume_recv Number of Subsume requests processed
+# TYPE rpc_method_subsume_recv counter
+rpc_method_subsume_recv{node_id="1"} 0
+# HELP rpc_method_adminsplit_recv Number of AdminSplit requests processed
+# TYPE rpc_method_adminsplit_recv counter
+rpc_method_adminsplit_recv{node_id="1"} 0
+# HELP rpc_connection_failures Counter of failed connections.\n\nThis includes both the event in which a healthy connection terminates as well as\nunsuccessful reconnection attempts.\n\nConnections that are terminated as part of local node shutdown are excluded.\nDecommissioned peers are excluded.\n
+# TYPE rpc_connection_failures counter
+rpc_connection_failures{node_id="1"} 0
+# HELP rpc_connection_avg_round_trip_latency Sum of exponentially weighted moving average of round-trip latencies, as measured through a gRPC RPC.\n\nDividing this Gauge by rpc.connection.healthy gives an approximation of average\nlatency, but the top-level round-trip-latency histogram is more useful. Instead,\nusers should consult the label families of this metric if they are available\n(which requires prometheus and the cluster setting 'server.child_metrics.enabled');\nthese provide per-peer moving averages.\n\nThis metric does not track failed connection. A failed connection's contribution\nis reset to zero.\n
+# TYPE rpc_connection_avg_round_trip_latency gauge
+rpc_connection_avg_round_trip_latency{node_id="1"} 739396
+# HELP rpc_method_endtxn_recv Number of EndTxn requests processed
+# TYPE rpc_method_endtxn_recv counter
+rpc_method_endtxn_recv{node_id="1"} 338
+# HELP rpc_connection_unhealthy Gauge of current connections in an unhealthy state (not bidirectionally connected or heartbeating)
+# TYPE rpc_connection_unhealthy gauge
+rpc_connection_unhealthy{node_id="1"} 0
+# HELP rpc_method_addsstable_recv Number of AddSSTable requests processed
+# TYPE rpc_method_addsstable_recv counter
+rpc_method_addsstable_recv{node_id="1"} 0
+# HELP rpc_connection_heartbeats Counter of successful heartbeats.
+# TYPE rpc_connection_heartbeats counter
+rpc_connection_heartbeats{node_id="1"} 114
+# HELP rpc_method_computechecksum_recv Number of ComputeChecksum requests processed
+# TYPE rpc_method_computechecksum_recv counter
+rpc_method_computechecksum_recv{node_id="1"} 57
+# HELP rpc_streams_rangefeed_active Number of currently running RangeFeed streams
+# TYPE rpc_streams_rangefeed_active gauge
+rpc_streams_rangefeed_active{node_id="1"} 13
+# HELP rpc_method_export_recv Number of Export requests processed
+# TYPE rpc_method_export_recv counter
+rpc_method_export_recv{node_id="1"} 0

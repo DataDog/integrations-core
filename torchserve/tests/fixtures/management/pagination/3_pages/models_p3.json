@@ -1,0 +1,8 @@
+{
+  "models": [
+    {
+      "modelName": "linear_regression_3_2",
+      "modelUrl": "linear_regression_3_2.mar"
+    }
+  ]
+}

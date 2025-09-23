@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "114d71e8-0128-4dca-aee8-297178732d31",
   "app_id": "system",
+  "owner": "agent-runtimes",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,8 +16,8 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Web",
-      "Category::Network"
+      "Category::Network",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Network",

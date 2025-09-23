@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c6033e2f-8b3d-4b82-8d35-7c61ce7d0908",
   "app_id": "sonarqube",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,13 @@
     "title": "SonarQube",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
+      "Category::Automation",
+      "Category::Log Collection",
       "Category::Security",
-      "Category::Issue Tracking",
-      "Category::Log Collection"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "SonarQube",
@@ -43,19 +44,22 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "java org.sonar.server.app.WebServer",
+        "java org.sonar.ce.app.CeServer"
+      ],
+      "source_type_id": 10132,
+      "auto_install": true
     },
     "dashboards": {
       "Sonarqube Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "SonarQube vulnerabilities": "assets/recommended_monitors/vulnerabilities.json"
+      "Sonarqube has vulnerabilities": "assets/monitors/vulnerabilities.json"
     },
     "saved_views": {
       "status_overview": "assets/saved_views/status_overview.json"
-    },
-    "logs": {
-      "source": "sonarqube"
     }
   }
 }

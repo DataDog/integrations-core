@@ -33,58 +33,27 @@ init_config:
 #
 instances:
 
-    ## @param name - string - required
-    ## Unique identifier for this instance.
+    ## @param username - string - optional
+    ## The User name used to connect to Openstack.
     #
-  - name: <INSTANCE_NAME>
+    # username: admin
 
-    ## @param user - mapping - required
-    ## Password authentication is the only auth method supported
-    ## User expects username, password, and user domain id
-    ## `user` should resolve to a structure like
-    ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
-    ## The check uses the Unscoped token method to collect information about all available projects to the user.
+    ## @param password - string - optional
+    ## The Password used to connect to Openstack.
     #
-    user:
-      password: <PASSWORD>
-      name: <USER_NAME>
-      domain:
-        id: <DOMAIN_ID>
+    # password: <PASSWORD>
 
-    ## @param whitelist_project_names - list of strings - optional - default: []
-    ## IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
-    ## Regex expressions for the project names are supported.
-    ## Blacklist takes precedence over whitelist in case of overlap.
+    ## @param domain_id - string - optional - default: default
+    ## The domain ID used to connect to Openstack. If not specified, the check will
+    ## use the "default" Domain ID
     #
-    # whitelist_project_names:
-    #   - <PROJECT_NAME>
-    #   - <PROJECT_PREFIX>*
+    # domain_id: default
 
-    ## @param blacklist_project_names - list of strings - optional - default: []
-    ## IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
-    ## Regex expressions for the project names are supported.
-    ## Blacklist takes precedence over whitelist in case of overlap.
+    ## @param use_legacy_check_version - boolean - optional - default: false
+    ## For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
+    ## integration by setting this field to "true".
     #
-    # blacklist_project_names:
-    #   - <PROJECT_NAME>
-    #   - <PROJECT_PREFIX>*
-
-    ## @param exclude_server_ids - list of strings - optional - default: []
-    ## IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
-    ## Regex expressions for the server IDs are supported.
-    #
-    # exclude_server_ids:
-    #   - <SERVER_ID>
-    #   - <SERVER_ID_PREFIX>*
-
-    ## @param exclude_network_ids - list of strings - optional - default: []
-    ## IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the
-    ## neutron:get_networks operation)
-    ## Regex expressions for the network IDs to exclude are supported.
-    #
-    # exclude_network_ids:
-    #   - <NETWORK_ID>
-    #   - <NETWORK_ID_PREFIX>*
+    use_legacy_check_version: false
 
     ## @param use_agent_proxy - boolean - optional - default: true
     ## Whether the dd-agent proxy should also be used for openstack API requests (if set).
@@ -115,41 +84,33 @@ instances:
     #
     # keystone_server_url: https://<KEYSTONE_ENDPOINT>:<PORT>/
 
-    ## @param collect_hypervisor_load - boolean - optional - default: true
-    ## Collects hypervisor_load.1/5/15 for each hypervisor
-    ## Disabled by default to increase performance of the check.
-    ## With this enabled there is an extra N requests per check run (N = # of hypervisors)
-    ## If the Agent is installed on each hypervisor, this metric is available as system.load.1/5/15
+    ## @param ironic_microversion - string - optional
+    ## The microversion of the Ironic (Bare Metal) API to call.
+    ## It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.
+    ##
+    ## View this page for more about Ironic microvoersion compatibility:
+    ##    https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
     #
-    # collect_hypervisor_load: true
+    ironic_microversion: '1.80'
 
-    ## @param collect_hypervisor_metrics - boolean - optional - default: true
-    ## Collects hypervisor metrics (including hypervisor_load).
+    ## @param nova_microversion - string - optional
+    ## The microversion of the Nova (Compute) API to call.
+    ## It is recommended to set this parameter to the latest Compute microversion supported by your Openstack version.
+    ## View this page for more about Compute microvoersion compatibility:
+    ##    https://docs.openstack.org/nova/latest/reference/api-microversion-history.html
+    ## View this page for more information about microversions in Openstack:
+    ##    https://docs.openstack.org/api-guide/compute/microversions.html
     #
-    # collect_hypervisor_metrics: true
+    nova_microversion: '2.93'
 
-    ## @param collect_project_metrics - boolean - optional - default: true
-    ## The admin user defined for Datadog starts with a "default" project.
-    ## If this option is disabled, project limits metrics are only collected from projects the
-    ## datadog defined user has access to view.
+    ## @param cinder_microversion - string - optional
+    ## The microversion of the Rest API to call.
+    ## It is recommended to set this parameter to the latest microversion supported by your Openstack version.
+    ##
+    ## View this page for more about microvoersion compatibility:
+    ##    https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html
     #
-    # collect_project_metrics: true
-
-    ## @param collect_network_metrics - boolean - optional - default: true
-    ## Collects network metrics.
-    #
-    # collect_network_metrics: true
-
-    ## @param collect_server_flavor_metrics - boolean - optional - default: true
-    ## Collect server flavor metrics.
-    #
-    # collect_server_flavor_metrics: true
-
-    ## @param collect_server_diagnostic_metrics - boolean - optional - default: true
-    ## Collect server diagnostic metrics. Enabling this may result in performance decrease.
-    ## This is fine for small deployments. For large deployment, turn it off and install the agent on VMs directly.
-    #
-    # collect_server_diagnostic_metrics: true
+    cinder_microversion: volume 3.70
 
     ## @param use_shortname - boolean - optional - default: false
     ## In some OpenStack environments, the hostname registered to Nova is the shortname.
@@ -157,6 +118,79 @@ instances:
     ## comparing against nova responses. Only affects aggregate tagging.
     #
     # use_shortname: false
+
+    ## @param endpoint_interface - string - optional - default: public
+    ## Indicates the visibility scope of the component's endpoints to use. The possible values are:
+    ##   public: This endpoint is accessible from outside the cloud and typically denotes a public-facing URL or 
+    ##       IP address.
+    ##   internal: This endpoint is typically used for communication between services within the cloud 
+    ##       infrastructure itself.
+    ##       It may be an internal IP or hostname that's not accessible from outside the cloud.  
+    ##   admin: This endpoint is specifically for administrative tasks and may have extended privileges or 
+    ##       functionality compared to the public and internal endpoints.
+    ##       It's meant for cloud operators or administrators.
+    #
+    # endpoint_interface: internal
+
+    ## @param endpoint_region_id - string - optional
+    ## The region_id that will be used to filter the endpoints to use for each component.
+    #
+    # endpoint_region_id: <ENDPOINT_REGION_ID>
+
+    ## @param all_projects - boolean - optional - default: false
+    ## List compute servers across all projects (admin only).
+    #
+    # all_projects: false
+
+    ## @param components - mapping - optional
+    ## General configuration that we want to apply to each of the components and their different metric blocks.
+    #
+    # components:
+    #   compute: false
+
+    ## @param projects - mapping - optional
+    ## Optional configuration to indicate the projects that we want to be processed. If not configured,
+    ## all projects will be processed.
+    ##
+    ## The 'include' key will indicate the regular expressions of the projects for which metrics are to be reported
+    ## and the configuration to be applied to each of them. Each group may have a 'components'-like configuration,
+    ## enabling or disabling components or metrics. For further details see previous section 'components'.
+    ## If no configuration associated with the key is indicated
+    ## with the regular expression, they will be processed with the default configuration.
+    ##
+    ## The projects will be processed in the order indicated in the 'include'.
+    ## If a projects is matched on an 'include' key, it will only be processed there and not in a later 'include'
+    ## that it might match on.
+    ##
+    ## The 'exclude' key will indicate the regular expressions of those projects for which metrics
+    ## are not to be reported.
+    ## The excludes will have priority over the includes, that is, if a projects matches an exclude, it will not be
+    ## processed even if it matches an include.
+    ##
+    ## The 'limit' key will allow limiting the number of projects processed to avoid a combinatorial explosion of tags
+    ## associated with a metric.
+    ##
+    ## The 'interval' key will indicate the validity time of the last list of projects obtained through the endpoint.
+    ## If 'interval' is not indicated, the list of projects will be obtained each time the check is executed
+    ## and will not be cached.
+    ##
+    ## In the following example, all projects will be processed except those whose name begins with 'tmp_'
+    ## up to a maximum of 10 projects.
+    ## Furthermore, the cache will be valid for 1 minute.
+    ##
+    ##   projects:
+    ##     limit: 10
+    ##     include:
+    ##       - '.*'
+    ##     exclude:
+    ##       - 'tmp_.*'
+    ##     interval: 60
+    #
+    # projects:
+    #   include:
+    #   - .*
+    #   exclude:
+    #   - tmp_.*
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -166,6 +200,12 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
@@ -208,16 +248,6 @@ instances:
     ## settings enabled and attempt to reach services directly.
     #
     # skip_proxy: false
-
-    ## @param username - string - optional
-    ## The username to use if services are behind basic or digest auth.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password to use if services are behind basic or NTLM auth.
-    #
-    # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, specify
@@ -307,8 +337,8 @@ instances:
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
     ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
@@ -325,6 +355,16 @@ instances:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.

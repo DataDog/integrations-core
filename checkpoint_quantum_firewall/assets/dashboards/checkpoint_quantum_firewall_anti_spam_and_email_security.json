@@ -1,0 +1,614 @@
+{
+    "title": "Checkpoint Quantum Firewall - Anti Spam & Email Security",
+    "description": "- This dashboard gives insight about anti-spam and email security related logs.",
+    "widgets": [
+        {
+            "id": 6341878164127886,
+            "definition": {
+                "type": "image",
+                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Check_Point_logo_2022.svg/481px-Check_Point_logo_2022.svg.png",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 2509837744493518,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard gives insight about anti-spam and email security related logs.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3854837030831754,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Total Events\n2. Events Over Time\n3. Events by Action\n4. Top Senders\n5. Top Receivers\n6. Event by Email Spam Categories\n7. Email Senders by Source Country\n8. Email Receivers by Destination Country\n9. Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3949047315918342,
+            "definition": {
+                "title": "Total Events",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Anti-Spam and Email Security\" $Checkpoint_Server $Action "
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 3167671302470724,
+            "definition": {
+                "title": "Events Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Anti Spam and Email Security",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Anti-Spam and Email Security\" $Checkpoint_Server $Action "
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 2,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 4390511306654606,
+            "definition": {
+                "title": "Events by Action",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@action",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Anti-Spam and Email Security\" $Checkpoint_Server $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 6293589520654150,
+            "definition": {
+                "title": "Top Senders",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@from",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Anti-Spam and Email Security\" $Checkpoint_Server $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 1205342972265208,
+            "definition": {
+                "title": "Top Receivers",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@to",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Anti-Spam and Email Security\" $Checkpoint_Server $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 449576329963848,
+            "definition": {
+                "title": "Event by Email Spam Categories",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@email_spam_category",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Anti-Spam and Email Security\" $Checkpoint_Server $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "automatic"
+                }
+            },
+            "layout": {
+                "x": 8,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 8962348530869104,
+            "definition": {
+                "title": "Email Senders by Source Country",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "geomap",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.iso_code",
+                                        "limit": 250,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Anti-Spam and Email Security\" $Checkpoint_Server $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ]
+                    }
+                ],
+                "style": {
+                    "palette": "hostmap_blues",
+                    "palette_flip": false
+                },
+                "view": {
+                    "focus": "WORLD"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 8768406256372780,
+            "definition": {
+                "title": "Email Receivers by Destination Country ",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "geomap",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.destination.geoip.country.iso_code",
+                                        "limit": 250,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:\"Anti-Spam and Email Security\" $Checkpoint_Server $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ]
+                    }
+                ],
+                "style": {
+                    "palette": "hostmap_blues",
+                    "palette_flip": false
+                },
+                "view": {
+                    "focus": "WORLD"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 13,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 2546012236521332,
+            "definition": {
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:checkpoint-quantum-firewall @product:\"Anti-Spam and Email Security\" $Checkpoint_Server $Action",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "from",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "network.client.ip",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "to",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "network.destination.ip",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "email_control",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "email_spam_category",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "email_subject",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Checkpoint_Server",
+            "prefix": "@origin",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Action",
+            "prefix": "@action",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

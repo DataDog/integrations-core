@@ -31,7 +31,7 @@ def test_collect_metadata(datadog_agent, instance):
         xenserver.session.get_this_host.return_value = {'Status': 'Success', 'Value': 'hostref'}
         xenserver.host.get_software_version.return_value = content
 
-        with mock.patch('six.moves.xmlrpc_client.Server', return_value=xenserver):
+        with mock.patch('datadog_checks.citrix_hypervisor.check.ServerProxy', return_value=xenserver):
             check.check(None)
             datadog_agent.assert_metadata('test:123', version_metadata)
             datadog_agent.assert_metadata_count(len(version_metadata))

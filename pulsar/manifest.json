@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "2a3a1555-3c19-42a9-b954-ce16c4aa6308",
   "app_id": "pulsar",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,12 @@
     "title": "Pulsar",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Message Queues",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Messaging",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "pulsar",
@@ -43,10 +43,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
-    },
-    "logs": {
-      "source": "pulsar"
+      },
+      "process_signatures": [
+        "java org.apache.pulsar.PulsarStandaloneStarter"
+      ],
+      "source_type_id": 10143,
+      "auto_install": true
     }
   }
 }

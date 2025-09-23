@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   dd-test-sshd:
     image: hermsi/alpine-sshd:${SSH_SERVER_IMAGE}

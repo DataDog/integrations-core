@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "created_at": "2021-03-18",
+  "last_updated_at": "2021-03-18",
+  "title": "Number of unrouted messages is high",
+  "tags": [
+    "integration:activemq"
+  ],
+  "description": "Based on optional filters, ActiveMQ Artemis messages are sent to addresses and consumed afterwards. However, messages can end up not being routed anywhere, planned or unplanned. This monitor uses anomaly detection over a 4-hour window to identify potential message routing issues.",
+  "definition": {
+    "message": "The number of unrouted messages on address {{address.name}} has exceeded its normal range to {{value}} messages.",
+    "name": "[ActiveMQ Artemis] High number of unrouted messages on address {{address.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "silenced": {},
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_4h):anomalies(avg:activemq.artemis.address.unrouted_messages{*} by {address}.as_count(), 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='hourly') >= 1",
+    "tags": [
+      "integration:activemq"
+    ],
+    "type": "query alert"
+  }
+}

@@ -3,24 +3,24 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
 import os
-from typing import Any, Dict, Iterator, List, Mapping, Optional, Pattern, Sequence, Tuple, Union
+from typing import Any, Dict, Iterator, List, Mapping, Optional, Pattern, Sequence, Tuple, Union  # noqa: F401
 
 import yaml
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_types import (
-    ContextData,
+    ContextData,  # noqa: F401
     ObjectIdentity,
     ObjectName,
     ObjectType,
-    SnmpEngine,
+    SnmpEngine,  # noqa: F401
     UdpTransportTarget,
     endOfMibView,
     lcd,
     noSuchInstance,
 )
-from .types import T
+from .types import T  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
@@ -48,17 +48,24 @@ def get_profile_definition(profile):
     return profile['definition']
 
 
-def _get_profiles_confd_root():
+def _get_profiles_confd_user_root():
     # type: () -> str
     # NOTE: this separate helper function exists for mocking purposes.
     confd = get_config('confd_path')
     return os.path.join(confd, 'snmp.d', 'profiles')
 
 
+def _get_profiles_confd_default_root():
+    # type: () -> str
+    # NOTE: this separate helper function exists for mocking purposes.
+    confd = get_config('confd_path')
+    return os.path.join(confd, 'snmp.d', 'default_profiles')
+
+
 def _get_profiles_site_root():
     # type: () -> str
     here = os.path.dirname(__file__)
-    return os.path.join(here, 'data', 'profiles')
+    return os.path.join(here, 'data', 'default_profiles')
 
 
 def _resolve_definition_file(definition_file):
@@ -66,7 +73,11 @@ def _resolve_definition_file(definition_file):
     if os.path.isabs(definition_file):
         return definition_file
 
-    definition_conf_file = os.path.join(_get_profiles_confd_root(), definition_file)
+    definition_conf_file = os.path.join(_get_profiles_confd_user_root(), definition_file)
+    if os.path.isfile(definition_conf_file):
+        return definition_conf_file
+
+    definition_conf_file = os.path.join(_get_profiles_confd_default_root(), definition_file)
     if os.path.isfile(definition_conf_file):
         return definition_conf_file
 
@@ -107,7 +118,9 @@ def recursively_expand_base_profiles(definition):
 
 def _iter_default_profile_file_paths():
     # type: () -> Iterator[str]
-    paths = [_get_profiles_site_root(), _get_profiles_confd_root()]
+
+    # the order of the path is important, the first profile with specific name found will take precedence
+    paths = [_get_profiles_confd_user_root(), _get_profiles_confd_default_root(), _get_profiles_site_root()]
 
     for path in paths:
         if not os.path.isdir(path):
@@ -138,6 +151,8 @@ def _load_default_profiles():
 
     for path in _iter_default_profile_file_paths():
         name = _get_profile_name(path)
+        if name in profiles:
+            continue
 
         if _is_abstract_profile(name):
             continue
@@ -145,9 +160,10 @@ def _load_default_profiles():
         definition = _read_profile_definition(path)
         try:
             recursively_expand_base_profiles(definition)
-        except Exception:
-            logger.error("Could not expand base profile %s", path)
-            raise
+        except Exception as exc:
+            logger.warning("Failed to expand base profiles in profile '%s': %s", name, exc)
+            continue
+
         profiles[name] = {'definition': definition}
 
     return profiles

@@ -1,0 +1,8 @@
+# TYPE envoy_http_local_rate_limit_enabled counter
+envoy_http_local_rate_limit_enabled{envoy_local_http_ratelimit_prefix="http_local_rate_limiter"} 0
+# TYPE envoy_http_local_rate_limit_enforced counter
+envoy_http_local_rate_limit_enforced{envoy_local_http_ratelimit_prefix="http_local_rate_limiter"} 0
+# TYPE envoy_http_local_rate_limit_ok counter
+envoy_http_local_rate_limit_ok{envoy_local_http_ratelimit_prefix="http_local_rate_limiter"} 0
+# TYPE envoy_http_local_rate_limit_rate_limited counter
+envoy_http_local_rate_limit_rate_limited{envoy_local_http_ratelimit_prefix="http_local_rate_limiter"} 0

@@ -1,0 +1,54 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "d0c1b332-dc56-46c8-ab6a-048052f91e41",
+  "app_id": "infiniband",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect and graph InfiniBand performance and statistics",
+    "title": "InfiniBand",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Network",
+      "Offering::Integration",
+      "Queried Data Type::Metrics",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 40961727,
+      "source_type_name": "Infiniband",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "infiniband.",
+        "check": "infiniband.VL15_dropped",
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "monitors": {
+      "port_state": "assets/monitors/port_state.json",
+      "physical_state": "assets/monitors/physical_state.json"
+    },
+    "dashboards": {
+      "InfiniBand Overview": "assets/dashboards/infiniband_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

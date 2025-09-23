@@ -1,0 +1,67 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "bae260a0-91be-4dc4-9767-61f072f82d76",
+  "app_id": "ray",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of Ray",
+    "title": "Ray",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::AI/ML",
+      "Category::Log Collection",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Ray",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ray.",
+        "check": "ray.process.open_fds",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "ray.util.client.server",
+        "gcs_server",
+        "raylet"
+      ],
+      "source_type_id": 10393,
+      "auto_install": true
+    },
+    "monitors": {
+      "High CPU Utilization on Ray.io node": "assets/monitors/cpu_utilization.json",
+      "Low GPU Utilization low on Ray.io Node": "assets/monitors/gpu_utilization.json",
+      "High Memory Usage": "assets/monitors/mem_utilization.json",
+      "High Number of Failed Tasks on Ray.io Node": "assets/monitors/failed_task.json"
+    },
+    "dashboards": {
+      "Ray Overview Dashboard": "assets/dashboards/overview_dashboard.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

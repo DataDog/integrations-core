@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "1b01568a-d25e-4e8d-98f6-c999f1d253c7",
   "app_id": "kubernetes",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,20 @@
     "title": "Kubernetes",
     "media": [],
     "classifier_tags": [
+      "Category::Containers",
+      "Category::Kubernetes",
+      "Category::Log Collection",
+      "Category::Network",
+      "Category::Orchestration",
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::Orchestration",
-      "Category::Containers",
-      "Category::Log Collection"
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-kubernetes-era"
+      }
     ]
   },
   "author": {
@@ -25,7 +35,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Kubernetes",
@@ -40,7 +49,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 128,
+      "auto_install": true
     },
     "dashboards": {
       "kubernetes": "assets/dashboards/kubernetes_dashboard.json",
@@ -52,16 +63,24 @@
       "Kubernetes DaemonSets Overview": "assets/dashboards/kubernetes_daemonsets.json",
       "Kubernetes Jobs & Cronjobs Overview": "assets/dashboards/kubernetes_jobs.json",
       "Kubernetes StatefulSets Overview": "assets/dashboards/kubernetes_statefulsets.json",
-      "Kubernetes Clusters Overview": "assets/dashboards/kubernetes_clusters.json"
+      "Kubernetes Clusters Overview": "assets/dashboards/kubernetes_clusters.json",
+      "Kubernetes CPU & Memory usage": "assets/dashboards/kubernetes_cpu_memory.json"
     },
     "monitors": {
-      "[kubernetes] Monitor Kubernetes Deployments Replica Pods": "assets/monitors/monitor_deployments_replicas.json",
-      "[kubernetes] Monitor Unschedulable Kubernetes Nodes": "assets/monitors/monitor_node_unavailable.json",
-      "[kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}": "assets/monitors/monitor_pod_crashloopbackoff.json",
-      "[kubernetes] Pod {{pod_name.name}} is ImagePullBackOff on namespace {{kube_namespace.name}}": "assets/monitors/monitor_pod_imagepullbackoff.json",
-      "[kubernetes] Monitor Kubernetes Failed Pods in Namespaces": "assets/monitors/monitor_pods_failed_state.json",
-      "[kubernetes] Monitor Kubernetes Pods Restarting": "assets/monitors/monitor_pods_restarting.json",
-      "[kubernetes] Monitor Kubernetes Statefulset Replicas": "assets/monitors/monitor_statefulset_replicas.json"
+      "Kubernetes Deployment Replicas are failing": "assets/monitors/monitor_deployments_replicas.json",
+      "Nodes are unavailable": "assets/monitors/monitor_node_unavailable.json",
+      "Pod is in a CrashloopBackOff state": "assets/monitors/monitor_pod_crashloopbackoff.json",
+      "Pod is in an ImagePullBackOff state": "assets/monitors/monitor_pod_imagepullbackoff.json",
+      "Pod is in an OOMKilled state": "assets/monitors/monitor_pod_oomkilled.json",
+      "Pods are failing": "assets/monitors/monitor_pods_failed_state.json",
+      "Pods are restarting": "assets/monitors/monitor_pods_restarting.json",
+      "Kubernetes Statefulset Replicas are failing": "assets/monitors/monitor_statefulset_replicas.json"
+    },
+    "saved_views": {
+      "non_ok_pods": "assets/saved_views/non_ok_pods.json",
+      "non_ready_nodes": "assets/saved_views/non_ready_nodes.json",
+      "unavailable_replicas_deployments": "assets/saved_views/unavailable_replicas_deployments.json",
+      "unbound_volumes": "assets/saved_views/unbound_volumes.json"
     }
   }
 }

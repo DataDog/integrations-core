@@ -1,5 +1,10 @@
 # Spark Check
 
+<div class="alert alert-warning">
+<a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Spark and Databricks jobs and clusters.<br/><br/>
+This page only documents how to ingest Spark metrics and logs. 
+</div>
+
 ![Spark Graph][1]
 
 ## Overview
@@ -54,7 +59,7 @@ To configure this check for an Agent running on a host:
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
+For containerized environments, see the Autodiscovery Integration Templates, either for [Docker][17] or [Kubernetes][7], for guidance on applying the parameters below.
 
 | Parameter            | Value                                                             |
 | -------------------- | ----------------------------------------------------------------- |
@@ -112,9 +117,9 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 ## Troubleshooting
 
-### Spark on AWS EMR
+### Spark on Amazon EMR
 
-To receive metrics for Spark on AWS EMR, [use bootstrap actions][12] to install the [Datadog Agent][13]:
+To receive metrics for Spark on Amazon EMR, [use bootstrap actions][12] to install the [Datadog Agent][13]:
 
 For Agent v5, create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with the [proper values on each EMR node][14].
 
@@ -129,10 +134,11 @@ The Spark integration only collects metrics about running apps. If you have no c
 Additional helpful documentation, links, and articles:
 
 - [Hadoop and Spark monitoring with Datadog][15]
+- [Monitoring Apache Spark applications running on Amazon EMR][16]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png
 [2]: https://spark.apache.org/
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: /account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/spark/datadog_checks/spark/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -145,3 +151,5 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/agent/
 [14]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
 [15]: https://www.datadoghq.com/blog/monitoring-spark
+[16]: https://www.datadoghq.com/blog/spark-emr-monitoring/
+[17]: https://docs.datadoghq.com/containers/docker/integrations/

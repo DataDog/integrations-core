@@ -4,8 +4,6 @@
 import os
 import socket
 
-from six import PY3, iteritems
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
@@ -18,9 +16,6 @@ try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
-
-if PY3:
-    long = int
 
 
 class LinuxNetwork(Network):
@@ -85,11 +80,11 @@ class LinuxNetwork(Network):
                     if self._collect_cx_queues:
                         cmd = "ss --numeric --tcp --all --ipv{}".format(ip_version)
                         output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env=ss_env)
-                        for (state, recvq, sendq) in self._parse_queues("ss", output):
+                        for state, recvq, sendq in self._parse_queues("ss", output):
                             self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
                             self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
 
-                for metric, value in iteritems(metrics):
+                for metric, value in metrics.items():
                     self.gauge(metric, value, tags=custom_tags)
 
             except OSError as e:
@@ -107,11 +102,11 @@ class LinuxNetwork(Network):
                 # udp6       0      0 :::41458                :::*
 
                 metrics = self.parse_cx_state(lines[2:], self.tcp_states['netstat'], 5)
-                for metric, value in iteritems(metrics):
+                for metric, value in metrics.items():
                     self.gauge(metric, value, tags=custom_tags)
 
                 if self._collect_cx_queues:
-                    for (state, recvq, sendq) in self._parse_queues("netstat", output):
+                    for state, recvq, sendq in self._parse_queues("netstat", output):
                         self.histogram('system.net.tcp.recv_q', recvq, custom_tags + ["state:" + state])
                         self.histogram('system.net.tcp.send_q', sendq, custom_tags + ["state:" + state])
 
@@ -132,23 +127,34 @@ class LinuxNetwork(Network):
         #     lo:45890956   112797   0    0    0     0          0         0    45890956   112797    0    0    0     0       0          0 # noqa: E501
         #   eth0:631947052 1042233   0   19    0   184          0      1206  1208625538  1320529    0    0    0     0       0          0 # noqa: E501
         #   eth1:       0        0   0    0    0     0          0         0           0        0    0    0    0     0       0          0 # noqa: E501
+        sys_net_location = '/sys/class/net'
         for line in lines[2:]:
             cols = line.split(':', 1)
             x = cols[1].split()
             # Filter inactive interfaces
-            if self.parse_long(x[0]) or self.parse_long(x[8]):
+            if self.parse_int(x[0]) or self.parse_int(x[8]):
                 iface = cols[0].strip()
+
+                # Try to get the NIC speed and MTU for additional tagging
+                meta_tags = []
+                speed_path = os.path.join(sys_net_location, iface, 'speed')
+                mtu_path = os.path.join(sys_net_location, iface, 'mtu')
+                if speed_value := self._read_int_file(speed_path):
+                    meta_tags.extend(['speed:' + str(speed_value)])
+                if mtu_value := self._read_int_file(mtu_path):
+                    meta_tags.extend(['mtu:' + str(mtu_value)])
+
                 metrics = {
-                    'bytes_rcvd': self.parse_long(x[0]),
-                    'bytes_sent': self.parse_long(x[8]),
-                    'packets_in.count': self.parse_long(x[1]),
-                    'packets_in.drop': self.parse_long(x[3]),
-                    'packets_in.error': self.parse_long(x[2]) + self.parse_long(x[3]),
-                    'packets_out.count': self.parse_long(x[9]),
-                    'packets_out.drop': self.parse_long(x[11]),
-                    'packets_out.error': self.parse_long(x[10]) + self.parse_long(x[11]),
+                    'bytes_rcvd': self.parse_int(x[0]),
+                    'bytes_sent': self.parse_int(x[8]),
+                    'packets_in.count': self.parse_int(x[1]),
+                    'packets_in.drop': self.parse_int(x[3]),
+                    'packets_in.error': self.parse_int(x[2]) + self.parse_int(x[3]),
+                    'packets_out.count': self.parse_int(x[9]),
+                    'packets_out.drop': self.parse_int(x[11]),
+                    'packets_out.error': self.parse_int(x[10]) + self.parse_int(x[11]),
                 }
-                self.submit_devicemetrics(iface, metrics, custom_tags)
+                self.submit_devicemetrics(iface, metrics, meta_tags + custom_tags)
                 self._handle_ethtool_stats(iface, custom_tags)
 
         netstat_data = {}
@@ -250,15 +256,15 @@ class LinuxNetwork(Network):
         for k in nstat_metrics_names:
             for met in nstat_metrics_names[k]:
                 if met in netstat_data.get(k, {}):
-                    self._submit_netmetric(
-                        nstat_metrics_names[k][met], self.parse_long(netstat_data[k][met]), tags=custom_tags
+                    self.submit_netmetric(
+                        nstat_metrics_names[k][met], self.parse_int(netstat_data[k][met]), tags=custom_tags
                     )
 
         for k in nstat_metrics_gauge_names:
             for met in nstat_metrics_gauge_names[k]:
                 if met in netstat_data.get(k, {}):
                     self._submit_netmetric_gauge(
-                        nstat_metrics_gauge_names[k][met], self.parse_long(netstat_data[k][met]), tags=custom_tags
+                        nstat_metrics_gauge_names[k][met], self.parse_int(netstat_data[k][met]), tags=custom_tags
                     )
 
         # Get the conntrack -S information
@@ -309,15 +315,6 @@ class LinuxNetwork(Network):
         )
         return expected_metrics
 
-    def _submit_netmetric(self, metric, value, tags=None):
-        if self._collect_rate_metrics:
-            self.rate(metric, value, tags=tags)
-        if self._collect_count_metrics:
-            self.monotonic_count('{}.count'.format(metric), value, tags=tags)
-
-    def _submit_netmetric_gauge(self, metric, value, tags=None):
-        self.gauge(metric, value, tags=tags)
-
     def _read_int_file(self, file_location):
         try:
             with open(file_location, 'r') as f:
@@ -332,7 +329,7 @@ class LinuxNetwork(Network):
 
     def _get_iface_sys_metrics(self, custom_tags):
         sys_net_location = '/sys/class/net'
-        sys_net_metrics = ['mtu', 'tx_queue_len']
+        sys_net_metrics = ['mtu', 'tx_queue_len', 'up']
         try:
             ifaces = os.listdir(sys_net_location)
         except OSError as e:
@@ -340,7 +337,10 @@ class LinuxNetwork(Network):
             return None
         for iface in ifaces:
             for metric_name in sys_net_metrics:
-                metric_file_location = os.path.join(sys_net_location, iface, metric_name)
+                metric_file_name = metric_name
+                if metric_name == 'up':
+                    metric_file_name = 'carrier'
+                metric_file_location = os.path.join(sys_net_location, iface, metric_file_name)
                 value = self._read_int_file(metric_file_location)
                 if value is not None:
                     self.gauge('system.net.iface.{}'.format(metric_name), value, tags=custom_tags + ["iface:" + iface])
@@ -420,13 +420,17 @@ class LinuxNetwork(Network):
 
     def _handle_ethtool_stats(self, iface, custom_tags):
         # read Ethtool metrics, if configured and available
+        self.log.debug("Handling ethtool stats")
         if not self._collect_ethtool_stats:
+            self.log.debug("Ethtool stat collection not configured")
             return
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
+            self.log.debug("Skipping network interface %s", iface)
             return
         if iface in ['lo', 'lo0']:
             # Skip loopback ifaces as they don't support SIOCETHTOOL
+            self.log.debug("Skipping loopback interface %s", iface)
             return
 
         driver_name, driver_version, ethtool_stats_names, ethtool_stats = self._fetch_ethtool_stats(iface)
@@ -434,17 +438,24 @@ class LinuxNetwork(Network):
         tags.append('driver_name:{}'.format(driver_name))
         tags.append('driver_version:{}'.format(driver_version))
         if self._collect_ena_metrics:
+            self.log.debug("Getting ena metrics")
             ena_metrics = ethtool.get_ena_metrics(ethtool_stats_names, ethtool_stats)
+            self.log.debug("ena metrics to submit %s", ena_metrics)
             self._submit_ena_metrics(iface, ena_metrics, tags)
         if self._collect_ethtool_metrics:
+            self.log.debug("Getting ethtool metrics")
             ethtool_metrics = ethtool.get_ethtool_metrics(driver_name, ethtool_stats_names, ethtool_stats)
+            self.log.debug("ethtool metrics to submit %s", ethtool_metrics)
             self._submit_ethtool_metrics(iface, ethtool_metrics, tags)
 
     def _submit_ena_metrics(self, iface, vals_by_metric, tags):
+        self.log.debug("Submitting ena metrics for %s, %s, %s", iface, vals_by_metric, tags)
         if not vals_by_metric:
+            self.log.debug("No vals_by_metric, returning without submitting ena metrics")
             return
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
+            self.log.debug("Skipping network interface %s", iface)
             return
 
         metric_tags = [] if tags is None else tags[:]
@@ -455,25 +466,30 @@ class LinuxNetwork(Network):
             assert m in allowed
 
         count = 0
-        for metric, val in iteritems(vals_by_metric):
+        for metric, val in vals_by_metric.items():
+            self.log.debug("Submitting system.net.%s", metric)
             self.gauge('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
         self.log.debug("tracked %s network ena metrics for interface %s", count, iface)
 
     def _submit_ethtool_metrics(self, iface, ethtool_metrics, base_tags):
+        self.log.debug("Submitting ethtool metrics for %s, %s, %s", iface, ethtool_metrics, base_tags)
         if not ethtool_metrics:
+            self.log.debug("No ethtool_metrics, returning without submitting ethtool metrics")
             return
         if iface in self._excluded_ifaces or (self._exclude_iface_re and self._exclude_iface_re.match(iface)):
             # Skip this network interface.
+            self.log.debug("Skipping network interface %s", iface)
             return
 
         base_tags_with_device = [] if base_tags is None else base_tags[:]
         base_tags_with_device.append('device:{}'.format(iface))
 
         count = 0
-        for ethtool_tag, metric_map in iteritems(ethtool_metrics):
+        for ethtool_tag, metric_map in ethtool_metrics.items():
             tags = base_tags_with_device + [ethtool_tag]
-            for metric, val in iteritems(metric_map):
+            for metric, val in metric_map.items():
+                self.log.debug("Submitting system.net.%s", metric)
                 self.monotonic_count('system.net.%s' % metric, val, tags=tags)
                 count += 1
         self.log.debug("tracked %s network ethtool metrics for interface %s", count, iface)
@@ -492,15 +508,19 @@ class LinuxNetwork(Network):
         ethtool_socket = None
         try:
             ethtool_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+            self.log.debug("ethtool_socket: %s", ethtool_socket)
             driver_name, driver_version = ethtool.get_ethtool_drvinfo(iface, ethtool_socket)
+            self.log.debug("driver_name = %s, driver_version = %s", driver_name, driver_version)
             stats_names, stats = ethtool.get_ethtool_stats(iface, ethtool_socket)
+            self.log.debug("Returning stats_names = %s, stats = %s", stats_names, stats)
             return driver_name, driver_version, stats_names, stats
         except OSError as e:
             # this will happen for interfaces that don't support SIOCETHTOOL - e.g. loopback or docker
             self.log.debug('OSError while trying to collect ethtool metrics for interface %s: %s', iface, str(e))
-        except Exception:
-            self.log.exception('Unable to collect ethtool metrics for interface %s', iface)
+        except Exception as generic_exception:
+            self.log.exception('Unable to collect ethtool metrics for interface %s. %s', iface, str(generic_exception))
         finally:
             if ethtool_socket is not None:
                 ethtool_socket.close()
+        self.log.debug("Returning default values for driver_name, driver_version, stats_names, stats")
         return None, None, [], []

@@ -4,7 +4,7 @@
 import socket
 from collections import namedtuple
 from contextlib import closing
-from typing import Any, List, Optional
+from typing import Any, List, Optional  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
@@ -14,7 +14,6 @@ AddrTuple = namedtuple('AddrTuple', ['address', 'socket_type'])
 
 
 class TCPCheck(AgentCheck):
-
     SOURCE_TYPE_NAME = 'system'
     SERVICE_CHECK_NAME = 'tcp.can_connect'
     CONFIGURATION_ERROR_MSG = "`{}` is an invalid `{}`; a {} must be specified."
@@ -116,8 +115,13 @@ class TCPCheck(AgentCheck):
         start = get_precise_time()  # Avoid initialisation warning
 
         if self.should_resolve_ips():
-            self.resolve_ips()
-            self.ip_cache_last_ts = start
+            try:
+                self.resolve_ips()
+                self.ip_cache_last_ts = start
+            except CheckException as e:
+                self.log.error("DNS resolution failed: %s", str(e))
+                self.report_as_service_check(AgentCheck.CRITICAL, "DNS resolution failed", str(e))
+                return  # The dns-resolve failed
 
         self.log.debug("Connecting to %s on port %d", self.host, self.port)
 
@@ -147,9 +151,7 @@ class TCPCheck(AgentCheck):
                         addr,
                         """Socket error: {}.
                     The connection timed out after {} ms because it took more time than the system tcp stack allows.
-                    You might want to change this setting to allow longer timeouts""".format(
-                            str(e), length
-                        ),
+                    You might want to change this setting to allow longer timeouts""".format(str(e), length),
                     )
                 else:
                     self.log.info(

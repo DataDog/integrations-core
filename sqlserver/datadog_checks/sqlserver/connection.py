@@ -5,15 +5,13 @@ import logging
 import socket
 from contextlib import closing, contextmanager
 
-from six import raise_from
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
+from datadog_checks.sqlserver.utils import construct_use_statement, is_collation_case_insensitive
 
 try:
     import adodbapi
-    from adodbapi.apibase import OperationalError
-    from pywintypes import com_error
 except ImportError:
     adodbapi = None
 
@@ -22,16 +20,24 @@ try:
 except ImportError:
     pyodbc = None
 
+from .azure import generate_managed_identity_token
+from .connection_errors import (
+    ConnectionErrorCode,
+    SQLConnectionError,
+    error_with_tags,
+    format_connection_exception,
+    obfuscate_error_msg,
+)
+
 logger = logging.getLogger(__file__)
 
 DATABASE_EXISTS_QUERY = 'select name, collation_name from sys.databases;'
 DEFAULT_CONN_PORT = 1433
+SUPPORT_LINK = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/troubleshooting"
 
-
-class SQLConnectionError(Exception):
-    """Exception raised for SQL instance connection issues"""
-
-    pass
+# used to specific azure AD access token, see the docs for more information on this attribute
+# https://learn.microsoft.com/en-us/sql/connect/odbc/using-azure-active-directory?view=sql-server-ver16
+SQL_COPT_SS_ACCESS_TOKEN = 1256
 
 
 def split_sqlserver_host_port(host):
@@ -131,94 +137,42 @@ def parse_connection_string_properties(cs):
     return params
 
 
-known_hresult_codes = {
-    -2147352567: "unable to connect",
-    -2147217843: "login failed for user",
-    # this error can also be caused by a failed TCP connection but we are already reporting on the TCP
-    # connection status via test_network_connectivity so we don't need to explicitly state that
-    # as an error condition in this message
-    -2147467259: "could not open database requested by login",
-}
-
-
-def _format_connection_exception(e):
-    """
-    Formats the provided database connection exception.
-    If the exception comes from an ADO Provider and contains a misleading 'Invalid connection string attribute' message
-    then the message is replaced with more descriptive messages based on the contained HResult error codes.
-    """
-    if adodbapi is not None:
-        if isinstance(e, OperationalError) and e.args and isinstance(e.args[0], com_error):
-            e_comm = e.args[0]
-            hresult = e_comm.hresult
-            sub_hresult = None
-            internal_message = None
-            if e_comm.args and len(e_comm.args) == 4:
-                internal_args = e_comm.args[2]
-                if len(internal_args) == 6:
-                    internal_message = internal_args[2]
-                    sub_hresult = internal_args[5]
-            if internal_message == 'Invalid connection string attribute':
-                base_message = known_hresult_codes.get(hresult)
-                sub_message = known_hresult_codes.get(sub_hresult)
-                if base_message and sub_message:
-                    return base_message + ": " + sub_message
-    return repr(e)
-
-
 class Connection(object):
     """Manages the connection to a SQL Server instance."""
 
-    DEFAULT_COMMAND_TIMEOUT = 5
+    DEFAULT_COMMAND_TIMEOUT = 10
     DEFAULT_DATABASE = 'master'
-    DEFAULT_DRIVER = 'SQL Server'
+    DEFAULT_ADOPROVIDER = 'MSOLEDBSQL'
+    DEFAULT_CONNECTOR = 'adodbapi'
+    DEFAULT_ODBC_DRIVER = '{ODBC Driver 18 for SQL Server}'
     DEFAULT_DB_KEY = 'database'
     DEFAULT_SQLSERVER_VERSION = 1e9
     SQLSERVER_2014 = 2014
     PROC_GUARD_DB_KEY = 'proc_only_if_database'
 
-    valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
-    default_adoprovider = 'SQLOLEDB'
+    VALID_ADOPROVIDERS = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
 
     def __init__(self, init_config, instance_config, service_check_handler):
         self.instance = instance_config
         self.service_check_handler = service_check_handler
         self.log = get_check_logger()
 
+        self.managed_auth_enabled = False
+        self.managed_identity_client_id = None
+        self.managed_identity_scope = None
+        managed_identity = self.instance.get('managed_identity')
+        if managed_identity:
+            self.managed_auth_enabled = True
+            self.managed_identity_client_id = managed_identity.get("client_id")
+            self.managed_identity_scope = managed_identity.get("identity_scope")
+
         # mapping of raw connections based on conn_key to different databases
         self._conns = {}
         self.timeout = int(self.instance.get('command_timeout', self.DEFAULT_COMMAND_TIMEOUT))
         self.existing_databases = None
         self.server_version = int(self.instance.get('server_version', self.DEFAULT_SQLSERVER_VERSION))
-
-        self.adoprovider = self.default_adoprovider
-
-        self.valid_connectors = []
-        if adodbapi is not None:
-            self.valid_connectors.append('adodbapi')
-        if pyodbc is not None:
-            self.valid_connectors.append('odbc')
-
-        connector = init_config.get('connector')
-        if connector is None or connector.lower() not in self.valid_connectors:
-            if connector is None:
-                self.log.debug("`connector` config value was not set, defaulting to adodbapi")
-            else:
-                self.log.error("Invalid database connector %s, defaulting to adodbapi", connector)
-            self.default_connector = 'adodbapi'
-        else:
-            self.default_connector = connector
-
-        self.connector = self.get_connector()
-
-        self.adoprovider = init_config.get('adoprovider', self.default_adoprovider)
-        if self.adoprovider.upper() not in self.valid_adoproviders:
-            self.log.error(
-                "Invalid ADODB provider string %s, defaulting to %s",
-                self.adoprovider,
-                self.default_adoprovider,
-            )
-            self.adoprovider = self.default_adoprovider
+        self.connector = self._get_connector(init_config, instance_config)
+        self.adoprovider = self._get_adoprovider(init_config, instance_config)
 
         self.log.debug('Connection initialized.')
 
@@ -243,7 +197,7 @@ class Connection(object):
             # FIXME: we should find a better way to compute unique keys to map opened connections other than
             # using auth info in clear text!
             raise SQLConnectionError("Cannot find an opened connection for host: {}".format(self.instance.get('host')))
-        return conn.cursor()
+        return CommenterCursorWrapper(conn.cursor())
 
     def close_cursor(self, cursor):
         """
@@ -293,7 +247,7 @@ class Connection(object):
         """
         conn_key = self._conn_key(db_key, db_name, key_prefix)
 
-        _, host, _, _, database, _ = self._get_access_info(db_key, db_name)
+        _, host, _, _, database, driver = self._get_access_info(db_key, db_name)
 
         cs = self.instance.get('connection_string', '')
         cs += ';' if cs != '' else ''
@@ -307,7 +261,15 @@ class Connection(object):
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
             else:
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
-                rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
+                if self.managed_auth_enabled:
+                    token_struct = generate_managed_identity_token(
+                        self.managed_identity_client_id, self.managed_identity_scope
+                    )
+                    rawconn = pyodbc.connect(
+                        cs, timeout=self.timeout, autocommit=True, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
+                    )
+                else:
+                    rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
                 rawconn.timeout = self.timeout
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
@@ -325,19 +287,37 @@ class Connection(object):
         except Exception as e:
             error_message = self.test_network_connectivity()
             tcp_connection_status = error_message if error_message else "OK"
-            message = "Unable to connect to SQL Server (host={} database={}). TCP-connection({}). Exception: {}".format(
-                host, database, tcp_connection_status, _format_connection_exception(e)
+            exception_msg, conn_warn_msg = format_connection_exception(e, driver)
+            if tcp_connection_status != "OK" and conn_warn_msg is ConnectionErrorCode.unknown:
+                conn_warn_msg = ConnectionErrorCode.tcp_connection_failed
+
+            exception_msg = obfuscate_error_msg(exception_msg, self.instance.get('password'))
+
+            check_err_message = error_with_tags(
+                "Unable to connect to SQL Server, see %s#%s for more details on how to debug this issue. "
+                "TCP-connection(%s), Exception: %s",
+                SUPPORT_LINK,
+                conn_warn_msg.value,
+                tcp_connection_status,
+                exception_msg,
+                host=host,
+                connection_host=host,
+                database=database,
+                code=conn_warn_msg.value,
+                connector=self.connector,
+                driver=driver,
             )
-
-            password = self.instance.get('password')
-            if password is not None:
-                message = message.replace(password, "*" * 6)
-
-            self.service_check_handler(AgentCheck.CRITICAL, host, database, message, is_default=is_default)
+            self.service_check_handler(AgentCheck.CRITICAL, host, database, check_err_message, is_default=is_default)
 
             # Only raise exception on the default instance database
             if is_default:
-                raise_from(SQLConnectionError(message), None)
+                # the message that is raised here (along with the exception stack trace)
+                # is what will be seen in the agent status output.
+                raise SQLConnectionError(check_err_message) from None
+            else:
+                # if not the default db, we should still log this exception
+                # to give the customer an opportunity to fix the issue
+                self.log.debug(check_err_message)
 
     def _setup_new_connection(self, rawconn):
         with rawconn.cursor() as cursor:
@@ -379,9 +359,9 @@ class Connection(object):
             try:
                 self.existing_databases = {}
                 cursor.execute(DATABASE_EXISTS_QUERY)
-                for row in cursor:
+                for row in cursor.fetchall():
                     # collation_name can be NULL if db offline, in that case assume its case_insensitive
-                    case_insensitive = not row.collation_name or 'CI' in row.collation_name
+                    case_insensitive = is_collation_case_insensitive(row.collation_name)
                     self.existing_databases[row.name.lower()] = (
                         case_insensitive,
                         row.name,
@@ -394,48 +374,85 @@ class Connection(object):
                 self.close_cursor(cursor)
 
         exists = False
-        if database and database.lower() in self.existing_databases:
+        if database.lower() in self.existing_databases:
             case_insensitive, cased_name = self.existing_databases[database.lower()]
             if case_insensitive or database == cased_name:
                 exists = True
 
         return exists, context
 
-    def get_connector(self):
-        connector = self.instance.get('connector', self.default_connector)
-        if connector != self.default_connector:
-            if connector.lower() not in self.valid_connectors:
-                self.log.warning(
-                    "Invalid database connector %s using default %s",
-                    connector,
-                    self.default_connector,
-                )
-                connector = self.default_connector
-            else:
-                self.log.debug(
-                    "Overriding default connector for %s with %s",
-                    self.instance['host'],
-                    connector,
-                )
-        return connector
+    def _get_connector(self, init_config, instance_config):
+        '''
+        Get the connector to use for the instance.
+        The connector config value takes precedence in the following order:
+        - instance_config
+        - init_config
+        - DEFAULT_CONNECTOR
+        '''
+        # First we check the valid connectors available. i.e. adodbapi, odbc
+        valid_connectors = []
+        if adodbapi is not None:
+            valid_connectors.append('adodbapi')
+        if pyodbc is not None:
+            valid_connectors.append('odbc')
 
-    def _get_adoprovider(self):
-        provider = self.instance.get('adoprovider', self.default_adoprovider)
-        if provider != self.adoprovider:
-            if provider.upper() not in self.valid_adoproviders:
-                self.log.warning(
-                    "Invalid ADO provider %s using default %s",
-                    provider,
-                    self.adoprovider,
-                )
-                provider = self.adoprovider
-            else:
-                self.log.debug(
-                    "Overriding default ADO provider for %s with %s",
-                    self.instance['host'],
-                    provider,
-                )
-        return provider
+        # Then we check the connector value from the init_config and instance_config
+        connector_from_init_config = init_config.get('connector')
+        if connector_from_init_config is not None and connector_from_init_config.lower() not in valid_connectors:
+            self.log.warning(
+                "Invalid database connector %s set in init_config, falling back to default %s",
+                connector_from_init_config,
+                self.DEFAULT_CONNECTOR,
+            )
+            connector_from_init_config = None
+
+        connector_from_instance_config = instance_config.get('connector')
+        if (
+            connector_from_instance_config is not None
+            and connector_from_instance_config.lower() not in valid_connectors
+        ):
+            self.log.warning(
+                "Invalid database connector %s set in instance_config, falling back to default %s",
+                connector_from_instance_config,
+                self.DEFAULT_CONNECTOR,
+            )
+            connector_from_instance_config = None
+
+        return connector_from_instance_config or connector_from_init_config or self.DEFAULT_CONNECTOR
+
+    def _get_adoprovider(self, init_config, instance_config):
+        '''
+        Get the adoprovider to use for the instance.
+        The adoprovider config value takes precedence in the following order:
+        - instance_config
+        - init_config
+        - DEFAULT_ADOPROVIDER
+        '''
+        adoprovider_from_init_config = init_config.get('adoprovider')
+        if (
+            adoprovider_from_init_config is not None
+            and adoprovider_from_init_config.upper() not in self.VALID_ADOPROVIDERS
+        ):
+            self.log.warning(
+                "Invalid ADODB provider set in init_config %s, falling back to default %s",
+                adoprovider_from_init_config,
+                self.DEFAULT_ADOPROVIDER,
+            )
+            adoprovider_from_init_config = None
+
+        adoprovider_from_instance_config = instance_config.get('adoprovider')
+        if (
+            adoprovider_from_instance_config is not None
+            and adoprovider_from_instance_config.upper() not in self.VALID_ADOPROVIDERS
+        ):
+            self.log.warning(
+                "Invalid ADODB provider set in instance_config %s, falling back to default %s",
+                adoprovider_from_instance_config,
+                self.DEFAULT_ADOPROVIDER,
+            )
+            adoprovider_from_instance_config = None
+
+        return adoprovider_from_instance_config or adoprovider_from_init_config or self.DEFAULT_ADOPROVIDER
 
     def _get_access_info(self, db_key, db_name=None):
         """Convenience method to extract info from instance"""
@@ -444,7 +461,7 @@ class Connection(object):
         password = self.instance.get('password')
         database = self.instance.get(db_key) if db_name is None else db_name
         driver = self.instance.get('driver')
-        host = self._get_host_with_port()
+        host = self.get_host_with_port()
 
         if not dsn:
             if not host:
@@ -456,15 +473,15 @@ class Connection(object):
                     self.DEFAULT_DATABASE,
                 )
                 database = self.DEFAULT_DATABASE
-            if not driver:
+            if not driver and self.connector == 'odbc':
                 self.log.debug(
-                    "No driver provided, falling back to default: %s",
-                    self.DEFAULT_DRIVER,
+                    "No odbc driver provided, falling back to default: %s",
+                    self.DEFAULT_ODBC_DRIVER,
                 )
-                driver = self.DEFAULT_DRIVER
+                driver = self.DEFAULT_ODBC_DRIVER
         return dsn, host, username, password, database, driver
 
-    def _get_host_with_port(self):
+    def get_host_with_port(self):
         """Return a string with correctly formatted host and, if necessary, port.
         If the host string in the config contains a port, that port is used.
         If not, any port provided as a separate port config option is used.
@@ -529,6 +546,20 @@ class Connection(object):
             'PWD': 'password',
         }
 
+        if self.managed_auth_enabled:
+            if username or password:
+                raise ConfigurationError(
+                    "Azure AD Authentication is configured, but username and password properties are also set "
+                    "please remove `username` and `password` from your instance config to use"
+                    "AD Authentication with a Managed Identity"
+                )
+            # client_id is used as the user id for managed user identities or server principals
+            if not self.managed_identity_client_id:
+                raise ConfigurationError(
+                    "Azure Managed Identity Authentication is not properly configured "
+                    "missing required property, client_id"
+                )
+
         if self.connector == 'adodbapi':
             other_connector = 'odbc'
             connector_options = adodbapi_options
@@ -583,6 +614,12 @@ class Connection(object):
         else:
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
+        if self.managed_auth_enabled:
+            # if managed_identity authentication is configured,
+            # remove the username/password from the CS, if set
+            username = None
+            password = None
+
         # The connection resiliency feature is supported on Microsoft Azure SQL Database
         # and SQL Server 2014 (and later) server versions. See the SQLServer docs for more information
         # https://docs.microsoft.com/en-us/sql/connect/odbc/connection-resiliency?view=sql-server-ver15
@@ -611,11 +648,12 @@ class Connection(object):
         else:
             _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
 
-        provider = self._get_adoprovider()
         retry_conn_count = ''
         if self.server_version >= self.SQLSERVER_2014:
             retry_conn_count = 'ConnectRetryCount=2;'
-        conn_str = '{}Provider={};Data Source={};Initial Catalog={};'.format(retry_conn_count, provider, host, database)
+        conn_str = '{}Provider={};Data Source={};Initial Catalog={};'.format(
+            retry_conn_count, self.adoprovider, host, database
+        )
 
         if username:
             conn_str += 'User ID={};'.format(username)
@@ -653,3 +691,29 @@ class Connection(object):
                 return "ERROR: {}".format(e.strerror if hasattr(e, 'strerror') else repr(e))
 
         return None
+
+    def _get_current_database_context(self):
+        """
+        Get the current database name.
+        """
+        with self.get_managed_cursor() as cursor:
+            cursor.execute('select DB_NAME()')
+            data = cursor.fetchall()
+            return data[0][0]
+
+    @contextmanager
+    def restore_current_database_context(self):
+        """
+        Restores the default database after executing use statements.
+        """
+        current_db = self._get_current_database_context()
+        try:
+            yield
+        finally:
+            if current_db:
+                try:
+                    self.log.debug("Restoring the original database context %s", current_db)
+                    with self.get_managed_cursor() as cursor:
+                        cursor.execute(construct_use_statement(current_db))
+                except Exception as e:
+                    self.log.error("Failed to switch back to the original database context %s: %s", current_db, e)

@@ -11,6 +11,7 @@ CEP_REGEX = re.compile('/cep-([^/]+)/')
 EPG_REGEX = re.compile('/epg-([^/]+)/')
 IP_REGEX = re.compile('/ip-([^/]+)/')
 NODE_REGEX = re.compile('node-([0-9]+)')
+ETH_REGEX = re.compile(r'\[([^]]*)\]')
 
 
 def parse_capacity_tags(dn):
@@ -83,6 +84,23 @@ def get_node_from_dn(dn):
     topology/pod-1/node-101/sys/phys-[eth1/6]/CDeqptMacsectxpkts5min
     """
     return _get_value_from_dn(NODE_REGEX, dn)
+
+
+def get_eth_id_from_dn(dn):
+    """
+    This parses the interface ID (eth) from a dn designator. They look like this:
+    topology/pod-1/node-101/sys/lldp/inst/if-[eth1/49]/adj-1
+    """
+    return _get_value_from_dn(ETH_REGEX, dn)
+
+
+def get_index_from_eth_id(eth_id):
+    """
+    This parses the interface index (eth) from an interface's ID. They look like this:
+    eth1/49
+    """
+    split = re.split('eth|/', eth_id)
+    return int(split[-1])
 
 
 def _get_value_from_dn(regex, dn):

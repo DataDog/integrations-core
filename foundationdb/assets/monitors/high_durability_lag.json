@@ -1,29 +1,36 @@
 {
+  "version": 2,
+  "created_at": "2022-03-14",
+  "last_updated_at": "2022-05-25",
+  "title": "High durability lag is detected",
+  "tags": [
+    "integration:foundationdb"
+  ],
+  "description": "Durability lag refers to the time delay between when data is written to a database and when it is fully committed and made durable. This monitor tracks the average durability lag for each specific process to ensure data remains consistent.",
+  "definition": {
+    "message": "{{#is_alert}}\nThe storage process has very high durability lag - that is, the time it takes for data fetched by the storage server to be written to disk.\n{{/is_alert}}\n{{#is_warning}}\nThe storage process has higher than usual durability lag - that is, the time it takes for data fetched by the storage server to be written to disk.\n{{/is_warning}}\n\nThis may indicate that the database cluster cannot keep up with the workload. Sometimes, storage servers can also struggle if faced with a huge number of reads of the keys they store, preventing progress on writes.",
     "name": "FoundationDB High Durability Lag",
-	"type": "query alert",
-	"query": "avg(last_5m):avg:foundationdb.process.role.durability_lag.seconds{fdb_role:storage} by {fdb_process} > 60",
-	"message": "{{#is_alert}}\nThe storage process has very high durability lag - that is, the time it takes for data fetched by the storage server to be written to disk.\n{{/is_alert}}\n{{#is_warning}}\nThe storage process has higher than usual durability lag - that is, the time it takes for data fetched by the storage server to be written to disk.\n{{/is_warning}}\n\nThis may indicate that the database cluster cannot keep up with the workload. Sometimes, storage servers can also struggle if faced with a huge number of reads of the keys they store, preventing progress on writes.",
-	"tags": [
-		"integration:fdb"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 1,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 60,
-			"warning": 15
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when there is a very high durability lag detected"
-	}
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 60,
+        "warning": 15
+      },
+      "timeout_h": 1
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:foundationdb.process.role.durability_lag.seconds{fdb_role:storage} by {fdb_process} > 60",
+    "tags": [
+      "integration:fdb"
+    ],
+    "type": "query alert"
+  }
 }

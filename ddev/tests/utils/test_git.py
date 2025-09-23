@@ -1,20 +1,54 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import subprocess
+
 from ddev.repo.core import Repository
 
 
 def test_current_branch(repository):
     repo = Repository(repository.path.name, str(repository.path))
 
-    assert repo.git.current_branch == repository.testing_branch
+    assert repo.git.current_branch() == repository.testing_branch
 
     new_branch = repository.new_branch()
     repo.git.capture('checkout', '-b', new_branch)
-    assert repo.git.current_branch == repository.testing_branch
+    assert repo.git.current_branch() == new_branch
 
-    assert repo.git.get_current_branch() == new_branch
-    assert repo.git.current_branch == new_branch
+
+def test_get_latest_commit(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    (repo.path / 'test1.txt').touch()
+    repo.git.capture('add', '.')
+    commit_status1 = repo.git.capture('commit', '-m', 'test1')
+    commit1 = repo.git.latest_commit()
+    assert len(commit1.sha) == 40
+
+    (repo.path / 'test2.txt').touch()
+    repo.git.capture('add', '.')
+    commit_status2 = repo.git.capture('commit', '-m', 'test2')
+    commit2 = repo.git.latest_commit()
+    assert len(commit2.sha) == 40
+
+    short_sha1 = commit1.sha[:7]
+    short_sha2 = commit2.sha[:7]
+
+    assert short_sha1 in commit_status1
+    assert short_sha1 not in commit_status2
+    assert short_sha2 in commit_status2
+    assert short_sha2 not in commit_status1
+
+
+def test_tags(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    assert repo.git.tags() == []
+
+    repo.git.capture('tag', 'foo')
+    repo.git.capture('tag', 'bar')
+
+    assert repo.git.tags() == ['bar', 'foo']
 
 
 def test_changed_files(repository):
@@ -39,11 +73,71 @@ def test_changed_files(repository):
     (zoo_subdir / 'foo.txt').touch()
 
     changed_files = ['zoo/sub/foo.txt', 'zoo/bar.txt', 'pyproject.toml']
-    assert repo.git.changed_files == changed_files
+    assert repo.git.changed_files() == changed_files
 
     (zoo_subdir / 'baz.txt').touch()
-    assert repo.git.changed_files == changed_files
-
     changed_files.insert(0, 'zoo/sub/baz.txt')
-    assert repo.git.get_changed_files() == changed_files
-    assert repo.git.changed_files == changed_files
+    assert repo.git.changed_files() == changed_files
+
+
+def test_filtered_tags(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    repo.git.capture('tag', 'foo')
+    repo.git.capture('tag', 'bar')
+    repo.git.capture('tag', 'baz')
+
+    assert repo.git.filter_tags('^ba') == ['bar', 'baz']
+
+
+def test_fetch_tags(repository, mocker):
+    mock = mocker.patch('subprocess.run')
+    repo = Repository(repository.path.name, str(repository.path))
+    repo.git.fetch_tags()
+    assert mock.call_args_list == [
+        mocker.call(
+            ['git', 'fetch', '--all', '--tags', '--force'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding='utf-8',
+            check=True,
+        ),
+    ]
+
+
+def test_get_merge_base(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+    base_commit = repo.git.latest_commit()
+    repo.git.capture('checkout', '-b', 'test_merge_base')
+
+    (repo.path / 'test1.txt').touch()
+    repo.git.capture('add', '.')
+    repo.git.capture('commit', '-m', 'test1')
+
+    base = repo.git.merge_base('origin/master')
+
+    assert base == base_commit.sha
+
+
+def test_get_merge_base_two_branches(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+    base_commit = repo.git.latest_commit()
+
+    repo.git.capture('checkout', '-b', 'test1_merge_base')
+
+    (repo.path / 'test1.txt').touch()
+    repo.git.capture('add', '.')
+    repo.git.capture('commit', '-m', 'test1')
+
+    repo.git.capture('branch', 'test2_merge_base')
+
+    (repo.path / 'test1_1.txt').touch()
+    repo.git.capture('add', '.')
+    repo.git.capture('commit', '-m', 'test1_1')
+
+    repo.git.capture('checkout', 'test2_merge_base')
+    (repo.path / 'test2_1.txt').touch()
+    repo.git.capture('add', '.')
+    repo.git.capture('commit', '-m', 'test2')
+    base = repo.git.merge_base('origin/master')
+    assert base == base_commit.sha

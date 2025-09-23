@@ -1,6 +1,4 @@
-version: '3'
 services:
-
   fluentd:
     image: fluent/fluentd:${FLUENTD_IMAGE_TAG}
     container_name: ${FLUENTD_CONTAINER_NAME}

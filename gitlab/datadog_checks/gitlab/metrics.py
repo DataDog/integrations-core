@@ -17,6 +17,16 @@ METRICS_MAP = {
     'geo_cursor_last_event_timestamp': 'geo.cursor_last_event_timestamp',
     'geo_db_replication_lag_seconds': 'geo.db_replication_lag_seconds',
     'geo_job_artifacts_synced_missing_on_primary': 'geo.job_artifacts_synced_missing_on_primary',
+    'geo_group_wiki_repositories': 'geo.group.wiki.repositories',
+    'geo_group_wiki_repositories_checksum_total': 'geo.group.wiki.repositories_checksum_total',
+    'geo_group_wiki_repositories_checksummed': 'geo.group.wiki.repositories_checksummed',
+    'geo_group_wiki_repositories_checksum_failed': 'geo.group.wiki.repositories_checksum_failed',
+    'geo_group_wiki_repositories_synced': 'geo.group.wiki.repositories_synced',
+    'geo_group_wiki_repositories_failed': 'geo.group.wiki.repositories_failed',
+    'geo_group_wiki_repositories_registry': 'geo.group.wiki.repositories_registry',
+    'geo_group_wiki_repositories_verification_total': 'geo.group.wiki.repositories_verification_total',
+    'geo_group_wiki_repositories_verified': 'geo.group.wiki.repositories_verified',
+    'geo_group_wiki_repositories_verification_failed': 'geo.group.wiki.repositories_verification_failed',
     'geo_last_event_id': 'geo.last_event_id',
     'geo_last_event_timestamp': 'geo.last_event_timestamp',
     'geo_last_successful_status_check_timestamp': 'geo.last_successful_status_check_timestamp',
@@ -36,6 +46,26 @@ METRICS_MAP = {
     'geo_package_files_failed': 'geo.package_files_failed',
     'geo_package_files_registry': 'geo.package_files_registry',
     'geo_package_files_synced': 'geo.package_files_synced',
+    'geo_project_repositories': 'geo.project.repositories',
+    'geo_project_repositories_checksum_total': 'geo.project.repositories_checksum_total',
+    'geo_project_repositories_checksummed': 'geo.project.repositories_checksummed',
+    'geo_project_repositories_checksum_failed': 'geo.project.repositories_checksum_failed',
+    'geo_project_repositories_failed': 'geo.project.repositories_failed',
+    'geo_project_repositories_registry': 'geo.project.repositories_registry',
+    'geo_project_repositories_synced': 'geo.project.repositories_synced',
+    'geo_project_repositories_verification_total': 'geo.project.repositories_verification_total',
+    'geo_project_repositories_verified': 'geo.project.repositories_verified',
+    'geo_project_repositories_verification_failed': 'geo.project.repositories_verification_failed',
+    'geo_project_wiki_repositories': 'geo.project.wiki.repositories',
+    'geo_project_wiki_repositories_checksum_total': 'geo.project.wiki.repositories_checksum_total',
+    'geo_project_wiki_repositories_checksummed': 'geo.project.wiki.repositories_checksummed',
+    'geo_project_wiki_repositories_checksum_failed': 'geo.project.wiki.repositories_checksum_failed',
+    'geo_project_wiki_repositories_synced': 'geo.project.wiki.repositories_synced',
+    'geo_project_wiki_repositories_failed': 'geo.project.wiki.repositories_failed',
+    'geo_project_wiki_repositories_registry': 'geo.project.wiki.repositories_registry',
+    'geo_project_wiki_repositories_verification_total': 'geo.project.wiki.repositories_verification_total',
+    'geo_project_wiki_repositories_verified': 'geo.project.wiki.repositories_verified',
+    'geo_project_wiki_repositories_verification_failed': 'geo.project.wiki.repositories_verification_failed',
     'geo_repositories': 'geo.repositories',
     'geo_repositories_checked': 'geo.repositories_checked_count',
     'geo_repositories_checked_count': 'geo.repositories_checked_count',
@@ -211,3 +241,111 @@ METRICS_MAP = {
     'upload_file_does_not_exist': 'upload_file_does_not_exist',
     'user_session_logins_total': 'user_session_logins_total',
 }
+
+OPENMETRICS_V2_TYPE_OVERRIDES = {
+    "gitlab_transaction_rails_queue_duration_total": "gauge",
+    "ruby_process_cpu_seconds_total": "gauge",
+    "geo_group_wiki_repositories_checksum_total": "gauge",
+    "geo_group_wiki_repositories_verification_total": "gauge",
+    "geo_project_repositories_checksum_total": "gauge",
+    "geo_project_repositories_verification_total": "gauge",
+    "geo_project_wiki_repositories_checksum_total": "gauge",
+    "geo_project_wiki_repositories_verification_total": "gauge",
+}
+
+
+GITALY_METRICS_MAP = {
+    "gitaly_cacheinvalidator_rpc": "cacheinvalidator_rpc",
+    "gitaly_catfile_cache_members": "catfile_cache_members",
+    "gitaly_catfile_processes": "catfile_processes",
+    "gitaly_command_context_switches": "command.context_switches",
+    "gitaly_command_cpu_seconds": "command.cpu_seconds",
+    "gitaly_command_major_page_faults": "command.major_page_faults",
+    "gitaly_command_minor_page_faults": "command.minor_page_faults",
+    "gitaly_command_real_seconds": "command.real_seconds",
+    "gitaly_command_signals_received": "command.signals_received",
+    "gitaly_command_spawn_token_acquiring_seconds": "command.spawn_token_acquiring_seconds",
+    "gitaly_commands_running": "commands_running",
+    "gitaly_concurrency_limiting_acquiring_seconds": "concurrency_limiting_acquiring_seconds",
+    "gitaly_concurrency_limiting_in_progress": "concurrency_limiting_in_progress",
+    "gitaly_concurrency_limiting_queued": "concurrency_limiting_queued",
+    "gitaly_diskcache_bytes_fetched": "diskcache.bytes_fetched",
+    "gitaly_diskcache_bytes_loser": "diskcache.bytes_loser",
+    "gitaly_diskcache_bytes_stored": "diskcache.bytes_stored",
+    "gitaly_diskcache_miss": "diskcache.miss",
+    "gitaly_diskcache_requests": "diskcache.requests",
+    "gitaly_diskcache_walker_empty_dir_removal": "diskcache.walker_empty_dir_removal",
+    "gitaly_diskcache_walker_empty_dir": "diskcache.walker_empty_dir",
+    "gitaly_diskcache_walker_error": "diskcache.walker_error",
+    "gitaly_diskcache_walker_removal": "diskcache.walker_removal",
+    "gitaly_hook_transaction_voting_delay_seconds": "hook_transaction_voting_delay_seconds",
+    "gitaly_inforef_cache_attempt": "inforef_cache_attempt",
+    "gitaly_list_commits_by_oid_request_size": "list_commits_by_oid_request_size",
+    "gitaly_pack_objects_acquiring_seconds": "pack_objects.acquiring_seconds",
+    "gitaly_pack_objects_generated_bytes": "pack_objects.generated_bytes",
+    "gitaly_pack_objects_in_progress": "pack_objects.in_progress",
+    "gitaly_pack_objects_queued": "pack_objects.queued",
+    "gitaly_pack_objects_served_bytes": "pack_objects.served_bytes",
+    "gitaly_spawn_timeouts": "spawn_timeouts",
+    "gitaly_streamcache_sendfile_bytes": "streamcache_sendfile_bytes",
+    "go_gc_duration_seconds": "go.gc_duration_seconds",
+    "go_goroutines": "go.goroutines",
+    "go_info": "go.info",
+    "go_memstats_alloc_bytes": "go.memstats_alloc_bytes",
+    "go_memstats_buck_hash_sys_bytes": "go.memstats_buck_hash_sys_bytes",
+    "go_memstats_frees": "go.memstats_frees",
+    "go_memstats_gc_sys_bytes": "go.memstats_gc_sys_bytes",
+    "go_memstats_heap_alloc_bytes": "go.memstats_heap_alloc_bytes",
+    "go_memstats_heap_idle_bytes": "go.memstats_heap_idle_bytes",
+    "go_memstats_heap_inuse_bytes": "go.memstats_heap_inuse_bytes",
+    "go_memstats_heap_objects": "go.memstats_heap_objects",
+    "go_memstats_heap_released_bytes": "go.memstats_heap_released_bytes",
+    "go_memstats_heap_sys_bytes": "go.memstats_heap_sys_bytes",
+    "go_memstats_last_gc_time_seconds": "go.memstats_last_gc_time_seconds",
+    "go_memstats_lookups": "go.memstats_lookups",
+    "go_memstats_mallocs": "go.memstats_mallocs",
+    "go_memstats_mcache_inuse_bytes": "go.memstats_mcache_inuse_bytes",
+    "go_memstats_mcache_sys_bytes": "go.memstats_mcache_sys_bytes",
+    "go_memstats_mspan_inuse_bytes": "go.memstats_mspan_inuse_bytes",
+    "go_memstats_mspan_sys_bytes": "go.memstats_mspan_sys_bytes",
+    "go_memstats_next_gc_bytes": "go.memstats_next_gc_bytes",
+    "go_memstats_other_sys_bytes": "go.memstats_other_sys_bytes",
+    "go_memstats_stack_inuse_bytes": "go.memstats_stack_inuse_bytes",
+    "go_memstats_stack_sys_bytes": "go.memstats_stack_sys_bytes",
+    "go_memstats_sys_bytes": "go.memstats_sys_bytes",
+    "go_threads": "go.threads",
+    "grpc_server_handled": "grpc_server.handled",
+    "grpc_server_handling_seconds": "grpc_server.handling_seconds",
+    "grpc_server_msg_received": "grpc_server.msg_received",
+    "grpc_server_msg_sent": "grpc_server.msg_sent",
+    "grpc_server_started": "grpc_server.started",
+    "process_cpu_seconds": "process_cpu_seconds",
+    "process_max_fds": "process_max_fds",
+    "process_open_fds": "process_open_fds",
+    "process_resident_memory_bytes": "process_resident_memory_bytes",
+    "process_start_time_seconds": "process_start_time_seconds",
+    "process_virtual_memory_bytes": "process_virtual_memory_bytes",
+    "process_virtual_memory_max_bytes": "process_virtual_memory_max_bytes",
+    "promhttp_metric_handler_requests_in_flight": "promhttp_metric_handler_requests_in_flight",
+    "promhttp_metric_handler_requests": "promhttp_metric_handler_requests",
+}
+
+
+def construct_metrics_config(metric_map):
+    metrics = []
+    for raw_metric_name, metric_name in metric_map.items():
+        if raw_metric_name not in OPENMETRICS_V2_TYPE_OVERRIDES:
+            if raw_metric_name.endswith('_total'):
+                raw_metric_name = raw_metric_name[:-6]
+                metric_name = metric_name[:-6]
+
+            elif metric_name.endswith('.count'):
+                metric_name = metric_name[:-6]
+
+            config = {raw_metric_name: {'name': metric_name}}
+        else:
+            config = {raw_metric_name: {'name': metric_name, 'type': OPENMETRICS_V2_TYPE_OVERRIDES[raw_metric_name]}}
+
+        metrics.append(config)
+
+    return metrics

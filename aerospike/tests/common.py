@@ -24,8 +24,15 @@ OPENMETRICS_V2_INSTANCE = {
 EXPECTED_PROMETHEUS_METRICS = [
     'aerospike.namespace.client_delete_error.count',
     'aerospike.namespace.client_read_error.count',
+    'aerospike.namespace.client_read_success.count',
+    'aerospike.namespace.client_read_not_found.count',
+    'aerospike.namespace.client_read_timeout.count',
+    'aerospike.namespace.client_read_filtered_out.count',
     'aerospike.namespace.client_udf_error.count',
     'aerospike.namespace.client_write_error.count',
+    'aerospike.namespace.client_write_success.count',
+    'aerospike.namespace.client_write_timeout.count',
+    'aerospike.namespace.client_write_filtered_out.count',
     'aerospike.namespace.clock_skew_stop_writes',
     'aerospike.namespace.dead_partitions',
     'aerospike.namespace.device_available_pct',
@@ -97,6 +104,32 @@ SET_METRICS.extend(LEGACY_SET_METRICS)
 
 ALL_METRICS = NAMESPACE_METRICS + LEGACY_SET_METRICS
 
+INDEXES_METRICS = [
+    "aerospike.sindex.delete_error",
+    "aerospike.sindex.delete_success",
+    "aerospike.sindex.entries",
+    "aerospike.sindex.histogram",
+    "aerospike.sindex.ibtr_memory_used",
+    "aerospike.sindex.keys",
+    "aerospike.sindex.load_pct",
+    "aerospike.sindex.loadtime",
+    "aerospike.sindex.nbtr_memory_used",
+    "aerospike.sindex.query_agg",
+    "aerospike.sindex.query_agg_avg_rec_count",
+    "aerospike.sindex.query_agg_avg_record_size",
+    "aerospike.sindex.query_avg_rec_count",
+    "aerospike.sindex.query_avg_record_size",
+    "aerospike.sindex.query_lookup_avg_rec_count",
+    "aerospike.sindex.query_lookup_avg_record_size",
+    "aerospike.sindex.query_lookups",
+    "aerospike.sindex.query_reqs",
+    "aerospike.sindex.si_accounted_memory",
+    "aerospike.sindex.stat_gc_recs",
+    "aerospike.sindex.stat_gc_time",
+    "aerospike.sindex.write_error",
+    "aerospike.sindex.write_success",
+]
+
 STATS_METRICS = [
     'cluster_size',
     'batch_index_initiate',
@@ -147,6 +180,32 @@ INSTANCE = {
     'datacenters': ['test'],
     'tags': ['tag:value'],
 }
+
+MOCK_INDEXES_METRICS = [
+    "keys=1",
+    "entries=1",
+    "ibtr_memory_used=18688",
+    "nbtr_memory_used=31",
+    "si_accounted_memory=18719",
+    "load_pct=100",
+    "loadtime=7",
+    "write_success=1",
+    "write_error=0",
+    "delete_success=0",
+    "delete_error=0",
+    "stat_gc_recs=0",
+    "stat_gc_time=0",
+    "query_reqs=0",
+    "query_avg_rec_count=0",
+    "query_avg_record_size=0",
+    "query_agg=0",
+    "query_agg_avg_rec_count=0",
+    "query_agg_avg_record_size=0",
+    "query_lookups=0",
+    "query_lookup_avg_rec_count=0",
+    "query_lookup_avg_record_size=0",
+    "histogram=false",
+]
 
 MOCK_DATACENTER_METRICS = [
     'dc_state=CLUSTER_UP',

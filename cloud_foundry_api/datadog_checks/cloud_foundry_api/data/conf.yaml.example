@@ -126,6 +126,11 @@ instances:
     ##     client_secret (required): The client secret.
     ##     basic_auth: Whether the provider expects credentials to be transmitted in
     ##                 an HTTP Basic Auth header. The default is: false
+    ##     options: Mapping of additional options to pass to the provider, such as the audience
+    ##              or the scope. For example:
+    ##                 options:
+    ##                   audience: https://example.com
+    ##                   scope: read:example
     ##
     ## The available writers are:
     ##
@@ -176,8 +181,8 @@ instances:
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
     ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
@@ -194,6 +199,16 @@ instances:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.

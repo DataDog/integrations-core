@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2023-12-13",
+    "last_updated_at": "2023-12-13",
+    "title": "High Number of Failed Tasks on Ray.io Node",
+    "description": "Tasks are scheduled to workers by the Ray scheduler. This monitor alerts when there are too many scheduling failures within a specified time period due to a particular reason.",
+    "definition": {
+        "id": 136348417,
+        "name": "High Number of Failed Tasks on Ray.io Node",
+        "type": "query alert",
+        "query": "avg(last_5m):avg:ray.scheduler.failed_worker_startup{*} by {reason,nodeaddress} > 25",
+        "message": "{{#is_alert}}\nThere are {{value}} tasks that failed to be schedule because workers were not available. This occurred on node: {{nodeaddress.name}}. The stated reason was {{reason.name}}.\n{{/is_alert}}",
+        "tags": [],
+        "options": {
+            "thresholds": {
+                "critical": 25
+            },
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "renotify_interval": 0,
+            "escalation_message": "",
+            "notify_no_data": false,
+            "avalanche_window": 10,
+            "silenced": {}
+        },
+        "priority": null,
+        "restricted_roles": null
+    },
+    "tags": [
+        "integration:ray"
+    ]
+}

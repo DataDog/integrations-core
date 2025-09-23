@@ -1,0 +1,22 @@
+[env.collectors.datadog-checks]
+
+[envs.default]
+dependencies = [
+  "foundationdb==6.3.25",
+]
+e2e-env = false
+
+[[envs.default.matrix]]
+python = ["3.12"]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+protocol = ["tls"]
+
+[envs.default.overrides]
+matrix.protocol.env-vars = [
+  { key = "PROTOCOL", value = "tls", if = ["tls"] },
+]
+
+[envs.default.env-vars]
+PROTOCOL = "none"

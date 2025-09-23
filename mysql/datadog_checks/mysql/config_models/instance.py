@@ -9,189 +9,282 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence
+from types import MappingProxyType
+from typing import Any, Optional
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
-from . import defaults, validators
+from . import defaults, deprecations, validators
+
+
+class ManagedAuthentication(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+    role_arn: Optional[str] = Field(None, examples=['arn:aws:iam::123456789012:role/MyRole'])
 
 
 class Aws(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    instance_endpoint: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    instance_endpoint: Optional[str] = None
+    managed_authentication: Optional[ManagedAuthentication] = None
+    region: Optional[str] = None
 
 
 class Azure(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    deployment_type: Optional[str] = None
+    fully_qualified_domain_name: Optional[str] = None
 
-    deployment_type: Optional[str]
-    name: Optional[str]
+
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_execution_time: Optional[float] = None
+
+
+class CollectSettings(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
 
 
 class CustomQuery(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = None
+    columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    metric_prefix: Optional[str] = None
+    query: Optional[str] = None
+    tags: Optional[tuple[str, ...]] = None
 
-    columns: Optional[Sequence[Mapping[str, Any]]]
-    query: Optional[str]
-    tags: Optional[Sequence[str]]
+
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
 
 
 class Gcp(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    instance_id: Optional[str] = None
+    project_id: Optional[str] = None
 
-    instance_id: Optional[str]
-    project_id: Optional[str]
+
+class IndexMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    limit: Optional[int] = None
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
 
 class ObfuscatorOptions(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collect_commands: Optional[bool]
-    collect_comments: Optional[bool]
-    collect_metadata: Optional[bool]
-    collect_tables: Optional[bool]
-    keep_sql_alias: Optional[bool]
-    replace_digits: Optional[bool]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collect_commands: Optional[bool] = None
+    collect_comments: Optional[bool] = None
+    collect_metadata: Optional[bool] = None
+    collect_tables: Optional[bool] = None
+    keep_boolean: Optional[bool] = None
+    keep_identifier_quotation: Optional[bool] = None
+    keep_null: Optional[bool] = None
+    keep_positional_parameter: Optional[bool] = None
+    keep_sql_alias: Optional[bool] = None
+    keep_trailing_semicolon: Optional[bool] = None
+    obfuscation_mode: Optional[str] = None
+    remove_space_between_parentheses: Optional[bool] = None
+    replace_digits: Optional[bool] = None
 
 
 class Options(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    disable_innodb_metrics: Optional[bool]
-    extra_innodb_metrics: Optional[bool]
-    extra_performance_metrics: Optional[bool]
-    extra_status_metrics: Optional[bool]
-    galera_cluster: Optional[bool]
-    replication: Optional[bool]
-    replication_channel: Optional[str]
-    replication_non_blocking_status: Optional[bool]
-    schema_size_metrics: Optional[bool]
-    system_table_size_metrics: Optional[bool]
-    table_rows_stats_metrics: Optional[bool]
-    table_size_metrics: Optional[bool]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    disable_innodb_metrics: Optional[bool] = None
+    extra_innodb_metrics: Optional[bool] = None
+    extra_performance_metrics: Optional[bool] = None
+    extra_status_metrics: Optional[bool] = None
+    galera_cluster: Optional[bool] = None
+    replication: Optional[bool] = None
+    replication_channel: Optional[str] = None
+    schema_size_metrics: Optional[bool] = None
+    system_table_size_metrics: Optional[bool] = None
+    table_rows_stats_metrics: Optional[bool] = None
+    table_size_metrics: Optional[bool] = None
 
 
 class QueryActivity(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collect_blocking_queries: Optional[bool] = None
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
 
 
 class QueryMetrics(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    collection_interval: Optional[float]
-    enabled: Optional[bool]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    only_query_recent_statements: Optional[bool] = None
 
 
 class QuerySamples(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    collection_strategy_cache_maxsize: Optional[int] = None
+    collection_strategy_cache_ttl: Optional[int] = None
+    enabled: Optional[bool] = None
+    events_statements_enable_procedure: Optional[str] = None
+    events_statements_row_limit: Optional[int] = None
+    events_statements_temp_table_name: Optional[str] = None
+    explain_procedure: Optional[str] = None
+    explained_queries_cache_maxsize: Optional[int] = None
+    explained_queries_per_hour_per_query: Optional[int] = None
+    fully_qualified_explain_procedure: Optional[str] = None
+    samples_per_hour_per_query: Optional[int] = None
+    seen_samples_cache_maxsize: Optional[int] = None
 
-    collection_interval: Optional[float]
-    collection_strategy_cache_maxsize: Optional[int]
-    collection_strategy_cache_ttl: Optional[int]
-    enabled: Optional[bool]
-    events_statements_enable_procedure: Optional[str]
-    events_statements_row_limit: Optional[int]
-    events_statements_table: Optional[str]
-    events_statements_temp_table_name: Optional[str]
-    explain_procedure: Optional[str]
-    explained_queries_cache_maxsize: Optional[int]
-    explained_queries_per_hour_per_query: Optional[int]
-    fully_qualified_explain_procedure: Optional[str]
-    samples_per_hour_per_query: Optional[int]
-    seen_samples_cache_maxsize: Optional[int]
+
+class SchemasCollection(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_execution_time: Optional[float] = None
 
 
 class Ssl(BaseModel):
-    class Config:
-        allow_mutation = False
-
-    ca: Optional[str]
-    cert: Optional[str]
-    check_hostname: Optional[bool]
-    key: Optional[str]
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    ca: Optional[str] = None
+    cert: Optional[str] = None
+    check_hostname: Optional[bool] = None
+    key: Optional[str] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    additional_status: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    additional_variable: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    aws: Optional[Aws] = None
+    azure: Optional[Azure] = None
+    charset: Optional[str] = None
+    collect_schemas: Optional[CollectSchemas] = None
+    collect_settings: Optional[CollectSettings] = None
+    connect_timeout: Optional[float] = None
+    custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
+    database_instance_collection_interval: Optional[float] = None
+    dbm: Optional[bool] = None
+    defaults_file: Optional[str] = None
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    exclude_hostname: Optional[bool] = None
+    gcp: Optional[Gcp] = None
+    host: Optional[str] = None
+    index_metrics: Optional[IndexMetrics] = None
+    log_unobfuscated_plans: Optional[bool] = None
+    log_unobfuscated_queries: Optional[bool] = None
+    max_custom_queries: Optional[int] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    min_collection_interval: Optional[float] = None
+    obfuscator_options: Optional[ObfuscatorOptions] = None
+    only_custom_queries: Optional[bool] = None
+    options: Optional[Options] = None
+    password: Optional[str] = None
+    port: Optional[float] = None
+    propagate_agent_tags: Optional[bool] = None
+    queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    query_activity: Optional[QueryActivity] = None
+    query_metrics: Optional[QueryMetrics] = None
+    query_samples: Optional[QuerySamples] = None
+    read_timeout: Optional[float] = None
+    reported_hostname: Optional[str] = None
+    schemas_collection: Optional[SchemasCollection] = None
+    service: Optional[str] = None
+    sock: Optional[str] = None
+    ssl: Optional[Ssl] = None
+    tags: Optional[tuple[str, ...]] = None
+    use_global_custom_queries: Optional[str] = None
+    username: Optional[str] = None
 
-    additional_status: Optional[Sequence[Mapping[str, Any]]]
-    additional_variable: Optional[Sequence[Mapping[str, Any]]]
-    aws: Optional[Aws]
-    azure: Optional[Azure]
-    charset: Optional[str]
-    connect_timeout: Optional[float]
-    custom_queries: Optional[Sequence[CustomQuery]]
-    dbm: Optional[bool]
-    defaults_file: Optional[str]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    gcp: Optional[Gcp]
-    host: Optional[str]
-    log_unobfuscated_plans: Optional[bool]
-    log_unobfuscated_queries: Optional[bool]
-    max_custom_queries: Optional[int]
-    metric_patterns: Optional[MetricPatterns]
-    min_collection_interval: Optional[float]
-    obfuscator_options: Optional[ObfuscatorOptions]
-    only_custom_queries: Optional[bool]
-    options: Optional[Options]
-    password: Optional[str]
-    port: Optional[float]
-    queries: Optional[Sequence[Mapping[str, Any]]]
-    query_activity: Optional[QueryActivity]
-    query_metrics: Optional[QueryMetrics]
-    query_samples: Optional[QuerySamples]
-    reported_hostname: Optional[str]
-    service: Optional[str]
-    sock: Optional[str]
-    ssl: Optional[Ssl]
-    tags: Optional[Sequence[str]]
-    use_global_custom_queries: Optional[str]
-    username: Optional[str]
+    @model_validator(mode='before')
+    def _handle_deprecations(cls, values, info):
+        fields = info.context['configured_fields']
+        validation.utils.handle_deprecations('instances', deprecations.instance(), fields, info.context)
+        return values
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

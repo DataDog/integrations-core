@@ -1,0 +1,418 @@
+# HELP argocd_app_info Information about application.
+# TYPE argocd_app_info gauge
+argocd_app_info{dest_namespace="",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="application-bootstrap",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="adcsconn-backend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="adcsconn-backend",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="admin-backend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="admin-backend",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="admin-frontend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="admin-frontend",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="agent-event-sorter",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="agent-event-sorter",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="agent-ib-router",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="agent-ib-router",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="api-docs",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="api-docs",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="api-gateway-enterprise",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="api-gateway-enterprise",namespace="argocd",operation="",project="infrastructure",repo="https://charts.konghq.com",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="api-gateway-enterprise",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="api-gateway-enterprise-plugins",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="api-gateway-internal",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="api-gateway-internal",namespace="argocd",operation="",project="infrastructure",repo="https://charts.konghq.com",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="api-gateway-internal",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="api-gateway-internal-plugins",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="api-gateway-public",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="api-gateway-public",namespace="argocd",operation="",project="infrastructure",repo="https://charts.konghq.com",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="api-gateway-public",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="api-gateway-public-plugins",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="argocd",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="argocd-slack-bot",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-bootstrap",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="argocd",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="cluster-bootstrap",namespace="argocd",operation="",project="bootstrap",repo="https://github.com/foo/bar-bootstrap",sync_status="OutOfSync"} 1
+argocd_app_info{dest_namespace="backend-alerts",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="backend-alerts",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="bumblebee",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="bumblebee",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="cert-manager",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="cert-manager",namespace="argocd",operation="",project="infrastructure",repo="https://charts.jetstack.io",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="cf-pipeline-test-app",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="cf-pipeline-test-app",namespace="argocd",operation="sync",project="main",repo="https://github.com/foo/bar-apps",sync_status="OutOfSync"} 1
+argocd_app_info{dest_namespace="codefresh",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="codefresh",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-bootstrap",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="contour-internal",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="contour-internal",namespace="argocd",operation="",project="infrastructure",repo="https://charts.bitnami.com/bitnami",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="contour-public",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="contour-public",namespace="argocd",operation="",project="infrastructure",repo="https://charts.bitnami.com/bitnami",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="cubejs",dest_server="https://kubernetes.default.svc",health_status="Progressing",name="cubejs",namespace="argocd",operation="sync",project="main",repo="https://github.com/foo/bar-apps",sync_status="OutOfSync"} 1
+argocd_app_info{dest_namespace="dapr-system",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="dapr",namespace="argocd",operation="",project="infrastructure",repo="https://dapr.github.io/helm-charts/",sync_status="OutOfSync"} 1
+argocd_app_info{dest_namespace="dapr-system",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="dapr-configuration",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="datadog",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="datadog",namespace="argocd",operation="",project="infrastructure",repo="https://helm.datadoghq.com/",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="datadog",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="datadog-dbm",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-bootstrap",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="db-migrations-operator",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="db-migrations-operator",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="external-dns",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="external-dns-environment",namespace="argocd",operation="",project="infrastructure",repo="https://charts.bitnami.com/bitnami/",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="external-dns",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="external-dns-environment-public",namespace="argocd",operation="",project="infrastructure",repo="https://charts.bitnami.com/bitnami/",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="external-dns",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="external-dns-internal",namespace="argocd",operation="",project="infrastructure",repo="https://charts.bitnami.com/bitnami/",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="external-dns",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="external-dns-internal-public",namespace="argocd",operation="",project="infrastructure",repo="https://charts.bitnami.com/bitnami/",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="kafka-connect",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="kafka-connect",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="kafka-connect-operator",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="kafka-connect-operator",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="kafka-metrics",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="kafka-metrics",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="kafka-schema-registry",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="kafka-schema-registry",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="kafka-ui",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="kafka-ui",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="foo-auth-server",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="foo-auth-server",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="konga",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="konga",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="kube-system",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="metrics-server",namespace="argocd",operation="",project="infrastructure",repo="https://charts.bitnami.com/bitnami",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="lacework",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="lacework",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-bootstrap",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="main-backend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="main-backend",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="main-backend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="main-backend-dynamic-deploy-te",namespace="argocd",operation="",project="dev",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="main-backend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="main-backend-gateway-prefix",namespace="argocd",operation="",project="dev",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="main-backend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="main-backend-pagination",namespace="argocd",operation="",project="dev",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="main-frontend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="main-frontend",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="main-frontend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="main-frontend-dynamic-deploy-te",namespace="argocd",operation="",project="dev",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="main-frontend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="main-frontend-gateway-prefix",namespace="argocd",operation="",project="dev",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="main-frontend",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="main-frontend-pagination",namespace="argocd",operation="",project="dev",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="meltano",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="meltano",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="nectar",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="nectar",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="orgs-backend",dest_server="https://kubernetes.default.svc",health_status="Missing",name="orgs-backend",namespace="argocd",operation="sync",project="main",repo="https://github.com/foo/bar-apps",sync_status="OutOfSync"} 1
+argocd_app_info{dest_namespace="pg-health-manager",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="pg-health-manager",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="rbac-manager",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="rbac-manager",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-bootstrap",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="real-time-comms",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="real-time-comms",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="schema-registry",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="schema-registry",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Unknown"} 1
+argocd_app_info{dest_namespace="subscriptions",dest_server="https://kubernetes.default.svc",health_status="Missing",name="subscriptions",namespace="argocd",operation="sync",project="main",repo="https://github.com/foo/bar-apps",sync_status="OutOfSync"} 1
+argocd_app_info{dest_namespace="subscriptions",dest_server="https://kubernetes.default.svc",health_status="Unknown",name="subscriptions-john-hurt",namespace="argocd",operation="",project="sandbox",repo="https://github.com/foo/bar-apps",sync_status="Unknown"} 1
+argocd_app_info{dest_namespace="superhot",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="superhot",namespace="argocd",operation="sync",project="main",repo="https://github.com/foo/bar-apps",sync_status="OutOfSync"} 1
+argocd_app_info{dest_namespace="superset",dest_server="https://kubernetes.default.svc",health_status="Progressing",name="superset",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-allow-block-list",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-allow-block-list",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-data-warehouse",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-data-warehouse",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Unknown"} 1
+argocd_app_info{dest_namespace="tc-external-list-feeder",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-external-list-feeder",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-file-action-determination",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-file-action-determination",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-file-classifier",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-file-classifier",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-file-research-routing",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-file-research-routing",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-global-file-classifier",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-global-file-classifier",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-reversinglabs-lookup",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-reversinglabs-lookup",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="OutOfSync"} 1
+argocd_app_info{dest_namespace="tc-reversinglabs-scraper",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-reversinglabs-scraper",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-rtc-comms",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-rtc-comms",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-third-party-threat-api",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-third-party-threat-api",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-threat-analyst-ui",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-threat-analyst-ui",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-threat-api",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-threat-api",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-threat-detections",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-threat-detections",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-virustotal-file-fetcher",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-virustotal-file-fetcher",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-virustotal-lookup",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-virustotal-lookup",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-virustotal-scraper",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-virustotal-scraper",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-yara-rest-api",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-yara-rest-api",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tc-yara-rules",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tc-yara-rules",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="teleport-kube-agent",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="teleport-kube-agent",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-bootstrap",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="traefik-cloudflare",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="eks-traefik-cloudflare",namespace="argocd",operation="",project="infrastructure",repo="https://helm.traefik.io/traefik",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="traefik-cloudflare",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="traefik-cloudflare",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-bootstrap",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="traefik-internal",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="eks-traefik-internal",namespace="argocd",operation="",project="infrastructure",repo="https://helm.traefik.io/traefik",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="traefik-internal",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="traefik-internal",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-bootstrap",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="traefik-public",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="eks-traefik-public",namespace="argocd",operation="",project="infrastructure",repo="https://helm.traefik.io/traefik",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="traefik-public",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="traefik-public",namespace="argocd",operation="",project="infrastructure",repo="https://github.com/foo/bar-bootstrap",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="tundra",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="tundra",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="vault-webhook",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="vault-webhook",namespace="argocd",operation="",project="infrastructure",repo="https://kubernetes-charts.banzaicloud.com",sync_status="Synced"} 1
+argocd_app_info{dest_namespace="vulnerability-detection",dest_server="https://kubernetes.default.svc",health_status="Healthy",name="vulnerability-detection",namespace="argocd",operation="",project="main",repo="https://github.com/foo/bar-apps",sync_status="Synced"} 1
+# HELP argocd_app_k8s_request_total Number of kubernetes requests executed during application reconciliation.
+# TYPE argocd_app_k8s_request_total counter
+argocd_app_k8s_request_total{name="application-bootstrap",namespace="argocd",project="infrastructure",resource_kind="argoproj.io",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="cf-pipeline-test-app",namespace="argocd",project="main",resource_kind="api",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="cf-pipeline-test-app",namespace="argocd",project="main",resource_kind="apps",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="cf-pipeline-test-app",namespace="argocd",project="main",resource_kind="autoscaling",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="cf-pipeline-test-app",namespace="argocd",project="main",resource_kind="extensions",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="cf-pipeline-test-app",namespace="argocd",project="main",resource_kind="networking.k8s.io",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="cf-pipeline-test-app",namespace="argocd",project="main",resource_kind="policy",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="cubejs",namespace="argocd",project="main",resource_kind="api",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 3
+argocd_app_k8s_request_total{name="cubejs",namespace="argocd",project="main",resource_kind="apps",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 4
+argocd_app_k8s_request_total{name="cubejs",namespace="argocd",project="main",resource_kind="autoscaling",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="cubejs",namespace="argocd",project="main",resource_kind="networking.k8s.io",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="cubejs",namespace="argocd",project="main",resource_kind="policy",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="orgs-backend",namespace="argocd",project="main",resource_kind="api",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="orgs-backend",namespace="argocd",project="main",resource_kind="apps",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="orgs-backend",namespace="argocd",project="main",resource_kind="autoscaling",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="orgs-backend",namespace="argocd",project="main",resource_kind="networking.k8s.io",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="orgs-backend",namespace="argocd",project="main",resource_kind="policy",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="subscriptions",namespace="argocd",project="main",resource_kind="api",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="subscriptions",namespace="argocd",project="main",resource_kind="apps",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="subscriptions",namespace="argocd",project="main",resource_kind="autoscaling",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="subscriptions",namespace="argocd",project="main",resource_kind="networking.k8s.io",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="subscriptions",namespace="argocd",project="main",resource_kind="policy",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 1
+argocd_app_k8s_request_total{name="superhot",namespace="argocd",project="main",resource_kind="apps",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 30
+argocd_app_k8s_request_total{name="superhot",namespace="argocd",project="main",resource_kind="autoscaling",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 30
+argocd_app_k8s_request_total{name="superhot",namespace="argocd",project="main",resource_kind="batch",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 10
+argocd_app_k8s_request_total{name="superhot",namespace="argocd",project="main",resource_kind="datadoghq.com",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 30
+argocd_app_k8s_request_total{name="superhot",namespace="argocd",project="main",resource_kind="policy",resource_namespace="",response_code="200",server="https://192.99.9.9:443",verb="Get"} 10
+# HELP argocd_app_reconcile Application reconciliation performance.
+# TYPE argocd_app_reconcile histogram
+argocd_app_reconcile_bucket{dest_server="https://kubernetes.default.svc",namespace="argocd",le="0.25"} 36
+argocd_app_reconcile_bucket{dest_server="https://kubernetes.default.svc",namespace="argocd",le="0.5"} 43
+argocd_app_reconcile_bucket{dest_server="https://kubernetes.default.svc",namespace="argocd",le="1"} 46
+argocd_app_reconcile_bucket{dest_server="https://kubernetes.default.svc",namespace="argocd",le="2"} 47
+argocd_app_reconcile_bucket{dest_server="https://kubernetes.default.svc",namespace="argocd",le="4"} 64
+argocd_app_reconcile_bucket{dest_server="https://kubernetes.default.svc",namespace="argocd",le="8"} 67
+argocd_app_reconcile_bucket{dest_server="https://kubernetes.default.svc",namespace="argocd",le="16"} 67
+argocd_app_reconcile_bucket{dest_server="https://kubernetes.default.svc",namespace="argocd",le="+Inf"} 67
+argocd_app_reconcile_sum{dest_server="https://kubernetes.default.svc",namespace="argocd"} 67.58281772599999
+argocd_app_reconcile_count{dest_server="https://kubernetes.default.svc",namespace="argocd"} 67
+# HELP argocd_app_sync_total Number of application syncs.
+# TYPE argocd_app_sync_total counter
+argocd_app_sync_total{dest_server="https://kubernetes.default.svc",name="application-bootstrap",namespace="argocd",phase="Succeeded",project="infrastructure"} 1
+argocd_app_sync_total{dest_server="https://kubernetes.default.svc",name="superhot",namespace="argocd",phase="Failed",project="main"} 1
+# HELP argocd_cluster_events_total Number of processes k8s resource events.
+# TYPE argocd_cluster_events_total counter
+argocd_cluster_events_total{group="",kind="ConfigMap",server="https://kubernetes.default.svc"} 22
+argocd_cluster_events_total{group="",kind="Endpoints",server="https://kubernetes.default.svc"} 5
+argocd_cluster_events_total{group="",kind="Node",server="https://kubernetes.default.svc"} 1
+argocd_cluster_events_total{group="",kind="Pod",server="https://kubernetes.default.svc"} 12
+argocd_cluster_events_total{group="apps",kind="Deployment",server="https://kubernetes.default.svc"} 1
+argocd_cluster_events_total{group="apps",kind="ReplicaSet",server="https://kubernetes.default.svc"} 1
+argocd_cluster_events_total{group="apps",kind="StatefulSet",server="https://kubernetes.default.svc"} 1
+argocd_cluster_events_total{group="argoproj.io",kind="Application",server="https://kubernetes.default.svc"} 49
+argocd_cluster_events_total{group="autoscaling",kind="HorizontalPodAutoscaler",server="https://kubernetes.default.svc"} 4
+argocd_cluster_events_total{group="batch",kind="Job",server="https://kubernetes.default.svc"} 3
+argocd_cluster_events_total{group="discovery.k8s.io",kind="EndpointSlice",server="https://kubernetes.default.svc"} 5
+argocd_cluster_events_total{group="policy",kind="PodDisruptionBudget",server="https://kubernetes.default.svc"} 3
+# HELP argocd_kubectl_exec_pending Number of pending kubectl executions
+# TYPE argocd_kubectl_exec_pending gauge
+argocd_kubectl_exec_pending{command="apply",hostname="argocd-application-controller-0"} 0
+# HELP argocd_kubectl_exec_total Number of kubectl executions
+# TYPE argocd_kubectl_exec_total counter
+argocd_kubectl_exec_total{command="apply",hostname="argocd-application-controller-0"} 59
+# HELP argocd_redis_request_duration Redis requests duration.
+# TYPE argocd_redis_request_duration histogram
+argocd_redis_request_duration_bucket{hostname="argocd-application-controller-0",initiator="argocd-application-controller",le="0.01"} 139
+argocd_redis_request_duration_bucket{hostname="argocd-application-controller-0",initiator="argocd-application-controller",le="0.05"} 187
+argocd_redis_request_duration_bucket{hostname="argocd-application-controller-0",initiator="argocd-application-controller",le="0.1"} 190
+argocd_redis_request_duration_bucket{hostname="argocd-application-controller-0",initiator="argocd-application-controller",le="0.25"} 196
+argocd_redis_request_duration_bucket{hostname="argocd-application-controller-0",initiator="argocd-application-controller",le="0.5"} 196
+argocd_redis_request_duration_bucket{hostname="argocd-application-controller-0",initiator="argocd-application-controller",le="1"} 196
+argocd_redis_request_duration_bucket{hostname="argocd-application-controller-0",initiator="argocd-application-controller",le="+Inf"} 196
+argocd_redis_request_duration_sum{hostname="argocd-application-controller-0",initiator="argocd-application-controller"} 2.2031489060000005
+argocd_redis_request_duration_count{hostname="argocd-application-controller-0",initiator="argocd-application-controller"} 196
+# HELP argocd_redis_request_total Number of redis requests executed during application reconciliation.
+# TYPE argocd_redis_request_total counter
+argocd_redis_request_total{failed="false",hostname="argocd-application-controller-0",initiator="argocd-application-controller"} 196
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 2.6538e-05
+go_gc_duration_seconds{quantile="0.25"} 5.5388e-05
+go_gc_duration_seconds{quantile="0.5"} 8.1483e-05
+go_gc_duration_seconds{quantile="0.75"} 0.000137361
+go_gc_duration_seconds{quantile="1"} 0.016814239
+go_gc_duration_seconds_sum 0.021029055
+go_gc_duration_seconds_count 39
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 644
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.17.10"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 1.50465632e+08
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 3.197617848e+09
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 2.387424e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 1.8932532e+07
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction 0.08728991884803432
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 2.3919096e+07
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 1.50465632e+08
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 3.15654144e+08
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 1.91266816e+08
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 1.090414e+06
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 1.6769024e+08
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 5.0692096e+08
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.6679307530805047e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 2.0022946e+07
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 4800
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 16384
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 2.073728e+06
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 4.096e+06
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 2.2931128e+08
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 1.278112e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 4.784128e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 4.784128e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 5.43402104e+08
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 12
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 10.23
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 35
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 4.29256704e+08
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.66793074681e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 1.305817088e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP workqueue_adds_total Total number of adds handled by workqueue
+# TYPE workqueue_adds_total counter
+workqueue_adds_total{name="app_operation_processing_queue"} 182
+workqueue_adds_total{name="app_reconciliation_queue"} 173
+workqueue_adds_total{name="project_reconciliation_queue"} 6
+# HELP workqueue_depth Current depth of workqueue
+# TYPE workqueue_depth gauge
+workqueue_depth{name="app_operation_processing_queue"} 0
+workqueue_depth{name="app_reconciliation_queue"} 0
+workqueue_depth{name="project_reconciliation_queue"} 0
+# HELP workqueue_longest_running_processor_seconds How many seconds has the longest running processor for workqueue been running.
+# TYPE workqueue_longest_running_processor_seconds gauge
+workqueue_longest_running_processor_seconds{name="app_operation_processing_queue"} 0
+workqueue_longest_running_processor_seconds{name="app_reconciliation_queue"} 1.859543059
+workqueue_longest_running_processor_seconds{name="project_reconciliation_queue"} 0
+# HELP workqueue_queue_duration_seconds How long in seconds an item stays in workqueue before being requested
+# TYPE workqueue_queue_duration_seconds histogram
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="1e-05"} 53
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="0.0001"} 73
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="0.001"} 76
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="0.01"} 81
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="0.1"} 176
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="1"} 178
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="5"} 182
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="10"} 182
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="15"} 182
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="30"} 182
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="60"} 182
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="120"} 182
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="180"} 182
+workqueue_queue_duration_seconds_bucket{name="app_operation_processing_queue",le="+Inf"} 182
+workqueue_queue_duration_seconds_sum{name="app_operation_processing_queue"} 19.454011684999994
+workqueue_queue_duration_seconds_count{name="app_operation_processing_queue"} 182
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="1e-05"} 12
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="0.0001"} 36
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="0.001"} 43
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="0.01"} 46
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="0.1"} 129
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="1"} 155
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="5"} 173
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="10"} 173
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="15"} 173
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="30"} 173
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="60"} 173
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="120"} 173
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="180"} 173
+workqueue_queue_duration_seconds_bucket{name="app_reconciliation_queue",le="+Inf"} 173
+workqueue_queue_duration_seconds_sum{name="app_reconciliation_queue"} 56.37040309199998
+workqueue_queue_duration_seconds_count{name="app_reconciliation_queue"} 173
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="1e-05"} 0
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="0.0001"} 0
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="0.001"} 0
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="0.01"} 0
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="0.1"} 0
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="1"} 6
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="5"} 6
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="10"} 6
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="15"} 6
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="30"} 6
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="60"} 6
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="120"} 6
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="180"} 6
+workqueue_queue_duration_seconds_bucket{name="project_reconciliation_queue",le="+Inf"} 6
+workqueue_queue_duration_seconds_sum{name="project_reconciliation_queue"} 1.142858983
+workqueue_queue_duration_seconds_count{name="project_reconciliation_queue"} 6
+# HELP workqueue_retries_total Total number of retries handled by workqueue
+# TYPE workqueue_retries_total counter
+workqueue_retries_total{name="app_operation_processing_queue"} 0
+workqueue_retries_total{name="app_reconciliation_queue"} 0
+workqueue_retries_total{name="project_reconciliation_queue"} 0
+# HELP workqueue_unfinished_work_seconds How many seconds of work has been done that is in progress and hasn't been observed by work_duration. Large values indicate stuck threads. One can deduce the number of stuck threads by observing the rate at which this increases.
+# TYPE workqueue_unfinished_work_seconds gauge
+workqueue_unfinished_work_seconds{name="app_operation_processing_queue"} 0
+workqueue_unfinished_work_seconds{name="app_reconciliation_queue"} 1.859543059
+workqueue_unfinished_work_seconds{name="project_reconciliation_queue"} 0
+# HELP workqueue_work_duration_seconds How long in seconds processing an item from workqueue takes.
+# TYPE workqueue_work_duration_seconds histogram
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="1e-05"} 7
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="0.0001"} 146
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="0.001"} 151
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="0.01"} 157
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="0.1"} 175
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="1"} 177
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="5"} 182
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="10"} 182
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="15"} 182
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="30"} 182
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="60"} 182
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="120"} 182
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="180"} 182
+workqueue_work_duration_seconds_bucket{name="app_operation_processing_queue",le="+Inf"} 182
+workqueue_work_duration_seconds_sum{name="app_operation_processing_queue"} 14.909918999999997
+workqueue_work_duration_seconds_count{name="app_operation_processing_queue"} 182
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="1e-05"} 0
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="0.0001"} 92
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="0.001"} 102
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="0.01"} 110
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="0.1"} 125
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="1"} 151
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="5"} 170
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="10"} 172
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="15"} 172
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="30"} 172
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="60"} 172
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="120"} 172
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="180"} 172
+workqueue_work_duration_seconds_bucket{name="app_reconciliation_queue",le="+Inf"} 172
+workqueue_work_duration_seconds_sum{name="app_reconciliation_queue"} 67.67900779800004
+workqueue_work_duration_seconds_count{name="app_reconciliation_queue"} 172
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="1e-06"} 4
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="1e-05"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="0.0001"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="0.001"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="0.01"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="0.1"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="1"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="5"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="10"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="15"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="30"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="60"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="120"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="180"} 6
+workqueue_work_duration_seconds_bucket{name="project_reconciliation_queue",le="+Inf"} 6
+workqueue_work_duration_seconds_sum{name="project_reconciliation_queue"} 1.2577000000000002e-05
+workqueue_work_duration_seconds_count{name="project_reconciliation_queue"} 6
+# HELP argocd_cluster_connection_status manually added
+# TYPE argocd_cluster_connection_status gauge
+argocd_cluster_connection_status{name="foo"} 0
+argocd_cluster_connection_status{name="bar"} 1
+argocd_cluster_connection_status{name="baz"} 2
+argocd_cluster_connection_status{name="faz"} 10

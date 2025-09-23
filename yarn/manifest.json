@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "427f8f08-00a1-455a-a0e5-9b2ec7ffb0a5",
   "app_id": "yarn",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,29 @@
     "title": "Yarn",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/hadoop-architecture-overview"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-hadoop-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collecting-hadoop-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog"
+      }
     ]
   },
   "author": {
@@ -26,7 +44,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Yarn",
@@ -43,14 +60,17 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "java org.apache.hadoop.yarn.server.resourcemanager.ResourceManager",
+        "java org.apache.hadoop.yarn.server.nodemanager.NodeManager"
+      ],
+      "source_type_id": 134,
+      "auto_install": true
     },
     "dashboards": {
       "yarn": "assets/dashboards/yarn_dashboard.json",
       "hadoop": "assets/dashboards/hadoop_dashboard.json"
-    },
-    "logs": {
-      "source": "yarn"
     }
   }
 }

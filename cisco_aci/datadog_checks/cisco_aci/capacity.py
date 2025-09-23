@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from six import iteritems
-
 from . import aci_metrics, exceptions, helpers
 
 
@@ -49,7 +47,7 @@ class Capacity:
         self.log.info("finished collecting capacity data")
 
     def _get_eqpt_capacity(self):
-        for c, metric_dict in iteritems(aci_metrics.EQPT_CAPACITY_METRICS):
+        for c, metric_dict in aci_metrics.EQPT_CAPACITY_METRICS.items():
             data = self.api.get_eqpt_capacity(c)
             for d in data:
                 dn = d.get('attributes', {}).get('dn')
@@ -63,14 +61,14 @@ class Capacity:
                     child_attrs = child.get(c, {}).get('attributes')
                     if not child_attrs or type(child_attrs) is not dict:
                         continue
-                    for cisco_metric, dd_metric in iteritems(metric_dict):
+                    for cisco_metric, dd_metric in metric_dict.items():
                         value = child_attrs.get(cisco_metric)
                         if not value:
                             continue
                         self.gauge(dd_metric, value, tags=tags, hostname=hostname)
 
     def _get_contexts(self):
-        for c, metric_dict in iteritems(aci_metrics.CAPACITY_CONTEXT_METRICS):
+        for c, metric_dict in aci_metrics.CAPACITY_CONTEXT_METRICS.items():
             dd_metric = metric_dict.get("metric_name")
             utilized_metric_name = dd_metric + ".utilized"
             # These Values are, for some reason, hardcoded in the UI
@@ -105,7 +103,7 @@ class Capacity:
 
     def _get_apic_capacity_metrics(self):
         tags = self.user_tags + self.check_tags
-        for c, opts in iteritems(aci_metrics.APIC_CAPACITY_METRICS):
+        for c, opts in aci_metrics.APIC_CAPACITY_METRICS.items():
             dd_metric = opts.get("metric_name")
             data = self.api.get_apic_capacity_metrics(c, query=opts.get("query_string"))
             if c == "fabricNode":

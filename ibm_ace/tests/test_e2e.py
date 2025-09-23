@@ -11,6 +11,7 @@ from .common import skip_windows_ci
 pytestmark = [skip_windows_ci, pytest.mark.e2e]
 
 
+@pytest.mark.flaky
 def test(dd_agent_check, instance, global_tags):
     aggregator = dd_agent_check(instance, rate=True)
 

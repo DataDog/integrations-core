@@ -1,0 +1,752 @@
+# HELP batch_durations_ms Duration in ms of a single batch
+# TYPE batch_durations_ms histogram
+batch_durations_ms_bucket{class_name="Example",operation="object_storage",shard_name="XevPBzvBUVmm",le="10"} 1
+batch_durations_ms_bucket{class_name="Example",operation="object_storage",shard_name="XevPBzvBUVmm",le="50"} 1
+batch_durations_ms_bucket{class_name="Example",operation="object_storage",shard_name="XevPBzvBUVmm",le="100"} 1
+batch_durations_ms_bucket{class_name="Example",operation="object_storage",shard_name="XevPBzvBUVmm",le="500"} 1
+batch_durations_ms_bucket{class_name="Example",operation="object_storage",shard_name="XevPBzvBUVmm",le="1000"} 1
+batch_durations_ms_bucket{class_name="Example",operation="object_storage",shard_name="XevPBzvBUVmm",le="5000"} 1
+batch_durations_ms_bucket{class_name="Example",operation="object_storage",shard_name="XevPBzvBUVmm",le="+Inf"} 1
+batch_durations_ms_sum{class_name="Example",operation="object_storage",shard_name="XevPBzvBUVmm"} 1
+batch_durations_ms_count{class_name="Example",operation="object_storage",shard_name="XevPBzvBUVmm"} 1
+batch_durations_ms_bucket{class_name="Example",operation="vector_storage",shard_name="XevPBzvBUVmm",le="10"} 1
+batch_durations_ms_bucket{class_name="Example",operation="vector_storage",shard_name="XevPBzvBUVmm",le="50"} 1
+batch_durations_ms_bucket{class_name="Example",operation="vector_storage",shard_name="XevPBzvBUVmm",le="100"} 1
+batch_durations_ms_bucket{class_name="Example",operation="vector_storage",shard_name="XevPBzvBUVmm",le="500"} 1
+batch_durations_ms_bucket{class_name="Example",operation="vector_storage",shard_name="XevPBzvBUVmm",le="1000"} 1
+batch_durations_ms_bucket{class_name="Example",operation="vector_storage",shard_name="XevPBzvBUVmm",le="5000"} 1
+batch_durations_ms_bucket{class_name="Example",operation="vector_storage",shard_name="XevPBzvBUVmm",le="+Inf"} 1
+batch_durations_ms_sum{class_name="Example",operation="vector_storage",shard_name="XevPBzvBUVmm"} 0
+batch_durations_ms_count{class_name="Example",operation="vector_storage",shard_name="XevPBzvBUVmm"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_api_level",shard_name="n/a",le="10"} 0
+batch_durations_ms_bucket{class_name="n/a",operation="total_api_level",shard_name="n/a",le="50"} 0
+batch_durations_ms_bucket{class_name="n/a",operation="total_api_level",shard_name="n/a",le="100"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_api_level",shard_name="n/a",le="500"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_api_level",shard_name="n/a",le="1000"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_api_level",shard_name="n/a",le="5000"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_api_level",shard_name="n/a",le="+Inf"} 1
+batch_durations_ms_sum{class_name="n/a",operation="total_api_level",shard_name="n/a"} 53
+batch_durations_ms_count{class_name="n/a",operation="total_api_level",shard_name="n/a"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_persistence_level",shard_name="n/a",le="10"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_persistence_level",shard_name="n/a",le="50"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_persistence_level",shard_name="n/a",le="100"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_persistence_level",shard_name="n/a",le="500"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_persistence_level",shard_name="n/a",le="1000"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_persistence_level",shard_name="n/a",le="5000"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_persistence_level",shard_name="n/a",le="+Inf"} 1
+batch_durations_ms_sum{class_name="n/a",operation="total_persistence_level",shard_name="n/a"} 3.315103
+batch_durations_ms_count{class_name="n/a",operation="total_persistence_level",shard_name="n/a"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_preprocessing",shard_name="n/a",le="10"} 0
+batch_durations_ms_bucket{class_name="n/a",operation="total_preprocessing",shard_name="n/a",le="50"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_preprocessing",shard_name="n/a",le="100"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_preprocessing",shard_name="n/a",le="500"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_preprocessing",shard_name="n/a",le="1000"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_preprocessing",shard_name="n/a",le="5000"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_preprocessing",shard_name="n/a",le="+Inf"} 1
+batch_durations_ms_sum{class_name="n/a",operation="total_preprocessing",shard_name="n/a"} 46.990863
+batch_durations_ms_count{class_name="n/a",operation="total_preprocessing",shard_name="n/a"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_uc_level",shard_name="n/a",le="10"} 0
+batch_durations_ms_bucket{class_name="n/a",operation="total_uc_level",shard_name="n/a",le="50"} 0
+batch_durations_ms_bucket{class_name="n/a",operation="total_uc_level",shard_name="n/a",le="100"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_uc_level",shard_name="n/a",le="500"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_uc_level",shard_name="n/a",le="1000"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_uc_level",shard_name="n/a",le="5000"} 1
+batch_durations_ms_bucket{class_name="n/a",operation="total_uc_level",shard_name="n/a",le="+Inf"} 1
+batch_durations_ms_sum{class_name="n/a",operation="total_uc_level",shard_name="n/a"} 50.542227
+batch_durations_ms_count{class_name="n/a",operation="total_uc_level",shard_name="n/a"} 1
+# HELP concurrent_queries_count Number of concurrently running query operations
+# TYPE concurrent_queries_count gauge
+concurrent_queries_count{class_name="Movies",query_type="get_graphql"} 0
+concurrent_queries_count{class_name="n/a",query_type="add_object"} 0
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 1.3874e-05
+go_gc_duration_seconds{quantile="0.25"} 0.000237292
+go_gc_duration_seconds{quantile="0.5"} 0.000408957
+go_gc_duration_seconds{quantile="0.75"} 0.000689167
+go_gc_duration_seconds{quantile="1"} 0.005800501
+go_gc_duration_seconds_sum 0.021168586
+go_gc_duration_seconds_count 24
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 86
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.19.9"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 7.2589424e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 1.43169608e+09
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.785825e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 1.5246381e+07
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction 8.098159265040014e-05
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 1.627268e+07
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 7.2589424e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 2.1839872e+08
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 8.6540288e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 193096
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 2.06987264e+08
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 3.04939008e+08
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.6885199148587465e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 1.5439477e+07
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 6000
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 15600
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 650016
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 3.368304e+06
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.23973776e+08
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 1.103327e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.245184e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.245184e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 3.28729928e+08
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 16
+# HELP lsm_active_segments Number of currently present segments per shard
+# TYPE lsm_active_segments gauge
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_active_segments{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+# HELP lsm_bloom_filters_duration_ms Duration of bloom filter operations
+# TYPE lsm_bloom_filters_duration_ms summary
+lsm_bloom_filters_duration_ms_sum{class_name="Movies",operation="get_false_positive",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_bloom_filters_duration_ms_count{class_name="Movies",operation="get_false_positive",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_bloom_filters_duration_ms_sum{class_name="Movies",operation="get_true_negative",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_bloom_filters_duration_ms_count{class_name="Movies",operation="get_true_negative",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_bloom_filters_duration_ms_sum{class_name="Movies",operation="get_true_positive",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_bloom_filters_duration_ms_count{class_name="Movies",operation="get_true_positive",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+# HELP lsm_memtable_durations_ms Time in ms for a bucket operation to complete
+# TYPE lsm_memtable_durations_ms summary
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 22.76525400000004
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 3757
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="append",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 75.07499699999686
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 38415
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 14.685878000000221
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 7817
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 15.530977000000174
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 10305
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 47.79647699999806
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 23727
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 9.59492900000011
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 3757
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 317.0079309999921
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 161895
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 54.62783299999785
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 27525
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 20.03662900000005
+lsm_memtable_durations_ms_count{class_name="Movies",operation="appendMapSorted",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 10170
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 32.32154999999999
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 3757
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="get",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0.9968269999999982
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 339
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getBySecondary",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getCollection",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="getMap",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 31.83990799999997
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 3757
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="put",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_durations_ms_sum{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_durations_ms_count{class_name="Movies",operation="setTombstone",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+# HELP lsm_memtable_size Size of memtable by path
+# TYPE lsm_memtable_size gauge
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 0
+lsm_memtable_size{class_name="Movies",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 0
+# HELP lsm_segment_count Number of segments by level
+# TYPE lsm_segment_count gauge
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset"} 1
+lsm_segment_count{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection"} 1
+# HELP lsm_segment_size Size of segment by level and unit
+# TYPE lsm_segment_size gauge
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace",unit="index"} 195364
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/objects",shard_name="S4Gq0SGpzte6",strategy="replace",unit="payload"} 8.717589e+06
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection",unit="index"} 270504
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property__id",shard_name="S4Gq0SGpzte6",strategy="setcollection",unit="payload"} 244221
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 317315
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 1.586203e+06
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="index"} 317315
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_cast_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="payload"} 1.251726e+06
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 94382
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 470190
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="index"} 94382
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_director_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="payload"} 267571
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 934
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 31014
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="index"} 934
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_genres_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="payload"} 299267
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 177434
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 880778
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="index"} 177434
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_keywords_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="payload"} 766557
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 1102
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 14062
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="index"} 1102
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_language_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="payload"} 109375
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 1.352923e+06
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 6.759803e+06
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="index"} 1.352923e+06
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_overview_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="payload"} 5.300726e+06
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 165264
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_popularity",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 796288
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 130460
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_revenue",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 630516
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 6160
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_runtime",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 33280
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 310663
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 1.559439e+06
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="index"} 310663
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_tagline_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="payload"} 933344
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="index"} 182062
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title",shard_name="S4Gq0SGpzte6",strategy="roaringset",unit="payload"} 909334
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="index"} 182062
+lsm_segment_size{class_name="Movies",level="0",path="/var/lib/weaviate/movies_S4Gq0SGpzte6_lsm/property_title_searchable",shard_name="S4Gq0SGpzte6",strategy="mapcollection",unit="payload"} 373736
+# HELP object_count Number of currently ongoing async operations
+# TYPE object_count gauge
+object_count{class_name="Movies",shard_name="S4Gq0SGpzte6"} 3757
+# HELP objects_durations_ms Duration of an individual object operation. Also as part of batches.
+# TYPE objects_durations_ms summary
+objects_durations_ms_sum{class_name="Movies",operation="put",shard_name="S4Gq0SGpzte6",step="inverted_extend"} 2028.7411919999993
+objects_durations_ms_count{class_name="Movies",operation="put",shard_name="S4Gq0SGpzte6",step="inverted_extend"} 3757
+objects_durations_ms_sum{class_name="Movies",operation="put",shard_name="S4Gq0SGpzte6",step="inverted_total"} 2276.4022370000002
+objects_durations_ms_count{class_name="Movies",operation="put",shard_name="S4Gq0SGpzte6",step="inverted_total"} 3757
+objects_durations_ms_sum{class_name="Movies",operation="put",shard_name="S4Gq0SGpzte6",step="retrieve_previous_determine_status"} 149.62158099999994
+objects_durations_ms_count{class_name="Movies",operation="put",shard_name="S4Gq0SGpzte6",step="retrieve_previous_determine_status"} 3757
+objects_durations_ms_sum{class_name="Movies",operation="put",shard_name="S4Gq0SGpzte6",step="total"} 2631.8203750000084
+objects_durations_ms_count{class_name="Movies",operation="put",shard_name="S4Gq0SGpzte6",step="total"} 3757
+objects_durations_ms_sum{class_name="Movies",operation="put",shard_name="S4Gq0SGpzte6",step="upsert_object_store"} 40.01686900000015
+objects_durations_ms_count{class_name="Movies",operation="put",shard_name="S4Gq0SGpzte6",step="upsert_object_store"} 3757
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 28.95
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 42
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 1.1761664e+08
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.68851849616e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 1.08797952e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 103
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0
+# HELP queries_durations_ms Duration of queries in milliseconds
+# TYPE queries_durations_ms histogram
+queries_durations_ms_bucket{class_name="Movies",query_type="get_graphql",le="10"} 0
+queries_durations_ms_bucket{class_name="Movies",query_type="get_graphql",le="50"} 8
+queries_durations_ms_bucket{class_name="Movies",query_type="get_graphql",le="100"} 109
+queries_durations_ms_bucket{class_name="Movies",query_type="get_graphql",le="500"} 168
+queries_durations_ms_bucket{class_name="Movies",query_type="get_graphql",le="1000"} 168
+queries_durations_ms_bucket{class_name="Movies",query_type="get_graphql",le="5000"} 168
+queries_durations_ms_bucket{class_name="Movies",query_type="get_graphql",le="+Inf"} 168
+queries_durations_ms_sum{class_name="Movies",query_type="get_graphql"} 15607
+queries_durations_ms_count{class_name="Movies",query_type="get_graphql"} 168
+# HELP queries_filtered_vector_durations_ms Duration of queries in milliseconds
+# TYPE queries_filtered_vector_durations_ms summary
+queries_filtered_vector_durations_ms_sum{class_name="Movies",operation="filter",shard_name="S4Gq0SGpzte6"} 0
+queries_filtered_vector_durations_ms_count{class_name="Movies",operation="filter",shard_name="S4Gq0SGpzte6"} 0
+queries_filtered_vector_durations_ms_sum{class_name="Movies",operation="filter",shard_name="n/a"} 0
+queries_filtered_vector_durations_ms_count{class_name="Movies",operation="filter",shard_name="n/a"} 0
+queries_filtered_vector_durations_ms_sum{class_name="Movies",operation="objects",shard_name="S4Gq0SGpzte6"} 0
+queries_filtered_vector_durations_ms_count{class_name="Movies",operation="objects",shard_name="S4Gq0SGpzte6"} 0
+queries_filtered_vector_durations_ms_sum{class_name="Movies",operation="objects",shard_name="n/a"} 0
+queries_filtered_vector_durations_ms_count{class_name="Movies",operation="objects",shard_name="n/a"} 0
+queries_filtered_vector_durations_ms_sum{class_name="Movies",operation="sort",shard_name="S4Gq0SGpzte6"} 0
+queries_filtered_vector_durations_ms_count{class_name="Movies",operation="sort",shard_name="S4Gq0SGpzte6"} 0
+queries_filtered_vector_durations_ms_sum{class_name="Movies",operation="sort",shard_name="n/a"} 0
+queries_filtered_vector_durations_ms_count{class_name="Movies",operation="sort",shard_name="n/a"} 0
+queries_filtered_vector_durations_ms_sum{class_name="Movies",operation="vector",shard_name="S4Gq0SGpzte6"} 0
+queries_filtered_vector_durations_ms_count{class_name="Movies",operation="vector",shard_name="S4Gq0SGpzte6"} 0
+queries_filtered_vector_durations_ms_sum{class_name="Movies",operation="vector",shard_name="n/a"} 0
+queries_filtered_vector_durations_ms_count{class_name="Movies",operation="vector",shard_name="n/a"} 0
+# HELP query_dimensions_total The vector dimensions used by any read-query that involves vectors
+# TYPE query_dimensions_total counter
+query_dimensions_total{class_name="Movies",operation="nearText",query_type="get_graphql"} 19584
+# HELP startup_durations_ms Duration of individual startup operations in ms
+# TYPE startup_durations_ms summary
+startup_durations_ms_sum{class_name="Movies",operation="hnsw_read_all_commitlogs",shard_name="S4Gq0SGpzte6"} 0.203
+startup_durations_ms_count{class_name="Movies",operation="hnsw_read_all_commitlogs",shard_name="S4Gq0SGpzte6"} 1
+startup_durations_ms_sum{class_name="Movies",operation="lsm_startup_bucket",shard_name="S4Gq0SGpzte6"} 6.435084999999999
+startup_durations_ms_count{class_name="Movies",operation="lsm_startup_bucket",shard_name="S4Gq0SGpzte6"} 21
+startup_durations_ms_sum{class_name="Movies",operation="lsm_startup_bucket_recovery",shard_name="S4Gq0SGpzte6"} 0.23916699999999996
+startup_durations_ms_count{class_name="Movies",operation="lsm_startup_bucket_recovery",shard_name="S4Gq0SGpzte6"} 21
+startup_durations_ms_sum{class_name="Movies",operation="shard_total_init",shard_name="S4Gq0SGpzte6"} 3.011583
+startup_durations_ms_count{class_name="Movies",operation="shard_total_init",shard_name="S4Gq0SGpzte6"} 1
+# HELP startup_progress A ratio (percentage) of startup progress for a particular component in a shard
+# TYPE startup_progress gauge
+startup_progress{class_name="Movies",operation="hnsw_read_commitlogs",shard_name="S4Gq0SGpzte6"} 0
+# HELP vector_index_durations_ms Duration of typical vector index operations (insert, delete)
+# TYPE vector_index_durations_ms summary
+vector_index_durations_ms_sum{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="find_and_connect_heuristic"} 856.376066
+vector_index_durations_ms_count{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="find_and_connect_heuristic"} 3802
+vector_index_durations_ms_sum{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="find_and_connect_search"} 3783.481376000002
+vector_index_durations_ms_count{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="find_and_connect_search"} 3802
+vector_index_durations_ms_sum{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="find_and_connect_total"} 4669.217923999999
+vector_index_durations_ms_count{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="find_and_connect_total"} 3756
+vector_index_durations_ms_sum{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="find_and_connect_update_connections"} 23.512442000000043
+vector_index_durations_ms_count{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="find_and_connect_update_connections"} 3802
+vector_index_durations_ms_sum{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="find_entrypoint"} 120.64308899999972
+vector_index_durations_ms_count{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="find_entrypoint"} 3756
+vector_index_durations_ms_sum{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="prepare_and_insert_node"} 22.135304000000048
+vector_index_durations_ms_count{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="prepare_and_insert_node"} 3756
+vector_index_durations_ms_sum{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="total"} 4827.759861999997
+vector_index_durations_ms_count{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="total"} 3757
+vector_index_durations_ms_sum{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="update_global_entrypoint"} 0.9000839999999805
+vector_index_durations_ms_count{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6",step="update_global_entrypoint"} 3756
+# HELP vector_index_maintenance_durations_ms Duration of a sync or async vector index maintenance operation
+# TYPE vector_index_maintenance_durations_ms summary
+vector_index_maintenance_durations_ms_sum{class_name="Movies",operation="grow",shard_name="S4Gq0SGpzte6"} 0
+vector_index_maintenance_durations_ms_count{class_name="Movies",operation="grow",shard_name="S4Gq0SGpzte6"} 0
+# HELP vector_index_operations Total number of mutating operations on the vector index
+# TYPE vector_index_operations gauge
+vector_index_operations{class_name="Movies",operation="create",shard_name="S4Gq0SGpzte6"} 3757
+vector_index_operations{class_name="Movies",operation="delete",shard_name="S4Gq0SGpzte6"} 0
+# HELP vector_index_size The size of the vector index. Typically larger than number of vectors, as it grows proactively.
+# TYPE vector_index_size gauge
+vector_index_size{class_name="Movies",shard_name="S4Gq0SGpzte6"} 25000
+# HELP vector_index_tombstone_cleaned Total number of deleted objects that have been cleaned up
+# TYPE vector_index_tombstone_cleaned counter
+vector_index_tombstone_cleaned{class_name="Movies",shard_name="S4Gq0SGpzte6"} 0
+# HELP vector_index_tombstone_cleanup_threads Number of threads in use to clean up tombstones
+# TYPE vector_index_tombstone_cleanup_threads gauge
+vector_index_tombstone_cleanup_threads{class_name="Movies",shard_name="S4Gq0SGpzte6"} 0
+# HELP vector_index_tombstones Number of active vector index tombstones
+# TYPE vector_index_tombstones gauge
+vector_index_tombstones{class_name="Movies",shard_name="S4Gq0SGpzte6"} 0
+# HELP requests_total Number of all requests made
+# TYPE requests_total gauge
+requests_total{api="graphql",class_name="n/a",query_type="",status="ok"} 839
+requests_total{api="graphql",class_name="n/a",query_type="",status="user_error"} 3
+requests_total{api="graphql",class_name="n/a",query_type="Aggregate",status="user_error"} 8
+requests_total{api="graphql",class_name="n/a",query_type="Explore",status="user_error"} 3
+requests_total{api="graphql",class_name="n/a",query_type="Get",status="user_error"} 28
+requests_total{api="rest",class_name="n/a",query_type="batch",status="ok"} 1143
+requests_total{api="rest",class_name="n/a",query_type="classification",status="ok"} 9
+requests_total{api="rest",class_name="n/a",query_type="misc",status="ok"} 14
+requests_total{api="rest",class_name="n/a",query_type="nodes",status="ok"} 12
+requests_total{api="rest",class_name="n/a",query_type="objects",status="ok"} 839
+requests_total{api="rest",class_name="n/a",query_type="objects",status="server_error"} 4
+requests_total{api="rest",class_name="n/a",query_type="objects",status="user_error"} 56
+requests_total{api="rest",class_name="n/a",query_type="schema",status="ok"} 552
+requests_total{api="rest",class_name="n/a",query_type="schema",status="user_error"} 55

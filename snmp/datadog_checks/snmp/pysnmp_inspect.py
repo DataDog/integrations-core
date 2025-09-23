@@ -4,9 +4,10 @@
 """
 Helpers for inspecting PySNMP objects.
 """
-from typing import Any
 
-from .pysnmp_types import ObjectIdentity, ObjectType
+from typing import Any  # noqa: F401
+
+from .pysnmp_types import ObjectIdentity, ObjectType  # noqa: F401
 
 
 def _get_constructor_arguments(obj):

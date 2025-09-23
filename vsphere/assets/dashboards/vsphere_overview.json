@@ -9,19 +9,29 @@
         "url": "/static/images/logos/vsphere_large.svg",
         "sizing": "fit"
       },
-      "layout": { "x": 0, "y": 1, "width": 47, "height": 10 }
+      "layout": {
+        "x": 0,
+        "y": 1,
+        "width": 47,
+        "height": 10
+      }
     },
     {
       "id": 1,
       "definition": {
         "type": "event_stream",
-        "query": "source:vsphere $vcenter_server.value $vcenter_datacenter.value",
+        "query": "source:vsphere $vcenter_server $vcenter_datacenter",
         "event_size": "l",
         "title": "vSphere events",
         "title_size": "16",
         "title_align": "left"
       },
-      "layout": { "x": 0, "y": 32, "width": 47, "height": 62 }
+      "layout": {
+        "x": 0,
+        "y": 32,
+        "width": 47,
+        "height": 62
+      }
     },
     {
       "id": 2,
@@ -31,11 +41,25 @@
           {
             "q": "top(avg:vsphere.mem.usage.avg{vsphere_type:vm,$vcenter_server,$vcenter_datacenter} by {host}, 25, 'mean', 'desc')",
             "conditional_formats": [
-              { "comparator": "<=", "value": 70, "palette": "white_on_green" },
-              { "comparator": "<=", "value": 90, "palette": "white_on_yellow" },
-              { "comparator": ">", "value": 90, "palette": "white_on_red" }
+              {
+                "comparator": "<=",
+                "value": 70,
+                "palette": "white_on_green"
+              },
+              {
+                "comparator": "<=",
+                "value": 90,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": ">",
+                "value": 90,
+                "palette": "white_on_red"
+              }
             ],
-            "style": { "palette": "dog_classic" }
+            "style": {
+              "palette": "dog_classic"
+            }
           }
         ],
         "custom_links": [],
@@ -43,7 +67,12 @@
         "title_size": "16",
         "title_align": "left"
       },
-      "layout": { "x": 98, "y": 36, "width": 47, "height": 26 }
+      "layout": {
+        "x": 98,
+        "y": 36,
+        "width": 47,
+        "height": 26
+      }
     },
     {
       "id": 3,
@@ -53,11 +82,25 @@
           {
             "q": "top(avg:vsphere.cpu.usage.avg{$vcenter_datacenter,$vcenter_server,vsphere_type:vm} by {host}, 25, 'mean', 'desc')",
             "conditional_formats": [
-              { "comparator": "<=", "value": 70, "palette": "white_on_green" },
-              { "comparator": "<=", "value": 90, "palette": "white_on_yellow" },
-              { "comparator": ">", "value": 90, "palette": "white_on_red" }
+              {
+                "comparator": "<=",
+                "value": 70,
+                "palette": "white_on_green"
+              },
+              {
+                "comparator": "<=",
+                "value": 90,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": ">",
+                "value": 90,
+                "palette": "white_on_red"
+              }
             ],
-            "style": { "palette": "dog_classic" }
+            "style": {
+              "palette": "dog_classic"
+            }
           }
         ],
         "custom_links": [],
@@ -65,7 +108,12 @@
         "title_size": "16",
         "title_align": "left"
       },
-      "layout": { "x": 98, "y": 9, "width": 47, "height": 26 }
+      "layout": {
+        "x": 98,
+        "y": 9,
+        "width": 47,
+        "height": 26
+      }
     },
     {
       "id": 4,
@@ -75,11 +123,25 @@
           {
             "q": "top(avg:vsphere.mem.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}, 10, 'mean', 'desc')",
             "conditional_formats": [
-              { "comparator": "<=", "value": 70, "palette": "white_on_green" },
-              { "comparator": "<=", "value": 90, "palette": "white_on_yellow" },
-              { "comparator": ">", "value": 90, "palette": "white_on_red" }
+              {
+                "comparator": "<=",
+                "value": 70,
+                "palette": "white_on_green"
+              },
+              {
+                "comparator": "<=",
+                "value": 90,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": ">",
+                "value": 90,
+                "palette": "white_on_red"
+              }
             ],
-            "style": { "palette": "dog_classic" }
+            "style": {
+              "palette": "dog_classic"
+            }
           }
         ],
         "custom_links": [],
@@ -87,7 +149,12 @@
         "title_size": "16",
         "title_align": "left"
       },
-      "layout": { "x": 49, "y": 36, "width": 47, "height": 26 }
+      "layout": {
+        "x": 49,
+        "y": 36,
+        "width": 47,
+        "height": 26
+      }
     },
     {
       "id": 5,
@@ -97,9 +164,21 @@
           {
             "q": "top(avg:vsphere.cpu.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}, 10, 'mean', 'desc')",
             "conditional_formats": [
-              { "comparator": "<=", "value": 70, "palette": "white_on_green" },
-              { "comparator": "<=", "value": 90, "palette": "white_on_yellow" },
-              { "comparator": ">", "value": 90, "palette": "white_on_red" }
+              {
+                "comparator": "<=",
+                "value": 70,
+                "palette": "white_on_green"
+              },
+              {
+                "comparator": "<=",
+                "value": 90,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": ">",
+                "value": 90,
+                "palette": "white_on_red"
+              }
             ]
           }
         ],
@@ -108,7 +187,12 @@
         "title_size": "16",
         "title_align": "left"
       },
-      "layout": { "x": 49, "y": 9, "width": 47, "height": 26 }
+      "layout": {
+        "x": 49,
+        "y": 9,
+        "width": 47,
+        "height": 26
+      }
     },
     {
       "id": 6,
@@ -132,7 +216,12 @@
         "show_legend": false,
         "legend_size": "0"
       },
-      "layout": { "x": 98, "y": 79, "width": 47, "height": 15 }
+      "layout": {
+        "x": 98,
+        "y": 79,
+        "width": 47,
+        "height": 15
+      }
     },
     {
       "id": 7,
@@ -163,7 +252,12 @@
         "show_legend": false,
         "legend_size": "0"
       },
-      "layout": { "x": 49, "y": 79, "width": 47, "height": 15 }
+      "layout": {
+        "x": 49,
+        "y": 79,
+        "width": 47,
+        "height": 15
+      }
     },
     {
       "id": 8,
@@ -194,7 +288,12 @@
         "show_legend": false,
         "legend_size": "0"
       },
-      "layout": { "x": 98, "y": 63, "width": 47, "height": 15 }
+      "layout": {
+        "x": 98,
+        "y": 63,
+        "width": 47,
+        "height": 15
+      }
     },
     {
       "id": 9,
@@ -225,7 +324,12 @@
         "show_legend": false,
         "legend_size": "0"
       },
-      "layout": { "x": 49, "y": 63, "width": 47, "height": 15 }
+      "layout": {
+        "x": 49,
+        "y": 63,
+        "width": 47,
+        "height": 15
+      }
     },
     {
       "id": 10,
@@ -239,7 +343,12 @@
         "tick_pos": "50%",
         "tick_edge": "bottom"
       },
-      "layout": { "x": 49, "y": 1, "width": 47, "height": 6 }
+      "layout": {
+        "x": 49,
+        "y": 1,
+        "width": 47,
+        "height": 6
+      }
     },
     {
       "id": 11,
@@ -258,7 +367,12 @@
         "autoscale": true,
         "precision": 0
       },
-      "layout": { "x": 32, "y": 12, "width": 15, "height": 9 }
+      "layout": {
+        "x": 32,
+        "y": 12,
+        "width": 15,
+        "height": 9
+      }
     },
     {
       "id": 12,
@@ -277,7 +391,12 @@
         "autoscale": true,
         "precision": 0
       },
-      "layout": { "x": 16, "y": 12, "width": 15, "height": 9 }
+      "layout": {
+        "x": 16,
+        "y": 12,
+        "width": 15,
+        "height": 9
+      }
     },
     {
       "id": 13,
@@ -288,10 +407,19 @@
         "title_align": "center",
         "check": "vsphere.can_connect",
         "grouping": "cluster",
-        "group_by": ["vcenter_server"],
-        "tags": ["*"]
+        "group_by": [
+          "vcenter_server"
+        ],
+        "tags": [
+          "*"
+        ]
       },
-      "layout": { "x": 0, "y": 12, "width": 15, "height": 9 }
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 15,
+        "height": 9
+      }
     },
     {
       "id": 14,
@@ -309,7 +437,12 @@
         "title_align": "left",
         "precision": 0
       },
-      "layout": { "x": 0, "y": 22, "width": 15, "height": 9 }
+      "layout": {
+        "x": 0,
+        "y": 22,
+        "width": 15,
+        "height": 9
+      }
     },
     {
       "id": 15,
@@ -328,7 +461,12 @@
         "autoscale": true,
         "precision": 0
       },
-      "layout": { "x": 16, "y": 22, "width": 15, "height": 9 }
+      "layout": {
+        "x": 16,
+        "y": 22,
+        "width": 15,
+        "height": 9
+      }
     },
     {
       "id": 16,
@@ -347,7 +485,12 @@
         "autoscale": true,
         "precision": 2
       },
-      "layout": { "x": 32, "y": 22, "width": 15, "height": 9 }
+      "layout": {
+        "x": 32,
+        "y": 22,
+        "width": 15,
+        "height": 9
+      }
     },
     {
       "id": 17,
@@ -361,7 +504,12 @@
         "tick_pos": "50%",
         "tick_edge": "bottom"
       },
-      "layout": { "x": 98, "y": 1, "width": 47, "height": 6 }
+      "layout": {
+        "x": 98,
+        "y": 1,
+        "width": 47,
+        "height": 6
+      }
     },
     {
       "id": 18,
@@ -375,7 +523,12 @@
         "tick_pos": "50%",
         "tick_edge": "bottom"
       },
-      "layout": { "x": 147, "y": 1, "width": 47, "height": 6 }
+      "layout": {
+        "x": 147,
+        "y": 1,
+        "width": 47,
+        "height": 6
+      }
     },
     {
       "id": 19,
@@ -385,9 +538,21 @@
           {
             "q": "top(avg:vsphere.disk.used.latest{$vcenter_server,$vcenter_datacenter,vsphere_type:datastore} by {vsphere_datastore}/avg:vsphere.disk.capacity.latest{$vcenter_server,$vcenter_datacenter,vsphere_type:datastore} by {vsphere_datastore}*100,10,'mean','desc')",
             "conditional_formats": [
-              { "comparator": "<=", "value": 270, "palette": "white_on_green" },
-              { "comparator": "<=", "value": 90, "palette": "white_on_yellow" },
-              { "comparator": ">", "value": 90, "palette": "white_on_red" }
+              {
+                "comparator": "<=",
+                "value": 70,
+                "palette": "white_on_green"
+              },
+              {
+                "comparator": "<=",
+                "value": 90,
+                "palette": "white_on_yellow"
+              },
+              {
+                "comparator": ">",
+                "value": 90,
+                "palette": "white_on_red"
+              }
             ]
           }
         ],
@@ -396,7 +561,12 @@
         "title_size": "16",
         "title_align": "left"
       },
-      "layout": { "x": 147, "y": 9, "width": 47, "height": 26 }
+      "layout": {
+        "x": 147,
+        "y": 9,
+        "width": 47,
+        "height": 26
+      }
     },
     {
       "id": 20,
@@ -426,7 +596,12 @@
         "title_align": "left",
         "show_legend": false
       },
-      "layout": { "x": 147, "y": 36, "width": 47, "height": 15 }
+      "layout": {
+        "x": 147,
+        "y": 36,
+        "width": 47,
+        "height": 15
+      }
     },
     {
       "id": 21,
@@ -457,11 +632,163 @@
         "show_legend": false,
         "legend_size": "0"
       },
-      "layout": { "x": 147, "y": 52, "width": 47, "height": 15 }
+      "layout": {
+        "x": 147,
+        "y": 52,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 22,
+      "definition": {
+        "type": "note",
+        "content": "# vSAN",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom"
+      },
+      "layout": {
+        "x": 147,
+        "y": 68,
+        "width": 47,
+        "height": 6
+      }
+    },
+    {
+      "id": 23,
+      "definition": {
+        "title": "vSAN Cluster Health Status (Top 25)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "vsphere.vsan.cluster.health.count{$vcenter_server , status:green} by {vsphere_cluster}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "vsphere.vsan.cluster.health.count{$vcenter_server , status:red} by {vsphere_cluster}"
+              }
+            ],
+            "response_format": "scalar",
+            "sort": {
+              "count": 25,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            },
+            "formulas": [
+              {
+                "conditional_formats": [
+                  {
+                    "comparator": ">",
+                    "value": 0,
+                    "palette": "white_on_green"
+                  }
+                ],
+                "cell_display_mode": "number",
+                "alias": "Is the Cluster Healthy?",
+                "formula": "query1"
+              },
+              {
+                "conditional_formats": [
+                  {
+                    "comparator": ">",
+                    "value": 0,
+                    "palette": "white_on_red"
+                  }
+                ],
+                "cell_display_mode": "number",
+                "alias": "Is the Cluster Unhealthy?",
+                "formula": "query2"
+              }
+            ]
+          }
+        ],
+        "has_search_bar": "auto"
+      },
+      "layout": {
+        "x": 147,
+        "y": 76,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "id": 7507009647195320,
+      "layout": {
+        "x": 147,
+        "y": 93,
+        "width": 47,
+        "height": 18
+      },
+      "definition": {
+        "title": "vSAN Cluster I/O Rates (Top 25)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_table",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:vsphere.vsan.cluster.iopsRead{$vcenter_server} by {vsphere_cluster}"
+              },
+              {
+                "data_source": "metrics",
+                "name": "query2",
+                "query": "avg:vsphere.vsan.cluster.iopsWrite{$vcenter_server} by {vsphere_cluster}"
+              }
+            ],
+            "response_format": "scalar",
+            "sort": {
+              "count": 25,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            },
+            "formulas": [
+              {
+                "cell_display_mode": "number",
+                "alias": "Read IOPS",
+                "formula": "query1"
+              },
+              {
+                "cell_display_mode": "number",
+                "alias": "Write IOPS",
+                "formula": "query2"
+              }
+            ]
+          }
+        ],
+        "has_search_bar": "auto"
+      }
     }
   ],
   "template_variables": [
-    { "name": "vcenter_server", "default": "*", "prefix": "vcenter_server" },
+    {
+      "name": "vcenter_server",
+      "default": "*",
+      "prefix": "vcenter_server"
+    },
     {
       "name": "vcenter_datacenter",
       "default": "*",
@@ -475,6 +802,5 @@
   ],
   "layout_type": "free",
   "is_read_only": true,
-  "notify_list": [],
-  "id": 133
+  "notify_list": []
 }

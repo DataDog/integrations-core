@@ -118,7 +118,7 @@ jmx_metrics:
       attribute:
         MessageCount:
           alias: activemq.artemis.queue.message_count
-          metric_type: monotonic_count
+          metric_type: gauge
         ConsumerCount:
           alias: activemq.artemis.queue.consumer_count
           metric_type: gauge
@@ -129,9 +129,8 @@ jmx_metrics:
           alias: activemq.artemis.queue.messages_added
           metric_type: monotonic_count
         MessagesExpired:
-          # implied as monotonic count, reports as gauge
           alias: activemq.artemis.queue.messages_expired
-          metric_type: gauge
+          metric_type: monotonic_count
         MessagesAcknowledged:
           alias: activemq.artemis.queue.messages_acknowledged
           metric_type: monotonic_count

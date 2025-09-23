@@ -5,7 +5,6 @@
 import logging
 
 import pytest
-from six import iteritems
 
 from . import common
 
@@ -25,7 +24,7 @@ def test_go_expvar(check, aggregator):
         aggregator.assert_metric(gauge, count=1, tags=shared_tags)
     for rate in common.CHECK_RATES:
         aggregator.assert_metric(rate, count=1, tags=shared_tags)
-    for rate, value in iteritems(CHECK_RATES_CUSTOM):
+    for rate, value in CHECK_RATES_CUSTOM.items():
         aggregator.assert_metric(rate, count=1, value=value, tags=shared_tags)
     for count in common.CHECK_COUNT:
         aggregator.assert_metric(count, count=1, metric_type=3, tags=shared_tags)

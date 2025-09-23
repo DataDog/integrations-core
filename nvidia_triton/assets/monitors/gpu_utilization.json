@@ -1,0 +1,30 @@
+{
+    "version": 2,
+    "created_at": "2023-11-15",
+    "last_updated_at": "2023-11-15",
+    "title": "Nvidia Triton GPU Utilization is high!",
+    "tags": ["integration:nvidia-triton"],
+    "description": "Notify your team when a GPU's Utilization is too high.",
+    "definition":{
+        "name": "Nvidia Triton GPU Utilization is High!",
+        "type": "query alert",
+        "query": "avg(last_5m):avg:nvidia_triton.gpu.utilization{*} by {gpu_uuid} > 0.9",
+        "message": "{{#is_alert}}  GPU : {{gpu_uuid.name}} utilization on {{host.name}} is high, please check it. {{/is_alert}}",
+        "tags": [
+            "integration:nvidia_triton"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 0.9,
+                "warning": 0.85
+            },
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {},
+            "avalanche_window": 10
+        },
+        "priority": null,
+        "restricted_roles": null
+    }
+  }

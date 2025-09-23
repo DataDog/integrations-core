@@ -1,610 +1,1065 @@
 {
     "title": "Airflow Overview",
-    "description": "## Airflow\n\nThis dashboard provides a high-level overview of your Airflow instances so you can monitor metrics related to DAGs, tasks, pools and executors.\n\nFor further reading on monitoring Airflow, see:\n\n- [Official Airflow integration docs](https://docs.datadoghq.com/integrations/airflow/#data-collected)\n\nClone this template to make changes and add your own graphs and widgets.",
+    "description": "## Airflow\n\nThis dashboard provides a high-level overview of your Airflow instances so you can monitor metrics related to DAGs, tasks, pools and executors.\n\nFor further reading on monitoring Airflow, see:\n\n- [Official Airflow integration docs](https://docs.datadoghq.com/integrations/airflow/#data-collected)\n  \nClone this template to make changes and add your own graphs and widgets.",
     "widgets": [
         {
-            "id": 0,
             "definition": {
-                "type": "image",
-                "url": "/static/images/logos/airflow_large.svg",
-                "sizing": "fit"
-            },
-            "layout": {
-                "x": 1,
-                "y": 1,
-                "width": 16,
-                "height": 9
-            }
-        },
-        {
-            "id": 1,
-            "definition": {
-                "type": "check_status",
-                "title": "Can Connect",
-                "title_size": "16",
-                "title_align": "center",
-                "check": "airflow.can_connect",
-                "grouping": "cluster",
-                "group_by": [],
-                "tags": [
-                    "$scope",
-                    "$host"
+                "title": "About Airflow",
+                "title_align": "left",
+                "banner_img": "/static/images/logos/airflow_small.svg",
+                "show_title": false,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7248787798500294,
+                        "definition": {
+                            "type": "note",
+                            "content": "This dashboard provides a high-level overview of your Airflow deployment to help monitor your system.\n",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2783259848144032,
+                        "definition": {
+                            "type": "note",
+                            "content": "**Refer to the following resources for more information**\n\n- [Datadog Airflow documentation](https://docs.datadoghq.com/integrations/airflow/?tab=host#overview)\n\n- [Available Airflow metrics](https://docs.datadoghq.com/integrations/airflow/?tab=host#metrics) \n",
+                            "background_color": "transparent",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": false
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    }
                 ]
             },
             "layout": {
-                "x": 1,
-                "y": 11,
-                "width": 16,
-                "height": 8
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 6
             }
         },
         {
-            "id": 2,
+            "id": 8146310266617062,
             "definition": {
-                "type": "check_status",
-                "title": "Healthy",
-                "title_size": "16",
-                "title_align": "center",
-                "check": "airflow.healthy",
-                "grouping": "cluster",
-                "group_by": [],
-                "tags": [
-                    "$scope",
-                    "$host"
+                "title": "Overview",
+                "background_color": "vivid_pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 628034008442880,
+                        "definition": {
+                            "type": "note",
+                            "content": "This is an overview of service checks, monitors and connect statuses of your Airflow deployment",
+                            "background_color": "pink",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7605881108562756,
+                        "definition": {
+                            "title": "Healthy",
+                            "title_size": "16",
+                            "title_align": "center",
+                            "time": {},
+                            "type": "check_status",
+                            "check": "airflow.healthy",
+                            "grouping": "cluster",
+                            "group_by": [
+                                "host"
+                            ],
+                            "tags": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5493002141659868,
+                        "definition": {
+                            "title": "Can Connect",
+                            "title_size": "16",
+                            "title_align": "center",
+                            "time": {},
+                            "type": "check_status",
+                            "check": "airflow.can_connect",
+                            "grouping": "cluster",
+                            "group_by": [
+                                "host"
+                            ],
+                            "tags": []
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 1,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1812685785650502,
+                        "definition": {
+                            "title": "Airflow Connection State",
+                            "type": "manage_status",
+                            "display_format": "list",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "query": "tag:integration:airflow",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
                 ]
             },
             "layout": {
-                "x": 1,
-                "y": 20,
-                "width": 16,
-                "height": 8
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 6
             }
         },
         {
-            "id": 3,
+            "id": 7581149594351844,
             "definition": {
-                "type": "note",
-                "content": "DAGs",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 66,
-                "y": 1,
-                "width": 95,
-                "height": 7
-            }
-        },
-        {
-            "id": 4,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
+                "title": "Airflow Schedulers & Executors",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "avg:airflow.dagbag_size{$host,$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 6330152135211266,
+                        "definition": {
+                            "type": "note",
+                            "content": "Airflow scheduler and executor metrics provide insights into the performance and behavior of the Airflow scheduler and task executors, allowing operators and developers to monitor and optimize the scheduling and execution of tasks within Airflow DAGs",
+                            "background_color": "purple",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 6211657018324016,
+                        "definition": {
+                            "title": "Job Scheduler Heatbeat",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Heartbeat",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.scheduler_heartbeat{$host} by {host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2543098148805112,
+                        "definition": {
+                            "title": "DAG Schedule Delay",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Schedule Delay",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:airflow.dagrun.schedule_delay{$host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 304594514469244,
+                        "definition": {
+                            "title": "Executor Tasks",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Queued Tasks",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Running Tasks",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.executor.queued_tasks{$host} by {host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:airflow.executor.running_tasks{$host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 1,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 686180107105300,
+                        "definition": {
+                            "title": "Executor Slots",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Executor Slots",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.executor.open_slots{$host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2243440111370522,
+                        "definition": {
+                            "title": "Pool task slots",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Open Slots",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Used Slots",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Starving Tasks",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.pool.open_slots{$host} by {host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:airflow.pool.used_slots{$host} by {host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:airflow.pool.starving_tasks{$host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 792230255020890,
+                        "definition": {
+                            "title": "Airflow Scheduler Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:airflow ",
+                                        "indexes": [],
+                                        "storage": "online_archives"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "full"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 12,
+                            "height": 4
                         }
                     }
-                ],
-                "custom_links": [],
-                "title": "DAG Bag Size",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
+                ]
             },
             "layout": {
-                "x": 114,
-                "y": 25,
-                "width": 47,
-                "height": 15
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 12
             }
         },
         {
-            "id": 5,
+            "id": 5340440168093318,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+                "title": "Airflow Dag Task Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "avg:airflow.dagbag_import_errors{$host,$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 2038656367341306,
+                        "definition": {
+                            "type": "note",
+                            "content": "Airflow DAG task metrics provide insights into the execution and performance of individual tasks within Airflow DAGs",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 7301335770671160,
+                        "definition": {
+                            "title": "DAG Bag Size",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Bag Size",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.dagbag_size{*} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1243836964915748,
+                        "definition": {
+                            "title": "DAG Run Task Total Duration",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.dag.task.duration.avg{$host,$dag_id} by {dag_id,host}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5918276593330658,
+                        "definition": {
+                            "title": "DAG Run Failed Duration",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Duration",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.dagrun.duration.failed.avg{$host,$dag_id} by {dag_id,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1986413884394950,
+                        "definition": {
+                            "title": "DAG Run Success Duration",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Duration",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.dagrun.duration.success.avg{$host,$dag_id} by {dag_id,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4329463428090712,
+                        "definition": {
+                            "title": "DAG Processes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Processes",
+                                            "formula": "abs(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.dag_processing.processes{*} by {host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6502566448634084,
+                        "definition": {
+                            "title": "Task Instances Successes & Failures",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Failures",
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Successes",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.ti_failures{*} by {host}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:airflow.ti_successes{*} by {host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 7,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8918441652911854,
+                        "definition": {
+                            "title": "Task Count Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "max:airflow.ti.finish{$host,$dag_id,$task_id,state:success} by {dag_id,task_id,state}.as_count()",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 12,
+                            "height": 4
                         }
                     }
-                ],
-                "custom_links": [],
-                "title": "DAG Import Errors",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
+                ]
             },
             "layout": {
-                "x": 114,
-                "y": 41,
-                "width": 47,
-                "height": 15
+                "x": 0,
+                "y": 18,
+                "width": 12,
+                "height": 15,
+                "is_column_break": true
             }
         },
         {
-            "id": 6,
+            "id": 1100454647839610,
             "definition": {
-                "type": "timeseries",
-                "requests": [
+                "title": "Airflow Jobs",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "q": "avg:airflow.dag_processing.processes{$host,$scope}.as_count()",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
+                        "id": 6006561832460592,
+                        "definition": {
+                            "type": "note",
+                            "content": "Airflow job metrics provide valuable insights into the performance, health, and execution of tasks within Airflow DAGs",
+                            "background_color": "green",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1459508235707710,
+                        "definition": {
+                            "title": "Job Started",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.job.start{*} by {job_name,host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "green",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2735126545346542,
+                        "definition": {
+                            "title": "Job Ended",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:airflow.job.end{$host} by {job_name,host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "green",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 6,
+                            "height": 3
                         }
                     }
-                ],
-                "custom_links": [],
-                "title": "DAG Processes",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
+                ]
             },
             "layout": {
-                "x": 114,
-                "y": 57,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 7,
-            "definition": {
-                "type": "note",
-                "content": "Executors",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 162,
-                "y": 1,
-                "width": 47,
-                "height": 7
-            }
-        },
-        {
-            "id": 8,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.executor.open_slots{$host,$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Executor Slots",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 162,
-                "y": 9,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 9,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.executor.queued_tasks{$host,$scope}, avg:airflow.executor.running_tasks{$host,$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Executor Tasks",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 162,
-                "y": 25,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 10,
-            "definition": {
-                "type": "note",
-                "content": "Scheduler",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 162,
-                "y": 41,
-                "width": 47,
-                "height": 7
-            }
-        },
-        {
-            "id": 11,
-            "definition": {
-                "type": "note",
-                "content": "Jobs",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 18,
-                "y": 25,
-                "width": 47,
-                "height": 7
-            }
-        },
-        {
-            "id": 12,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.job.start{$host,$scope} by {job_name}.as_count()",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Job Started",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 18,
+                "x": 0,
                 "y": 33,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 13,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.job.end{$host,$scope} by {job_name}.as_count()",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Job Ended",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 18,
-                "y": 49,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 14,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.scheduler_heartbeat{$host,$scope}.as_count()",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Job Scheduler Heatbeat",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 162,
-                "y": 49,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 15,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.dag.task.duration.avg{$host,$scope} by {dag_id}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "DAG Run Task Duration",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 66,
-                "y": 9,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 16,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.dagrun.duration.success.avg{$host,$scope} by {dag_id}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "DAG Run Success Duration",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 66,
-                "y": 41,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 17,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.dagrun.duration.failed.avg{$host,$scope} by {dag_id}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "DAG Run Failed Duration",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 66,
-                "y": 57,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 18,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.dagrun.schedule_delay.avg{$host,$scope} by {dag_id}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "DAG Run Failed Duration",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 66,
-                "y": 25,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 19,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.dag.loading_duration.avg{$host,$scope} by {dag_file}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "DAG Loading Duration",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 114,
-                "y": 9,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 20,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.ti_failures{$host,$scope}.as_count(), avg:airflow.ti_successes{$host,$scope}.as_count()",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Task Instances Successes & Failures",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 18,
-                "y": 9,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 21,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "avg:airflow.pool.open_slots{$host,$scope}, avg:airflow.pool.used_slots{$host,$scope}, avg:airflow.pool.starving_tasks{$host,$scope}",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "custom_links": [],
-                "title": "Pools Open/Used/Starving",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 162,
-                "y": 65,
-                "width": 47,
-                "height": 15
-            }
-        },
-        {
-            "id": 22,
-            "definition": {
-                "type": "note",
-                "content": "Tasks",
-                "background_color": "gray",
-                "font_size": "24",
-                "text_align": "center",
-                "show_tick": true,
-                "tick_pos": "50%",
-                "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 18,
-                "y": 1,
-                "width": 47,
-                "height": 7
+                "width": 12,
+                "height": 5
             }
         }
     ],
     "template_variables": [
         {
-            "name": "scope",
-            "default": "*",
-            "prefix": null
+            "name": "host",
+            "prefix": "@host",
+            "available_values": [],
+            "default": "*"
         },
         {
-            "name": "host",
-            "default": "*",
-            "prefix": "host"
+            "name": "dag_id",
+            "prefix": "dag_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "task_id",
+            "prefix": "task_id",
+            "available_values": [],
+            "default": "*"
         }
     ],
-    "layout_type": "free",
-    "is_read_only": true,
+    "layout_type": "ordered",
     "notify_list": [],
-    "id": 30298
+    "reflow_type": "fixed"
 }

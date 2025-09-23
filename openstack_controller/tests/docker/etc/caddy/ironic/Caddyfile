@@ -1,0 +1,34 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @get_baremetal {
+        method GET
+        path /baremetal
+    }
+    route @get_baremetal {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_baremetal_v1_nodes {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /baremetal/v1/nodes/detail
+    }
+    route @get_baremetal_v1_nodes {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_baremetal_v1_conductors {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /baremetal/v1/conductors
+    }
+    route @get_baremetal_v1_conductors {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    file_server browse
+}

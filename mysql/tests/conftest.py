@@ -8,12 +8,13 @@ import os
 import mock
 import pymysql
 import pytest
+from packaging.version import parse as parse_version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
-from .common import MYSQL_REPLICATION
+from .common import MYSQL_REPLICATION, MYSQL_VERSION_PARSED
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,9 @@ def dd_environment(config_e2e):
     logs_path = _mysql_logs_path()
 
     with TempDir('logs') as logs_host_path:
+        # for Ubuntu
+        os.chmod(logs_host_path, 0o770)
+
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_path)]}
 
         with docker_run(
@@ -78,7 +82,7 @@ def instance_basic():
         'username': common.USER,
         'password': common.PASS,
         'port': common.PORT,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
     }
 
 
@@ -89,7 +93,7 @@ def instance_complex():
         'username': common.USER,
         'password': common.PASS,
         'port': common.PORT,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'options': {
             'replication': True,
             'extra_status_metrics': True,
@@ -98,7 +102,8 @@ def instance_complex():
             'schema_size_metrics': True,
             'table_size_metrics': True,
             'system_table_size_metrics': True,
-            'table_row_stats_metrics': True,
+            'table_rows_stats_metrics': True,
+            'index_metrics': True,
         },
         'tags': tags.METRIC_TAGS,
         'queries': [
@@ -126,7 +131,7 @@ def instance_additional_status():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_status': [
             {
                 'name': "Innodb_rows_read",
@@ -174,7 +179,7 @@ def instance_status_already_queried():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_status': [
             {
                 'name': "Open_files",
@@ -193,7 +198,7 @@ def instance_var_already_queried():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_variable': [
             {
                 'name': "Key_buffer_size",
@@ -212,7 +217,7 @@ def instance_invalid_var():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'additional_status': [
             {
                 'name': "longer_query_time",
@@ -236,7 +241,7 @@ def instance_custom_queries():
         'password': common.PASS,
         'port': common.PORT,
         'tags': tags.METRIC_TAGS,
-        'disable_generic_tags': 'true',
+        'disable_generic_tags': True,
         'custom_queries': [
             {
                 'query': "SELECT name,age from testdb.users where name='Alice' limit 1;",
@@ -262,7 +267,12 @@ def version_metadata():
     major, minor = version[:2]
     patch = version[2] if len(version) > 2 else mock.ANY
 
-    flavor = "MariaDB" if MYSQL_FLAVOR == "mariadb" else "MySQL"
+    if MYSQL_FLAVOR == 'percona':
+        flavor = "Percona"
+    elif MYSQL_FLAVOR == "mariadb":
+        flavor = "MariaDB"
+    else:
+        flavor = "MySQL"
 
     return {
         'version.scheme': 'semver',
@@ -272,6 +282,7 @@ def version_metadata():
         'version.raw': mock.ANY,
         'version.build': mock.ANY,
         'flavor': flavor,
+        'resolved_hostname': 'forced_hostname',
     }
 
 
@@ -323,7 +334,7 @@ def init_group_replication():
 def _init_datadog_sample_collection(conn):
     logger.debug("initializing datadog sample collection")
     cur = conn.cursor()
-    cur.execute("CREATE DATABASE datadog")
+    cur.execute("CREATE DATABASE IF NOT EXISTS datadog")
     cur.execute("GRANT CREATE TEMPORARY TABLES ON `datadog`.* TO 'dog'@'%'")
     cur.execute("GRANT EXECUTE on `datadog`.*  TO 'dog'@'%'")
     _create_explain_procedure(conn, "datadog")
@@ -334,6 +345,7 @@ def _init_datadog_sample_collection(conn):
 def _create_explain_procedure(conn, schema):
     logger.debug("creating explain procedure in schema=%s", schema)
     cur = conn.cursor()
+    cur.execute("DROP PROCEDURE IF EXISTS {schema}.explain_statement".format(schema=schema))
     cur.execute(
         """
     CREATE PROCEDURE {schema}.explain_statement(IN query TEXT)
@@ -344,9 +356,7 @@ def _create_explain_procedure(conn, schema):
         EXECUTE stmt;
         DEALLOCATE PREPARE stmt;
     END;
-    """.format(
-            schema=schema
-        )
+    """.format(schema=schema)
     )
     if schema != 'datadog':
         cur.execute("GRANT EXECUTE ON PROCEDURE {schema}.explain_statement to 'dog'@'%'".format(schema=schema))
@@ -356,12 +366,14 @@ def _create_explain_procedure(conn, schema):
 def _create_enable_consumers_procedure(conn):
     logger.debug("creating enable_events_statements_consumers procedure")
     cur = conn.cursor()
+    cur.execute("DROP PROCEDURE IF EXISTS datadog.enable_events_statements_consumers")
     cur.execute(
         """
         CREATE PROCEDURE datadog.enable_events_statements_consumers()
             SQL SECURITY DEFINER
         BEGIN
             UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name LIKE 'events_statements_%';
+            UPDATE performance_schema.setup_consumers SET enabled='YES' WHERE name = 'events_waits_current';
         END;
     """
     )
@@ -370,7 +382,9 @@ def _create_enable_consumers_procedure(conn):
 
 def init_master():
     logger.debug("initializing master")
-    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
+    conn = pymysql.connect(
+        host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_FLAVOR == 'percona' else None
+    )
     _add_dog_user(conn)
     _add_bob_user(conn)
     _add_fred_user(conn)
@@ -380,7 +394,10 @@ def init_master():
 @pytest.fixture
 def root_conn():
     conn = pymysql.connect(
-        host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_REPLICATION == 'group' else None
+        host=common.HOST,
+        port=common.PORT,
+        user='root',
+        password='mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION == 'group' else None,
     )
     yield conn
     conn.close()
@@ -400,24 +417,29 @@ def _add_dog_user(conn):
     cur.execute("GRANT PROCESS ON *.* TO 'dog'@'%'")
     cur.execute("GRANT REPLICATION CLIENT ON *.* TO 'dog'@'%'")
     cur.execute("GRANT SELECT ON performance_schema.* TO 'dog'@'%'")
-    if MYSQL_FLAVOR == 'mysql' and MYSQL_VERSION == '8.0':
-        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
-    elif MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION == '10.5':
-        cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
-        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
-    else:
+    cur.execute("GRANT SELECT ON mysql.innodb_index_stats TO 'dog'@'%'")
+
+    # refactor try older mysql.user table first. if this fails, go to newer ALTER USER
+    try:
         cur.execute("UPDATE mysql.user SET max_user_connections = 0 WHERE user='dog' AND host='%'")
         cur.execute("FLUSH PRIVILEGES")
+    # need to get better exception in order to raise errors in the future
+    except Exception:
+        if MYSQL_FLAVOR == 'mariadb':
+            cur.execute("GRANT SLAVE MONITOR ON *.* TO 'dog'@'%'")
+        cur.execute("ALTER USER 'dog'@'%' WITH MAX_USER_CONNECTIONS 0")
 
 
 def _add_bob_user(conn):
     cur = conn.cursor()
+    cur.execute("DROP USER IF EXISTS 'bob'@'%'")
     cur.execute("CREATE USER 'bob'@'%' IDENTIFIED BY 'bob'")
     cur.execute("GRANT USAGE on *.* to 'bob'@'%'")
 
 
 def _add_fred_user(conn):
     cur = conn.cursor()
+    cur.execute("DROP USER IF EXISTS 'fred'@'%'")
     cur.execute("CREATE USER 'fred'@'%' IDENTIFIED BY 'fred'")
     cur.execute("GRANT USAGE on *.* to 'fred'@'%'")
 
@@ -439,13 +461,16 @@ def fred_conn():
 def populate_database():
     logger.debug("populating database")
     conn = pymysql.connect(
-        host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_REPLICATION == 'group' else None
+        host=common.HOST,
+        port=common.PORT,
+        user='root',
+        password='mypass' if MYSQL_REPLICATION == 'group' or MYSQL_FLAVOR == 'percona' else None,
     )
 
     cur = conn.cursor()
 
     cur.execute("USE mysql;")
-    cur.execute("CREATE DATABASE testdb;")
+    cur.execute("CREATE DATABASE IF NOT EXISTS testdb;")
     cur.execute("USE testdb;")
     cur.execute("CREATE TABLE testdb.users (id INT NOT NULL UNIQUE KEY, name VARCHAR(20), age INT);")
     cur.execute("INSERT INTO testdb.users (id,name,age) VALUES(1,'Alice',25);")
@@ -453,8 +478,93 @@ def populate_database():
     cur.execute("GRANT SELECT ON testdb.users TO 'dog'@'%';")
     cur.execute("GRANT SELECT, UPDATE ON testdb.users TO 'bob'@'%';")
     cur.execute("GRANT SELECT, UPDATE ON testdb.users TO 'fred'@'%';")
+    add_schema_test_databases(cur)
     cur.close()
     _create_explain_procedure(conn, "testdb")
+
+
+def add_schema_test_databases(cursor):
+    cursor.execute("USE mysql;")
+    cursor.execute("CREATE DATABASE IF NOT EXISTS datadog_test_schemas;")
+    cursor.execute("USE datadog_test_schemas;")
+    cursor.execute("GRANT SELECT ON datadog_test_schemas.* TO 'dog'@'%';")
+    # needed to query INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS in mariadb 10.5 and above
+    cursor.execute("GRANT REFERENCES ON datadog_test_schemas.* TO 'dog'@'%';")
+    cursor.execute(
+        """CREATE TABLE cities (
+           id INT NOT NULL DEFAULT 0,
+           name VARCHAR(255),
+           population INT NOT NULL DEFAULT 0,
+           CONSTRAINT PK_Cities PRIMARY KEY (id))
+        """
+    )
+    cursor.execute(
+        """CREATE TABLE cities_partitioned (
+           id INT NOT NULL DEFAULT 0,
+           name VARCHAR(255),
+           population INT NOT NULL DEFAULT 0,
+           CONSTRAINT PK_Cities PRIMARY KEY (id))
+
+           PARTITION BY RANGE (id) (
+           PARTITION p0 VALUES LESS THAN (100),
+           PARTITION p1 VALUES LESS THAN (200),
+           PARTITION p2 VALUES LESS THAN (300),
+           PARTITION p3 VALUES LESS THAN MAXVALUE);
+        """
+    )
+
+    # create one column index
+    cursor.execute("CREATE INDEX single_column_index ON cities (population);")
+    # create two column index, one with subpart and descending
+    cursor.execute("CREATE INDEX two_columns_index ON cities (id, name(3) DESC);")
+    # create functional key part index - available after MySQL 8.0.13
+    if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and MYSQL_FLAVOR == 'mysql':
+        cursor.execute("CREATE INDEX functional_key_part_index ON cities ((population + 1) DESC);")
+
+    cursor.execute(
+        """CREATE TABLE landmarks (
+           name VARCHAR(255),
+           city_id INT DEFAULT 0,
+           CONSTRAINT FK_CityId FOREIGN KEY (city_id)
+           REFERENCES cities(id) ON DELETE SET NULL ON UPDATE RESTRICT);
+        """
+    )
+
+    cursor.execute(
+        """ CREATE TABLE Restaurants (
+            RestaurantName VARCHAR(255),
+            District VARCHAR(100),
+            Cuisine VARCHAR(100),
+            CONSTRAINT UC_RestaurantNameDistrict UNIQUE (RestaurantName, District));
+        """
+    )
+
+    cursor.execute(
+        """CREATE TABLE RestaurantReviews (
+            RestaurantName VARCHAR(255),
+            District VARCHAR(255),
+            Review TEXT,
+            CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
+            REFERENCES Restaurants(RestaurantName, District) ON DELETE CASCADE ON UPDATE NO ACTION);
+        """
+    )
+    # Second DB
+    cursor.execute("CREATE DATABASE datadog_test_schemas_second;")
+    cursor.execute("USE datadog_test_schemas_second;")
+    cursor.execute("GRANT SELECT ON datadog_test_schemas_second.* TO 'dog'@'%';")
+    cursor.execute("CREATE TABLE IF NOT EXISTS ϑings (id INT DEFAULT 0, name VARCHAR(255));")
+    cursor.execute("CREATE UNIQUE INDEX thingsindex ON ϑings (name);")
+
+    cursor.execute(
+        """CREATE TABLE ts (id INT, purchased DATE)
+           PARTITION BY RANGE( YEAR(purchased) )
+           SUBPARTITION BY HASH( TO_DAYS(purchased) )
+           SUBPARTITIONS 2 (
+               PARTITION p0 VALUES LESS THAN (1990),
+               PARTITION p1 VALUES LESS THAN (2000),
+               PARTITION p2 VALUES LESS THAN MAXVALUE);
+        """
+    )
 
 
 def _wait_for_it_script():
@@ -474,6 +584,9 @@ def _mysql_conf_path():
         filename = 'mysql.conf'
     elif MYSQL_FLAVOR == 'mariadb':
         filename = 'mariadb.conf'
+    elif MYSQL_FLAVOR == 'percona':
+        # declared directly in the compose file
+        filename = ''
     else:
         raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
 
@@ -495,6 +608,8 @@ def _mysql_logs_path():
             return '/var/log/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return '/opt/bitnami/mariadb/logs'
+    elif MYSQL_FLAVOR == 'percona':
+        return '/var/log/mysql'
     else:
         raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
 
@@ -506,9 +621,11 @@ def _mysql_docker_repo():
         # https://github.com/DataDog/integrations-core/pull/4669)
         if MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
-        elif MYSQL_VERSION == '8.0' or MYSQL_VERSION == 'latest':
+        elif MYSQL_VERSION.startswith('8') or MYSQL_VERSION == 'latest':
             return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'
+    elif MYSQL_FLAVOR == 'percona':
+        return 'percona/percona-server'
     else:
         raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))

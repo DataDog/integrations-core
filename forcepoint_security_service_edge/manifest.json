@@ -1,0 +1,77 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "2a8fcdbf-9f07-4729-9f65-b4b60794e6b8",
+  "app_id": "forcepoint-security-service-edge",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Forcepoint Security Service Edge logs",
+    "title": "Forcepoint Security Service Edge",
+    "media": [
+      {
+        "caption": "Forcepoint Security Service Edge - Access Logs",
+        "image_url": "images/forcepoint_security_service_edge_access_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forcepoint Security Service Edge - Admin Logs",
+        "image_url": "images/forcepoint_security_service_edge_admin_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forcepoint Security Service Edge - Cloud Logs",
+        "image_url": "images/forcepoint_security_service_edge_cloud_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forcepoint Security Service Edge - Health Logs",
+        "image_url": "images/forcepoint_security_service_edge_health_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forcepoint Security Service Edge - Overview",
+        "image_url": "images/forcepoint_security_service_edge_overview.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 35705978,
+      "source_type_name": "Forcepoint Security Service Edge",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Forcepoint Security Service Edge - Access Logs": "assets/dashboards/forcepoint_security_service_edge_access_logs.json",
+      "Forcepoint Security Service Edge - Admin Logs": "assets/dashboards/forcepoint_security_service_edge_admin_logs.json",
+      "Forcepoint Security Service Edge - Cloud Logs": "assets/dashboards/forcepoint_security_service_edge_cloud_logs.json",
+      "Forcepoint Security Service Edge - Health Logs": "assets/dashboards/forcepoint_security_service_edge_health_logs.json",
+      "Forcepoint Security Service Edge - Overview": "assets/dashboards/forcepoint_security_service_edge_overview.json"
+    },
+    "logs": {
+      "source": "forcepoint-security-service-edge"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

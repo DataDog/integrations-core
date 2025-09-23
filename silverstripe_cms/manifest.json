@@ -1,0 +1,66 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "acd6d383-dfe8-4e70-8c68-e5f3b6da84af",
+  "app_id": "silverstripe-cms",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Silverstripe CMS content, and user activity.",
+    "title": "Silverstripe CMS",
+    "media": [
+      {
+        "caption": "Silverstripe CMS - Overview",
+        "image_url": "images/silverstripe_cms_overview.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 35271991,
+      "source_type_name": "Silverstripe CMS",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "silverstripe_cms.",
+        "check": [
+          "silverstripe_cms.files.count"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Silverstripe CMS - Overview": "assets/dashboards/silverstripe_cms_overview.json"
+    },
+    "monitors": {
+      "Pages with broken files are higher": "assets/monitors/pages_with_broken_files_are_higher.json",
+      "Pages with broken links are higher": "assets/monitors/pages_with_broken_links_are_higher.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

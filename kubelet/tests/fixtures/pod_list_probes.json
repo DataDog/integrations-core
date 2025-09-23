@@ -1913,7 +1913,7 @@
                 "terminationGracePeriodSeconds": 30,
                 "dnsPolicy": "ClusterFirst",
                 "nodeSelector": {
-                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/os": "linux",
                     "node.kubernetes.io/masq-agent-ds-ready": "true"
                 },
                 "serviceAccountName": "ip-masq-agent",
@@ -2346,7 +2346,7 @@
                 "terminationGracePeriodSeconds": 0,
                 "dnsPolicy": "ClusterFirst",
                 "nodeSelector": {
-                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/os": "linux",
                     "projectcalico.org/ds-ready": "true"
                 },
                 "serviceAccountName": "calico-sa",
@@ -2871,6 +2871,18 @@
                             "httpGet": {
                                 "path": "/readiness",
                                 "port": 8081,
+                                "scheme": "HTTP"
+                            },
+                            "initialDelaySeconds": 3,
+                            "timeoutSeconds": 5,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "failureThreshold": 3
+                        },
+                        "startupProbe": {
+                            "httpGet": {
+                                "path": "/healthcheck/kubedns",
+                                "port": 10054,
                                 "scheme": "HTTP"
                             },
                             "initialDelaySeconds": 3,

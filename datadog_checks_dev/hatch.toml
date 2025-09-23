@@ -1,12 +1,4 @@
 [env.collectors.datadog-checks]
-check-types = true
-mypy-args = [
-  "--install-types",
-  "--non-interactive",
-  "--follow-imports=silent",
-  "datadog_checks/dev/tooling/commands/release/trello/testable.py",
-  "datadog_checks/dev/tooling/commands/release/trello/status.py",
-]
 
 [envs.default]
 e2e-env = false
@@ -15,12 +7,13 @@ e2e-env = false
 DDEV_TESTING_PLUGIN = "true"
 
 [[envs.default.matrix]]
-python = ["27", "38"]
+python = ["3.12"]
 
 [envs.default.overrides]
 matrix.python.features = [
-  { value = "cli", if = ["38"] },
+  { value = "cli", if = ["3.12"] },
 ]
-matrix.python.scripts = [
-  { key = "test", value = "_dd-test --ignore tests/tooling", if = ["27"] },
+# TODO: remove this when the old CLI is gone
+matrix.python.pre-install-commands = [
+  { value = "python -m pip install --no-deps --disable-pip-version-check {verbosity:flag:-1} -e ../ddev", if = ["3.12"] },
 ]

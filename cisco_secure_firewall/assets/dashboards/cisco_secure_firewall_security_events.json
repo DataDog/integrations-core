@@ -1,0 +1,1680 @@
+{
+    "title": "Cisco Secure Firewall - Security Events",
+    "description": "- This dashboard provides insights into security events logs.",
+    "widgets": [
+        {
+            "id": 5128228901661168,
+            "definition": {
+                "type": "image",
+                "url": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2F3.bp.blogspot.com%2F-zO5McOTnG10%2FVWY-VxCCKMI%2FAAAAAAAADc8%2FON3fAeUlPUQ%2Fs1600%2FCisco_logo.svg.png&f=1&nofb=1&ipt=7c7c79c2963ca2a0f694a7b1704d207d6e7b7c18078bebc66d6b87f864698569&ipo=images",
+                "sizing": "contain",
+                "margin": "lg",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 857218292034968,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard provides insights into security events logs.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 808417330624756,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n\n1. Security Events Over Time \n2. Security Events by Severity \n3. Security Events by Types \n4. Total Intrusions \n5. Total Connections \n6. Total Malware Detected File Count \n7. Total Intrude Source IPs \n8. Total Intrude Destination IPs \n9. Distribution of Intrude Source \n10. Top Protocols Associated with Intrusion \n11. Intrusion by Classification \n12. Top Intruded Policies \n13. Security Events by Clients Apps \n14. Top Application Protocols \n15. Events by ACPolicy \n16. Events by NAPPolicy \n17. Event Distribution by Access Control Rule Action \n18. Top Connecting Source IP \n19. Top Connecting Destination IP ",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 781794320943458,
+            "definition": {
+                "title": "Security Events Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Security Event",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "semantic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 7690194448944614,
+            "definition": {
+                "title": "Security Events by Severity",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "status",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "semantic"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 3950669698271632,
+            "definition": {
+                "title": "Security Events by Types",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@security_event_name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "semantic"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 5,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 8950770753939590,
+            "definition": {
+                "title": "Total Intrusions",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 2483221709296604,
+            "definition": {
+                "title": "Total Connections",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 4,
+                "y": 9,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 6409266514938054,
+            "definition": {
+                "title": "Total Malware Detected File Count",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430005 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 8,
+                "y": 9,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 903145375626402,
+            "definition": {
+                "title": "Total Intrude Source IPs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5265621487838914,
+            "definition": {
+                "title": "Total Intrude Destination IPs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.destination.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 12,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 2661710796495802,
+            "definition": {
+                "title": "Distribution of Intrude Source",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "geomap",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.iso_code",
+                                        "limit": 250,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ]
+                    }
+                ],
+                "style": {
+                    "palette": "hostmap_blues",
+                    "palette_flip": false
+                },
+                "view": {
+                    "focus": "WORLD"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 4546347196084120,
+            "definition": {
+                "title": "Top Protocols Associated with Intrusion ",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@Protocol",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 19,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 6153000669495924,
+            "definition": {
+                "title": "Intrusion by Classification",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@Classification",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 19,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 8304238988334858,
+            "definition": {
+                "title": "Top Intruded Policies",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@IntrusionPolicy",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430001 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5737187338860554,
+            "definition": {
+                "title": "Security Events by Clients Apps",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@Client",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 22,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 7586323504647580,
+            "definition": {
+                "title": "Top Application Protocols",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@ApplicationProtocol",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 25,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 3334123363257434,
+            "definition": {
+                "title": "Events by ACPolicy",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@ACPolicy",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 25,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 3400399431924746,
+            "definition": {
+                "title": "Events by NAPPolicy",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@NAPPolicy",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430* $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 28,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 6320551786014120,
+            "definition": {
+                "title": "Event Distribution by Access Control Rule Action",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@AccessControlRuleAction",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 28,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5287217623531794,
+            "definition": {
+                "title": "Top Connecting Source IP",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 31,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5348503446189218,
+            "definition": {
+                "title": "Top Connecting Destination IP",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.destination.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 31,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 284906330255972,
+            "definition": {
+                "title": "Geo Distribution of Connected Sources",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "geomap",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.iso_code",
+                                        "limit": 250,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:430002 $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ]
+                    }
+                ],
+                "style": {
+                    "palette": "hostmap_blues",
+                    "palette_flip": false
+                },
+                "view": {
+                    "focus": "WORLD"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 34,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 4737122718921028,
+            "definition": {
+                "title": "Top Users",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 38,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 4746349429684994,
+            "definition": {
+                "title": "Top Web Application Accessed",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@WebApplication",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 38,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 2913675788314404,
+            "definition": {
+                "title": "Top URL Categories",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@URLCategory",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 41,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5664646978667514,
+            "definition": {
+                "title": "Top URL Accessed",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@URL",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 41,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 3687893476831154,
+            "definition": {
+                "title": "Packets Transferred Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Initiator Packets",
+                                "formula": "query1"
+                            },
+                            {
+                                "alias": "Responder Packets",
+                                "formula": "query2"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@cisco.secure.firewall.InitiatorPackets"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query2",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@cisco.secure.firewall.ResponderPackets"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 44,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 3972456994426316,
+            "definition": {
+                "title": "Bytes Transferred Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Initiator Bytes",
+                                "formula": "query1"
+                            },
+                            {
+                                "alias": "Responder Bytes",
+                                "formula": "query2"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@cisco.secure.firewall.InitiatorBytes"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query2",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@cisco.secure.firewall.ResponderBytes"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:(430002 OR 430003 OR 430004 OR 430005) $Device-ID $Host $Src-IP $Dest-IP $Protocol"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 47,
+                "width": 12,
+                "height": 3
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Device-ID",
+            "prefix": "@device_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Src-IP",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Dest-IP",
+            "prefix": "@network.destination.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Protocol",
+            "prefix": "@Protocol",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

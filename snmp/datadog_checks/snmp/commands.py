@@ -1,18 +1,19 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator  # noqa: F401
 
 from pyasn1.type.univ import Null
-from pysnmp import hlapi
+from pysnmp import hlapi  # noqa: F401
 from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
 from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
+from pysnmp.smi.rfc1902 import ObjectIdentity, ObjectType
 
 from datadog_checks.base.errors import CheckException
 
-from .config import InstanceConfig
+from .config import InstanceConfig  # noqa: F401
 
 
 def _handle_error(ctx, config):
@@ -33,13 +34,12 @@ def snmp_get(config, oids, lookup_mib):
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
     ):
-        var_binds = vbProcessor.unmakeVarBinds(snmpEngine, varBinds, lookup_mib)
+        newVarBinds = unmakeVarbinds(snmpEngine, varBinds, lookup_mib)
 
         cbCtx['error'] = errorIndication
-        cbCtx['var_binds'] = var_binds
+        cbCtx['var_binds'] = newVarBinds
 
     ctx = {}  # type: Dict[str, Any]
-
     var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
 
     cmdgen.GetCommandGenerator().sendVarBinds(
@@ -160,3 +160,15 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
                 yield var_binds[0]
             else:
                 return
+
+
+def unmakeVarbinds(snmpEngine, varBinds, lookupMib=True):
+    """Taken from pysnmp's varbinds.py, amended to not ignore the errors that return when resolving the MIB."""
+    if lookupMib:
+        mibViewController = vbProcessor.getMibViewController(snmpEngine)
+        varBinds = [
+            ObjectType(ObjectIdentity(x[0]), x[1]).resolveWithMib(mibViewController, ignoreErrors=False)
+            for x in varBinds
+        ]
+
+    return varBinds

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ac3cc203-5b28-457d-8737-bbe32fa7c3b9",
   "app_id": "container",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,9 +13,11 @@
     "title": "Container",
     "media": [],
     "classifier_tags": [
+      "Category::Containers",
+      "Category::Kubernetes",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Category::Containers"
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -23,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Container",
@@ -38,7 +40,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10242,
+      "auto_install": true
     },
     "dashboards": {
       "Containers": "assets/dashboards/containers.json"

@@ -1,0 +1,1207 @@
+{
+    "title": "Palo Alto Panorama: GlobalProtect",
+    "description": "",
+    "widgets": [
+        {
+            "id": 3092474590624262,
+            "definition": {
+                "type": "image",
+                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/PaloAltoNetworks_2020_Logo.svg/220px-PaloAltoNetworks_2020_Logo.svg.png",
+                "url_dark_theme": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/PaloAltoNetworks_2020_Logo.svg/220px-PaloAltoNetworks_2020_Logo.svg.png",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 3,
+                "height": 2
+            }
+        },
+        {
+            "id": 4688297178923336,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard gives insights about GlobalProtect logs.\n- GlobalProtect displays the logs related to GlobalProtect system, GlobalProtect portal, and gateway logs.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 3,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8599185040282124,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Total GlobalProtect Events\n2. GlobalProtect Events Overtime\n3. Connection Stages\n4. Authentication Methods\n5. Connection Statuses\n6. Top Client OSs\n7. Top Source Users\n8. Top Source Regions\n9. Geo Distribution by User Public IP\n10. Top Used Gateway Priorities\n11. Connection Methods\n12. GlobalProtect Client Versions\n13. Top Gateways Used\n14. Top Tunnel Types\n15. Top User Public IPs\n16. Top Errors\n17. Gateway Selection Method\n18. Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 7,
+                "y": 0,
+                "width": 5,
+                "height": 2
+            }
+        },
+        {
+            "id": 345407825527640,
+            "definition": {
+                "title": "Total GlobalProtect Events",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 6804421863386286,
+            "definition": {
+                "title": "GlobalProtect Events Overtime",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "GlobalProtect",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@subtype",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 2,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 6205045309047866,
+            "definition": {
+                "title": "Connection Stages",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@stage",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 1561976797598968,
+            "definition": {
+                "title": "Authentication Methods",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@auth_method",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 5,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 4555792593992804,
+            "definition": {
+                "title": "Connection Statuses",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@status",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "automatic"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 5,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 5772405259988610,
+            "definition": {
+                "title": "Top Client OSs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@http.useragent_details.os.family",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 9,
+                "y": 5,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 5074642991254010,
+            "definition": {
+                "title": "Top Source Users",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 8681469698339168,
+            "definition": {
+                "title": "Top Source Regions",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@srcregion",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 8,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 995832136782352,
+            "definition": {
+                "title": "Geo Distribution by User Public IP",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "geomap",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.iso_code",
+                                        "limit": 250,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ]
+                    }
+                ],
+                "style": {
+                    "palette": "hostmap_blues",
+                    "palette_flip": false
+                },
+                "view": {
+                    "focus": "WORLD"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 8,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 1724800236216840,
+            "definition": {
+                "title": "Top Used Gateway Priorities",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@priority",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 821969300317820,
+            "definition": {
+                "title": "Connection Methods",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@connect_method",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "automatic"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 12,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 528357851839282,
+            "definition": {
+                "title": "GlobalProtect Client Versions",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@client_ver",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "automatic"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 12,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 3409924901657536,
+            "definition": {
+                "title": "Top Gateways Used",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@gateway",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 9,
+                "y": 12,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 4842646254107800,
+            "definition": {
+                "title": "Top Tunnel Types",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@tunnel_type",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 1125426737335600,
+            "definition": {
+                "title": "Top User Public IPs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 15,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 7727127522985056,
+            "definition": {
+                "title": "Top Errors",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@error",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 15,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 8291612460816156,
+            "definition": {
+                "title": "Gateway Selection Method",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@selection_type",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "automatic"
+                }
+            },
+            "layout": {
+                "x": 9,
+                "y": 15,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 2669721022694840,
+            "definition": {
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:palo-alto-panorama @type:GLOBALPROTECT $Device_Serial_Number $Subtype $Gateway $Status",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "time_generated",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "subtype",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "stage",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "auth_method",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "status",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "http.useragent_details.os.family",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "usr.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "priority",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "connect_method",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "client_ver",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "gateway",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "tunnel_type",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "network.client.ip",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "error",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "selection_type",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 18,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Device_Serial_Number",
+            "prefix": "@serial",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Subtype",
+            "prefix": "@subtype",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Gateway",
+            "prefix": "@gateway",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Status",
+            "prefix": "@status",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

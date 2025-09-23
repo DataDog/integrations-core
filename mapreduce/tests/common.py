@@ -82,9 +82,16 @@ def setup_mapreduce():
 
 @contextmanager
 def mock_local_mapreduce_dns():
-    mapping = {x: ('127.0.0.1', None) for x in MOCKED_E2E_HOSTS}
+    mapping = dict.fromkeys(MOCKED_E2E_HOSTS, ('127.0.0.1', None))
     with mock_local(mapping):
         yield
+
+
+def assert_metrics_covered(aggregator, at_least=1):
+    for metric in EXPECTED_METRICS:
+        aggregator.assert_metric(metric, at_least=at_least)
+
+    aggregator.assert_all_metrics_covered()
 
 
 MR_CONFIG = {
@@ -156,6 +163,9 @@ EXPECTED_METRICS = [
     "mapreduce.job.maps_total",
 ]
 
+
+# These metrics are only asserted in e2e tests since they are computed by the Agent.
+# The integration sends for instance `mapreduce.job.elapsed_time` as a histogram.
 ELAPSED_TIME_BUCKET_METRICS = [
     "mapreduce.job.elapsed_time.max",
     "mapreduce.job.elapsed_time.avg",

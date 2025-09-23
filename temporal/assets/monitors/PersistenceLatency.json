@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2023-04-13",
+  "last_updated_at": "2023-04-13",
+  "title": "Persistence latency is elevated",
+  "tags": [
+    "integration:temporal"
+  ],
+  "description": "Persistence store is a database used by Temporal Services to persist events generated and processed in your Temporal Cluster and SDK. This monitor tracks the latency of the Persistence service to avoid performance issues or slow data access times.",
+  "definition": {
+    "message": "The latency for the Temporal persistence is elevated ({{ value }}).",
+    "name": "Temporal persistence latency is elevated",
+    "options": {
+      "avalanche_window": 10,
+      "include_tags": false,
+      "new_host_delay": 300,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "silenced": {},
+      "thresholds": {
+        "critical": 1000,
+        "warning": 500
+      }
+    },
+    "priority": null,
+    "query": "avg(last_5m):sum:temporal.server.persistence.latency.sum{*}.as_rate() / sum:temporal.server.persistence.latency.count{*}.as_rate() > 1000",
+    "restricted_roles": null,
+    "tags": [
+      "integration:temporal"
+    ],
+    "type": "query alert"
+  }
+}

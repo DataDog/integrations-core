@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7368f005-2333-4dc5-a2b5-14419e4995d1",
   "app_id": "cockroachdb",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,13 +13,22 @@
     "title": "CockroachDB",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
+      "Category::Caching",
       "Category::Cloud",
-      "Category::Data Store",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog"
+      }
     ]
   },
   "author": {
@@ -27,7 +37,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "CockroachDB",
@@ -44,13 +53,15 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "cockroach"
+      ],
+      "source_type_id": 10036,
+      "auto_install": true
     },
     "dashboards": {
       "CockroachDB Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "cockroachdb"
     }
   }
 }

@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import socket
 import ssl
-from datetime import datetime
+from datetime import datetime, timezone
+from urllib.parse import urlparse
 
 import service_identity
-from six import text_type
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative
 
@@ -149,7 +148,7 @@ class TLSCheck(AgentCheck):
             validator, host_type = self.validation_data
 
             try:
-                validator(cert, text_type(self._server_hostname))
+                validator(cert, str(self._server_hostname))
             except service_identity.VerificationError:
                 message = 'The {} on the certificate does not match the given host'.format(host_type)
                 self.log.debug(message)
@@ -180,7 +179,7 @@ class TLSCheck(AgentCheck):
 
         if self._send_cert_duration:
             self.log.debug('Checking issued days of certificate')
-            issued_delta = cert.not_valid_after - cert.not_valid_before
+            issued_delta = cert.not_valid_after_utc - cert.not_valid_before_utc
             issued_seconds = issued_delta.total_seconds()
             issued_days = seconds_to_days(issued_seconds)
 
@@ -188,7 +187,7 @@ class TLSCheck(AgentCheck):
             self.count('tls.issued_seconds', issued_seconds, tags=self._tags)
 
         self.log.debug('Checking age of certificate')
-        delta = cert.not_valid_after - datetime.utcnow()
+        delta = cert.not_valid_after_utc - datetime.now(timezone.utc)
         seconds_left = delta.total_seconds()
         days_left = seconds_to_days(seconds_left)
 

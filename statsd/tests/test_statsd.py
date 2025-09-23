@@ -14,7 +14,7 @@ log = logging.getLogger(__file__)
 
 CHECK_NAME = 'statsd'
 HOST = get_docker_hostname()
-PORT = 8126
+PORT = 8128
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = "http://{}:{}".format(HOST, PORT)
 

@@ -9,9 +9,10 @@
     "check": "weblogic.can_connect",
     "statuses": [
       "ok",
-      "critical"
+      "critical",
+      "warning"
     ],
     "name": "Can Connect",
-    "description": "Returns `OK` if the Agent is able to connect to and collect metrics from the monitored WebLogic instance. Returns `CRITICAL` otherwise."
+    "description": "Returns `OK` if the Agent is able to connect to and collect metrics from the monitored WebLogic instance, `WARNING` if no metrics are collected, and `OK` otherwise."
   }
 ]

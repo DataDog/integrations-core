@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e588293a-833f-4888-a7b4-2208e087059a",
   "app_id": "ibm-db2",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,9 +16,15 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-db2-with-datadog"
+      }
     ]
   },
   "author": {
@@ -26,7 +33,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "IBM Db2",
@@ -43,13 +49,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10054,
+      "auto_install": true
     },
     "dashboards": {
       "IBM Db2 Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "ibm_db2"
     }
   }
 }

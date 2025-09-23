@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "75f6813c-934c-4f1a-b8f4-71f9f1911165",
   "app_id": "pdh",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -13,7 +14,8 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Windows",
-      "Category::OS & System"
+      "Category::OS & System",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -22,7 +24,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "PDH",
@@ -34,7 +35,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10065,
+      "auto_install": true
     }
   }
 }

@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-from six import PY2
 
 from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
 
@@ -271,7 +269,6 @@ def test_section_example():
     )
 
 
-@pytest.mark.skipif(PY2, reason='Dictionary key order is not guaranteed in Python 2')
 def test_section_example_indent():
     consumer = get_example_consumer(
         """
@@ -334,7 +331,6 @@ def test_section_example_indent():
     )
 
 
-@pytest.mark.skipif(PY2, reason='Dictionary key order is not guaranteed in Python 2')
 def test_section_example_indent_required():
     consumer = get_example_consumer(
         """
@@ -871,9 +867,7 @@ def test_section_description_length_limit():
               description: words
               value:
                 type: string
-        """.format(
-            'a' * DESCRIPTION_LINE_LENGTH_LIMIT
-        )
+        """.format('a' * DESCRIPTION_LINE_LENGTH_LIMIT)
     )
 
     files = consumer.render()
@@ -894,9 +888,7 @@ def test_option_description_length_limit():
             description: {}
             value:
               type: string
-        """.format(
-            'a' * DESCRIPTION_LINE_LENGTH_LIMIT
-        )
+        """.format('a' * DESCRIPTION_LINE_LENGTH_LIMIT)
     )
 
     files = consumer.render()
@@ -918,9 +910,7 @@ def test_option_description_length_limit_with_noqa():
             value:
               type: string
               example: something
-        """.format(
-            'a' * DESCRIPTION_LINE_LENGTH_LIMIT + ' /noqa'
-        )
+        """.format('a' * DESCRIPTION_LINE_LENGTH_LIMIT + ' /noqa')
     )
 
     files = consumer.render()
@@ -932,13 +922,10 @@ def test_option_description_length_limit_with_noqa():
         ## {}
         #
         # foo: something
-        """.format(
-            'a' * DESCRIPTION_LINE_LENGTH_LIMIT
-        )
+        """.format('a' * DESCRIPTION_LINE_LENGTH_LIMIT)
     )
 
 
-@pytest.mark.skipif(PY2, reason='Dictionary key order is not guaranteed in Python 2')
 def test_deprecation():
     consumer = get_example_consumer(
         """
@@ -1216,9 +1203,7 @@ def test_compact_example_long_line():
                 type: array
                 items:
                   type: string
-        """.format(
-            long_str
-        )
+        """.format(long_str)
     )
     files = consumer.render()
     contents, errors = files['test.yaml.example']
@@ -1230,9 +1215,7 @@ def test_compact_example_long_line():
         #
         # foo:
         #   - [{0}, {0}, {0}, {0}]
-        """.format(
-            long_str
-        )
+        """.format(long_str)
     )
 
 
@@ -1710,5 +1693,81 @@ def test_parent_option_enabled():
                 ## words
                 #
                 # disabled_sub_option: foo.bar_none
+        """
+    )
+
+
+def test_multi_instances_w_nested_options():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            multiple_instances_defined: true
+            options:
+            - name: Instance A
+              description: Instance A Example
+              options:
+              - name: option_w_options
+                enabled: true
+                description: Option with options description
+                options:
+                - name: sub_option_1
+                  required: true
+                  description: Sub_option_1 description
+                  value:
+                    type: boolean
+                    example: true
+                - name: sub_option_2
+                  description: Sub_option_2 description
+                  value:
+                    type: string
+                    example: foobar
+            - name: Instance B
+              description: Instance B Example
+              options:
+              - name: option_3
+                description: Option_3 description
+                value:
+                  type: boolean
+                  example: true
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independently of the others.
+        #
+        instances:
+
+            ## Instance A Example
+          -
+            ## Option with options description
+            #
+            option_w_options:
+
+                ## @param sub_option_1 - boolean - required
+                ## Sub_option_1 description
+                #
+                sub_option_1: true
+
+                ## @param sub_option_2 - string - optional - default: foobar
+                ## Sub_option_2 description
+                #
+                # sub_option_2: foobar
+
+            ## Instance B Example
+          -
+            ## @param option_3 - boolean - optional - default: true
+            ## Option_3 description
+            #
+            # option_3: true
         """
     )

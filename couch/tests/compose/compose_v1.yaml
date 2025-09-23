@@ -1,8 +1,7 @@
-version: '3.5'
-
 services:
   couch:
     container_name: couchdb-1
     image: couchdb:${COUCH_VERSION}
     ports:
       - ${COUCH_PORT}:5984
+    platform: linux/x86_64

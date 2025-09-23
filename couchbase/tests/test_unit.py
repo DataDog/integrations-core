@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
-
 import mock
 import pytest
 
 from datadog_checks.couchbase import Couchbase
+from datadog_checks.dev.utils import get_metadata_metrics
+
+from .common import MOCKED_COUCHBASE_METRICS, QUERY_STATS
+from .conftest import mock_http_responses
 
 
 def test_camel_case_to_joined_lower(instance):
@@ -35,15 +37,15 @@ def test_camel_case_to_joined_lower(instance):
 def test_extract_seconds_value(instance):
     couchbase = Couchbase('couchbase', {}, [instance])
 
-    EXTRACT_SECONDS_TEST_PAIRS = {
+    extract_seconds_test_pairs = {
         '3.45s': 3.45,
         '12ms': 0.012,
         '700.5us': 0.0007005,
-        u'733.364\u00c2s': 0.000733364,
+        '733.364\u00c2s': 0.000733364,
         '0': 0,
     }
 
-    for test_input, expected_output in EXTRACT_SECONDS_TEST_PAIRS.items():
+    for test_input, expected_output in extract_seconds_test_pairs.items():
         test_output = couchbase.extract_seconds_value(test_input)
         assert test_output == expected_output, 'Input was {}, expected output was {}, actual output was {}'.format(
             test_input, expected_output, test_output
@@ -70,27 +72,25 @@ def test__get_query_monitoring_data(instance_query):
         ("legacy config", {'user': 'new_foo', 'ssl_verify': False}, {'auth': ('new_foo', 'password'), 'verify': False}),
     ],
 )
-def test_config(test_case, dd_run_check, extra_config, expected_http_kwargs, instance):
-    instance = deepcopy(instance)
+def test_config(test_case, extra_config, expected_http_kwargs, instance):
+    """
+    Test that the legacy and new auth configurations are both supported.
+    """
     instance.update(extra_config)
+
     check = Couchbase('couchbase', {}, [instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        dd_run_check(check)
-
-        http_wargs = dict(
-            auth=mock.ANY,
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=mock.ANY,
-            verify=mock.ANY,
-            allow_redirects=mock.ANY,
-        )
-        http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://localhost:8091/pools/default/tasks', **http_wargs)
+    http_wargs = {
+        'auth': mock.ANY,
+        'cert': mock.ANY,
+        'headers': mock.ANY,
+        'proxies': mock.ANY,
+        'timeout': mock.ANY,
+        'verify': mock.ANY,
+        'allow_redirects': mock.ANY,
+    }
+    http_wargs.update(expected_http_kwargs)
+    assert check.http.options == http_wargs
 
 
 @pytest.mark.parametrize(
@@ -122,3 +122,35 @@ def test_extract_index_tags(instance, test_input, expected_tags):
     """
     test_output = couchbase._extract_index_tags(test_input)
     assert eval(str(test_output)) == expected_tags
+
+
+def test_unit(dd_run_check, check, instance, mocker, aggregator):
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+
+    dd_run_check(check(instance))
+
+    for metric in MOCKED_COUCHBASE_METRICS:
+        aggregator.assert_metric("couchbase." + metric)
+
+    aggregator.assert_service_check('couchbase.can_connect', Couchbase.OK)
+    aggregator.assert_service_check('couchbase.by_node.cluster_membership', Couchbase.OK)
+    aggregator.assert_service_check('couchbase.by_node.health', Couchbase.OK)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_unit_query_metrics(dd_run_check, check, instance_query, mocker, aggregator):
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+
+    dd_run_check(check(instance_query))
+
+    for metric in MOCKED_COUCHBASE_METRICS + QUERY_STATS:
+        aggregator.assert_metric("couchbase." + metric)
+
+    aggregator.assert_service_check('couchbase.can_connect', Couchbase.OK)
+    aggregator.assert_service_check('couchbase.by_node.cluster_membership', Couchbase.OK)
+    aggregator.assert_service_check('couchbase.by_node.health', Couchbase.OK)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

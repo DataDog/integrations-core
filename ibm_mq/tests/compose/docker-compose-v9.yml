@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   ibm_mq1:
     container_name: ibm_mq1

@@ -1,0 +1,46 @@
+[
+    {
+        "name": "mongodb.profiling.level",
+        "type": 0,
+        "value": 0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "clustername:my_cluster",
+            "hosting_type:self-hosted"
+        ]
+    },
+    {
+        "name": "mongodb.profiling.slowms",
+        "type": 0,
+        "value": 100,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "clustername:my_cluster",
+            "hosting_type:self-hosted"
+        ]
+    },
+    {
+        "name": "mongodb.profiling.level",
+        "type": 0,
+        "value": 1,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "clustername:my_cluster",
+            "hosting_type:self-hosted"
+        ]
+    },
+    {
+        "name": "mongodb.profiling.slowms",
+        "type": 0,
+        "value": 100,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "clustername:my_cluster",
+            "hosting_type:self-hosted"
+        ]
+    }
+]

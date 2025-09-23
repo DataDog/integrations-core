@@ -1,0 +1,10 @@
+[
+    {
+        "name": "mongodb.system.cpu.percent",
+        "type": 0,
+        "value": 20.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    }
+]

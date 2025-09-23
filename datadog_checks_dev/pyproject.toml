@@ -1,7 +1,6 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +8,7 @@ build-backend = "hatchling.build"
 name = "datadog-checks-dev"
 description = "The Datadog Checks Developer Tool"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 keywords = [
     "datadog",
     "datadog agent",
@@ -27,25 +26,20 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "contextlib2; python_version < '3.0'",
     "coverage>=5.0.3",
-    "flaky",
+    "flaky>=3.8.0",
     "mock",
-    "psutil",
-    "pytest<7.2.0",  # pytest 7.2.0 has broken our tests
-    "pytest-benchmark[histogram]>=3.2.1",
+    "pytest==8.1.1",
+    "pytest-asyncio>=0.23.4",
+    "pytest-benchmark[histogram]>=4.0.0",
     "pytest-cov>=2.6.1",
-    "pytest-memray>=1.3.0; python_version > '3.0' and (platform_system=='Linux' or platform_system=='Darwin')",
+    "pytest-memray>=1.4.0; platform_system=='Linux' or platform_system=='Darwin'",
     "pytest-mock",
     "pyyaml>=5.4.1",
     "requests>=2.22.0",
-    "shutilwhich==1.1.0; python_version < '3.0'",
-    "six",
-    "subprocess32==3.5.4; python_version < '3.0'",
     "tenacity",
 ]
 dynamic = [
@@ -57,47 +51,45 @@ cli = [
     "aiohttp",
     "aiomultiprocess",
     "atomicwrites",
-    "beautifulsoup4>=4.9.3",
+    "beautifulsoup4==4.12.3",
+    "black==23.12.1",  # TODO Remove once https://github.com/koxudaxi/datamodel-code-generator/issues/1821 is fixed
     "build>=0.7.0",
-    "click~=8.1",
+    "click~=8.1.6",
     "codespell",
     "colorama",
-    "datamodel-code-generator~=0.12.0",
+    "datamodel-code-generator~=0.25.6",
     "hatch>=1.5.0",
-    "in-toto==1.0.1",
+    "in-toto==2.0.0",
     "jsonschema",
     "markdown",
     "orjson",
     "packaging",
     "pip-tools",
+    "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
-    "pyperclip>=1.7.0",
-    "pysmi>=0.3.4",
-    "securesystemslib[crypto]==0.20.1",
-    "semver",
+    "pydantic>=2.0.2",
+    "pysmi==0.3.4",
+    "securesystemslib[crypto]==0.28.0",
+    "semver>=2.13.0",
     "tabulate>=0.8.9",
     "toml>=0.9.4, <1.0.0",
     "tomli>=1.1.0",
     "tomli-w>=1.0.0",
-    "tox>=3.12.1",
+    "tox>=3.12.1, <4.0.0",
+    # Move towncrier dependency to ddev once we migrate changelog-related commands.
+    # We need at least v23.11.0, because it lets us release with empty changelogs:
+    # The issue that is fixed: https://github.com/twisted/towncrier/issues/538
+    # v24.7 changed the way towncrier searches for template files and that broke us.
+    # We have to pin to 23.11.0 until the following issue is done:
+    # https://github.com/twisted/towncrier/issues/641
+    "towncrier==23.11.0",
     "twine>=1.11.0",
-    "virtualenv",
+    "virtualenv<20.22.0",
     # TODO: Remove once every check has a pyproject.toml
-    "setuptools<61",
-    "wheel>=0.31.0",
 ]
-
-[project.scripts]
-ddev = "datadog_checks.dev.tooling.cli:ddev"
 
 [project.entry-points.pytest11]
 datadog_checks = "datadog_checks.dev.plugin.pytest"
-
-[project.entry-points.tox]
-datadog_checks = "datadog_checks.dev.plugin.tox"
-
-[project.entry-points.hatch]
-datadog_checks = "datadog_checks.dev.plugin.hatch"
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
@@ -118,3 +110,6 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.pytest.ini_options]
+testpaths = "tests"

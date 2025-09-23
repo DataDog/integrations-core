@@ -1,0 +1,2577 @@
+{
+    "author_name": "Datadog",
+    "description": "This dashboard provides critical visibility into the health and performance of your InfiniBand fabric infrastructure. The metrics displayed reveal both physical layer issues (like signal integrity problems and link failures) and RDMA protocol-specific errors (such as timeout events and buffer constraints). By monitoring these key indicators, you can quickly identify connectivity failures, congestion points, and resource limitations before they impact application performance. The dashboard focuses on actionable metrics that help pinpoint the root cause of performance degradation - whether it's at the physical link level, within port buffers, or in the RDMA transport layer. This comprehensive visibility enables proactive maintenance and faster troubleshooting, helping maintain the high-throughput, low-latency connectivity that your data-intensive applications depend on.\n\n**Further reading:**\n\n-   [Datadog InfiniBand Integration Documentation](https://docs.datadoghq.com/integrations/infiniband/)\n-   [Infiniband Port Counters](https://docs.nvidia.com/networking/display/ibdiagnetusermanualv290/port+counters)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "device",
+            "prefix": "device"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "port",
+            "prefix": "port"
+        }
+    ],
+    "title": "InfiniBand Overview",
+    "widgets": [
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_background": false,
+                            "has_border": false,
+                            "horizontal_align": "center",
+                            "margin": "md",
+                            "sizing": "cover",
+                            "type": "image",
+                            "url": "/static/images/logos/infiniband_large.svg",
+                            "url_dark_theme": "/static/images/logos/infiniband_reversed_large.svg",
+                            "vertical_align": "center"
+                        },
+                        "id": 6676885668580031,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "This dashboard provides critical visibility into the health and performance of your InfiniBand fabric infrastructure. The metrics displayed reveal both physical layer issues (like signal integrity problems and link failures) and RDMA protocol-specific errors (such as timeout events and buffer constraints). By monitoring these key indicators, you can quickly identify connectivity failures, congestion points, and resource limitations before they impact application performance. The dashboard focuses on actionable metrics that help pinpoint the root cause of performance degradation - whether it's at the physical link level, within port buffers, or in the RDMA transport layer. This comprehensive visibility enables proactive maintenance and faster troubleshooting, helping maintain the high-throughput, low-latency connectivity that your data-intensive applications depend on.",
+                            "font_size": "14",
+                            "has_padding": false,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 7643882380799009,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "**Further reading:**\n\n- [Datadog InfiniBand Integration Documentation](https://docs.datadoghq.com/integrations/infiniband/)\n- [Infiniband Port Counters](https://docs.nvidia.com/networking/display/ibdiagnetusermanualv290/port+counters)",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 8677274438523236,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 6
+                        }
+                    }
+                ]
+            },
+            "id": 3255781064469560,
+            "layout": {
+                "height": 9,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "InfiniBand Monitoring Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "InfiniBand Overview shows a quick summary of all reporting InfiniBand instances and related monitors and their status.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8654798649293102,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_state{$host,$device,$port} by {port_state}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "Port States Overview",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 2961545223081293,
+                        "layout": {
+                            "height": 4,
+                            "width": 3,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_phys_state{$host,$device,$port} by {port_phys_state}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "Physical States Overview",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 232927924973025,
+                        "layout": {
+                            "height": 4,
+                            "width": 3,
+                            "x": 3,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:(integration:infiniband) $host",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "show_status": true,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "InfiniBand Monitor Summary",
+                            "type": "manage_status"
+                        },
+                        "id": 2277572513463848,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 7739368590855267,
+            "layout": {
+                "height": 9,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "InfiniBand Interface Counters",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "These metrics monitor the physical health and performance of your InfiniBand fabric, tracking link stability, error patterns, congestion points, and traffic volumes. By observing these foundational metrics, you can identify hardware failures, signal integrity issues, and network bottlenecks before they cascade into application-level problems. This section provides the essential visibility needed to maintain a reliable high-speed fabric infrastructure.\n",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2205192473394066,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_state{$host,$device,$port} by {port_state,host,device}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 5
+                            },
+                            "title": "Port State by Host and Device Past 5 Minutes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 4733152882986982,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "count:infiniband.port_phys_state{$host,$device,$port} by {port_phys_state,host,device}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "time": {
+                                "type": "live",
+                                "unit": "minute",
+                                "value": 5
+                            },
+                            "title": "Port Physical State by Host and Device Past 5 Minutes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 4465680688049229,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Symbol Error",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.symbol_error{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Minor Link Errors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2059054901186522,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Link Downed",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.link_downed{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Times Port was Downed",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5040778924687450,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Link Error Recovery",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.link_error_recovery{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Error Recovery Completed",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4747259141715002,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Received Errors",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.port_rcv_errors{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Error Packets Received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5037623189613132,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Received Remote Physical Errors",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.port_rcv_remote_physical_errors{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "EBP (End Bad Packet) Received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6006347611465996,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Local Link Integrity Errors",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.local_link_integrity_errors{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Local Errors Threshold Exceeds",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7161405104799048,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Received Discards",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.port_rcv_discards{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Discarded Received Packets",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2408171477760518,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Transmit Discards",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.port_xmit_discards{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Outbound Packets Discarded",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1686860121052044,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Transmit Wait",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.port_xmit_wait{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Transmit Wait Time Ticks",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6005122839855104,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Received Data",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Received Data",
+                                            "formula": "monotonic_diff(query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.port_rcv_data{$host,$device,$port} by {device,port,host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:infiniband.port_rcv_data_64{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Data Octets Received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2883976128074332,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 14
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Transmit Data",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Transmit Data",
+                                            "formula": "monotonic_diff(query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.port_xmit_data{$host,$device,$port} by {device,port,host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:infiniband.port_xmit_data_64{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Data Octets Transmitted",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 422065416322692,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 14
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Received Packets",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Received Packets",
+                                            "formula": "monotonic_diff(query2)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.port_rcv_packets{$host,$device,$port} by {device,port,host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:infiniband.port_rcv_packets_64{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Packets Received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6207649051498670,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 14
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Excessive Buffer Overrun Errors",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.excessive_buffer_overrun_errors{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Excessive Buffer Overrun",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7647609776224090,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 17
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Received Switch Relay Errors",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.port_rcv_switch_relay_errors{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Packet Discarded Due to Switch Relay Errors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6453159987521510,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 17
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Port Received Constraint Errors",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.port_rcv_constraint_errors{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Packets Received Discarded at the Switch Port",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6282520790599704,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 17
+                        }
+                    }
+                ]
+            },
+            "id": 8860321968669652,
+            "layout": {
+                "height": 21,
+                "width": 12,
+                "x": 0,
+                "y": 9
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Remote Direct Memory Access Counters",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "These metrics reveal the operational health of RDMA communications running over your InfiniBand fabric, exposing protocol errors, congestion events, resource limitations, and message handling issues. Monitoring these RDMA-specific indicators helps identify application-level performance problems, buffer misconfigurations, and protocol inefficiencies that standard network metrics might miss. These metrics are critical for maintaining the ultra-low latency and high throughput that make RDMA valuable for your performance-sensitive applications.",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 7157115367428154,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Local Ack Timeout Error",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.local_ack_timeout_err{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Ack Timer Expirations",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2786027167438442,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Packet Sequence Error",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.packet_seq_err{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Negative Ack Sequence Packets Received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4570067100056912,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "RNR NAK Retry Error",
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.rnr_nak_retry_err{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Receiver Not Ready Negative Acks",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8042496090573167,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.np_cnp_sent{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CNP Packets Sent",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6405401023791558,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.np_ecn_marked_roce_packets{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Congestion Marked Packets",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5373899524394730,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.roce_adp_retrans{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Adaptive Retransmissions",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4357715356274972,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.out_of_buffer{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Drops Due to Out of Buffer",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 480412858996172,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.out_of_sequence{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Out of Sequence Packets Received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 195916469919840,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.duplicate_request{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Duplicate Requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1580317837769128,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.req_cqe_error{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CQE Completed with Errors (Requester)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2204757296450874,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.resp_cqe_error{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CQE Completed with Errors (Responder)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8658199796959200,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.resp_remote_access_errors{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Remote Access Errors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8768912800197226,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.resp_local_length_error{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Local Length Errors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5585942402148508,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 14
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.req_remote_invalid_request{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Invalid Local Requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5691895571813591,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 14
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.rx_wqe_err{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Work Queue Entry Errors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3923670826869286,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 14
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.roce_slow_restart{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "RoCE Slow Restart Count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2720056577221008,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 17
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.rp_cnp_ignored{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CNP Packets Ignored",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 269695291275666,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 17
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.rp_cnp_handled{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CNP Packets Handled",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4423998223286058,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 17
+                        }
+                    }
+                ]
+            },
+            "id": 4134214912809508,
+            "layout": {
+                "height": 21,
+                "width": 12,
+                "x": 0,
+                "y": 30
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "AWS Elastic Fabric Adapter Counters",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "orange",
+                            "content": "These metrics monitor AWS Elastic Fabric Adapter (EFA) performance, tracking packet transmission, RDMA operations, and buffer utilization specific to this cloud-optimized interconnect. By observing these specialized counters, you can identify communication bottlenecks and resource constraints affecting your HPC and ML workloads in AWS. These metrics help ensure you're maximizing the performance benefits of AWS's low-latency networking while providing early warning of potential issues.",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8080549994326675,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.rdma_write_wrs{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Completed RDMA Write Ops",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1775002162805766,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.tx_bytes{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Bytes Transmitted",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2998279324469822,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.rx_bytes{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Bytes Received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1417680021091146,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.rx_pkts{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Packets Received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1183346785957536,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.rx_drops{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Packets Dropped",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4119153488553678,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.tx_pkts{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Packets Transmitted",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4028343292910970,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 8
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.send_wrs{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Send Packets Sent",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6083259591664452,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.recv_bytes{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Send Bytes Received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4394005712587140,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.send_bytes{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Send Bytes Sent ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1887146755117518,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 14
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "monotonic_diff(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:infiniband.rdma.recv_wrs{$host,$device,$port} by {device,port,host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Send Packets Received",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5691222410939430,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 14
+                        }
+                    }
+                ]
+            },
+            "id": 1767858235976600,
+            "layout": {
+                "height": 18,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 51
+            }
+        }
+    ]
+}

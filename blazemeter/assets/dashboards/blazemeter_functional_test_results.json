@@ -1,0 +1,928 @@
+{
+    "title": "BlazeMeter - Functional Test Results",
+    "description": "This dashboard offers insights into functional test results, showing browser/platform details, test execution statuses, unique test/suite counts, and metrics like passed, failed, and broken tests. It also highlights trends, undefined statuses, and overall defined status, summarizing test results.",
+    "widgets": [
+        {
+            "id": 6029219956940210,
+            "definition": {
+                "type": "image",
+                "url": "/static/images/logos/blazemeter_large.svg",
+                "url_dark_theme": "",
+                "sizing": "contain",
+                "margin": "sm",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 7756505993488990,
+            "definition": {
+                "title": "Monitors Summary",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7467907033511374,
+                        "definition": {
+                            "title": "Monitors Summary",
+                            "type": "manage_status",
+                            "display_format": "countsAndList",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:(integration:blazemeter AND service:functional)",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 5
+            }
+        },
+        {
+            "id": 6552212167429970,
+            "definition": {
+                "type": "note",
+                "content": "**[BlazeMeter](https://www.blazemeter.com/)** is a cloud-based performance testing platform that enables scalable load testing for web applications, mobile apps, and APIs.\n\nThis dashboard offers insights into functional test results, showing browser/platform details, test execution statuses, unique test/suite counts, and metrics like passed, failed, and broken tests.\n\nFor more information, see the [BlazeMeter Integration Documentation](https://docs.datadoghq.com/integrations/blazemeter/).\n\n**Tip**:\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "blue",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 6407805327499302,
+            "definition": {
+                "title": "Grid Summary Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5659348247887240,
+                        "definition": {
+                            "title": "Total Unique Test Cases",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.gridSummary_uniqueTestCasesCount{$Project_ID,$TestName,$Master_ID}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#65a8e6"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5995567347624670,
+                        "definition": {
+                            "title": "Total Unique Test Suites",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.gridSummary_uniqueSuitesCount{$Master_ID,$Project_ID,$TestName}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#65a8e6"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1458951021187866,
+                        "definition": {
+                            "title": "Total Passed Test Cases",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.gridSummary_passedTestCasesCount{$Master_ID,$Project_ID,$TestName}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 106878830747380,
+                        "definition": {
+                            "title": "Total Failed Test Cases",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.gridSummary_failedTestCasesCount{$Master_ID,$TestName,$Project_ID}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2769921148791912,
+                        "definition": {
+                            "title": "Total Broken Test Cases",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.gridSummary_brokenTestCasesCount{$Master_ID,$Project_ID,$TestName}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4899827304942860,
+                        "definition": {
+                            "title": "Total Undefined Test Cases",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.gridSummary_undefinedTestCasesCount{$Master_ID,$Project_ID,$TestName}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6125456236258964,
+                        "definition": {
+                            "title": "Total Test Cases",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.gridSummary_testCasesCount{$Master_ID,$Project_ID,$TestName}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#65a8e6"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 0,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8490765855046840,
+                        "definition": {
+                            "title": "Average Pass Percentage",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:blazemeter.functional.gridSummary_passedPercent{$Master_ID,$Project_ID,$TestName}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query1 * 100"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 420063294307378,
+                        "definition": {
+                            "title": "Grid Summary Details ",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query7",
+                                            "query": "sum:blazemeter.functional.gridSummary_testCasesCount{$Project_ID,$TestName,$Master_ID} by {masterid}",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.gridSummary_uniqueTestCasesCount{$Project_ID,$TestName,$Master_ID} by {masterid}",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:blazemeter.functional.gridSummary_passedTestCasesCount{$Project_ID,$TestName,$Master_ID} by {masterid}",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "sum:blazemeter.functional.gridSummary_failedTestCasesCount{$Project_ID,$TestName,$Workspace_ID,$Master_ID} by {masterid}",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "query": "sum:blazemeter.functional.gridSummary_brokenTestCasesCount{$Project_ID,$TestName,$Master_ID} by {masterid}",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "query": "sum:blazemeter.functional.gridSummary_undefinedTestCasesCount{$Project_ID,$TestName,$Master_ID} by {masterid}",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query8",
+                                            "query": "avg:blazemeter.functional.gridSummary_passedPercent{$Project_ID,$TestName,$Master_ID} by {masterid}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:blazemeter.functional.gridSummary_uniqueSuitesCount{$Project_ID,$TestName,$Master_ID} by {masterid}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Test Cases",
+                                            "formula": "query7"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Unique Test Cases",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Passed Test Cases",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Failed Test Cases",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Broken Test Cases",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Undefined Test Cases",
+                                            "formula": "query6"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Unique Suites",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Pass Percentage",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query8 * 100"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 11
+            }
+        },
+        {
+            "id": 4349084946575638,
+            "definition": {
+                "title": "Test Case Results Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8410576336892386,
+                        "definition": {
+                            "title": "Distribution of Tests by Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.individual_testCasesCount{$Project_ID,$TestName,$Session_ID,$SessionName,$Master_ID} by {definedstatus}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2363290537348992,
+                        "definition": {
+                            "title": "Top Browsers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.individual_testCasesCount{$Project_ID,$TestName,$Session_ID,$SessionName,$Master_ID} by {browsername,masterid}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 4315138705396420,
+                        "definition": {
+                            "title": "Top Platforms",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.individual_testCasesCount{$Project_ID,$TestName,$Session_ID,$SessionName,$Master_ID} by {platformname,masterid}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 8311385865814324,
+                        "definition": {
+                            "title": "Top Broken Test Suite Names",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.individual_testCasesCount{$Project_ID,$TestName,$Session_ID,$SessionName,definedstatus:broken,$Master_ID} by {testsuitename,definedstatus}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 6,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 8803519680369122,
+                        "definition": {
+                            "title": "Top Failing Tests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:blazemeter.functional.individual_testCasesCount{$Project_ID,$TestName,$Session_ID,$SessionName,definedstatus:failed,$Master_ID} by {testname,masterid}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 9,
+                            "width": 6,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 12,
+                "height": 15
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Project_ID",
+            "prefix": "projectid",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Master_ID",
+            "prefix": "masterid",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "TestName",
+            "prefix": "testname",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Session_ID",
+            "prefix": "sessionid",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "SessionName",
+            "prefix": "sessionname",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

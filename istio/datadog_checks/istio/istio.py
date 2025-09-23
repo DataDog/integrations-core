@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2018-Present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from six import PY2
-
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 
+from .check import IstioCheckV2
 from .constants import BLACKLIST_LABELS
 from .legacy_1_4 import LegacyIstioCheck_1_4
 from .metrics import ISTIOD_METRICS
@@ -32,7 +31,7 @@ class Istio(OpenMetricsBaseCheck):
         instance.update(
             {
                 'prometheus_url': instance.get('istiod_endpoint'),
-                'namespace': 'istio',
+                'namespace': instance.get('namespace', 'istio'),
                 'metrics': metrics,
                 'metadata_metric_name': 'istio_build',
                 'metadata_label_map': {'version': 'tag'},
@@ -46,15 +45,6 @@ class Istio(OpenMetricsBaseCheck):
         instance = instances[0]
 
         if is_affirmative(instance.get('use_openmetrics', False)):
-            if PY2:
-                raise ConfigurationError(
-                    "Openmetrics on this integration is only available when using py3. "
-                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                    "for more information"
-                )
-            # TODO: when we drop Python 2 move this import up top
-            from .check import IstioCheckV2
-
             return IstioCheckV2(name, init_config, instances)
         else:
             if instance.get('istiod_endpoint'):

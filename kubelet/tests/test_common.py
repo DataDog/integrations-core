@@ -35,7 +35,7 @@ def test_container_filter(monkeypatch):
     pod_list_utils = PodListUtils(pods)
 
     assert pod_list_utils is not None
-    assert len(pod_list_utils.containers) == 10
+    assert len(pod_list_utils.containers) == 14
     assert long_cid in pod_list_utils.containers
     c_is_excluded.assert_not_called()
 
@@ -69,6 +69,41 @@ def test_container_filter(monkeypatch):
     assert pod_list_utils.is_excluded(long_cid) is True
     c_is_excluded.assert_called_once()
     c_is_excluded.assert_called_with(ctr_name, ctr_image, namespace)
+
+
+def test_container_filter_imageID(monkeypatch):
+    c_is_excluded = mock.Mock(return_value=True)
+    monkeypatch.setattr('datadog_checks.kubelet.common.c_is_excluded', c_is_excluded)
+
+    pods = json.loads(mock_from_file('pods_images_sha.json'))
+    pod_list_utils = PodListUtils(pods)
+
+    # Test normal image
+    c_is_excluded.reset_mock()
+    assert pod_list_utils.is_excluded("docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561")
+    c_is_excluded.assert_called_once_with(
+        mock.ANY,
+        "asia.gcr.io/google-containers/fluentd-gcp:2.0.10",
+        mock.ANY,
+    )
+
+    # Test fallback to imageID removing any prefix
+    c_is_excluded.reset_mock()
+    assert pod_list_utils.is_excluded("docker://580cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05")
+    c_is_excluded.assert_called_once_with(
+        mock.ANY,
+        "asia.gcr.io/p@sha256:5831390762c790b0375c202579fd41dd5f40c71950f7538adbe14b0c16f35d56",
+        mock.ANY,
+    )
+
+    # Test fallback to imageID without anything to remove
+    c_is_excluded.reset_mock()
+    assert pod_list_utils.is_excluded("containerd://1258aef41f9b5181dd6b2328f0248af12af5e5e897dc197bd32d59e3dad4f9f4")
+    c_is_excluded.assert_called_once_with(
+        mock.ANY,
+        "docker.io/library/redis@sha256:b0e0e30549716e5a53d455c7cde800578358ed7cfd9686113433597cea56d899",
+        mock.ANY,
+    )
 
 
 def test_filter_staticpods(monkeypatch):

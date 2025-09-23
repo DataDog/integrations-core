@@ -1,0 +1,828 @@
+{
+    "title": "Checkpoint Quantum Firewall - Audit",
+    "description": "- This dashboard gives insights about audit log details.",
+    "widgets": [
+        {
+            "id": 1604811535990430,
+            "definition": {
+                "type": "image",
+                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Check_Point_logo_2022.svg/481px-Check_Point_logo_2022.svg.png",
+                "url_dark_theme": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Check_Point_logo_2022.svg/481px-Check_Point_logo_2022.svg.png",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 6787304180107734,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard gives insights about audit log details.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 7269957039286982,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Most Active Administrator\n2. Total Policies Installed\n3. Total Sessions Published\n4. Total Created Object\n5. Total Modified Object\n6. Total Deleted Object\n7. Total Created Rule\n8. Total Modified Rule\n9. Total Deleted Rule\n10. Audit Activity Count by Subject\n11. Audit Activity Count by Action Status\n12. Audit Activity Count by Operation\n13. Installed Policies Log Details\n14. Published Sessions Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 2806570433963960,
+            "definition": {
+                "title": "Most Active Administrator",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@administrator",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 2930904656182762,
+            "definition": {
+                "title": "Total Policies Installed",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @operation:\"Install Policy\" $Checkpoint_Server $Action $Administrator "
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 4,
+                "y": 2,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 6163534300569610,
+            "definition": {
+                "title": "Total Sessions Published",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @operation:Publish $Checkpoint_Server $Action $Administrator "
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 8,
+                "y": 2,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7415795313544518,
+            "definition": {
+                "title": "Total Created Object",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @operation:\"Create Object\" $Checkpoint_Server $Action $Administrator "
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 4595523239282720,
+            "definition": {
+                "title": "Total Modified Object",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @operation:\"Modify Object\" $Checkpoint_Server $Action $Administrator "
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 4,
+                "y": 5,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7232065477104940,
+            "definition": {
+                "title": "Total Deleted Object",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @operation:\"Delete Object\" $Checkpoint_Server $Action $Administrator "
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 8,
+                "y": 5,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 935443617044170,
+            "definition": {
+                "title": "Total Created Rule",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @operation:\"Create Rule\" $Checkpoint_Server $Action $Administrator "
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 6653854168396486,
+            "definition": {
+                "title": "Total Modified Rule",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @operation:\"Modify Rule\" $Checkpoint_Server $Action $Administrator "
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 4,
+                "y": 8,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 4159807514613496,
+            "definition": {
+                "title": "Total Deleted Rule",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) @operation:\"Delete Rule\" $Checkpoint_Server $Action $Administrator "
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 8,
+                "y": 8,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 1470213192657762,
+            "definition": {
+                "title": "Audit Activity Count by Subject",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@subject",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 11,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6952254368115628,
+            "definition": {
+                "title": "Audit Activity Count by Action Status",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@action",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 11,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 3706670090386222,
+            "definition": {
+                "title": "Audit Activity Count by Operation",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@operation",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole) $Checkpoint_Server $Action $Administrator"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 15,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 240564572200940,
+            "definition": {
+                "title": "Installed Policies Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:checkpoint-quantum-firewall @product:(SmartConsole OR SmartView) @operation:\"Install Policy\" $Checkpoint_Server $Action $Administrator ",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "origin",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "action",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "subject",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "additional_info",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "administrator",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "client_ip",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "operation",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "objecttype",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "audit_status",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "objectname",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 19,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 6315435197711994,
+            "definition": {
+                "title": "Published Sessions Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:checkpoint-quantum-firewall @product:(WEB_API OR SmartConsole OR SmartView) @operation:Publish $Checkpoint_Server $Action $Administrator ",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "origin",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "action",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "subject",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "client_ip",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "administrator",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "operation",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "session_name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "session_description",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "fieldschanges",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 23,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Checkpoint_Server",
+            "prefix": "@origin",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Action",
+            "prefix": "@action",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Administrator",
+            "prefix": "@administrator",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

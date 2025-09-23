@@ -4,12 +4,13 @@
 from __future__ import unicode_literals
 
 from copy import deepcopy
-from distutils.version import StrictVersion
 
 import mock
 import pytest
 import redis
+from packaging.version import Version
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.redisdb import Redis
 
 from .common import HOST, PASSWORD, PORT, REDIS_VERSION
@@ -32,8 +33,8 @@ def test_aof_loading_metrics(aggregator, redis_instance):
         redis_check = Redis('redisdb', {}, [redis_instance])
         conn = redis.return_value
         conn.config_get.return_value = {}
-        conn.info = (
-            lambda *args: []
+        conn.info = lambda *args: (
+            []
             if args
             else {
                 'role': 'foo',
@@ -47,6 +48,7 @@ def test_aof_loading_metrics(aggregator, redis_instance):
         redis_check._check_db()
 
         aggregator.assert_metric('redis.info.latency_ms')
+        aggregator.assert_metric('redis.ping.latency_ms')
         aggregator.assert_metric('redis.net.commands', 0)
         aggregator.assert_metric('redis.key.length', 0)
 
@@ -55,6 +57,7 @@ def test_aof_loading_metrics(aggregator, redis_instance):
         aggregator.assert_metric('redis.aof.loading_loaded_perc', 44)
         aggregator.assert_metric('redis.aof.loading_eta_seconds', 45)
         aggregator.assert_all_metrics_covered()
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instance):
@@ -63,8 +66,8 @@ def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instan
     db.lpush("test_list", 1)
     db.lpush("test_list", 2)
     db.lpush("test_list", 3)
-    version = StrictVersion(db.info().get('redis_version'))
-    if version >= StrictVersion('5.0.0'):
+    version = Version(db.info().get('redis_version'))
+    if version >= Version('5.0.0'):
         db.xadd("test_stream", {"foo": "bar"})
     db.set("key1", "value")
     db.set("key2", "value")
@@ -88,7 +91,7 @@ def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instan
             aggregator.assert_metric(name, tags=expected)
 
     aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected_db + ['key:test_list', 'key_type:list'])
-    if version >= StrictVersion('5.0.0'):
+    if version >= Version('5.0.0'):
         aggregator.assert_metric(
             'redis.key.length', 1, count=1, tags=expected_db + ['key:test_stream', 'key_type:stream']
         )
@@ -98,10 +101,12 @@ def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instan
 
     # in the old tests these was explicitly asserted, keeping it like that
     assert 'redis.net.commands' in aggregator.metric_names
-    if version >= StrictVersion('2.6.0'):
+    if version >= Version('2.6.0'):
         # instantaneous_ops_per_sec info is only available on redis>=2.6
         assert 'redis.net.instantaneous_ops_per_sec' in aggregator.metric_names
     db.flushdb()
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_service_check(aggregator, dd_run_check, check, redis_auth, redis_instance):
@@ -144,7 +149,7 @@ def test_metadata(dd_run_check, check, master_instance, datadog_agent):
 def test_redis_command_stats(aggregator, dd_run_check, check, redis_instance):
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
     version = db.info().get('redis_version')
-    if StrictVersion(version) < StrictVersion('2.6.0'):
+    if Version(version) < Version('2.6.0'):
         # Command stats only works with Redis >= 2.6.0
         return
 
@@ -220,6 +225,7 @@ def test__check_key_lengths_single_db(aggregator, redis_instance):
 
     # that single metric should have value=2
     aggregator.assert_metric('redis.key.length', value=2)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test__check_key_lengths_multi_db(aggregator, redis_instance):
@@ -254,3 +260,4 @@ def test__check_key_lengths_multi_db(aggregator, redis_instance):
     aggregator.assert_metric('redis.key.length', value=2, tags=['key:test_foo', 'key_type:list', 'redis_db:db3'])
     aggregator.assert_metric('redis.key.length', value=1, tags=['key:test_bar', 'key_type:list', 'redis_db:db0'])
     aggregator.assert_metric('redis.key.length', value=0, tags=['key:missing_key'])
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)

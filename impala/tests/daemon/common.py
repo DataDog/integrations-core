@@ -4,7 +4,7 @@
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 
 # E501: line too long (XXX > 120 characters)
-# flake8: noqa: E501
+# ruff: noqa: E501
 
 TAGS = ['endpoint:http://localhost:25000/metrics_prometheus']
 

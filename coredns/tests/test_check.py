@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import PY2
 
 from datadog_checks.coredns import CoreDNSCheck
 from datadog_checks.dev.utils import ON_WINDOWS, get_metadata_metrics
@@ -31,7 +30,6 @@ class TestCoreDNS:
         for metric in metrics:
             aggregator.assert_metric(metric)
 
-    @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
     def test_check_omv2(self, aggregator, mock_get, dd_run_check, omv2_instance):
         """
         Testing CoreDNS check OpenMetrics V2.
@@ -65,7 +63,6 @@ class TestCoreDNS:
 
         aggregator.assert_all_metrics_covered()
 
-    @pytest.mark.skipif(PY2, reason='OpenMetrics V2 is only available with Python 3')
     def test_docker_omv2(self, aggregator, dd_environment, dd_run_check, docker_omv2_instance):
         """
         Testing OpenMetricsV2 metrics emitted from docker container.

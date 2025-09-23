@@ -1,13 +1,54 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+import datetime
+import re
 from copy import deepcopy
 
+import dateutil.parser
 import pymongo
+from dateutil.tz import tzutc
 
+from datadog_checks.mongo.api import CRITICAL_FAILURE
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import (
     ALLOWED_CUSTOM_METRICS_TYPES,
     ALLOWED_CUSTOM_QUERIES_COMMANDS,
     ReplicaSetDeployment,
 )
+
+MONGO_DATE_EXPRESSIONS = {
+    r"ISODate\(\s*\'(.*?)\'\s*\)": (lambda m: dateutil.parser.isoparse(m.groups()[0])),
+    r"ISODate\(\s*\)|Date\(\s*\)": (lambda m: datetime.datetime.now(tz=tzutc())),
+    r"new\s*Date\(ISODate\(\s*\)\.getTime\(\s*\)((\s*[+\-*\/]\s*(\d+))*)\s*\)": (
+        lambda m: datetime.datetime.now(tz=tzutc()) + datetime.timedelta(milliseconds=eval(m.groups()[0]))
+    ),
+}
+
+
+def replace_value(obj, log):
+    if isinstance(obj, str):
+        new_v = obj
+        for expression, f in MONGO_DATE_EXPRESSIONS.items():
+            m = re.match(expression, obj)
+            if m:
+                log.debug("match: %s", obj)
+                log.debug("groups: %s", m.groups())
+                new_v = f(m)
+                break
+        return new_v
+    return obj
+
+
+def replace_datetime(obj, log):
+    log.debug("replace_datetime in %s", obj)
+    # Recur as necessary into dicts and lists
+    if isinstance(obj, dict):
+        return {k: replace_datetime(v, log) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_datetime(item, log) for item in obj]
+    return replace_value(obj, log)
 
 
 class CustomQueriesCollector(MongoCollector):
@@ -22,6 +63,7 @@ class CustomQueriesCollector(MongoCollector):
         # Can theoretically be run on any node as long as it contains data.
         # i.e Arbiters are ruled out
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            self.log.debug("CustomQueriesCollector cannot be run on arbiter nodes.")
             return False
         return True
 
@@ -95,6 +137,10 @@ class CustomQueriesCollector(MongoCollector):
         try:
             # This is where it is necessary to extract the command and its argument from the query to pass it as the
             # first two params.
+            self.log.debug("mongo_command: %s", mongo_command)
+            self.log.debug("mongo_command_value: %s", mongo_command_value)
+            mongo_query = replace_datetime(mongo_query, self.log)
+            self.log.debug("mongo_query: %s", mongo_query)
             result = db.command(mongo_command, mongo_command_value, **mongo_query)
             if result['ok'] == 0:
                 raise pymongo.errors.PyMongoError(result['errmsg'])
@@ -123,6 +169,7 @@ class CustomQueriesCollector(MongoCollector):
         empty_result_set = True
 
         for row in cursor:
+            self.log.debug("row: %s", row)
             empty_result_set = False
             metric_info = []
             query_tags = list(tags)
@@ -156,6 +203,8 @@ class CustomQueriesCollector(MongoCollector):
         for raw_query in self.custom_queries:
             try:
                 self._collect_custom_metrics_for_query(api, raw_query)
+            except CRITICAL_FAILURE as e:
+                raise e  # Critical failures must bubble up to trigger a CRITICAL service check.
             except Exception as e:
                 metric_prefix = raw_query.get('metric_prefix')
                 self.log.warning("Errors while collecting custom metrics with prefix %s", metric_prefix, exc_info=e)

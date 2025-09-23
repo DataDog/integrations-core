@@ -2,7 +2,7 @@
 
 -----
 
-[Prometheus](https://prometheus.io) is an open source monitoring system for timeseries metric data. Many Datadog 
+[Prometheus](https://prometheus.io) is an open source monitoring system for timeseries metric data. Many Datadog
 integrations collect metrics based on Prometheus exported data sets.
 
 Prometheus-based integrations use the OpenMetrics exposition format to collect metrics.
@@ -11,19 +11,17 @@ Prometheus-based integrations use the OpenMetrics exposition format to collect m
 
 All functionality is exposed by the `OpenMetricsBaseCheck` and `OpenMetricsScraperMixin` classes.
 
-::: datadog_checks.base.checks.openmetrics.OpenMetricsBaseCheck
-    rendering:
+::: datadog_checks.base.checks.openmetrics.base_check.OpenMetricsBaseCheck
+    options:
       heading_level: 4
-    selection:
       members:
         - __init__
         - check
         - get_scraper_config
 
 ::: datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin
-    rendering:
+    options:
       heading_level: 4
-    selection:
       members:
         - parse_metric_family
         - scrape_metrics
@@ -62,7 +60,7 @@ All [HTTP options](../base/http.md#options) are also supported.
 
 
 ::: datadog_checks.base.checks.openmetrics.base_check.StandardFields
-    rendering:
+    options:
       show_root_heading: false
       show_root_toc_entry: false
 
@@ -78,7 +76,7 @@ Prometheus gauge metrics are submitted as Datadog gauge metrics.
 
 ### Counter
 
-A [Prometheus counter](https://prometheus.io/docs/concepts/metric_types/#counter) is a cumulative metric that represents 
+A [Prometheus counter](https://prometheus.io/docs/concepts/metric_types/#counter) is a cumulative metric that represents
 a single monotonically increasing counter whose value can only increase or be reset to zero on restart.
 
 | Config Option | Value | Datadog Metric Submitted |
@@ -88,7 +86,7 @@ a single monotonically increasing counter whose value can only increase or be re
 
 ### Histogram
 
-A [Prometheus histogram](https://prometheus.io/docs/concepts/metric_types/#histogram) samples observations and counts 
+A [Prometheus histogram](https://prometheus.io/docs/concepts/metric_types/#histogram) samples observations and counts
 them in configurable buckets along with a sum of all observed values.
 
 Histogram metrics ending in:
@@ -96,7 +94,7 @@ Histogram metrics ending in:
 - `_sum` represent the total sum of all observed values. Generally [sums](https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations)
  are like counters but it's also possible for a negative observation which would not behave like a typical always increasing counter.
 - `_count` represent the total number of events that have been observed.
-- `_bucket` represent the cumulative counters for the observation buckets. Note that buckets are only submitted if `send_histogram_buckets` is enabled.
+- `_bucket` represent the cumulative counters for the observation buckets. Note that buckets are only submitted if `send_histograms_buckets` is enabled.
 
 
 | Subtype | Config Option | Value | Datadog Metric Submitted |

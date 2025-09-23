@@ -39,7 +39,7 @@ files:
             account: <ACCOUNT>.<REGION_ID>.privatelink
         value:
           type: string
-          example: <ACCOUNT>
+          example: <ORG_NAME>-<ACCOUNT_NAME>
       - name: username
         required: true
         description: Login name for the user.
@@ -200,6 +200,7 @@ files:
                   type: gauge
               tags:
                 - test:snowflake
+              metric_prefix: snowflake
       - template: instances/default
         overrides:
           min_collection_interval.description: |

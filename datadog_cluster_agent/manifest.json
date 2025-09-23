@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b6c2b71b-38c9-4769-86ad-516953849236",
   "app_id": "datadog-cluster-agent",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,7 +16,8 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Containers"
+      "Category::Containers",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -24,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Datadog Cluster Agent",
@@ -35,13 +36,15 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "datadog_cluster_agent.",
+        "prefix": "datadog.cluster_agent.",
         "check": "datadog.cluster_agent.api_requests",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10108,
+      "auto_install": true
     },
     "dashboards": {
       "Datadog Cluster Agent - Overview": "assets/dashboards/datadog_cluster_agent_overview.json"

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "def4c078-7aa6-45ab-8429-b594c98f3d48",
   "app_id": "activemq-xml",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,13 +13,18 @@
     "title": "ActiveMQ XML",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Processing",
       "Category::Log Collection",
-      "Category::Messaging",
-      "Category::Autodiscovery"
+      "Category::Message Queues",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-activemq-metrics-performance"
+      }
     ]
   },
   "author": {
@@ -27,7 +33,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "ActiveMQ XML",
@@ -44,7 +49,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10240,
+      "auto_install": true
     },
     "logs": {
       "source": "activemq"

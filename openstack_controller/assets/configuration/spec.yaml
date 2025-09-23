@@ -15,14 +15,35 @@ files:
     - template: instances
       options:
         - name: name
-          required: true
+          hidden: true
           description: |
             Unique identifier for this instance.
           value:
             example: <INSTANCE_NAME>
             type: string
+        - name: username
+          description: |
+           The User name used to connect to Openstack.
+          value:
+            example: "admin"
+            type: string
+            display_default: null
+        - name: password
+          description: |
+           The Password used to connect to Openstack.
+          value:
+            example: <PASSWORD>
+            type: string
+
+        - name: domain_id
+          description: |
+           The domain ID used to connect to Openstack. If not specified, the check will
+           use the "default" Domain ID
+          value:
+            example: "default"
+            type: string
         - name: user
-          required: true
+          hidden: true
           description: |
            Password authentication is the only auth method supported
            User expects username, password, and user domain id
@@ -36,7 +57,17 @@ files:
               domain:
                 id: <DOMAIN_ID>
             type: object
+          enabled: true
+        - name: use_legacy_check_version
+          description: |
+            For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
+            integration by setting this field to "true".
+          enabled: true
+          value:
+              type: boolean
+              example: false
         - name: whitelist_project_names
+          hidden: true
           description: |
            IDs of projects to whitelist for monitoring (by default the agent collects limit metrics from all projects)
            Regex expressions for the project names are supported.
@@ -50,6 +81,7 @@ files:
             items:
               type: string
         - name: blacklist_project_names
+          hidden: true
           description: |
            IDs of projects to blacklist for monitoring (by default the agent collects limit metrics from all projects)
            Regex expressions for the project names are supported.
@@ -63,6 +95,7 @@ files:
             items:
               type: string
         - name: exclude_server_ids
+          hidden: true
           description: |
            IDs of servers to exclude from monitoring. (by default the agent collects metrics from all guest servers)
            Regex expressions for the server IDs are supported.
@@ -75,6 +108,7 @@ files:
             items:
               type: string
         - name: exclude_network_ids
+          hidden: true
           description: |
            IDs of networks to exclude from monitoring (by default the agent collects metrics from networks returned by the
            neutron:get_networks operation)
@@ -99,7 +133,7 @@ files:
             paginated_limit sets the number of items some api calls should return.
           value:
             example: 1000
-            display_default: 1000
+            default: null
             type: integer
         - name: openstack_config_file_path
           description: |
@@ -124,7 +158,45 @@ files:
             example: https://<KEYSTONE_ENDPOINT>:<PORT>/
             type: string
             display_default: null
+        - name: ironic_microversion
+          description: |
+           The microversion of the Ironic (Bare Metal) API to call.
+           It is recommended to set this parameter to the latest Ironic microversion supported by your Openstack version.
+
+           View this page for more about Ironic microvoersion compatibility:
+              https://docs.openstack.org/ironic/latest/contributor/webapi-version-history.html
+          enabled: true
+          value:
+            example: "1.80"
+            type: string
+            display_default: null
+        - name: nova_microversion
+          description: |
+           The microversion of the Nova (Compute) API to call.
+           It is recommended to set this parameter to the latest Compute microversion supported by your Openstack version.
+           View this page for more about Compute microvoersion compatibility:
+              https://docs.openstack.org/nova/latest/reference/api-microversion-history.html
+           View this page for more information about microversions in Openstack:
+              https://docs.openstack.org/api-guide/compute/microversions.html
+          enabled: true
+          value:
+            example: "2.93"
+            type: string
+            display_default: null
+        - name: cinder_microversion
+          description: |
+           The microversion of the Rest API to call.
+           It is recommended to set this parameter to the latest microversion supported by your Openstack version.
+
+           View this page for more about microvoersion compatibility:
+              https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html
+          enabled: true
+          value:
+            example: "volume 3.70"
+            type: string
+            display_default: null
         - name: collect_hypervisor_load
+          hidden: true
           description: |
            Collects hypervisor_load.1/5/15 for each hypervisor
            Disabled by default to increase performance of the check.
@@ -135,6 +207,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_hypervisor_metrics
+          hidden: true
           description: |
            Collects hypervisor metrics (including hypervisor_load).
           value:
@@ -142,6 +215,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_project_metrics
+          hidden: true
           description: |
            The admin user defined for Datadog starts with a "default" project.
            If this option is disabled, project limits metrics are only collected from projects the
@@ -151,6 +225,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_network_metrics
+          hidden: true
           description: |
            Collects network metrics.
           value:
@@ -158,6 +233,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_server_flavor_metrics
+          hidden: true
           description: |
            Collect server flavor metrics.
           value:
@@ -165,6 +241,7 @@ files:
             display_default: true
             type: boolean
         - name: collect_server_diagnostic_metrics
+          hidden: true
           description: |
            Collect server diagnostic metrics. Enabling this may result in performance decrease.
            This is fine for small deployments. For large deployment, turn it off and install the agent on VMs directly.
@@ -181,13 +258,496 @@ files:
             example: false
             display_default: false
             type: boolean
+        - name: endpoint_interface
+          description: |
+           Indicates the visibility scope of the component's endpoints to use. The possible values are:
+             public: This endpoint is accessible from outside the cloud and typically denotes a public-facing URL or 
+                 IP address.
+             internal: This endpoint is typically used for communication between services within the cloud 
+                 infrastructure itself.
+                 It may be an internal IP or hostname that's not accessible from outside the cloud.  
+             admin: This endpoint is specifically for administrative tasks and may have extended privileges or 
+                 functionality compared to the public and internal endpoints.
+                 It's meant for cloud operators or administrators.
+          value:
+            example: "internal"
+            display_default: "public"
+            type: string
+        - name: endpoint_region_id
+          description: |
+           The region_id that will be used to filter the endpoints to use for each component.
+          value:
+            type: string
+        - name: all_projects
+          description: |
+           List compute servers across all projects (admin only).
+          value:
+            example: false
+            display_default: false
+            type: boolean
+        - name: components
+          description: |
+            General configuration that we want to apply to each of the components and their different metric blocks.
+          value:
+            type: object
+            properties:
+              - name: identity
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: regions
+                        type: boolean
+                      - name: domains
+                        type: boolean
+                      - name: projects
+                        type: boolean
+                      - name: users
+                        type: boolean
+                      - name: groups
+                        type: boolean
+                      - name: services
+                        type: boolean
+                      - name: limits
+                        type: boolean
+              - name: compute
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: limits
+                        type: boolean
+                      - name: services
+                        type: boolean
+                      - name: flavors
+                        type: boolean
+                      - name: hypervisors
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of hypervisors to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: uptime
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                      - name: quota_sets
+                        type: boolean
+                      - name: servers
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of servers to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: flavors
+                                          type: boolean
+                                        - name: diagnostics
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+              - name: network
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: agents
+                        type: boolean
+                      - name: networks
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of networks to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                      - name: quotas
+                        type: boolean
+              - name: block-storage
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: volumes
+                        type: boolean
+                      - name: transfers
+                        type: boolean
+                      - name: snapshots
+                        type: boolean
+                      - name: pools
+                        type: boolean
+                      - name: clusters
+                        type: boolean
+              - name: baremetal
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: nodes
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of nodes to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: uptime
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                              - name: portgroups
+                                anyOf:
+                                  - type: boolean
+                                  - type: object
+                      - name: conductors
+                        type: boolean
+                      - name: volumes
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: connectors
+                                type: boolean
+                              - name: targets
+                                type: boolean
+                      - name: ports
+                        type: boolean  
+                      - name: drivers
+                        type: boolean
+                      - name: allocations
+                        type: boolean
+              - name: load-balancer
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: loadbalancers
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of loadbalancers to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: stats
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                      - name: listeners
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of listeners to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: stats
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                      - name: pools
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of pools to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                                        - name: members
+                                          anyOf:
+                                          - type: boolean
+                                          - type: object
+                                            properties:
+                                              - name: limit
+                                                description: |
+                                                  Maximum number of members to be processed.
+                                                type: integer
+                                              - name: include
+                                                type: array
+                                                items:
+                                                  anyOf:
+                                                    - type: string
+                                                    - type: object
+                                                      properties:
+                                                        - name: name
+                                                          type: string
+                                              - name: exclude
+                                                type: array
+                                                items:
+                                                  type: string
+                                              - name: interval
+                                                type: integer           
+                      - name: healthmonitors
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of healthmonitors to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+                      - name: quotas
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of quotas to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: name
+                                          type: string
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer                                  
+                      - name: amphorae
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: limit
+                                description: |
+                                  Maximum number of amphorae to be processed.
+                                type: integer
+                              - name: include
+                                type: array
+                                items:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        - name: id
+                                          type: string
+                                        - name: stats
+                                          type: boolean
+                              - name: exclude
+                                type: array
+                                items:
+                                  type: string
+                              - name: interval
+                                type: integer
+              - name: image
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: images
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: members
+                                type: boolean
+              - name: heat
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: stacks
+                        type: boolean
+              - name: swift
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: containers
+                        type: boolean
+            example:
+              compute: false
+        - name: projects
+          description: |
+            Optional configuration to indicate the projects that we want to be processed. If not configured,
+            all projects will be processed.
+
+            The 'include' key will indicate the regular expressions of the projects for which metrics are to be reported
+            and the configuration to be applied to each of them. Each group may have a 'components'-like configuration,
+            enabling or disabling components or metrics. For further details see previous section 'components'.
+            If no configuration associated with the key is indicated
+            with the regular expression, they will be processed with the default configuration.
+
+            The projects will be processed in the order indicated in the 'include'.
+            If a projects is matched on an 'include' key, it will only be processed there and not in a later 'include'
+            that it might match on.
+
+            The 'exclude' key will indicate the regular expressions of those projects for which metrics
+            are not to be reported.
+            The excludes will have priority over the includes, that is, if a projects matches an exclude, it will not be
+            processed even if it matches an include.
+
+            The 'limit' key will allow limiting the number of projects processed to avoid a combinatorial explosion of tags
+            associated with a metric.
+
+            The 'interval' key will indicate the validity time of the last list of projects obtained through the endpoint.
+            If 'interval' is not indicated, the list of projects will be obtained each time the check is executed
+            and will not be cached.
+
+            In the following example, all projects will be processed except those whose name begins with 'tmp_'
+            up to a maximum of 10 projects.
+            Furthermore, the cache will be valid for 1 minute.
+
+              projects:
+                limit: 10
+                include:
+                  - '.*'
+                exclude:
+                  - 'tmp_.*'
+                interval: 60
+          value:
+            type: object
+            properties:
+              - name: limit
+                description: |
+                  Maximum number of clusters to be processed.
+                type: integer
+              - name: include
+                type: array
+                items:
+                  anyOf:
+                    - type: string
+                    - type: object
+              - name: exclude
+                type: array
+                items:
+                  type: string
+              - name: interval
+                type: integer
+            example:
+              include:
+                - '.*'
+              exclude:
+                - 'tmp_.*'
         - template: instances/default
           overrides:
             service.hidden: true
-            min_collection_interval.hidden: true
             empty_default_hostname.hidden: true
         - template: instances/http
           overrides:
+            username.hidden: true
+            password.hidden: true
             tls_use_host_header.hidden: true
             auth_type.hidden: true
             use_legacy_auth_encoding.hidden: true

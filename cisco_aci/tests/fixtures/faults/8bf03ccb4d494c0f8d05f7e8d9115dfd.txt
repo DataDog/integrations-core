@@ -1,0 +1,32 @@
+{
+  "totalCount": "1",
+  "imdata": [
+    {
+      "faultDelegate": {
+        "attributes": {
+          "ack": "no",
+          "affected": "uni/epp/fv-[uni/tn-Tenant888/ap-app_demo_ap/epg-dev_epg]/node-1101/polDelSt",
+          "cause": "configuration-failed",
+          "changeSet": "deploymentState:not-registered-for-atg",
+          "childAction": "",
+          "code": "F1298",
+          "created": "2025-03-12T09:39:32.189+00:00",
+          "descr": "Fault delegate: For tenant Tenant888, application profile app_demo_ap, deployment of application EPG dev_epg failed on node 1101. Reason Node Cannot Deploy EPG",
+          "dn": "uni/tn-Tenant888/ap-app_demo_ap/epg-dev_epg/fd-[uni/epp/fv-[uni/tn-Tenant888/ap-app_demo_ap/epg-dev_epg]/node-1101/polDelSt]-fault-F1298",
+          "domain": "tenant",
+          "highestSeverity": "minor",
+          "lastTransition": "2025-03-12T14:53:06.041+00:00",
+          "lc": "raised",
+          "occur": "1",
+          "origSeverity": "minor",
+          "prevSeverity": "minor",
+          "rule": "fv-pol-delivery-status-configuration-failed",
+          "severity": "minor",
+          "status": "",
+          "subject": "epg",
+          "type": "config"
+        }
+      }
+    }
+  ]
+}

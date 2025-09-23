@@ -1,29 +1,36 @@
 {
-    "name": "[Active Directory] Elevated LDAP binding duration for host {{host.name}}",
-    "type": "query alert",
-    "query": "avg(last_5m):avg:active_directory.ldap.bind_time{*} by {host} > 30",
+  "version": 2,
+  "created_at": "2021-04-20",
+  "last_updated_at": "2021-04-20",
+  "title": "LDAP binding duration is high",
+  "tags": [
+    "integration:active-directory"
+  ],
+  "description": "The binding process is crucial for authentication and authorization between a client and LDAP server. This monitor tracks the binding duration to indicate performance issues or delays in LDAP authentication or directory access.",
+  "definition": {
     "message": "{{#is_alert}}\n\nAlert: the LDAP binding duration for host {{host.name}}  went above {{threshold}}, current value is: {{value}} ms \n\n{{/is_alert}} \n{{#is_warning}}\n\nWarning: the LDAP binding duration for host {{host.name}}  went above {{threshold}}, current value is: {{value}} ms\n\n{{/is_warning}} \n\nLDAP bind times that start to exceed 15 or 30 ms may be an indication network issues are present.",
-    "tags": [
-        "integration:active_directory"
-    ],
+    "name": "[Active Directory] Elevated LDAP binding duration for host {{host.name}}",
     "options": {
-        "notify_audit": false,
-        "locked": false,
-        "timeout_h": 0,
-        "new_host_delay": 300,
-        "require_full_window": false,
-        "notify_no_data": false,
-        "renotify_interval": 0,
-        "escalation_message": "",
-        "no_data_timeframe": null,
-        "include_tags": true,
-        "thresholds": {
-            "critical": 30,
-            "warning": 15
-        }
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 30,
+        "warning": 15
+      },
+      "timeout_h": 0
     },
     "priority": null,
-    "recommended_monitor_metadata": {
-        "description": "Notifies when Active Directory LDAP binding duration goes above 15ms for a specific host."
-    }
+    "query": "avg(last_5m):avg:active_directory.ldap.bind_time{*} by {host} > 30",
+    "tags": [
+      "integration:active_directory"
+    ],
+    "type": "query alert"
+  }
 }

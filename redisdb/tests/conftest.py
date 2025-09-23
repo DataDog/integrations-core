@@ -37,13 +37,15 @@ class CheckCluster(LazyFunction):
                     master.lpush('test_key1', 'test_value1')
                     master.lpush('test_key2', 'test_value2')
                     master.lpush('test_key3', 'test_value3')
+                    master.xadd('test_key4', {'test_value4b': 'test_value4a'})
+                    master.xadd('test_key4', {'test_value4b': 'test_value4b'})
                     break
             except redis.ConnectionError:
                 pass
 
             time.sleep(self.wait)
         else:
-            raise RetryError('Redis cluster boot timed out!\n' 'Master: {}\n' 'Replica: {}'.format(master, replica))
+            raise RetryError('Redis cluster boot timed out!\nMaster: {}\nReplica: {}'.format(master, replica))
 
 
 @pytest.fixture(scope='session')

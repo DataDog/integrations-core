@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import ReplicaSetDeployment
 
@@ -20,5 +24,5 @@ class ConnPoolStatsCollector(MongoCollector):
 
     def collect(self, api):
         db = api["admin"]
-        stats = {'connection_pool': db.command('connPoolStats')}
+        stats = {'connection_pool': db.command('connPoolStats', maxTimeMS=api._timeout)}
         self._submit_payload(stats)

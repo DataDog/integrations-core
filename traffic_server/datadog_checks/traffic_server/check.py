@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
@@ -12,7 +12,6 @@ SERVICE_CHECK_CONNECT = "can_connect"
 
 
 class TrafficServerCheck(AgentCheck):
-
     __NAMESPACE__ = 'traffic_server'
 
     def __init__(self, name, init_config, instances):

@@ -1,11 +1,12 @@
-version: '3'
 services:
-    gs1:
-        container_name: gluster-node-1
-        image: gluster/gluster-centos:latest
-        privileged: true
+  gs1:
+    container_name: gluster-node-1
+    image: gluster-custom:latest
+    build: ./
+    privileged: true
 
-    gs2:
-        image: gluster/gluster-centos:latest
-        container_name: gluster-node-2
-        privileged: true
+  gs2:
+    container_name: gluster-node-2
+    image: gluster-custom:latest
+    build: ./
+    privileged: true 

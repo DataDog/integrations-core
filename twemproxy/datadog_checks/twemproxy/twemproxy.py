@@ -4,7 +4,6 @@
 import socket
 
 import simplejson as json
-from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_unicode
 
@@ -158,11 +157,11 @@ class Twemproxy(AgentCheck):
 
         version = parsed.get('version', None)
 
-        for key, val in iteritems(parsed):
+        for key, val in parsed.items():
             if isinstance(val, dict):
                 # server pool
                 pool_tags = tags + ['pool:%s' % key]
-                for server_key, server_val in iteritems(val):
+                for server_key, server_val in val.items():
                     if isinstance(server_val, dict):
                         # server
                         server_tags = pool_tags + ['server:%s' % server_key]

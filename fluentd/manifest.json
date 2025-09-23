@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c725a834-feee-481d-94f0-afe95f39d0b1",
   "app_id": "fluentd",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -13,10 +14,17 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Metrics",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-fluentd-datadog"
+      }
     ]
   },
   "author": {
@@ -25,7 +33,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "fluentd",
@@ -47,7 +54,9 @@
         "td-agent",
         "fluentd",
         "ruby td-agent"
-      ]
+      ],
+      "source_type_id": 108,
+      "auto_install": true
     },
     "dashboards": {
       "fluentd": "assets/dashboards/fluentd_dashboard.json"

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8dd65d36-9cb4-4295-bb0c-68d67c0cdd4b",
   "app_id": "teamcity",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -9,15 +10,22 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Track builds and understand the performance impact of every deploy.",
-    "title": "Teamcity Integration",
+    "title": "TeamCity",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Configuration & Deployment",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Notifications",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog"
+      }
     ]
   },
   "author": {
@@ -26,7 +34,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Teamcity",
@@ -37,18 +44,31 @@
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
+      "metrics": {
+        "prefix": "teamcity.",
+        "check": [
+          "teamcity.builds",
+          "teamcity.build_duration"
+        ],
+        "metadata_path": "metadata.csv"
+      },
       "events": {
         "creates_events": true
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 109,
+      "auto_install": true
+    },
+    "dashboards": {
+      "TeamCity Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "Builds are failing": "assets/monitors/build_status.json"
     },
     "saved_views": {
       "teamcity_processes": "assets/saved_views/teamcity_processes.json"
-    },
-    "logs": {
-      "source": "teamcity"
     }
   }
 }

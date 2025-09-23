@@ -3,8 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 from collections import defaultdict
-
-from six.moves.urllib.parse import urljoin, urlparse, urlunparse
+from urllib.parse import urljoin, urlparse, urlunparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 
@@ -16,6 +15,8 @@ ENVOY_VERSION = {'istio_build': {'type': 'metadata', 'label': 'tag', 'name': 've
 LABEL_MAP = {
     'cluster_name': 'envoy_cluster',
     'envoy_cluster_name': 'envoy_cluster',
+    'envoy_local_http_ratelimit_prefix': 'stat_prefix',  # local rate limit
+    'envoy_connection_limit_prefix': 'stat_prefix',  # connection limit
     'envoy_http_conn_manager_prefix': 'stat_prefix',  # tracing
     'envoy_listener_address': 'address',  # listener
     'envoy_virtual_cluster': 'virtual_envoy_cluster',  # vhost
@@ -89,6 +90,66 @@ METRIC_WITH_LABEL_NAME = {
         'metric_type': 'monotonic_count',
         'new_name': 'listener.downstream_cx.count',
     },
+    r'envoy_connection_limit_(.+)_active_connections$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'gauge',
+        'new_name': 'connection_limit.active_connections',
+    },
+    r'envoy_connection_limit_(.+)_limited_connections$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'connection_limit.limited_connections.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_enabled$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_enabled.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_enforced$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_enforced.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_ok$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_ok.count',
+    },
+    r'envoy_(.+)_http_local_rate_limit_rate_limited$': {
+        'label_name': 'stat_prefix',
+        'metric_type': 'monotonic_count',
+        'new_name': 'http.local_rate_limit_rate_limited.count',
+    },
+    r'envoy_cluster_(.+)_client_ssl_socket_factory_downstream_context_secrets_not_ready$': {
+        'label_name': 'envoy_service',
+        'metric_type': 'monotonic_count',
+        'new_name': 'cluster.client_ssl_socket_factory.downstream_context_secrets_not_ready.count',
+    },
+    r'envoy_cluster_(.+)_client_ssl_socket_factory_upstream_context_secrets_not_ready$': {
+        'label_name': 'envoy_service',
+        'metric_type': 'monotonic_count',
+        'new_name': 'cluster.client_ssl_socket_factory.upstream_context_secrets_not_ready.count',
+    },
+    r'envoy_cluster_(.+)_client_ssl_socket_factory_ssl_context_update_by_sds$': {
+        'label_name': 'envoy_service',
+        'metric_type': 'monotonic_count',
+        'new_name': 'cluster.client_ssl_socket_factory.ssl_context_update_by_sds.count',
+    },
+    r'envoy_listener_(.+)_server_ssl_socket_factory_upstream_context_secrets_not_ready': {
+        'label_name': 'envoy_address',
+        'metric_type': 'monotonic_count',
+        'new_name': 'listener.server_ssl_socket_factory.upstream_context_secrets_not_ready.count',
+    },
+    r'envoy_listener_(.+)_server_ssl_socket_factory_ssl_context_update_by_sds': {
+        'label_name': 'envoy_address',
+        'metric_type': 'monotonic_count',
+        'new_name': 'listener.server_ssl_socket_factory.ssl_context_update_by_sds.count',
+    },
+    r'envoy_listener_(.+)_server_ssl_socket_factory_downstream_context_secrets_not_ready': {
+        'label_name': 'envoy_address',
+        'metric_type': 'monotonic_count',
+        'new_name': 'listener.server_ssl_socket_factory.downstream_context_secrets_not_ready.count',
+    },
 }
 
 
@@ -101,6 +162,8 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
         super().__init__(name, init_config, instances)
         self.check_initializations.append(self.configure_additional_transformers)
         openmetrics_endpoint = self.instance.get('openmetrics_endpoint')
+        self.collect_server_info = self.instance.get('collect_server_info', True)
+
         self.base_url = None
         try:
             parts = urlparse(openmetrics_endpoint)
@@ -148,7 +211,12 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
         if not self.base_url:
             self.log.debug("Skipping server info collection due to malformed url: %s", self.base_url)
             return
+
         # From http://domain/thing/stats to http://domain/thing/server_info
+        if not self.collect_server_info:
+            self.log.debug("Skipping server info collection as it is disabled, collect_server_info")
+            return
+
         server_info_url = urljoin(self.base_url, 'server_info')
         raw_version = _get_server_info(server_info_url, self.log, self.http)
 

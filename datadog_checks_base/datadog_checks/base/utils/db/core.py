@@ -3,16 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 from itertools import chain
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.db.types import QueriesExecutor, QueriesSubmitter, Transformer
+from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.containers import iter_unique
+from datadog_checks.base.utils.db.types import QueriesExecutor, QueriesSubmitter, Transformer  # noqa: F401
 
-from ...config import is_affirmative
-from ..containers import iter_unique
 from .query import Query
 from .transform import COLUMN_TRANSFORMERS, EXTRA_TRANSFORMERS
-from .utils import SUBMISSION_METHODS, create_submission_transformer
+from .utils import SUBMISSION_METHODS, create_submission_transformer, tracked_query
 
 
 class QueryExecutor(object):
@@ -31,6 +31,7 @@ class QueryExecutor(object):
         error_handler=None,  # type: Callable[[str], str]
         hostname=None,  # type: str
         logger=None,
+        track_operation_time=False,  # type: bool
     ):  # type: (...) -> QueryExecutor
         self.executor = executor  # type: QueriesExecutor
         self.submitter = submitter  # type: QueriesSubmitter
@@ -45,6 +46,7 @@ class QueryExecutor(object):
         self.queries = [Query(payload) for payload in queries or []]  # type: List[Query]
         self.hostname = hostname  # type: str
         self.logger = logger or logging.getLogger(__name__)
+        self.track_operation_time = track_operation_time
 
     def compile_queries(self):
         """This method compiles every `Query` object."""
@@ -66,13 +68,25 @@ class QueryExecutor(object):
             global_tags.extend(list(extra_tags))
 
         for query in self.queries:
+            if not query.should_execute():
+                self.logger.debug(
+                    'Query %s was executed less than %s seconds ago, skipping',
+                    query.name,
+                    query.collection_interval,
+                )
+                continue
+
             query_name = query.name
             query_columns = query.column_transformers
             extra_transformers = query.extra_transformers
             query_tags = query.base_tags
 
             try:
-                rows = self.execute_query(query.query)
+                if self.track_operation_time:
+                    with tracked_query(check=self.submitter, operation=query_name):
+                        rows = self.execute_query(query.query)
+                else:
+                    rows = self.execute_query(query.query)
             except Exception as e:
                 if self.error_handler:
                     self.logger.error('Error querying %s: %s', query_name, self.error_handler(str(e)))
@@ -105,17 +119,20 @@ class QueryExecutor(object):
                         continue
                     elif column_type == 'tag':
                         tags.append(transformer(None, column_value))  # get_tag transformer
+                    elif column_type == 'tag_not_null':
+                        if column_value is not None:
+                            tags.append(transformer(None, column_value))  # get_tag transformer
                     elif column_type == 'tag_list':
                         tags.extend(transformer(None, column_value))  # get_tag_list transformer
                     else:
                         submission_queue.append((transformer, column_value))
 
                 for transformer, value in submission_queue:
-                    transformer(sources, value, tags=tags, hostname=self.hostname)
+                    transformer(sources, value, tags=tags, hostname=self.hostname, raw=query.metric_name_raw)
 
                 for name, transformer in extra_transformers:
                     try:
-                        result = transformer(sources, tags=tags, hostname=self.hostname)
+                        result = transformer(sources, tags=tags, hostname=self.hostname, raw=query.metric_name_raw)
                     except Exception as e:
                         self.logger.error('Error transforming %s: %s', name, e)
                         continue

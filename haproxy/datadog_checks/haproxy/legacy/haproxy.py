@@ -9,9 +9,7 @@ import re
 import socket
 import time
 from collections import defaultdict, namedtuple
-
-from six import PY2, iteritems
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.errors import CheckException
@@ -21,7 +19,6 @@ from .version_utils import get_version_from_http, get_version_from_socket
 
 
 class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
-
     SHOWTABLE_RE = re.compile(
         r"# table: (?P<name>[^ ,]+), type: (?P<type>[^ ,]+), size:(?P<size>[0-9]+), used:(?P<used>[0-9]+)$"
     )
@@ -40,7 +37,6 @@ class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
 
 
 class HAProxyCheckLegacy(AgentCheck):
-
     SERVICE_CHECK_NAME = 'haproxy.backend_up'
     HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
 
@@ -115,20 +111,15 @@ class HAProxyCheckLegacy(AgentCheck):
 
     @staticmethod
     def _decode_response(response):
-        # it only needs additional decoding in py3, so skip it if it's py2
-        if PY2:
-            return response.content.splitlines()
-        else:
-            content = response.content
+        content = response.content
+        # If the content is a string, it can't be decoded again
+        # But if it's bytes, it can be decoded.
+        # So, check if it has the decode method
+        decode_fn = getattr(content, "decode", None)
+        if callable(decode_fn):
+            content = content.decode('utf-8')
 
-            # If the content is a string, it can't be decoded again
-            # But if it's bytes, it can be decoded.
-            # So, check if it has the decode method
-            decode_fn = getattr(content, "decode", None)
-            if callable(decode_fn):
-                content = content.decode('utf-8')
-
-            return content.splitlines()
+        return content.splitlines()
 
     @staticmethod
     def _parse_uptime(uptime):
@@ -443,7 +434,7 @@ class HAProxyCheckLegacy(AgentCheck):
 
         # match.groupdict() returns tags dictionary in the form of {'name': 'value'}
         # convert it to Datadog tag LIST: ['name:value']
-        return ["%s:%s" % (name, value) for name, value in iteritems(match.groupdict())]
+        return ["%s:%s" % (name, value) for name, value in match.groupdict().items()]
 
     @staticmethod
     def _normalize_status(status):
@@ -460,10 +451,10 @@ class HAProxyCheckLegacy(AgentCheck):
         return formatted_status
 
     def _process_backend_hosts_metric(self, active_tag=None):
-        agg_statuses = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
+        agg_statuses = defaultdict(lambda: dict.fromkeys(Services.COLLATED_STATUSES, 0))
         active_tag = [] if active_tag is None else active_tag
 
-        for host_status, count in iteritems(self.hosts_statuses):
+        for host_status, count in self.hosts_statuses.items():
             try:
                 service, back_or_front, hostname, status = host_status
             except ValueError:
@@ -500,7 +491,7 @@ class HAProxyCheckLegacy(AgentCheck):
         self,
         active_tag=None,
     ):
-        agg_statuses_counter = defaultdict(lambda: {status: 0 for status in Services.COLLATED_STATUSES})
+        agg_statuses_counter = defaultdict(lambda: dict.fromkeys(Services.COLLATED_STATUSES, 0))
         active_tag = [] if active_tag is None else active_tag
         # Initialize `statuses_counter`: every value is a defaultdict initialized with the correct
         # keys, which depends on the `collate_status_tags_per_host` option
@@ -512,7 +503,7 @@ class HAProxyCheckLegacy(AgentCheck):
             reported_statuses_dict[reported_status] = 0
         statuses_counter = defaultdict(lambda: copy.copy(reported_statuses_dict))
 
-        for host_status, count in iteritems(self.hosts_statuses):
+        for host_status, count in self.hosts_statuses.items():
             hostname = None
             try:
                 service, _, hostname, status = host_status
@@ -555,13 +546,13 @@ class HAProxyCheckLegacy(AgentCheck):
                 status_key = Services.STATUS_TO_COLLATED.get(status, Services.UNAVAILABLE)
                 agg_statuses_counter[tuple(agg_tags)][status_key] += count
 
-        for tags, count_per_status in iteritems(statuses_counter):
-            for status, count in iteritems(count_per_status):
+        for tags, count_per_status in statuses_counter.items():
+            for status, count in count_per_status.items():
                 self.gauge('haproxy.count_per_status', count, tags=tags + ('status:%s' % status,))
 
         # Send aggregates
-        for service_tags, service_agg_statuses in iteritems(agg_statuses_counter):
-            for status, count in iteritems(service_agg_statuses):
+        for service_tags, service_agg_statuses in agg_statuses_counter.items():
+            for status, count in service_agg_statuses.items():
                 self.gauge("haproxy.count_per_status", count, tags=service_tags + ('status:%s' % status,))
 
     def _process_metrics(self, data, custom_tags=None, active_tag=None):

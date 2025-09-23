@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from packaging import version
 
 from datadog_checks.mongo import MongoDb
 
-from .common import HOST, PORT1, auth, shard, standalone, tls
+from .common import HOST, MONGODB_VERSION, PORT1, auth, shard, standalone, tls
 
 BASE_METRICS = [
     'mongodb.connections.available',
@@ -38,17 +39,23 @@ BASE_METRICS = [
 ]
 
 MONGOS_METRICS = BASE_METRICS + [
-    'mongodb.stats.filesize',
     'mongodb.stats.indexsize',
     'mongodb.stats.datasize',
     'mongodb.stats.indexes',
     'mongodb.stats.objects',
 ]
 
+MONGOS_METRICS_PRE_VERSION_7 = [
+    'mongodb.stats.filesize',
+]
+
 MONGOD_METRICS = BASE_METRICS + [
     'mongodb.oplatencies.reads.latencyps',
     'mongodb.oplatencies.writes.latencyps',
     'mongodb.oplatencies.commands.latencyps',
+    'mongodb.oplatencies.reads.latency',
+    'mongodb.oplatencies.writes.latency',
+    'mongodb.oplatencies.commands.latency',
     'mongodb.metrics.queryexecutor.scannedps',
     'mongodb.metrics.queryexecutor.scannedobjectsps',
     'mongodb.fsynclocked',
@@ -57,7 +64,9 @@ MONGOD_METRICS = BASE_METRICS + [
 
 @standalone
 @pytest.mark.e2e
-def test_e2e_mongo_standalone(dd_agent_check, instance_user):
+@pytest.mark.parametrize('database_autodiscovery_enabled', [True, False])
+def test_e2e_mongo_standalone(dd_agent_check, instance_user, database_autodiscovery_enabled):
+    instance_user['database_autodiscovery'] = {'enabled': database_autodiscovery_enabled}
     aggregator = dd_agent_check(instance_user, rate=True)
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
@@ -66,10 +75,17 @@ def test_e2e_mongo_standalone(dd_agent_check, instance_user):
 
 @shard
 @pytest.mark.e2e
-def test_e2e_mongo_shard(dd_agent_check, instance_authdb):
+@pytest.mark.parametrize('database_autodiscovery_enabled', [True, False])
+def test_e2e_mongo_shard(dd_agent_check, instance_authdb, database_autodiscovery_enabled):
+    instance_authdb['database_autodiscovery'] = {'enabled': database_autodiscovery_enabled}
     aggregator = dd_agent_check(instance_authdb, rate=True)
+
     for metric in MONGOS_METRICS:
         aggregator.assert_metric(metric)
+
+    if version.parse(MONGODB_VERSION) < version.parse('7.0'):
+        for metric in MONGOS_METRICS_PRE_VERSION_7:
+            aggregator.assert_metric(metric)
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
 
 
@@ -86,7 +102,7 @@ def test_e2e_mongo_auth(dd_agent_check, instance_authdb):
 @pytest.mark.e2e
 def test_e2e_mongo_tls(dd_agent_check):
     instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'hosts': [f'{HOST}:{PORT1}'],
         'database': 'test',
         'tls': True,
         'tls_allow_invalid_certificates': True,

@@ -1,6 +1,4 @@
 # This file is based on https://github.com/apache/impala/blob/master/docker/quickstart.yml with minor improvements to make it work OOTB
-
-version: "3"
 services:
   hms:
     image: apache/impala:${IMPALA_VERSION}-impala_quickstart_hms

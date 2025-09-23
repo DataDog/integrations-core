@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   namenode:
     image: rmohr/activemq:${VERSION}
@@ -14,4 +12,3 @@ services:
     ports:
       - "8161:8161"
       - "${JMX_PORT}:${JMX_PORT}"
-

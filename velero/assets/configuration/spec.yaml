@@ -1,0 +1,15 @@
+name: Velero
+files:
+- name: velero.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+  - template: logs
+    example:
+    - type: docker
+      source: velero
+      service: <SERVICE>

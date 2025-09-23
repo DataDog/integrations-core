@@ -4,27 +4,26 @@
 """
 Helpers for parsing the `metrics` section of a config file.
 """
+
 import re
-from logging import Logger
+from logging import Logger  # noqa: F401
 from typing import Dict, List, NamedTuple, Optional, Pattern, Sequence, TypedDict, Union, cast
 
-import six
-
 from datadog_checks.base import ConfigurationError
+from datadog_checks.snmp.models import OID
+from datadog_checks.snmp.pysnmp_types import ObjectIdentity
+from datadog_checks.snmp.resolver import OIDResolver  # noqa: F401
 
-from ..models import OID
-from ..pysnmp_types import ObjectIdentity
-from ..resolver import OIDResolver
 from .metric_tags import MetricTag, parse_metric_tag
 from .metrics_types import (
     ColumnTableMetricTag,
     IndexTableMetricTag,
-    Metric,
+    Metric,  # noqa: F401
     OIDMetric,
-    Symbol,
+    Symbol,  # noqa: F401
     SymbolMetric,
     TableMetric,
-    TableMetricTag,
+    TableMetricTag,  # noqa: F401
 )
 from .parsed_metrics import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, ParsedTableMetric
 
@@ -45,6 +44,12 @@ def parse_metrics(metrics, resolver, logger, bulk_threshold=0):
     parsed_metrics = []  # type: List[ParsedMetric]
 
     for metric in metrics:
+        # Backward compatibility layer for python related to renaming of forced_type to metric_type
+        # https://github.com/DataDog/datadog-agent/pull/17900
+        metric_type = metric.get('metric_type')
+        if metric_type is not None:
+            metric['forced_type'] = metric_type
+
         result = _parse_metric(metric, logger)
 
         for oid in result.oids_to_fetch:
@@ -321,6 +326,11 @@ def _parse_table_metric(metric, logger):
     parsed_metrics = []
 
     for symbol in metric['symbols']:
+        if not isinstance(symbol, str) and symbol.get('constant_value_one', False):
+            # Ignoring constant_value_one for backward compatibility
+            if logger:
+                logger.debug("`constant_value_one` is only available with the core SNMP integration")
+            continue
         parsed_symbol = _parse_symbol(mib, symbol)
         oids_to_resolve.update(parsed_symbol.oids_to_resolve)
 
@@ -445,6 +455,14 @@ def _parse_table_metric_tag(mib, parsed_table, metric_tag):
         index: 2
     ```
     """
+
+    # Renamed `symbol` to `column` for backward compatibility with this change:
+    #   Deprecate `metric_tags[].column` in favour of `symbol`
+    #   https://github.com/DataDog/datadog-agent/pull/20030
+    if 'symbol' in metric_tag:
+        metric_tag['column'] = metric_tag['symbol']
+        del metric_tag['symbol']
+
     if 'column' in metric_tag:
         metric_tag = cast(ColumnTableMetricTag, metric_tag)
         metric_tag_mib = metric_tag.get('MIB', mib)
@@ -539,7 +557,7 @@ def _parse_index_slices(metric_tag):
             if not isinstance(rule, dict) or set(rule) != {'start', 'end'}:
                 raise ConfigurationError('Transform rule must contain start and end. Invalid rule: {}'.format(rule))
             start, end = rule['start'], rule['end']
-            if not isinstance(start, six.integer_types) or not isinstance(end, six.integer_types):
+            if not isinstance(start, int) or not isinstance(end, int):
                 raise ConfigurationError('Transform rule start and end must be integers. Invalid rule: {}'.format(rule))
             if start > end:
                 raise ConfigurationError(

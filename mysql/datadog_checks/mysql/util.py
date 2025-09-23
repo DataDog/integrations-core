@@ -1,6 +1,13 @@
+# (C) Datadog, Inc. 2022-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+from contextlib import closing
 from enum import Enum
+
+import pymysql
+
+from datadog_checks.mysql.cursor import CommenterCursor
 
 
 class DatabaseConfigurationError(Enum):
@@ -38,3 +45,23 @@ def get_truncation_state(statement):
     # a statement is truncated
     truncated = statement[-3:] == '...'
     return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+
+
+def connect_with_session_variables(**connect_args):
+    db = pymysql.connect(**connect_args)
+    with closing(db.cursor(CommenterCursor)) as cursor:
+        # PyMYSQL only sets autocommit if it receives a different value from the server
+        # see https://github.com/PyMySQL/PyMySQL/blob/bbd049f40db9c696574ce6f31669880042c56d79/pymysql/connections.py#L443-L447
+        # but there are cases where the server will not send a correct value for autocommit, so we
+        # set it explicitly to ensure it's set correctly
+        cursor.execute("SET AUTOCOMMIT=1")
+        # Lower the lock wait timeout to avoid deadlocks on metadata locks. By default this is a year.
+        # https://dev.mysql.com/doc/refman/8.4/en/server-system-variables.html#sysvar_lock_wait_timeout
+        cursor.execute("SET LOCK_WAIT_TIMEOUT=5")
+    return db
+
+
+def get_list_chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]

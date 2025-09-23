@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import random
 
 import pytest
 
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, _merge_duplicate_rows
 
 
 def add_to_dict(a, b):
@@ -181,3 +182,245 @@ class TestStatementMetrics:
         ]
 
         assert expected_merged_metrics == metrics
+
+    def test_merge_duplicate_rows(self):
+        rows = [
+            {
+                'count': 1,
+                'time': 100,
+                'errors': 32,
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 2,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 26,
+                'time': 125,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ?',
+                'query_signature': 'sig2',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 26,
+                'time': 101,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id != ?',
+                'query_signature': 'sig3',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+        ]
+
+        merged_rows, dropped_metrics = _merge_duplicate_rows(rows, ['count', 'time'], lambda x: x['query_signature'])
+        assert dropped_metrics == {'time'}
+        assert len(merged_rows) == 3
+        assert merged_rows == {
+            'sig1': {
+                'count': 3,
+                'time': 100,
+                'errors': 32,
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            'sig2': {
+                'count': 26,
+                'time': 125,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ?',
+                'query_signature': 'sig2',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            'sig3': {
+                'count': 26,
+                'time': 101,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id != ?',
+                'query_signature': 'sig3',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+        }
+
+    def __run_compute_derivative_rows(self, sm, rounds=10):
+        for _ in range(rounds):
+            rows = [
+                {
+                    'count': 100,
+                    'time': 2005,
+                    'errors': 1,
+                    'query': 'x' * 3000,
+                    'db': 'puppies',
+                    'user': 'dog',
+                    'query_signature': 'sig{}'.format(random.randint(0, 10000)),
+                }
+                for _ in range(10000)
+            ]
+            sm.compute_derivative_rows(rows, ['count', 'time'], lambda x: x['query_signature'])
+
+    def test_compute_derivative_rows_mem_usage(self):
+        '''
+        Test that the memory usage of `compute_derivative_rows` is within acceptable limits
+        Make sure we minimize the temporary objects created when computing the derivative
+        This test is skipped if tracemalloc is not available
+        '''
+        # The memory usage threshold takes tracing overhead into account
+        MEMORY_USAGE_THRESHOLD = 10 * 1024 * 1024  # 10 MB
+
+        try:
+            import tracemalloc
+        except ImportError:
+            return
+
+        tracemalloc.start()
+
+        _, peak_before = tracemalloc.get_traced_memory()
+        sm = StatementMetrics()
+        self.__run_compute_derivative_rows(sm)
+
+        _, peak_after = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+
+        # Calculate the difference in memory usage
+        peak_diff = peak_after - peak_before
+        assert peak_diff < MEMORY_USAGE_THRESHOLD, "Memory usage difference {} is over the threshold {}".format(
+            peak_diff, MEMORY_USAGE_THRESHOLD
+        )
+
+    def test_compute_derivative_rows_benchmark(self, benchmark):
+        sm = StatementMetrics()
+        benchmark(self.__run_compute_derivative_rows, sm)
+
+    def test_compute_derivative_rows_with_execution_indicators(self):
+        sm = StatementMetrics()
+
+        def key(row):
+            return (row['query'], row['db'], row['user'])
+
+        metrics = ['calls', 'total_time', 'rows']
+        execution_indicators = ['calls']
+
+        # Initial state
+        rows1 = [
+            {'calls': 10, 'total_time': 1000, 'rows': 50, 'query': 'SELECT 1', 'db': 'test', 'user': 'user1'},
+            {'calls': 5, 'total_time': 500, 'rows': 25, 'query': 'SELECT 2', 'db': 'test', 'user': 'user1'},
+        ]
+
+        sm.compute_derivative_rows(rows1, metrics, key=key, execution_indicators=execution_indicators)
+
+        # Second run - only duration changes (should be ignored)
+        rows2 = [
+            {'calls': 10, 'total_time': 1001, 'rows': 50, 'query': 'SELECT 1', 'db': 'test', 'user': 'user1'},
+            {'calls': 5, 'total_time': 501, 'rows': 25, 'query': 'SELECT 2', 'db': 'test', 'user': 'user1'},
+        ]
+        assert [] == sm.compute_derivative_rows(rows2, metrics, key=key, execution_indicators=execution_indicators)
+
+        # Third run - calls change (should be included)
+        rows3 = [
+            {'calls': 11, 'total_time': 1002, 'rows': 51, 'query': 'SELECT 1', 'db': 'test', 'user': 'user1'},
+            {'calls': 5, 'total_time': 502, 'rows': 25, 'query': 'SELECT 2', 'db': 'test', 'user': 'user1'},
+        ]
+        result = sm.compute_derivative_rows(rows3, metrics, key=key, execution_indicators=execution_indicators)
+        assert len(result) == 1
+        assert result[0]['calls'] == 1
+        assert result[0]['total_time'] == 1
+        assert result[0]['rows'] == 1
+
+    def test_compute_derivative_rows_with_multiple_execution_indicators(self):
+        sm = StatementMetrics()
+
+        def key(row):
+            return (row['query'], row['db'], row['user'])
+
+        metrics = ['calls', 'executions', 'total_time', 'rows']
+        execution_indicators = ['calls', 'executions']
+
+        # Initial state
+        rows1 = [
+            {
+                'calls': 10,
+                'executions': 10,
+                'total_time': 1000,
+                'rows': 50,
+                'query': 'SELECT 1',
+                'db': 'test',
+                'user': 'user1',
+            },
+        ]
+
+        sm.compute_derivative_rows(rows1, metrics, key=key, execution_indicators=execution_indicators)
+
+        # Second run - only one execution indicator changes
+        rows2 = [
+            {
+                'calls': 11,
+                'executions': 10,
+                'total_time': 1001,
+                'rows': 50,
+                'query': 'SELECT 1',
+                'db': 'test',
+                'user': 'user1',
+            },
+        ]
+        result = sm.compute_derivative_rows(rows2, metrics, key=key, execution_indicators=execution_indicators)
+        assert len(result) == 1
+        assert result[0]['calls'] == 1
+        assert result[0]['executions'] == 0
+        assert result[0]['total_time'] == 1
+        assert result[0]['rows'] == 0
+
+        # Third run - both execution indicators change
+        rows3 = [
+            {
+                'calls': 12,
+                'executions': 11,
+                'total_time': 1002,
+                'rows': 51,
+                'query': 'SELECT 1',
+                'db': 'test',
+                'user': 'user1',
+            },
+        ]
+        result = sm.compute_derivative_rows(rows3, metrics, key=key, execution_indicators=execution_indicators)
+        assert len(result) == 1
+        assert result[0]['calls'] == 1
+        assert result[0]['executions'] == 1
+        assert result[0]['total_time'] == 1
+        assert result[0]['rows'] == 1
+
+    def test_compute_derivative_rows_with_invalid_execution_indicators(self):
+        sm = StatementMetrics()
+
+        def key(row):
+            return (row['query'], row['db'], row['user'])
+
+        metrics = ['calls', 'total_time', 'rows']
+
+        # Test with empty execution indicators
+        rows1 = [
+            {'calls': 10, 'total_time': 1000, 'rows': 50, 'query': 'SELECT 1', 'db': 'test', 'user': 'user1'},
+        ]
+        rows2 = [
+            {'calls': 11, 'total_time': 1001, 'rows': 51, 'query': 'SELECT 1', 'db': 'test', 'user': 'user1'},
+        ]
+
+        # Empty execution indicators should behave like no execution indicators specified
+        _ = sm.compute_derivative_rows(rows1, metrics, key=key, execution_indicators=[])
+        result = sm.compute_derivative_rows(rows2, metrics, key=key, execution_indicators=[])
+        assert len(result) == 1
+        assert result[0]['calls'] == 1
+        assert result[0]['total_time'] == 1
+        assert result[0]['rows'] == 1

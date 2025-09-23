@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "081f9cd9-a86a-4cea-ae5b-b4f7e163f413",
   "app_id": "ambari",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,11 @@
     "title": "Ambari",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Network",
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::Processing",
-      "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Ambari",
@@ -42,13 +42,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10064,
+      "auto_install": true
     },
     "dashboards": {
       "Ambari base dashboard": "assets/dashboards/base_dashboard.json"
-    },
-    "logs": {
-      "source": "ambari"
     }
   }
 }

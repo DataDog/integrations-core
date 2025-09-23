@@ -71,6 +71,11 @@ files:
       overrides:
         disable_generic_tags.hidden: False
         disable_generic_tags.enabled: True
+        disable_generic_tags.description: |
+          Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
+          getting mixed with other integration tags.
+          Note that this is only relevant to service check submissions. Metrics do not include any generic tags.
+
   - template: logs
     example:
     - type: file

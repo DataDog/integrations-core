@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 
 import semver
 
@@ -26,22 +27,24 @@ REPO_OPTIONS_MAP = {
     '-x': 'here',
 }
 
+# If we add or remove a new repo choice, make sure to keep the
+# enum in ddev/src/ddev/utils/metadata.py in sync.
 REPO_CHOICES = {
     'core': 'integrations-core',
     'extras': 'integrations-extras',
     'internal': 'integrations-internal',
     'agent': 'datadog-agent',
     'marketplace': 'marketplace',
-    'integrations': 'integrations',
+    'integrations-internal-core': 'integrations-internal-core',
 }
 
 VERSION_BUMP = {
-    'Added': semver.bump_minor,
-    'Changed': semver.bump_major,
-    'Deprecated': semver.bump_minor,
-    'Fixed': semver.bump_patch,
-    'Removed': semver.bump_major,
-    'Security': semver.bump_minor,
+    'added': semver.bump_minor,
+    'changed': semver.bump_major,
+    'deprecated': semver.bump_minor,
+    'fixed': semver.bump_patch,
+    'removed': semver.bump_major,
+    'security': semver.bump_minor,
     'major': semver.bump_major,
     'minor': semver.bump_minor,
     'patch': semver.bump_patch,
@@ -51,7 +54,7 @@ VERSION_BUMP = {
     'beta': lambda v: semver.bump_prerelease(v, 'beta'),
 }
 
-CHANGELOG_TYPES_ORDERED = ['Added', 'Fixed', 'Security', 'Changed', 'Deprecated', 'Removed']
+CHANGELOG_TYPES_ORDERED = ['Removed', 'Changed', 'Security', 'Deprecated', 'Added', 'Fixed']
 
 AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'ntp'}
 
@@ -86,32 +89,42 @@ NOT_TILES = [
 
 CHECK_LINKS = """\
 [1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[2]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [4]: https://github.com/DataDog/{repository}/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/{repository}/blob/master/{name}/metadata.csv
 [8]: https://github.com/DataDog/{repository}/blob/master/{name}/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 """
 
+CHECK_ONLY_LINKS = """\
+[1]: **LINK_TO_INTEGRATION_SITE**
+[2]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
+[4]: https://github.com/DataDog/{repository}/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
+[9]: https://docs.datadoghq.com/help/
+"""
+
 LOGS_LINKS = """\
 [1]: https://docs.datadoghq.com/help/
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [4]: **LINK_TO_INTEGRATION_SITE**
 [5]: https://github.com/DataDog/{repository}/blob/master/{name}/assets/service_checks.json
 """
 
 JMX_LINKS = """\
 [1]: **LINK_TO_INTEGERATION_SITE**
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/{repository}/blob/master/{name}/datadog_checks/{name}/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [5]: https://docs.datadoghq.com/integrations/java/
 [6]: https://docs.datadoghq.com/help/
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://github.com/DataDog/{repository}/blob/master/{name}/assets/service_checks.json
 """
 
@@ -125,24 +138,57 @@ SNMP_TILE_LINKS = """\
 
 TILE_LINKS = """\
 [1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/help/
 """
 
 integration_type_links = {
     'check': CHECK_LINKS,
+    'check_only': CHECK_ONLY_LINKS,
     'logs': LOGS_LINKS,
     'jmx': JMX_LINKS,
     'snmp_tile': SNMP_TILE_LINKS,
     'tile': TILE_LINKS,
+    'metrics_crawler': TILE_LINKS,
 }
 
 # If a file changes in a PR with any of these file extensions,
 # a test will run against the check containing the file
-TESTABLE_FILE_PATTERNS = ('*.py', '*.ini', '*.in', '*.txt', '*.yml', '*.yaml', '**/tests/*', '**/pyproject.toml')
+TESTABLE_FILE_PATTERNS = (
+    '*.py',
+    '*.ini',
+    '*.in',
+    '*.txt',
+    '*.yml',
+    '*.yaml',
+    '**/tests/*',
+    '**/pyproject.toml',
+    '**/hatch.toml',
+)
 NON_TESTABLE_FILES = ('auto_conf.yaml', 'agent_requirements.in')
 
 ROOT = ''
+
+# Files searched for COPYRIGHT_RE
+COPYRIGHT_LOCATIONS_RE = re.compile(r'^(license.*|notice.*|copying.*|copyright.*|readme.*)$', re.I)
+
+# General match for anything that looks like a copyright declaration
+COPYRIGHT_RE = re.compile(
+    r'^(?!i\.e\.,.*$)(Copyright\s+(?:©|\(c\)\s+)?(?:(?:[0-9 ,-]|present)+\s+)?(?:by\s+)?(.*))$', re.I
+)
+
+# Copyright strings to ignore, as they are not owners.  Most of these are from
+# boilerplate license files.
+#
+# These match at the beginning of the copyright (the result of COPYRIGHT_RE).
+COPYRIGHT_IGNORE_RE = [
+    re.compile(r'copyright(:? and license)?$', re.I),
+    re.compile(r'copyright (:?holder|owner|notice|license|statement|law|on the Program|and Related)', re.I),
+    re.compile(r'Copyright & License -'),
+    re.compile(r'copyright .yyyy. .name of copyright owner.', re.I),
+    re.compile(r'copyright \(c\) <year>\s{2}<name of author>', re.I),
+    re.compile(r'.*\sFree Software Foundation', re.I),
+]
 
 
 def get_root():
@@ -167,7 +213,7 @@ def get_agent_requirements():
     Return the full path to the requirements file listing all the dependencies
     needed by the embedded Python environment
     """
-    return os.path.join(get_root(), 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in')
+    return os.path.join(get_root(), 'agent_requirements.in')
 
 
 def get_agent_integrations_file():
@@ -195,3 +241,15 @@ def get_integration_changelog(check):
 
 def get_license_attribution_file():
     return os.path.join(get_root(), 'LICENSE-3rdparty.csv')
+
+
+def get_copyright_locations_re():
+    return COPYRIGHT_LOCATIONS_RE
+
+
+def get_copyright_re():
+    return COPYRIGHT_RE
+
+
+def get_copyright_ignore_re():
+    return COPYRIGHT_IGNORE_RE

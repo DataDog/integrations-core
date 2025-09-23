@@ -71,6 +71,15 @@ instances:
     #
     # network_latency_checks: false
 
+    ## @param use_node_name_as_hostname - boolean - optional - default: true
+    ## Whether to use the Consul node name as the hostname. If set to true, 
+    ## the Agent uses the Consul node name as the hostname. If set to false, 
+    ## the Agent uses the system hostname and avoids duplicate hostnames.
+    ## Disabling this causes all the `consul.net.node.*` metrics to be reported 
+    ## under one host (the host that collects them), and they can be filtered using `consul_node_name`.
+    #
+    # use_node_name_as_hostname: true
+
     ## @param self_leader_check - boolean - optional - default: false
     ## Whether to enable self leader checks. Each instance with this enabled
     ## watches for itself to become the leader and emits an event when that
@@ -133,6 +142,12 @@ instances:
     #
     disable_legacy_service_tag: true
 
+    ## @param collect_health_checks - boolean - optional - default: false
+    ## Whether to enable new service health checks from this instance. Enabling this will
+    ## also emit an event for every failed service health check.
+    #
+    # collect_health_checks: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
@@ -166,7 +181,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -189,7 +204,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
@@ -287,6 +302,11 @@ instances:
     ##     client_secret (required): The client secret.
     ##     basic_auth: Whether the provider expects credentials to be transmitted in
     ##                 an HTTP Basic Auth header. The default is: false
+    ##     options: Mapping of additional options to pass to the provider, such as the audience
+    ##              or the scope. For example:
+    ##                 options:
+    ##                   audience: https://example.com
+    ##                   scope: read:example
     ##
     ## The available writers are:
     ##
@@ -365,8 +385,8 @@ instances:
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
     ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
@@ -383,6 +403,16 @@ instances:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.

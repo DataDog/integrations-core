@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "15b15f01-b342-4001-89ac-9e92fc4f3234",
   "app_id": "druid",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,13 @@
     "title": "Druid",
     "media": [],
     "classifier_tags": [
+      "Category::Caching",
+      "Category::Data Stores",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Druid",
@@ -43,13 +44,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10074,
+      "auto_install": true
     },
     "dashboards": {
       "Druid Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "druid"
     }
   }
 }

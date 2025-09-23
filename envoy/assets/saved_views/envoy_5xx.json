@@ -1,0 +1,30 @@
+{
+    "name": "Envoy 5xx Response Logs",
+    "query": "source:envoy @http.status_code:[500 TO 599] ",
+    "type": "logs",
+    "page": "stream",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "visible_facets": [
+        "source",
+        "host",
+        "service",
+        "@http.status_code",
+        "@http.method",
+        "@http.url",
+        "@http.authority"
+    ],
+    "options": {
+        "columns": [
+            "@http.status_code",
+            "@http.url",
+            "@http.method",
+            "@http.authority"
+        ],
+        "show_date_column": true,
+        "show_message_column": true,
+        "message_display": "inline",
+        "show_timeline": true
+    }
+}

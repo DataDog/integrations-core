@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, List
+from typing import Any, Dict, List  # noqa: F401
 
-from ..constants import BASE_ENDPOINT, RESOURCE_TYPES
+from datadog_checks.marklogic.constants import BASE_ENDPOINT, RESOURCE_TYPES
 
 
 def parse_resources(data):

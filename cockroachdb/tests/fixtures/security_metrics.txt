@@ -1,0 +1,30 @@
+# HELP build_timestamp Build information
+# TYPE build_timestamp gauge
+build_timestamp{tag="v22.2.8",go_version="go1.19.6"} 1.681737728e+09
+# HELP security_certificate_expiration_ui Expiration for the UI certificate. 0 means no certificate or error.
+# TYPE security_certificate_expiration_ui gauge
+security_certificate_expiration_ui 0
+# HELP security_certificate_expiration_client_tenant Expiration for the Tenant Client certificate. 0 means no certificate or error.
+# TYPE security_certificate_expiration_client_tenant gauge
+security_certificate_expiration_client_tenant 0
+# HELP security_certificate_expiration_node Expiration for the node certificate. 0 means no certificate or error.
+# TYPE security_certificate_expiration_node gauge
+security_certificate_expiration_node 1.841077264e+09
+# HELP security_certificate_expiration_node_client Expiration for the node's client certificate. 0 means no certificate or error.
+# TYPE security_certificate_expiration_node_client gauge
+security_certificate_expiration_node_client 0
+# HELP security_certificate_expiration_ca Expiration for the CA certificate. 0 means no certificate or error.
+# TYPE security_certificate_expiration_ca gauge
+security_certificate_expiration_ca 1.999189262e+09
+# HELP security_certificate_expiration_client_ca Expiration for the client CA certificate. 0 means no certificate or error.
+# TYPE security_certificate_expiration_client_ca gauge
+security_certificate_expiration_client_ca 0
+# HELP leases_expiration Number of replica leaseholders using expiration-based leases
+# TYPE leases_expiration gauge
+leases_expiration{store="1"} 2
+# HELP security_certificate_expiration_ui_ca Expiration for the UI CA certificate. 0 means no certificate or error.
+# TYPE security_certificate_expiration_ui_ca gauge
+security_certificate_expiration_ui_ca 0
+# HELP security_certificate_expiration_ca_client_tenant Expiration for the Tenant Client CA certificate. 0 means no certificate or error.
+# TYPE security_certificate_expiration_ca_client_tenant gauge
+security_certificate_expiration_ca_client_tenant 0

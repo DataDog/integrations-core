@@ -1,6 +1,6 @@
 {
     "title": "Amazon Fargate Overview",
-    "description": "## Amazon Fargate\n\nThis dashboard displays key metrics from your Amazon ECS cluster on AWS Fargate, such as cpu, memory, IO usage, and network.\n\nFurther reading on ECS-Fargate:\n\n- [Datadog ECS-Fargate integration docs](https://docs.datadoghq.com/integrations/ecs_fargate/)\n- [Integration setup docs](https://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate/?tab=rediswebui)\n",
+    "description": "## Amazon Fargate\n\nThis dashboard displays key metrics from your Amazon ECS cluster on AWS Fargate, such as cpu, memory, IO usage, network and Ephemeral Storage\n\nFurther reading on ECS-Fargate:\n\n- [Datadog ECS-Fargate integration docs](https://docs.datadoghq.com/integrations/ecs_fargate/)\n- [Integration setup docs](https://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate/?tab=rediswebui)\n",
     "widgets": [
         {
             "id": 0,
@@ -664,11 +664,240 @@
                 "width": 47,
                 "height": 15
             }
+        },
+        {
+            "id": 3114557731825634,
+            "layout": {
+                "x": 1,
+                "y": 82,
+                "width": 95,
+                "height": 5
+            },
+            "definition": {
+                "type": "note",
+                "content": "Ephemeral Storage",
+                "background_color": "gray",
+                "font_size": "24",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            }
+        },
+        {
+            "id": 256850209781962,
+            "layout": {
+                "x": 1,
+                "y": 89,
+                "width": 47,
+                "height": 15
+            },
+            "definition": {
+                "title": "Reserved MiB of Ephemeral Storage per task, cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns":
+                [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time":
+                {},
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:ecs.fargate.ephemeral_storage.reserved{*} by {task_name,cluster_name}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 6562039189475188,
+            "layout": {
+                "x": 49,
+                "y": 89,
+                "width": 47,
+                "height": 15
+            },
+            "definition": {
+                "title": "Average # of utilized MiB of Ephemeral Storage per task, cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {},
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:ecs.fargate.ephemeral_storage.utilized{*} by {task_name,cluster_name}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2841847602733776,
+            "layout": {
+                "x": 98,
+                "y": 82,
+                "width": 96,
+                "height": 5
+            },
+            "definition": {
+                "type": "note",
+                "content": "Task",
+                "background_color": "gray",
+                "font_size": "24",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            }
+        },
+        {
+            "id": 2968193745830470,
+            "layout": {
+                "x": 98,
+                "y": 89,
+                "width": 47,
+                "height": 15
+            },
+            "definition": {
+                "title": "Task CPU Limit (shared by all containers)",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:ecs.fargate.cpu.task.limit{*}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 4420041363122044,
+            "layout": {
+                "x": 147,
+                "y": 89,
+                "width": 47,
+                "height": 15
+            },
+            "definition": {
+                "title": "Task Memory Limit (shared by all containers)",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:ecs.fargate.mem.task.limit{*}"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            }
         }
     ],
-    "template_variables": [],
+"template_variables": [],
     "layout_type": "free",
     "is_read_only": true,
-    "notify_list": [],
-    "id": 30264
+    "notify_list": []
 }

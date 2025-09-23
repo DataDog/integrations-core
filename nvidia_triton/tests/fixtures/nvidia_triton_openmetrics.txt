@@ -1,0 +1,441 @@
+# HELP nv_inference_request_success Number of successful inference requests, all batch sizes
+# TYPE nv_inference_request_success counter
+nv_inference_request_success{model="simple_string",version="1"} 0
+nv_inference_request_success{model="simple_sequence",version="1"} 0
+nv_inference_request_success{model="simple_int8",version="1"} 0
+nv_inference_request_success{model="simple_identity",version="1"} 0
+nv_inference_request_success{model="densenet_onnx",version="1"} 3
+nv_inference_request_success{model="simple_dyna_sequence",version="1"} 0
+nv_inference_request_success{model="inception_graphdef",version="1"} 0
+nv_inference_request_success{model="simple",version="1"} 0
+# HELP nv_inference_request_failure Number of failed inference requests, all batch sizes
+# TYPE nv_inference_request_failure counter
+nv_inference_request_failure{model="simple_string",version="1"} 0
+nv_inference_request_failure{model="simple_sequence",version="1"} 0
+nv_inference_request_failure{model="simple_int8",version="1"} 0
+nv_inference_request_failure{model="simple_identity",version="1"} 0
+nv_inference_request_failure{model="densenet_onnx",version="1"} 0
+nv_inference_request_failure{model="simple_dyna_sequence",version="1"} 0
+nv_inference_request_failure{model="inception_graphdef",version="1"} 0
+nv_inference_request_failure{model="simple",version="1"} 0
+# HELP nv_inference_count Number of inferences performed (does not include cached requests)
+# TYPE nv_inference_count counter
+nv_inference_count{model="simple_string",version="1"} 0
+nv_inference_count{model="simple_sequence",version="1"} 0
+nv_inference_count{model="simple_int8",version="1"} 0
+nv_inference_count{model="simple_identity",version="1"} 0
+nv_inference_count{model="densenet_onnx",version="1"} 3
+nv_inference_count{model="simple_dyna_sequence",version="1"} 0
+nv_inference_count{model="inception_graphdef",version="1"} 0
+nv_inference_count{model="simple",version="1"} 0
+# HELP nv_inference_exec_count Number of model executions performed (does not include cached requests)
+# TYPE nv_inference_exec_count counter
+nv_inference_exec_count{model="simple_string",version="1"} 0
+nv_inference_exec_count{model="simple_sequence",version="1"} 0
+nv_inference_exec_count{model="simple_int8",version="1"} 0
+nv_inference_exec_count{model="simple_identity",version="1"} 0
+nv_inference_exec_count{model="densenet_onnx",version="1"} 3
+nv_inference_exec_count{model="simple_dyna_sequence",version="1"} 0
+nv_inference_exec_count{model="inception_graphdef",version="1"} 0
+nv_inference_exec_count{model="simple",version="1"} 0
+# HELP nv_inference_request_duration_us Cumulative inference request duration in microseconds (includes cached requests)
+# TYPE nv_inference_request_duration_us counter
+nv_inference_request_duration_us{model="simple_string",version="1"} 0
+nv_inference_request_duration_us{model="simple_sequence",version="1"} 0
+nv_inference_request_duration_us{model="simple_int8",version="1"} 0
+nv_inference_request_duration_us{model="simple_identity",version="1"} 0
+nv_inference_request_duration_us{model="densenet_onnx",version="1"} 1327965
+nv_inference_request_duration_us{model="simple_dyna_sequence",version="1"} 0
+nv_inference_request_duration_us{model="inception_graphdef",version="1"} 0
+nv_inference_request_duration_us{model="simple",version="1"} 0
+# HELP nv_inference_queue_duration_us Cumulative inference queuing duration in microseconds (includes cached requests)
+# TYPE nv_inference_queue_duration_us counter
+nv_inference_queue_duration_us{model="simple_string",version="1"} 0
+nv_inference_queue_duration_us{model="simple_sequence",version="1"} 0
+nv_inference_queue_duration_us{model="simple_int8",version="1"} 0
+nv_inference_queue_duration_us{model="simple_identity",version="1"} 0
+nv_inference_queue_duration_us{model="densenet_onnx",version="1"} 145
+nv_inference_queue_duration_us{model="simple_dyna_sequence",version="1"} 0
+nv_inference_queue_duration_us{model="inception_graphdef",version="1"} 0
+nv_inference_queue_duration_us{model="simple",version="1"} 0
+# HELP nv_inference_compute_input_duration_us Cumulative compute input duration in microseconds (does not include cached requests)
+# TYPE nv_inference_compute_input_duration_us counter
+nv_inference_compute_input_duration_us{model="simple_string",version="1"} 0
+nv_inference_compute_input_duration_us{model="simple_sequence",version="1"} 0
+nv_inference_compute_input_duration_us{model="simple_int8",version="1"} 0
+nv_inference_compute_input_duration_us{model="simple_identity",version="1"} 0
+nv_inference_compute_input_duration_us{model="densenet_onnx",version="1"} 626
+nv_inference_compute_input_duration_us{model="simple_dyna_sequence",version="1"} 0
+nv_inference_compute_input_duration_us{model="inception_graphdef",version="1"} 0
+nv_inference_compute_input_duration_us{model="simple",version="1"} 0
+# HELP nv_inference_compute_infer_duration_us Cumulative compute inference duration in microseconds (does not include cached requests)
+# TYPE nv_inference_compute_infer_duration_us counter
+nv_inference_compute_infer_duration_us{model="simple_string",version="1"} 0
+nv_inference_compute_infer_duration_us{model="simple_sequence",version="1"} 0
+nv_inference_compute_infer_duration_us{model="simple_int8",version="1"} 0
+nv_inference_compute_infer_duration_us{model="simple_identity",version="1"} 0
+nv_inference_compute_infer_duration_us{model="densenet_onnx",version="1"} 1326831
+nv_inference_compute_infer_duration_us{model="simple_dyna_sequence",version="1"} 0
+nv_inference_compute_infer_duration_us{model="inception_graphdef",version="1"} 0
+nv_inference_compute_infer_duration_us{model="simple",version="1"} 0
+# HELP nv_inference_compute_output_duration_us Cumulative inference compute output duration in microseconds (does not include cached requests)
+# TYPE nv_inference_compute_output_duration_us counter
+nv_inference_compute_output_duration_us{model="simple_string",version="1"} 0
+nv_inference_compute_output_duration_us{model="simple_sequence",version="1"} 0
+nv_inference_compute_output_duration_us{model="simple_int8",version="1"} 0
+nv_inference_compute_output_duration_us{model="simple_identity",version="1"} 0
+nv_inference_compute_output_duration_us{model="densenet_onnx",version="1"} 61
+nv_inference_compute_output_duration_us{model="simple_dyna_sequence",version="1"} 0
+nv_inference_compute_output_duration_us{model="inception_graphdef",version="1"} 0
+nv_inference_compute_output_duration_us{model="simple",version="1"} 0
+# HELP nv_energy_consumption GPU energy consumption in joules since the Triton Server started
+# TYPE nv_energy_consumption counter
+nv_energy_consumption{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 4879631.328000044
+# HELP nv_inference_pending_request_count Instantaneous number of pending requests awaiting execution per-model.
+# TYPE nv_inference_pending_request_count gauge
+nv_inference_pending_request_count{model="simple_string",version="1"} 0
+nv_inference_pending_request_count{model="simple_sequence",version="1"} 0
+nv_inference_pending_request_count{model="simple_int8",version="1"} 0
+nv_inference_pending_request_count{model="simple_identity",version="1"} 0
+nv_inference_pending_request_count{model="densenet_onnx",version="1"} 0
+nv_inference_pending_request_count{model="simple_dyna_sequence",version="1"} 0
+nv_inference_pending_request_count{model="inception_graphdef",version="1"} 0
+nv_inference_pending_request_count{model="simple",version="1"} 0
+# HELP nv_gpu_utilization GPU utilization rate [0.0 - 1.0)
+# TYPE nv_gpu_utilization gauge
+nv_gpu_utilization{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 0
+# HELP nv_gpu_memory_total_bytes GPU total memory, in bytes
+# TYPE nv_gpu_memory_total_bytes gauge
+nv_gpu_memory_total_bytes{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 16106127360
+# HELP nv_gpu_memory_used_bytes GPU used memory, in bytes
+# TYPE nv_gpu_memory_used_bytes gauge
+nv_gpu_memory_used_bytes{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 266338304
+# HELP nv_gpu_power_usage GPU power usage in watts
+# TYPE nv_gpu_power_usage gauge
+nv_gpu_power_usage{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 32.09
+# HELP nv_gpu_power_limit GPU power management limit in watts
+# TYPE nv_gpu_power_limit gauge
+nv_gpu_power_limit{gpu_uuid="GPU-951eeeeb-d284-d263-688e-d98a5306389b"} 70
+# HELP nv_cpu_utilization CPU utilization rate [0.0 - 1.0]
+# TYPE nv_cpu_utilization gauge
+nv_cpu_utilization 0
+# HELP nv_cpu_memory_total_bytes CPU total memory (RAM), in bytes
+# TYPE nv_cpu_memory_total_bytes gauge
+nv_cpu_memory_total_bytes 33164935168
+# HELP nv_cpu_memory_used_bytes CPU used memory (RAM), in bytes
+# TYPE nv_cpu_memory_used_bytes gauge
+nv_cpu_memory_used_bytes 2249916416
+# HELP nv_cache_util Cache utilization [0.0 - 1.0]
+# TYPE nv_cache_util gauge
+nv_cache_util 0.0001220703125
+# HELP nv_cache_num_entries Number of responses stored in response cache
+# TYPE nv_cache_num_entries gauge
+nv_cache_num_entries 0
+# HELP nv_cache_num_hits Number of cache hits in response cache
+# TYPE nv_cache_num_hits gauge
+nv_cache_num_hits 0
+# HELP nv_cache_num_misses Number of cache misses in response cache
+# TYPE nv_cache_num_misses gauge
+nv_cache_num_misses 0
+# HELP nv_cache_num_lookups Number of cache lookups in response cache
+# TYPE nv_cache_num_lookups gauge
+nv_cache_num_lookups 0
+# HELP nv_cache_num_evictions Number of cache evictions in response cache
+# TYPE nv_cache_num_evictions gauge
+nv_cache_num_evictions 0
+# HELP nv_cache_lookup_duration Total cache lookup duration (hit and miss), in microseconds
+# TYPE nv_cache_lookup_duration gauge
+nv_cache_lookup_duration 0
+# HELP nv_cache_insertion_duration Total cache insertion duration, in microseconds
+# TYPE nv_cache_insertion_duration gauge
+nv_cache_insertion_duration 0
+# HELP nv_inference_request_summary_us Summary of inference request duration in microseconds (includes cached requests)
+# TYPE nv_inference_request_summary_us summary
+nv_inference_request_summary_us_count{model="simple_string",version="1"} 0
+nv_inference_request_summary_us_sum{model="simple_string",version="1"} 0
+nv_inference_request_summary_us{model="simple_string",version="1",quantile="0.5"} 3
+nv_inference_request_summary_us{model="simple_string",version="1",quantile="0.9"} 3
+nv_inference_request_summary_us{model="simple_string",version="1",quantile="0.95"} 3
+nv_inference_request_summary_us{model="simple_string",version="1",quantile="0.99"} 3
+nv_inference_request_summary_us{model="simple_string",version="1",quantile="0.999"} 3
+nv_inference_request_summary_us_count{model="simple_sequence",version="1"} 0
+nv_inference_request_summary_us_sum{model="simple_sequence",version="1"} 0
+nv_inference_request_summary_us{model="simple_sequence",version="1",quantile="0.5"} 3
+nv_inference_request_summary_us{model="simple_sequence",version="1",quantile="0.9"} 3
+nv_inference_request_summary_us{model="simple_sequence",version="1",quantile="0.95"} 3
+nv_inference_request_summary_us{model="simple_sequence",version="1",quantile="0.99"} 3
+nv_inference_request_summary_us{model="simple_sequence",version="1",quantile="0.999"} 3
+nv_inference_request_summary_us_count{model="simple_int8",version="1"} 0
+nv_inference_request_summary_us_sum{model="simple_int8",version="1"} 0
+nv_inference_request_summary_us{model="simple_int8",version="1",quantile="0.5"} 3
+nv_inference_request_summary_us{model="simple_int8",version="1",quantile="0.9"} 3
+nv_inference_request_summary_us{model="simple_int8",version="1",quantile="0.95"} 3
+nv_inference_request_summary_us{model="simple_int8",version="1",quantile="0.99"} 3
+nv_inference_request_summary_us{model="simple_int8",version="1",quantile="0.999"} 3
+nv_inference_request_summary_us_count{model="simple_identity",version="1"} 0
+nv_inference_request_summary_us_sum{model="simple_identity",version="1"} 0
+nv_inference_request_summary_us{model="simple_identity",version="1",quantile="0.5"} 3
+nv_inference_request_summary_us{model="simple_identity",version="1",quantile="0.9"} 3
+nv_inference_request_summary_us{model="simple_identity",version="1",quantile="0.95"} 3
+nv_inference_request_summary_us{model="simple_identity",version="1",quantile="0.99"} 3
+nv_inference_request_summary_us{model="simple_identity",version="1",quantile="0.999"} 3
+nv_inference_request_summary_us_count{model="densenet_onnx",version="1"} 3
+nv_inference_request_summary_us_sum{model="densenet_onnx",version="1"} 1327965
+nv_inference_request_summary_us{model="densenet_onnx",version="1",quantile="0.5"} 3
+nv_inference_request_summary_us{model="densenet_onnx",version="1",quantile="0.9"} 3
+nv_inference_request_summary_us{model="densenet_onnx",version="1",quantile="0.95"} 3
+nv_inference_request_summary_us{model="densenet_onnx",version="1",quantile="0.99"} 3
+nv_inference_request_summary_us{model="densenet_onnx",version="1",quantile="0.999"} 3
+nv_inference_request_summary_us_count{model="simple_dyna_sequence",version="1"} 0
+nv_inference_request_summary_us_sum{model="simple_dyna_sequence",version="1"} 0
+nv_inference_request_summary_us{model="simple_dyna_sequence",version="1",quantile="0.5"} 3
+nv_inference_request_summary_us{model="simple_dyna_sequence",version="1",quantile="0.9"} 3
+nv_inference_request_summary_us{model="simple_dyna_sequence",version="1",quantile="0.95"} 3
+nv_inference_request_summary_us{model="simple_dyna_sequence",version="1",quantile="0.99"} 3
+nv_inference_request_summary_us{model="simple_dyna_sequence",version="1",quantile="0.999"} 3
+nv_inference_request_summary_us_count{model="inception_graphdef",version="1"} 0
+nv_inference_request_summary_us_sum{model="inception_graphdef",version="1"} 0
+nv_inference_request_summary_us{model="inception_graphdef",version="1",quantile="0.5"} 3
+nv_inference_request_summary_us{model="inception_graphdef",version="1",quantile="0.9"} 3
+nv_inference_request_summary_us{model="inception_graphdef",version="1",quantile="0.95"} 3
+nv_inference_request_summary_us{model="inception_graphdef",version="1",quantile="0.99"} 3
+nv_inference_request_summary_us{model="inception_graphdef",version="1",quantile="0.999"} 3
+nv_inference_request_summary_us_count{model="simple",version="1"} 0
+nv_inference_request_summary_us_sum{model="simple",version="1"} 0
+nv_inference_request_summary_us{model="simple",version="1",quantile="0.5"} 3
+nv_inference_request_summary_us{model="simple",version="1",quantile="0.9"} 3
+nv_inference_request_summary_us{model="simple",version="1",quantile="0.95"} 3
+nv_inference_request_summary_us{model="simple",version="1",quantile="0.99"} 3
+nv_inference_request_summary_us{model="simple",version="1",quantile="0.999"} 3
+# HELP nv_inference_queue_summary_us Summary of inference queuing duration in microseconds (includes cached requests)
+# TYPE nv_inference_queue_summary_us summary
+nv_inference_queue_summary_us_count{model="simple_string",version="1"} 0
+nv_inference_queue_summary_us_sum{model="simple_string",version="1"} 0
+nv_inference_queue_summary_us{model="simple_string",version="1",quantile="0.5"} 3
+nv_inference_queue_summary_us{model="simple_string",version="1",quantile="0.9"} 3
+nv_inference_queue_summary_us{model="simple_string",version="1",quantile="0.95"} 3
+nv_inference_queue_summary_us{model="simple_string",version="1",quantile="0.99"} 3
+nv_inference_queue_summary_us{model="simple_string",version="1",quantile="0.999"} 3
+nv_inference_queue_summary_us_count{model="simple_sequence",version="1"} 0
+nv_inference_queue_summary_us_sum{model="simple_sequence",version="1"} 0
+nv_inference_queue_summary_us{model="simple_sequence",version="1",quantile="0.5"} 3
+nv_inference_queue_summary_us{model="simple_sequence",version="1",quantile="0.9"} 3
+nv_inference_queue_summary_us{model="simple_sequence",version="1",quantile="0.95"} 3
+nv_inference_queue_summary_us{model="simple_sequence",version="1",quantile="0.99"} 3
+nv_inference_queue_summary_us{model="simple_sequence",version="1",quantile="0.999"} 3
+nv_inference_queue_summary_us_count{model="simple_int8",version="1"} 0
+nv_inference_queue_summary_us_sum{model="simple_int8",version="1"} 0
+nv_inference_queue_summary_us{model="simple_int8",version="1",quantile="0.5"} 3
+nv_inference_queue_summary_us{model="simple_int8",version="1",quantile="0.9"} 3
+nv_inference_queue_summary_us{model="simple_int8",version="1",quantile="0.95"} 3
+nv_inference_queue_summary_us{model="simple_int8",version="1",quantile="0.99"} 3
+nv_inference_queue_summary_us{model="simple_int8",version="1",quantile="0.999"} 3
+nv_inference_queue_summary_us_count{model="simple_identity",version="1"} 0
+nv_inference_queue_summary_us_sum{model="simple_identity",version="1"} 0
+nv_inference_queue_summary_us{model="simple_identity",version="1",quantile="0.5"} 3
+nv_inference_queue_summary_us{model="simple_identity",version="1",quantile="0.9"} 3
+nv_inference_queue_summary_us{model="simple_identity",version="1",quantile="0.95"} 3
+nv_inference_queue_summary_us{model="simple_identity",version="1",quantile="0.99"} 3
+nv_inference_queue_summary_us{model="simple_identity",version="1",quantile="0.999"} 3
+nv_inference_queue_summary_us_count{model="densenet_onnx",version="1"} 3
+nv_inference_queue_summary_us_sum{model="densenet_onnx",version="1"} 145
+nv_inference_queue_summary_us{model="densenet_onnx",version="1",quantile="0.5"} 3
+nv_inference_queue_summary_us{model="densenet_onnx",version="1",quantile="0.9"} 3
+nv_inference_queue_summary_us{model="densenet_onnx",version="1",quantile="0.95"} 3
+nv_inference_queue_summary_us{model="densenet_onnx",version="1",quantile="0.99"} 3
+nv_inference_queue_summary_us{model="densenet_onnx",version="1",quantile="0.999"} 3
+nv_inference_queue_summary_us_count{model="simple_dyna_sequence",version="1"} 0
+nv_inference_queue_summary_us_sum{model="simple_dyna_sequence",version="1"} 0
+nv_inference_queue_summary_us{model="simple_dyna_sequence",version="1",quantile="0.5"} 3
+nv_inference_queue_summary_us{model="simple_dyna_sequence",version="1",quantile="0.9"} 3
+nv_inference_queue_summary_us{model="simple_dyna_sequence",version="1",quantile="0.95"} 3
+nv_inference_queue_summary_us{model="simple_dyna_sequence",version="1",quantile="0.99"} 3
+nv_inference_queue_summary_us{model="simple_dyna_sequence",version="1",quantile="0.999"} 3
+nv_inference_queue_summary_us_count{model="inception_graphdef",version="1"} 0
+nv_inference_queue_summary_us_sum{model="inception_graphdef",version="1"} 0
+nv_inference_queue_summary_us{model="inception_graphdef",version="1",quantile="0.5"} 3
+nv_inference_queue_summary_us{model="inception_graphdef",version="1",quantile="0.9"} 3
+nv_inference_queue_summary_us{model="inception_graphdef",version="1",quantile="0.95"} 3
+nv_inference_queue_summary_us{model="inception_graphdef",version="1",quantile="0.99"} 3
+nv_inference_queue_summary_us{model="inception_graphdef",version="1",quantile="0.999"} 3
+nv_inference_queue_summary_us_count{model="simple",version="1"} 0
+nv_inference_queue_summary_us_sum{model="simple",version="1"} 0
+nv_inference_queue_summary_us{model="simple",version="1",quantile="0.5"} 3
+nv_inference_queue_summary_us{model="simple",version="1",quantile="0.9"} 3
+nv_inference_queue_summary_us{model="simple",version="1",quantile="0.95"} 3
+nv_inference_queue_summary_us{model="simple",version="1",quantile="0.99"} 3
+nv_inference_queue_summary_us{model="simple",version="1",quantile="0.999"} 3
+# HELP nv_inference_compute_input_summary_us Cumulative compute input duration in microseconds (does not include cached requests)
+# TYPE nv_inference_compute_input_summary_us summary
+nv_inference_compute_input_summary_us_count{model="simple_string",version="1"} 0
+nv_inference_compute_input_summary_us_sum{model="simple_string",version="1"} 0
+nv_inference_compute_input_summary_us{model="simple_string",version="1",quantile="0.5"} 3
+nv_inference_compute_input_summary_us{model="simple_string",version="1",quantile="0.9"} 3
+nv_inference_compute_input_summary_us{model="simple_string",version="1",quantile="0.95"} 3
+nv_inference_compute_input_summary_us{model="simple_string",version="1",quantile="0.99"} 3
+nv_inference_compute_input_summary_us{model="simple_string",version="1",quantile="0.999"} 3
+nv_inference_compute_input_summary_us_count{model="simple_sequence",version="1"} 0
+nv_inference_compute_input_summary_us_sum{model="simple_sequence",version="1"} 0
+nv_inference_compute_input_summary_us{model="simple_sequence",version="1",quantile="0.5"} 3
+nv_inference_compute_input_summary_us{model="simple_sequence",version="1",quantile="0.9"} 3
+nv_inference_compute_input_summary_us{model="simple_sequence",version="1",quantile="0.95"} 3
+nv_inference_compute_input_summary_us{model="simple_sequence",version="1",quantile="0.99"} 3
+nv_inference_compute_input_summary_us{model="simple_sequence",version="1",quantile="0.999"} 3
+nv_inference_compute_input_summary_us_count{model="simple_int8",version="1"} 0
+nv_inference_compute_input_summary_us_sum{model="simple_int8",version="1"} 0
+nv_inference_compute_input_summary_us{model="simple_int8",version="1",quantile="0.5"} 3
+nv_inference_compute_input_summary_us{model="simple_int8",version="1",quantile="0.9"} 3
+nv_inference_compute_input_summary_us{model="simple_int8",version="1",quantile="0.95"} 3
+nv_inference_compute_input_summary_us{model="simple_int8",version="1",quantile="0.99"} 3
+nv_inference_compute_input_summary_us{model="simple_int8",version="1",quantile="0.999"} 3
+nv_inference_compute_input_summary_us_count{model="simple_identity",version="1"} 0
+nv_inference_compute_input_summary_us_sum{model="simple_identity",version="1"} 0
+nv_inference_compute_input_summary_us{model="simple_identity",version="1",quantile="0.5"} 3
+nv_inference_compute_input_summary_us{model="simple_identity",version="1",quantile="0.9"} 3
+nv_inference_compute_input_summary_us{model="simple_identity",version="1",quantile="0.95"} 3
+nv_inference_compute_input_summary_us{model="simple_identity",version="1",quantile="0.99"} 3
+nv_inference_compute_input_summary_us{model="simple_identity",version="1",quantile="0.999"} 3
+nv_inference_compute_input_summary_us_count{model="densenet_onnx",version="1"} 3
+nv_inference_compute_input_summary_us_sum{model="densenet_onnx",version="1"} 626
+nv_inference_compute_input_summary_us{model="densenet_onnx",version="1",quantile="0.5"} 3
+nv_inference_compute_input_summary_us{model="densenet_onnx",version="1",quantile="0.9"} 3
+nv_inference_compute_input_summary_us{model="densenet_onnx",version="1",quantile="0.95"} 3
+nv_inference_compute_input_summary_us{model="densenet_onnx",version="1",quantile="0.99"} 3
+nv_inference_compute_input_summary_us{model="densenet_onnx",version="1",quantile="0.999"} 3
+nv_inference_compute_input_summary_us_count{model="simple_dyna_sequence",version="1"} 0
+nv_inference_compute_input_summary_us_sum{model="simple_dyna_sequence",version="1"} 0
+nv_inference_compute_input_summary_us{model="simple_dyna_sequence",version="1",quantile="0.5"} 3
+nv_inference_compute_input_summary_us{model="simple_dyna_sequence",version="1",quantile="0.9"} 3
+nv_inference_compute_input_summary_us{model="simple_dyna_sequence",version="1",quantile="0.95"} 3
+nv_inference_compute_input_summary_us{model="simple_dyna_sequence",version="1",quantile="0.99"} 3
+nv_inference_compute_input_summary_us{model="simple_dyna_sequence",version="1",quantile="0.999"} 3
+nv_inference_compute_input_summary_us_count{model="inception_graphdef",version="1"} 0
+nv_inference_compute_input_summary_us_sum{model="inception_graphdef",version="1"} 0
+nv_inference_compute_input_summary_us{model="inception_graphdef",version="1",quantile="0.5"} 3
+nv_inference_compute_input_summary_us{model="inception_graphdef",version="1",quantile="0.9"} 3
+nv_inference_compute_input_summary_us{model="inception_graphdef",version="1",quantile="0.95"} 3
+nv_inference_compute_input_summary_us{model="inception_graphdef",version="1",quantile="0.99"} 3
+nv_inference_compute_input_summary_us{model="inception_graphdef",version="1",quantile="0.999"} 3
+nv_inference_compute_input_summary_us_count{model="simple",version="1"} 0
+nv_inference_compute_input_summary_us_sum{model="simple",version="1"} 0
+nv_inference_compute_input_summary_us{model="simple",version="1",quantile="0.5"} 3
+nv_inference_compute_input_summary_us{model="simple",version="1",quantile="0.9"} 3
+nv_inference_compute_input_summary_us{model="simple",version="1",quantile="0.95"} 3
+nv_inference_compute_input_summary_us{model="simple",version="1",quantile="0.99"} 3
+nv_inference_compute_input_summary_us{model="simple",version="1",quantile="0.999"} 3
+# HELP nv_inference_compute_infer_summary_us Cumulative compute inference duration in microseconds (does not include cached requests)
+# TYPE nv_inference_compute_infer_summary_us summary
+nv_inference_compute_infer_summary_us_count{model="simple_string",version="1"} 0
+nv_inference_compute_infer_summary_us_sum{model="simple_string",version="1"} 0
+nv_inference_compute_infer_summary_us{model="simple_string",version="1",quantile="0.5"} 3
+nv_inference_compute_infer_summary_us{model="simple_string",version="1",quantile="0.9"} 3
+nv_inference_compute_infer_summary_us{model="simple_string",version="1",quantile="0.95"} 3
+nv_inference_compute_infer_summary_us{model="simple_string",version="1",quantile="0.99"} 3
+nv_inference_compute_infer_summary_us{model="simple_string",version="1",quantile="0.999"} 3
+nv_inference_compute_infer_summary_us_count{model="simple_sequence",version="1"} 0
+nv_inference_compute_infer_summary_us_sum{model="simple_sequence",version="1"} 0
+nv_inference_compute_infer_summary_us{model="simple_sequence",version="1",quantile="0.5"} 3
+nv_inference_compute_infer_summary_us{model="simple_sequence",version="1",quantile="0.9"} 3
+nv_inference_compute_infer_summary_us{model="simple_sequence",version="1",quantile="0.95"} 3
+nv_inference_compute_infer_summary_us{model="simple_sequence",version="1",quantile="0.99"} 3
+nv_inference_compute_infer_summary_us{model="simple_sequence",version="1",quantile="0.999"} 3
+nv_inference_compute_infer_summary_us_count{model="simple_int8",version="1"} 0
+nv_inference_compute_infer_summary_us_sum{model="simple_int8",version="1"} 0
+nv_inference_compute_infer_summary_us{model="simple_int8",version="1",quantile="0.5"} 3
+nv_inference_compute_infer_summary_us{model="simple_int8",version="1",quantile="0.9"} 3
+nv_inference_compute_infer_summary_us{model="simple_int8",version="1",quantile="0.95"} 3
+nv_inference_compute_infer_summary_us{model="simple_int8",version="1",quantile="0.99"} 3
+nv_inference_compute_infer_summary_us{model="simple_int8",version="1",quantile="0.999"} 3
+nv_inference_compute_infer_summary_us_count{model="simple_identity",version="1"} 0
+nv_inference_compute_infer_summary_us_sum{model="simple_identity",version="1"} 0
+nv_inference_compute_infer_summary_us{model="simple_identity",version="1",quantile="0.5"} 3
+nv_inference_compute_infer_summary_us{model="simple_identity",version="1",quantile="0.9"} 3
+nv_inference_compute_infer_summary_us{model="simple_identity",version="1",quantile="0.95"} 3
+nv_inference_compute_infer_summary_us{model="simple_identity",version="1",quantile="0.99"} 3
+nv_inference_compute_infer_summary_us{model="simple_identity",version="1",quantile="0.999"} 3
+nv_inference_compute_infer_summary_us_count{model="densenet_onnx",version="1"} 3
+nv_inference_compute_infer_summary_us_sum{model="densenet_onnx",version="1"} 1326831
+nv_inference_compute_infer_summary_us{model="densenet_onnx",version="1",quantile="0.5"} 3
+nv_inference_compute_infer_summary_us{model="densenet_onnx",version="1",quantile="0.9"} 3
+nv_inference_compute_infer_summary_us{model="densenet_onnx",version="1",quantile="0.95"} 3
+nv_inference_compute_infer_summary_us{model="densenet_onnx",version="1",quantile="0.99"} 3
+nv_inference_compute_infer_summary_us{model="densenet_onnx",version="1",quantile="0.999"} 3
+nv_inference_compute_infer_summary_us_count{model="simple_dyna_sequence",version="1"} 0
+nv_inference_compute_infer_summary_us_sum{model="simple_dyna_sequence",version="1"} 0
+nv_inference_compute_infer_summary_us{model="simple_dyna_sequence",version="1",quantile="0.5"} 3
+nv_inference_compute_infer_summary_us{model="simple_dyna_sequence",version="1",quantile="0.9"} 3
+nv_inference_compute_infer_summary_us{model="simple_dyna_sequence",version="1",quantile="0.95"} 3
+nv_inference_compute_infer_summary_us{model="simple_dyna_sequence",version="1",quantile="0.99"} 3
+nv_inference_compute_infer_summary_us{model="simple_dyna_sequence",version="1",quantile="0.999"} 3
+nv_inference_compute_infer_summary_us_count{model="inception_graphdef",version="1"} 0
+nv_inference_compute_infer_summary_us_sum{model="inception_graphdef",version="1"} 0
+nv_inference_compute_infer_summary_us{model="inception_graphdef",version="1",quantile="0.5"} 3
+nv_inference_compute_infer_summary_us{model="inception_graphdef",version="1",quantile="0.9"} 3
+nv_inference_compute_infer_summary_us{model="inception_graphdef",version="1",quantile="0.95"} 3
+nv_inference_compute_infer_summary_us{model="inception_graphdef",version="1",quantile="0.99"} 3
+nv_inference_compute_infer_summary_us{model="inception_graphdef",version="1",quantile="0.999"} 3
+nv_inference_compute_infer_summary_us_count{model="simple",version="1"} 0
+nv_inference_compute_infer_summary_us_sum{model="simple",version="1"} 0
+nv_inference_compute_infer_summary_us{model="simple",version="1",quantile="0.5"} 3
+nv_inference_compute_infer_summary_us{model="simple",version="1",quantile="0.9"} 3
+nv_inference_compute_infer_summary_us{model="simple",version="1",quantile="0.95"} 3
+nv_inference_compute_infer_summary_us{model="simple",version="1",quantile="0.99"} 3
+nv_inference_compute_infer_summary_us{model="simple",version="1",quantile="0.999"} 3
+# HELP nv_inference_compute_output_summary_us Cumulative inference compute output duration in microseconds (does not include cached requests)
+# TYPE nv_inference_compute_output_summary_us summary
+nv_inference_compute_output_summary_us_count{model="simple_string",version="1"} 0
+nv_inference_compute_output_summary_us_sum{model="simple_string",version="1"} 0
+nv_inference_compute_output_summary_us{model="simple_string",version="1",quantile="0.5"} 3
+nv_inference_compute_output_summary_us{model="simple_string",version="1",quantile="0.9"} 3
+nv_inference_compute_output_summary_us{model="simple_string",version="1",quantile="0.95"} 3
+nv_inference_compute_output_summary_us{model="simple_string",version="1",quantile="0.99"} 3
+nv_inference_compute_output_summary_us{model="simple_string",version="1",quantile="0.999"} 3
+nv_inference_compute_output_summary_us_count{model="simple_sequence",version="1"} 0
+nv_inference_compute_output_summary_us_sum{model="simple_sequence",version="1"} 0
+nv_inference_compute_output_summary_us{model="simple_sequence",version="1",quantile="0.5"} 3
+nv_inference_compute_output_summary_us{model="simple_sequence",version="1",quantile="0.9"} 3
+nv_inference_compute_output_summary_us{model="simple_sequence",version="1",quantile="0.95"} 3
+nv_inference_compute_output_summary_us{model="simple_sequence",version="1",quantile="0.99"} 3
+nv_inference_compute_output_summary_us{model="simple_sequence",version="1",quantile="0.999"} 3
+nv_inference_compute_output_summary_us_count{model="simple_int8",version="1"} 0
+nv_inference_compute_output_summary_us_sum{model="simple_int8",version="1"} 0
+nv_inference_compute_output_summary_us{model="simple_int8",version="1",quantile="0.5"} 3
+nv_inference_compute_output_summary_us{model="simple_int8",version="1",quantile="0.9"} 3
+nv_inference_compute_output_summary_us{model="simple_int8",version="1",quantile="0.95"} 3
+nv_inference_compute_output_summary_us{model="simple_int8",version="1",quantile="0.99"} 3
+nv_inference_compute_output_summary_us{model="simple_int8",version="1",quantile="0.999"} 3
+nv_inference_compute_output_summary_us_count{model="simple_identity",version="1"} 0
+nv_inference_compute_output_summary_us_sum{model="simple_identity",version="1"} 0
+nv_inference_compute_output_summary_us{model="simple_identity",version="1",quantile="0.5"} 3
+nv_inference_compute_output_summary_us{model="simple_identity",version="1",quantile="0.9"} 3
+nv_inference_compute_output_summary_us{model="simple_identity",version="1",quantile="0.95"} 3
+nv_inference_compute_output_summary_us{model="simple_identity",version="1",quantile="0.99"} 3
+nv_inference_compute_output_summary_us{model="simple_identity",version="1",quantile="0.999"} 3
+nv_inference_compute_output_summary_us_count{model="densenet_onnx",version="1"} 3
+nv_inference_compute_output_summary_us_sum{model="densenet_onnx",version="1"} 61
+nv_inference_compute_output_summary_us{model="densenet_onnx",version="1",quantile="0.5"} 3
+nv_inference_compute_output_summary_us{model="densenet_onnx",version="1",quantile="0.9"} 3
+nv_inference_compute_output_summary_us{model="densenet_onnx",version="1",quantile="0.95"} 3
+nv_inference_compute_output_summary_us{model="densenet_onnx",version="1",quantile="0.99"} 3
+nv_inference_compute_output_summary_us{model="densenet_onnx",version="1",quantile="0.999"} 3
+nv_inference_compute_output_summary_us_count{model="simple_dyna_sequence",version="1"} 0
+nv_inference_compute_output_summary_us_sum{model="simple_dyna_sequence",version="1"} 0
+nv_inference_compute_output_summary_us{model="simple_dyna_sequence",version="1",quantile="0.5"} 3
+nv_inference_compute_output_summary_us{model="simple_dyna_sequence",version="1",quantile="0.9"} 3
+nv_inference_compute_output_summary_us{model="simple_dyna_sequence",version="1",quantile="0.95"} 3
+nv_inference_compute_output_summary_us{model="simple_dyna_sequence",version="1",quantile="0.99"} 3
+nv_inference_compute_output_summary_us{model="simple_dyna_sequence",version="1",quantile="0.999"} 3
+nv_inference_compute_output_summary_us_count{model="inception_graphdef",version="1"} 0
+nv_inference_compute_output_summary_us_sum{model="inception_graphdef",version="1"} 0
+nv_inference_compute_output_summary_us{model="inception_graphdef",version="1",quantile="0.5"} 3
+nv_inference_compute_output_summary_us{model="inception_graphdef",version="1",quantile="0.9"} 3
+nv_inference_compute_output_summary_us{model="inception_graphdef",version="1",quantile="0.95"} 3
+nv_inference_compute_output_summary_us{model="inception_graphdef",version="1",quantile="0.99"} 3
+nv_inference_compute_output_summary_us{model="inception_graphdef",version="1",quantile="0.999"} 3
+nv_inference_compute_output_summary_us_count{model="simple",version="1"} 0
+nv_inference_compute_output_summary_us_sum{model="simple",version="1"} 0
+nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.5"} 3
+nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.9"} 3
+nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.95"} 3
+nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.99"} 3
+nv_inference_compute_output_summary_us{model="simple",version="1",quantile="0.999"} 3

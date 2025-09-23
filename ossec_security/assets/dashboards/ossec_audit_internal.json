@@ -1,0 +1,791 @@
+{
+    "title": "OSSEC - Audit/Internal",
+    "description": "-   This dashboard offers comprehensive insights into OSSEC audit/internal logs related to activities conducted on OSSEC server.\n",
+    "widgets": [
+        {
+            "id": 2373384864959014,
+            "definition": {
+                "type": "image",
+                "url": "https://www.ossec.net/wp-content/uploads/2019/01/ossec-300x113.png",
+                "url_dark_theme": "https://www.ossec.net/wp-content/uploads/2019/01/ossec_logo_2-300x113.png",
+                "sizing": "contain",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 5,
+                "height": 3
+            }
+        },
+        {
+            "id": 902847814995084,
+            "definition": {
+                "title": "Audit/Internal Event Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1280502707915960,
+                        "definition": {
+                            "title": "Audit Events Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:ossec-security service:system $Host_Name $Group_List $Level"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1257808143878904,
+                        "definition": {
+                            "title": "Total Count of Audit Events",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:ossec-security service:system $Level $Group_List $Host_Name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3587052944361292,
+                        "definition": {
+                            "title": "Top 10 Events by Level (Level >3)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@level",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:ossec-security service:system @level:>3 $Level $Group_List $Host_Name"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 5,
+                "y": 0,
+                "width": 7,
+                "height": 7
+            }
+        },
+        {
+            "id": 1395902028908320,
+            "definition": {
+                "type": "note",
+                "content": "### Dashboard Overview\nAudit Event dashboard offers comprehensive insights into OSSEC audit/internal logs related to activities conducted on OSSEC server.\n\nFor more information, see the [OSSEC Integration Documentation](https://docs.datadoghq.com/integrations/ossec_security/)\n\nTips:\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 5,
+                "height": 4
+            }
+        },
+        {
+            "id": 7705943365813826,
+            "definition": {
+                "title": "Integrity Checksum Event Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:ossec-security service:system @rule_id:([550 TO 552] OR [594 TO 596]) $Level $Group_List $Host_Name",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "level",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "rule_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "file",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "description",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "md5_old",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "md5_new",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "sha1_old",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "sha1_new",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "log",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 8855619840133816,
+            "definition": {
+                "title": "Syscheck Event Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:ossec-security service:system @group_list:syscheck $Level $Group_List $Host_Name ",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "level",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "rule_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "group",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "description",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "log",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 8004017264460084,
+            "definition": {
+                "title": "Top 10 Rootcheck Events Performed",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@rule_id",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:ossec-security service:system @group_list:rootcheck $Level $Group_List $Host_Name"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 948552622899648,
+            "definition": {
+                "title": "System Audit Event Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:ossec-security service:system @rule_id:(516 OR 519) $Level $Group_List $Host_Name ",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "level",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "description",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "log",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 4,
+                "y": 8,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 4269308157647600,
+            "definition": {
+                "title": "Rootcheck Events Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:ossec-security service:system @group_list:rootcheck $Level $Group_List $Host_Name",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "level",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "rule_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "group",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "description",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "log",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 681841601742090,
+            "definition": {
+                "title": "Occurrence of Low-Disk Space Events Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Count",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:ossec-security service:system @rule_id:531 $Level $Group_List $Host_Name"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 6689918095414824,
+            "definition": {
+                "title": "Host Info Event Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:ossec-security service:system @rule_id:(580 OR 581) $Level $Group_List $Host_Name",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "level",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "rule_id",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "group",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "description",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "log",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 20,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 2985008898786858,
+            "definition": {
+                "title": "Log File Change Events",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:ossec-security service:system @rule_id:(591 OR 592) $Level $Group_List $Host_Name",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "level",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "file",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "description",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "log",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 24,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 1359797966106016,
+            "definition": {
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:ossec-security service:system $Level $Group_List $Host_Name",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "level",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "description",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "full"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 28,
+                "width": 12,
+                "height": 5
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Level",
+            "prefix": "@level",
+            "available_values": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15"
+            ],
+            "default": "*"
+        },
+        {
+            "name": "Group_List",
+            "prefix": "@group_list",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Host_Name",
+            "prefix": "@syslog.hostname",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

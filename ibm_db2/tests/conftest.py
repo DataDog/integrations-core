@@ -15,7 +15,14 @@ from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
 class DbManager(object):
     def __init__(self, config):
         self.target, self.username, self.password = IbmDb2Check.get_connection_data(
-            config['db'], config['username'], config['password'], config['host'], config['port'], 'none', None
+            config['db'],
+            config['username'],
+            config['password'],
+            config['host'],
+            config['port'],
+            'none',
+            None,
+            None,
         )
         self.db_name = config['db']
         self.conn = None

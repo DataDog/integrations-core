@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import certifi
 
 from datadog_checks.base import ConfigurationError, is_affirmative
@@ -7,33 +11,29 @@ from datadog_checks.mongo.utils import build_connection_string, parse_mongo_uri
 
 
 class MongoConfig(object):
-    def __init__(self, instance, log):
+    def __init__(self, instance, log, init_config):
         self.log = log
+        self.min_collection_interval = int(instance.get('min_collection_interval', 15))
 
         # x.509 authentication
 
-        cacert_cert_dir = instance.get('ssl_ca_certs')
+        cacert_cert_dir = instance.get('tls_ca_file')
         if cacert_cert_dir is None and (
-            is_affirmative(instance.get('options', {}).get("ssl")) or is_affirmative(instance.get('ssl'))
+            is_affirmative(instance.get('options', {}).get("tls")) or is_affirmative(instance.get('tls'))
         ):
             cacert_cert_dir = certifi.where()
 
-        self.ssl_params = exclude_undefined_keys(
+        self.tls_params = exclude_undefined_keys(
             {
-                'ssl': instance.get('ssl', None),
-                'ssl_keyfile': instance.get('ssl_keyfile', None),
-                'ssl_certfile': instance.get('ssl_certfile', None),
-                'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
-                'ssl_ca_certs': cacert_cert_dir,
-                'ssl_match_hostname': instance.get('ssl_match_hostname', None),
-                'tls': instance.get('tls', None),
-                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file', None),
-                'tlsCAFile': instance.get('tls_ca_file', None),
-                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames', None),
-                'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates', None),
+                'tls': instance.get('tls'),
+                'tlsCertificateKeyFile': instance.get('tls_certificate_key_file'),
+                'tlsCAFile': cacert_cert_dir,
+                'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames'),
+                'tlsAllowInvalidCertificates': instance.get('tls_allow_invalid_certificates'),
             }
         )
-        self.log.debug('ssl_params: %s', self.ssl_params)
+
+        self.log.debug('tls_params: %s', self.tls_params)
 
         if 'server' in instance:
             self.server = instance['server']
@@ -44,7 +44,7 @@ class MongoConfig(object):
                 self.hosts,
                 _,
                 self.auth_source,
-            ) = parse_mongo_uri(self.server, sanitize_username=bool(self.ssl_params))
+            ) = parse_mongo_uri(self.server, sanitize_username=bool(self.tls_params))
             self.scheme = None
             self.additional_options = {}
             self.hosts = ["%s:%s" % (host[0], host[1]) for host in self.hosts]
@@ -58,6 +58,11 @@ class MongoConfig(object):
             self.scheme = instance.get('connection_scheme', 'mongodb')
             self.db_name = instance.get('database')
             self.additional_options = instance.get('options', {})
+            if 'replicaSet' in self.additional_options:
+                raise ConfigurationError(
+                    'Setting the `replicaSet` option is not supported. '
+                    'Configure one check instance for each node instead'
+                )
             self.auth_source = self.additional_options.get('authSource') or self.db_name or 'admin'
 
         if not self.hosts:
@@ -78,20 +83,48 @@ class MongoConfig(object):
 
         # Authenticate
         self.do_auth = True
-        self.use_x509 = self.ssl_params and not self.password
+        self.use_x509 = self.tls_params and not self.password
         if not self.username:
             self.log.info("Disabling authentication because a username was not provided.")
             self.do_auth = False
 
         self.replica_check = is_affirmative(instance.get('replica_check', True))
+        self.dbstats_tag_dbname = is_affirmative(instance.get('dbstats_tag_dbname', True))
 
+        self.add_node_tag_to_events = is_affirmative(instance.get('add_node_tag_to_events', True))
         self.collections_indexes_stats = is_affirmative(instance.get('collections_indexes_stats'))
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])
+        self._metrics_collection_interval = instance.get("metrics_collection_interval", {})
+        self.system_database_stats = is_affirmative(instance.get('system_database_stats', True))
+        self.free_storage_metrics = is_affirmative(instance.get('free_storage_metrics', True))
 
         self._base_tags = list(set(instance.get('tags', [])))
+
+        # DBM config options
+        self.dbm_enabled = is_affirmative(instance.get('dbm', False))
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
+        self.cluster_name = instance.get('cluster_name', None)
+        self.cloud_metadata = self._compute_cloud_metadata(instance)
+        self._operation_samples_config = instance.get('operation_samples', {})
+        self._slow_operations_config = instance.get('slow_operations', {})
+        # Backward compatibility: check new names first, then fall back to old names
+        self._schemas_config = instance.get('collect_schemas', instance.get('schemas', {}))
+
+        if self.dbm_enabled and not self.cluster_name:
+            raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
+
+        # MongoDB instance hostname override
+        self.reported_database_hostname = instance.get('reported_database_hostname', None)
+
+        # MongoDB database auto-discovery, disabled by default
+        self.database_autodiscovery_config = self._get_database_autodiscovery_config(instance)
+
+        # Generate tags for service checks and metrics
+        # TODO: service check and metric tags should be updated to be dynamic with auto-discovered databases
         self.service_check_tags = self._compute_service_check_tags()
         self.metric_tags = self._compute_metric_tags()
+        self.service = instance.get('service') or init_config.get('service') or ''
 
     def _get_clean_server_name(self):
         try:
@@ -108,7 +141,7 @@ class MongoConfig(object):
                 server = self.server
 
             self.log.debug("Parsing mongo uri with server: %s", server)
-            return parse_mongo_uri(server, sanitize_username=bool(self.ssl_params))[4]
+            return parse_mongo_uri(server, sanitize_username=bool(self.tls_params))[4]
         except Exception as e:
             raise ConfigurationError(
                 "Could not build a mongo uri with the given hosts: %s. Error: %s" % (self.hosts, repr(e))
@@ -121,7 +154,128 @@ class MongoConfig(object):
             main_host, main_port = main_host.split(':')
 
         service_check_tags = ["db:%s" % self.db_name, "host:%s" % main_host, "port:%s" % main_port] + self._base_tags
+        if self.cluster_name:
+            service_check_tags.append('clustername:%s' % self.cluster_name)
         return service_check_tags
 
     def _compute_metric_tags(self):
-        return self._base_tags + ['server:%s' % self.clean_server_name]
+        tags = self._base_tags + ['server:%s' % self.clean_server_name]
+        if self.cluster_name:
+            tags.append('clustername:%s' % self.cluster_name)
+        return tags
+
+    def _compute_cloud_metadata(self, instance):
+        cloud_metadata = {}
+        if aws := instance.get('aws'):
+            cloud_metadata['aws'] = {
+                'instance_endpoint': aws.get('instance_endpoint'),
+                'cluster_identifier': aws.get('cluster_identifier') or self.cluster_name,
+            }
+        return cloud_metadata
+
+    @property
+    def operation_samples(self):
+        enabled = False
+        if self.dbm_enabled is True and self._operation_samples_config.get('enabled') is not False:
+            # if DBM is enabled and the operation samples config is not explicitly disabled, then it is enabled
+            enabled = True
+        return {
+            'enabled': enabled,
+            'collection_interval': self._operation_samples_config.get('collection_interval', 10),
+            'run_sync': is_affirmative(self._operation_samples_config.get('run_sync', False)),
+            'explain_verbosity': self._operation_samples_config.get('explain_verbosity', 'queryPlanner'),
+            'explained_operations_cache_maxsize': int(
+                self._operation_samples_config.get('explained_operations_cache_maxsize', 5000)
+            ),
+            'explained_operations_per_hour_per_query': int(
+                self._operation_samples_config.get('explained_operations_per_hour_per_query', 10)
+            ),
+        }
+
+    @property
+    def slow_operations(self):
+        enabled = False
+        if self.dbm_enabled is True and self._slow_operations_config.get('enabled') is not False:
+            # if DBM is enabled and the operation metrics config is not explicitly disabled, then it is enabled
+            enabled = True
+        return {
+            'enabled': enabled,
+            'collection_interval': self._slow_operations_config.get('collection_interval', 10),
+            'run_sync': is_affirmative(self._slow_operations_config.get('run_sync', False)),
+            'max_operations': int(self._slow_operations_config.get('max_operations', 1000)),
+            'explain_verbosity': self._slow_operations_config.get('explain_verbosity', 'queryPlanner'),
+            'explained_operations_cache_maxsize': int(
+                self._slow_operations_config.get('explained_operations_cache_maxsize', 5000)
+            ),
+            'explained_operations_per_hour_per_query': int(
+                self._slow_operations_config.get('explained_operations_per_hour_per_query', 10)
+            ),
+        }
+
+    @property
+    def schemas(self):
+        enabled = False
+        if self.dbm_enabled is True and self._schemas_config.get('enabled') is not False:
+            # if DBM is enabled and the schemas config is not explicitly disabled, then it is enabled
+            enabled = True
+        max_collections = self._schemas_config.get('max_collections')
+        return {
+            'enabled': enabled,
+            'collection_interval': self._schemas_config.get('collection_interval', 3600),
+            'run_sync': is_affirmative(self._schemas_config.get('run_sync', True)),
+            'sample_size': int(self._schemas_config.get('sample_size', 10)),
+            'max_collections': int(max_collections) if max_collections else None,
+            'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
+            'collect_search_indexes': is_affirmative(self._schemas_config.get('collect_search_indexes', False)),
+        }
+
+    def _get_database_autodiscovery_config(self, instance):
+        database_autodiscovery_config = instance.get('database_autodiscovery', {"enabled": False})
+        if database_autodiscovery_config['enabled']:
+            if self.db_name != 'admin':
+                # If database_autodiscovery is enabled, the `database` parameter should not be set
+                # because we want to monitor all databases. Unless the `database` parameter is set to 'admin'.
+                self.log.warning(
+                    "The `database` parameter should not be set when `database_autodiscovery` is enabled. "
+                    "The `database` parameter will be ignored."
+                )
+            if self.coll_names:
+                self.log.warning(
+                    "The `collections` parameter should not be set when `database_autodiscovery` is enabled. "
+                    "The `collections` parameter will be ignored."
+                )
+        if self.db_names:
+            # dbnames is deprecated and will be removed in a future version
+            self.log.warning(
+                "The `dbnames` parameter is deprecated and will be removed in a future version. "
+                "To monitor more databases, enable `database_autodiscovery` and use "
+                "`database_autodiscovery.include` instead."
+            )
+            include_list = [f"{db}$" for db in self.db_names]  # Append $ to each db name for exact match
+            if not database_autodiscovery_config['enabled']:
+                # if database_autodiscovery is not enabled, we should enable it
+                database_autodiscovery_config['enabled'] = True
+            if not database_autodiscovery_config.get('include'):
+                # if database_autodiscovery is enabled but include list is not set, set the include list
+                database_autodiscovery_config['include'] = include_list
+        # Limit the maximum number of collections per database to monitor
+        database_autodiscovery_config["max_collections_per_database"] = int(
+            database_autodiscovery_config.get("max_collections_per_database", 100)
+        )
+        return database_autodiscovery_config
+
+    @property
+    def metrics_collection_interval(self):
+        '''
+        metrics collection interval is used to customize how often to collect different types of metrics
+        by default, metrics are collected on every check run with default interval of 15 seconds
+        '''
+        return {
+            # $collStats and $indexStats are collected on every check run but they can get expensive on large databases
+            'collection': int(self._metrics_collection_interval.get('collection', 300)),
+            'collections_indexes_stats': int(self._metrics_collection_interval.get('collections_indexes_stats', 300)),
+            # $shardDataDistribution stats are collected every 5 minutes by default due to the high resource usage
+            'sharded_data_distribution': int(self._metrics_collection_interval.get('sharded_data_distribution', 300)),
+            'db_stats': int(self._metrics_collection_interval.get('db_stats', self.min_collection_interval)),
+            'session_stats': int(self._metrics_collection_interval.get('session_stats', self.min_collection_interval)),
+        }

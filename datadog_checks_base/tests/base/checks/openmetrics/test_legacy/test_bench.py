@@ -7,11 +7,8 @@ import pytest
 
 from datadog_checks.base import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
-from datadog_checks.dev.testing import requires_py3
 
 from ..bench_utils import AMAZON_MSK_JMX_METRICS_MAP, AMAZON_MSK_JMX_METRICS_OVERRIDES
-
-pytestmark = [requires_py3]
 
 HERE = get_here()
 FIXTURE_PATH = os.path.abspath(os.path.join(os.path.dirname(HERE), '..', '..', '..', 'fixtures', 'prometheus'))

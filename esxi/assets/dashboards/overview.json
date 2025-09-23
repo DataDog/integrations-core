@@ -1,0 +1,1182 @@
+{
+    "author_name": "Datadog",
+    "description": "**ESXi**\n\nThis dashboard provides an overview of your [ESXi](https://www.vmware.com/products/esxi-and-esx.html) and vSphere deployment. It focuses on information about Host and VM performance.\n\n**Useful Links**\n\n* [Integration Documentation](https://docs.datadoghq.com/integrations/esxi)\n* [ESXi Documentation](https://www.vmware.com/products/esxi-and-esx.html)\n* [vSphere Documentation](https://www.vmware.com/products/vsphere.html)\n* [vSphere Integration Documentation](https://docs.datadoghq.com/integrations/vsphere)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "esxi_url",
+            "prefix": "esxi_url"
+        }
+    ],
+    "title": "ESXi Overview",
+    "widgets": [
+        {
+            "definition": {
+                "banner_img": "/static/images/logos/esxi_large.svg",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "New group",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**ESXi**\n\nThis dashboard provides an overview of your ESXi hosts and the vSphere VMs running on them. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5478983280988798,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Useful Links**\n\n* [Integration Documentation](https://docs.datadoghq.com/integrations/esxi)\n* [ESXi Documentation](https://www.vmware.com/products/esxi-and-esx.html)\n* [vSphere Documentation](https://www.vmware.com/products/vsphere.html)\n* [vSphere Integration Documentation](https://docs.datadoghq.com/integrations/vsphere)",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 6394363111995732,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 3,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 5398344842010224,
+            "layout": {
+                "height": 6,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "The overview section gives you a high-level overview of your environment, including your ESXi hosts and VMs ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 3949807862436880,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:esxi.host.count{$esxi_url}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "ESXi Host count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 8677451471649906,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:esxi.vm.count{$esxi_url}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "VM count",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 5353449890157204,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "can_connect",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:esxi.host.can_connect{$esxi_url} by {esxi_url}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Hosts status",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 2845209288861634,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 7752646698053128,
+            "layout": {
+                "height": 6,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Hosts Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:esxi.mem.usage.avg{$host, $esxi_url, esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "Top Memory Loaded Hosts ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 6410201189458864,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.cpu.usage.avg{$host,$esxi_url,esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                },
+                                "palette": "dog_classic"
+                            },
+                            "title": "Top CPU loaded Hosts ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 651996062856626,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:esxi.mem.usage.avg{$host,$esxi_url,esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Host Memory Usage ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2768420896288256,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.cpu.usage.avg{$host, $esxi_url, esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Host CPU usage ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6329913229296406,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.mem.vmmemctl.avg{$host, $esxi_url, esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Memory Ballooning by Host",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 7954070982654004,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Capacity",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.mem.reservedCapacity.avg{$host, $esxi_url, esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Reserved Capacity by Host",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 8771722866171838,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 6518790764913386,
+            "layout": {
+                "height": 9,
+                "width": 12,
+                "x": 0,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "VM Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.cpu.usage.avg{$host,$esxi_url,esxi_type:vm} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                },
+                                "palette": "dog_classic"
+                            },
+                            "title": "Top CPU loaded VMs ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 3217781339941434,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:esxi.mem.usage.avg{$host,$esxi_url,esxi_type:vm} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                },
+                                "palette": "dog_classic"
+                            },
+                            "title": "Top Memory Loaded VMs ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 2271073395701778,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.cpu.usage.avg{$host,$esxi_url,esxi_type:vm} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "VM CPU usage ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2111086858981498,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:esxi.mem.usage.avg{$host,$esxi_url,esxi_type:vm} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "VM Memory Usage ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4613170905229390,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 56338867669282,
+            "layout": {
+                "height": 6,
+                "width": 12,
+                "x": 0,
+                "y": 15
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Datastores",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.disk.usage.avg{$host, $esxi_url, vsphere_type:vm} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "VM Disk Usage ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4729117543973968,
+                        "layout": {
+                            "height": 2,
+                            "width": 7,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "latency",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.datastore.maxTotalLatency.latest{$esxi_url, $host, esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Highest Latency across all Datastores used by Host",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 959011864732606,
+                        "layout": {
+                            "height": 4,
+                            "width": 5,
+                            "x": 7,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.disk.usage.avg{$esxi_url, $host, esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Host Disk Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1708544199325442,
+                        "layout": {
+                            "height": 2,
+                            "width": 7,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 2334998541778104,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 21
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Network",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:esxi.net.usage.avg{$host, $esxi_url, esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Host Network Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7267421884417542,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "RX dropped",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "TX dropped",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.net.droppedRx.sum{$esxi_url, $host, esxi_type:vm} by {host}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:esxi.net.droppedTx.sum{$esxi_url, $host, esxi_type:vm} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Packets Dropped by VM",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 8616476500770080,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.net.transmitted.avg{$host, $esxi_url, esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Host Transmit Rate",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1596263157928570,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:esxi.net.usage.avg{$host,$esxi_url,esxi_type:vm} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "VM Network Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 180169499372374,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:esxi.net.received.avg{$host, $esxi_url, esxi_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Host Received Rate",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4750172753898716,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 5344709264082736,
+            "layout": {
+                "height": 5,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 26
+            }
+        }
+    ]
+}

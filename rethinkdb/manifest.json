@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f8348717-0ba8-4d42-b856-983e0cde0314",
   "app_id": "rethinkdb",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,8 +16,9 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "RethinkDB",
@@ -45,16 +46,15 @@
       },
       "process_signatures": [
         "rethinkdb"
-      ]
+      ],
+      "source_type_id": 10092,
+      "auto_install": true
     },
     "dashboards": {
       "RethinkDB Overview": "assets/dashboards/overview.json"
     },
     "saved_views": {
       "rethinkdb_processes": "assets/saved_views/rethinkdb_processes.json"
-    },
-    "logs": {
-      "source": "rethinkdb"
     }
   }
 }

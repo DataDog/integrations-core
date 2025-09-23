@@ -5,10 +5,13 @@ from __future__ import division
 
 from copy import deepcopy
 
+from datadog_checks.base.checks.kubelet_base.base import urljoin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
 
 from .common import get_container_label, replace_container_rt_prefix, tags_for_docker
+
+PROBES_METRICS_PATH = '/metrics/probes'
 
 
 class ProbesPrometheusScraperMixin(object):
@@ -25,7 +28,7 @@ class ProbesPrometheusScraperMixin(object):
             'prober_probe_total': self.prober_probe_total,
         }
 
-    def _create_probes_prometheus_instance(self, instance):
+    def _create_probes_prometheus_instance(self, instance, prom_url):
         """
         Create a copy of the instance and set default values.
         This is so the base class can create a scraper_config with the proper values.
@@ -34,10 +37,7 @@ class ProbesPrometheusScraperMixin(object):
         probes_instance.update(
             {
                 'namespace': self.NAMESPACE,
-                # We need to specify a prometheus_url so the base class can use it as the key for our config_map,
-                # we specify a dummy url that will be replaced in the `check()` function. We append it with "probes"
-                # so the key is different than the rest of the kubelet scrapers.
-                'prometheus_url': instance.get('probes_metrics_endpoint', 'dummy_url/probes'),
+                'prometheus_url': instance.get('probes_metrics_endpoint', urljoin(prom_url, PROBES_METRICS_PATH)),
             }
         )
         return probes_instance
@@ -67,6 +67,8 @@ class ProbesPrometheusScraperMixin(object):
                 metric_name_suffix = '.liveness_probe'
             elif probe_type == 'Readiness':
                 metric_name_suffix = '.readiness_probe'
+            elif probe_type == 'Startup':
+                metric_name_suffix = '.startup_probe'
             else:
                 self.log.debug("Unsupported probe type %s", probe_type)
                 continue
@@ -107,4 +109,4 @@ class ProbesPrometheusScraperMixin(object):
                     container_id,
                 )
 
-            self.count(metric_name, sample[self.SAMPLE_VALUE], container_tags + self.instance_tags)
+            self.gauge(metric_name, sample[self.SAMPLE_VALUE], container_tags + self.instance_tags)

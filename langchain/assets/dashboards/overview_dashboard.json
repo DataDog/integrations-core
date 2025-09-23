@@ -1,0 +1,1544 @@
+{
+  "title": "LangChain Overview Dashboard",
+  "description": null,
+  "widgets": [
+    {
+      "id": 2496684549046532,
+      "definition": {
+        "title": "",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7080454066802084,
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/langchain_large.svg",
+              "url_dark_theme": "/static/images/logos/langchain_reversed_large.svg",
+              "sizing": "cover",
+              "has_background": true,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 2589342244933158,
+            "definition": {
+              "type": "note",
+              "content": "Track LLM usage, cost and performance through the LangChain integration. You can use this dashboard to monitor your API requests, token usage and track costs both in aggregate as well as by model or LLM provider.",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 2760361309876146,
+            "definition": {
+              "type": "note",
+              "content": "**Further reading:**\n\n- [Datadog LangChain Integration Documentation](https://docs.datadoghq.com/integrations/langchain/)",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 5
+      }
+    },
+    {
+      "id": 936499891369216,
+      "definition": {
+        "title": "Usage Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8683047345847654,
+            "definition": {
+              "title": "Total LangChain requests",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "count:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {},
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5949713187496698,
+            "definition": {
+              "title": "API Response Time (p95)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "p95:trace.langchain.request{$env,$service,$version,$provider,$model,$api_key}",
+                      "aggregator": "percentile"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 8001467169161888,
+            "definition": {
+              "title": "Avg Tokens per Request (OpenAI)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:langchain.tokens.total{!langchain.request.type:chain$env,$service,$version,$provider,$model,$api_key}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 1178558583094028,
+            "definition": {
+              "title": "OpenAI Estimated Cost (USD)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:langchain.tokens.total_cost{!langchain.request.type:chain$env,$service,$version,$provider,$model,$api_key}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "precision": 2
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 5
+      }
+    },
+    {
+      "id": 5033334724400598,
+      "definition": {
+        "title": "Usage Trends",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8378582887212572,
+            "definition": {
+              "title": "LangChain Service Map",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "topology_map",
+              "requests": [
+                {
+                  "request_type": "topology",
+                  "query": {
+                    "filters": [
+                      "$env",
+                      "datacenter:*"
+                    ],
+                    "service": "langchain",
+                    "data_source": "service_map"
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 4949772468343024,
+            "definition": {
+              "title": "Total LangChain Requests by Type",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "count:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key} by {langchain.request.type}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3776803905811660,
+            "definition": {
+              "title": "Total LangChain Requests by Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "count:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key,!langchain.request.provider:} by {langchain.request.type}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9004354203528536,
+            "definition": {
+              "title": "Total LangChain Requests by LLM Provider",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "count:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key,!langchain.request.provider:} by {langchain.request.provider}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2757472264055284,
+            "definition": {
+              "title": "Total LangChain Requests by LLM Provider",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "count:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key,!langchain.request.provider:} by {langchain.request.provider}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 7,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1094497922374640,
+            "definition": {
+              "title": "Total LangChain Requests by Model",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "count:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key,!langchain.request.provider:} by {langchain.request.model,langchain.request.provider}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6629140552183534,
+            "definition": {
+              "title": "Total LangChain Requests by Model",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "count:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key,!langchain.request.provider:} by {langchain.request.model}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 10,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 14
+      }
+    },
+    {
+      "id": 9002777716553282,
+      "definition": {
+        "title": "Token & Cost Usage (OpenAI)",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3820520106328682,
+            "definition": {
+              "type": "note",
+              "content": "Track LLM token usage and cost here. Note currently **only OpenAI provides** token/cost usage metrics to the LangChain integration for LLM and Chat Model calls (excluding Embeddings and streamed responses).\n\n**Further Reading**:\n- [LangChain's Token Tracking Documentation](https://python.langchain.com/docs/modules/model_io/models/llms/how_to/token_usage_tracking#:~:text=It%20is%20currently%20only%20implemented%20for%20the%20OpenAI%20API) ",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 1061204713120718,
+            "definition": {
+              "title": "OpenAI Estimated Cost (USD)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:langchain.tokens.total_cost{!langchain.request.type:chain,$env,$service,$version,$provider,$model,$api_key}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "custom_unit": "$",
+              "precision": 2
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 3636961212439062,
+            "definition": {
+              "title": "Token Usage by Model",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Prompt Tokens",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Completion Tokens",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:langchain.tokens.prompt{$env,$service,$version,$provider,$model,$api_key} by {langchain.request.model}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:langchain.tokens.completion{$env,$service,$version,$provider,$model,$api_key} by {langchain.request.model}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1932431416355454,
+            "definition": {
+              "type": "note",
+              "content": "OpenAI model pricing (per 1K tokens)\n- **ada**: $0.0004\n- **babbage**: $0.0005\n- **curie**: $0.002\n- **davinci**: $0.02\n- **gpt-3.5-turbo**: $0.002\n- **gpt-4-8k**: $0.03 prompt, $0.06 completion\n- **gpt-4-32k**: $0.06 prompt, $0.12 completion\n\n\n\nhttps://openai.com/pricing (2023-04-12)",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 3745974527131924,
+            "definition": {
+              "title": "Avg Prompt Tokens per Request",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:langchain.tokens.prompt{!langchain.request.type:chain,$env,$service,$version,$provider,$model,$api_key}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": false
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 1
+            }
+          },
+          {
+            "id": 1438739786594214,
+            "definition": {
+              "title": "Avg Completion Tokens per Request",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:langchain.tokens.completion{!langchain.request.type:chain,$env,$service,$version,$provider,$model,$api_key}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": false
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 3,
+              "height": 1
+            }
+          },
+          {
+            "id": 536779649766840,
+            "definition": {
+              "title": "Overall Prompt & Completion Token Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Prompt Tokens",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Completion Tokens",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:langchain.tokens.prompt{!langchain.request.type:chain,$env,$service,$version,$provider,$model,$api_key}.as_count()"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:langchain.tokens.completion{!langchain.request.type:chain,$env,$service,$version,$provider,$model,$api_key}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1429702366358716,
+            "definition": {
+              "title": "Avg Tokens per Request",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:langchain.tokens.total{!langchain.request.type:chain,$env,$service,$version,$provider,$model,$api_key}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": false
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 4,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 19,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "id": 2315001715632694,
+      "definition": {
+        "title": "Performance",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8837735138861830,
+            "definition": {
+              "title": "Error Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Error Rate",
+                      "formula": "(query1 / query2)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:trace.langchain.request.errors{$env,$service,$version,$provider,$model,$api_key}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:trace.langchain.request.hits{$env,$service,$version,$provider,$model,$api_key}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 3293880175367874,
+            "definition": {
+              "title": "Error Count by Type",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:langchain.request.error{$env,$service,$version,$provider,$model,$api_key} by {error_type}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 6978002627789494,
+            "definition": {
+              "title": "API Response Time by Provider (p95)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "p95:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key,!langchain.request.provider:} by {langchain.request.provider}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7806555021997868,
+            "definition": {
+              "title": "API Response Time by Service (p95)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "p95:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key,!langchain.request.provider:} by {service}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 8633097533517714,
+            "definition": {
+              "title": "API Response Time by Model (p95)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "p95:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key,!langchain.request.model:} by {langchain.request.model}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7449181352763002,
+            "definition": {
+              "title": "Response Time to Prompt Token Ratio",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Response Time/Prompt Token",
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "p95:langchain.request.duration{$env,$service,$version,$provider,$model,$api_key}"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:langchain.tokens.prompt{$env,$service,$version,$provider,$model,$api_key}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 26,
+        "width": 12,
+        "height": 9
+      }
+    },
+    {
+      "id": 7164204427791536,
+      "definition": {
+        "title": "Prompt and completion samples",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3311956372340530,
+            "definition": {
+              "type": "note",
+              "content": "Prompts and completions are sampled from the Datadog APM library integrations.\n\nBy default prompts and completions are sampled 100% on all spans. \n\nLogs are sampled at a rate of 10% by default when spans are sampled. \n\nSee the [LangChain integration docs](https://docs.datadoghq.com/integrations/langchain/#log-prompt--completion-sampling) for how to configure this rate.",
+              "background_color": "green",
+              "font_size": "12",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
+          },
+          {
+            "id": 3986048573608701,
+            "definition": {
+              "title": "LLM Completion Samples",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "langchain.request.type:llm ",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "langchain.request.provider",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "langchain.request.model",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "prompts.0",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "choices.0.0.text",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 10,
+              "height": 4
+            }
+          },
+          {
+            "id": 3834498292628262,
+            "definition": {
+              "title": "Chat Model Completion Samples",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "langchain.request.type:chat_model ",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "langchain.request.provider",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "langchain.request.model",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "messages.0.0.content",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "messages.0.0.message_type",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "choices.0.0.content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 4620159773227051,
+            "definition": {
+              "title": "Chain Completion Samples",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "langchain.request.type:chain ",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "prompt",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "inputs",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "outputs",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 7261440966429361,
+            "definition": {
+              "title": "Vectorstore Similarity Search Samples",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "langchain.request.type:similarity_search ",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "langchain.request.provider",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "query",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "k",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "documents.0.page_content",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "documents.0.metadata",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 12,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 35,
+        "width": 12,
+        "height": 14,
+        "is_column_break": true
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "service",
+      "prefix": "service",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "version",
+      "prefix": "version",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "provider",
+      "prefix": "langchain.request.provider",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "model",
+      "prefix": "langchain.request.model",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "api_key",
+      "prefix": "langchain.request.api_key",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

@@ -2,6 +2,21 @@
     {
         "agent_version": "5.2.0",
         "integration": "vSphere",
+        "check": "vsphere.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "vcenter_server"
+        ],
+        "name": "Can Connect",
+        "description": "Returns status after trying to connect to your vCenter instance using the API."
+    },
+    {
+        "agent_version": "5.2.0",
+        "integration": "vSphere",
         "check": "vcenter.can_connect",
         "statuses": [
             "ok",
@@ -9,10 +24,9 @@
         ],
         "groups": [
             "host",
-            "vcenter_server",
-            "vcenter_host"
+            "vcenter_server"
         ],
-        "name": "Can Connect",
-        "description": "Returns status after pinging your vCenter instance. Additional information about response status at the time of collection is included in the check message."
+        "name": "[Legacy] Can Connect",
+        "description": "[Legacy check version] Returns status after pinging your vCenter instance. Additional information about response status at the time of collection is included in the check message."
     }
 ]

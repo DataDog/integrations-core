@@ -41,6 +41,7 @@ files:
           type: string
     - name: password
       description: The password for the connection.
+      secret: true
       value:
         type: string
     - name: collect_client_metrics

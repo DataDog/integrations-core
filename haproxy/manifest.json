@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "804dd2ae-d0a9-4063-a2bc-bd949ac7bb62",
   "app_id": "haproxy",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,29 @@
     "title": "HAProxy",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Web",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-haproxy-with-datadog"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/"
+      }
     ]
   },
   "author": {
@@ -26,7 +44,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "HAProxy",
@@ -52,7 +69,9 @@
         "haproxy",
         "haproxy-master",
         "haproxy-controller"
-      ]
+      ],
+      "source_type_id": 38,
+      "auto_install": true
     },
     "dashboards": {
       "haproxy": "assets/dashboards/overview.json",
@@ -60,17 +79,17 @@
       "HAProxy - Overview (OpenMetrics)": "assets/dashboards/openmetrics_overview.json"
     },
     "monitors": {
-      "[HAProxy] Anomalous number of frontend 4xx HTTP responses for host: {{host.name}}": "assets/monitors/frontend_5xx.json",
-      "[HAProxy] Anomalous number of frontend 5xx HTTP responses for host: {{host.name}}": "assets/monitors/frontend_4xx.json",
-      "[HAProxy] High amount of frontend session usage for host: {{host.name}}": "assets/monitors/frontend_sessions.json",
-      "[HAProxy] High amount of backend session usage for host: {{host.name}}": "assets/monitors/backend_sessions.json",
-      "[HAProxy] High number of frontend denied requests for host: {{host.name}}": "assets/monitors/frontend_dreq.json",
-      "[HAProxy] High number of backend denied responses for host: {{host.name}}": "assets/monitors/backend_dreq.json",
-      "[HAProxy] Anomalous frontend request rate for host {{host.name}}": "assets/monitors/request_rate.json",
-      "[HAProxy] Number of client-side request error for {{host.name}} is above normal.": "assets/monitors/frontend_ereq.json",
-      "[HAProxy] Number of backend connection failures for host: {{host.name}} is above normal.": "assets/monitors/backend_econ.json",
-      "[HAProxy] Backend queue time went above 500ms for host: {{host.name}}": "assets/monitors/backend_queue_time.json",
-      "[HAProxy] Backend response time is above 500ms for host: {{host.name}}": "assets/monitors/backend_rtime.json"
+      "Number of frontend 5xx HTTP responses is high": "assets/monitors/frontend_5xx.json",
+      "Number of frontend 4xx HTTP responses is high": "assets/monitors/frontend_4xx.json",
+      "Frontend sessions usage is high": "assets/monitors/frontend_sessions.json",
+      "Backend sessions usage is high": "assets/monitors/backend_sessions.json",
+      "Number of frontend denied requests is high": "assets/monitors/frontend_dreq.json",
+      "Number of denied response is high": "assets/monitors/backend_dreq.json",
+      "Frontend request rate is anomalous": "assets/monitors/request_rate.json",
+      "Number of client-side request error is high": "assets/monitors/frontend_ereq.json",
+      "Number of backend connection failures is high": "assets/monitors/backend_econ.json",
+      "Backend queue time is high": "assets/monitors/backend_queue_time.json",
+      "Response time is high": "assets/monitors/backend_rtime.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
@@ -79,9 +98,6 @@
       "bot_errors": "assets/saved_views/bot_errors.json",
       "response_time_overview": "assets/saved_views/response_time.json",
       "haproxy_processes": "assets/saved_views/haproxy_processes.json"
-    },
-    "logs": {
-      "source": "haproxy"
     }
   }
 }

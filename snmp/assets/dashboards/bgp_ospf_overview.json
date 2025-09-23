@@ -1,0 +1,888 @@
+{
+    "title": "NDM BGP/OSPF Overview",
+    "description": "This dashboard is meant to be a generic view for any type of device, use the template variables above to dynamically filter widgets in a dashboard.",
+    "widgets": [
+        {
+            "id": 13,
+            "definition": {
+                "type": "image",
+                "url": "https://imgix.datadoghq.com/img/blog/monitor-snmp-with-datadog/snmp-hero-image.png?fit=crop&w=1200&h=630",
+                "sizing": "zoom"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "note",
+                "content": "This dashboard is meant to be a **generic view** of OSPF and BGP information for any type of device, use the [template variables](https://docs.datadoghq.com/dashboards/template_variables/#saved-views) above to dynamically filter widgets in a dashboard.\n\nFor example, use `$snmp_host` to filter by a specific hostname or `$snmp_device` to filter by a device's IP address.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left"
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 1059248410633808,
+            "definition": {
+                "title": "Device Details",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 23,
+                        "definition": {
+                            "title": "System Uptime by device (days)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "type": "distribution",
+                            "xaxis": {
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto",
+                                "include_zero": true
+                            },
+                            "yaxis": {
+                                "scale": "linear",
+                                "min": "auto",
+                                "max": "auto",
+                                "include_zero": true
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / 8640000"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "max:snmp.sysUpTimeInstance{$profile,$snmp_host,$snmp_device} by {snmp_host}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "min"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 19,
+                        "definition": {
+                            "title": "All interfaces status",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "max:snmp.interface.status{$profile,$snmp_host,$snmp_device,$interface} by {snmp_device,snmp_profile,snmp_host,admin_status,oper_status}",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "text_formats": [
+                                        [],
+                                        [],
+                                        [],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "up"
+                                                },
+                                                "palette": "black_on_light_green"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "down"
+                                                },
+                                                "palette": "black_on_light_red"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "testing"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "up"
+                                                },
+                                                "palette": "black_on_light_green"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "down"
+                                                },
+                                                "palette": "black_on_light_red"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "testing"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "unknown"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "dormant"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "not_present"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "lower_layer_down"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            }
+                                        ],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "up"
+                                                },
+                                                "palette": "black_on_light_green"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "down"
+                                                },
+                                                "palette": "black_on_light_red"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "testing"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "unknown"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "dormant"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "not_resent"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "lower_layer_down"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            }
+                                        ]
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "status",
+                                            "formula": "query2",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            },
+                                            "cell_display_mode": "number"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 27,
+                        "definition": {
+                            "title": "Bottom 10 devices by Uptime (hours)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / 360000",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "asc"
+                                            }
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "palette": "white_on_green",
+                                            "value": 48,
+                                            "comparator": ">="
+                                        },
+                                        {
+                                            "palette": "white_on_yellow",
+                                            "value": 12,
+                                            "comparator": ">"
+                                        },
+                                        {
+                                            "palette": "white_on_red",
+                                            "value": 12,
+                                            "comparator": "<="
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:snmp.sysUpTimeInstance{$profile,$snmp_host,$snmp_device,$interface} by {snmp_host}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "last"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 22,
+                        "definition": {
+                            "type": "note",
+                            "content": "The OID that the **UPTIME** metric corresponds to is a 32-bit counter with a maximum value of 2^32 (the integer 4294967296). Because the returned uptime value is given in hundredths of a second, **the maximum possible uptime that can be displayed is 497 days** (4294967296 hundreds of seconds). \n\nIf the uptime exceeds this value, the counter resets to 0 and uptime values will appear lower than they actually are.",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 7
+            }
+        },
+        {
+            "id": 4112300131729308,
+            "definition": {
+                "title": "OSPF",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 33,
+                        "definition": {
+                            "title": "OSPF Interfaces",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "avg:snmp.ospfIfRetransInterval{$profile,$snmp_host,$snmp_device} by {snmp_host,ospf_ip_addr,if_state}",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "text_formats": [
+                                        [],
+                                        [],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "down"
+                                                },
+                                                "palette": "black_on_light_red",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Down"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "loopback"
+                                                },
+                                                "palette": "black_on_light_yellow",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Loopback"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "waiting"
+                                                },
+                                                "palette": "black_on_light_yellow",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Waiting"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "point_to_point"
+                                                },
+                                                "palette": "black_on_light_green",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Point to Point"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "designated_router"
+                                                },
+                                                "palette": "black_on_light_green",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Designated Router"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "backup_designated_router"
+                                                },
+                                                "palette": "black_on_light_green",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Backup Designated Router"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "other_designated_router"
+                                                },
+                                                "palette": "black_on_light_green",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Other Designated Router"
+                                                }
+                                            }
+                                        ]
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Retrans (secs)",
+                                            "formula": "query2",
+                                            "limit": {
+                                                "count": 10000,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 35,
+                        "definition": {
+                            "title": "OSPF Neighbors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "sum:snmp.ospfNbrEvents{$profile,$snmp_host,$snmp_device,$ospf_neighbor_id,$ospf_neighbor_ip} by {snmp_device,snmp_host,neighbor_id,neighbor_ip,neighbor_state}",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "query": "max:snmp.ospfNbrLsRetransQLen{$profile,$snmp_host,$snmp_device,$ospf_neighbor_id,$ospf_neighbor_ip} by {snmp_device,snmp_host,neighbor_id,neighbor_ip,neighbor_state}",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "text_formats": [
+                                        [],
+                                        [],
+                                        [],
+                                        [],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "down"
+                                                },
+                                                "palette": "black_on_light_red",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Down"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "attempt"
+                                                },
+                                                "palette": "black_on_light_red",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Attempt"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "init"
+                                                },
+                                                "palette": "black_on_light_yellow",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Init"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "two_way"
+                                                },
+                                                "palette": "black_on_light_yellow",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Two Way"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "exchange_start"
+                                                },
+                                                "palette": "black_on_light_yellow",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Exchange Start"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "exchange"
+                                                },
+                                                "palette": "black_on_light_yellow",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Exchange"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "loading"
+                                                },
+                                                "palette": "black_on_light_yellow",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Loading"
+                                                }
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "full"
+                                                },
+                                                "palette": "black_on_light_green",
+                                                "replace": {
+                                                    "type": "all",
+                                                    "with": "Full"
+                                                }
+                                            }
+                                        ]
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Events",
+                                            "formula": "query2",
+                                            "limit": {
+                                                "count": 10000,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "alias": "Queue Length",
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 34,
+                        "definition": {
+                            "type": "note",
+                            "content": "### **OSPF Interface States:**\n\nThe **STATE** metric is the current OSPF interface state.\n\n**(1) down, (2) loopback, (3) waiting, (4) point to point, (5) designated router, (6) backup designated router, (7) other designated router**\n\n---------------------\n\nThe **RETRANS** metric is the number of seconds between link state advertisement retransmissions, for adjacencies belonging to this interface.",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "right"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 36,
+                        "definition": {
+                            "type": "note",
+                            "content": "### **OSPF Neighbor States:**\n\nThe **STATE** metric is the state of the relationship with this neighbor.\n\n**(1) down, (2) attempt, (3) init, (4) two way, (5) exchange start, (6) exchange, (7) loading, (8) full** \n\n---------------------\n\nThe **EVENTS** metric is the number of times this neighbor relationship has changed state or an error has occurred. ",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "right"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 1738928755750598,
+            "definition": {
+                "title": "BGP",
+                "background_color": "orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 31,
+                        "definition": {
+                            "title": "BGP Neighbors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "query": "max:snmp.bgpPeerNegotiatedVersion{$profile,$snmp_host,$snmp_device,$bgp_neighbor ,$bgp_remote_as} by {snmp_device,snmp_host,neighbor,peer_state,admin_status,remote_as}",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "query": "sum:snmp.bgpPeerInUpdates{$profile,$snmp_host,$snmp_device,$bgp_neighbor ,$bgp_remote_as} by {snmp_device,snmp_host,neighbor,peer_state,admin_status,remote_as}",
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "query": "sum:snmp.bgpPeerOutUpdates{$profile,$snmp_host,$snmp_device,$bgp_neighbor ,$bgp_remote_as} by {snmp_device,snmp_host,neighbor,peer_state,admin_status,remote_as}",
+                                            "data_source": "metrics",
+                                            "name": "query5",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "query": "sum:snmp.bgpPeerInTotalMessages{$profile,$snmp_host,$snmp_device,$bgp_neighbor ,$bgp_remote_as} by {snmp_device,snmp_host,neighbor,peer_state,admin_status,remote_as}",
+                                            "data_source": "metrics",
+                                            "name": "query6",
+                                            "aggregator": "last"
+                                        },
+                                        {
+                                            "query": "sum:snmp.bgpPeerOutTotalMessages{$profile,$snmp_host,$snmp_device,$bgp_neighbor ,$bgp_remote_as} by {snmp_device,snmp_host,neighbor,peer_state,admin_status,remote_as}",
+                                            "data_source": "metrics",
+                                            "name": "query7",
+                                            "aggregator": "last"
+                                        }
+                                    ],
+                                    "text_formats": [
+                                        [],
+                                        [],
+                                        [],
+                                        [
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "idle"
+                                                },
+                                                "palette": "black_on_light_red"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "connect"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "active"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "opensent"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "openconfirm"
+                                                },
+                                                "palette": "black_on_light_yellow"
+                                            },
+                                            {
+                                                "match": {
+                                                    "type": "is",
+                                                    "value": "established"
+                                                },
+                                                "palette": "black_on_light_green"
+                                            }
+                                        ]
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Version",
+                                            "formula": "query3",
+                                            "limit": {
+                                                "count": 10000,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "alias": "In Updates",
+                                            "formula": "query4"
+                                        },
+                                        {
+                                            "alias": "Out Updates",
+                                            "formula": "query5"
+                                        },
+                                        {
+                                            "alias": "In Messages",
+                                            "formula": "query6"
+                                        },
+                                        {
+                                            "alias": "Out Messages",
+                                            "formula": "query7"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 32,
+                        "definition": {
+                            "type": "note",
+                            "content": "### **BGP Connection States:**\n\nThe **ADMIN** metric is the desired state of the BGP connection.\n\n**(1) stop, (2) start:** A transition from stop to start represents the restart of a BGP peer connection.\n\n---------------------\n\nThe **STATE** metric is the current BGP peer connection state.\n\n**(1) idle, (2) connect, (3) active, (4) open sent, (5) open confirm, (6) established**",
+                            "background_color": "gray",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "right"
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 5,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 6
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "profile",
+            "prefix": "snmp_profile",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "snmp_host",
+            "prefix": "snmp_host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "snmp_device",
+            "prefix": "snmp_device",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "bgp_neighbor",
+            "prefix": "neighbor",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "bgp_remote_as",
+            "prefix": "remote_as",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "ospf_neighbor_id",
+            "prefix": "neighbor_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "ospf_neighbor_ip",
+            "prefix": "neighbor_ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "interface",
+            "prefix": "interface",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed",
+    "tags": []
+}

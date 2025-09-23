@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "3d7ace6a-9efd-4d21-b4e6-a9956512a875",
   "app_id": "lighttpd",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,17 @@
     "title": "Lighttpd",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Web",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-lighttpd-web-server-metrics"
+      }
     ]
   },
   "author": {
@@ -26,7 +32,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Lighttpd",
@@ -46,16 +51,15 @@
       },
       "process_signatures": [
         "lighttpd"
-      ]
+      ],
+      "source_type_id": 58,
+      "auto_install": true
     },
     "dashboards": {
       "lighttpd": "assets/dashboards/lighttpd_dashboard.json"
     },
     "saved_views": {
       "lighttpd_processes": "assets/saved_views/lighttpd_processes.json"
-    },
-    "logs": {
-      "source": "lighttpd"
     }
   }
 }

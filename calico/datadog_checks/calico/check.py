@@ -8,8 +8,9 @@ from .metrics import METRIC_MAP
 
 
 class CalicoCheck(OpenMetricsBaseCheckV2):
-    def __init__(self, name, init_config, instances=None):
+    DEFAULT_METRIC_LIMIT = 0
 
+    def __init__(self, name, init_config, instances=None):
         super(CalicoCheck, self).__init__(
             name,
             init_config,

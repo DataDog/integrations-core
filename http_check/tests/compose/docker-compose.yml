@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   # Runs at startup to build certs and exit
   cert-builder:
@@ -20,6 +18,14 @@ services:
       - "443:443"
     depends_on:
       - cert-builder
+      - tinyproxy
+    networks:
+      default:
+        aliases:
+          - valid.mock
+          - expired.mock
+          - wronghost.mock
+          - selfsigned.mock
 
   redis:
     container_name: mockbin_redis
@@ -30,6 +36,15 @@ services:
     image: mashape/mockbin
     ports:
       - "8080:8080"
+
+  tinyproxy:
+    container_name: tinyproxy
+    build: tinyproxy
+    ports:
+      - "8008:8008"
+
+networks:
+  default:
 
 volumes:
   certs:

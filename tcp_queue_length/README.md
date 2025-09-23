@@ -23,7 +23,7 @@ yum install -y kernel-headers-$(uname -r)
 yum install -y kernel-devel-$(uname -r)
 ```
 
-**Note**: Windows, Container-Optimized OS, and CentOS/RHEL versions earlier than 8 are not supported.
+**Note**: Windows and CentOS/RHEL versions earlier than 8 are not supported.
 
 ### Configuration
 
@@ -46,6 +46,37 @@ system_probe_config:
 
 With the [Datadog Helm chart][3], the `system-probe` must be activated by setting `datadog.systemProbe.enabled` to `true` in the `values.yaml` file.
 Then, the check can be activated by setting the `datadog.systemProbe.enableTCPQueueLength` parameter.
+
+### Configuration with the Operator (v1.0.0+)
+
+Set the `features.tcpQueueLength.enabled` parameter in the DatadogAgent manifest:
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    tcpQueueLength:
+      enabled: true
+```
+
+**Note**: When using COS (Container Optimized OS), override the `src` volume in the node Agent:
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    tcpQueueLength:
+      enabled: true
+  override:
+    nodeAgent:
+      volumes: 
+      - emptyDir: {}
+        name: src
+```
 
 ### Validation
 
@@ -73,6 +104,6 @@ Need help? Contact [Datadog support][5].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/tcp_queue_length.d/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[3]: https://github.com/helm/charts/tree/master/stable/datadog
+[3]: https://github.com/DataDog/helm-charts
 [4]: https://github.com/DataDog/integrations-core/blob/master/tcp_queue_length/metadata.csv
 [5]: https://docs.datadoghq.com/help/

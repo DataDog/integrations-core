@@ -1,0 +1,21 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+# v22 of gunicorn is the first that supports python 3.12
+version = ["22", "23"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "GUNICORN_VERSION", value = "22.0.0", if = ["22"] },
+  { key = "GUNICORN_VERSION", value = "23.0.0", if = ["23"] },
+]
+
+[envs.default]
+dependencies = [
+  "virtualenv",
+]
+platforms = [
+  "linux",
+  "macos",
+]

@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2024-08-06",
+	"last_updated_at": "2024-08-06",
+	"title": "Contentful: Scheduled Action has failed",
+	"description": "Scheduled Action failures are monitored.",
+	"definition": {
+		"id": 149527848,
+		"name": "Contentful: Scheduled Action has failed",
+		"type": "log alert",
+		"query": "logs(\"source:contentful @evt.name:ContentManagement.ScheduledAction.execute @details.sys.status:failed\").index(\"*\").rollup(\"count\").by(\"@details.sys.id,@details.entity.sys.id,@details.sys.space.sys.id,@details.sys.environment.sys.id\").last(\"12h\") >= 1",
+		"message": "{{#is_alert}}\nScheduled Action with ID: {{[@details.sys.id].name}} has failed.\n\nEntity ID: {{[@details.entity.sys.id].name}}  \nSpace: {{[@details.sys.space.sys.id].name}}  \nEnvironment: {{[@details.sys.environment.sys.id].name}}  \n{{/is_alert}}",
+		"tags": [
+			"contentful"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:contentful"
+	]
+}

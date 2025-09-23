@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "49687997-bbf2-45db-9b4f-223cf7c492ed",
   "app_id": "gunicorn",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,10 +13,16 @@
     "title": "Gunicorn",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::Web",
-      "Category::Log Collection"
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-gunicorn-performance"
+      }
     ]
   },
   "author": {
@@ -24,7 +31,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Gunicorn",
@@ -44,7 +50,9 @@
       },
       "process_signatures": [
         "gunicorn: master"
-      ]
+      ],
+      "source_type_id": 60,
+      "auto_install": true
     },
     "dashboards": {
       "gunicorn": "assets/dashboards/gunicorn_dashboard.json"
@@ -55,9 +63,6 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "gunicorn_processes": "assets/saved_views/gunicorn_processes.json"
-    },
-    "logs": {
-      "source": "gunicorn"
     }
   }
 }

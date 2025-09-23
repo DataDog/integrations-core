@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "05198ed5-6fe5-417b-8711-e124718e9715",
   "app_id": "terraform",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -9,13 +10,16 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Manage your Datadog account using Terraform",
-    "title": "terraform",
+    "title": "Terraform",
     "media": [],
     "classifier_tags": [
+      "Category::Configuration & Deployment",
+      "Category::Developer Tools",
+      "Category::Orchestration",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Orchestration"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -24,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "terraform",
@@ -34,7 +37,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10153,
+      "auto_install": true
     }
   }
 }

@@ -8,11 +8,12 @@
         ],
         "statuses": [
             "ok",
-            "critical"
+            "critical",
+            "warning"
         ],
         "check": "sonarqube.can_connect",
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SonarQube instance's JMX endpoint, otherwise returns `OK`."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SonarQube instance's JMX endpoint, `WARNING` if no metrics are collected, and `OK` otherwise."
     },
     {
         "agent_version": "7.25.0",

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c4c79ae5-b702-415c-bc76-a7b71efd43d8",
   "app_id": "ibm-was",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,13 +13,12 @@
     "title": "IBM WAS",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Web",
-      "Category::OS & System",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::OS & System",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -27,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "IBM WAS",
@@ -44,13 +43,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10048,
+      "auto_install": true
     },
     "dashboards": {
       "IBM_WAS": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "ibm_was"
     }
   }
 }

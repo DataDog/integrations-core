@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 from decimal import Decimal
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict  # noqa: F401
 
 import mock
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.utils.db import Query
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
@@ -55,7 +55,8 @@ def test_token_path(dd_run_check, aggregator):
         'ocsp_response_cache_filename': None,
         'authenticator': 'oauth',
         'client_session_keep_alive': False,
-        'private_key': None,
+        'private_key_file': None,
+        'private_key_file_pwd': None,
         'proxy_host': None,
         'proxy_port': None,
         'proxy_user': None,
@@ -65,10 +66,13 @@ def test_token_path(dd_run_check, aggregator):
     tokens = ['mytoken1', 'mytoken2', 'mytoken3']
 
     check = SnowflakeCheck(CHECK_NAME, {}, [instance])
-    with mock.patch(
-        'datadog_checks.snowflake.check.open',
-        side_effect=[mock.mock_open(read_data=tok).return_value for tok in tokens],
-    ), mock.patch('datadog_checks.snowflake.check.sf') as sf:
+    with (
+        mock.patch(
+            'datadog_checks.snowflake.check.open',
+            side_effect=[mock.mock_open(read_data=tok).return_value for tok in tokens],
+        ),
+        mock.patch('datadog_checks.snowflake.check.sf') as sf,
+    ):
         dd_run_check(check)
         sf.connect.assert_called_once_with(token='mytoken1', **default_args)
 
@@ -123,7 +127,7 @@ def test_version_metadata(dd_run_check, instance, datadog_agent):
         'version.raw': '4.30.2',
         'version.scheme': 'semver',
     }
-    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_version):
+    with mock.patch('datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=iter(expected_version)):
         check = SnowflakeCheck(CHECK_NAME, {}, [instance])
         check.check_id = 'test:123'
         check._conn = mock.MagicMock()

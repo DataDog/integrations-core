@@ -1,0 +1,12 @@
+{
+    "Id": "ProjectGroups-3",
+    "Name": "hello",
+    "Description": null,
+    "EnvironmentIds": [],
+    "RetentionPolicyId": null,
+    "SpaceId": "Spaces-1",
+    "Links": {
+      "Self": "/api/Spaces-1/projectgroups/ProjectGroups-3",
+      "Projects": "/api/Spaces-1/projectgroups/ProjectGroups-3/projects"
+    }
+  }

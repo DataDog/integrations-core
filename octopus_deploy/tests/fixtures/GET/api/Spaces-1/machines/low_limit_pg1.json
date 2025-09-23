@@ -1,0 +1,119 @@
+{
+    "ItemType": "Machine",
+    "TotalResults": 3,
+    "ItemsPerPage": 2,
+    "NumberOfPages": 2,
+    "LastPageNumber": 0,
+    "Items": [
+        {
+            "Id": "Machines-1",
+            "EnvironmentIds": [
+                "Environments-1"
+            ],
+            "Roles": [
+                "test-tag"
+            ],
+            "TenantedDeploymentParticipation": "Untenanted",
+            "TenantIds": [],
+            "TenantTags": [],
+            "SpaceId": "Spaces-1",
+            "Name": "test-machine",
+            "Thumbprint": "test-footprint",
+            "Uri": "hostname-test:10933/",
+            "IsDisabled": false,
+            "MachinePolicyId": "MachinePolicies-1",
+            "HealthStatus": "Healthy",
+            "HasLatestCalamari": false,
+            "StatusSummary": "Octopus was able to successfully establish a connection with this machine on Wednesday",
+            "IsInProcess": false,
+            "Endpoint": {
+                "CommunicationStyle": "TentaclePassive",
+                "ProxyId": null,
+                "Thumbprint": "test-footprint",
+                "Uri": "hostname-test:10933/",
+                "TentacleVersionDetails": {
+                    "UpgradeLocked": false,
+                    "Version": "8.2.2517",
+                    "UpgradeSuggested": false,
+                    "UpgradeRequired": false,
+                    "UpgradeAvailable": false
+                },
+                "CertificateSignatureAlgorithm": "sha256RSA",
+                "Id": null,
+                "LastModifiedOn": null,
+                "LastModifiedBy": null,
+                "Links": {}
+            },
+            "OperatingSystem": "Ubuntu 24.04.1 LTS",
+            "ShellName": "Bash",
+            "ShellVersion": "5.2.21(1)-release",
+            "Architecture": "x86_64",
+            "Slug": "test-machine",
+            "SkipInitialHealthCheck": false,
+            "Links": {
+                "Self": "/api/Spaces-1/machines/Machines-1",
+                "Connection": "/api/Spaces-1/machines/Machines-1/connection",
+                "TasksTemplate": "/api/Spaces-1/machines/Machines-1/tasks{?skip,take,type}",
+                "SinglyScopedVariableDetails": "/api/Spaces-1/machines/Machines-1/singlyScopedVariableDetails"
+            }
+        },
+        {
+            "Id": "Machines-2",
+            "EnvironmentIds": [],
+            "Roles": [
+                "test",
+                "tag"
+            ],
+            "TenantedDeploymentParticipation": "Untenanted",
+            "TenantIds": [],
+            "TenantTags": [],
+            "SpaceId": "Spaces-1",
+            "Name": "test-machine1",
+            "Thumbprint": "test-footprint1",
+            "Uri": "hostname-test1:10933/",
+            "IsDisabled": false,
+            "MachinePolicyId": "MachinePolicies-1",
+            "HealthStatus": "Healthy with warnings",
+            "HasLatestCalamari": false,
+            "StatusSummary": "Octopus was able to successfully establish a connection with this machine on Wednesday",
+            "IsInProcess": false,
+            "Endpoint": {
+                "CommunicationStyle": "TentaclePassive",
+                "ProxyId": null,
+                "Thumbprint": "test-footprint1",
+                "Uri": "hostname-test1:10933/",
+                "TentacleVersionDetails": {
+                    "UpgradeLocked": false,
+                    "Version": "8.2.2517",
+                    "UpgradeSuggested": false,
+                    "UpgradeRequired": false,
+                    "UpgradeAvailable": false
+                },
+                "CertificateSignatureAlgorithm": "sha256RSA",
+                "Id": null,
+                "LastModifiedOn": null,
+                "LastModifiedBy": null,
+                "Links": {}
+            },
+            "OperatingSystem": "Ubuntu 24.04.1 LTS",
+            "ShellName": "Bash",
+            "ShellVersion": "5.2.21(1)-release",
+            "Architecture": "x86_64",
+            "Slug": "test-machine1",
+            "SkipInitialHealthCheck": false,
+            "Links": {
+                "Self": "/api/Spaces-1/machines/Machines-1",
+                "Connection": "/api/Spaces-1/machines/Machines-1/connection",
+                "TasksTemplate": "/api/Spaces-1/machines/Machines-1/tasks{?skip,take,type}",
+                "SinglyScopedVariableDetails": "/api/Spaces-1/machines/Machines-1/singlyScopedVariableDetails"
+            }
+        }
+    ],
+    "Links": {
+        "Self": "/api/Spaces-1/machines?skip=0&take=30",
+        "Template": "/api/Spaces-1/machines{?skip,take,name,ids,partialName,roles,isDisabled,healthStatuses,commStyles,tenantIds,tenantTags,environmentIds,shellNames,deploymentTargetTypes}",
+        "Page.All": "/api/Spaces-1/machines?skip=0&take=2147483647",
+        "Page.Current": "/api/Spaces-1/machines?skip=0&take=30",
+        "Page.Last": "/api/Spaces-1/machines?skip=0&take=30"
+    }
+}

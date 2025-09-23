@@ -1,28 +1,35 @@
 {
-	"name": "[ElasticSearch] Query load is high on {{host.name}} ",
-	"type": "query alert",
-	"query": "avg(last_5m):sum:elasticsearch.search.query.current{*} by {host} > 10",
-	"message": "Number of queries currently in progress is high ({{value}} queries)",
-	"tags": [
-		"integration:elastic"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 10,
-			"warning": 8
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Get notified when the query load is high."
-	}
+  "version": 2,
+  "created_at": "2021-01-08",
+  "last_updated_at": "2021-03-05",
+  "title": "Query load is high",
+  "tags": [
+    "integration:elasticsearch"
+  ],
+  "description": "The volume and intensity of search queries being made to an Elasticsearch cluster can change. This monitor tracks the query load on individual Elasticsearch nodes to highlight potential need for optimization or scaling to maintain optimal performance.",
+  "definition": {
+    "message": "Number of queries currently in progress is high ({{value}} queries)",
+    "name": "[ElasticSearch] Query load is high on {{host.name}} ",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 10,
+        "warning": 8
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):sum:elasticsearch.search.query.current{*} by {host} > 10",
+    "tags": [
+      "integration:elastic"
+    ],
+    "type": "query alert"
+  }
 }

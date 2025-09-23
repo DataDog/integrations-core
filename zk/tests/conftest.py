@@ -5,9 +5,9 @@ import os
 import sys
 import time
 from copy import deepcopy
+from io import StringIO
 
 import pytest
-from six import StringIO
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import RetryError, docker_run
@@ -94,6 +94,13 @@ def get_conn_failure_config():
     return conn_failure_config
 
 
+@pytest.fixture
+def get_multiple_expected_modes_config():
+    config = deepcopy(VALID_CONFIG)
+    config.update({'expected_mode': ['standalone', 'leader']})
+    return config
+
+
 def get_version():
     zk_version = os.environ.get("ZK_VERSION")
     version = [int(k) for k in zk_version.split(".")]
@@ -150,13 +157,16 @@ def dd_environment(get_instance):
         condition = [condition_non_tls]
 
     with docker_run(compose_file, conditions=condition, sleep=5):
-        yield get_instance, {
-            'docker_volumes': [
-                '{}:/conf/private_key.pem'.format(private_key),
-                '{}:/conf/cert.pem'.format(cert),
-                '{}:/conf/ca_cert.pem'.format(ca_cert),
-            ]
-        }
+        yield (
+            get_instance,
+            {
+                'docker_volumes': [
+                    '{}:/conf/private_key.pem'.format(private_key),
+                    '{}:/conf/cert.pem'.format(cert),
+                    '{}:/conf/ca_cert.pem'.format(ca_cert),
+                ]
+            },
+        )
 
 
 @pytest.fixture()

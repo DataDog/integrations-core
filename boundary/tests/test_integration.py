@@ -33,3 +33,20 @@ def test(aggregator, dd_run_check, get_check, instance):
 
     aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
     aggregator.assert_all_metrics_covered()
+
+
+def test_health_wrong_endpoint(aggregator, dd_run_check, get_check, instance):
+    instance = instance.copy()
+    health_endpoint = 'http://localhost:1234'
+    instance['health_endpoint'] = health_endpoint
+    instance['timeout'] = 1
+
+    check = get_check(instance)
+    dd_run_check(check)
+
+    aggregator.assert_service_check(
+        'boundary.controller.health', ServiceCheck.CRITICAL, tags=[f'endpoint:{health_endpoint}', *instance['tags']]
+    )
+    aggregator.assert_service_check(
+        'boundary.openmetrics.health', ServiceCheck.OK, tags=[f'endpoint:{METRIC_ENDPOINT}', *instance['tags']]
+    )

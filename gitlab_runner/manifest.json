@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ee31aff6-4821-4dbf-af9c-bd09e59a4e80",
   "app_id": "gitlab-runner",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -18,7 +19,8 @@
       "Category::Collaboration",
       "Category::Source Control",
       "Category::Issue Tracking",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -27,7 +29,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Gitlab Runner",
@@ -44,10 +45,13 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
-    },
-    "logs": {
-      "source": "gitlab_runner"
+      },
+      "process_signatures": [
+        "gitlab-runner",
+        "gitlab-ci-multi-runner"
+      ],
+      "source_type_id": 10028,
+      "auto_install": true
     }
   }
 }

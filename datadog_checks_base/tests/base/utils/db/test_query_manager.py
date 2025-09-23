@@ -718,8 +718,7 @@ class TestTransformerCompilation:
         with pytest.raises(
             ValueError,
             match=(
-                '^error compiling type `percent` for extra foo of test query: '
-                'the `total` parameter must be a string$'
+                '^error compiling type `percent` for extra foo of test query: the `total` parameter must be a string$'
             ),
         ):
             query_manager.compile_queries()
@@ -871,6 +870,121 @@ class TestTransformerCompilation:
         ):
             query_manager.compile_queries()
 
+    def test_log_no_attributes(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [
+                    {'type': 'log'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([[]]),
+            tags=['test:foo'],
+        )
+
+        with pytest.raises(
+            ValueError,
+            match='^error compiling type `log` for extra log of test query: the `attributes` parameter is required$',
+        ):
+            query_manager.compile_queries()
+
+    def test_log_attributes_not_dict(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [
+                    {'type': 'log', 'attributes': 9000},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([[]]),
+            tags=['test:foo'],
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `log` for extra log of test query: the `attributes` parameter must be a mapping$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_log_attributes_empty(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [
+                    {'type': 'log', 'attributes': {}},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([[]]),
+            tags=['test:foo'],
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `log` for extra log of test query: the `attributes` parameter must not be empty$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_log_attributes_status_not_string(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [
+                    {'type': 'log', 'attributes': {'message': 9000}},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([[]]),
+            tags=['test:foo'],
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `log` for extra log of test query: '
+                'source `9000` for attribute `message` of parameter `attributes` is not a string$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_log_attributes_status_invalid(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [
+                    {'type': 'log', 'attributes': {'message': 'bar'}},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([[]]),
+            tags=['test:foo'],
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `log` for extra log of test query: '
+                'source `bar` for attribute `message` of parameter `attributes` is not an available source$'
+            ),
+        ):
+            query_manager.compile_queries()
+
 
 class TestSubmission:
     @pytest.mark.parametrize(
@@ -997,9 +1111,9 @@ class TestSubmission:
         query_manager2 = QueryManager(check2, mock_executor(), [dummy_query])
         query_manager1.compile_queries()
         query_manager2.compile_queries()
-        assert not id(query_manager1.queries[0]) == id(
-            query_manager2.queries[0]
-        ), "QueryManager does not copy the queries"
+        assert not id(query_manager1.queries[0]) == id(query_manager2.queries[0]), (
+            "QueryManager does not copy the queries"
+        )
 
     def test_query_execution_error(self, caplog, aggregator):
         class Result(object):

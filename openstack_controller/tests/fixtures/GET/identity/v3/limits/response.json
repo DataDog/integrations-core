@@ -1,0 +1,35 @@
+{
+  "limits": [
+    {
+      "resource_name": "volume",
+      "region_id": null,
+      "links": {
+          "self": "http://10.3.150.25/identity/v3/limits/25a04c7a065c430590881c646cdcdd58"
+      },
+      "service_id": "9408080f1970482aa0e38bc2d4ea34b7",
+      "project_id": "3a705b9f56bb439381b43c4fe59dccce",
+      "domain_id": null,
+      "id": "25a04c7a065c430590881c646cdcdd58",
+      "resource_limit": 11,
+      "description": "Number of volumes for project 3a705b9f56bb439381b43c4fe59dccce"
+  },
+  {
+      "resource_name": "snapshot",
+      "region_id": "RegionOne",
+      "links": {
+          "self": "http://10.3.150.25/identity/v3/limits/3229b3849f584faea483d6851f7aab05"
+      },
+      "service_id": "9408080f1970482aa0e38bc2d4ea34b7",
+      "project_id": "3a705b9f56bb439381b43c4fe59dccce",
+      "domain_id": null,
+      "id": "3229b3849f584faea483d6851f7aab05",
+      "resource_limit": 5,
+      "description": null
+  }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.11/identity/v3/limits",
+    "previous": null
+  }
+}

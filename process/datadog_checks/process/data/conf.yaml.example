@@ -22,6 +22,13 @@ init_config:
     #
     # shared_process_list_cache_duration: 120
 
+    ## @param reset_cache_on_process_changes - boolean - optional - default: true
+    ## When set to true, the shared process list cache is reset (forced to refresh) when a process disappears 
+    ## during scanning or when no matching processes are found for an instance. This ensures fresh process data 
+    ## but may impact performance on systems with frequent process changes.
+    #
+    # reset_cache_on_process_changes: true
+
     ## @param procfs_path - string - optional
     ## Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
     ## DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead
@@ -72,8 +79,13 @@ instances:
     # pid_file: <PID_FILE>
 
     ## @param exact_match - boolean - optional - default: true
-    ## Matches your search_string on proc.name().
-    ## If you want to match on a substring within proc.cmdline(), set this to false
+    ## If you want to match your `search_string` on a substring within the list of process names, 
+    ## set this to true. This is equivalent to running `ps -e` on Linux or `Get-Process` on Windows.
+    ##
+    ## If you want to match your `search_string` on a substring within the list of process names
+    ## and the command line, set this to false. This is equivalent to running `ps -ef` on Linux or
+    ## `Get-CimInstance Win32_Process | select name,commandline` on Windows.
+    ##
     ## Regex is also supported when this flag is set to `false`.
     ##
     ## Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have access to the full
@@ -123,6 +135,19 @@ instances:
     ## If set to `true`, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
     #
     # try_sudo: false
+
+    ## @param pid_cache_duration - integer - optional - default: 120
+    ## Changes the check refresh rate of the matching pid list every X seconds except if it
+    ## detects a change before. You might want to set it low if you want to
+    ## alert on process service checks.
+    #
+    # pid_cache_duration: 120
+
+    ## @param use_oneshot - boolean - optional - default: true
+    ## If set to `true`, the check uses `psutil.Process().oneshot()` to collect and cache process metrics. 
+    ## This can help speed up the check completion.
+    #
+    # use_oneshot: true
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2025-04-08",
+	"last_updated_at": "2025-04-08",
+	"title": "Celery workers are offline.",
+	"description": "This monitor alerts when the number of Celery workers online is 0.",
+	"definition": {
+		"id": 168617317,
+		"name": "Celery workers are down on {{host.name}}",
+		"type": "query alert",
+		"query": "min(last_5m):sum:celery.flower.worker.online{*} by {host,endpoint} <= 0",
+		"message": "{{#is_alert}}\n  There are no Celery workers online. Please check.\n{{/is_alert}}",
+		"tags": [
+			"integration:celery"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"renotify_interval": 0,
+			"escalation_message": "",
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:celery"
+	]
+}

@@ -9,8 +9,8 @@ import platform
 
 import mock
 import pytest
-from six import PY3, iteritems
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.network import ethtool
 
 from . import common
@@ -444,9 +444,9 @@ GVE_ETHTOOL_VALUES = {
 
 def send_ethtool_ioctl_mock(iface, sckt, data):
     for input, result in common.ETHTOOL_IOCTL_INPUTS_OUTPUTS.items():
-        if input == (iface, data.tobytes() if PY3 else data.tostring()):
+        if input == (iface, data.tobytes()):
             data[:] = array.array('B', [])
-            data.frombytes(result) if PY3 else data.fromstring(result)
+            data.frombytes(result)
             return
     raise ValueError("Couldn't match any iface/data combination in the test data")
 
@@ -466,6 +466,7 @@ def test_collect_ena(is_linux, is_bsd, send_ethtool_ioctl, check):
         'aws.ec2.conntrack_allowance_exceeded': 0,
         'aws.ec2.linklocal_allowance_exceeded': 0,
         'aws.ec2.pps_allowance_exceeded': 0,
+        'aws.ec2.conntrack_allowance_available': 0,
     }
 
 
@@ -535,11 +536,13 @@ def test_submit_ena(is_linux, is_bsd, send_ethtool_ioctl, check, aggregator):
         'system.net.aws.ec2.conntrack_allowance_exceeded',
         'system.net.aws.ec2.linklocal_allowance_exceeded',
         'system.net.aws.ec2.pps_allowance_exceeded',
+        'system.net.aws.ec2.conntrack_allowance_available',
     ]
     for m in expected_metrics:
         aggregator.assert_metric(
             m, count=1, value=0, tags=['device:eth0', 'driver_name:ena', 'driver_version:5.11.0-1022-aws']
         )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
@@ -554,14 +557,15 @@ def test_submit_ena_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check,
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     check_instance._handle_ethtool_stats('eth0', [])
 
-    for tag, metrics in iteritems(ENA_ETHTOOL_VALUES):
-        for metric_suffix, value in iteritems(metrics):
+    for tag, metrics in ENA_ETHTOOL_VALUES.items():
+        for metric_suffix, value in metrics.items():
             aggregator.assert_metric(
                 'system.net.' + metric_suffix,
                 count=1,
                 value=value,
                 tags=['device:eth0', 'driver_name:ena', 'driver_version:5.11.0-1022-aws', tag],
             )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
@@ -576,14 +580,15 @@ def test_submit_hv_netvsc_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, 
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     check_instance._handle_ethtool_stats('hv_netvsc', [])
 
-    for tag, metrics in iteritems(HV_NETVSC_ETHTOOL_VALUES):
-        for metric_suffix, value in iteritems(metrics):
+    for tag, metrics in HV_NETVSC_ETHTOOL_VALUES.items():
+        for metric_suffix, value in metrics.items():
             aggregator.assert_metric(
                 'system.net.' + metric_suffix,
                 count=1,
                 value=value,
                 tags=['device:hv_netvsc', 'driver_name:hv_netvsc', 'driver_version:5.8.0-1042-azure', tag],
             )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
@@ -598,14 +603,15 @@ def test_submit_gve_ethtool_metrics(is_linux, is_bsd, send_ethtool_ioctl, check,
     send_ethtool_ioctl.side_effect = send_ethtool_ioctl_mock
     check_instance._handle_ethtool_stats('gve', [])
 
-    for tag, metrics in iteritems(GVE_ETHTOOL_VALUES):
-        for metric_suffix, value in iteritems(metrics):
+    for tag, metrics in GVE_ETHTOOL_VALUES.items():
+        for metric_suffix, value in metrics.items():
             aggregator.assert_metric(
                 'system.net.' + metric_suffix,
                 count=1,
                 value=value,
                 tags=['device:gve', 'driver_name:gve', 'driver_version:1.0.0', tag],
             )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
@@ -668,6 +674,33 @@ def test_parse_queue_num():
     queue_name, metric_name = ethtool._parse_ethtool_queue_num('rx_queue_123_packets')
     assert queue_name == 'queue:123'
     assert metric_name == 'rx_packets'
+
+
+@pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")
+def test_parse_unprefixed_queue_num():
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('rx0_cnt')
+    assert queue_name == 'queue:0'
+    assert metric_name == 'rx_cnt'
+
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('tx10_doorbells')
+    assert queue_name == 'queue:10'
+    assert metric_name == 'tx_doorbells'
+
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('aqueue10_doorbells')
+    assert queue_name is None
+    assert metric_name is None
+
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('ametric_rx0')
+    assert queue_name == 'queue:0'
+    assert metric_name == 'ametric_rx'
+
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('ch0_packets')
+    assert queue_name is None
+    assert metric_name is None
+
+    queue_name, metric_name = ethtool._parse_ethtool_unprefixed_queue_num('rx_packets')
+    assert queue_name is None
+    assert metric_name is None
 
 
 @pytest.mark.skipif(platform.system() == 'Windows', reason="Only runs on Unix systems")

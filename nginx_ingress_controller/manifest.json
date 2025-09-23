@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f84e3ebf-848b-4894-a5b0-9abbd21d4189",
   "app_id": "nginx-ingress-controller",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,14 +13,15 @@
     "title": "nginx-ingress-controller",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Orchestration",
       "Category::Containers",
+      "Category::Kubernetes",
       "Category::Log Collection",
-      "Category::Web",
-      "Category::Network"
+      "Category::Network",
+      "Category::Orchestration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -28,7 +30,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "nginx-ingress-controller",
@@ -45,7 +46,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10050,
+      "auto_install": true
     },
     "dashboards": {
       "nginx_ingress_controller": "assets/dashboards/overview.json"
@@ -55,9 +58,6 @@
       "5xx_errors": "assets/saved_views/5xx_errors.json",
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json"
-    },
-    "logs": {
-      "source": "nginx_ingress_controller"
     }
   }
 }

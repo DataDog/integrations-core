@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   kerberos-kdc:
     build: ./kerberos-kdc
@@ -28,7 +26,7 @@ services:
       - "464:8464"
 
   web:
-    image: kerberos-nginx:1.17.3
+    image: kerberos-nginx:1.20.2
     build: ./kerberos-nginx
     container_name: kerberos-nginx
     environment:

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8dfc1942-7820-49c7-93c8-5a31579ee52a",
   "app_id": "apache",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,25 @@
     "title": "Apache",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Web",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-apache-web-server-performance"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collect-apache-performance-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-apache-web-server-datadog"
+      }
     ]
   },
   "author": {
@@ -26,7 +40,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Apache",
@@ -48,14 +61,16 @@
         "httpd",
         "apache",
         "apache2"
-      ]
+      ],
+      "source_type_id": 30,
+      "auto_install": true
     },
     "dashboards": {
       "apache": "assets/dashboards/apache_dashboard.json"
     },
     "monitors": {
-      "[Apache] Low number of idle workers": "assets/recommended_monitors/apache_low_idle_workers.json",
-      "[Apache] resource utilization": "assets/recommended_monitors/high_keep_alive_and_cpu.json"
+      "Idle workers number is low": "assets/monitors/apache_low_idle_workers.json",
+      "CPU load is running high": "assets/monitors/high_keep_alive_and_cpu.json"
     },
     "saved_views": {
       "4xx_errors": "assets/saved_views/4xx_errors.json",
@@ -63,9 +78,6 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "apache_processes": "assets/saved_views/apache_processes.json"
-    },
-    "logs": {
-      "source": "apache"
     }
   }
 }

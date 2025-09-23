@@ -11,8 +11,6 @@ import array
 import struct
 from collections import defaultdict
 
-from six import PY3
-
 from .const import (
     ENA_METRIC_NAMES,
     ENA_METRIC_PREFIX,
@@ -41,7 +39,7 @@ def _byte_array_to_string(s):
     Convert a byte array to string
     b'hv_netvsc\x00\x00\x00\x00' -> 'hv_netvsc'
     """
-    s = s.tobytes() if PY3 else s.tostring()
+    s = s.tobytes()
     s = s.partition(b'\x00')[0].decode('utf-8')
     return s
 
@@ -112,6 +110,30 @@ def _parse_ethtool_queue_num(stat_name):
     return 'queue:{}'.format(queue_num), '_'.join(parts)
 
 
+def _parse_ethtool_unprefixed_queue_num(stat_name):
+    """
+    Extract the queue and the metric name from ethtool stat name:
+    tx0_bytes -> (queue:0, tx_bytes)
+    rx1_packets -> (queue:1, rx_packets)
+    """
+    if 'rx' not in stat_name and 'tx' not in stat_name:
+        return None, None
+    parts = stat_name.split('_')
+    queue_num = None
+    queue_index = None
+    for i, part in enumerate(parts):
+        if not part.startswith('tx') and not part.startswith('rx'):
+            continue
+        if part[2:].isdigit():
+            queue_num = part[2:]
+            queue_index = i
+            break
+    if queue_num is None or not queue_num.isdigit():
+        return None, None
+    parts[queue_index] = parts[queue_index][:2]
+    return 'queue:{}'.format(queue_num), '_'.join(parts)
+
+
 def _parse_ethtool_queue_array(stat_name):
     """
     Extract the queue and the metric name from ethtool stat name:
@@ -164,6 +186,9 @@ def get_ethtool_metrics(driver_name, stats_names, stats):
     for i, stat_name in enumerate(stats_names):
         tag, metric_name = _parse_ethtool_queue_num(stat_name)
         metric_prefix = '.queue.'
+        if not tag:
+            tag, metric_name = _parse_ethtool_unprefixed_queue_num(stat_name)
+            metric_prefix = '.queue.'
         if not tag:
             tag, metric_name = _parse_ethtool_cpu_num(stat_name)
             metric_prefix = '.cpu.'

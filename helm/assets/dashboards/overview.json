@@ -163,6 +163,5 @@
   "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "2bq-8gn-gmz"
+  "reflow_type": "fixed"
 }

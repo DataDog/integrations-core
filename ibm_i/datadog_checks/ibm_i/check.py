@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 from datetime import datetime
-from typing import List, NamedTuple, Tuple
+from typing import List, NamedTuple, Tuple  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager

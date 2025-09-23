@@ -137,7 +137,7 @@ class CactiCheck(AgentCheck):
             return metric_count
 
         # Find the consolidation functions for the RRD metrics
-        c_funcs = set([v for k, v in info.items() if k.endswith('.cf')])
+        c_funcs = {v for k, v in info.items() if k.endswith('.cf')}
         if not c_funcs:
             self.log.debug("No funcs found for %s", rrd_path)
 
@@ -208,9 +208,7 @@ class CactiCheck(AgentCheck):
                     AND dl.snmp_index = hsc.snmp_index
             WHERE dt.data_source_path IS NOT NULL
             AND dt.data_source_path != ''
-            AND ({} OR hsc.field_name is NULL) """.format(
-            and_parameters
-        )
+            AND ({} OR hsc.field_name is NULL) """.format(and_parameters)
 
         c.execute(rrd_query)
         res = []
@@ -223,7 +221,7 @@ class CactiCheck(AgentCheck):
                 res.append((hostname, device_name, rrd_path))
 
         # Collect stats
-        num_hosts = len(set([r[0] for r in res]))
+        num_hosts = len({r[0] for r in res})
         self.gauge('cacti.rrd.count', len(res), tags=tags)
         self.gauge('cacti.hosts.count', num_hosts, tags=tags)
 

@@ -1,0 +1,1090 @@
+{
+  "title": "Tekton Overview",
+  "description": "**Tekton**\n\nThis dashboard provides insights into your Tekton cluster. You can use the dashboard to track health status, performance, and resource utilization metrics from all your tasks and pipelines.\n\n**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/tekton)",
+  "widgets": [
+    {
+      "id": 5334996938399250,
+      "definition": {
+        "title": "About Elasticsearch",
+        "title_align": "center",
+        "banner_img": "/static/images/logos/tekton_small.svg",
+        "show_title": false,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2216315201983656,
+            "definition": {
+              "type": "note",
+              "content": "This is a high-level overview of your Tekton clusters, so you can track health status, search and indexing performance, and resource utilization metrics from all your tasks and pipelines.",
+              "background_color": "transparent",
+              "font_size": "18",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7039156995897432,
+            "definition": {
+              "type": "note",
+              "content": "**Useful Links**\n\n##### [**Datadog Tekton integration docs&nbsp;↗**](https://docs.datadoghq.com/integrations/tekton/)",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 8798296092771830,
+      "definition": {
+        "title": "Overview",
+        "title_align": "center",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7533563692510458,
+            "definition": {
+              "title": "Tekton Monitor Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "query": "tekton",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 2515482633273920,
+            "definition": {
+              "title": "Pipelines Controllers",
+              "title_size": "13",
+              "title_align": "center",
+              "type": "check_status",
+              "check": "tekton.pipelines_controller.openmetrics.health",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 3083041976779494,
+            "definition": {
+              "title": "API queries",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "sum",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Pipelines",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Triggers",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:tekton.pipelines_controller.client.results.count{$host} by {host}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:tekton.triggers_controller.client.results.count{$host} by {host}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4911535333048516,
+            "definition": {
+              "title": "Triggers Controllers",
+              "title_size": "13",
+              "title_align": "center",
+              "type": "check_status",
+              "check": "tekton.triggers_controller.openmetrics.health",
+              "grouping": "cluster",
+              "group_by": [],
+              "tags": []
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 8134283451021318,
+            "definition": {
+              "title": "Pod latency",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:tekton.pipelines_controller.taskruns_pod_latency{$host} by {pod,host}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "inline"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2067738027076040,
+            "definition": {
+              "title": "API queries latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "sum",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Pipelines",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Triggers",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:tekton.pipelines_controller.client.latency.sum{$host} by {host}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:tekton.triggers_controller.client.latency.sum{$host} by {host}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 1805520499405800,
+      "definition": {
+        "title": "PipelineRuns Overview ",
+        "title_align": "center",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2262321051816626,
+            "definition": {
+              "type": "note",
+              "content": "This section will give you a global overview of the Pipelines that ran or are running, along with their durations.",
+              "background_color": "vivid_blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8633533131925644,
+            "definition": {
+              "title": "Running PipelineRuns",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "sum",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Running",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Waiting on pipeline resolution",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Waiting on task resolution",
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:tekton.pipelines_controller.running_pipelineruns{$host} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:tekton.pipelines_controller.running_pipelineruns_waiting_on_pipeline_resolution{$host} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:tekton.pipelines_controller.running_pipelineruns_waiting_on_task_resolution{$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 4701703449578766,
+            "definition": {
+              "title": "PipelineRuns duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "sum",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Duration",
+                      "formula": "query4"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:tekton.pipelines_controller.pipelinerun.duration.sum{$host} by {host}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2608123261060076,
+            "definition": {
+              "title": "PipelineRuns by status",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "sum",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query4"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:tekton.pipelines_controller.pipelinerun.count{$host} by {status,host}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 8226309228467650,
+            "definition": {
+              "title": "Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:tekton.pipelines_controller.pipelinerun.duration.sum{$host} by {pipeline,host}.as_count()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "inline"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 822789541531096,
+            "definition": {
+              "title": "Status",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:tekton.pipelines_controller.pipelinerun.duration.count{$host} by {pipeline,status,host}.as_count()",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "inline"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 7,
+              "width": 6,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 12,
+        "height": 13
+      }
+    },
+    {
+      "id": 8269758147441496,
+      "definition": {
+        "title": "TaskRuns Overview ",
+        "title_align": "center",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7668945929012218,
+            "definition": {
+              "type": "note",
+              "content": "This section will give you a global overview of the Tasks that ran or are running, along with their durations.",
+              "background_color": "vivid_blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 324379203097242,
+            "definition": {
+              "title": "Running TaskRuns",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "sum",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Running",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Throttled by Node",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Throttled by Quota",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Waiting on task resolution",
+                      "formula": "query4"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:tekton.pipelines_controller.running_taskruns{$host} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:tekton.pipelines_controller.running_taskruns_throttled_by_node{$host} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:tekton.pipelines_controller.running_taskruns_throttled_by_quota{$host} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:tekton.pipelines_controller.running_taskruns_waiting_on_task_resolution{$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 3884850671821850,
+            "definition": {
+              "title": "TaskRuns duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "sum",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Duration",
+                      "formula": "query4"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:tekton.pipelines_controller.taskrun_duration.sum{$host} by {host}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4372939865604658,
+            "definition": {
+              "title": "TaskRuns by status",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "vertical",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "sum",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query4"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:tekton.pipelines_controller.taskrun.count{$host} by {status,host}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 887721986101580,
+            "definition": {
+              "title": "Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:tekton.pipelines_controller.taskrun_duration.sum{$host} by {task,host}.as_count()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "inline"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 1035427566910228,
+            "definition": {
+              "title": "Status",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:tekton.pipelines_controller.taskrun_duration.count{$host} by {task,status,host}.as_count()",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "inline"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 7,
+              "width": 6,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 13,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 5074062477339492,
+      "definition": {
+        "title": "Logs",
+        "title_align": "left",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3842809483320060,
+            "definition": {
+              "type": "note",
+              "content": "When investigating logs, you can refer to the timeseries data to see the ratio of a certain log status to other expected statuses. In situations where you notice an increase in the ratio of error logs, you can refer to the log stream set up to filter erroneous logs for your perusal. Please note that you will have to enable logs to see the widgets in this group populate. ",
+              "background_color": "vivid_blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "25%",
+              "tick_edge": "bottom",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 4621557139055218,
+            "definition": {
+              "title": "Count per Log Status",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "a"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "a",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "status",
+                          "limit": 30,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          },
+                          "should_exclude_missing": true
+                        },
+                        {
+                          "facet": "host",
+                          "limit": 30,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "search": {
+                        "query": "source:tekton"
+                      },
+                      "storage": "online_archives"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 6180752420123462,
+            "definition": {
+              "title": "Errors",
+              "title_size": "16",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:tekton status:(error OR critical) ",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "cluster_name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "node_name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "url",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 12,
+        "height": 9
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "host",
+      "prefix": "@host",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

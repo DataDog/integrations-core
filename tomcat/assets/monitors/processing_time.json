@@ -1,30 +1,39 @@
 {
-  "name": "[Tomcat] Anomalous average processing time for host {{host.name}}",
-  "type": "query alert",
-  "query": "avg(last_4h):anomalies(avg:tomcat.processing_time{*} by {host}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
-  "message": "There is an anomaly in the Tomcat average processing time on host: {{host.name}} \n\nIf the processing time increases as traffic increases, then you may not have enough worker threads to process the requests, or your server is reaching its threshold and consuming too much memory.\n\nNote: When compared with the `tomcat.request_count` metric, you can gauge how many requests your server can efficiently handle.",
-  "tags": ["integration:tomcat"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": true,
-    "notify_no_data": false,
-    "renotify_interval": 0,
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 1,
-      "critical_recovery": 0
+  "version": 2,
+  "created_at": "2021-03-09",
+  "last_updated_at": "2021-03-09",
+  "title": "Processing time is anomalous",
+  "tags": [
+    "integration:tomcat"
+  ],
+  "description": "Processing time is the time taken by a request from when its received to when a response is generated. This monitor tracks the average processing time for each host to avoid performance issues that may impact the responsiveness of the application.",
+  "definition": {
+    "message": "There is an anomaly in the Tomcat average processing time on host: {{host.name}} \n\nIf the processing time increases as traffic increases, then you may not have enough worker threads to process the requests, or your server is reaching its threshold and consuming too much memory.\n\nNote: When compared with the `tomcat.request_count` metric, you can gauge how many requests your server can efficiently handle.",
+    "name": "[Tomcat] Anomalous average processing time for host {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
     },
-    "threshold_windows": {
-      "trigger_window": "last_15m",
-      "recovery_window": "last_15m"
-    }
-  },
-  "recommended_monitor_metadata": {
-    "description": "Notifies when Tomcat experiences an anomalous processing time for a specific host."
+    "query": "avg(last_4h):anomalies(avg:tomcat.processing_time{*} by {host}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+    "tags": [
+      "integration:tomcat"
+    ],
+    "type": "query alert"
   }
 }

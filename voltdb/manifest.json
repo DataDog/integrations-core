@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4ea56824-28da-4beb-8937-c45ef32fdb7f",
   "app_id": "voltdb",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,8 +16,9 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "VoltDB",
@@ -45,19 +46,18 @@
       },
       "process_signatures": [
         "voltdb"
-      ]
+      ],
+      "source_type_id": 10149,
+      "auto_install": true
     },
     "dashboards": {
       "VoltDB - Overview": "assets/dashboards/voltdb_overview.json"
     },
     "monitors": {
-      "CPU load": "assets/monitors/cpu_load.json"
+      "Voltdb Node CPU is high": "assets/monitors/cpu_load.json"
     },
     "saved_views": {
       "voltdb_processes": "assets/saved_views/voltdb_processes.json"
-    },
-    "logs": {
-      "source": "voltdb"
     }
   }
 }

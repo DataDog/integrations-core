@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.nginx.metrics import COUNT_METRICS
 
-from .common import assert_all_metrics_and_metadata, assert_num_metrics
+from .common import TAGS_WITH_HOST_AND_PORT, assert_all_metrics_and_metadata, assert_num_metrics
 from .utils import mocked_perform_request
 
 pytestmark = [pytest.mark.unit]
@@ -78,14 +78,12 @@ def test_plus_api_v5(check, instance_plus_v7, aggregator):
     # total number of metrics should be higher than v4 w/ resolvers and http location zones data
     assert_num_metrics(aggregator, 1261)
 
-    base_tags = ['bar:bar', 'foo:foo']
-
     # resolvers endpoint
-    resolvers_tags = base_tags + ['resolver:resolver-http']
+    resolvers_tags = TAGS_WITH_HOST_AND_PORT + ['resolver:resolver-http']
     aggregator.assert_metric('nginx.resolver.responses.noerror', value=0, tags=resolvers_tags, count=1)
 
     # http location zones endpoint w/out code data
-    location_zone_tags = base_tags + ['location_zone:swagger']
+    location_zone_tags = TAGS_WITH_HOST_AND_PORT + ['location_zone:swagger']
     location_zone_code_tags = location_zone_tags + ['code:404']
 
     aggregator.assert_metric(
@@ -118,7 +116,7 @@ def test_plus_api_v5(check, instance_plus_v7, aggregator):
     )
 
     # no limit conns endpoint
-    conn_tags = base_tags + ['limit_conn:addr']
+    conn_tags = TAGS_WITH_HOST_AND_PORT + ['limit_conn:addr']
     aggregator.assert_metric(
         'nginx.stream.limit_conn.rejected', value=0, metric_type=aggregator.MONOTONIC_COUNT, tags=conn_tags, count=0
     )
@@ -135,14 +133,12 @@ def test_plus_api_v6(check, instance_plus_v7, aggregator):
     # total number of metrics should be higher than v5 w/ http limit conns, http limit reqs, and stream limit conns
     assert_num_metrics(aggregator, 1277)
 
-    base_tags = ['bar:bar', 'foo:foo']
-
     # same tests for v3
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
 
     # stream limit conns endpoint
-    conn_tags = base_tags + ['limit_conn:addr']
+    conn_tags = TAGS_WITH_HOST_AND_PORT + ['limit_conn:addr']
     aggregator.assert_metric(
         'nginx.stream.limit_conn.rejected', value=0, metric_type=aggregator.MONOTONIC_COUNT, tags=conn_tags, count=1
     )
@@ -157,7 +153,7 @@ def test_plus_api_v6(check, instance_plus_v7, aggregator):
     )
 
     # http limit reqs endpoint
-    limit_req_tags = base_tags + ['limit_req:one']
+    limit_req_tags = TAGS_WITH_HOST_AND_PORT + ['limit_req:one']
     aggregator.assert_metric(
         'nginx.limit_req.delayed_dry_run',
         value=322948,
@@ -167,7 +163,7 @@ def test_plus_api_v6(check, instance_plus_v7, aggregator):
     )
 
     # http server zones endpoint does not have code information
-    code_tags = base_tags + ['code:200', 'server_zone:hg.nginx.org']
+    code_tags = TAGS_WITH_HOST_AND_PORT + ['code:200', 'server_zone:hg.nginx.org']
     aggregator.assert_metric(
         'nginx.server_zone.responses.code',
         value=803845,
@@ -190,14 +186,12 @@ def test_plus_api_v7(check, instance_plus_v7, aggregator, only_query_enabled_end
     # with codes data for http upstream, http server zones, and http location zone
     assert_num_metrics(aggregator, 1352)
 
-    base_tags = ['bar:bar', 'foo:foo']
-
     # same tests for v3
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone1', count=1)
     aggregator.assert_metric_has_tag('nginx.stream.zone_sync.zone.records_total', 'zone:zone2', count=1)
 
     # http location zones endpoint
-    location_zone_tags = base_tags + ['location_zone:swagger']
+    location_zone_tags = TAGS_WITH_HOST_AND_PORT + ['location_zone:swagger']
     location_zone_code_tags = location_zone_tags + ['code:404']
 
     aggregator.assert_metric(
@@ -216,7 +210,7 @@ def test_plus_api_v7(check, instance_plus_v7, aggregator, only_query_enabled_end
     )
 
     # http server zones endpoint
-    code_tags = base_tags + ['code:200', 'server_zone:hg.nginx.org']
+    code_tags = TAGS_WITH_HOST_AND_PORT + ['code:200', 'server_zone:hg.nginx.org']
     aggregator.assert_metric(
         'nginx.server_zone.responses.code',
         value=803845,
@@ -226,7 +220,7 @@ def test_plus_api_v7(check, instance_plus_v7, aggregator, only_query_enabled_end
     )
 
     # http limit reqs endpoint
-    limit_req_tags = base_tags + ['limit_req:one']
+    limit_req_tags = TAGS_WITH_HOST_AND_PORT + ['limit_req:one']
     aggregator.assert_metric(
         'nginx.limit_req.delayed_dry_run',
         value=322948,
@@ -236,7 +230,7 @@ def test_plus_api_v7(check, instance_plus_v7, aggregator, only_query_enabled_end
     )
 
     # http upstreams endpoint
-    upstream_tags = base_tags + ['server:10.0.0.42:8084', 'upstream:demo-backend']
+    upstream_tags = TAGS_WITH_HOST_AND_PORT + ['server:10.0.0.42:8084', 'upstream:demo-backend']
     aggregator.assert_metric(
         'nginx.upstream.peers.health_checks.unhealthy_count',
         value=0,
@@ -252,7 +246,7 @@ def test_plus_api_v7(check, instance_plus_v7, aggregator, only_query_enabled_end
         count=1,
     )
 
-    upstream_code_tags = base_tags + ['code:200', 'server:10.0.0.42:8084', 'upstream:demo-backend']
+    upstream_code_tags = TAGS_WITH_HOST_AND_PORT + ['code:200', 'server:10.0.0.42:8084', 'upstream:demo-backend']
     aggregator.assert_metric(
         'nginx.upstream.peers.responses.code',
         value=12960954,
@@ -262,7 +256,7 @@ def test_plus_api_v7(check, instance_plus_v7, aggregator, only_query_enabled_end
     )
 
     # resolvers endpoint
-    resolvers_tags = base_tags + ['resolver:resolver-http']
+    resolvers_tags = TAGS_WITH_HOST_AND_PORT + ['resolver:resolver-http']
     aggregator.assert_metric(
         'nginx.resolver.responses.noerror',
         value=0,
@@ -272,7 +266,7 @@ def test_plus_api_v7(check, instance_plus_v7, aggregator, only_query_enabled_end
     )
 
     # stream limit conns endpoint
-    conn_tags = base_tags + ['limit_conn:addr']
+    conn_tags = TAGS_WITH_HOST_AND_PORT + ['limit_conn:addr']
     aggregator.assert_metric(
         'nginx.stream.limit_conn.rejected', value=0, metric_type=aggregator.MONOTONIC_COUNT, tags=conn_tags, count=1
     )
@@ -304,14 +298,12 @@ def test_plus_api_v7_no_stream(check, instance, aggregator):
     # Number of metrics should be low since stream is disabled
     assert_num_metrics(aggregator, 1025)
 
-    base_tags = ['bar:bar', 'foo:foo']
-
     # test that stream metrics are not emitted
     aggregator.assert_metric('nginx.stream.zone_sync.zone.records_total', count=0)
     aggregator.assert_metric('nginx.stream.limit_conn.rejected', count=0)
 
     # http server zones endpoint
-    code_tags = base_tags + ['code:200', 'server_zone:hg.nginx.org']
+    code_tags = TAGS_WITH_HOST_AND_PORT + ['code:200', 'server_zone:hg.nginx.org']
     aggregator.assert_metric(
         'nginx.server_zone.responses.code',
         value=803845,
@@ -321,7 +313,7 @@ def test_plus_api_v7_no_stream(check, instance, aggregator):
     )
 
     # http upstreams endpoint
-    upstream_tags = base_tags + ['server:10.0.0.42:8084', 'upstream:demo-backend']
+    upstream_tags = TAGS_WITH_HOST_AND_PORT + ['server:10.0.0.42:8084', 'upstream:demo-backend']
     aggregator.assert_metric(
         'nginx.upstream.peers.health_checks.unhealthy_count',
         value=0,

@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator  # noqa: F401
 
 import pytest
 import requests
@@ -18,6 +18,7 @@ from .common import (
     HERE,
     MANAGE_ADMIN_USERNAME,
     MANAGE_USER_USERNAME,
+    MARKLOGIC_VERSION,
     PASSWORD,
 )
 
@@ -28,13 +29,22 @@ def dd_environment():
 
     # Standalone
     compose_file = os.path.join(HERE, 'compose', 'standalone/docker-compose.yml')
+
+    if MARKLOGIC_VERSION.startswith("9."):
+        conditions = [
+            CheckDockerLogs(compose_file, 'Deleted', wait=5),
+        ]
+    else:
+        conditions = [
+            CheckDockerLogs(compose_file, 'Cluster config complete, marking this node as ready.', wait=5),
+        ]
+
+    conditions.append(WaitFor(setup_admin_user))
+    conditions.append(WaitFor(setup_datadog_users))
+
     with docker_run(
         compose_file=compose_file,
-        conditions=[
-            CheckDockerLogs(compose_file, r'Deleted'),
-            WaitFor(setup_admin_user),
-            WaitFor(setup_datadog_users),
-        ],
+        conditions=conditions,
     ):
         yield CHECK_CONFIG
 
@@ -42,7 +52,7 @@ def dd_environment():
 def setup_admin_user():
     # type: () -> None
     # From https://docs.marklogic.com/10.0/guide/admin-api/cluster
-    # Reset admin user password (usefull for cluster setup)
+    # Reset admin user password (useful for cluster setup)
     requests.post(
         'http://localhost:8001/admin/v1/instance-admin',
         data={

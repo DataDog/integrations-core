@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2018-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import os
 
 import pytest
@@ -27,7 +31,9 @@ def dd_environment():
         build=True,
         endpoints="{}/stats".format(URL),
         log_patterns=['front-envoy(.*?)all dependencies initialized. starting workers'],
-        attempts=2,
+        sleep=10,
+        attempts=5,
+        attempts_wait=10,
     ):
         # Exercising envoy a bit will trigger extra metrics
         requests.get('http://{}:8000/service/1'.format(HOST))
@@ -38,3 +44,8 @@ def dd_environment():
 @pytest.fixture
 def check():
     return lambda instance: Envoy('envoy', {}, [instance])
+
+
+@pytest.fixture
+def default_instance():
+    return copy.deepcopy(DEFAULT_INSTANCE)

@@ -1,5 +1,5 @@
 {
-  "version": "0.22.0",
+  "version": "1.7.1",
   "started_tasks": 0,
   "start_time": 1428673344.06054,
   "staged_tasks": 1,
@@ -113,8 +113,8 @@
       "role": "*"
     }
   ],
-  "git_sha": "e890e2414903bb69cab730d5204f10b10d2e91bb",
-  "git_tag": "0.22.0",
+  "git_sha": "d5678c3c5500cec72e22e775d9d048c55c128954",
+  "git_tag": "1.7.1",
   "hostname": "localhost",
   "id": "20150410-134224-16777343-5050-1778-S0",
   "killed_tasks": 0,

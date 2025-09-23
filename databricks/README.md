@@ -1,307 +1,112 @@
 # Agent Check: Databricks
 
+![Databricks default dashboard][21]
+
 ## Overview
 
-Monitor your [Databricks][1] clusters with the Datadog [Spark integration][2].
+Datadog offers several Databricks monitoring capabilities.
 
+[Data Jobs Monitoring][25] provides monitoring for your Databricks jobs and clusters. You can detect problematic Databricks jobs and workflows anywhere in your data pipelines, remediate failed and long-running-jobs faster, and optimize cluster resources to reduce costs.
+
+[Cloud Cost Management][26] gives you a view to analyze all your Databricks DBU costs alongside the associated cloud spend.
+
+[Log Management][27] enables you to aggregate and analyze logs from your Databricks jobs & clusters. You can collect these logs as part of [Data Jobs Monitoring][25].
+
+[Infrastructure Monitoring][28] gives you a limited subset of the Data Jobs Monitoring functionality - visibility into the resource utilization of your Databricks clusters and Apache Spark performance metrics.
+
+[Reference Tables][32] allow you to import metadata from your Databricks workspace into Datadog. These tables enrich your Datadog telemetry with critical context like workspace names, job definitions, cluster configurations, and user roles.
+
+Model serving metrics provide insights into how your  Databricks model serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rate, high latency, are over/under provisioned, and more.
 ## Setup
 
 ### Installation
 
-Monitor Databricks Spark applications with the [Datadog Spark integration][3]. Install the [Datadog Agent][4] on your clusters following the [Configuration](#configuration) instructions for your appropriate cluster.
+First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspace) in Datadog's Databricks integration tile. Complete installation by configuring one or more capabilities of the integration: [Data Jobs Monitoring](#data-jobs-monitoring), [Cloud Cost Management](#cloud-cost-management), and [Model Serving](#model-serving). 
 
 ### Configuration
-
-Configure the Spark integration to monitor your Apache Spark Cluster on Databricks and collect system and Spark metrics.
-
-1. Determine the best init script below for your Databricks cluster environment. 
-
-2. Copy and run the contents into a notebook. The notebook creates an init script that installs a Datadog Agent on your clusters.
-    The notebook only needs to be run once to save the script as a global configuration. For more information about the Databricks Datadog Init scripts, see [Apache Spark Cluster Monitoring with Databricks and Datadog][3].
-    - Set `<init-script-folder>` path to where you want your init scripts to be saved in.
-        
-3. Configure a new Databricks cluster with the cluster-scoped init script path using the UI, Databricks CLI, or invoking the Clusters API.
-    - Set the `DD_API_KEY` environment variable in the cluster's Advanced Options with your Datadog API key.
-    - Add `DD_ENV` environment variable under Advanced Options to add a global environment tag to better identify your clusters.
-    - Set `DD_SITE` to your [site URL][11].
-
-
-#### Standard cluster
-
+#### Connect to a new Databricks Workspace
 <!-- xxx tabs xxx -->
-<!-- xxx tab "Driver only" xxx -->
-##### Install the Datadog Agent on Driver
-Install the Datadog Agent on the driver node of the cluster. This is a updated version of the [Datadog Init Script][5] Databricks notebook example.
 
-After creating the `datadog-install-driver-only.sh` script, add the init script path in the [cluster configuration page][6].
+<!-- xxx tab "Use a Service Principal for OAuth" xxx -->
+<div class="alert alert-warning">New workspaces must authenticate using OAuth. Workspaces integrated with a Personal Access Token continue to function and can switch to OAuth at any time. After a workspace starts using OAuth, it cannot revert to a Personal Access Token.</div>
 
-```shell script
-%python 
-
-dbutils.fs.put("dbfs:/<init-script-folder>/datadog-install-driver-only.sh","""
-#!/bin/bash
-
-date -u +"%Y-%m-%d %H:%M:%S UTC"
-echo "Running on the driver? $DB_IS_DRIVER"
-echo "Driver ip: $DB_DRIVER_IP"
-
-cat <<EOF > /tmp/start_datadog.sh
-#!/bin/bash
-
-if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
-  
-  echo "Installing Datadog Agent on the driver..."
-  
-  # CONFIGURE HOST TAGS FOR CLUSTER
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:driver"
-
-  # INSTALL THE LATEST DATADOG AGENT 7
-  DD_INSTALL_ONLY=true DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
-
-  # WAIT FOR DATADOG AGENT TO BE INSTALLED
-  while [ -z \$datadoginstalled ]; do
-    if [ -e "/etc/datadog-agent/datadog.yaml" ]; then
-      datadoginstalled=TRUE
-    fi
-    sleep 2
-  done
-
-  echo "Datadog Agent is installed"
-
-  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
-  sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
-
-  # WAITING UNTIL MASTER PARAMS ARE LOADED, THEN GRABBING IP AND PORT
-  while [ -z \$gotparams ]; do
-    if [ -e "/tmp/master-params" ]; then
-      DB_DRIVER_PORT=\$(cat /tmp/master-params | cut -d' ' -f2)
-      gotparams=TRUE
-    fi
-    sleep 2
-  done
-
-  hostip=\$(hostname -I | xargs)  
-
-  # WRITING CONFIG FILE FOR SPARK INTEGRATION WITH STRUCTURED STREAMING METRICS ENABLED AND LOGS CONFIGURATION
-  # MODIFY TO INCLUDE OTHER OPTIONS IN spark.d/conf.yaml.example
-  echo "init_config:
-instances:
-    - spark_url: http://\$DB_DRIVER_IP:\$DB_DRIVER_PORT
-      spark_cluster_mode: spark_standalone_mode
-      cluster_name: \${hostip}
-      streaming_metrics: true
-logs:
-    - type: file
-      path: /databricks/driver/logs/*.log
-      source: spark
-      service: databricks
-      log_processing_rules:
-        - type: multi_line
-          name: new_log_start_with_date
-          pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
-
-  # RESTARTING AGENT
-  sleep 15
-  sudo service datadog-agent restart
-
-fi
-EOF
-
-# CLEANING UP
-if [ \$DB_IS_DRIVER ]; then
-  chmod a+x /tmp/start_datadog.sh
-  /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
-fi
-""", True)
-```
-
+1. In your Databricks account, click on **User Management** in the left menu. Then, under the **Service principals** tab, click **Add service principal**.
+2. Under the **Credentials & secrets** tab, click **Generate secret**. Set **Lifetime (days)** to the maximum value allowed (730), then click **Generate**. Take note of your client ID and client secret. Also take note of your account ID, which can be found by clicking on your profile in the upper-right corner.
+3. Click **Workspaces** in the left menu, then select the name of your workspace.
+4. Go to the **Permissions** tab and click **Add permissions**.
+5. Search for the service principal you created and assign it the **Admin** permission.
+6. In Datadog, open the Databricks integration tile.
+7. On the **Configure** tab, click **Add Databricks Workspace**.
+9. Enter a workspace name, your Databricks workspace URL, account ID, and the client ID and secret you generated.
 <!-- xxz tab xxx -->
-<!-- xxx tab "All nodes" xxx -->
-##### Install the Datadog Agent on driver and worker nodes
 
-After creating the `datadog-install-driver-workers.sh` script, add the init script path in the [cluster configuration page][6].
+<!-- xxx tab "Use a Personal Access Token (Legacy)" xxx -->
+<div class="alert alert-warning">This option is only available for workspaces created before July 7, 2025. New workspaces must authenticate using OAuth.</div>
 
-```shell script
-%python 
+1. In your Databricks workspace, click on your profile in the top right corner and go to **Settings**. Select **Developer** in the left side bar. Next to **Access tokens**, click **Manage**.
+2. Click **Generate new token**, enter "Datadog Integration" in the **Comment** field, remove the default value in **Lifetime (days)**, and click **Generate**. Take note of your token.
 
-dbutils.fs.put("dbfs:/<init-script-folder>/datadog-install-driver-workers.sh","""
-#!/bin/bash
-cat <<EOF > /tmp/start_datadog.sh
+   **Important:**
+   * Make sure you delete the default value in **Lifetime (days)** so that the token doesn't expire and the integration doesn't break.
+   * Ensure the account generating the token has [CAN VIEW access][30] for the Databricks jobs and clusters you want to monitor.
 
-#!/bin/bash
+   As an alternative, follow the [official Databricks documentation][31] to generate an access token for a [service principal][31].
 
-date -u +"%Y-%m-%d %H:%M:%S UTC"
-echo "Running on the driver? $DB_IS_DRIVER"
-echo "Driver ip: $DB_DRIVER_IP"
-
-if [[ \${DB_IS_DRIVER} = "TRUE" ]]; then
-
-  echo "Installing Datadog Agent on the driver (master node)."
-  
-  # CONFIGURE HOST TAGS FOR DRIVER
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:driver"
-
-  # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
-  DD_INSTALL_ONLY=true DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
-  
-  # WAIT FOR DATADOG AGENT TO BE INSTALLED
-  while [ -z \$datadoginstalled ]; do
-    if [ -e "/etc/datadog-agent/datadog.yaml" ]; then
-      datadoginstalled=TRUE
-    fi
-    sleep 2
-  done
-
-  echo "Datadog Agent is installed"
-
-  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
-  sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
-
-  while [ -z \$gotparams ]; do
-    if [ -e "/tmp/driver-env.sh" ]; then
-      DB_DRIVER_PORT=\$(grep -i "CONF_UI_PORT" /tmp/driver-env.sh | cut -d'=' -f2)
-      gotparams=TRUE
-    fi
-    sleep 2
-  done
-
-  hostip=$(hostname -I | xargs)
-
-  # WRITING CONFIG FILE FOR SPARK INTEGRATION WITH STRUCTURED STREAMING METRICS ENABLED
-  # MODIFY TO INCLUDE OTHER OPTIONS IN spark.d/conf.yaml.example
-  echo "init_config:
-instances:
-    - spark_url: http://\${DB_DRIVER_IP}:\${DB_DRIVER_PORT}
-      spark_cluster_mode: spark_driver_mode
-      cluster_name: \${hostip}
-      streaming_metrics: true
-logs:
-    - type: file
-      path: /databricks/driver/logs/*.log
-      source: spark
-      service: databricks
-      log_processing_rules:
-        - type: multi_line
-          name: new_log_start_with_date
-          pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
-else
-
-  # CONFIGURE HOST TAGS FOR WORKERS
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:worker"
-
-  # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
-  DD_INSTALL_ONLY=true DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
-
-fi
-
-  # RESTARTING AGENT
-  sleep 15
-  sudo service datadog-agent restart
-EOF
-
-# CLEANING UP
-chmod a+x /tmp/start_datadog.sh
-/tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
-""", True)
-```
+3. In Datadog, open the Databricks integration tile.
+4. On the **Configure** tab, click **Add Databricks Workspace**.
+5. Enter a workspace name, your Databricks workspace URL, and the Databricks token you generated.
 <!-- xxz tab xxx -->
+
 <!-- xxz tabs xxx -->
 
-#### Job cluster
-After creating the `datadog-install-job-driver-mode.sh` script, add the init script path in the [cluster configuration page][6].
+#### Data Jobs Monitoring 
 
-**Note**: Job clusters are monitored in `spark_driver_mode` with the Spark UI port.
+1. Connect a workspace in Datadog's Databricks integration tile.
+2. In the **Select products to set up integration** section, set **Data Jobs Monitoring** to **Enabled** to start monitoring Databricks jobs and clusters. 
+3. See [the docs for Data Jobs Monitoring][33] to complete the configuration. 
 
+**Note**: Ensure that the user or service principal being used [has the necessary permissions](#permissions) to access your Databricks cost data.
 
-```shell script
-%python 
+#### Cloud Cost Management 
 
-dbutils.fs.put("dbfs:/<init-script-folder>/datadog-install-job-driver-mode.sh","""
-#!/bin/bash
+1. Connect a workspace in Datadog's Databricks integration tile.
+2. In the **Select products to set up integration** section, set **Cloud Cost Management** to **Enabled** to view and analyze Databricks DBU costs alongside the associated cloud cost. 
 
-date -u +"%Y-%m-%d %H:%M:%S UTC"
-echo "Running on the driver? $DB_IS_DRIVER"
-echo "Driver ip: $DB_DRIVER_IP"
+**Note**: Ensure that the user or service principal being used [has the necessary permissions](#permissions) to access your Databricks cost data.
 
-cat <<EOF >> /tmp/start_datadog.sh
-#!/bin/bash
+#### Model Serving
 
-if [ \$DB_IS_DRIVER ]; then
+1. Configure a workspace in Datadog's Databricks integration tile.
+2. In the **Select resources to set up collection** section, set **Metrics - Model Serving** to **Enabled** in order to ingest model serving metrics.
 
-  echo "Installing Datadog Agent on the driver..."
+#### Reference Table Configuration
+1. Configure a workspace in Datadog's Databricks integration tile.
+2. In the accounts detail panel, click **Reference Tables**.
+3. In the **Reference Tables** tab, click **Add New Reference Table**.
+4. Provide the **Reference table name**, **Databricks table name**, and **Primary key** of your Databricks view or table.
 
-  # CONFIGURE HOST TAGS FOR DRIVER
-  DD_TAGS="environment:\${DD_ENV}","databricks_cluster_id:\${DB_CLUSTER_ID}","databricks_cluster_name:\${DB_CLUSTER_NAME}","spark_host_ip:\${SPARK_LOCAL_IP}","spark_node:driver"
+  * For optimal results, create a view in Databricks that includes only the specific data you want to send to Datadog. This means generating a dedicated table that reflects the exact scope needed for your use case.
 
-  # INSTALL THE LATEST DATADOG AGENT 7 ON DRIVER AND WORKER NODES
-  DD_INSTALL_ONLY=true DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=\$DD_API_KEY DD_HOST_TAGS=\$DD_TAGS bash -c "\$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script.sh)"
+5. Click **Save**.
 
-  # WAIT FOR DATADOG AGENT TO BE INSTALLED
-  while [ -z \$datadoginstalled ]; do
-    if [ -e "/etc/datadog-agent/datadog.yaml" ]; then
-      datadoginstalled=TRUE
-    fi
-    sleep 2
-  done
-
-  echo "Datadog Agent is installed"  
-
-  # ENABLE LOGS IN datadog.yaml TO COLLECT DRIVER LOGS
-  sed -i '/.*logs_enabled:.*/a logs_enabled: true' /etc/datadog-agent/datadog.yaml
-
-  while [ -z \$gotparams ]; do
-    if [ -e "/tmp/driver-env.sh" ]; then
-      DB_DRIVER_PORT=\$(grep -i "CONF_UI_PORT" /tmp/driver-env.sh | cut -d'=' -f2)
-      gotparams=TRUE
-    fi
-    sleep 2
-  done
-
-  hostip=\$(hostname -I | xargs)
-
-  # WRITING SPARK CONFIG FILE
-  echo "init_config:
-instances:
-    - spark_url: http://\$DB_DRIVER_IP:\$DB_DRIVER_PORT
-      spark_cluster_mode: spark_driver_mode
-      cluster_name: \$hostip
-logs:
-    - type: file
-      path: /databricks/driver/logs/*.log
-      source: spark
-      service: databricks
-      log_processing_rules:
-        - type: multi_line
-          name: new_log_start_with_date
-          pattern: \d{2,4}[\-\/]\d{2,4}[\-\/]\d{2,4}.*" > /etc/datadog-agent/conf.d/spark.d/spark.yaml
-
-  # RESTARTING AGENT
-  sleep 15
-  sudo service datadog-agent restart
-
-fi
-EOF
-
-# CLEANING UP
-if [ \$DB_IS_DRIVER ]; then
-  chmod a+x /tmp/start_datadog.sh
-  /tmp/start_datadog.sh >> /tmp/datadog_start.log 2>&1 & disown
-fi
-""", True)
-
-```
-
-
-### Validation
-
-[Run the Agent's status subcommand][7] and look for `spark` under the Checks section.
+#### Permissions
+For Datadog to access your Databricks cost data in Data Jobs Monitoring or [Cloud Cost Management][34], the user or service principal used to query [system tables][35] must have the following permissions:
+   - `CAN USE` permission on the SQL Warehouse.
+   - Read access to the [system tables][35] within Unity Catalog. This can be granted with:
+   ```sql
+   GRANT USE CATALOG ON CATALOG system TO <service_principal>;
+   GRANT SELECT ON CATALOG system TO <service_principal>;
+   GRANT USE SCHEMA ON CATALOG system TO <service_principal>;
+   ```
+   The user granting these must have the `MANAGE` privilege on `CATALOG system`.
 
 ## Data Collected
 
 ### Metrics
-
-See the [Spark integration documentation][8] for a list of metrics collected.
-
+#### Model Serving Metrics
+See [metadata.csv][29] for a list of metrics provided by this integration.
+#### Spark Metrics
+See the [Spark integration documentation][8] for a list of Spark metrics collected.
 
 ### Service Checks
 
@@ -313,20 +118,25 @@ The Databricks integration does not include any events.
 
 ## Troubleshooting
 
+You can troubleshoot issues yourself by enabling the [Databricks web terminal][18] or by using a [Databricks Notebook][19]. Consult the [Agent Troubleshooting][20] documentation for information on useful troubleshooting steps. 
+
 Need help? Contact [Datadog support][10].
 
-## Further Reading
-
-{{< partial name="whats-next/whats-next.html" >}}
-
-[1]: https://databricks.com/
-[2]: https://docs.datadoghq.com/integrations/spark/?tab=host
-[3]: https://databricks.com/blog/2017/06/01/apache-spark-cluster-monitoring-with-databricks-and-datadog.html
-[4]: https://app.datadoghq.com/account/settings#agent
-[5]: https://docs.databricks.com/_static/notebooks/datadog-init-script.html
-[6]: https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
+[10]: https://docs.datadoghq.com/help/
+[18]: https://docs.databricks.com/en/clusters/web-terminal.html
+[19]: https://docs.databricks.com/en/notebooks/index.html
+[20]: https://docs.datadoghq.com/agent/troubleshooting/
+[21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.png
+[25]: https://www.datadoghq.com/product/data-jobs-monitoring/
+[26]: https://www.datadoghq.com/product/cloud-cost-management/
+[27]: https://www.datadoghq.com/product/log-management/
+[28]: https://docs.datadoghq.com/integrations/databricks/?tab=driveronly
+[29]: https://github.com/DataDog/integrations-core/blob/master/databricks/metadata.csv
+[30]: https://docs.databricks.com/en/security/auth-authz/access-control/index.html#job-acls
+[31]: https://docs.databricks.com/en/admin/users-groups/service-principals.html#what-is-a-service-principal
+[32]: https://docs.datadoghq.com/reference_tables
+[33]: https://docs.datadoghq.com/data_jobs/databricks
+[34]: https://docs.datadoghq.com/cloud_cost_management/
+[35]: https://docs.databricks.com/aws/en/admin/system-tables/
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
 [9]: https://docs.datadoghq.com/integrations/spark/#service-checks
-[10]: https://docs.datadoghq.com/help/
-[11]: https://docs.datadoghq.com/getting_started/site/

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "0e1f1ef2-ea62-4ae4-a99f-8c40171b729c",
   "app_id": "ignite",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,14 @@
     "title": "ignite",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Caching",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Category::Network",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +29,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Ignite",
@@ -43,13 +45,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10100,
+      "auto_install": true
     },
     "dashboards": {
       "Ignite Overview": "assets/dashboards/ignite_overview.json"
-    },
-    "logs": {
-      "source": "ignite"
     }
   }
 }

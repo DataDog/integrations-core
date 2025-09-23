@@ -1,0 +1,23 @@
+{
+    "name": "Flux Overview",
+    "options": {
+        "columns": [
+            "host",
+            "service",
+            "@controller",
+            "@controllerGroup",
+            "@controllerKind"
+        ],
+        "message_display": "inline",
+        "show_date_column": true,
+        "show_message_column": true,
+        "show_timeline": true
+    },
+    "page": "stream",
+    "query": "source:fluxcd ",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "type": "logs",
+    "visible_facets": []
+}

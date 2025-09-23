@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   supervisord:
     image: datadog/docker-library:supervisord_${SUPERVISOR_VERSION}

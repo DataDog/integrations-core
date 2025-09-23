@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f5919a4b-4142-4889-b9c0-6ecdab299ebb",
   "app_id": "eks-fargate",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -17,7 +18,22 @@
       "Supported OS::Windows",
       "Category::Cloud",
       "Category::AWS",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/aws-fargate-metrics/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/"
+      }
     ]
   },
   "author": {
@@ -26,7 +42,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "EKS Fargate",

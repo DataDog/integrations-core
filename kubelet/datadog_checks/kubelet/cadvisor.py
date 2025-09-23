@@ -6,10 +6,9 @@ from __future__ import division
 import logging
 import numbers
 from fnmatch import fnmatch
+from urllib.parse import urlparse
 
 import requests
-from six import iteritems
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base.utils.tagging import tagger
 
@@ -51,7 +50,7 @@ class CadvisorScraper(object):
         url = "http://{}:{}{}".format(kubelet_hostname, cadvisor_port, LEGACY_CADVISOR_METRICS_PATH)
 
         # Test the endpoint is present
-        r = requests.head(url, timeout=1)
+        r = requests.head(url, timeout=1)  # SKIP_HTTP_VALIDATION
         r.raise_for_status()
 
         return url
@@ -106,19 +105,19 @@ class CadvisorScraper(object):
         if isinstance(dat, numbers.Number):
             # Pod level metric filtering
             is_pod_metric = False
-            if self.pod_level_metrics and any([fnmatch(metric, pat) for pat in self.pod_level_metrics]):
+            if self.pod_level_metrics and any(fnmatch(metric, pat) for pat in self.pod_level_metrics):
                 is_pod_metric = True
             if is_pod_metric != is_pod:
                 return
 
             # Metric submission
-            if self.enabled_rates and any([fnmatch(metric, pat) for pat in self.enabled_rates]):
+            if self.enabled_rates and any(fnmatch(metric, pat) for pat in self.enabled_rates):
                 self.rate(metric, float(dat), tags)
-            elif self.enabled_gauges and any([fnmatch(metric, pat) for pat in self.enabled_gauges]):
+            elif self.enabled_gauges and any(fnmatch(metric, pat) for pat in self.enabled_gauges):
                 self.gauge(metric, float(dat), tags)
 
         elif isinstance(dat, dict):
-            for k, v in iteritems(dat):
+            for k, v in dat.items():
                 self._publish_raw_metrics(metric + '.%s' % k.lower(), v, tags, is_pod, depth + 1)
 
         elif isinstance(dat, list):

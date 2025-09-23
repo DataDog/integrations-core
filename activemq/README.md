@@ -6,7 +6,7 @@ The ActiveMQ check collects metrics for brokers, queues, producers, consumers, a
 
 **Note:** This check also supports ActiveMQ Artemis (future ActiveMQ version `6`) and reports metrics under the `activemq.artemis` namespace. See [metadata.csv][1] for a list of metrics provided by this integration.
 
-**Note**: If you are running a ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][2].
+**Note**: If you are running an ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][2].
 
 ## Setup
 
@@ -81,7 +81,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 | Parameter            | Value                                |
 | -------------------- | ------------------------------------ |
 | `<INTEGRATION_NAME>` | `activemq`                           |
-| `<INIT_CONFIG>`      | blank or `{}`                        |
+| `<INIT_CONFIG>`      | `"is_jmx": true`                     |
 | `<INSTANCE_CONFIG>`  | `{"host": "%%host%%","port":"1099"}` |
 
 ##### Log collection
@@ -128,14 +128,14 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
 [2]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/jmxfetch
 [5]: https://activemq.apache.org/jmx.html
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [7]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/conf.yaml.example
 [8]: https://github.com/DataDog/integrations-core/blob/master/activemq/datadog_checks/activemq/data/metrics.yaml
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[10]: https://docs.datadoghq.com/containers/guide/autodiscovery-with-jmx/?tab=containeragent
 [11]: https://docs.datadoghq.com/agent/kubernetes/log/
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/activemq/assets/service_checks.json

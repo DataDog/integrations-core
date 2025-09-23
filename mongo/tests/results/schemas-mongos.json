@@ -1,0 +1,1184 @@
+[
+    {
+        "host": "mongohost",
+        "agent_version": "0.0.0",
+        "dbms": "mongo",
+        "kind": "mongodb_databases",
+        "collection_interval": 3600,
+        "dbms_version": "4.1.13",
+        "cloud_metadata": {},
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "clustername:my_cluster",
+            "hosting_type:self-hosted",
+            "sharding_cluster_role:mongos"
+        ],
+        "timestamp": 1715911398111.2722,
+        "metadata": [
+            {
+                "name": "integration",
+                "collections": [
+                    {
+                        "name": "foo",
+                        "namespace": "integration.foo",
+                        "sharded": true,
+                        "docs": [
+                            {
+                                "name": "_id",
+                                "type": "ObjectId",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "data",
+                                "type": "Null",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "data",
+                                "type": "String",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "available",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "max",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "min",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "count",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo",
+                                "type": "Object",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo.type",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo.coordinates",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "tags",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "nested",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b.c",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b.c.d",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "occurrences",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.count",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.exists",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "sum",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "geo.test",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "occurrences.test",
+                                "type": "String",
+                                "prevalence": 0.25
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "_id_",
+                                "keys": [
+                                    {
+                                        "field": "_id",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "unique": true
+                            },
+                            {
+                                "name": "property_type_1_room_type_1_beds_1",
+                                "keys": [
+                                    {
+                                        "field": "property_type",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "room_type",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "beds",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "compound": true
+                            },
+                            {
+                                "name": "name_1",
+                                "keys": [
+                                    {
+                                        "field": "name",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular"
+                            },
+                            {
+                                "name": "address.location_2dsphere",
+                                "keys": [
+                                    {
+                                        "field": "address.location",
+                                        "type": "2dsphere"
+                                    }
+                                ],
+                                "type": "geospatial"
+                            },
+                            {
+                                "name": "last_scraped_1",
+                                "keys": [
+                                    {
+                                        "field": "last_scraped",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "ttl": 3600
+                            },
+                            {
+                                "name": "name_1_listing_url_1",
+                                "keys": [
+                                    {
+                                        "field": "name",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "listing_url",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "compound": true,
+                                "partial": true
+                            },
+                            {
+                                "name": "room_type_1",
+                                "keys": [
+                                    {
+                                        "field": "room_type",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "sparse": true
+                            },
+                            {
+                                "name": "name_text_summary_text_space_text",
+                                "keys": [
+                                    {
+                                        "field": "_fts",
+                                        "type": "text"
+                                    },
+                                    {
+                                        "field": "_ftsx",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "text",
+                                "compound": true
+                            },
+                            {
+                                "name": "$**_1",
+                                "keys": [
+                                    {
+                                        "field": "$**",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "wildcard"
+                            },
+                            {
+                                "name": "address.location_2d",
+                                "keys": [
+                                    {
+                                        "field": "address.location",
+                                        "type": "2d"
+                                    }
+                                ],
+                                "type": "geospatial"
+                            },
+                            {
+                                "name": "price_hashed",
+                                "keys": [
+                                    {
+                                        "field": "price",
+                                        "type": "hashed"
+                                    }
+                                ],
+                                "type": "hashed"
+                            },
+                            {
+                                "name": "price_hashed_clearning_fee_1",
+                                "keys": [
+                                    {
+                                        "field": "price",
+                                        "type": "hashed"
+                                    },
+                                    {
+                                        "field": "clearning_fee",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "hashed",
+                                "compound": true
+                            },
+                            {
+                                "name": "amenities_1",
+                                "keys": [
+                                    {
+                                        "field": "amenities",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular"
+                            },
+                            {
+                                "name": "summary_1",
+                                "keys": [
+                                    {
+                                        "field": "summary",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "case_insensitive": true
+                            }
+                        ],
+                        "search_indexes": []
+                    },
+                    {
+                        "name": "bar",
+                        "namespace": "integration.bar",
+                        "sharded": true,
+                        "docs": [
+                            {
+                                "name": "_id",
+                                "type": "ObjectId",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "name",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "status",
+                                "type": "String",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "amount",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "elements",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "rating",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address",
+                                "type": "Object",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.street",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.city",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.state",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.zip",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.rating",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.comment",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviewed",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "tests",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "dummy",
+                                "type": "Null",
+                                "prevalence": 0.5
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "_id_",
+                                "keys": [
+                                    {
+                                        "field": "_id",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "unique": true
+                            },
+                            {
+                                "name": "property_type_1_room_type_1_beds_1",
+                                "keys": [
+                                    {
+                                        "field": "property_type",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "room_type",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "beds",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "compound": true
+                            },
+                            {
+                                "name": "name_1",
+                                "keys": [
+                                    {
+                                        "field": "name",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular"
+                            },
+                            {
+                                "name": "address.location_2dsphere",
+                                "keys": [
+                                    {
+                                        "field": "address.location",
+                                        "type": "2dsphere"
+                                    }
+                                ],
+                                "type": "geospatial"
+                            },
+                            {
+                                "name": "last_scraped_1",
+                                "keys": [
+                                    {
+                                        "field": "last_scraped",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "ttl": 3600
+                            },
+                            {
+                                "name": "name_1_listing_url_1",
+                                "keys": [
+                                    {
+                                        "field": "name",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "listing_url",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "compound": true,
+                                "partial": true
+                            },
+                            {
+                                "name": "room_type_1",
+                                "keys": [
+                                    {
+                                        "field": "room_type",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "sparse": true
+                            },
+                            {
+                                "name": "name_text_summary_text_space_text",
+                                "keys": [
+                                    {
+                                        "field": "_fts",
+                                        "type": "text"
+                                    },
+                                    {
+                                        "field": "_ftsx",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "text",
+                                "compound": true
+                            },
+                            {
+                                "name": "$**_1",
+                                "keys": [
+                                    {
+                                        "field": "$**",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "wildcard"
+                            },
+                            {
+                                "name": "address.location_2d",
+                                "keys": [
+                                    {
+                                        "field": "address.location",
+                                        "type": "2d"
+                                    }
+                                ],
+                                "type": "geospatial"
+                            },
+                            {
+                                "name": "price_hashed",
+                                "keys": [
+                                    {
+                                        "field": "price",
+                                        "type": "hashed"
+                                    }
+                                ],
+                                "type": "hashed"
+                            },
+                            {
+                                "name": "price_hashed_clearning_fee_1",
+                                "keys": [
+                                    {
+                                        "field": "price",
+                                        "type": "hashed"
+                                    },
+                                    {
+                                        "field": "clearning_fee",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "hashed",
+                                "compound": true
+                            },
+                            {
+                                "name": "amenities_1",
+                                "keys": [
+                                    {
+                                        "field": "amenities",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular"
+                            },
+                            {
+                                "name": "summary_1",
+                                "keys": [
+                                    {
+                                        "field": "summary",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "case_insensitive": true
+                            }
+                        ],
+                        "search_indexes": []
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "host": "mongohost",
+        "agent_version": "0.0.0",
+        "dbms": "mongo",
+        "kind": "mongodb_databases",
+        "collection_interval": 3600,
+        "dbms_version": "4.1.13",
+        "cloud_metadata": {},
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "clustername:my_cluster",
+            "hosting_type:self-hosted",
+            "sharding_cluster_role:mongos"
+        ],
+        "timestamp": 1715911398111.2722,
+        "metadata": [
+            {
+                "name": "test",
+                "collections": [
+                    {
+                        "name": "foo",
+                        "namespace": "test.foo",
+                        "sharded": true,
+                        "docs": [
+                            {
+                                "name": "_id",
+                                "type": "ObjectId",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "data",
+                                "type": "Null",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "data",
+                                "type": "String",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "available",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "max",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "min",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "count",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo",
+                                "type": "Object",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo.type",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "geo.coordinates",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "tags",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "nested",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b.c",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "nested.a.b.c.d",
+                                "type": "Object",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "occurrences",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.count",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "occurrences.exists",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "sum",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "geo.test",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "occurrences.test",
+                                "type": "String",
+                                "prevalence": 0.25
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "_id_",
+                                "keys": [
+                                    {
+                                        "field": "_id",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "unique": true
+                            },
+                            {
+                                "name": "property_type_1_room_type_1_beds_1",
+                                "keys": [
+                                    {
+                                        "field": "property_type",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "room_type",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "beds",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "compound": true
+                            },
+                            {
+                                "name": "name_1",
+                                "keys": [
+                                    {
+                                        "field": "name",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular"
+                            },
+                            {
+                                "name": "address.location_2dsphere",
+                                "keys": [
+                                    {
+                                        "field": "address.location",
+                                        "type": "2dsphere"
+                                    }
+                                ],
+                                "type": "geospatial"
+                            },
+                            {
+                                "name": "last_scraped_1",
+                                "keys": [
+                                    {
+                                        "field": "last_scraped",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "ttl": 3600
+                            },
+                            {
+                                "name": "name_1_listing_url_1",
+                                "keys": [
+                                    {
+                                        "field": "name",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "listing_url",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "compound": true,
+                                "partial": true
+                            },
+                            {
+                                "name": "room_type_1",
+                                "keys": [
+                                    {
+                                        "field": "room_type",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "sparse": true
+                            },
+                            {
+                                "name": "name_text_summary_text_space_text",
+                                "keys": [
+                                    {
+                                        "field": "_fts",
+                                        "type": "text"
+                                    },
+                                    {
+                                        "field": "_ftsx",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "text",
+                                "compound": true
+                            },
+                            {
+                                "name": "$**_1",
+                                "keys": [
+                                    {
+                                        "field": "$**",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "wildcard"
+                            },
+                            {
+                                "name": "address.location_2d",
+                                "keys": [
+                                    {
+                                        "field": "address.location",
+                                        "type": "2d"
+                                    }
+                                ],
+                                "type": "geospatial"
+                            },
+                            {
+                                "name": "price_hashed",
+                                "keys": [
+                                    {
+                                        "field": "price",
+                                        "type": "hashed"
+                                    }
+                                ],
+                                "type": "hashed"
+                            },
+                            {
+                                "name": "price_hashed_clearning_fee_1",
+                                "keys": [
+                                    {
+                                        "field": "price",
+                                        "type": "hashed"
+                                    },
+                                    {
+                                        "field": "clearning_fee",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "hashed",
+                                "compound": true
+                            },
+                            {
+                                "name": "amenities_1",
+                                "keys": [
+                                    {
+                                        "field": "amenities",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular"
+                            },
+                            {
+                                "name": "summary_1",
+                                "keys": [
+                                    {
+                                        "field": "summary",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "case_insensitive": true
+                            }
+                        ],
+                        "search_indexes": []
+                    },
+                    {
+                        "name": "bar",
+                        "namespace": "test.bar",
+                        "sharded": true,
+                        "docs": [
+                            {
+                                "name": "_id",
+                                "type": "ObjectId",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "name",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "status",
+                                "type": "String",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "amount",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "elements",
+                                "type": "Int32",
+                                "prevalence": 0.5
+                            },
+                            {
+                                "name": "rating",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address",
+                                "type": "Object",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.street",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.city",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.state",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "address.zip",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.rating",
+                                "type": "Double",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.comment",
+                                "type": "String",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviews.date",
+                                "type": "Date",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "reviewed",
+                                "type": "Int32",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "tests",
+                                "type": "Array",
+                                "prevalence": 1.0
+                            },
+                            {
+                                "name": "dummy",
+                                "type": "Null",
+                                "prevalence": 0.5
+                            }
+                        ],
+                        "indexes": [
+                            {
+                                "name": "_id_",
+                                "keys": [
+                                    {
+                                        "field": "_id",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "unique": true
+                            },
+                            {
+                                "name": "property_type_1_room_type_1_beds_1",
+                                "keys": [
+                                    {
+                                        "field": "property_type",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "room_type",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "beds",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "compound": true
+                            },
+                            {
+                                "name": "name_1",
+                                "keys": [
+                                    {
+                                        "field": "name",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular"
+                            },
+                            {
+                                "name": "address.location_2dsphere",
+                                "keys": [
+                                    {
+                                        "field": "address.location",
+                                        "type": "2dsphere"
+                                    }
+                                ],
+                                "type": "geospatial"
+                            },
+                            {
+                                "name": "last_scraped_1",
+                                "keys": [
+                                    {
+                                        "field": "last_scraped",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "ttl": 3600
+                            },
+                            {
+                                "name": "name_1_listing_url_1",
+                                "keys": [
+                                    {
+                                        "field": "name",
+                                        "type": "1"
+                                    },
+                                    {
+                                        "field": "listing_url",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "compound": true,
+                                "partial": true
+                            },
+                            {
+                                "name": "room_type_1",
+                                "keys": [
+                                    {
+                                        "field": "room_type",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "sparse": true
+                            },
+                            {
+                                "name": "name_text_summary_text_space_text",
+                                "keys": [
+                                    {
+                                        "field": "_fts",
+                                        "type": "text"
+                                    },
+                                    {
+                                        "field": "_ftsx",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "text",
+                                "compound": true
+                            },
+                            {
+                                "name": "$**_1",
+                                "keys": [
+                                    {
+                                        "field": "$**",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "wildcard"
+                            },
+                            {
+                                "name": "address.location_2d",
+                                "keys": [
+                                    {
+                                        "field": "address.location",
+                                        "type": "2d"
+                                    }
+                                ],
+                                "type": "geospatial"
+                            },
+                            {
+                                "name": "price_hashed",
+                                "keys": [
+                                    {
+                                        "field": "price",
+                                        "type": "hashed"
+                                    }
+                                ],
+                                "type": "hashed"
+                            },
+                            {
+                                "name": "price_hashed_clearning_fee_1",
+                                "keys": [
+                                    {
+                                        "field": "price",
+                                        "type": "hashed"
+                                    },
+                                    {
+                                        "field": "clearning_fee",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "hashed",
+                                "compound": true
+                            },
+                            {
+                                "name": "amenities_1",
+                                "keys": [
+                                    {
+                                        "field": "amenities",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular"
+                            },
+                            {
+                                "name": "summary_1",
+                                "keys": [
+                                    {
+                                        "field": "summary",
+                                        "type": "1"
+                                    }
+                                ],
+                                "type": "regular",
+                                "case_insensitive": true
+                            }
+                        ],
+                        "search_indexes": []
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -5,10 +5,10 @@
 import json
 import uuid
 
-from ....fs import write_file
-from ...commands.console import abort
-from ...datastructures import JSONDict
-from ...utils import get_manifest_file, load_manifest
+from datadog_checks.dev.fs import write_file
+from datadog_checks.dev.tooling.commands.console import abort
+from datadog_checks.dev.tooling.datastructures import JSONDict
+from datadog_checks.dev.tooling.utils import get_manifest_file, load_manifest
 
 # This means the value is either not present in the old manifest, or there's logic needed to compute it
 SKIP_IF_FOUND = "SKIP"
@@ -40,7 +40,6 @@ V2_TO_V1_MAP = JSONDict(
         "/author/homepage": "/author/homepage",
         "/author/name": "/author/name",
         "/author/support_email": "/maintainer",
-        "/oauth": {},
         "/assets": {},
         "/assets/integration": {},
         "/assets/integration/source_type_name": "/display_name",
@@ -81,13 +80,13 @@ CATEGORIES_TO_CLASSIFIER_TAGS = {
     "configuration & deployment": "Category::Configuration & Deployment",
     "containers": "Category::Containers",
     "cost management": "Category::Cost Management",
-    "data store": "Category::Data Store",
+    "data store": "Category::Data Stores",
     "developer tools": "Category::Developer Tools",
     "event management": "Category::Event Management",
     "exceptions": "Category::Exceptions",
     "google cloud": "Category::Google Cloud",
     "incidents": "Category::Incidents",
-    "iot": "Category::IOT",
+    "iot": "Category::IoT",
     "isp": "Category::ISP",
     "issue tracking": "Category::Issue Tracking",
     "languages": "Category::Languages",
@@ -97,7 +96,7 @@ CATEGORIES_TO_CLASSIFIER_TAGS = {
     "metrics": "Category::Metrics",
     "monitoring": "Category::Monitoring",
     "network": "Category::Network",
-    "notification": "Category::Notification",
+    "notification": "Category::Notifications",
     "oracle": "Category::Oracle",
     "orchestration": "Category::Orchestration",
     "os & system": "Category::OS System",
@@ -113,7 +112,6 @@ CATEGORIES_TO_CLASSIFIER_TAGS = {
 
 
 def migrate_manifest(repo_name, integration, to_version):
-
     loaded_manifest = JSONDict(load_manifest(integration))
     manifest_version = loaded_manifest.get_path("/manifest_version")
 

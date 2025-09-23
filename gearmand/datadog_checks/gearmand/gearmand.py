@@ -3,17 +3,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from six import PY2
+import python3_gearman as gearman
 
 from datadog_checks.base import AgentCheck
-
-# Python 3 compatibility is a different library
-# It's a drop in replacement but has a different name
-# This will enable the check to use the new library
-if PY2:
-    import gearman
-else:
-    import python3_gearman as gearman
 
 MAX_NUM_TASKS = 200
 
@@ -26,7 +18,7 @@ class Gearman(AgentCheck):
         return {"gearman": gearman.__version__}
 
     def _get_client(self, host, port):
-        if not (host, port) in self.gearman_clients:
+        if (host, port) not in self.gearman_clients:
             self.log.debug("Connecting to gearman at address %s:%s", host, port)
             self.gearman_clients[(host, port)] = gearman.GearmanAdminClient(["%s:%s" % (host, port)])
 

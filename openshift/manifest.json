@@ -12,10 +12,14 @@
     "title": "OpenShift",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
       "Category::Containers",
+      "Category::Kubernetes",
+      "Category::Log Collection",
+      "Category::Network",
       "Category::Orchestration",
-      "Category::Log Collection"
+      "Category::Provisioning",
+      "Supported OS::Linux",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -24,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "OpenShift",
@@ -42,7 +45,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10024,
+      "auto_install": true
     }
   }
 }

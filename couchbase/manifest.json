@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e7fac1cd-65ba-4a58-af73-ee5f160cc6f9",
   "app_id": "couchbase",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,19 @@
     "title": "CouchBase",
     "media": [],
     "classifier_tags": [
+      "Category::Caching",
+      "Category::Data Stores",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog"
+      }
     ]
   },
   "author": {
@@ -26,7 +34,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Couchbase",
@@ -46,7 +53,9 @@
       },
       "process_signatures": [
         "beam.smp couchbase"
-      ]
+      ],
+      "source_type_id": 59,
+      "auto_install": true
     },
     "dashboards": {
       "couchbase": "assets/dashboards/couchbase_dashboard.json"

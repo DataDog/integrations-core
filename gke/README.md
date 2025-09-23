@@ -2,7 +2,7 @@
 
 ## Overview
 
-Google Kubernetes Engine (GKE), a service on the Google Cloud Platform (GCP), is a hosted platform for running and orchestrating containerized applications. Similar to Amazon's Elastic Container Service (ECS), GKE manages Docker containers deployed on a cluster of machines. However, unlike ECS, GKE uses Kubernetes.
+Google Kubernetes Engine (GKE), a service on the Google Cloud Platform (GCP), is a hosted platform for running and orchestrating containerized applications backed by Kubernetes. GKE clusters can be monitored by the [Google Cloud Platform][5] integration as well as by the Datadog Agent running as workloads within the cluster.
 
 ## Setup
 
@@ -14,21 +14,17 @@ Google Kubernetes Engine (GKE), a service on the Google Cloud Platform (GCP), is
 
 3. Install the [Google Cloud SDK][3] and the `kubectl` command line tool on your local machine. Once you [pair the Cloud SDK with your GCP account][4], you can control your clusters directly from your local machine using `kubectl`.
 
-4. Create a small GKE cluster named `doglib` with the ability to access the Cloud Datastore by running the following command:
-
-```
-$  gcloud container clusters create doglib --num-nodes 3 --zone "us-central1-b" --scopes "cloud-platform"
-```
-
 ### Set up the GCE integration 
 
 Install the [Google Cloud Platform][5] integration.
 
 You can then access an out-of-the-box [Google Compute Engine dashboard][6] that displays metrics like disk I/O, CPU utilization, and network traffic.
 
-### Set up the GKE integration
+### Set up the Kubernetes integration
 
-Choose a mode of operation. A *mode of operation* refers to the level of flexibility, responsibility, and control that you have over your cluster. GKE offers two modes of operation:
+To further monitor your GKE cluster, install the Datadog Agent using the Datadog Helm Chart or Datadog Operator. Once deployed, the Datadog Agent and Datadog Cluster Agent monitor your cluster and the workloads on it.
+
+GKE supports two [main modes of operation][15] that can change the level of flexibility, responsibility, and control that you have over your cluster. These different modes change how you deploy the Datadog components.
 
 - **Standard**: You manage the cluster's underlying infrastructure, giving you node configuration flexibility.
 
@@ -39,9 +35,7 @@ Choose a mode of operation. A *mode of operation* refers to the level of flexibi
 
 #### Standard
 
-Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes cluster. 
-
-You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9].
+Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes cluster. See [Install the Datadog Agent on Kubernetes][8].
 
 
 <!-- xxz tab xxx -->
@@ -49,42 +43,19 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
 
 #### Autopilot
 
-1. Install Helm.
+Autopilot requires a more distinct setup for the Kubernetes installation compared to the standard installation. This type of cluster requires using the Datadog Helm chart.
 
-2. Add the Datadog repository to your Helm repositories:
+Deploy a [containerized version of the Datadog Agent][7] on your Kubernetes cluster with the Helm [installation of the Datadog Agent on Kubernetes][16]. When setting your Helm `datadog-values.yaml` configuration, see the [GKE Autopilot section on the Kubernetes Distributions][14] for the necessary configuration changes. Most notably, set `providers.gke.autopilot` to `true`.
 
-  ```bash
-  helm repo add datadog https://helm.datadoghq.com
-  helm repo update
-  ```
+#### Admission Controller
+ 
+To use [Admission Controller][102] with Autopilot, set the [`configMode`][103] of the Admission Controller to either `service` or `hostip`. 
 
-3. Deploy the Datadog Agent and Cluster Agent on Autopilot with the following command:
+Because Autopilot does not allow `socket` mode, Datadog recommends using `service` (with `hostip` as a fallback) to provide a more robust layer of abstraction for the controller. 
 
-  ```bash
-  helm install <RELEASE_NAME> \
-      --set datadog.apiKey=<DATADOG_API_KEY> \
-      --set datadog.appKey=<DATADOG_APP_KEY> \
-      --set clusterAgent.enabled=true \
-      --set clusterAgent.metricsProvider.enabled=true \
-      --set providers.gke.autopilot=true \
-      datadog/datadog
-  ```
-
-  **Note**: If you also wish to enable logs or traces, add lines to this command setting `datadog.logs.enabled` (for logs) and `datadog.apm.enabled` (for traces) to `true`. For example:
-
-  ```bash
-  helm install --name <RELEASE_NAME> \
-      --set datadog.apiKey=<DATADOG_API_KEY> \
-      --set datadog.appKey=<DATADOG_APP_KEY> \
-      --set clusterAgent.enabled=true \
-      --set clusterAgent.metricsProvider.enabled=true \
-      --set providers.gke.autopilot=true \
-      --set datadog.logs.enabled=true \
-      --set datadog.apm.enabled=true \
-      datadog/datadog
-  ```
-
-  See the [Datadog helm-charts repository][10] for a full list of configurable values.
+[101]: https://github.com/DataDog/helm-charts/tree/master/charts/datadog#values
+[102]: https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator
+[103]: https://github.com/DataDog/helm-charts/blob/datadog-3.110.0/charts/datadog/values.yaml#L1284-L1293
 
 
 <!-- xxz tab xxx -->
@@ -92,16 +63,24 @@ You can deploy the Agent with a [Helm chart][8] or directly with a [DaemonSet][9
 
 ## Further Reading
 
-- [Announcing support for GKE Autopilot][11]
+- [Monitor GKE Autopilot with Datadog][10]
+- [Monitor GKE with Datadog][11]
+- [Monitor your T2A-powered GKE workloads with Datadog][12]
+- [New GKE dashboards and metrics provide deeper visibility into your environment][13]
 
 [1]: https://cloud.google.com/resource-manager/docs/creating-managing-projects
 [2]: https://console.cloud.google.com/apis/api/container.googleapis.com
 [3]: https://cloud.google.com/sdk/docs/
 [4]: https://cloud.google.com/sdk/docs/initializing
 [5]: /integrations/google_cloud_platform/
-[6]: https://app.datadoghq.com/screen/integration/gce
-[7]: https://app.datadoghq.com/account/settings#agent/kubernetes
-[8]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm
-[9]: https://docs.datadoghq.com/agent/kubernetes/?tab=daemonset
-[10]: https://github.com/DataDog/helm-charts/tree/master/charts/datadog#values
-[11]: https://www.datadoghq.com/blog/gke-autopilot-monitoring/
+[6]: /screen/integration/gce
+[7]: /account/settings/agent/latest?platform=kubernetes
+[8]: https://docs.datadoghq.com/containers/kubernetes/installation?tab=operator
+[9]: https://github.com/DataDog/helm-charts/tree/master/charts/datadog#values
+[10]: https://www.datadoghq.com/blog/gke-autopilot-monitoring/
+[11]: https://www.datadoghq.com/blog/monitor-google-kubernetes-engine/
+[12]: https://www.datadoghq.com/blog/monitor-tau-t2a-gke-workloads-with-datadog-arm-support/
+[13]: https://www.datadoghq.com/blog/gke-dashboards-integration-improvements/
+[14]: https://docs.datadoghq.com/containers/kubernetes/distributions/?tab=helm#autopilot
+[15]: https://cloud.google.com/kubernetes-engine/docs/concepts/choose-cluster-mode
+[16]: https://docs.datadoghq.com/containers/kubernetes/installation?tab=helm

@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2025-04-02",
+	"last_updated_at": "2025-04-02",
+	"title": "High CPU on appliance",
+	"description": "The appliance is using too much CPU",
+	"definition": {
+		"id": 168101940,
+		"name": "High CPU on appliance",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:appgate.apn_cpu_usage_percent{*} by {collective_name,site_name,appliance_name,func} > 90",
+		"message": "Appliance: {{appliance_name.name}}",
+		"tags": [
+			"agisdp_monitor",
+			"integration:appgate_sdp"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 90,
+				"warning": 80
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"new_group_delay": 60,
+			"silenced": {},
+			"on_missing_data": "default"
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:appgate-sdp"
+	]
+}

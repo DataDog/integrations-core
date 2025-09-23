@@ -126,17 +126,17 @@
     {
         "name": "vsphere.cpu.costop.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.costop.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.costop.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.costop.sum",
@@ -251,17 +251,17 @@
     {
         "name": "vsphere.cpu.demand.avg",
         "value": 713.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.demand.avg",
         "value": 818.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.demand.avg",
         "value": 794.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.demand.avg",
@@ -366,17 +366,17 @@
     {
         "name": "vsphere.cpu.demandEntitlementRatio.latest",
         "value": 230.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.demandEntitlementRatio.latest",
         "value": 264.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.demandEntitlementRatio.latest",
         "value": 256.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.demandEntitlementRatio.latest",
@@ -481,17 +481,17 @@
     {
         "name": "vsphere.cpu.entitlement.latest",
         "value": 309.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.entitlement.latest",
         "value": 309.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.entitlement.latest",
         "value": 309.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.entitlement.latest",
@@ -606,17 +606,17 @@
     {
         "name": "vsphere.cpu.idle.sum",
         "value": 13074.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.idle.sum",
         "value": 11483.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.idle.sum",
         "value": 13308.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.idle.sum",
@@ -731,17 +731,17 @@
     {
         "name": "vsphere.cpu.latency.avg",
         "value": 40.02,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.latency.avg",
         "value": 52.51,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.latency.avg",
         "value": 38.45,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.latency.avg",
@@ -846,17 +846,17 @@
     {
         "name": "vsphere.cpu.maxlimited.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.maxlimited.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.maxlimited.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.maxlimited.sum",
@@ -961,17 +961,17 @@
     {
         "name": "vsphere.cpu.overlap.sum",
         "value": 65.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.overlap.sum",
         "value": 73.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.overlap.sum",
         "value": 67.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.overlap.sum",
@@ -1086,17 +1086,17 @@
     {
         "name": "vsphere.cpu.readiness.avg",
         "value": 21.53,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.readiness.avg",
         "value": 29.1,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.readiness.avg",
         "value": 20.52,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.readiness.avg",
@@ -1211,17 +1211,17 @@
     {
         "name": "vsphere.cpu.ready.sum",
         "value": 4307.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.ready.sum",
         "value": 5820.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.ready.sum",
         "value": 4104.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.ready.sum",
@@ -1336,17 +1336,17 @@
     {
         "name": "vsphere.cpu.run.sum",
         "value": 2618.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.run.sum",
         "value": 2662.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.run.sum",
         "value": 2586.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.run.sum",
@@ -1461,17 +1461,17 @@
     {
         "name": "vsphere.cpu.swapwait.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.swapwait.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.swapwait.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.swapwait.sum",
@@ -1576,17 +1576,17 @@
     {
         "name": "vsphere.cpu.system.sum",
         "value": 24.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.system.sum",
         "value": 18.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.system.sum",
         "value": 17.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.system.sum",
@@ -1711,17 +1711,17 @@
     {
         "name": "vsphere.cpu.usage.avg",
         "value": 15.55,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.usage.avg",
         "value": 16.1,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.usage.avg",
         "value": 15.62,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.usage.avg",
@@ -1836,17 +1836,17 @@
     {
         "name": "vsphere.cpu.usagemhz.avg",
         "value": 356.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.usagemhz.avg",
         "value": 369.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.usagemhz.avg",
         "value": 358.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.usagemhz.avg",
@@ -1961,17 +1961,17 @@
     {
         "name": "vsphere.cpu.used.sum",
         "value": 2553.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.used.sum",
         "value": 2605.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.used.sum",
         "value": 2529.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.used.sum",
@@ -2096,17 +2096,17 @@
     {
         "name": "vsphere.cpu.wait.sum",
         "value": 13052.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.cpu.wait.sum",
         "value": 11494.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.cpu.wait.sum",
         "value": 13286.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.cpu.wait.sum",
@@ -2221,17 +2221,17 @@
     {
         "name": "vsphere.datastore.maxTotalLatency.latest",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.datastore.maxTotalLatency.latest",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.datastore.maxTotalLatency.latest",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.datastore.maxTotalLatency.latest",
@@ -2346,17 +2346,17 @@
     {
         "name": "vsphere.disk.maxTotalLatency.latest",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.disk.maxTotalLatency.latest",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.disk.maxTotalLatency.latest",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.disk.maxTotalLatency.latest",
@@ -2606,17 +2606,17 @@
     {
         "name": "vsphere.mem.active.avg",
         "value": 20968.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.active.avg",
         "value": 20968.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.active.avg",
         "value": 20968.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.active.avg",
@@ -2731,17 +2731,17 @@
     {
         "name": "vsphere.mem.activewrite.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.activewrite.avg",
         "value": 20968.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.activewrite.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.activewrite.avg",
@@ -2856,17 +2856,17 @@
     {
         "name": "vsphere.mem.compressed.avg",
         "value": 11328.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.compressed.avg",
         "value": 3832.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.compressed.avg",
         "value": 9660.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.compressed.avg",
@@ -2981,17 +2981,17 @@
     {
         "name": "vsphere.mem.compressionRate.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.compressionRate.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.compressionRate.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.compressionRate.avg",
@@ -3106,17 +3106,17 @@
     {
         "name": "vsphere.mem.consumed.avg",
         "value": 235896.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.consumed.avg",
         "value": 238332.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.consumed.avg",
         "value": 234944.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.consumed.avg",
@@ -3231,17 +3231,17 @@
     {
         "name": "vsphere.mem.decompressionRate.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.decompressionRate.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.decompressionRate.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.decompressionRate.avg",
@@ -3346,17 +3346,17 @@
     {
         "name": "vsphere.mem.entitlement.avg",
         "value": 275960.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.entitlement.avg",
         "value": 278624.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.entitlement.avg",
         "value": 274896.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.entitlement.avg",
@@ -3471,17 +3471,17 @@
     {
         "name": "vsphere.mem.granted.avg",
         "value": 303692.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.granted.avg",
         "value": 305592.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.granted.avg",
         "value": 300896.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.granted.avg",
@@ -3616,17 +3616,17 @@
     {
         "name": "vsphere.mem.latency.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.latency.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.latency.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.latency.avg",
@@ -3751,17 +3751,17 @@
     {
         "name": "vsphere.mem.llSwapInRate.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.llSwapInRate.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.llSwapInRate.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.llSwapInRate.avg",
@@ -3886,17 +3886,17 @@
     {
         "name": "vsphere.mem.llSwapOutRate.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.llSwapOutRate.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.llSwapOutRate.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.llSwapOutRate.avg",
@@ -4011,17 +4011,17 @@
     {
         "name": "vsphere.mem.llSwapUsed.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.llSwapUsed.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.llSwapUsed.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.llSwapUsed.avg",
@@ -4146,17 +4146,17 @@
     {
         "name": "vsphere.mem.overhead.avg",
         "value": 26868.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.overhead.avg",
         "value": 26580.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.overhead.avg",
         "value": 26588.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.overhead.avg",
@@ -4261,17 +4261,17 @@
     {
         "name": "vsphere.mem.overheadMax.avg",
         "value": 27056.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.overheadMax.avg",
         "value": 26764.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.overheadMax.avg",
         "value": 26768.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.overheadMax.avg",
@@ -4376,17 +4376,17 @@
     {
         "name": "vsphere.mem.overheadTouched.avg",
         "value": 26868.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.overheadTouched.avg",
         "value": 26580.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.overheadTouched.avg",
         "value": 26588.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.overheadTouched.avg",
@@ -4511,17 +4511,17 @@
     {
         "name": "vsphere.mem.shared.avg",
         "value": 108000.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.shared.avg",
         "value": 108372.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.shared.avg",
         "value": 104992.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.shared.avg",
@@ -4656,17 +4656,17 @@
     {
         "name": "vsphere.mem.swapin.avg",
         "value": 186692.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.swapin.avg",
         "value": 114580.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.swapin.avg",
         "value": 118136.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.swapin.avg",
@@ -4781,17 +4781,17 @@
     {
         "name": "vsphere.mem.swapinRate.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.swapinRate.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.swapinRate.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.swapinRate.avg",
@@ -4906,17 +4906,17 @@
     {
         "name": "vsphere.mem.swapout.avg",
         "value": 274252.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.swapout.avg",
         "value": 194976.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.swapout.avg",
         "value": 200692.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.swapout.avg",
@@ -5031,17 +5031,17 @@
     {
         "name": "vsphere.mem.swapoutRate.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.swapoutRate.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.swapoutRate.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.swapoutRate.avg",
@@ -5146,17 +5146,17 @@
     {
         "name": "vsphere.mem.swapped.avg",
         "value": 71844.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.swapped.avg",
         "value": 77648.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.swapped.avg",
         "value": 76516.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.swapped.avg",
@@ -5261,17 +5261,17 @@
     {
         "name": "vsphere.mem.swaptarget.avg",
         "value": 54592.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.swaptarget.avg",
         "value": 55600.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.swaptarget.avg",
         "value": 57984.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.swaptarget.avg",
@@ -5426,17 +5426,17 @@
     {
         "name": "vsphere.mem.usage.avg",
         "value": 1.99,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.usage.avg",
         "value": 1.99,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.usage.avg",
         "value": 1.99,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.usage.avg",
@@ -5611,17 +5611,17 @@
     {
         "name": "vsphere.mem.vmmemctl.avg",
         "value": 661504.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.vmmemctl.avg",
         "value": 661504.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.vmmemctl.avg",
         "value": 661504.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.vmmemctl.avg",
@@ -5726,17 +5726,17 @@
     {
         "name": "vsphere.mem.vmmemctltarget.avg",
         "value": 660428.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.vmmemctltarget.avg",
         "value": 660428.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.vmmemctltarget.avg",
         "value": 660428.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.vmmemctltarget.avg",
@@ -5851,17 +5851,17 @@
     {
         "name": "vsphere.mem.zero.avg",
         "value": 58772.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.zero.avg",
         "value": 54264.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.zero.avg",
         "value": 57552.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.zero.avg",
@@ -5966,17 +5966,17 @@
     {
         "name": "vsphere.mem.zipSaved.latest",
         "value": 6336.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.zipSaved.latest",
         "value": 1784.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.zipSaved.latest",
         "value": 4960.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.zipSaved.latest",
@@ -6081,17 +6081,17 @@
     {
         "name": "vsphere.mem.zipped.latest",
         "value": 11328.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.mem.zipped.latest",
         "value": 3832.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.mem.zipped.latest",
         "value": 9660.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.mem.zipped.latest",
@@ -6206,17 +6206,17 @@
     {
         "name": "vsphere.net.broadcastRx.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.broadcastRx.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.broadcastRx.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.broadcastRx.sum",
@@ -6331,17 +6331,17 @@
     {
         "name": "vsphere.net.broadcastTx.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.broadcastTx.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.broadcastTx.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.broadcastTx.sum",
@@ -6456,17 +6456,17 @@
     {
         "name": "vsphere.net.bytesRx.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.bytesRx.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.bytesRx.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.bytesRx.avg",
@@ -6581,17 +6581,17 @@
     {
         "name": "vsphere.net.bytesTx.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.bytesTx.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.bytesTx.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.bytesTx.avg",
@@ -6706,17 +6706,17 @@
     {
         "name": "vsphere.net.droppedRx.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.droppedRx.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.droppedRx.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.droppedRx.sum",
@@ -6831,17 +6831,17 @@
     {
         "name": "vsphere.net.droppedTx.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.droppedTx.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.droppedTx.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.droppedTx.sum",
@@ -6976,17 +6976,17 @@
     {
         "name": "vsphere.net.multicastRx.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.multicastRx.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.multicastRx.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.multicastRx.sum",
@@ -7101,17 +7101,17 @@
     {
         "name": "vsphere.net.multicastTx.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.multicastTx.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.multicastTx.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.multicastTx.sum",
@@ -7226,17 +7226,17 @@
     {
         "name": "vsphere.net.packetsRx.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.packetsRx.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.packetsRx.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.packetsRx.sum",
@@ -7351,17 +7351,17 @@
     {
         "name": "vsphere.net.packetsTx.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.packetsTx.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.packetsTx.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.packetsTx.sum",
@@ -7476,17 +7476,17 @@
     {
         "name": "vsphere.net.received.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.received.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.received.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.received.avg",
@@ -7601,17 +7601,17 @@
     {
         "name": "vsphere.net.transmitted.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.transmitted.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.transmitted.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.transmitted.avg",
@@ -7736,17 +7736,17 @@
     {
         "name": "vsphere.net.usage.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.net.usage.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.net.usage.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.net.usage.avg",
@@ -7861,17 +7861,17 @@
     {
         "name": "vsphere.power.energy.sum",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.power.energy.sum",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.power.energy.sum",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.power.energy.sum",
@@ -7986,17 +7986,17 @@
     {
         "name": "vsphere.power.power.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.power.power.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.power.power.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.power.power.avg",
@@ -8121,17 +8121,17 @@
     {
         "name": "vsphere.rescpu.actav1.latest",
         "value": 31.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.actav1.latest",
         "value": 35.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.actav1.latest",
         "value": 34.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.actav1.latest",
@@ -8246,17 +8246,17 @@
     {
         "name": "vsphere.rescpu.actav15.latest",
         "value": 33.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.actav15.latest",
         "value": 31.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.actav15.latest",
         "value": 32.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.actav15.latest",
@@ -8371,17 +8371,17 @@
     {
         "name": "vsphere.rescpu.actav5.latest",
         "value": 32.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.actav5.latest",
         "value": 32.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.actav5.latest",
         "value": 31.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.actav5.latest",
@@ -8496,17 +8496,17 @@
     {
         "name": "vsphere.rescpu.actpk1.latest",
         "value": 52.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.actpk1.latest",
         "value": 46.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.actpk1.latest",
         "value": 42.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.actpk1.latest",
@@ -8621,17 +8621,17 @@
     {
         "name": "vsphere.rescpu.actpk15.latest",
         "value": 40.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.actpk15.latest",
         "value": 39.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.actpk15.latest",
         "value": 39.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.actpk15.latest",
@@ -8746,17 +8746,17 @@
     {
         "name": "vsphere.rescpu.actpk5.latest",
         "value": 40.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.actpk5.latest",
         "value": 42.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.actpk5.latest",
         "value": 39.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.actpk5.latest",
@@ -8871,17 +8871,17 @@
     {
         "name": "vsphere.rescpu.maxLimited1.latest",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.maxLimited1.latest",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.maxLimited1.latest",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.maxLimited1.latest",
@@ -8996,17 +8996,17 @@
     {
         "name": "vsphere.rescpu.maxLimited15.latest",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.maxLimited15.latest",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.maxLimited15.latest",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.maxLimited15.latest",
@@ -9121,17 +9121,17 @@
     {
         "name": "vsphere.rescpu.maxLimited5.latest",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.maxLimited5.latest",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.maxLimited5.latest",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.maxLimited5.latest",
@@ -9246,17 +9246,17 @@
     {
         "name": "vsphere.rescpu.runav1.latest",
         "value": 15.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.runav1.latest",
         "value": 15.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.runav1.latest",
         "value": 15.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.runav1.latest",
@@ -9371,17 +9371,17 @@
     {
         "name": "vsphere.rescpu.runav15.latest",
         "value": 15.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.runav15.latest",
         "value": 15.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.runav15.latest",
         "value": 15.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.runav15.latest",
@@ -9496,17 +9496,17 @@
     {
         "name": "vsphere.rescpu.runav5.latest",
         "value": 15.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.runav5.latest",
         "value": 15.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.runav5.latest",
         "value": 15.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.runav5.latest",
@@ -9621,17 +9621,17 @@
     {
         "name": "vsphere.rescpu.runpk1.latest",
         "value": 17.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.runpk1.latest",
         "value": 18.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.runpk1.latest",
         "value": 16.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.runpk1.latest",
@@ -9746,17 +9746,17 @@
     {
         "name": "vsphere.rescpu.runpk15.latest",
         "value": 17.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.runpk15.latest",
         "value": 17.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.runpk15.latest",
         "value": 16.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.runpk15.latest",
@@ -9871,17 +9871,17 @@
     {
         "name": "vsphere.rescpu.runpk5.latest",
         "value": 16.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.runpk5.latest",
         "value": 17.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.runpk5.latest",
         "value": 16.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.runpk5.latest",
@@ -9996,17 +9996,17 @@
     {
         "name": "vsphere.rescpu.sampleCount.latest",
         "value": 160.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.sampleCount.latest",
         "value": 160.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.sampleCount.latest",
         "value": 160.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.sampleCount.latest",
@@ -10121,17 +10121,17 @@
     {
         "name": "vsphere.rescpu.samplePeriod.latest",
         "value": 6000.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.rescpu.samplePeriod.latest",
         "value": 6000.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.rescpu.samplePeriod.latest",
         "value": 6000.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.rescpu.samplePeriod.latest",
@@ -10256,17 +10256,17 @@
     {
         "name": "vsphere.sys.heartbeat.latest",
         "value": 30.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.sys.heartbeat.latest",
         "value": 30.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.sys.heartbeat.latest",
         "value": 30.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.sys.heartbeat.latest",
@@ -10366,17 +10366,17 @@
     {
         "name": "vsphere.sys.osUptime.latest",
         "value": 29027687.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.sys.osUptime.latest",
         "value": 29028801.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.sys.osUptime.latest",
         "value": 29029196.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.sys.osUptime.latest",
@@ -10491,17 +10491,17 @@
     {
         "name": "vsphere.sys.uptime.latest",
         "value": 29028102.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.sys.uptime.latest",
         "value": 29028946.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.sys.uptime.latest",
         "value": 29029307.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.sys.uptime.latest",
@@ -10509,6 +10509,16 @@
         "hostname": "VM4-9"
     },
     {
+        "name": "vsphere.mem.capacity.usage.avg",
+        "value": 4957.0,
+        "hostname": "10.0.0.103"
+    },
+    {
+        "name": "vsphere.mem.capacity.usage.avg",
+        "value": 4957.0,
+        "hostname": "10.0.0.104"
+    },
+    {
         "name": "vsphere.virtualDisk.read.avg",
         "value": 0.0,
         "hostname": "$VM3-2"
@@ -10606,21 +10616,136 @@
     {
         "name": "vsphere.virtualDisk.read.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.virtualDisk.read.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.virtualDisk.read.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.virtualDisk.read.avg",
         "value": 0.0,
+        "hostname": "VM4-9"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "$VM3-2"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "$VM5"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM3-1"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-1"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-10"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-11"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-12"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-13"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-14"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-15"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-16"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-17"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-18"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-19"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-2"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-20"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-3"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-4"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "VM4-5"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "vm4-6"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "vm4-7"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
+        "hostname": "vm4-8"
+    },
+    {
+        "name": "vsphere.cpu.capacity.demand.avg",
+        "value": 19955.0,
         "hostname": "VM4-9"
     },
     {
@@ -10721,17 +10846,17 @@
     {
         "name": "vsphere.virtualDisk.write.avg",
         "value": 0.0,
-        "hostname": "VM4-6"
+        "hostname": "vm4-6"
     },
     {
         "name": "vsphere.virtualDisk.write.avg",
         "value": 0.0,
-        "hostname": "VM4-7"
+        "hostname": "vm4-7"
     },
     {
         "name": "vsphere.virtualDisk.write.avg",
         "value": 0.0,
-        "hostname": "VM4-8"
+        "hostname": "vm4-8"
     },
     {
         "name": "vsphere.virtualDisk.write.avg",

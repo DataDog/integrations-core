@@ -5,17 +5,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
-from typing import Any
+import os
+import re
+from typing import Any  # noqa: F401
 
 import mock
 import pytest
-from six import PY3
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.base import __version__ as base_package_version
-from datadog_checks.base import to_native_string
-from datadog_checks.base.checks.base import datadog_agent
-from datadog_checks.dev.testing import requires_py3
+
+from .utils import BaseModelTest
 
 
 def test_instance():
@@ -41,17 +41,14 @@ def test_check_version():
     assert check.check_version == base_package_version
 
 
-def test_load_config():
-    assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
-
-
 def test_persistent_cache(datadog_agent):
-    check = AgentCheck()
-    check.check_id = 'test'
+    check = AgentCheck(init_config={}, instances=[{}])
+    check.check_id = 'test:123'
+    check.run_check_initializations()
 
     check.write_persistent_cache('foo', 'bar')
 
-    assert datadog_agent.read_persistent_cache('test_foo') == 'bar'
+    assert datadog_agent.read_persistent_cache('test:123_foo') == 'bar'
     assert check.read_persistent_cache('foo') == 'bar'
 
 
@@ -112,7 +109,7 @@ class TestSecretsSanitization:
         secret = 'p@$$w0rd'
         check = AgentCheck()
         check.register_secret(secret)
-        sanitized = check.sanitize(secret)
+        sanitized = re.escape(check.sanitize(secret))
 
         check.service_check('test.can_check', status=AgentCheck.CRITICAL, message=secret)
 
@@ -341,29 +338,29 @@ def test_agent_signature(case_name, check, expected_attributes):
 class TestMetricNormalization:
     def test_default(self):
         check = AgentCheck()
-        metric_name = u'Klüft inför på fédéral'
+        metric_name = 'Klüft inför på fédéral'
         normalized_metric_name = 'Kluft_infor_pa_federal'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_fix_case(self):
         check = AgentCheck()
-        metric_name = u'Klüft inför på fédéral'
+        metric_name = 'Klüft inför på fédéral'
         normalized_metric_name = 'kluft_infor_pa_federal'
 
         assert check.normalize(metric_name, fix_case=True) == normalized_metric_name
 
     def test_prefix(self):
         check = AgentCheck()
-        metric_name = u'metric'
-        prefix = u'somePrefix'
+        metric_name = 'metric'
+        prefix = 'somePrefix'
         normalized_metric_name = 'somePrefix.metric'
 
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
 
     def test_prefix_bytes(self):
         check = AgentCheck()
-        metric_name = u'metric'
+        metric_name = 'metric'
         prefix = b'some'
         normalized_metric_name = 'some.metric'
 
@@ -372,7 +369,7 @@ class TestMetricNormalization:
     def test_prefix_unicode_metric_bytes(self):
         check = AgentCheck()
         metric_name = b'metric'
-        prefix = u'some'
+        prefix = 'some'
         normalized_metric_name = 'some.metric'
 
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
@@ -380,35 +377,35 @@ class TestMetricNormalization:
     def test_prefix_fix_case(self):
         check = AgentCheck()
         metric_name = b'metric'
-        prefix = u'somePrefix'
+        prefix = 'somePrefix'
         normalized_metric_name = 'some_prefix.metric'
 
         assert check.normalize(metric_name, fix_case=True, prefix=prefix) == normalized_metric_name
 
     def test_underscores_redundant(self):
         check = AgentCheck()
-        metric_name = u'a_few__redundant___underscores'
+        metric_name = 'a_few__redundant___underscores'
         normalized_metric_name = 'a_few_redundant_underscores'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_underscores_at_ends(self):
         check = AgentCheck()
-        metric_name = u'_some_underscores_'
+        metric_name = '_some_underscores_'
         normalized_metric_name = 'some_underscores'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_underscores_and_dots(self):
         check = AgentCheck()
-        metric_name = u'some_.dots._and_._underscores'
+        metric_name = 'some_.dots._and_._underscores'
         normalized_metric_name = 'some.dots.and.underscores'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_invalid_chars_and_underscore(self):
         check = AgentCheck()
-        metric_name = u'metric.hello++aaa$$_bbb'
+        metric_name = 'metric.hello++aaa$$_bbb'
         normalized_metric_name = 'metric.hello_aaa_bbb'
 
         assert check.normalize(metric_name) == normalized_metric_name
@@ -418,7 +415,7 @@ class TestMetricNormalization:
     'case, tag, expected_tag',
     [
         ('nothing to normalize', 'abc:123', 'abc:123'),
-        ('unicode', u'Klüft inför på fédéral', 'Klüft_inför_på_fédéral'),
+        ('unicode', 'Klüft inför på fédéral', 'Klüft_inför_på_fédéral'),
         ('invalid chars', 'foo,+*-/()[]{}-  \t\nbar:123', 'foo_bar:123'),
         ('leading and trailing underscores', '__abc:123__', 'abc:123'),
         ('redundant underscore', 'foo_____bar', 'foo_bar'),
@@ -471,7 +468,7 @@ class TestEvents:
         check.event(event)
         aggregator.assert_event('test event test event', tags=["foo", "bar"])
 
-    @pytest.mark.parametrize('msg_text', [u'test-π', 'test-π', b'test-\xcf\x80'])
+    @pytest.mark.parametrize('msg_text', ['test-π', 'test-π', b'test-\xcf\x80'])
     def test_encoding(self, aggregator, msg_text):
         check = AgentCheck()
         event = {
@@ -479,7 +476,7 @@ class TestEvents:
             'msg_title': 'new test event',
             'aggregation_key': 'test.event',
             'msg_text': msg_text,
-            'tags': ['∆', u'Ω-bar'],
+            'tags': ['∆', 'Ω-bar'],
             'timestamp': 1,
         }
         check.event(event)
@@ -543,6 +540,150 @@ class TestServiceChecks:
         aggregator.assert_service_check('service_check', status=AgentCheck.OK)
 
 
+class TestLogSubmission:
+    def test_cursor(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+        check.send_log({'message': 'bar'}, cursor={'data': '2'})
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo'},
+                {'message': 'bar'},
+                {'message': 'baz'},
+            ],
+        )
+        assert check.get_log_cursor() == {'data': '2'}
+
+    def custom_persistent_cache_id_check(self) -> AgentCheck:
+        class TestCheck(AgentCheck):
+            def persistent_cache_id(self) -> str:
+                return "always_the_same"
+
+        return TestCheck(name="test", init_config={}, instances=[{}])
+
+    def test_cursor_with_custom_cache_invalidation_strategy_after_restart(self):
+        check = self.custom_persistent_cache_id_check()
+        check.check_id = 'test:bar:123'
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+
+        assert check.get_log_cursor() == {'data': '1'}
+
+        new_check = self.custom_persistent_cache_id_check()
+        new_check.check_id = 'test:bar:123456'
+        assert new_check.get_log_cursor() == {'data': '1'}
+
+        check = self.custom_persistent_cache_id_check()
+        check.check_id = 'test:bar:123'
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+
+        assert check.get_log_cursor() == {'data': '1'}
+
+        new_check = self.custom_persistent_cache_id_check()
+        new_check.check_id = 'test:bar:123456'
+        assert new_check.get_log_cursor() == {'data': '1'}
+
+    def test_cursor_invalidated_for_different_persistent_check_id_part(self):
+        check = self.custom_persistent_cache_id_check()
+        check.check_id = 'test:bar:123'
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+
+        assert check.get_log_cursor() == {'data': '1'}
+
+        new_check = self.custom_persistent_cache_id_check()
+        new_check.check_id = 'test:bar:123456'
+        assert new_check.get_log_cursor() == {'data': '1'}
+
+    def test_no_cursor(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'})
+        check.send_log({'message': 'bar'})
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo'},
+                {'message': 'bar'},
+                {'message': 'baz'},
+            ],
+        )
+        assert check.get_log_cursor() is None
+
+    def test_tags(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{'tags': ['foo:bar', 'baz:qux']}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'})
+        check.send_log({'message': 'bar', 'ddtags': 'bar:baz'})
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo', 'ddtags': 'baz:qux,foo:bar'},
+                {'message': 'bar', 'ddtags': 'bar:baz'},
+                {'message': 'baz', 'ddtags': 'baz:qux,foo:bar'},
+            ],
+        )
+
+    def test_stream(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo'}, cursor={'data': '1'}, stream='stream1')
+        check.send_log({'message': 'bar'}, cursor={'data': '2'}, stream='stream2')
+        check.send_log({'message': 'baz'})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo'},
+                {'message': 'bar'},
+                {'message': 'baz'},
+            ],
+        )
+        assert check.get_log_cursor(stream='stream1') == {'data': '1'}
+        assert check.get_log_cursor(stream='stream2') == {'data': '2'}
+
+    def test_timestamp(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        check.check_id = 'test'
+
+        check.send_log({'message': 'foo', 'timestamp': 1722958617.2842212})
+        check.send_log({'message': 'bar', 'timestamp': 1722958619.2358432})
+        check.send_log({'message': 'baz', 'timestamp': 1722958620.5963688})
+
+        datadog_agent.assert_logs(
+            check.check_id,
+            [
+                {'message': 'foo', 'timestamp': 1722958617284},
+                {'message': 'bar', 'timestamp': 1722958619235},
+                {'message': 'baz', 'timestamp': 1722958620596},
+            ],
+        )
+        assert check.get_log_cursor() is None
+
+
+class TestLogsEnabledDetection:
+    def test_default(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+
+        assert check.logs_enabled is False
+
+    def test_enabled(self, datadog_agent):
+        check = AgentCheck('check_name', {}, [{}])
+        datadog_agent._config['logs_enabled'] = True
+
+        assert check.logs_enabled is True
+
+
 class TestTags:
     def test_default_string(self):
         check = AgentCheck()
@@ -566,37 +707,28 @@ class TestTags:
 
         assert normalized_tags is not tags
 
-        if PY3:
-            assert normalized_tag == tag.decode('utf-8')
-        else:
-            # Ensure no new allocation occurs
-            assert normalized_tag is tag
+        assert normalized_tag == tag.decode('utf-8')
 
     def test_unicode_string(self):
         check = AgentCheck()
-        tag = u'unicode:string'
+        tag = 'unicode:string'
         tags = [tag]
 
         normalized_tags = check._normalize_tags_type(tags, None)
         normalized_tag = normalized_tags[0]
 
         assert normalized_tags is not tags
-
-        if PY3:
-            # Ensure no new allocation occurs
-            assert normalized_tag is tag
-        else:
-            assert normalized_tag == tag.encode('utf-8')
+        assert normalized_tag is tag
 
     def test_unicode_device_name(self):
         check = AgentCheck()
         tags = []
-        device_name = u'unicode_string'
+        device_name = 'unicode_string'
 
         normalized_tags = check._normalize_tags_type(tags, device_name)
         normalized_device_tag = normalized_tags[0]
 
-        assert isinstance(normalized_device_tag, str if PY3 else bytes)
+        assert isinstance(normalized_device_tag, str)
 
     def test_duplicated_device_name(self):
         check = AgentCheck()
@@ -624,15 +756,13 @@ class TestTags:
             check.set_external_tags(external_host_tags)
             assert external_host_tags == [('hostname', {'src_name': ['normalize:tag']})]
 
-    def test_external_hostname(self):
+    def test_external_hostname(self, datadog_agent):
         check = AgentCheck()
-        external_host_tags = [(u'hostnam\xe9', {'src_name': ['key1:val1']})]
-        with mock.patch.object(datadog_agent, 'set_external_tags') as set_external_tags:
-            check.set_external_tags(external_host_tags)
-            if PY3:
-                set_external_tags.assert_called_with([(u'hostnam\xe9', {'src_name': ['key1:val1']})])
-            else:
-                set_external_tags.assert_called_with([('hostnam\xc3\xa9', {'src_name': ['key1:val1']})])
+        external_host_tags = [('hostnam\xe9', {'src_name': ['key1:val1']})]
+        check.set_external_tags(external_host_tags)
+
+        datadog_agent.assert_external_tags('hostnam\xe9', {'src_name': ['key1:val1']})
+        datadog_agent.assert_external_tags_count(1)
 
     @pytest.mark.parametrize(
         "disable_generic_tags, expected_tags",
@@ -963,7 +1093,6 @@ class TestCheckInitializations:
         assert check.initialize.call_count == 2
 
 
-@requires_py3
 def test_load_configuration_models(dd_run_check, mocker):
     instance = {'endpoint': 'url', 'tags': ['foo:bar'], 'proxy': {'http': 'http://1.2.3.4:9000'}}
     init_config = {'proxy': {'https': 'https://1.2.3.4:4242'}}
@@ -977,41 +1106,24 @@ def test_load_configuration_models(dd_run_check, mocker):
     instance_config = {}
     shared_config = {}
     package = mocker.MagicMock()
-    package.InstanceConfig = mocker.MagicMock(return_value=instance_config)
-    package.SharedConfig = mocker.MagicMock(return_value=shared_config)
+    package.InstanceConfig.model_validate = mocker.MagicMock(return_value=instance_config)
+    package.SharedConfig.model_validate = mocker.MagicMock(return_value=shared_config)
     import_module = mocker.patch('importlib.import_module', return_value=package)
 
     dd_run_check(check)
 
-    instance_data = check._get_config_model_initialization_data()
-    instance_data.update(instance)
-    init_config_data = check._get_config_model_initialization_data()
-    init_config_data.update(init_config)
-
     import_module.assert_called_with('datadog_checks.base.config_models')
-    package.InstanceConfig.assert_called_once_with(**instance_data)
-    package.SharedConfig.assert_called_once_with(**init_config_data)
+    package.InstanceConfig.model_validate.assert_called_once_with(
+        instance, context=check._get_config_model_context(instance)
+    )
+    package.SharedConfig.model_validate.assert_called_once_with(
+        init_config, context=check._get_config_model_context(init_config)
+    )
 
     assert check._config_model_instance is instance_config
     assert check._config_model_shared is shared_config
 
 
-if PY3:
-
-    from pydantic import BaseModel, Field
-
-    class BaseModelTest(BaseModel):
-        field = ""
-        schema_ = Field("", alias='schema')
-
-else:
-
-    class BaseModelTest:
-        def __init__(self, **kwargs):
-            pass
-
-
-@requires_py3
 @pytest.mark.parametrize(
     "check_instance_config, default_instance_config, log_lines, unknown_options",
     [
@@ -1219,3 +1331,37 @@ def test_detect_typos_configuration_models(
         assert "Detected potential typo in configuration option" not in caplog.text
 
     assert typos == set(unknown_options)
+
+
+def test_env_var_logic_default():
+    with mock.patch.dict('os.environ', {'GOFIPS': '0'}):
+        AgentCheck()
+        assert os.getenv('OPENSSL_CONF', None) is None
+        assert os.getenv('OPENSSL_MODULES', None) is None
+
+
+def test_env_var_logic_preset():
+    preset_conf = 'path/to/openssl.cnf'
+    preset_modules = 'path/to/ossl-modules'
+    with mock.patch.dict('os.environ', {'GOFIPS': '1', 'OPENSSL_CONF': preset_conf, 'OPENSSL_MODULES': preset_modules}):
+        AgentCheck()
+        assert os.getenv('OPENSSL_CONF', None) == preset_conf
+        assert os.getenv('OPENSSL_MODULES', None) == preset_modules
+
+
+@pytest.mark.parametrize(
+    "should_profile_value, expected_calls",
+    [
+        pytest.param(True, 1, id="enabled"),
+        pytest.param(False, 0, id="disabled"),
+    ],
+)
+def test_profile_memory_when_enabled(should_profile_value, expected_calls):
+    check = AgentCheck('test', {}, [{}])
+    check.should_profile_memory = mock.MagicMock(return_value=should_profile_value)
+    check.profile_memory = mock.MagicMock()
+
+    check.run()
+
+    assert check.should_profile_memory.call_count == 1
+    assert check.profile_memory.call_count == expected_calls

@@ -1,0 +1,27 @@
+name: Tekton
+files:
+- name: tekton.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - name: pipelines_controller_endpoint
+      description: |
+        Endpoint exposing the Pipelines Controller's Prometheus metrics.
+      value:
+        display_default: null
+        example: http://tekton-pipelines-controller:9090/metrics
+        type: string
+    - name: triggers_controller_endpoint
+      description: |
+        Endpoint exposing the Triggers Controller's Prometheus metrics.
+      value:
+        display_default: null
+        example: http://tekton-triggers-controller:9000/metrics
+        type: string
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: false
+        openmetrics_endpoint.hidden: true

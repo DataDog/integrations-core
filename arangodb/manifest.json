@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "2851c4fa-97d2-4949-9673-b21671b57b0a",
   "app_id": "arangodb",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,13 @@
     "title": "ArangoDB",
     "media": [],
     "classifier_tags": [
+      "Category::Caching",
+      "Category::Data Stores",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "ArangoDB",
@@ -42,17 +44,16 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10266,
+      "auto_install": true
     },
     "dashboards": {
       "ArangoDB Overview": "assets/dashboards/arangodb_overview.json"
     },
     "monitors": {
-      "[ArangoDB] High server Kernel mode percentage usage": "assets/recommended_monitors/high_server_kernel_mode.json",
-      "[ArangoDB] High server User mode percentage usage": "assets/recommended_monitors/high_server_user_mode.json"
-    },
-    "logs": {
-      "source": "arangodb"
+      "ArangoDB's server Kernel mode usage is higher": "assets/monitors/high_server_kernel_mode.json",
+      "ArangoDB's server User mode usage is higher": "assets/monitors/high_server_user_mode.json"
     }
   }
 }

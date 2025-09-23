@@ -2,22 +2,30 @@
   "manifest_version": "2.0.0",
   "app_uuid": "23e9084d-5801-4a71-88fe-f62b7c1bb289",
   "app_id": "snowflake",
-  "display_on_public_website": true,
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor key metrics for credit usage, storage, query, user history and more.",
-    "title": "Snowflake",
+    "title": "Snowflake - Agent based (Deprecated)",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Cloud",
-      "Category::Data Store",
-      "Category::Cost Management"
+      "Category::Data Stores",
+      "Category::Cost Management",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/snowflake-monitoring-datadog/"
+      }
     ]
   },
   "author": {
@@ -26,7 +34,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Snowflake",
@@ -43,14 +50,17 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10123,
+      "auto_install": true
     },
     "dashboards": {
       "Snowflake": "assets/dashboards/snowflake.json",
-      "Snowflake Organization Metrics": "assets/dashboards/organization_metrics.json"
+      "Snowflake Organization Metrics": "assets/dashboards/organization_metrics.json",
+      "Snowflake Cloud Cost Management Overview": "assets/dashboards/snowflake_costs.json"
     },
     "monitors": {
-      "Snowflake failed logins": "assets/recommended_monitors/snowflake_failed_logins.json"
+      "Failed login attempts are increasing": "assets/monitors/snowflake_failed_logins.json"
     }
   }
 }

@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Note**: This integration only applies to OpenStack v13+ (containerized OpenStack). If you are looking to collect metrics from OpenStack v12 and below (non-containerized OpenStack), use the [OpenStack integration][1].
+**Note**: This integration only applies to OpenStack v13+. If you are looking to collect metrics from OpenStack v12 and below, use the [OpenStack integration][1].
 
 This check monitors [OpenStack][2] from the controller node.
 
@@ -14,7 +14,7 @@ The OpenStack Controller check is included in the [Datadog Agent][3] package, so
 
 ### Configuration
 
-The OpenStack Controller integration is designed to collect information from all compute nodes and the servers running it. The integration should be run from a single Agent to monitor your OpenStack environment, and can be deployed on your controller node or an adjacent server that has access to the Keystone and Nova endpoints.
+The OpenStack Controller integration is designed to collect information from all compute nodes and the servers running it. The integration should be run from a single Agent to monitor your OpenStack environment, and can be deployed on your controller node or an adjacent server that has access to the Keystone, Nova, Neutron, Cinder, Ironic, and Octavia endpoints.
 
 #### Prepare OpenStack
 
@@ -28,27 +28,15 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
    init_config:
 
    instances:
-     ## @param name - string - required
-     ## Unique identifier for this instance.
-     #
-     - name: "<INSTANCE_NAME>"
-
-       ## @param user - object - required
-       ## Password authentication is the only auth method supported
-       ## User expects username, password, and user domain id
-       ## `user` should resolve to a structure like
-       ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
-       ## The check uses the Unscoped token method to collect information about
-       ## all available projects to the user.
-       #
-       user:
-         password: "<PASSWORD>"
-         name: "<USER_NAME>"
-         domain:
-           id: "<DOMAIN_ID>"
+     - keystone_server_url: "<AUTH_URL>"
+       password: "<PASSWORD>"
+       username: "<USER_NAME>"
+       domain_id: "<DOMAIN_ID>"
    ```
 
 2. [Restart the Agent][5]
+
+**Note**: If you are upgrading the integration to v6.0.0 or later from v5.0.0 or older, you need to enable the `use_legacy_check_version` flag to use newer features. You may also need to make changes to your configuration to maintain compatibility. See the [sample openstack controller.d/conf.yaml][4] for details.  
 
 ##### Log collection
 
@@ -92,13 +80,20 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor your OpenStack components with Datadog][10]
+
 
 [1]: https://docs.datadoghq.com/integrations/openstack/
 [2]: https://www.openstack.org
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/datadog_checks/openstack_controller/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/openstack-controller-integration/

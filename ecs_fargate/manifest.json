@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4c298061-c7d2-4ce6-ab3e-5378039de65a",
   "app_id": "aws-fargate",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,13 +13,43 @@
     "title": "Amazon ECS on AWS Fargate",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::AWS",
+      "Category::Cloud",
       "Category::Containers",
-      "Category::Log Collection",
-      "Category::Orchestration"
+      "Category::Network",
+      "Category::Orchestration",
+      "Category::Provisioning",
+      "Category::Tracing",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-aws-fargate"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collect-fargate-logs-with-firelens/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/aws-fargate-metrics/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/"
+      }
     ]
   },
   "author": {
@@ -27,7 +58,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Amazon Fargate",
@@ -44,10 +74,19 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10033,
+      "auto_install": true
     },
     "dashboards": {
       "Amazon Fargate": "assets/dashboards/amazon_fargate_overview.json"
+    },
+    "monitors": {
+      "ECS Fargate CPU Usage": "assets/monitors/ecs_fargate_cpu_usage.json",
+      "ECS Fargate Memory Usage": "assets/monitors/ecs_fargate_mem_usage.json",
+      "ECS Fargate Ephemeral Storage Utilization": "assets/monitors/ecs_fargate_ephemeral_storage.json",
+      "ECS Fargate Network Received Error Rate": "assets/monitors/ecs_fargate_net_rcvd.json",
+      "ECS Fargate Network Sent Error Rate": "assets/monitors/ecs_fargate_net_sent.json"
     }
   }
 }

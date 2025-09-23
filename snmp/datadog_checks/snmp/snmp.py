@@ -12,9 +12,7 @@ import time
 import weakref
 from collections import defaultdict
 from concurrent import futures
-from typing import Any, DefaultDict, Dict, List, Optional, Pattern, Tuple
-
-from six import iteritems
+from typing import Any, DefaultDict, Dict, List, Optional, Pattern, Tuple  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
@@ -28,7 +26,7 @@ from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type, try_varbind_value_to_float
 from .mibs import MIBLoader
 from .models import OID
-from .parsing import ColumnTag, IndexTag, ParsedMetric, ParsedTableMetric, SymbolTag
+from .parsing import ColumnTag, IndexTag, ParsedMetric, ParsedTableMetric, SymbolTag  # noqa: F401
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .utils import (
     OIDPrinter,
@@ -52,7 +50,6 @@ def reply_invalid(oid):
 
 
 class SnmpCheck(AgentCheck):
-
     SC_STATUS = 'snmp.can_check'
     _running = True
     _thread = None
@@ -123,7 +120,8 @@ class SnmpCheck(AgentCheck):
             try:
                 recursively_expand_base_profiles(definition)
             except Exception as exc:
-                raise ConfigurationError("Failed to expand base profiles in profile '{}': {}".format(name, exc))
+                self.log.warning("Failed to expand base profiles in profile '%s': %s", name, exc)
+                continue
 
             profiles[name] = {'definition': definition}
 
@@ -194,7 +192,8 @@ class SnmpCheck(AgentCheck):
             return None
 
     def fetch_results(
-        self, config  # type: InstanceConfig
+        self,
+        config,  # type: InstanceConfig
     ):
         # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], List[OID], Optional[str]]
         """
@@ -370,7 +369,7 @@ class SnmpCheck(AgentCheck):
         self._thread.start()
         self._executor = futures.ThreadPoolExecutor(max_workers=self._config.workers)
 
-    def check(self, instance):
+    def check(self, _):
         # type: (Dict[str, Any]) -> None
         start_time = time.time()
         self._submitted_metrics = 0
@@ -395,7 +394,8 @@ class SnmpCheck(AgentCheck):
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
-            _, tags = self._check_device(config)
+            error, tags = self._check_device(config)
+            # no need to handle error here since it's already handled inside `self._check_device`
 
         self.submit_telemetry_metrics(start_time, tags)
 
@@ -513,7 +513,7 @@ class SnmpCheck(AgentCheck):
                 self.log.debug('Ignoring metric %s', name)
                 continue
             if isinstance(metric, ParsedTableMetric):
-                for index, val in iteritems(results[name]):
+                for index, val in results[name].items():
                     metric_tags = tags + self.get_index_tags(index, results, metric.index_tags, metric.column_tags)
                     self.submit_metric(
                         name, val, metric.forced_type, metric_tags, metric.options, metric.extract_value_pattern
@@ -603,7 +603,7 @@ class SnmpCheck(AgentCheck):
         try:
             if_high_speed_val = results['ifHighSpeed'][index]
         except KeyError:
-            self.log.debug('[SNMP Bandwidth usage] missing `ifHighSpeed` metric, skipping this row. ' 'index=%s', index)
+            self.log.debug('[SNMP Bandwidth usage] missing `ifHighSpeed` metric, skipping this row. index=%s', index)
             return
 
         if_high_speed = try_varbind_value_to_float(if_high_speed_val)

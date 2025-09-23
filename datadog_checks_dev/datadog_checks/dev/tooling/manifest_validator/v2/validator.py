@@ -8,10 +8,9 @@ import jsonschema
 import requests
 
 import datadog_checks.dev.tooling.manifest_validator.common.validator as common
-
-from ...constants import get_root
-from ...manifest_validator.common.validator import BaseManifestValidator
-from ..constants import V2
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.manifest_validator.common.validator import BaseManifestValidator
+from datadog_checks.dev.tooling.manifest_validator.constants import V2
 
 METRIC_TO_CHECK_EXCLUDE_LIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
@@ -245,8 +244,8 @@ class ChangelogValidator(BaseManifestValidator):
                 self.fail(f"{os.path.join(check_name, changelog)} does not exist.")
 
 
-def get_v2_validators(ctx, is_extras, is_marketplace):
-    return [
+def get_v2_validators(ctx, is_extras, is_marketplace, ignore_schema=False):
+    validators = [
         common.MaintainerValidator(
             is_extras, is_marketplace, check_in_extras=False, check_in_marketplace=False, version=V2
         ),
@@ -258,6 +257,9 @@ def get_v2_validators(ctx, is_extras, is_marketplace):
         TileDescriptionValidator(is_marketplace=is_marketplace, is_extras=is_extras, version=V2),
         MediaGalleryValidator(is_marketplace=is_marketplace, is_extras=is_extras, version=V2),
         ChangelogValidator(version=V2),
-        # keep SchemaValidator last, and avoid running this validation if errors already found
-        SchemaValidator(ctx=ctx, version=V2, skip_if_errors=True),
     ]
+    if not ignore_schema:
+        # keep SchemaValidator last, and avoid running this validation if errors already found
+        validators.append(SchemaValidator(ctx=ctx, version=V2, skip_if_errors=True))
+
+    return validators

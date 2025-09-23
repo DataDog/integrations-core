@@ -7,8 +7,6 @@ import time
 from collections import Counter, defaultdict
 from copy import deepcopy
 
-from six import iteritems
-
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
@@ -33,6 +31,7 @@ ALLOWED_WAITING_REASONS = [
     'containercreating',
     'createcontainererror',
     'invalidimagename',
+    'createcontainerconfigerror',
 ]
 ALLOWED_TERMINATED_REASONS = ['oomkilled', 'containercannotrun', 'error']
 
@@ -174,18 +173,18 @@ class KubernetesState(OpenMetricsBaseCheck):
         self.process(scraper_config, metric_transformers=self.METRIC_TRANSFORMERS)
 
         # Logic for Cron Jobs
-        for job_tags, job in iteritems(self.failed_cron_job_counts):
+        for job_tags, job in self.failed_cron_job_counts.items():
             self.monotonic_count(scraper_config['namespace'] + '.job.failed', job.count, list(job_tags))
             job.set_previous_and_reset_current_ts()
 
-        for job_tags, job in iteritems(self.succeeded_cron_job_counts):
+        for job_tags, job in self.succeeded_cron_job_counts.items():
             self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job.count, list(job_tags))
             job.set_previous_and_reset_current_ts()
 
         # Logic for Jobs
-        for job_tags, job_count in iteritems(self.job_succeeded_count):
+        for job_tags, job_count in self.job_succeeded_count.items():
             self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job_count, list(job_tags))
-        for job_tags, job_count in iteritems(self.job_failed_count):
+        for job_tags, job_count in self.job_failed_count.items():
             self.monotonic_count(scraper_config['namespace'] + '.job.failed', job_count, list(job_tags))
 
     def _filter_metric(self, metric, scraper_config):
@@ -507,7 +506,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         metric_name = scraper_config['namespace'] + '.node.by_condition'
         metric_tags = []
-        for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+        for label_name, label_value in sample[self.SAMPLE_LABELS].items():
             metric_tags += self._build_tags(label_name, label_value, scraper_config)
         self.gauge(
             metric_name,
@@ -631,7 +630,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
             status_phase_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in iteritems(status_phase_counter):
+        for tags, count in status_phase_counter.items():
             self.gauge(metric_name, count, tags=list(tags))
 
     def _submit_metric_kube_pod_container_status_reason(
@@ -649,7 +648,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             else:
                 continue
 
-            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            for label_name, label_value in sample[self.SAMPLE_LABELS].items():
                 if label_name == "reason":
                     continue
 
@@ -686,7 +685,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             on_schedule = int(sample[self.SAMPLE_VALUE]) - curr_time
             tags = []
-            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            for label_name, label_value in sample[self.SAMPLE_LABELS].items():
                 tags += self._build_tags(label_name, label_value, scraper_config)
 
             tags += scraper_config['custom_tags']
@@ -702,7 +701,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         service_check_name = scraper_config['namespace'] + '.job.complete'
         for sample in metric.samples:
             tags = []
-            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            for label_name, label_value in sample[self.SAMPLE_LABELS].items():
                 if label_name == 'job' or label_name == 'job_name':
                     tags += self._get_job_tags(label_name, label_value, scraper_config)
                 else:
@@ -713,7 +712,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         service_check_name = scraper_config['namespace'] + '.job.complete'
         for sample in metric.samples:
             tags = []
-            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            for label_name, label_value in sample[self.SAMPLE_LABELS].items():
                 if label_name == 'job' or label_name == 'job_name':
                     tags += self._get_job_tags(label_name, label_value, scraper_config)
                 else:
@@ -724,7 +723,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             job_ts = None
             tags = [] + scraper_config['custom_tags']
-            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            for label_name, label_value in sample[self.SAMPLE_LABELS].items():
                 if label_name == 'job' or label_name == 'job_name':
                     tags += self._get_job_tags(label_name, label_value, scraper_config)
                     job_ts = self._extract_job_timestamp(label_value)
@@ -741,7 +740,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         for sample in metric.samples:
             job_ts = None
             tags = [] + scraper_config['custom_tags']
-            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+            for label_name, label_value in sample[self.SAMPLE_LABELS].items():
                 if label_name == 'job' or label_name == 'job_name':
                     tags += self._get_job_tags(label_name, label_value, scraper_config)
                     job_ts = self._extract_job_timestamp(label_value)
@@ -779,7 +778,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             )
             by_condition_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in iteritems(by_condition_counter):
+        for tags, count in by_condition_counter.items():
             self.gauge(metric_name, count, tags=list(tags))
 
     def kube_node_status_ready(self, metric, scraper_config):
@@ -849,7 +848,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         if metric.type in METRIC_TYPES:
             for sample in metric.samples:
                 tags = []
-                for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                for label_name, label_value in sample[self.SAMPLE_LABELS].items():
                     tags += self._build_tags(label_name, label_value, scraper_config)
                 tags += scraper_config['custom_tags']
                 status = statuses[int(sample[self.SAMPLE_VALUE])]  # value can be 0 or 1
@@ -919,7 +918,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = self._tags_for_count(sample, config, scraper_config)
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
-        for tags, count in iteritems(object_counter):
+        for tags, count in object_counter.items():
             self.gauge(metric_name, count, tags=list(tags))
 
     def count_objects_by_tags(self, metric, scraper_config):
@@ -932,7 +931,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = self._tags_for_count(sample, config, scraper_config)
             object_counter[tuple(sorted(tags))] += 1
 
-        for tags, count in iteritems(object_counter):
+        for tags, count in object_counter.items():
             self.gauge(metric_name, count, tags=list(tags))
 
     def _tags_for_count(self, sample, count_config, scraper_config):
@@ -979,7 +978,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         custom_tags = scraper_config['custom_tags']
         _tags = list(custom_tags)
         _tags += scraper_config['_metric_tags']
-        for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+        for label_name, label_value in sample[self.SAMPLE_LABELS].items():
             if label_name not in scraper_config['exclude_labels']:
                 _tags += self._build_tags(label_name, label_value, scraper_config)
         return self._finalize_tags_to_submit(

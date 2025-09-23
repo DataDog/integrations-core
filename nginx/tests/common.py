@@ -4,6 +4,7 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx.metrics import COUNT_METRICS, METRICS_SEND_AS_COUNT, METRICS_SEND_AS_HISTOGRAM
 
@@ -16,6 +17,8 @@ HOST = get_docker_hostname()
 PORT = '8080'
 PORT_SSL = '8081'
 TAGS = ['foo:foo', 'bar:bar']
+TAGS_WITH_HOST = TAGS + ['nginx_host:{}'.format(HOST)]
+TAGS_WITH_HOST_AND_PORT = TAGS_WITH_HOST + ['port:{}'.format(PORT)]
 USING_VTS = os.getenv('NGINX_IMAGE', '').endswith('nginx-vts')
 USING_LATEST = os.getenv('NGINX_IMAGE', '').endswith('latest')
 NGINX_VERSION = os.getenv('NGINX_VERSION', os.environ.get('NGINX_IMAGE'))
@@ -80,6 +83,11 @@ ALL_PLUS_METRICS = (
     + METRICS_SEND_AS_HIST_HISTS
 )
 
+VTS_MOCKED_METRICS = {
+    "nginx.timestamp",
+    "nginx.upstream.peers.response_time",
+}
+
 
 def assert_all_metrics_and_metadata(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -94,3 +102,17 @@ def assert_num_metrics(aggregator, num_expected):
     for m in aggregator.metric_names:
         total += len(aggregator.metrics(m))
     assert total == num_expected
+
+
+def mock_http_responses(url, **_params):
+    mapping = {
+        'http://localhost:8080/vts_status': 'vts.json',
+    }
+
+    metrics_file = mapping.get(url)
+
+    if not metrics_file:
+        raise Exception("url `{url}` not registered".format(url=url))
+
+    with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
+        return MockResponse(content=f.read(), headers={"content-type": "application/json"})

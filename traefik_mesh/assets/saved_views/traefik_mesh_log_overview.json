@@ -1,0 +1,14 @@
+{
+    "name": "Traefik Mesh Logs Overview",
+    "query": "source:traefik_mesh",
+    "visible_facets": [
+        "source",
+        "host",
+        "service"
+    ],
+    "type": "logs",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "page": "patterns"
+}

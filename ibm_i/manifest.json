@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "30045928-4be2-4efd-9a08-160e904494a1",
   "app_id": "ibm-i",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -14,7 +15,8 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::OS & System"
+      "Category::OS & System",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -23,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "IBM i",
@@ -40,7 +41,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10219,
+      "auto_install": true
     },
     "dashboards": {
       "IBM i Overview": "assets/dashboards/ibm_i_overview.json"

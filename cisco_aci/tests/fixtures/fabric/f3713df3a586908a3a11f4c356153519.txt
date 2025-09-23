@@ -1,0 +1,61 @@
+{
+    "totalCount": "1",
+    "imdata": [
+        {
+            "lldpAdjEp": {
+                "attributes": {
+                    "capability": "router",
+                    "chassisIdT": "mac",
+                    "chassisIdV": "6a:00:21:1f:55:2a",
+                    "childAction": "",
+                    "dn": "topology/pod-1/node-101/sys/lldp/inst/if-[eth1/49]/adj-1",
+                    "enCap": "",
+                    "id": "1",
+                    "mgmtId": "0",
+                    "mgmtIp": "10.0.200.5",
+                    "mgmtPortMac": "unspecified",
+                    "modTs": "2024-09-12T06:51:52.580+00:00",
+                    "monPolDn": "uni/fabric/monfab-default",
+                    "name": "",
+                    "portDesc": "topology/pod-1/paths-201/pathep-[eth5/1]",
+                    "portIdT": "mac",
+                    "portIdV": "6a:00:21:1f:55:2a",
+                    "portVlan": "unspecified",
+                    "stQual": "",
+                    "status": "",
+                    "sysDesc": "topology/pod-1/node-201",
+                    "sysName": "SP201",
+                    "ttl": "120"
+                }
+            }
+        },
+        {
+            "lldpAdjEp": {
+                "attributes": {
+                    "capability": "router",
+                    "chassisIdT": "mac",
+                    "chassisIdV": "6a:00:21:1f:55:2b",
+                    "childAction": "",
+                    "dn": "topology/pod-1/node-102/sys/lldp/inst/if-[eth1/49]/adj-1",
+                    "enCap": "",
+                    "id": "1",
+                    "mgmtId": "0",
+                    "mgmtIp": "10.0.200.5",
+                    "mgmtPortMac": "unspecified",
+                    "modTs": "2024-09-12T06:51:52.580+00:00",
+                    "monPolDn": "uni/fabric/monfab-default",
+                    "name": "",
+                    "portDesc": "topology/pod-1/paths-201/pathep-[eth5/2]",
+                    "portIdT": "mac",
+                    "portIdV": "6a:00:21:1f:55:2b",
+                    "portVlan": "unspecified",
+                    "stQual": "",
+                    "status": "",
+                    "sysDesc": "topology/pod-1/node-201",
+                    "sysName": "SP201",
+                    "ttl": "120"
+                }
+            }
+        }
+    ]
+}

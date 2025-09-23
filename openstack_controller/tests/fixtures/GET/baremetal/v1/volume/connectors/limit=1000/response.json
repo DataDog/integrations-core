@@ -1,0 +1,36 @@
+{
+    "connectors": [
+        {
+            "connector_id": "iqn.2017-07.org.openstack:01:d9a51732c3f",
+            "links": [
+                {
+                    "href": "http://127.0.0.1:6385/v1/volume/connectors/9bf93e01-d728-47a3-ad4b-5e66a835037c",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1:6385/volume/connectors/9bf93e01-d728-47a3-ad4b-5e66a835037c",
+                    "rel": "bookmark"
+                }
+            ],
+            "node_uuid": "6d85703a-565d-469a-96ce-30b6de53079d",
+            "type": "iqn",
+            "uuid": "9bf93e01-d728-47a3-ad4b-5e66a835037c"
+        },
+        {
+            "uuid": "4e7b162e-0241-40dd-8069-345e751f8708",
+            "connector_id": "iqn.2017-07.org.openstack:01:d9a51732c3f",
+            "type": "iqn",
+            "links": [
+                {
+                    "href": "http://127.0.0.1/baremetal/v1/volume/connectors/4e7b162e-0241-40dd-8069-345e751f8708",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/baremetal/volume/connectors/4e7b162e-0241-40dd-8069-345e751f8708",
+                    "rel": "bookmark"
+                }
+            ],
+            "node_uuid": "a27588a6-518d-49b4-a23c-3d51255a7e8b"
+        }
+    ]
+}

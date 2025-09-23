@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   mysql-master:
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"

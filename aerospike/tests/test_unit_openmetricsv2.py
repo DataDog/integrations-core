@@ -6,12 +6,11 @@ import os
 import pytest
 
 from datadog_checks.aerospike import AerospikeCheck
-from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import EXPECTED_PROMETHEUS_METRICS, EXPECTED_PROMETHEUS_METRICS_5_6, HERE, PROMETHEUS_XDR_METRICS
 
-pytestmark = [pytest.mark.unit, requires_py3]
+pytestmark = [pytest.mark.unit]
 
 
 def get_fixture_path(filename):
@@ -20,6 +19,7 @@ def get_fixture_path(filename):
 
 def test_openmetricsv2_check(aggregator, dd_run_check, instance_openmetrics_v2, mock_http_response):
     mock_http_response(file_path=get_fixture_path('prometheus.txt'))
+
     check = AerospikeCheck('aerospike', {}, [instance_openmetrics_v2])
     dd_run_check(check)
 

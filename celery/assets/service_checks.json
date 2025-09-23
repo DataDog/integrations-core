@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.66.0",
+        "integration": "Celery",
+        "check": "celery.flower.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Celery Flower OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Celery OpenMetrics endpoint, otherwise returns `OK`."
+    }
+]

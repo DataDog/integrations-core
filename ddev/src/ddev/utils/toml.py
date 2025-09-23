@@ -16,3 +16,16 @@ def load_toml_data(data):
 def load_toml_file(path):
     with open(path, encoding='utf-8') as f:
         return tomllib.loads(f.read())
+
+
+def dumps_toml_data(data):
+    import tomli_w
+
+    return tomli_w.dumps(data)
+
+
+def dump_toml_data(data, path):
+    import tomli_w
+
+    with open(path, "wb") as f:
+        tomli_w.dump(data, f)

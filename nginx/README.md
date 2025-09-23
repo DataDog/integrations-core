@@ -117,7 +117,7 @@ data:
 [...]
   status.conf: |
     server {
-      listen 18080;
+      listen 81;
 
       location /nginx_status {
         stub_status on;
@@ -129,14 +129,14 @@ data:
     }
 ```
 
-Then, in your NGINX pod, expose the `18080` endpoint and mount that file in the NGINX configuration folder:
+Then, in your NGINX pod, expose the `81` endpoint and mount that file in the NGINX configuration folder:
 
 ```yaml
 spec:
   containers:
     - name: nginx
       ports:
-        - containerPort: 18080
+        - containerPort: 81
       volumeMounts:
         - mountPath: /etc/nginx/conf.d/status.conf
           subPath: status.conf
@@ -148,20 +148,6 @@ spec:
           name: "nginx-conf"
 ```
 
-Finally, expose that port in your NGINX service:
-
-```yaml
-spec:
-  ports:
-  - port: 80
-    protocol: TCP
-    targetPort: 80
-    name: default
-  - port: 81
-    protocol: TCP
-    targetPort: 18080
-    name: status
-```
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -276,7 +262,13 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][11] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][12].
+To collect metrics, set the following parameters and values in an [Autodiscovery template][11]. You can do this with Kubernetes Annotations (shown below) on your NGINX pod(s), or with a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][12].
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `["nginx"]`                                                                |
+| `<INIT_CONFIG>`      | `[{}]`                                                                     |
+| `<INSTANCE_CONFIG>`  | `[{"nginx_status_url": "http://%%host%%:18080/nginx_status"}]`             |
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -328,7 +320,11 @@ metadata:
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
 
-Then, set [Log Integrations][10] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][14].
+Then, set the following parameter in an [Autodiscovery template][11]. You can do this with Kubernetes Annotations (shown below) on your Redis pod(s), or with a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][12].
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<LOG_CONFIG>`       | `[{"source":"nginx","service":"nginx"}]`                                   |
 
 **Annotations v1/v2**
 

@@ -1,8 +1,14 @@
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import pytest
 
 from datadog_checks.envoy.errors import UnknownMetric, UnknownTags
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 from datadog_checks.envoy.parser import parse_histogram, parse_metric
+
+pytestmark = [pytest.mark.unit]
 
 
 def test_unknown_metric():
@@ -599,8 +605,7 @@ def test_ignore_nan():
 def test_correct():
     metric = 'envoy.http.downstream_rq_time'
     value = (
-        'P0(0,0) P25(25,0) P50(50,0) P75(75,0) P90(90,1.06) P95(95,1.08) '
-        'P99(99,1.096) P99.9(99.9,1.0996) P100(100,1.1)'
+        'P0(0,0) P25(25,0) P50(50,0) P75(75,0) P90(90,1.06) P95(95,1.08) P99(99,1.096) P99.9(99.9,1.0996) P100(100,1.1)'
     )
 
     assert list(parse_histogram(metric, value)) == [

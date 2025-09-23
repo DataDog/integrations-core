@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List, Tuple  # noqa: F401
 
 from requests.exceptions import ConnectionError, HTTPError
 
@@ -178,7 +178,7 @@ class MarklogicCheck(AgentCheck):
     def _collect_resource_request_metrics(self, resource_type, name, group, tags):
         # type: (str, str, str, List[str]) -> None
         """Collect request metrics of a specific resource"""
-        data = self.api.get_requests_data(resource=resource_type, name=name, group=group)
+        data = self.api.get_requests_data(resource=resource_type, name=name, group=group)  # SKIP_HTTP_VALIDATION
         metrics = parse_per_resource_request_metrics(data, tags)
         self.submit_metrics(metrics)
 
@@ -190,14 +190,14 @@ class MarklogicCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, data):
         # type: (Dict[str, Any]) -> None
-        # Example: 9.0-12
+        # Example: 9.0-12 or 11.0.3
         try:
             version = data['local-cluster-status']['version']
             self.set_metadata(
                 'version',
                 version,
                 scheme='regex',
-                pattern=r'(?P<major>\d+)\.(?P<minor>\d+)\-(?P<patch>\d+)',
+                pattern=r'(?P<major>\d+)\.(?P<minor>\d+)(\-|\.)(?P<patch>\d+)',
             )
         except Exception as e:
             self.log.warning('Error collecting MarkLogic version: %s', str(e))

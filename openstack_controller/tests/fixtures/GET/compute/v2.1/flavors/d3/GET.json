@@ -1,0 +1,24 @@
+{
+  "flavor": {
+    "id": "d3",
+    "name": "ds2G",
+    "ram": 2048,
+    "disk": 10,
+    "swap": "",
+    "OS-FLV-EXT-DATA:ephemeral": 0,
+    "OS-FLV-DISABLED:disabled": false,
+    "vcpus": 2,
+    "os-flavor-access:is_public": true,
+    "rxtx_factor": 1,
+    "links": [
+      {
+        "rel": "self",
+        "href": "http://34.91.114.145/compute/v2.1/flavors/d3"
+      },
+      {
+        "rel": "bookmark",
+        "href": "http://34.91.114.145/compute/flavors/d3"
+      }
+    ]
+  }
+}

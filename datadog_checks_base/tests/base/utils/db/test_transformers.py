@@ -2,13 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from dateutil.tz import gettz
 
 from datadog_checks.base.utils.time import UTC
 
-from .common import create_query_manager, mock_executor
+from .common import CHECK_ID, create_query_manager, mock_executor
 
 
 class TestColumnTransformers:
@@ -74,6 +74,39 @@ class TestColumnTransformers:
             9,
             metric_type=aggregator.GAUGE,
             tags=['test:foo', 'test:bar', 'test:tag3', 'foo_tag:tagE', 'foo_tag:tagF'],
+        )
+        aggregator.assert_all_metrics_covered()
+
+    def test_tag_not_null(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'foo_tag', 'type': 'tag_not_null'},
+                    {'name': 'test.foo', 'type': 'gauge'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag2', 'tagA', 7], ['tag3', None, 9]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo',
+            7,
+            metric_type=aggregator.GAUGE,
+            tags=['test:foo', 'test:bar', 'test:tag2', 'foo_tag:tagA'],
+        )
+
+        aggregator.assert_metric(
+            'test.foo',
+            9,
+            metric_type=aggregator.GAUGE,
+            tags=['test:foo', 'test:bar', 'test:tag3'],
         )
         aggregator.assert_all_metrics_covered()
 
@@ -433,7 +466,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.utcnow() + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(timezone.utc) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
@@ -634,3 +667,43 @@ class TestExtraTransformers:
             'percent', 60, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
         )
         aggregator.assert_all_metrics_covered()
+
+    def test_log(self, datadog_agent):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'msg', 'type': 'source'},
+                    {'name': 'level', 'type': 'source'},
+                    {'name': 'time', 'type': 'source'},
+                    {'name': 'bar', 'type': 'source'},
+                ],
+                'extras': [
+                    {
+                        'type': 'log',
+                        'attributes': {
+                            'message': 'msg',
+                            'status': 'level',
+                            'date': 'time',
+                            'foo': 'bar',
+                        },
+                    }
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', 'Test message', 'INFO', '2024-01-01T12:00:00Z', 'baz']]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        data = {
+            'message': 'Test message',
+            'status': 'INFO',
+            'date': '2024-01-01T12:00:00Z',
+            'foo': 'baz',
+            'ddtags': 'test:foo,test:bar,test:tag1',
+        }
+        datadog_agent.assert_logs(CHECK_ID, [data])

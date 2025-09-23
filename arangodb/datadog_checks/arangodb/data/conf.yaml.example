@@ -51,7 +51,7 @@ instances:
   - openmetrics_endpoint: <OPENMETRICS_ENDPOINT>
 
     ## @param raw_metric_prefix - string - optional
-    ## A prefix that will be removed from all exposed metric names, if present.
+    ## A prefix that is removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
     #
     # raw_metric_prefix: <PREFIX>_
@@ -63,22 +63,24 @@ instances:
     ##
     ## 1. If the item is a string, then it represents the exposed metric name, and
     ##    the sent metric name will be identical. For example:
-    ##
+    ##      ```
     ##      extra_metrics:
     ##      - <METRIC_1>
     ##      - <METRIC_2>
+    ##      ```
     ## 2. If the item is a mapping, then the keys represent the exposed metric names.
     ##
-    ##      a. If a value is a string, then it represents the sent metric name. For example:
-    ##
+    ##      1. If a value is a string, then it represents the sent metric name. For example:
+    ##           ```
     ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>: <SENT_METRIC_1>
     ##           - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
-    ##      b. If a value is a mapping, then it must have a `name` and/or `type` key.
+    ##           ```
+    ##      2. If a value is a mapping, then it must have a `name` and/or `type` key.
     ##         The `name` represents the sent metric name, and the `type` represents how
     ##         the metric should be handled, overriding any type information the endpoint
     ##         may provide. For example:
-    ##
+    ##           ```
     ##           extra_metrics:
     ##           - <EXPOSED_METRIC_1>:
     ##               name: <SENT_METRIC_1>
@@ -86,7 +88,7 @@ instances:
     ##           - <EXPOSED_METRIC_2>:
     ##               name: <SENT_METRIC_2>
     ##               type: <METRIC_TYPE_2>
-    ##
+    ##           ```
     ##         The supported native types are `gauge`, `counter`, `histogram`, and `summary`.
     ##
     ## Note: To collect counter metrics with names ending in `_total`, specify the metric name without the `_total`
@@ -96,13 +98,19 @@ instances:
     ## https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
     ##
     ## Regular expressions may be used to match the exposed metric names, for example:
-    ##
+    ##   ```
     ##   extra_metrics:
     ##   - ^network_(ingress|egress)_.+
     ##   - .+:
     ##       type: gauge
+    ##   ```
     #
-    # extra_metrics: []
+    # extra_metrics:
+    #   - <METRIC_1>
+    #   - <EXPOSED_METRIC_2>: <SENT_METRIC_2>
+    #   - <EXPOSED_METRIC_3>:
+    #       name: <SENT_METRIC_3>
+    #       type: <METRIC_TYPE_3>
 
     ## @param exclude_metrics - list of strings - optional
     ## A list of metrics to exclude, with each entry being either
@@ -114,7 +122,7 @@ instances:
     # exclude_metrics: []
 
     ## @param exclude_metrics_by_labels - mapping - optional
-    ## A mapping of labels where metrics with matching label name and values are ignored. To match
+    ## A mapping of labels to exclude metrics with matching label name and their corresponding metric values. To match
     ## all values of a label, set it to `true`.
     ##
     ## Note: Label filtering happens before `rename_labels`.
@@ -148,7 +156,7 @@ instances:
     # include_labels: []
 
     ## @param rename_labels - mapping - optional
-    ## A mapping of label names to how they should be renamed.
+    ## A mapping of label names to their new names.
     #
     # rename_labels:
     #   <LABEL_NAME_1>: <NEW_LABEL_NAME_1>
@@ -160,6 +168,11 @@ instances:
     #
     # enable_health_service_check: true
 
+    ## @param ignore_connection_errors - boolean - optional - default: false
+    ## Whether or not to ignore connection errors when scraping `openmetrics_endpoint`.
+    #
+    # ignore_connection_errors: false
+
     ## @param hostname_label - string - optional
     ## Override the hostname for every metric submission with the value of one of its labels.
     #
@@ -167,7 +180,7 @@ instances:
 
     ## @param hostname_format - string - optional
     ## When `hostname_label` is set, this instructs the check how to format the values. The string
-    ## `<HOSTNAME>` will be replaced by the value of the label defined by `hostname_label`.
+    ## `<HOSTNAME>` is replaced by the value of the label defined by `hostname_label`.
     #
     # hostname_format: <HOSTNAME>
 
@@ -177,7 +190,7 @@ instances:
     # collect_histogram_buckets: true
 
     ## @param non_cumulative_histogram_buckets - boolean - optional - default: false
-    ## Whether or not histogram buckets should be non-cumulative and to come with a `lower_bound` tag.
+    ## Whether or not histogram buckets are non-cumulative and to come with a `lower_bound` tag.
     #
     # non_cumulative_histogram_buckets: false
 
@@ -210,30 +223,28 @@ instances:
     ## exposed metrics from which to share labels, and the values are mappings that configure the
     ## sharing behavior. Each mapping must have at least one of the following keys:
     ##
-    ##   labels - This is a list of labels to share. All labels are shared if this is not set.
-    ##   match - This is a list of labels to match on other metrics as a condition for sharing.
-    ##   values - This is a list of allowed values as a condition for sharing.
+    ##   - labels - This is a list of labels to share. All labels are shared if this is not set.
+    ##   - match - This is a list of labels to match on other metrics as a condition for sharing.
+    ##   - values - This is a list of allowed values as a condition for sharing.
     ##
     ## To unconditionally share all labels of a metric, set it to `true`.
     ##
     ## For example, the following configuration instructs the check to apply all labels from `metric_a`
     ## to all other metrics, the `node` label from `metric_b` to only those metrics that have a `pod`
     ## label value that matches the `pod` label value of `metric_b`, and all labels from `metric_c`
-    ## to all other metrics if its value is equal to `23` or `42`.
-    ##
-    ##   share_labels:
-    ##     metric_a: true
-    ##     metric_b:
-    ##       labels:
-    ##       - node
-    ##       match:
-    ##       - pod
-    ##     metric_c:
-    ##       values:
-    ##       - 23
-    ##       - 42
+    ## to all other metrics if their value is equal to `23` or `42`.
     #
-    # share_labels: {}
+    # share_labels:
+    #   metric_a: true
+    #   metric_b:
+    #     labels:
+    #     - node
+    #     match:
+    #     - pod
+    #   metric_c:
+    #     values:
+    #     - 23
+    #     - 42
 
     ## @param cache_shared_labels - boolean - optional - default: true
     ## When `share_labels` is set, it instructs the check to cache labels collected from the first payload
@@ -255,18 +266,13 @@ instances:
     #
     # cache_metric_wildcards: true
 
-    ## @param use_latest_spec - boolean - optional - default: false
-    ## Whether or not the parser will strictly adhere to the latest version of the OpenMetrics specification.
-    #
-    # use_latest_spec: false
-
     ## @param telemetry - boolean - optional - default: false
     ## Whether or not to submit metrics prefixed by `<NAMESPACE>.telemetry.` for debugging purposes.
     #
     # telemetry: false
 
     ## @param ignore_tags - list of strings - optional
-    ## A list of regular expressions used to ignore tags added by autodiscovery and entries in the `tags` option.
+    ## A list of regular expressions used to ignore tags added by Autodiscovery and entries in the `tags` option.
     #
     # ignore_tags:
     #   - <FULL:TAG>
@@ -306,7 +312,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -329,7 +335,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
@@ -427,6 +433,11 @@ instances:
     ##     client_secret (required): The client secret.
     ##     basic_auth: Whether the provider expects credentials to be transmitted in
     ##                 an HTTP Basic Auth header. The default is: false
+    ##     options: Mapping of additional options to pass to the provider, such as the audience
+    ##              or the scope. For example:
+    ##                 options:
+    ##                   audience: https://example.com
+    ##                   scope: read:example
     ##
     ## The available writers are:
     ##
@@ -505,8 +516,8 @@ instances:
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
     ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
@@ -523,6 +534,16 @@ instances:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.

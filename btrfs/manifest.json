@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "471f9447-678b-4199-9503-7170b65d07c5",
   "app_id": "btrfs",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -14,7 +15,8 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::OS & System"
+      "Category::OS & System",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -23,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Btrfs",
@@ -34,13 +35,15 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "btrfs.",
+        "prefix": "system.disk.btrfs.",
         "check": "system.disk.btrfs.total",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 89,
+      "auto_install": true
     },
     "dashboards": {
       "btrfs": "assets/dashboards/btrfs_dashboard.json"

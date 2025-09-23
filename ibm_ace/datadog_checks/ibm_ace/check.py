@@ -32,7 +32,11 @@ class IbmAceCheck(AgentCheck, ConfigMixin):
                 self.disconnect()
 
     def initialize_config(self):
-        tags = [f'mq_server:{self.config.mq_server}', f'mq_port:{self.config.mq_port}', *self.config.tags]
+        tags = [f'mq_server:{self.config.mq_server}', f'mq_port:{self.config.mq_port}']
+
+        if self.config.tags:
+            tags.extend(self.config.tags)
+
         self._tags = tuple(tags)
 
         cd = pymqi.CD()

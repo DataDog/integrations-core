@@ -3,10 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...manifest_utils import Manifest
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_manifest_file
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_debug, echo_failure, echo_info, echo_success
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    echo_debug,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
+from datadog_checks.dev.tooling.manifest_utils import Manifest
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_manifest_file
 
 
 @click.command('eula', context_settings=CONTEXT_SETTINGS, short_help='Validate EULA files')
@@ -33,35 +41,37 @@ def eula(check):
         eula_relative_location, eula_exists = manifest.get_eula_from_manifest()
         manifest_file = get_manifest_file(check_name)
 
-        if not eula_exists:
-            echo_info(f'{check_name}... ', nl=False)
-            echo_info(' FAILED')
-            message = f'{eula_relative_location} does not exist'
-            echo_failure('  ' + message)
-            annotate_error(manifest_file, message)
-            failed_checks += 1
-            continue
-
-        # Check file extension of eula is .pdf
-        if not eula_relative_location.endswith(".pdf"):
-            echo_info(f'{check_name}... ', nl=False)
-            echo_info(' FAILED')
-            message = f'{eula_relative_location} is missing the pdf extension'
-            echo_failure('  ' + message)
-            annotate_error(manifest_file, message)
-            continue
-
-        # Check PDF starts with PDF magic_number: "%PDF"
-        with open(eula_relative_location, 'rb') as f:
-            magic_number = f.readline()
-            if b'%PDF' not in magic_number:
+        # Only validate eula if it's included in the manifest
+        if eula_relative_location is not None:
+            if not eula_exists:
                 echo_info(f'{check_name}... ', nl=False)
                 echo_info(' FAILED')
-                message = f'{eula_relative_location} is not a PDF file'
+                message = f'{eula_relative_location} does not exist'
                 echo_failure('  ' + message)
                 annotate_error(manifest_file, message)
                 failed_checks += 1
                 continue
+
+            # Check file extension of eula is .pdf
+            if not eula_relative_location.endswith(".pdf"):
+                echo_info(f'{check_name}... ', nl=False)
+                echo_info(' FAILED')
+                message = f'{eula_relative_location} is missing the pdf extension'
+                echo_failure('  ' + message)
+                annotate_error(manifest_file, message)
+                continue
+
+            # Check PDF starts with PDF magic_number: "%PDF"
+            with open(eula_relative_location, 'rb') as f:
+                magic_number = f.readline()
+                if b'%PDF' not in magic_number:
+                    echo_info(f'{check_name}... ', nl=False)
+                    echo_info(' FAILED')
+                    message = f'{eula_relative_location} is not a PDF file'
+                    echo_failure('  ' + message)
+                    annotate_error(manifest_file, message)
+                    failed_checks += 1
+                    continue
 
         ok_checks += 1
 

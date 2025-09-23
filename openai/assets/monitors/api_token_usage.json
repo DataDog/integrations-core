@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2023-08-09",
+  "last_updated_at": "2023-08-09",
+  "title": "Token usage is abnormally high",
+  "tags": [
+    "integration:openai"
+  ],
+  "description": "OpenAI's tokens can be thought of as pieces of words. Before the API processes the prompts, the input is broken down into tokens. Depending on the model used, requests have a tokens limit. This monitor tracks the token usage.",
+  "definition": {
+    "message": "{{#is_alert}}\n\nALERT: Your OpenAI usage in the last hour has been abnormally high\n\n{{/is_alert}}",
+    "name": "[OpenAI] Abnormally high token usage ",
+    "options": {
+      "include_tags": false,
+      "no_data_timeframe": 10,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_30m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      }
+    },
+    "query": "avg(last_12h):anomalies(sum:openai.api.usage.n_context{*}.as_count() + sum:openai.api.usage.n_generated{*}.as_count(), 'basic', 2, direction='both', interval=120, alert_window='last_30m', count_default_zero='true', seasonality='hourly') >= 1",
+    "tags": [
+      "integration:openai"
+    ],
+    "type": "query alert"
+  }
+}

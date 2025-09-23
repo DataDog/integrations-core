@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   apache:
     image: "httpd:${APACHE_VERSION}"

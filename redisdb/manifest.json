@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "15f0ff37-2b36-4165-9606-758271d4a16d",
   "app_id": "redis",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,20 @@
     "title": "Redis",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Data Store",
       "Category::Caching",
-      "Category::Log Collection"
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Category::Tracing",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics"
+      }
     ]
   },
   "author": {
@@ -26,7 +35,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Redis",
@@ -46,22 +54,21 @@
       },
       "process_signatures": [
         "redis-server"
-      ]
+      ],
+      "source_type_id": 21,
+      "auto_install": true
     },
     "dashboards": {
       "redis": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[Redis] High memory consumption": "assets/monitors/high_mem.json"
+      "Memory consumption is high": "assets/monitors/high_mem.json"
     },
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",
       "pid_overview": "assets/saved_views/pid_overview.json",
       "redis_pattern": "assets/saved_views/redis_pattern.json",
       "redis_processes": "assets/saved_views/redis_processes.json"
-    },
-    "logs": {
-      "source": "redis"
     }
   }
 }

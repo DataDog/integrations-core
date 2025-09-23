@@ -1,14 +1,14 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-fluentd.retry_count,gauge,,time,,The number of retries for this plugin.,-1,fluentd,retry count,
+fluentd.buffer_available_buffer_space_ratios,gauge,,,,Show available space for buffer,0,fluentd,space ratio buffer,
+fluentd.buffer_queue_byte_size,gauge,,byte,,Current bytesize of queued buffer chunks,0,fluentd,queue byte,
 fluentd.buffer_queue_length,gauge,,buffer,,The length of the buffer queue for this plugin.,-1,fluentd,buffer queue length,memory
+fluentd.buffer_stage_byte_size,gauge,,byte,,Current bytesize of staged buffer chunks,0,fluentd,stage byte,memory
+fluentd.buffer_stage_length,gauge,,,,The length of staged buffer chunks,0,fluentd,stage length,
 fluentd.buffer_total_queued_size,gauge,,byte,,The size of the buffer queue for this plugin.,-1,fluentd,buffer queue size,
-fluentd.emit_records,gauge,,record,,The total number of emitted records,0,fluentd,emit records,cpu
 fluentd.emit_count,gauge,,unit,,The total number of emit call in output plugin,0,fluentd,emit count,cpu
-fluentd.write_count,gauge,,unit,,The total number of write/try_write call in output plugin,0,fluentd,write count,
+fluentd.emit_records,gauge,,record,,The total number of emitted records,0,fluentd,emit records,cpu
+fluentd.flush_time_count,gauge,,millisecond,,The total time of buffer flush in milliseconds,0,fluentd,flush time,
+fluentd.retry_count,gauge,,time,,The number of retries for this plugin.,-1,fluentd,retry count,
 fluentd.rollback_count,gauge,,unit,,The total number of rollback. rollback happens when write/try_write failed,-1,fluentd,rollback count,
 fluentd.slow_flush_count,gauge,,unit,,The total number of slow flush. This count will be incremented when buffer flush is longer than slow_flush_log_threshold,-1,fluentd,slow flush,cpu|memory
-fluentd.flush_time_count,gauge,,millisecond,,The total time of buffer flush in milliseconds,0,fluentd,flush time,
-fluentd.buffer_stage_length,gauge,,,,The length of staged buffer chunks,0,fluentd,stage length,
-fluentd.buffer_stage_byte_size,gauge,,byte,,Current bytesize of staged buffer chunks,0,fluentd,stage byte,memory
-fluentd.buffer_queue_byte_size,gauge,,byte,,Current bytesize of queued buffer chunks,0,fluentd,queue byte,
-fluentd.buffer_available_buffer_space_ratios,gauge,,,,Show available space for buffer,0,fluentd,space ratio buffer,
+fluentd.write_count,gauge,,unit,,The total number of write/try_write call in output plugin,0,fluentd,write count,

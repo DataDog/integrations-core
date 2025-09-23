@@ -89,28 +89,6 @@ The `attribute` filter can accept two types of values:
         - RecentHitRate
   ```
 
-#### Older versions
-
-List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, use singletons and multiple `include` statements instead.
-
-```yaml
-# Datadog Agent > 5.3.0
-  conf:
-    - include:
-      domain: domain_name
-      bean:
-        - first_bean_name
-        - second_bean_name
-# Older Datadog Agent versions
-  conf:
-    - include:
-      domain: domain_name
-      bean: first_bean_name
-    - include:
-      domain: domain_name
-      bean: second_bean_name
-```
-
 #### Log collection
 
 
@@ -224,11 +202,15 @@ See [service_checks.json][14] for a list of service checks provided by this inte
 ## Troubleshooting
 
 ### Missing `tomcat.*` metrics
-The integration collects default Tomcat metrics from the `Catalina` bean domain name. If exposed Tomcat metrics are prefixed with a different bean domain name, such as `Tomcat`, copy the default metrics from the `metrics.yaml` to the `conf` section of the `tomcat.d/conf.yaml` and modify the `domain` filter to use the applicable bean domain name. 
+
+The Datadog Agent collects JMX metrics with either `Catalina` or `Tomcat` as bean domain names with the Datadog Agent version **7.49.0** or later. Older versions only collect metrics with `Catalina` as the bean domain name.
+Standalone Tomcat deployments have metrics under domain `Catalina`, but embedded Tomcat deployments (such as with Spring Boot) have metrics under domain `Tomcat`.
+
+If the Datadog Agent version is older than **7.49.0**, and if the exposed Tomcat metrics are prefixed with a different bean domain name such as `Tomcat`, copy the default metrics from the `metrics.yaml` file to the `conf` section of the `tomcat.d/conf.yaml` file and modify the `domain` filter to use the applicable bean domain name.
 
 ```yaml
 - include:
-    domain: Tomcat      # default: Catalina
+    domain: Tomcat
     type: ThreadPool
     attribute:
       maxThreads:
@@ -246,20 +228,20 @@ See the [JMX Check documentation][7] for more detailed information.
 
 ### Commands to view the available metrics
 
-The `datadog-agent jmx` command was added in version 4.1.0.
+The `datadog-agent jmx` command allows you to run troubleshooting commands on JMXFetch integrations. On Linux systems, you will need to prepend the command with `sudo -u dd-agent` so that the Datadog Agent runs as the correct user.
 
-- List attributes that match at least one of your instance configurations:
-  `sudo /etc/init.d/datadog-agent jmx list_matching_attributes`
-- List attributes that match one of your instance configurations but that are not collected because it would exceed the number of metrics that can be collected:
-  `sudo /etc/init.d/datadog-agent jmx list_limited_attributes`
-- List attributes that are actually collected by your current instance configurations:
-  `sudo /etc/init.d/datadog-agent jmx list_collected_attributes`
-- List attributes that don't match any of your instance configurations:
-  `sudo /etc/init.d/datadog-agent jmx list_not_matching_attributes`
-- List every attribute available that has a type supported by JMXFetch:
-  `sudo /etc/init.d/datadog-agent jmx list_everything`
-- Start the collection of metrics based on your current configuration and display them in the console:
-  `sudo /etc/init.d/datadog-agent jmx collect`
+#### datadog-agent jmx collect
+Running `datadog-agent jmx collect` starts the collection of metrics based on your current configuration and displays them in the console.
+
+#### datadog-agent jmx list
+The `datadog-agent jmx list` has a number of available subcommands:
+- `collected` - List attributes that will actually be collected by your current instance's configuration.
+- `everything` - List every attribute available that has a type supported by JMXFetch.
+- `limited` - List attributes that match one of your instances' configurations but that are not being collected because it would exceed the number of metrics that can be collected.
+- `matching` - List attributes that match at least one of your instances' configurations.
+- `not-matching` - List attributes that don't match any of your instances' configurations.
+- `with-metrics` - List attributes and metrics data that match at least one of your instances' configurations.
+- `with-rate-metrics` - List attributes and metrics data that match at least one of your instances' configurations, including rates and counters.
 
 ## Further Reading
 
@@ -267,10 +249,11 @@ Additional helpful documentation, links, and articles:
 
 - [Monitor Tomcat metrics with Datadog][15]
 - [Key metrics for monitoring Tomcat][16]
+- [Analyzing Tomcat logs and metrics with Datadog][17]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard_2.png
+[2]: /account/settings/agent/latest
+[3]: https://tomcat.apache.org/tomcat-10.1-doc/monitoring.html
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -284,3 +267,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://github.com/DataDog/integrations-core/blob/master/tomcat/assets/service_checks.json
 [15]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
 [16]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance
+[17]: https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog

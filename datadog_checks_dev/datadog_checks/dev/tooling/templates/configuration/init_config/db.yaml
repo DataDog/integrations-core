@@ -13,3 +13,4 @@
       - query: <QUERY>
         columns: <COLUMNS>
         tags: <TAGS>
+        collection_interval: <COLLECTION_INTERVAL>

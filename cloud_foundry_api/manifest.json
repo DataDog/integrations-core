@@ -16,7 +16,8 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Cloud",
-      "Category::Orchestration"
+      "Category::Orchestration",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Cloud Foundry API",

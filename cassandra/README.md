@@ -15,18 +15,9 @@ Get metrics from Cassandra in real time to:
 
 The Cassandra check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Cassandra nodes. It's recommended to use Oracle's JDK for this integration.
 
-**Note**: This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect see the [JMX documentation][3] for detailed instructions. If you need to monitor more metrics, contact [Datadog support][4].
+**Note**: This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in [the status page][11]. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect see the [JMX documentation][3] for detailed instructions. If you need to monitor more metrics, contact [Datadog support][4].
 
 ### Configuration
-
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx -->
-
-#### Host
-
-To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
@@ -37,6 +28,8 @@ To configure this check for an Agent running on a host:
 ##### Log collection
 
 _Available for Agent versions >6.0_
+
+For containerized environments, follow the instructions on the [Kubernetes Log Collection][18] or [Docker Log Collection][19] pages.
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -64,30 +57,6 @@ _Available for Agent versions >6.0_
     To make sure that stacktraces are properly aggregated as one single log, a [multiline processing rule][7] can be added.
 
 3. [Restart the Agent][6].
-
-<!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
-
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below. 
-
-##### Metric collection
-
-For containerized environments, see the [Autodiscovery with JMX][9] guide, which includes [updating your Agent Image][17] on your clusters through Autodiscovery.
-
-##### Log collection
-
-_Available for Agent versions >6.0_
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
-
-| Parameter      | Value                                                  |
-| -------------- | ------------------------------------------------------ |
-| `<LOG_CONFIG>` | `{"source": "cassandra", "service": "<SERVICE_NAME>"}` |
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -117,8 +86,8 @@ Need help? Contact [Datadog support][4].
 - [How to collect Cassandra metrics][15]
 - [Monitoring Cassandra with Datadog][16]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard_2.png
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/integrations/java/
 [4]: https://docs.datadoghq.com/help/
 [5]: https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/conf.yaml.example
@@ -134,3 +103,5 @@ Need help? Contact [Datadog support][4].
 [15]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
 [16]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
 [17]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containeragent#autodiscovery-annotations
+[18]: https://docs.datadoghq.com/containers/kubernetes/log/
+[19]: https://docs.datadoghq.com/containers/docker/log/

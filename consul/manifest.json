@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d0b52e9d-6594-4ff5-9b66-800943f75756",
   "app_id": "consul",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,15 +13,42 @@
     "title": "Consul",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Containers",
-      "Category::Orchestration",
       "Category::Configuration & Deployment",
-      "Category::Notification",
+      "Category::Containers",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Network",
+      "Category::Notifications",
+      "Category::Orchestration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/guide/hcp-consul"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/engineering/consul-at-datadog/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/consul-metrics/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/consul-monitoring-tools/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/consul-datadog/"
+      }
     ]
   },
   "author": {
@@ -29,7 +57,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Consul",
@@ -51,16 +78,20 @@
         "consul agent",
         "consul_agent",
         "consul-agent"
-      ]
+      ],
+      "source_type_id": 122,
+      "auto_install": true
     },
     "dashboards": {
-      "consul": "assets/dashboards/consul_dashboard.json"
+      "consul": "assets/dashboards/consul_overview.json"
+    },
+    "monitors": {
+      "consul service status": "assets/monitors/consul_status.json"
     },
     "saved_views": {
-      "consul_processes": "assets/saved_views/consul_processes.json"
-    },
-    "logs": {
-      "source": "consul"
+      "consul_processes": "assets/saved_views/consul_processes.json",
+      "consul_errors": "assets/saved_views/consul_errors.json",
+      "consul_overview": "assets/saved_views/consul_overview.json"
     }
   }
 }

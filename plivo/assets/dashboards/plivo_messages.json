@@ -1,0 +1,2032 @@
+{
+  "title": "Plivo Messages",
+  "description": "This dashboard provides an overview of messaging activity, tracking total messages for SMS, MMS, and WhatsApp across Plivo. It monitors key aspects such as delivered, sent, undelivered, failed, and rejected messages. It offers geographic and directional insights through messages by state, source and destination number by location, and domestic vs international calls. It also highlights messages by mobile country code and mobile network code.",
+  "widgets": [
+    {
+      "id": 2013071669494946,
+      "definition": {
+        "type": "image",
+        "url": "https://cdn.prod.website-files.com/6565737286e587567248583f/65c074c83684ac48c3c5bdb2_plivo-logo-copy.svg",
+        "url_dark_theme": "https://cdn.prod.website-files.com/6565737286e587567248583f/65c078c160754415ff91f02e_plivo-logo-copy-white.svg",
+        "sizing": "cover",
+        "has_background": false,
+        "has_border": false,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 4018468064327812,
+      "definition": {
+        "title": "Monitors Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8344140412003932,
+            "definition": {
+              "title": "Message Monitors Summary",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(source:plivo AND service:messages)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 7359921821269134,
+      "definition": {
+        "type": "note",
+        "content": "**Overview**\n\nThis dashboard provides an overview of messaging activity, tracking total messages for SMS, MMS, and WhatsApp across Plivo. It monitors key aspects such as delivered, sent, undelivered, failed, and rejected messages. It offers geographic and directional insights through messages by state, source and destination number by location, and domestic vs international calls. It also highlights messages by mobile country code and mobile network code.\n\nFor more information, see the [Plivo Integration Documentation](https://docs.datadoghq.com/integrations/plivo/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 4822451967929558,
+      "definition": {
+        "title": "Message Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3526829660146514,
+            "definition": {
+              "title": "Total Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages $Destination_Country_ISO $From_Number $Direction $Type $To_Number"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5597780906136474,
+            "definition": {
+              "title": "Total SMS",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @message_type:sms $Type $Direction $Destination_Country_ISO $From_Number $To_Number"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5732791399104246,
+            "definition": {
+              "title": "Total MMS",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @message_type:mms $Type $Direction $Destination_Country_ISO $From_Number $To_Number"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 7655571532636294,
+            "definition": {
+              "title": "Total WhatsApp Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @message_type:whatsapp $Type $Direction $Destination_Country_ISO $From_Number $To_Number"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 12,
+        "height": 4
+      }
+    },
+    {
+      "id": 2972978959767664,
+      "definition": {
+        "title": "Message Status",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6039959623850936,
+            "definition": {
+              "title": "Sent Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @message_state:sent $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 5315096325863336,
+            "definition": {
+              "title": "Delivered Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @message_state:delivered $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 6532468701674364,
+            "definition": {
+              "title": "Undelivered Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @message_state:undelivered $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#f3dcaa"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 5390314257401970,
+            "definition": {
+              "title": "Rejected Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @message_state:rejected $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 4640413465738812,
+            "definition": {
+              "title": "Received Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @message_state:received $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#bad5f3"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 4,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 349216391813200,
+            "definition": {
+              "title": "Failed Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @message_state:failed $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_red"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 8,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 7141062249076592,
+            "definition": {
+              "title": "Messages by State",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@message_state",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 6
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 12,
+        "height": 13
+      }
+    },
+    {
+      "id": 8856219625279316,
+      "definition": {
+        "title": "Message Errors",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1307597774039432,
+            "definition": {
+              "title": "Messages by Errors",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@plivo.error.message",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages -@plivo.error.type:000 @plivo.error.type:* $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 2859813451355224,
+            "definition": {
+              "title": "Error Messages Information",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@plivo.error.message",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        },
+                        {
+                          "facet": "@plivo.error.type",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        },
+                        {
+                          "facet": "@message_type",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages -@plivo.error.type:000 @plivo.error.type:* $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 1000,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "count",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 23,
+        "width": 12,
+        "height": 9
+      }
+    },
+    {
+      "id": 1857487239129400,
+      "definition": {
+        "title": "Message Cost",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6391824534187320,
+            "definition": {
+              "title": "Total Messages Cost",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "sum",
+                        "metric": "@plivo.total_amount"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5922950353131846,
+            "definition": {
+              "title": "Total Carrier Fees",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "sum",
+                        "metric": "@plivo.carrier_fees"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 5145714790665456,
+            "definition": {
+              "title": "Total Cost by Message Type",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "sum",
+                        "metric": "@plivo.total_amount"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@message_type",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "sum",
+                            "metric": "@plivo.total_amount"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 5
+            }
+          },
+          {
+            "id": 3046723342600052,
+            "definition": {
+              "title": "Average Cost per Message",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "dollar"
+                        }
+                      },
+                      "formula": "query1 / query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "sum",
+                        "metric": "@plivo.total_amount"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "data_source": "logs",
+                      "name": "query2",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO -@message_type:whatsapp"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 32,
+        "width": 12,
+        "height": 6
+      }
+    },
+    {
+      "id": 872967548523012,
+      "definition": {
+        "title": "Message Geographic Insights",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7292868978131250,
+            "definition": {
+              "title": "Source Number by Location",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 250,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 250,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4477142382927168,
+            "definition": {
+              "title": "Destination Number by Location",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "geomap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@geo.country_iso_code",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 869237664206206,
+            "definition": {
+              "title": "Top Messages by Mobile Country Code",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@mcc",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 1073889434375674,
+            "definition": {
+              "title": "Top Messages by Mobile Network code",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@mnc",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4785504157638168,
+            "definition": {
+              "title": "International Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @is_domestic:false $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 754950580521200,
+            "definition": {
+              "title": "Domestic Messages",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:plivo service:messages @is_domestic:true $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 8,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 8164513711878104,
+            "definition": {
+              "title": "Messages from Destination Network",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@destination_network",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO -@destination_network:\"\""
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 8,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 38,
+        "width": 12,
+        "height": 13
+      }
+    },
+    {
+      "id": 3641747244089906,
+      "definition": {
+        "title": "Message Other Insights",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3269093702465224,
+            "definition": {
+              "title": "Messages by Direction",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@message_direction",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4181581469967932,
+            "definition": {
+              "title": "WhatsApp Conversation by Origin",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@conversation_origin",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages message_type:whatsapp $Type $From_Number $To_Number $Destination_Country_ISO $Direction -@conversation_origin:\"\""
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4121904028450888,
+            "definition": {
+              "title": "Messages by Phone number",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@from_number",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        },
+                        {
+                          "facet": "@to_number",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "count",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 2170680690728864,
+            "definition": {
+              "title": "Messages over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@plivo.messaging.message_id"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@message_type",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "cardinality",
+                            "metric": "@plivo.messaging.message_id"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:plivo service:messages $Type $Direction $To_Number $From_Number $Destination_Country_ISO"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 5158040496283684,
+            "definition": {
+              "title": "Message Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:plivo service:messages $Direction $Type $From_Number $To_Number $Destination_Country_ISO ",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 51,
+        "width": 12,
+        "height": 16
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "Direction",
+      "prefix": "@message_direction",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Type",
+      "prefix": "@message_type",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "From_Number",
+      "prefix": "@from_number",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "To_Number",
+      "prefix": "@to_number",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Destination_Country_ISO",
+      "prefix": "@geo.country_iso_code",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

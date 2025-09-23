@@ -8,12 +8,12 @@ from __future__ import absolute_import
 
 import re
 from collections import defaultdict
-from typing import List
+from typing import List  # noqa: F401
 
-from six import PY2, iteritems
-
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+
+from .check import AerospikeCheckV2
 
 try:
     import aerospike
@@ -52,14 +52,14 @@ def parse_namespace(data, namespace, secondary):
         line = data.pop(0)
 
         # $ asinfo -v 'sindex/phobos_sindex'
-        # ns=phobos_sindex:set=longevity:indexname=str_100_idx:num_bins=1:bins=str_100_bin:type=TEXT:sync_state=synced:state=RW
-        # ns=phobos_sindex:set=longevity:indexname=str_uniq_idx:num_bins=1:bins=str_uniq_bin:type=TEXT:sync_state=synced:state=RW
+        # ns=phobos_sindex:set=longevity:indexname=str_100_idx:num_bins=1:bins=str_100_bin:type=TEXT:sync_state=synced:state=RW  # noqa: E501
+        # ns=phobos_sindex:set=longevity:indexname=str_uniq_idx:num_bins=1:bins=str_uniq_bin:type=TEXT:sync_state=synced:state=RW  # noqa: E501
         # ns=phobos_sindex:set=longevity:indexname=int_uniq_idx:num_bins=1:bins=int_uniq_bin:type=INT SIGNED:\
         # sync_state=synced:state=RW
         #
         # $ asinfo -v 'sets/bar'
-        # ns=bar:set=demo:objects=1:tombstones=0:memory_data_bytes=34:truncate_lut=0:stop-writes-count=0:set-enable-xdr=use-default:disable-eviction=false
-        # ns=bar:set=demo2:objects=123456:tombstones=0:memory_data_bytes=8518464:truncate_lut=0:stop-writes-count=0:set-enable-xdr=use-default:disable-eviction=false
+        # ns=bar:set=demo:objects=1:tombstones=0:memory_data_bytes=34:truncate_lut=0:stop-writes-count=0:set-enable-xdr=use-default:disable-eviction=false  # noqa: E501
+        # ns=bar:set=demo2:objects=123456:tombstones=0:memory_data_bytes=8518464:truncate_lut=0:stop-writes-count=0:set-enable-xdr=use-default:disable-eviction=false  # noqa: E501
 
         match = re.match('^ns=%s:([^:]+:)?%s=([^:]+):.*$' % (namespace, secondary), line)
         if match is None:
@@ -78,15 +78,6 @@ class AerospikeCheck(AgentCheck):
         instance = instances[0]
 
         if 'openmetrics_endpoint' in instance:
-            if PY2:
-                raise ConfigurationError(
-                    "This version of the integration is only available when using py3. "
-                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                    "for more information or use the older style config."
-                )
-            # TODO: when we drop Python 2 move this import up top
-            from .check import AerospikeCheckV2
-
             return AerospikeCheckV2(name, init_config, instances)
 
         else:
@@ -161,7 +152,7 @@ class AerospikeCheck(AgentCheck):
 
             # https://www.aerospike.com/docs/reference/info/#sindex
             sindex = self.get_info('sindex/{}'.format(ns))
-            for idx in parse_namespace(sindex[:-1], ns, 'indexname'):
+            for idx in parse_namespace(sindex, ns, 'indexname'):
                 sindex_tags = ['sindex:{}'.format(idx)]
                 sindex_tags.extend(namespace_tags)
                 self.collect_info('sindex/{}/{}'.format(ns, idx), SINDEX_METRIC_TYPE, tags=sindex_tags)
@@ -232,7 +223,7 @@ class AerospikeCheck(AgentCheck):
                 self.log.warning('Exceeded cap `%s` for metric type `%s` - please contact support', cap, metric_type)
                 return
 
-        for key, value in iteritems(required_data):
+        for key, value in required_data.items():
             self.send(metric_type, key, value, tags)
 
     def get_namespaces(self):
@@ -491,7 +482,7 @@ class AerospikeCheck(AgentCheck):
 
             ns_latencies[ns].setdefault("metric_names", []).extend(metric_names)
 
-        for ns, v in iteritems(ns_latencies):
+        for ns, v in ns_latencies.items():
             metric_names = v.get("metric_names", [])
             metric_values = v.get("metric_values", [])
             namespace_tags = ['namespace:{}'.format(ns)] if ns else []

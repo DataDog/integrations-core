@@ -1,0 +1,80 @@
+{
+    "pools": [
+        {
+            "id": "d0335b34-3115-4b3b-9a1a-7e2363ebfee3",
+            "name": "pool-1",
+            "description": "",
+            "provisioning_status": "ACTIVE",
+            "operating_status": "ERROR",
+            "admin_state_up": true,
+            "protocol": "HTTP",
+            "lb_algorithm": "ROUND_ROBIN",
+            "session_persistence": null,
+            "project_id": "966af9e5e65f4744840da2a01e48d72a",
+            "loadbalancers": [
+                {
+                  "id": "4bb7bfb1-83c2-45e8-b0e1-ed3022329115"
+                }
+              ],
+              "listeners": [
+                {
+                  "id": "de81cbdc-8207-4253-8f21-3eea9870e7a9"
+                }
+              ],
+            "created_at": "2023-10-25T17:39:54",
+            "updated_at": "2023-10-25T17:44:20",
+            "healthmonitor_id": "eb5f8815-e005-4ff6-9cad-015a84b3903e",
+            "members": [
+                {
+                    "id": "58bff794-5d25-4332-82ab-9f4ecaf94f09"
+                }
+            ],
+            "tags": [],
+            "tls_container_ref": null,
+            "ca_tls_container_ref": null,
+            "crl_container_ref": null,
+            "tls_enabled": false,
+            "tls_ciphers": null,
+            "tls_versions": null,
+            "alpn_protocols": null,
+            "tenant_id": "966af9e5e65f4744840da2a01e48d72a"
+        },
+        {
+            "id": "6dccbec7-b404-47ed-821e-aa15d16a7b4c",
+            "name": "hellohello",
+            "description": "hihi",
+            "provisioning_status": "ACTIVE",
+            "operating_status": "ONLINE",
+            "admin_state_up": true,
+            "protocol": "HTTP",
+            "lb_algorithm": "ROUND_ROBIN",
+            "session_persistence": null,
+            "project_id": "966af9e5e65f4744840da2a01e48d72a",
+            "loadbalancers": [
+                {
+                    "id": "df692609-aca3-421a-8c3c-9f3fa2ce8b76"
+                }
+            ],
+            "listeners": [
+                {
+                    "id": "302abf94-1360-41a9-91e8-a9bcb3ab3590"
+                }
+            ],
+            "created_at": "2023-11-01T17:46:50",
+            "updated_at": "2023-11-01T17:48:00",
+            "healthmonitor_id": "8dd3b40d-2799-4d23-bd8f-fb1d2919a38d",
+            "members": [],
+            "tags": [],
+            "tls_container_ref": null,
+            "ca_tls_container_ref": null,
+            "crl_container_ref": null,
+            "tls_enabled": false,
+            "tls_ciphers": null,
+            "tls_versions": null,
+            "alpn_protocols": null,
+            "tenant_id": "966af9e5e65f4744840da2a01e48d72a"
+        }
+    ],
+    "pools_links": [
+    ]
+}

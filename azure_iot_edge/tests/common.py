@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from typing import List, Tuple
+from typing import List, Tuple  # noqa: F401
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.stubs.aggregator import AggregatorStub
@@ -346,8 +346,7 @@ E2E_EXTRA_SPAWNED_CONTAINERS = [
 
 E2E_METRICS = (
     # All metrics...
-    {name for name, _ in MODULE_METRICS}
-    .union(name for name, _, _ in AGENT_METRICS)
+    {name for name, _ in MODULE_METRICS}.union(name for name, _, _ in AGENT_METRICS)
     .union(name for name, _ in HUB_METRICS)
     # ... Except a few that don't get emitted by default.
     .difference(

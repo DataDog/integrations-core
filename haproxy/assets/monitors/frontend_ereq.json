@@ -1,30 +1,39 @@
 {
-  "name": "[HAProxy] Number of client-side request error for {{host.name}} is above normal.",
-  "type": "query alert",
-  "query": "avg(last_4h):anomalies(avg:haproxy.frontend.errors.req_rate{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
-  "message": "There is a higher number of client-side request error for host: {{host.name}}\n\nClient-side request errors could have a number of causes:\n\n- Client terminates before sending request\n- Read error from client\n- Client timeout\n- Client terminated connection\n- Request was tarpitted/subject to ACL",
-  "tags": ["integration:haproxy"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": true,
-    "notify_no_data": false,
-    "renotify_interval": 0,
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 1,
-      "critical_recovery": 0
+  "version": 2,
+  "created_at": "2021-03-01",
+  "last_updated_at": "2021-03-01",
+  "title": "Number of client-side request error is high",
+  "tags": [
+    "integration:haproxy"
+  ],
+  "description": "The clients send requests asking the server for a specific resource. This monitor tracks anomalies in the request error rate for HAProxy frontends, on different hosts, to identify issues on the frontend of your web application infrastructure.",
+  "definition": {
+    "message": "There is a higher number of client-side request error for host: {{host.name}}\n\nClient-side request errors could have a number of causes:\n\n- Client terminates before sending request\n- Read error from client\n- Client timeout\n- Client terminated connection\n- Request was tarpitted/subject to ACL",
+    "name": "[HAProxy] Number of client-side request error for {{host.name}} is above normal.",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
     },
-    "threshold_windows": {
-      "trigger_window": "last_15m",
-      "recovery_window": "last_15m"
-    }
-  },
-  "recommended_monitor_metadata": {
-    "description": "Notifies when HAProxy frontend error request rate is above normal for a specific host."
+    "query": "avg(last_4h):anomalies(avg:haproxy.frontend.errors.req_rate{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+    "tags": [
+      "integration:haproxy"
+    ],
+    "type": "query alert"
   }
 }

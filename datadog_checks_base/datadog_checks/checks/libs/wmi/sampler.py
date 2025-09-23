@@ -2,7 +2,7 @@
 # under the Apache License Version 2.0.
 # This product includes software developed at Datadog (https://www.datadoghq.com/).
 # Copyright 2016-2019 Datadog, Inc.
-# flake8: noqa
+# ruff: noqa
 
 """
 A lightweight Python WMI module wrapper built on top of `pywin32` and `win32com` extensions.
@@ -23,4 +23,5 @@ Please refer to `checks.lib.wmi.counter_type` for more information*
 Original discussion thread: https://github.com/DataDog/dd-agent/issues/1952
 Credits to @TheCloudlessSky (https://github.com/TheCloudlessSky)
 """
+
 from ....win.wmi.sampler import WMISampler

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "1f436ae6-e063-408f-ad35-37ee37fa2183",
   "app_id": "silk",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -16,8 +17,9 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Cloud",
-      "Category::Data Store",
-      "Category::Provisioning"
+      "Category::Data Stores",
+      "Category::Provisioning",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Silk",
@@ -43,13 +44,15 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10250,
+      "auto_install": true
     },
     "dashboards": {
       "Silk - Overview": "assets/dashboards/silk_overview.json"
     },
     "monitors": {
-      "Latency high": "assets/recommended_monitors/latency_high.json"
+      "Latency is high": "assets/monitors/latency_high.json"
     }
   }
 }

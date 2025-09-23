@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "49dc62d7-7e0c-4c46-b90f-dfd4d5c35d53",
   "app_id": "envoy",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,13 +13,16 @@
     "title": "Envoy",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Cloud",
-      "Category::Web",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Network",
+      "Category::Security",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -27,7 +31,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Envoy",
@@ -44,13 +47,25 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "envoy"
+      ],
+      "source_type_id": 10012,
+      "auto_install": true
     },
     "dashboards": {
-      "Envoy - Overview": "assets/dashboards/envoy_overview.json"
+      "Envoy - Overview": "assets/dashboards/envoy_overview.json",
+      "Envoy Openmetrics Overview": "assets/dashboards/openmetrics_overview.json"
     },
-    "logs": {
-      "source": "envoy"
+    "monitors": {
+      "Envoy instance disconnected from control plane": "assets/monitors/connected_state.json"
+    },
+    "saved_views": {
+      "envoy_overview": "assets/saved_views/envoy_overview.json",
+      "envoy_4xx": "assets/saved_views/envoy_4xx.json",
+      "envoy_5xx": "assets/saved_views/envoy_5xx.json",
+      "envoy_error_grouped": "assets/saved_views/envoy_error_grouped.json"
     }
   }
 }

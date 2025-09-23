@@ -1,0 +1,274 @@
+
+# HELP storage_api_upload_started Upload started
+# TYPE storage_api_upload_started gauge
+
+# HELP storage_api_upload_success Successful uploads
+# TYPE storage_api_upload_success gauge
+
+# HELP storage_api_database_query_performance Database query performance
+# TYPE storage_api_database_query_performance histogram
+storage_api_database_query_performance_bucket{le="0.005",name="ListBuckets"} 0
+storage_api_database_query_performance_bucket{le="0.01",name="ListBuckets"} 0
+storage_api_database_query_performance_bucket{le="0.025",name="ListBuckets"} 0
+storage_api_database_query_performance_bucket{le="0.05",name="ListBuckets"} 1
+storage_api_database_query_performance_bucket{le="0.1",name="ListBuckets"} 1
+storage_api_database_query_performance_bucket{le="0.25",name="ListBuckets"} 1
+storage_api_database_query_performance_bucket{le="0.5",name="ListBuckets"} 1
+storage_api_database_query_performance_bucket{le="1",name="ListBuckets"} 1
+storage_api_database_query_performance_bucket{le="2.5",name="ListBuckets"} 1
+storage_api_database_query_performance_bucket{le="5",name="ListBuckets"} 1
+storage_api_database_query_performance_bucket{le="10",name="ListBuckets"} 1
+storage_api_database_query_performance_bucket{le="+Inf",name="ListBuckets"} 1
+storage_api_database_query_performance_sum{name="ListBuckets"} 0.031662833
+storage_api_database_query_performance_count{name="ListBuckets"} 1
+
+# HELP storage_api_queue_job_scheduled_time Time taken to schedule a job in the queue
+# TYPE storage_api_queue_job_scheduled_time histogram
+
+# HELP storage_api_queue_job_scheduled Current number of pending messages in the queue
+# TYPE storage_api_queue_job_scheduled gauge
+
+# HELP storage_api_queue_job_completed Current number of processed messages in the queue
+# TYPE storage_api_queue_job_completed gauge
+
+# HELP storage_api_queue_job_retry_failed Current number of failed attempts messages in the queue
+# TYPE storage_api_queue_job_retry_failed gauge
+
+# HELP storage_api_queue_job_error Current number of errored messages in the queue
+# TYPE storage_api_queue_job_error gauge
+
+# HELP storage_api_s3_upload_part S3 upload part performance
+# TYPE storage_api_s3_upload_part histogram
+
+# HELP storage_api_db_pool Number of database pools created
+# TYPE storage_api_db_pool gauge
+storage_api_db_pool{is_external="false"} 1
+
+# HELP storage_api_db_connections Number of database connections
+# TYPE storage_api_db_connections gauge
+storage_api_db_connections{is_external="false"} 0
+
+# HELP storage_api_http_pool_busy_sockets Number of busy sockets currently in use
+# TYPE storage_api_http_pool_busy_sockets gauge
+storage_api_http_pool_busy_sockets{name="s3_tus",region="stub",protocol="https"} 0
+
+# HELP storage_api_http_pool_free_sockets Number of free sockets available for reuse
+# TYPE storage_api_http_pool_free_sockets gauge
+storage_api_http_pool_free_sockets{name="s3_tus",region="stub",protocol="https"} 0
+
+# HELP storage_api_http_pool_requests Number of pending requests waiting for a socket
+# TYPE storage_api_http_pool_requests gauge
+storage_api_http_pool_requests{name="s3_tus",region="stub"} 0
+
+# HELP storage_api_http_pool_errors Number of pending requests waiting for a socket
+# TYPE storage_api_http_pool_errors gauge
+storage_api_http_pool_errors{name="s3_tus",region="stub",type="socket_error",protocol="https"} 0
+storage_api_http_pool_errors{name="s3_tus",region="stub",type="timeout_socket_error",protocol="https"} 0
+storage_api_http_pool_errors{name="s3_tus",region="stub",type="create_socket_error",protocol="https"} 0
+
+# HELP storage_api_http_request_duration_seconds request duration in seconds
+# TYPE storage_api_http_request_duration_seconds histogram
+storage_api_http_request_duration_seconds_bucket{le="0.005",method="GET",route="/bucket",status_code="2xx"} 0
+storage_api_http_request_duration_seconds_bucket{le="0.01",method="GET",route="/bucket",status_code="2xx"} 0
+storage_api_http_request_duration_seconds_bucket{le="0.025",method="GET",route="/bucket",status_code="2xx"} 0
+storage_api_http_request_duration_seconds_bucket{le="0.05",method="GET",route="/bucket",status_code="2xx"} 1
+storage_api_http_request_duration_seconds_bucket{le="0.1",method="GET",route="/bucket",status_code="2xx"} 1
+storage_api_http_request_duration_seconds_bucket{le="0.25",method="GET",route="/bucket",status_code="2xx"} 1
+storage_api_http_request_duration_seconds_bucket{le="0.5",method="GET",route="/bucket",status_code="2xx"} 1
+storage_api_http_request_duration_seconds_bucket{le="1",method="GET",route="/bucket",status_code="2xx"} 1
+storage_api_http_request_duration_seconds_bucket{le="2.5",method="GET",route="/bucket",status_code="2xx"} 1
+storage_api_http_request_duration_seconds_bucket{le="5",method="GET",route="/bucket",status_code="2xx"} 1
+storage_api_http_request_duration_seconds_bucket{le="10",method="GET",route="/bucket",status_code="2xx"} 1
+storage_api_http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/bucket",status_code="2xx"} 1
+storage_api_http_request_duration_seconds_sum{method="GET",route="/bucket",status_code="2xx"} 0.043428125
+storage_api_http_request_duration_seconds_count{method="GET",route="/bucket",status_code="2xx"} 1
+
+# HELP storage_api_http_request_summary_seconds request duration in seconds summary
+# TYPE storage_api_http_request_summary_seconds summary
+storage_api_http_request_summary_seconds{quantile="0.01",method="GET",route="/bucket",status_code="2xx"} 0.042737459
+storage_api_http_request_summary_seconds{quantile="0.05",method="GET",route="/bucket",status_code="2xx"} 0.042737459
+storage_api_http_request_summary_seconds{quantile="0.5",method="GET",route="/bucket",status_code="2xx"} 0.042737459
+storage_api_http_request_summary_seconds{quantile="0.9",method="GET",route="/bucket",status_code="2xx"} 0.042737459
+storage_api_http_request_summary_seconds{quantile="0.95",method="GET",route="/bucket",status_code="2xx"} 0.042737459
+storage_api_http_request_summary_seconds{quantile="0.99",method="GET",route="/bucket",status_code="2xx"} 0.042737459
+storage_api_http_request_summary_seconds{quantile="0.999",method="GET",route="/bucket",status_code="2xx"} 0.042737459
+storage_api_http_request_summary_seconds_sum{method="GET",route="/bucket",status_code="2xx"} 0.042737459
+storage_api_http_request_summary_seconds_count{method="GET",route="/bucket",status_code="2xx"} 1
+
+# HELP storage_api_process_cpu_user_seconds_total Total user CPU time spent in seconds.
+# TYPE storage_api_process_cpu_user_seconds_total counter
+storage_api_process_cpu_user_seconds_total{region="stub"} 361.14234300000004
+
+# HELP storage_api_process_cpu_system_seconds_total Total system CPU time spent in seconds.
+# TYPE storage_api_process_cpu_system_seconds_total counter
+storage_api_process_cpu_system_seconds_total{region="stub"} 143.664084
+
+# HELP storage_api_process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE storage_api_process_cpu_seconds_total counter
+storage_api_process_cpu_seconds_total{region="stub"} 504.80642700000004
+
+# HELP storage_api_process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE storage_api_process_start_time_seconds gauge
+storage_api_process_start_time_seconds{region="stub"} 1733450910
+
+# HELP storage_api_process_resident_memory_bytes Resident memory size in bytes.
+# TYPE storage_api_process_resident_memory_bytes gauge
+storage_api_process_resident_memory_bytes{region="stub"} 103641088
+
+# HELP storage_api_process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE storage_api_process_virtual_memory_bytes gauge
+storage_api_process_virtual_memory_bytes{region="stub"} 4783030272
+
+# HELP storage_api_process_heap_bytes Process heap size in bytes.
+# TYPE storage_api_process_heap_bytes gauge
+storage_api_process_heap_bytes{region="stub"} 132231168
+
+# HELP storage_api_process_open_fds Number of open file descriptors.
+# TYPE storage_api_process_open_fds gauge
+storage_api_process_open_fds{region="stub"} 21
+
+# HELP storage_api_process_max_fds Maximum number of open file descriptors.
+# TYPE storage_api_process_max_fds gauge
+storage_api_process_max_fds{region="stub"} 1048576
+
+# HELP storage_api_nodejs_eventloop_lag_seconds Lag of event loop in seconds.
+# TYPE storage_api_nodejs_eventloop_lag_seconds gauge
+storage_api_nodejs_eventloop_lag_seconds{region="stub"} 0.0089925
+
+# HELP storage_api_nodejs_eventloop_lag_min_seconds The minimum recorded event loop delay.
+# TYPE storage_api_nodejs_eventloop_lag_min_seconds gauge
+storage_api_nodejs_eventloop_lag_min_seconds{region="stub"} 0.000014848
+
+# HELP storage_api_nodejs_eventloop_lag_max_seconds The maximum recorded event loop delay.
+# TYPE storage_api_nodejs_eventloop_lag_max_seconds gauge
+storage_api_nodejs_eventloop_lag_max_seconds{region="stub"} 1.198522367
+
+# HELP storage_api_nodejs_eventloop_lag_mean_seconds The mean of the recorded event loop delays.
+# TYPE storage_api_nodejs_eventloop_lag_mean_seconds gauge
+storage_api_nodejs_eventloop_lag_mean_seconds{region="stub"} 0.011911191714967564
+
+# HELP storage_api_nodejs_eventloop_lag_stddev_seconds The standard deviation of the recorded event loop delays.
+# TYPE storage_api_nodejs_eventloop_lag_stddev_seconds gauge
+storage_api_nodejs_eventloop_lag_stddev_seconds{region="stub"} 0.0035951748338251626
+
+# HELP storage_api_nodejs_eventloop_lag_p50_seconds The 50th percentile of the recorded event loop delays.
+# TYPE storage_api_nodejs_eventloop_lag_p50_seconds gauge
+storage_api_nodejs_eventloop_lag_p50_seconds{region="stub"} 0.011395071
+
+# HELP storage_api_nodejs_eventloop_lag_p90_seconds The 90th percentile of the recorded event loop delays.
+# TYPE storage_api_nodejs_eventloop_lag_p90_seconds gauge
+storage_api_nodejs_eventloop_lag_p90_seconds{region="stub"} 0.014335999
+
+# HELP storage_api_nodejs_eventloop_lag_p99_seconds The 99th percentile of the recorded event loop delays.
+# TYPE storage_api_nodejs_eventloop_lag_p99_seconds gauge
+storage_api_nodejs_eventloop_lag_p99_seconds{region="stub"} 0.017448959
+
+# HELP storage_api_nodejs_active_resources Number of active resources that are currently keeping the event loop alive, grouped by async resource type.
+# TYPE storage_api_nodejs_active_resources gauge
+storage_api_nodejs_active_resources{type="PipeWrap",region="stub"} 2
+storage_api_nodejs_active_resources{type="TCPSocketWrap",region="stub"} 2
+storage_api_nodejs_active_resources{type="TCPServerWrap",region="stub"} 1
+storage_api_nodejs_active_resources{type="Timeout",region="stub"} 2
+storage_api_nodejs_active_resources{type="Immediate",region="stub"} 1
+
+# HELP storage_api_nodejs_active_resources_total Total number of active resources.
+# TYPE storage_api_nodejs_active_resources_total gauge
+storage_api_nodejs_active_resources_total{region="stub"} 8
+
+# HELP storage_api_nodejs_active_handles Number of active libuv handles grouped by handle type. Every handle type is C++ class name.
+# TYPE storage_api_nodejs_active_handles gauge
+storage_api_nodejs_active_handles{type="Socket",region="stub"} 4
+storage_api_nodejs_active_handles{type="Server",region="stub"} 1
+
+# HELP storage_api_nodejs_active_handles_total Total number of active handles.
+# TYPE storage_api_nodejs_active_handles_total gauge
+storage_api_nodejs_active_handles_total{region="stub"} 5
+
+# HELP storage_api_nodejs_active_requests Number of active libuv requests grouped by request type. Every request type is C++ class name.
+# TYPE storage_api_nodejs_active_requests gauge
+
+# HELP storage_api_nodejs_active_requests_total Total number of active requests.
+# TYPE storage_api_nodejs_active_requests_total gauge
+storage_api_nodejs_active_requests_total{region="stub"} 0
+
+# HELP storage_api_nodejs_heap_size_total_bytes Process heap size from Node.js in bytes.
+# TYPE storage_api_nodejs_heap_size_total_bytes gauge
+storage_api_nodejs_heap_size_total_bytes{region="stub"} 51707904
+
+# HELP storage_api_nodejs_heap_size_used_bytes Process heap size used from Node.js in bytes.
+# TYPE storage_api_nodejs_heap_size_used_bytes gauge
+storage_api_nodejs_heap_size_used_bytes{region="stub"} 43002696
+
+# HELP storage_api_nodejs_external_memory_bytes Node.js external memory size in bytes.
+# TYPE storage_api_nodejs_external_memory_bytes gauge
+storage_api_nodejs_external_memory_bytes{region="stub"} 3568105
+
+# HELP storage_api_nodejs_heap_space_size_total_bytes Process heap space size total from Node.js in bytes.
+# TYPE storage_api_nodejs_heap_space_size_total_bytes gauge
+storage_api_nodejs_heap_space_size_total_bytes{space="read_only",region="stub"} 0
+storage_api_nodejs_heap_space_size_total_bytes{space="new",region="stub"} 1048576
+storage_api_nodejs_heap_space_size_total_bytes{space="old",region="stub"} 44597248
+storage_api_nodejs_heap_space_size_total_bytes{space="code",region="stub"} 3670016
+storage_api_nodejs_heap_space_size_total_bytes{space="shared",region="stub"} 0
+storage_api_nodejs_heap_space_size_total_bytes{space="new_large_object",region="stub"} 0
+storage_api_nodejs_heap_space_size_total_bytes{space="large_object",region="stub"} 2220032
+storage_api_nodejs_heap_space_size_total_bytes{space="code_large_object",region="stub"} 172032
+storage_api_nodejs_heap_space_size_total_bytes{space="shared_large_object",region="stub"} 0
+
+# HELP storage_api_nodejs_heap_space_size_used_bytes Process heap space size used from Node.js in bytes.
+# TYPE storage_api_nodejs_heap_space_size_used_bytes gauge
+storage_api_nodejs_heap_space_size_used_bytes{space="read_only",region="stub"} 0
+storage_api_nodejs_heap_space_size_used_bytes{space="new",region="stub"} 310136
+storage_api_nodejs_heap_space_size_used_bytes{space="old",region="stub"} 37172576
+storage_api_nodejs_heap_space_size_used_bytes{space="code",region="stub"} 3194320
+storage_api_nodejs_heap_space_size_used_bytes{space="shared",region="stub"} 0
+storage_api_nodejs_heap_space_size_used_bytes{space="new_large_object",region="stub"} 0
+storage_api_nodejs_heap_space_size_used_bytes{space="large_object",region="stub"} 2186264
+storage_api_nodejs_heap_space_size_used_bytes{space="code_large_object",region="stub"} 155296
+storage_api_nodejs_heap_space_size_used_bytes{space="shared_large_object",region="stub"} 0
+
+# HELP storage_api_nodejs_heap_space_size_available_bytes Process heap space size available from Node.js in bytes.
+# TYPE storage_api_nodejs_heap_space_size_available_bytes gauge
+storage_api_nodejs_heap_space_size_available_bytes{space="read_only",region="stub"} 0
+storage_api_nodejs_heap_space_size_available_bytes{space="new",region="stub"} 720744
+storage_api_nodejs_heap_space_size_available_bytes{space="old",region="stub"} 6558624
+storage_api_nodejs_heap_space_size_available_bytes{space="code",region="stub"} 246096
+storage_api_nodejs_heap_space_size_available_bytes{space="shared",region="stub"} 0
+storage_api_nodejs_heap_space_size_available_bytes{space="new_large_object",region="stub"} 1048576
+storage_api_nodejs_heap_space_size_available_bytes{space="large_object",region="stub"} 0
+storage_api_nodejs_heap_space_size_available_bytes{space="code_large_object",region="stub"} 0
+storage_api_nodejs_heap_space_size_available_bytes{space="shared_large_object",region="stub"} 0
+
+# HELP storage_api_nodejs_version_info Node.js version info.
+# TYPE storage_api_nodejs_version_info gauge
+storage_api_nodejs_version_info{version="v20.18.0",major="20",minor="18",patch="0",region="stub"} 1
+
+# HELP storage_api_nodejs_gc_duration_seconds Garbage collection duration by kind, one of major, minor, incremental or weakcb.
+# TYPE storage_api_nodejs_gc_duration_seconds histogram
+storage_api_nodejs_gc_duration_seconds_bucket{le="0.001",kind="minor",region="stub"} 544
+storage_api_nodejs_gc_duration_seconds_bucket{le="0.01",kind="minor",region="stub"} 1002
+storage_api_nodejs_gc_duration_seconds_bucket{le="0.1",kind="minor",region="stub"} 1006
+storage_api_nodejs_gc_duration_seconds_bucket{le="1",kind="minor",region="stub"} 1006
+storage_api_nodejs_gc_duration_seconds_bucket{le="2",kind="minor",region="stub"} 1006
+storage_api_nodejs_gc_duration_seconds_bucket{le="5",kind="minor",region="stub"} 1006
+storage_api_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="minor",region="stub"} 1006
+storage_api_nodejs_gc_duration_seconds_sum{kind="minor",region="stub"} 1.4403644915223157
+storage_api_nodejs_gc_duration_seconds_count{kind="minor",region="stub"} 1006
+storage_api_nodejs_gc_duration_seconds_bucket{le="0.001",kind="incremental",region="stub"} 4
+storage_api_nodejs_gc_duration_seconds_bucket{le="0.01",kind="incremental",region="stub"} 8
+storage_api_nodejs_gc_duration_seconds_bucket{le="0.1",kind="incremental",region="stub"} 12
+storage_api_nodejs_gc_duration_seconds_bucket{le="1",kind="incremental",region="stub"} 12
+storage_api_nodejs_gc_duration_seconds_bucket{le="2",kind="incremental",region="stub"} 12
+storage_api_nodejs_gc_duration_seconds_bucket{le="5",kind="incremental",region="stub"} 12
+storage_api_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="incremental",region="stub"} 12
+storage_api_nodejs_gc_duration_seconds_sum{kind="incremental",region="stub"} 0.07946879202127458
+storage_api_nodejs_gc_duration_seconds_count{kind="incremental",region="stub"} 12
+storage_api_nodejs_gc_duration_seconds_bucket{le="0.001",kind="major",region="stub"} 0
+storage_api_nodejs_gc_duration_seconds_bucket{le="0.01",kind="major",region="stub"} 10
+storage_api_nodejs_gc_duration_seconds_bucket{le="0.1",kind="major",region="stub"} 11
+storage_api_nodejs_gc_duration_seconds_bucket{le="1",kind="major",region="stub"} 11
+storage_api_nodejs_gc_duration_seconds_bucket{le="2",kind="major",region="stub"} 11
+storage_api_nodejs_gc_duration_seconds_bucket{le="5",kind="major",region="stub"} 11
+storage_api_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="major",region="stub"} 11
+storage_api_nodejs_gc_duration_seconds_sum{kind="major",region="stub"} 0.04609945893287658
+storage_api_nodejs_gc_duration_seconds_count{kind="major",region="stub"} 11

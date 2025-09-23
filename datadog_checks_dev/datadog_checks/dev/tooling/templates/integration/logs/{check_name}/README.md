@@ -12,11 +12,11 @@ This integration monitors [{integration_name}][4].
 
 ### Configuration
 
-1. <List of steps to setup this Integration>
+!!! Add list of steps to set up this integration !!!
 
 ### Validation
 
-<Steps to validate integration is functioning as expected>
+!!! Add steps to validate integration is functioning as expected !!!
 
 ## Data Collected
 
@@ -50,12 +50,6 @@ This integration monitors [{integration_name}][4].
 ### Events
 
 The {integration_name} integration does not include any events.
-
-### Service Checks
-
-The {integration_name} integration does not include any service checks.
-
-See [service_checks.json][5] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 

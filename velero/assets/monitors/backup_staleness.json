@@ -1,0 +1,33 @@
+{
+	"version": 2,
+	"created_at": "2025-03-23",
+	"last_updated_at": "2025-03-23",
+	"title": "Last backup is stale",
+	"description": "This monitor tracks the staleness of Velero backups by checking when the last successful backup occurred. If no successful backups have completed recently, this could indicate issues with the backup system, scheduling, or infrastructure.",
+	"definition": {
+	    "name": "[Velero] No successful backups",
+	    "type": "query alert",
+		"query": "change(avg(last_5m),last_1d):avg:velero.backup.last_successful_timestamp{*} == 0",
+	    "message": "No successful Velero backups have completed in the last day.\n\nThis could mean:\n* Scheduled backups are not running\n* All backup attempts are failing\n* The backup system is not functioning\n\n{{#is_alert}}\nLast successful backup: {{value}} (Unix timestamp)\n{{/is_alert}}\n\nVerify:\n1. Velero schedules are configured correctly\n2. Storage backend is accessible\n3. Velero pods are running\n4. Check Velero logs for errors\n\n@slack-datadog-velero-alerts",
+	    "tags": [
+	    	"integration:velero"
+	    ],
+	    "options": {
+	    	"thresholds": {
+	    		"critical": 0
+	    	},
+	    	"notify_audit": false,
+	    	"require_full_window": false,
+	    	"notify_no_data": true,
+	    	"no_data_timeframe": 120,
+	    	"renotify_interval": 60,
+	    	"include_tags": true,
+	    	"evaluation_delay": 300,
+	    	"escalation_message": ""
+	    },
+	    "priority": 2
+},
+	"tags": [
+		"integration:velero"
+	]
+}

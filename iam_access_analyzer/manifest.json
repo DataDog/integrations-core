@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "13a88901-3d20-43b3-9a3c-3b20b2adf1cc",
   "app_id": "iam-access-analyzer",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,11 @@
     "title": "AWS IAM Access Analyzer",
     "media": [],
     "classifier_tags": [
-      "Category::Log Collection",
       "Category::Security",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -32,7 +33,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10081,
+      "auto_install": true
     }
   },
   "author": {
@@ -40,6 +43,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

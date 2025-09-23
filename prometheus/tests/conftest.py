@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2019-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 import os
 
 import mock
@@ -59,7 +63,7 @@ def poll_mock():
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
     poll_mock_patch = mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),

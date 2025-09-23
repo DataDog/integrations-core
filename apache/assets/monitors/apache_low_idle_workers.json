@@ -1,0 +1,40 @@
+{
+  "version": 2,
+  "created_at": "2021-02-12",
+  "last_updated_at": "2021-02-23",
+  "title": "Idle workers number is low",
+  "tags": [
+    "integration:apache"
+  ],
+  "description": "Idle workers in Apache are available server threads that can handle incoming requests. This monitor tracks anomalies in Apache's idle workers count, detecting when it falls below expected levels to identify performance issues in Apache web servers.",
+  "definition": {
+    "message": "The number of idle workers is abnormally low: {{value}}. You may see slower request processing times.",
+    "name": "[Apache] Low number of idle workers",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_5m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0.3,
+        "warning": 0.8
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_4h):anomalies(avg:apache.performance.idle_workers{*} by {host}, 'basic', 2, direction='below', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
+    "tags": [
+      "integration:apache"
+    ],
+    "type": "query alert"
+  }
+}

@@ -1,0 +1,243 @@
+{
+    "title": "Cisco Duo - Offline Enrollment Log Details",
+    "description": "- This dashboard provides insights into offline enrollment logs of Cisco Duo.",
+    "widgets": [
+        {
+            "id": 3285471501278366,
+            "definition": {
+                "type": "image",
+                "url": "https://www.cisco.com/c/en/us/services/acquisitions/duo/jcr:content/Grid/category_atl/layout-category-atl/wide_narrow_v2/WN-Wide-V2-1/hero_panel/image.img.png/1574789907440.png",
+                "url_dark_theme": "https://www.cisco.com/c/en/us/services/acquisitions/duo/jcr:content/Grid/category_atl/layout-category-atl/wide_narrow_v2/WN-Wide-V2-1/hero_panel/image.img.png/1574789907440.png",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8205340665520076,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard provides insights into offline enrollment logs of Cisco Duo.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 5484151201719816,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Total Logs \n2. Action by Users \n3. Log Details ",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8243739200683380,
+            "definition": {
+                "title": "Total Logs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-duo service:offline_enrollment $Action $User"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 8595268301221634,
+            "definition": {
+                "title": "Action by Users",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@cisco.duo.action",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@object",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-duo service:offline_enrollment $Action $User"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Count",
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 4,
+                "y": 2,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 7103708143953348,
+            "definition": {
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:cisco-duo service:offline_enrollment $Action $User",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Action",
+            "prefix": "@cisco.duo.action",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "User",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

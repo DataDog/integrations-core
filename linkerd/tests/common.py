@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2019-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.base.stubs import aggregator
 from datadog_checks.dev import get_here
 from datadog_checks.linkerd.metrics import construct_metrics_config
@@ -548,6 +552,9 @@ EXPECTED_METRICS_V2_EXTENDED = {
     'linkerd.route.actual_response_total': aggregator.MONOTONIC_COUNT,
     'linkerd.tcp.connection_duration.count': aggregator.GAUGE,
     'linkerd.tcp.connection_duration.sum': aggregator.GAUGE,
+    'linkerd.control.response_latency.count': aggregator.GAUGE,
+    'linkerd.control.response_latency.sum': aggregator.GAUGE,
+    'linkerd.control.response_total': aggregator.MONOTONIC_COUNT,
 }
 
 EXPECTED_METRICS_V2 = EXPECTED_METRICS_V2_BASE.copy()
@@ -555,6 +562,13 @@ EXPECTED_METRICS_V2.update(EXPECTED_METRICS_V2_EXTENDED)
 
 EXPECTED_METRICS_V2_E2E = {
     k: aggregator.COUNT if v == aggregator.MONOTONIC_COUNT else v for k, v in EXPECTED_METRICS_V2_BASE.items()
+}
+
+OPTIONAL_METRICS_V2_E2E = {
+    'linkerd.route.actual_request_total': aggregator.MONOTONIC_COUNT,
+    'linkerd.control.response_latency.count': aggregator.GAUGE,
+    'linkerd.control.response_latency.sum': aggregator.GAUGE,
+    'linkerd.control.response_total': aggregator.MONOTONIC_COUNT,
 }
 
 EXPECTED_METRICS_V2_NEW = {}

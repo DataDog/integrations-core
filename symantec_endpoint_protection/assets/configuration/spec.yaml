@@ -1,0 +1,10 @@
+name: Symantec Endpoint Protection
+files:
+- name: symantec_endpoint_protection.yaml
+  options:
+  - template: logs
+    example:
+    - type: udp
+      port: <PORT>
+      source: symantec-endpoint-protection
+      service: symantec-endpoint-protection

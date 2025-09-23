@@ -6,13 +6,12 @@ import sys
 
 import click
 
-from ..._env import DDTRACE_OPTIONS_LIST, E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
-from ...ci import get_ci_env_vars, running_on_ci
-from ...fs import chdir, file_exists, remove_path
-from ...subprocess import run_command
-from ...utils import ON_WINDOWS
-from ..constants import get_root
-from ..testing import (
+from datadog_checks.dev._env import DDTRACE_OPTIONS_LIST, E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
+from datadog_checks.dev.ci import get_ci_env_vars, running_on_ci
+from datadog_checks.dev.fs import chdir, file_exists, remove_path
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.testing import (
     construct_pytest_options,
     display_check_envs,
     fix_coverage_report,
@@ -20,7 +19,9 @@ from ..testing import (
     prepare_test_commands,
     pytest_coverage_sources,
 )
-from ..utils import code_coverage_enabled, complete_testable_checks
+from datadog_checks.dev.tooling.utils import code_coverage_enabled, complete_testable_checks
+from datadog_checks.dev.utils import ON_WINDOWS
+
 from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_success, echo_waiting, echo_warning
 
 
@@ -31,7 +32,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_succes
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
 @click.option('--latest', is_flag=True, help='Only verify support of new product versions')
 @click.option('--e2e', is_flag=True, help='Run only end-to-end tests')
-@click.option('--ddtrace', is_flag=True, help='Run tests using dd-trace-py')
+@click.option('--ddtrace', is_flag=True, envvar='DDEV_TEST_ENABLE_TRACING', help='Run tests using dd-trace-py')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
 @click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
@@ -48,8 +49,8 @@ from .console import CONTEXT_SETTINGS, abort, echo_debug, echo_info, echo_succes
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
 @click.option('--force-base-unpinned', is_flag=True, help='Force using datadog-checks-base as specified by check dep')
 @click.option('--force-base-min', is_flag=True, help='Force using lowest viable release version of datadog-checks-base')
-@click.option('--force-env-rebuild', is_flag=True, help='Force creating a new env')
-@click.option('--memray', is_flag=True, help='Run memray to measure memory usage')
+@click.option('--force-env-rebuild', '-fr', is_flag=True, help='Force creating a new env')
+@click.option('--memray', is_flag=True, help='Run memray to measure memory usage on all tests')
 @click.pass_context
 def test(
     ctx,
@@ -277,6 +278,7 @@ def test(
             break
 
     if not tests_ran:
+        # TODO: remove branch when tox is replaced by Hatch
         if format_style:
             echo_warning('Code formatting is not enabled!')
             echo_info('To enable it, set `dd_check_style = true` under the `[testenv]` section of `tox.ini`.')

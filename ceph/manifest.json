@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "485341cc-3dee-4136-b147-dda76171701a",
   "app_id": "ceph",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -14,9 +15,16 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::OS & System",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-ceph-datadog"
+      }
     ]
   },
   "author": {
@@ -25,7 +33,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Ceph",
@@ -47,16 +54,15 @@
         "ceph-mon",
         "ceph-mgr",
         "ceph-osd"
-      ]
+      ],
+      "source_type_id": 138,
+      "auto_install": true
     },
     "dashboards": {
       "ceph": "assets/dashboards/overview.json"
     },
     "saved_views": {
       "ceph_processes": "assets/saved_views/ceph_processes.json"
-    },
-    "logs": {
-      "source": "ceph"
     }
   }
 }

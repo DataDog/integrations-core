@@ -12,7 +12,7 @@ URL = 'http://{}:8080'.format(HOST)
 
 AIRFLOW_VERSION = os.getenv('AIRFLOW_VERSION')
 
-INSTANCE = {'url': URL, 'tags': ['key:my-tag']}
+INSTANCE = {'url': URL, 'tags': ['key:my-tag'], 'username': 'airflow', 'password': 'airflow'}
 
 FULL_CONFIG = {
     'instances': [INSTANCE],

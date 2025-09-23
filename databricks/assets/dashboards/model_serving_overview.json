@@ -1,0 +1,1110 @@
+{
+  "title": "Databricks Model Serving",
+  "description": "This Dashboard provides a high level overview of your Pinecone service. Use it to monitor the health and performance of your vector database. \n\nFor further information, see the [Pinecone Integration Documentation](https://docs.datadoghq.com/integrations/pinecone/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+  "widgets": [
+    {
+      "id": 4831622862262762,
+      "definition": {
+        "title": "New group",
+        "banner_img": "/static/images/integration_dashboard/databricks_hero_1.png",
+        "show_title": false,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 696611051845420,
+            "definition": {
+              "type": "note",
+              "content": "This dashboard provides a high level overview of the health of your Databricks model serving endpoints. These include metrics such as latency, request rate, error rate, CPU usage, etc. This can be used to visualize how your serving infrastructure is behaving.\n\nFor more information about Databricks model serving, see [Databricks Model Serving](https://docs.databricks.com/en/machine-learning/model-serving/index.html) and [Serving Endpoints](https://docs.databricks.com/api/workspace/servingendpoints) .\n\nFor further information on Datadog's integration with Databricks, see the [Databricks Integration Documentation](##TODO##).",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 5
+      }
+    },
+    {
+      "id": 3764041205563078,
+      "definition": {
+        "title": "Overview",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2364160159281040,
+            "definition": {
+              "title": "Resource Utilization Overview",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:databricks.model_serving.cpu_usage_percentage{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:databricks.model_serving.mem_usage_percentage{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:databricks.model_serving.gpu_usage_percentage.avg{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:databricks.model_serving.gpu_mem_usage_percentage.avg{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "avg cpu usage",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "avg cpu mem usage",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "avg gpu usage",
+                      "formula": "query3"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "avg gpu mem usage",
+                      "formula": "query4"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 282877050046086,
+            "definition": {
+              "title": "Top endpoints by request latency",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:databricks.model_serving.request_latency_ms.99percentile{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "avg:databricks.model_serving.request_latency_ms.95percentile{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:databricks.model_serving.request_latency_ms.90percentile{$workspace_id, $endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "99 percentile",
+                      "formula": "query1"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "95 percentile",
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "90 percentile",
+                      "formula": "query3"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 6819245007400226,
+            "definition": {
+              "title": "Top endpoints by cumulative request count",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:databricks.model_serving.request_count_total{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:databricks.model_serving.request_4xx_count_total{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}.weighted()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:databricks.model_serving.request_5xx_count_total{$workspace_id, $workspace_name, $served_entity_name, $endpoint_name} by {endpoint_name}.weighted()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Request Count",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "4xx Error count",
+                      "formula": "query2"
+                    },
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "5xx Error count",
+                      "formula": "query3"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 7
+      }
+    },
+    {
+      "id": 7064634868158922,
+      "definition": {
+        "title": "Resource Utilization",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7266618368102262,
+            "definition": {
+              "type": "note",
+              "content": "Processing and memory usage metrics describe how effectively computational and storage resources are being utilized during model serving, indicating whether the current setup meets the demand for processing data and running models efficiently.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "75%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 5547479570648212,
+            "definition": {
+              "type": "note",
+              "content": "CPU Usage",
+              "background_color": "blue",
+              "font_size": "24",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 6181794824329746,
+            "definition": {
+              "type": "note",
+              "content": "GPU Usage\n\n",
+              "background_color": "vivid_blue",
+              "font_size": "24",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 865170122425732,
+            "definition": {
+              "type": "note",
+              "content": "High CPU usage or CPU memory usage can indicate a need for optimization or scaling to prevent performance bottlenecks, while low usage may suggest potential for cost savings or resource reallocation.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "75%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 7409546524688414,
+            "definition": {
+              "type": "note",
+              "content": "GPU metrics are an experimental Databricks feature and are subject to change.",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 968488512949198,
+            "definition": {
+              "title": "Average CPU Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:databricks.model_serving.cpu_usage_percentage{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 8401637794826174,
+            "definition": {
+              "type": "note",
+              "content": "High GPU usage or GPU memory usage highlights heavy computational demands typical of complex models, necessitating careful management to avoid resource exhaustion. Conversely, low usage in these areas indicates potential underutilization, offering opportunities for optimizing workloads or reducing costs. ",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "75%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 2039643544055706,
+            "definition": {
+              "title": "Average GPU Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "max:databricks.model_serving.gpu_usage_percentage.avg{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 8341999391822062,
+            "definition": {
+              "title": "Average CPU Memory Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:databricks.model_serving.mem_usage_percentage{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6769326008109800,
+            "definition": {
+              "title": "Average GPU Memory Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:databricks.model_serving.gpu_mem_usage_percentage.avg{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 7,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 12,
+        "height": 11
+      }
+    },
+    {
+      "id": 1871554135387136,
+      "definition": {
+        "title": "Requests",
+        "background_color": "purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8369113540588714,
+            "definition": {
+              "type": "note",
+              "content": "The request count measures the volume of requests handled by the endpoint, with high values indicative of increased user traffic or activity, which could strain server resources if not managed properly. \n\nConversely, a low request count might indicate lower user engagement, which could either be typical during off-peak hours or signal potential access issues if unexpected.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "75%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 1333178577565114,
+            "definition": {
+              "type": "note",
+              "content": "The request error count tracks the number of failed HTTP requests, with high values indicating potential server, code, or client-related issues that could degrade user experience. \n\nLow error count suggests that the majority of requests are being processed successfully, reflecting a stable application.\n\nA 5xx status code indicates a server error, where the server failed to fulfill a valid request, implying a problem on the server side. A 4xx status code signifies a client error, where the request cannot be processed due to issues such as a malformed request or unauthorized access, suggesting fault lies with the client's request.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "75%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 8753457556283120,
+            "definition": {
+              "title": "Requests in the last minute",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      },
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "max:databricks.model_serving.request_count_total{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7772095570773674,
+            "definition": {
+              "title": "5xx Error Count",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:databricks.model_serving.request_5xx_count_total{$workspace_name,$endpoint_name,$served_entity_name} by {endpoint_name}.weighted()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 5365339434275840,
+            "definition": {
+              "title": "Total Provisioned Concurrent Requests",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "avg:databricks.model_serving.provisioned_concurrent_requests_total{$endpoint_name,$served_entity_name,$workspace_name} by {endpoint_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7486385226747274,
+            "definition": {
+              "title": "4xx Error Count",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:databricks.model_serving.request_4xx_count_total{$endpoint_name, $workspace_name, $served_entity_name} by {endpoint_name}.weighted()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 18,
+        "width": 12,
+        "height": 7,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 1497094030519600,
+      "definition": {
+        "title": "Latency",
+        "background_color": "blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 69403009180860,
+            "definition": {
+              "type": "note",
+              "content": "Request latency measures the time it takes for a server to process and respond to a user request. \n\nHigh latency values indicate slow response times, which can lead to a poor user experience and suggest potential issues like network congestion, inefficient code, or server overload. \n\nOn the other hand, low latency values signify quick responses, reflecting a well-optimized system and contributing to a positive user experience.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 6262930933038372,
+            "definition": {
+              "title": "Request Latency (p99)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "max:databricks.model_serving.request_latency_ms.99percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 5,
+              "y": 0,
+              "width": 7,
+              "height": 2
+            }
+          },
+          {
+            "id": 1597060530161390,
+            "definition": {
+              "title": "Request Latency (p95)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "max:databricks.model_serving.request_latency_ms.95percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 5,
+              "y": 2,
+              "width": 7,
+              "height": 2
+            }
+          },
+          {
+            "id": 8891554743052240,
+            "definition": {
+              "title": "Request Latency (p90)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      },
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "max:databricks.model_serving.request_latency_ms.90percentile{$endpoint_name, $served_entity_name, $workspace_name} by {endpoint_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 5,
+              "y": 4,
+              "width": 7,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 25,
+        "width": 12,
+        "height": 7
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "workspace_id",
+      "prefix": "workspace_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "workspace_name",
+      "prefix": "workspace_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "endpoint_name",
+      "prefix": "endpoint_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "served_entity_name",
+      "prefix": "served_entity_name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

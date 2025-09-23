@@ -14,7 +14,36 @@
     "totalShuffleRead": 90,
     "totalShuffleWrite": 89,
     "maxMemory": 278019440,
-    "executorLogs": {}
+    "executorLogs": {},
+    "memoryMetrics": {
+      "usedOnHeapStorageMemory": 79283,
+      "usedOffHeapStorageMemory": 0,
+      "totalOnHeapStorageMemory": 384093388,
+      "totalOffHeapStorageMemory": 0
+    },
+    "blacklistedInStages": [],
+    "peakMemoryMetrics": {
+      "JVMHeapMemory": 345498432,
+      "JVMOffHeapMemory": 196924864,
+      "OnHeapExecutionMemory": 0,
+      "OffHeapExecutionMemory": 0,
+      "OnHeapStorageMemory": 2445933,
+      "OffHeapStorageMemory": 0,
+      "OnHeapUnifiedMemory": 2445933,
+      "OffHeapUnifiedMemory": 0,
+      "DirectPoolMemory": 276762,
+      "MappedPoolMemory": 0,
+      "ProcessTreeJVMVMemory": 0,
+      "ProcessTreeJVMRSSMemory": 0,
+      "ProcessTreePythonVMemory": 0,
+      "ProcessTreePythonRSSMemory": 0,
+      "ProcessTreeOtherVMemory": 0,
+      "ProcessTreeOtherRSSMemory": 0,
+      "MinorGCCount": 118,
+      "MinorGCTime": 1436,
+      "MajorGCCount": 4,
+      "MajorGCTime": 419
+    }
   },
   {
     "id": "1",
@@ -31,6 +60,35 @@
     "totalShuffleRead": 10,
     "totalShuffleWrite": 11,
     "maxMemory": 555755765,
-    "executorLogs": {}
+    "executorLogs": {},
+    "memoryMetrics": {
+      "usedOnHeapStorageMemory": 79283,
+      "usedOffHeapStorageMemory": 0,
+      "totalOnHeapStorageMemory": 384093388,
+      "totalOffHeapStorageMemory": 0
+    },
+    "blacklistedInStages": [],
+    "peakMemoryMetrics": {
+      "JVMHeapMemory": 361970928,
+      "JVMOffHeapMemory": 94409256,
+      "OnHeapExecutionMemory": 16777216,
+      "OffHeapExecutionMemory": 0,
+      "OnHeapStorageMemory": 2181737,
+      "OffHeapStorageMemory": 0,
+      "OnHeapUnifiedMemory": 18958953,
+      "OffHeapUnifiedMemory": 0,
+      "DirectPoolMemory": 8710,
+      "MappedPoolMemory": 0,
+      "ProcessTreeJVMVMemory": 0,
+      "ProcessTreeJVMRSSMemory": 0,
+      "ProcessTreePythonVMemory": 0,
+      "ProcessTreePythonRSSMemory": 0,
+      "ProcessTreeOtherVMemory": 0,
+      "ProcessTreeOtherRSSMemory": 0,
+      "MinorGCCount": 988,
+      "MinorGCTime": 5670,
+      "MajorGCCount": 3,
+      "MajorGCTime": 252
+    }
   }
 ]

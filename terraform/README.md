@@ -12,8 +12,8 @@ The Datadog Terraform provider is available through the [Terraform Registry][1].
 
 ### Configuration
 
-1. [Install Terraform][2]
-2. Create a directory to contain the Terraform configuration files, for example: `terraform_config/`
+1. [Install Terraform][2].
+2. Create a directory to contain the Terraform configuration files, for example: `terraform_config/`.
 3. Create a `main.tf` file in the `terraform_config/` directory with the following content:
     ```
     terraform {
@@ -31,8 +31,20 @@ The Datadog Terraform provider is available through the [Terraform Registry][1].
     }
     ```
 
+    **Note**: If you are not using the Datadog US1 site, you must set the `api_url` [optional parameter][7] with your [Datadog site][6]. Ensure the documentation site selector on the right of the page is set to your correct Datadog site, then use the following URL as the value of the `api_url` parameter:
+
+<!-- partial
+    ```
+    https://api.{{< region-param key="dd_site" code="true" >}}/
+    ```
+partial -->
+
 4. Run `terraform init`. This initializes the directory for use with Terraform and pulls the Datadog provider.
-5. Create any `.tf` file in the `terraform_config/` directory and start creating Datadog resources. For example:
+5. Create any `.tf` file in the `terraform_config/` directory and start creating Datadog resources. 
+
+## Create a monitor
+
+This example demonstrates a `monitor.tf` file that creates a [live process monitor][5].
 
     ```
     # monitor.tf
@@ -51,7 +63,7 @@ The Datadog Terraform provider is available through the [Terraform Registry][1].
     }
     ```
 
-6. Run `terraform apply` to create this monitor in your Datadog account!
+Run `terraform apply` to create this monitor in your Datadog account.
 
 ## Send Events to Datadog
 
@@ -98,3 +110,6 @@ Need help? Contact [Datadog support][3].
 [2]: https://learn.hashicorp.com/tutorials/terraform/install-cli
 [3]: https://docs.datadoghq.com/help/
 [4]: https://github.com/DataDog/datadogpy
+[5]: https://docs.datadoghq.com/monitors/types/process/
+[6]: https://docs.datadoghq.com/getting_started/site/
+[7]: https://registry.terraform.io/providers/DataDog/datadog/latest/docs#optional

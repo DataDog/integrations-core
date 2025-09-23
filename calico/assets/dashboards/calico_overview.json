@@ -6,9 +6,9 @@
       "id": 4031301325725339,
       "definition": {
         "title": "Overview",
-        "type": "group",
         "background_color": "vivid_green",
         "show_title": true,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -17,11 +17,17 @@
               "title": "Number of Calico hosts",
               "title_size": "16",
               "title_align": "left",
-              "time": { "live_span": "1h" },
+              "time": {
+                "live_span": "1h"
+              },
               "type": "query_value",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "response_format": "scalar",
                   "queries": [
                     {
@@ -36,7 +42,12 @@
               "autoscale": true,
               "precision": 2
             },
-            "layout": { "x": 0, "y": 0, "width": 4, "height": 2 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 8654910011050756,
@@ -47,7 +58,11 @@
               "type": "query_value",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "response_format": "scalar",
                   "queries": [
                     {
@@ -62,7 +77,12 @@
               "autoscale": true,
               "precision": 2
             },
-            "layout": { "x": 4, "y": 0, "width": 4, "height": 2 }
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 4757599322266899,
@@ -73,7 +93,11 @@
               "type": "query_value",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "response_format": "scalar",
                   "queries": [
                     {
@@ -88,7 +112,12 @@
               "autoscale": true,
               "precision": 2
             },
-            "layout": { "x": 8, "y": 0, "width": 4, "height": 2 }
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
           },
           {
             "id": 3982749497993691,
@@ -102,7 +131,10 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
                     }
                   ],
                   "response_format": "scalar",
@@ -117,7 +149,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 2, "width": 6, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 4
+            }
           },
           {
             "id": 961830747605203,
@@ -131,7 +168,10 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
                     }
                   ],
                   "response_format": "scalar",
@@ -146,7 +186,12 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 2, "width": 6, "height": 4 }
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 4
+            }
           },
           {
             "id": 473010488744980,
@@ -160,7 +205,10 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
                     }
                   ],
                   "response_format": "scalar",
@@ -175,7 +223,12 @@
                 }
               ]
             },
-            "layout": { "x": 0, "y": 6, "width": 6, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 4
+            }
           },
           {
             "id": 7695734983045154,
@@ -189,7 +242,10 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
                     }
                   ],
                   "response_format": "scalar",
@@ -204,19 +260,29 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 6, "width": 6, "height": 4 }
+            "layout": {
+              "x": 6,
+              "y": 6,
+              "width": 6,
+              "height": 4
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 0, "width": 12, "height": 11 }
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 11
+      }
     },
     {
       "id": 4808370589500869,
       "definition": {
         "title": "Ipsets & iptables",
-        "type": "group",
         "background_color": "purple",
         "show_title": true,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -227,20 +293,30 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
-                      "query": "sum:calico.felix.ipset.calls.count{host:MacBook-Pro-de-Max.local}",
+                      "query": "sum:calico.felix.ipset.calls.count{*}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -249,10 +325,17 @@
                   "display_type": "line"
                 }
               ],
-              "yaxis": { "min": "0" },
+              "yaxis": {
+                "min": "0"
+              },
               "markers": []
             },
-            "layout": { "x": 0, "y": 0, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 5489213612306292,
@@ -262,20 +345,30 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
-                      "query": "sum:calico.felix.iptables.chains{host:MacBook-Pro-de-Max.local}",
+                      "query": "sum:calico.felix.iptables.chains{*}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
                   "style": {
                     "palette": "purple",
                     "line_type": "solid",
@@ -284,10 +377,17 @@
                   "display_type": "area"
                 }
               ],
-              "yaxis": { "min": "0" },
+              "yaxis": {
+                "min": "0"
+              },
               "markers": []
             },
-            "layout": { "x": 6, "y": 0, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 3673861447245056,
@@ -297,20 +397,30 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
-                      "query": "sum:calico.felix.ipset.errors.count{host:MacBook-Pro-de-Max.local}",
+                      "query": "sum:calico.felix.ipset.errors.count{*}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -319,10 +429,17 @@
                   "display_type": "line"
                 }
               ],
-              "yaxis": { "min": "0" },
+              "yaxis": {
+                "min": "0"
+              },
               "markers": []
             },
-            "layout": { "x": 0, "y": 3, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 5751107302077524,
@@ -332,20 +449,30 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
-                  "response_format": "timeseries",
-                  "on_right_yaxis": false,
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "queries": [
                     {
-                      "query": "sum:calico.felix.iptables.rules{host:MacBook-Pro-de-Max.local}",
+                      "query": "sum:calico.felix.iptables.rules{*}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
                   ],
+                  "response_format": "timeseries",
                   "style": {
                     "palette": "dog_classic",
                     "line_type": "solid",
@@ -354,10 +481,17 @@
                   "display_type": "line"
                 }
               ],
-              "yaxis": { "min": "0" },
+              "yaxis": {
+                "min": "0"
+              },
               "markers": []
             },
-            "layout": { "x": 6, "y": 3, "width": 6, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 2075344795212216,
@@ -367,11 +501,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "queries": [
@@ -398,7 +542,12 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 6, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 3192306087025579,
@@ -412,7 +561,10 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
                     }
                   ],
                   "response_format": "scalar",
@@ -427,7 +579,12 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 6, "width": 3, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 6370937267148846,
@@ -441,7 +598,10 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
                     }
                   ],
                   "response_format": "scalar",
@@ -456,7 +616,12 @@
                 }
               ]
             },
-            "layout": { "x": 9, "y": 6, "width": 3, "height": 3 }
+            "layout": {
+              "x": 9,
+              "y": 6,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 1442866379284126,
@@ -466,11 +631,21 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [{ "formula": "query1" }],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
                   "response_format": "timeseries",
                   "on_right_yaxis": false,
                   "queries": [
@@ -497,7 +672,12 @@
               },
               "markers": []
             },
-            "layout": { "x": 0, "y": 9, "width": 6, "height": 3 }
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 6,
+              "height": 3
+            }
           },
           {
             "id": 7805418918236989,
@@ -511,7 +691,10 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
                     }
                   ],
                   "response_format": "scalar",
@@ -526,7 +709,12 @@
                 }
               ]
             },
-            "layout": { "x": 6, "y": 9, "width": 3, "height": 3 }
+            "layout": {
+              "x": 6,
+              "y": 9,
+              "width": 3,
+              "height": 3
+            }
           },
           {
             "id": 8886576624693546,
@@ -540,7 +728,10 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "limit": { "count": 10, "order": "desc" }
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
                     }
                   ],
                   "response_format": "scalar",
@@ -555,19 +746,30 @@
                 }
               ]
             },
-            "layout": { "x": 9, "y": 9, "width": 3, "height": 3 }
+            "layout": {
+              "x": 9,
+              "y": 9,
+              "width": 3,
+              "height": 3
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 11, "width": 12, "height": 13 }
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 13,
+        "is_column_break": true
+      }
     },
     {
       "id": 2472312726446081,
       "definition": {
         "title": "Logs",
-        "type": "group",
         "background_color": "gray",
         "show_title": true,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -576,15 +778,47 @@
               "title": "Dataplane Logs",
               "title_size": "16",
               "title_align": "left",
-              "type": "log_stream",
-              "query": "felix\\/int_dataplane.go",
-              "sort": { "column": "time", "order": "desc" },
-              "columns": ["host", "service"],
-              "show_date_column": false,
-              "show_message_column": true,
-              "message_display": "inline"
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "felix\\/int_dataplane.go",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
             },
-            "layout": { "x": 0, "y": 0, "width": 12, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
           },
           {
             "id": 7461713444584281,
@@ -592,25 +826,60 @@
               "title": "IPsets Logs",
               "title_size": "16",
               "title_align": "left",
-              "type": "log_stream",
-              "query": "felix\\/ipsets.go",
-              "sort": { "column": "time", "order": "desc" },
-              "columns": ["host", "service"],
-              "show_date_column": false,
-              "show_message_column": true,
-              "message_display": "inline"
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "felix\\/ipsets.go",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
             },
-            "layout": { "x": 0, "y": 4, "width": 12, "height": 4 }
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 4
+            }
           }
         ]
       },
-      "layout": { "x": 0, "y": 24, "width": 12, "height": 9 }
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 12,
+        "height": 9
+      }
     }
   ],
   "template_variables": [],
   "layout_type": "ordered",
-  "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "kv7-pa6-dz4"
+  "reflow_type": "fixed"
 }

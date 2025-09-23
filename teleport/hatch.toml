@@ -1,0 +1,19 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+setup = ["caddy"]
+
+[envs.default.overrides]
+name."^py3.12$".e2e-env = { value = true }
+name."^py3.12-caddy$".e2e-env = { value = true }
+matrix.setup.e2e-env = { value = true, if = ["caddy"] }
+matrix.setup.env-vars = [
+  { key = "USE_TELEPORT_CADDY", value = "true", if = ["caddy"] },
+]
+
+[envs.default]
+e2e-env = false

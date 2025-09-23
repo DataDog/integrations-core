@@ -2,17 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import PY3
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.testing import requires_py3
 
-if PY3:
-    from .config_models import ConfigMixin
-else:
-    ConfigMixin = object
-
-pytestmark = [requires_py3]
+from .config_models import ConfigMixin
 
 
 class Check(AgentCheck, ConfigMixin):
@@ -21,9 +14,6 @@ class Check(AgentCheck, ConfigMixin):
 
 
 def test_defaults(dd_run_check):
-    # TODO: move imports up top when we drop Python 2
-    from immutables import Map
-
     init_config = {}
     instance = {}
 
@@ -32,14 +22,14 @@ def test_defaults(dd_run_check):
 
     dd_run_check(check)
 
-    assert check.shared_config.deprecated == ''
+    assert check.shared_config.deprecated is None
 
-    assert check.config.text == ''
+    assert check.config.text is None
     assert check.config.flag is False
-    assert check.config.timeout == 0 and isinstance(check.config.timeout, float)
-    assert check.config.pid == 0 and isinstance(check.config.pid, int)
-    assert check.config.array == ()
-    assert check.config.mapping == Map()
+    assert check.config.timeout is None
+    assert check.config.pid is None
+    assert check.config.array is None
+    assert check.config.mapping is None
     assert check.config.obj is None
 
     assert not check.warnings
@@ -56,7 +46,7 @@ def test_errors_shared_config(dd_run_check):
         Exception,
         match="""Detected 1 error while loading configuration model `SharedConfig`:
 timeout
-  value is not a valid float""",
+  Input should be a valid number, unable to parse string as a number""",
     ):
         dd_run_check(check, extract_message=True)
 
@@ -72,11 +62,11 @@ def test_errors_instance_config(dd_run_check):
         Exception,
         match="""Detected 3 errors while loading configuration model `InstanceConfig`:
 array -> 1
-  str type expected
+  Input should be a valid string
 obj -> foo
-  field required
+  Field required
 timeout
-  value is not a valid float""",
+  Input should be a valid number, unable to parse string as a number""",
     ):
         dd_run_check(check, extract_message=True)
 
@@ -137,12 +127,12 @@ def test_deprecations(dd_run_check):
 
     assert check.warnings == [
         """Option `deprecated` in `init_config` is deprecated ->
-Release: 8.0.0
+Agent_Version: 8.0.0
 Migration: do this
            and that
 """,
         """Option `deprecated` in `instances` is deprecated ->
-Release: 9.0.0
+Agent version: 9.0.0
 Migration: do this
            and that
 """,

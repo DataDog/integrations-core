@@ -16,7 +16,19 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Cloud",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Provisioning",
+      "Category::Orchestration",
+      "Category::Configuration & Deployment",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/openstack-controller-integration/"
+      }
     ]
   },
   "author": {
@@ -25,7 +37,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Openstack_controller",
@@ -42,10 +53,13 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10226,
+      "auto_install": true
     },
     "dashboards": {
-      "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
+      "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json",
+      "OpenStack Controller Overview [Default Microversion]": "assets/dashboards/openstack_controller_overview_[default_microversion].json"
     },
     "logs": {
       "source": "openstack"

@@ -7,7 +7,6 @@ import time
 
 import mock
 import pytest
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack.openstack import (
@@ -138,7 +137,7 @@ def test_unscoped_from_config():
 
                 assert scope.auth_token == 'fake_token'
                 assert len(scope.project_scope_map) == 1
-                for _, project_scope in iteritems(scope.project_scope_map):
+                for project_scope in scope.project_scope_map.values():
                     assert isinstance(project_scope, OpenStackProjectScope)
                     assert project_scope.auth_token == 'fake_token'
                     assert project_scope.tenant_id == '263fd9'
@@ -147,23 +146,23 @@ def test_unscoped_from_config():
 def test_get_nova_endpoint():
     assert (
         KeystoneCatalog.get_nova_endpoint(common.EXAMPLE_AUTH_RESPONSE)
-        == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
+        == 'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
     )
     assert (
         KeystoneCatalog.get_nova_endpoint(common.EXAMPLE_AUTH_RESPONSE, nova_api_version='v2')
-        == u'http://10.0.2.15:8773/'
+        == 'http://10.0.2.15:8773/'
     )
 
 
 def test_get_neutron_endpoint():
-    assert KeystoneCatalog.get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == u'http://10.0.2.15:9292'
+    assert KeystoneCatalog.get_neutron_endpoint(common.EXAMPLE_AUTH_RESPONSE) == 'http://10.0.2.15:9292'
 
 
 def test_from_auth_response():
     catalog = KeystoneCatalog.from_auth_response(common.EXAMPLE_AUTH_RESPONSE, 'v2.1')
     assert isinstance(catalog, KeystoneCatalog)
-    assert catalog.neutron_endpoint == u'http://10.0.2.15:9292'
-    assert catalog.nova_endpoint == u'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
+    assert catalog.neutron_endpoint == 'http://10.0.2.15:9292'
+    assert catalog.nova_endpoint == 'http://10.0.2.15:8774/v2.1/0850707581fe4d738221a72db0182876'
 
 
 def test_ensure_auth_scope(aggregator):
@@ -198,7 +197,7 @@ def test_ensure_auth_scope(aggregator):
 
 def test_parse_uptime_string():
     uptime_parsed = openstack_check._parse_uptime_string(
-        u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
+        ' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
     )
     assert uptime_parsed.get('loads') == [0.04, 0.14, 0.19]
 
@@ -252,8 +251,7 @@ def test_network_exclusion(*args):
     with mock.patch(
         'datadog_checks.openstack.OpenStackCheck.get_stats_for_single_network'
     ) as mock_get_stats_single_network:
-
-        openstack_check.exclude_network_id_rules = set([re.compile(rule) for rule in common.EXCLUDED_NETWORK_IDS])
+        openstack_check.exclude_network_id_rules = {re.compile(rule) for rule in common.EXCLUDED_NETWORK_IDS}
 
         # Retrieve network stats
         openstack_check.get_network_stats([])
@@ -264,7 +262,7 @@ def test_network_exclusion(*args):
         assert mock_get_stats_single_network.call_args[0][0] == common.FILTERED_NETWORK_ID
 
         # cleanup
-        openstack_check.exclude_network_id_rules = set([])
+        openstack_check.exclude_network_id_rules = set()
 
 
 @mock.patch(
@@ -300,3 +298,55 @@ def test_cache_between_runs(self, *args):
 
     assert 'server-1' not in cached_servers
     assert 'server_newly_added' in cached_servers
+
+
+@pytest.mark.parametrize(
+    'init_config, instances, exception',
+    [
+        pytest.param(
+            {
+                'keystone_server_url': 'http://10.0.2.15:5000',
+                'ssl_verify': False,
+            },
+            [{}],
+            r'datadog_checks.base.errors.ConfigurationError: Detected 2 errors',
+            id="empty instance",
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://10.0.2.15:5000',
+                'ssl_verify': False,
+            },
+            [{'name': 'test'}],
+            r'datadog_checks.base.errors.ConfigurationError: Detected 1 error',
+            id="no user",
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://10.0.2.15:5000',
+                'ssl_verify': False,
+            },
+            [{'user': {'name': 'test'}}],
+            r'datadog_checks.base.errors.ConfigurationError: Detected 1 error',
+            id="no name",
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://10.0.2.15:5000',
+                'ssl_verify': False,
+            },
+            [{'user': {'name': 'test', 'password': 'pass', 'domain': {'id': 'test'}}, 'name': 'test'}],
+            None,
+            id="valid",
+        ),
+    ],
+)
+def test_config(dd_run_check, init_config, instances, exception, caplog):
+    check = OpenStackCheck("test", init_config, instances)
+
+    if exception is not None:
+        with pytest.raises(Exception, match=exception):
+            dd_run_check(check)
+    else:
+        dd_run_check(check)
+        assert "The agent could not contact the specified identity server" in caplog.text

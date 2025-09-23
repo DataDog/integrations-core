@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "6fbcfd6b-369d-4e69-8974-87b3fb5d4715",
   "app_id": "kubernetes-state-core",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,18 @@
     "title": "Kubernetes State Core",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::Mac OS",
-      "Supported OS::Windows",
+      "Category::Containers",
       "Category::Orchestration",
-      "Category::Containers"
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Supported OS::Windows",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/engineering/our-journey-taking-kubernetes-state-metrics-to-the-next-level/"
+      }
     ]
   },
   "author": {
@@ -25,7 +33,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Kubernetes State Core",

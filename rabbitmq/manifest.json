@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a10b582b-71ef-4773-b7b8-b7751c724620",
   "app_id": "rabbitmq",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,27 @@
     "title": "RabbitMQ",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Processing",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Message Queues",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration",
+      "Product::Data Streams Monitoring"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/rabbitmq-monitoring"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/rabbitmq-monitoring-tools"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog"
+      }
     ]
   },
   "author": {
@@ -26,7 +42,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "RabbitMQ",
@@ -47,23 +62,26 @@
       "process_signatures": [
         "rabbitmq",
         "rabbitmq-server"
-      ]
+      ],
+      "source_type_id": 51,
+      "auto_install": true
     },
     "dashboards": {
       "rabbitmq_screenboard": "assets/dashboards/rabbitmq_screenboard_dashboard.json",
       "rabbitmq": "assets/dashboards/rabbitmq_dashboard.json"
     },
     "monitors": {
-      "disk_usage": "assets/monitors/disk_usage.json",
-      "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json"
+      "Level of disk usage is too high for host": "assets/monitors/disk_usage.json",
+      "Messages unacknowledged rate is higher than usual": "assets/monitors/message_unacknowledge_rate_anomaly.json",
+      "Disk space is low": "assets/monitors/disk_usage_prometheus.json",
+      "Unacknowledged Messages are higher than usual": "assets/monitors/message_unack_prometheus.json",
+      "RabbitMQ queue has 0 consumers": "assets/monitors/consumers_at_zero.json",
+      "Messages are ready in RabbitMQ queue": "assets/monitors/message_ready.json"
     },
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",
       "rabbitmq_pattern": "assets/saved_views/rabbitmq_pattern.json",
       "rabbitmq_processes": "assets/saved_views/rabbitmq_processes.json"
-    },
-    "logs": {
-      "source": "rabbitmq"
     }
   }
 }

@@ -1,13 +1,13 @@
 import glob
+from genericpath import isfile
 from os.path import join
 
 import yaml
-from genericpath import isfile
 from yaml.error import YAMLError
 from yaml.loader import SafeLoader
 
-from .....constants import get_root
-from ....console import echo_failure
+from datadog_checks.dev.tooling.commands.console import echo_failure
+from datadog_checks.dev.tooling.constants import get_root
 
 
 def initialize_path(directories):

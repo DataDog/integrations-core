@@ -138,6 +138,15 @@
     },
     "app-20201120094950-0000.driver.spark.streaming.my_named_query.states-usedBytes": {
       "value": 12
+    },
+    "app-20201120094950-0000.driver.spark.streaming.my.app.punctuation.inputRate-total": {
+      "value": 100
+    },
+    "app-20201120094950-0000.driver.spark.streaming.my.app.punctuation.latency": {
+      "value": 100
+    },
+    "app-20201120094950-0000.driver.spark.streaming.my.app.punctuation.processingRate-total": {
+      "value": 100
     }
   },
   "counters": {

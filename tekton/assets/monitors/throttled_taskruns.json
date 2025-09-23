@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2024-02-26",
+  "last_updated_at": "2024-02-26",
+  "title": "TaskRuns are throttled",
+  "tags": [
+    "integration:tekton"
+  ],
+  "description": "Tekton can run Tasks in parallel across different Pipelines. This monitor tracks the number of throttled Tasks.",
+  "definition": {
+    "message": "{{value}} Tekton TaskRuns are getting throttled.",
+    "name": "[Tekton] High number of throttled TaskRuns",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 360,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 50,
+        "warning": 30
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_1h):avg:tekton.pipelines_controller.running_taskruns_throttled_by_node{*} + avg:tekton.pipelines_controller.running_taskruns_throttled_by_quota{*} > 50",
+    "tags": [
+      "integration:tekton"
+    ],
+    "type": "query alert"
+  }
+}

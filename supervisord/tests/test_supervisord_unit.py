@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import xmlrpc.client as xmlrpclib
 from socket import socket
 
 import mock
 import pytest
 from mock import patch
-from six.moves import xmlrpc_client as xmlrpclib
 
 from datadog_checks.supervisord.supervisord import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
 
@@ -24,9 +24,7 @@ def mock_server(url, transport=None):
 def test_check(aggregator, check):
     """Integration test for supervisord check. Using a mocked supervisord."""
 
-    with patch.object(xmlrpclib, 'Server', side_effect=mock_server), patch.object(
-        xmlrpclib, 'ServerProxy', side_effect=mock_server
-    ):
+    with patch.object(xmlrpclib, 'ServerProxy', side_effect=mock_server):
         for tc in TEST_CASES:
             for instance in tc['instances']:
                 name = instance['name']

@@ -13,6 +13,7 @@ import pytest
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.docker import using_windows_containers
+from datadog_checks.sqlserver.const import SWITCH_DB_STATEMENT
 
 from .common import (
     DOCKER_SERVER,
@@ -59,6 +60,7 @@ def instance_session_default():
     }
     windows_sqlserver_driver = os.environ.get('WINDOWS_SQLSERVER_DRIVER', None)
     if not windows_sqlserver_driver or windows_sqlserver_driver == 'odbc':
+        instance['connection_string'] = 'TrustServerCertificate=yes'
         return instance
     instance['adoprovider'] = windows_sqlserver_driver
     instance['connector'] = 'adodbapi'
@@ -70,6 +72,17 @@ def instance_docker_defaults(instance_session_default):
     # deepcopy necessary here because we want to make sure each test invocation gets its own unique copy of the instance
     # this also means that none of the test need to defensively make their own copies
     return deepcopy(instance_session_default)
+
+
+@pytest.fixture
+def instance_docker_metrics(instance_session_default):
+    '''
+    This fixture is used to test the metrics that are emitted from the integration main check.
+    We disable all DBM checks and only care about the main check metrics.
+    '''
+    instance = deepcopy(instance_session_default)
+    instance['dbm'] = False
+    return instance
 
 
 @pytest.fixture
@@ -86,11 +99,26 @@ def instance_minimal_defaults():
 def instance_docker(instance_docker_defaults):
     instance_docker_defaults.update(
         {
-            'include_task_scheduler_metrics': True,
-            'include_db_fragmentation_metrics': True,
-            'include_fci_metrics': True,
-            'include_ao_metrics': False,
-            'include_master_files_metrics': True,
+            'database_metrics': {
+                'ao_metrics': {
+                    'enabled': False,
+                },
+                'task_scheduler_metrics': {
+                    'enabled': True,
+                },
+                'db_fragmentation_metrics': {
+                    'enabled': True,
+                },
+                'fci_metrics': {
+                    'enabled': True,
+                },
+                'master_files_metrics': {
+                    'enabled': True,
+                },
+                'table_size_metrics': {
+                    'enabled': True,
+                },
+            },
             'disable_generic_tags': True,
         }
     )
@@ -122,7 +150,7 @@ def _common_pyodbc_connect(conn_str):
 @pytest.fixture
 def datadog_conn_docker(instance_docker):
     # Make DB connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], instance_docker['username'], instance_docker['password']
     )
     conn = _common_pyodbc_connect(conn_str)
@@ -131,14 +159,26 @@ def datadog_conn_docker(instance_docker):
 
 
 @pytest.fixture
-def bob_conn(instance_docker):
-    # Make DB connection
-
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+def bob_conn_str(instance_docker):
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], "bob", "Password12!"
     )
-    conn = SelfHealingConnection(conn_str)
+    return conn_str
+
+
+@pytest.fixture
+def bob_conn(bob_conn_str):
+    # Make DB connection
+    conn = SelfHealingConnection(bob_conn_str)
     conn.reconnect()
+    yield conn
+    conn.close()
+
+
+@pytest.fixture
+def bob_conn_raw(bob_conn_str):
+    # Make DB connection
+    conn = _common_pyodbc_connect(bob_conn_str)
     yield conn
     conn.close()
 
@@ -174,10 +214,11 @@ class SelfHealingConnection:
                 logging.info("executing query with retries. query='%s' params=%s attempt=%s", query, params, attempt)
                 with self.conn.cursor() as cursor:
                     if database:
-                        cursor.execute("USE {}".format(database))
+                        cursor.execute(SWITCH_DB_STATEMENT.format(database))
                     cursor.execute(query, params)
                     if return_result:
                         return cursor.fetchall()
+                    return
             except Exception:
                 tracebacks.append(",".join(traceback.format_exception(*sys.exc_info())))
                 logging.exception("failed to execute query attempt=%s", attempt)
@@ -190,7 +231,7 @@ class SelfHealingConnection:
 @pytest.fixture
 def sa_conn(instance_docker):
     # system administrator connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], "sa", "Password123"
     )
     conn = _common_pyodbc_connect(conn_str)
@@ -200,28 +241,28 @@ def sa_conn(instance_docker):
 
 @pytest.fixture
 def instance_e2e(instance_docker):
-    instance_docker['driver'] = 'FreeTDS'
+    instance_docker['driver'] = '{ODBC Driver 18 for SQL Server}'
     instance_docker['dbm'] = True
     return instance_docker
 
 
 @pytest.fixture
 def instance_ao_docker_primary(instance_docker):
-    instance_docker['include_ao_metrics'] = True
+    instance_docker['database_metrics']['ao_metrics']['enabled'] = True
     return instance_docker
 
 
 @pytest.fixture
 def instance_ao_docker_primary_local_only(instance_ao_docker_primary):
     instance = deepcopy(instance_ao_docker_primary)
-    instance['only_emit_local'] = True
+    instance['database_metrics']['ao_metrics']['only_emit_local'] = True
     return instance
 
 
 @pytest.fixture
 def instance_ao_docker_primary_non_existing_ag(instance_ao_docker_primary):
     instance = deepcopy(instance_ao_docker_primary)
-    instance['availability_group'] = 'AG2'
+    instance['database_metrics']['ao_metrics']['availability_group'] = 'AG2'
     return instance
 
 
@@ -277,7 +318,7 @@ def dd_environment(full_e2e_config):
         raise Exception("pyodbc is not installed!")
 
     def sqlserver_can_connect():
-        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(
+        conn_str = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;TrustServerCertificate=yes;'.format(
             get_local_driver(), DOCKER_SERVER
         )
         pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
@@ -293,7 +334,7 @@ def dd_environment(full_e2e_config):
     completion_message = 'INFO: setup.sql completed.'
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
         completion_message = (
-            'Always On Availability Groups connection with primary database established ' 'for secondary database'
+            'Always On Availability Groups connection with primary database established for secondary database'
         )
     if 'compose-high-cardinality' in os.environ["COMPOSE_FOLDER"]:
         # This env is a highly loaded database and is expected to take a while to setup.
@@ -302,5 +343,7 @@ def dd_environment(full_e2e_config):
 
     conditions += [CheckDockerLogs(compose_file, completion_message)]
 
-    with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3):
+    with docker_run(
+        compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3, capture=False
+    ):
         yield full_e2e_config, E2E_METADATA

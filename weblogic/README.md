@@ -20,7 +20,7 @@ No additional installation is needed on your server.
 
 1. This check is JMX-based and collects metrics from the Platform MBean Server exported by the JVM, so your WebLogic servers must have JMX Remote Monitoring enabled. See [Remote Monitoring and Management][9] for installation instructions.
 
-2. Set the system property `-Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder` to enable these metrics on the Platform MBean Server. This may be enabled in either the WebLogic Server Administration Console or in the server startup scripts:
+2. Set the system property `-Djavax.management.builder.initial=weblogic.management.jmx.mbeanserver.WLSMBeanServerBuilder` to enable these metrics on the Platform MBean Server. This should be enabled in both the WebLogic Server Administration Console and in the server startup scripts. **Note**: This can and should be done more than once.
 
 
    _**Enable in the Administration Console**_
@@ -150,7 +150,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][6].
 
 
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/weblogic/datadog_checks/weblogic/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://docs.datadoghq.com/integrations/java/

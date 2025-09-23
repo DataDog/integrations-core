@@ -1,0 +1,75 @@
+name: Test results for the master branch
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test-results:
+    name: Publish
+    runs-on: ubuntu-22.04
+
+    env:
+      BADGES_BRANCH: badges
+      BADGE_PATH: test-results.svg
+
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: write
+
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        ref: "${{ env.BADGES_BRANCH }}"
+
+    - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      with:
+        pattern: test-results-*
+        path: test-results
+        merge-multiple: true
+
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@afb2984f4d89672b2f9d9c13ae23d53779671984 # v2.19.0
+      id: test-results
+      with:
+        files: "test-results/*/*.xml"
+
+    - name: Set badge color
+      run: |-
+        case ${{ fromJSON( steps.test-results.outputs.json ).conclusion }} in
+          success)
+            echo "BADGE_COLOR=31c653" >> $GITHUB_ENV
+            ;;
+          failure)
+            echo "BADGE_COLOR=800000" >> $GITHUB_ENV
+            ;;
+          neutral)
+            echo "BADGE_COLOR=696969" >> $GITHUB_ENV
+            ;;
+        esac
+
+    - name: Create badge
+      uses: emibcn/badge-action@808173dd03e2f30c980d03ee49e181626088eee8 # v2.0.3
+      with:
+        label: Tests
+        status: "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests }} tests, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} runs, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_fail }} failed"
+        color: "${{ env.BADGE_COLOR }}"
+        path: "${{ env.BADGE_PATH }}"
+
+    - name: Configure Git for GitHub Actions bot
+      run: |-
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Commit if stats have changed
+      run: |-
+        git add "${{ env.BADGE_PATH }}"
+        if git commit -m "Update test results from ${{ github.sha }}"; then
+          git push
+        else
+          echo "Nothing has changed"
+        fi

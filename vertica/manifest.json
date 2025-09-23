@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c5946789-de76-4ec6-9485-db83dd66fd28",
   "app_id": "vertica",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,8 +16,9 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Vertica",
@@ -42,16 +43,15 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10072,
+      "auto_install": true
     },
     "dashboards": {
       "Vertica Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[Vertica] Nodes down above K-safety level": "assets/monitors/vertica_replication_safety.json"
-    },
-    "logs": {
-      "source": "vertica"
+      "Vertica Nodes down above K-safety level": "assets/monitors/vertica_replication_safety.json"
     }
   }
 }

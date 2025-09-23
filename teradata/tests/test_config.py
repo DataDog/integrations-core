@@ -24,7 +24,7 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
             {'server': 'localhost', 'username': 'dd_user', 'password': 'db_pass'},
             re.compile(
                 'ConfigurationError: Detected 1 error while loading configuration model `InstanceConfig`:'
-                '\\n.*(database)\\n.*field required'
+                '\\n.*(database)\\n.*Field required'
             ),
             False,
             id='Invalid config: missing database',
@@ -33,7 +33,7 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
             {'database': 'main_db', 'username': 'dd_user', 'password': 'db_pass'},
             re.compile(
                 'ConfigurationError: Detected 1 error while loading configuration model `InstanceConfig`:\\n.*(server)'
-                '\\n.*field required'
+                '\\n.*Field required'
             ),
             False,
             id='Invalid config: missing server',
@@ -71,8 +71,8 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'auth_mechanism': 'TD2'},
             re.compile(
-                'Detected 1 error while loading configuration model `InstanceConfig`:\n__root__\n'
-                '  `username` and `password` are required.'
+                'Detected 1 error while loading configuration model `InstanceConfig`:\n\n'
+                '  Value error, `username` and `password` are required.'
             ),
             False,
             id='TD2 auth: missing username and password',
@@ -138,7 +138,8 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
                 'password': 'pass123',
                 'auth_mechanism': 'wrong',
             },
-            'Detected 1 error while loading configuration model `InstanceConfig`:\nauth_mechanism\n  unexpected value',
+            "Detected 1 error while loading configuration model `InstanceConfig`:\nauth_mechanism\n"
+            "  Input should be 'TD2', 'TDNEGO', 'LDAP', 'KRB5' or 'JWT'",
             False,
             id='Auth Mechanism: invalid option',
         ),
@@ -175,13 +176,15 @@ from .common import CHECK_NAME, SERVICE_CHECK_CONNECT, SERVICE_CHECK_QUERY
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'ssl_mode': 'WRONG', 'username': 'bob', 'password': 'pass123'},
-            'Detected 1 error while loading configuration model `InstanceConfig`:\nssl_mode\n  unexpected value',
+            "Detected 1 error while loading configuration model `InstanceConfig`:\nssl_mode\n"
+            "  Input should be 'Allow', 'Disable', 'Prefer' or 'Require'",
             False,
             id='SSL auth: invalid mode',
         ),
         pytest.param(
             {'server': 'tdserver', 'database': 'db', 'ssl_mode': 'VERIFY-CA', 'username': 'bob', 'password': 'pass123'},
-            'Detected 1 error while loading configuration model `InstanceConfig`:\nssl_mode\n  unexpected value',
+            "Detected 1 error while loading configuration model `InstanceConfig`:\nssl_mode\n"
+            "  Input should be 'Allow', 'Disable', 'Prefer' or 'Require'",
             False,
             id='SSL auth: invalid unsupported mode',
         ),

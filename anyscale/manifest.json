@@ -1,0 +1,48 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "e3d14556-99b3-4c17-a51a-4d66ef622601",
+  "app_id": "anyscale",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of Anyscale",
+    "title": "Anyscale",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::AI/ML",
+      "Offering::Integration",
+      "Queried Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 27164037,
+      "source_type_name": "Anyscale",
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Anyscale Overview": "assets/dashboards/anyscale_overview.json"
+    },
+    "monitors": {
+      "High CPU Utilization on Anyscale node": "assets/monitors/cpu_utilization.json",
+      "Low GPU Utilization low on Anyscale Node": "assets/monitors/gpu_utilization.json",
+      "High Memory Usage": "assets/monitors/mem_utilization.json",
+      "High Number of Failed Tasks on Anyscale Node": "assets/monitors/failed_task.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

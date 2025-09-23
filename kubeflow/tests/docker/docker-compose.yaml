@@ -1,0 +1,10 @@
+services:
+
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/kubeflow_metrics.txt:/metrics/metrics

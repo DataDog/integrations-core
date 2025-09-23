@@ -7,7 +7,6 @@ import os
 import re
 
 import simplejson as json
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
@@ -59,7 +58,7 @@ class Ceph(AgentCheck):
         ceph_args = '{} --cluster {}'.format(ceph_args, ceph_cluster)
 
         raw = {}
-        for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail'):
+        for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail', 'osd metadata'):
             try:
                 args = '{} {} -fjson'.format(ceph_args, cmd)
                 output, _, _ = get_subprocess_output(args.split(), self.log)
@@ -109,9 +108,20 @@ class Ceph(AgentCheck):
     def _extract_metrics(self, raw, tags):
         try:
             raw_osd_perf = raw.get('osd_perf', {}).get('osdstats', raw.get('osd_perf'))
+            osd_tags = {
+                metadata['id']: [
+                    'ceph_osd_objectstore:%s' % metadata["osd_objectstore"],
+                    'ceph_osd_device:%s' % metadata["devices"],
+                    'ceph_osd_device_id:%s' % metadata["device_ids"],
+                    'ceph_osd_device_class:%s' % metadata["default_device_class"],
+                    'ceph_version:%s' % metadata["ceph_version_short"],
+                    'ceph_release:%s' % metadata["ceph_release"],
+                ]
+                for metadata in raw.get('osd_metadata', [])
+            }
 
             for osdperf in raw_osd_perf['osd_perf_infos']:
-                local_tags = tags + ['ceph_osd:osd%s' % osdperf['id']]
+                local_tags = tags + ['ceph_osd:osd%s' % osdperf["id"]] + osd_tags.get(osdperf['id'], [])
                 self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
                 self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
         except (KeyError, TypeError):
@@ -138,7 +148,7 @@ class Ceph(AgentCheck):
             # so we won't send the metric osd.pct_used
             if 'checks' in raw['health_detail']:
                 checks = raw['health_detail']['checks']
-                for check_name, check_detail in iteritems(checks):
+                for check_name, check_detail in checks.items():
                     if check_name == 'OSD_NEARFULL':
                         health['num_near_full_osds'] = len(check_detail['detail'])
                     if check_name == 'OSD_FULL':
@@ -307,6 +317,17 @@ class Ceph(AgentCheck):
                 self.gauge(self.NAMESPACE + '.num_objects', stats['objects'], local_tags)
                 self.rate(self.NAMESPACE + '.read_bytes', stats['rd_bytes'], local_tags)
                 self.rate(self.NAMESPACE + '.write_bytes', stats['wr_bytes'], local_tags)
+
+            try:
+                l_classes = raw['df_detail']['stats_by_class']
+                for deviceclass, stats in l_classes.items():
+                    local_tags = tags + ['ceph_osd_device_class:%s' % deviceclass]
+                    if float(stats['total_bytes']) > 0:
+                        self.gauge(
+                            self.NAMESPACE + '.class_pct_used', 100.0 * float(stats['total_used_raw_ratio']), local_tags
+                        )
+            except (KeyError, ValueError):
+                self.log.debug('Error retrieving metrics by class')
 
         except (KeyError, ValueError):
             self.log.debug('Error retrieving df_detail metrics')

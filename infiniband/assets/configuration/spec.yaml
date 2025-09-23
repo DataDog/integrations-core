@@ -1,0 +1,80 @@
+name: "Infiniband"
+files:
+  - name: infiniband.yaml
+    example_name: conf.yaml.example
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: infiniband_path
+            description: |
+              The path to the infiniband directory.
+            value:
+              example: "/sys/class/infiniband"
+              type: string
+              display_default: "/sys/class/infiniband"
+          - name: exclude_devices
+            description: |
+              A list of devices to exclude from the check. Devices are located in the infiniband directory. 
+              The devices are located by default in /sys/class/infiniband.
+            value:
+              example:
+                - "mlx5_0"
+                - "efa0" 
+                - "ib1"
+              type: array
+              items:
+                type: string
+          - name: additional_counters
+            description: |
+              A list of additional counters to collect. The counter names are the files in which the counter 
+              values are stored. These are located inside /sys/class/infiniband/devices/<device>/ports/<port>/counters.
+            value:
+              example:
+                - "additional_counter"
+                - "rx_mpwqe_frag"
+              type: array
+              items:
+                type: string
+          - name: additional_hw_counters
+            description: |
+              A list of additional hardware counters to collect. The counter names are the files in which the 
+              counter values are stored. These are located inside 
+              /sys/class/infiniband/devices/<device>/ports/<port>/hw_counters.
+            value:
+              example:
+                - "additional_hw_counter"
+                - "rx_mpwqe_frag"
+              type: array
+              items:
+                type: string
+          - name: exclude_counters
+            description: |
+              A list of counters to exclude from the check.
+            value:
+              example:
+                - "duplicate_request"
+                - "lifespan"
+              type: array
+              items:
+                type: string
+          - name: exclude_hw_counters
+            description: |
+              A list of hardware counters to exclude from the check.
+            value:
+              example:
+                - "VL15_dropped"
+                - "link_downed"
+              type: array
+              items:
+                type: string
+          - name: collection_type
+            hidden: true
+            description: |
+              The type of collection to use. Available options are `gauge`, `monotonic_count`, and `both`.
+            value:
+              example: "gauge"
+              type: string
+          - template: instances/default

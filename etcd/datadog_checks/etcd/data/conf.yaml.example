@@ -45,13 +45,6 @@ init_config:
 #
 instances:
 
-  -
-    ## @param use_preview - boolean - optional - default: true
-    ## Enable this option to run the Prometheus-based check of etcd.
-    ## Note: This requires etcd v3 or greater.
-    #
-    # use_preview: true
-
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
@@ -225,7 +218,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -248,7 +241,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
@@ -346,6 +339,11 @@ instances:
     ##     client_secret (required): The client secret.
     ##     basic_auth: Whether the provider expects credentials to be transmitted in
     ##                 an HTTP Basic Auth header. The default is: false
+    ##     options: Mapping of additional options to pass to the provider, such as the audience
+    ##              or the scope. For example:
+    ##                 options:
+    ##                   audience: https://example.com
+    ##                   scope: read:example
     ##
     ## The available writers are:
     ##
@@ -424,8 +422,8 @@ instances:
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
     ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
@@ -442,6 +440,16 @@ instances:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.
@@ -542,12 +550,6 @@ instances:
     ## Enable to tag metrics with `is_leader:true` or `is_leader:false`.
     #
     # leader_tag: true
-
-    ## @param url - string - optional - default: https://server:port
-    ## Note: the following configuration option is only available when `use_preview` option is set to `false`.
-    ## The API endpoint of your etcd instance.
-    #
-    # url: https://server:port
 
 ## Log Section
 ##

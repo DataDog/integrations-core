@@ -1,0 +1,145 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - dd-integrations-core-wheels-build-stable.datadoghq.com
+      user-agent:
+      - python-httpx/0.24.1
+    method: GET
+    uri: https://dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/datadog-disk/index.html
+  response:
+    content: '<a href=''datadog_disk-2.0.1-py2.py3-none-any.whl''>datadog_disk-2.0.1-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.1.0-py2.py3-none-any.whl''>datadog_disk-2.1.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.10.0-py2.py3-none-any.whl''>datadog_disk-2.10.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.10.1-py2.py3-none-any.whl''>datadog_disk-2.10.1-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.11.0-py2.py3-none-any.whl''>datadog_disk-2.11.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.2.0-py2.py3-none-any.whl''>datadog_disk-2.2.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.3.0-py2.py3-none-any.whl''>datadog_disk-2.3.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.4.0-py2.py3-none-any.whl''>datadog_disk-2.4.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.5.0-py2.py3-none-any.whl''>datadog_disk-2.5.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.5.1-py2.py3-none-any.whl''>datadog_disk-2.5.1-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.5.2-py2.py3-none-any.whl''>datadog_disk-2.5.2-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.5.3-py2.py3-none-any.whl''>datadog_disk-2.5.3-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.6.0-py2.py3-none-any.whl''>datadog_disk-2.6.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.7.0-py2.py3-none-any.whl''>datadog_disk-2.7.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.8.0-py2.py3-none-any.whl''>datadog_disk-2.8.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.9.0-py2.py3-none-any.whl''>datadog_disk-2.9.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-2.9.1-py2.py3-none-any.whl''>datadog_disk-2.9.1-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-3.0.0-py2.py3-none-any.whl''>datadog_disk-3.0.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.0.0-py2.py3-none-any.whl''>datadog_disk-4.0.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.1.0-py2.py3-none-any.whl''>datadog_disk-4.1.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.1.0rc1-py2.py3-none-any.whl''>datadog_disk-4.1.0rc1-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.1.1-py2.py3-none-any.whl''>datadog_disk-4.1.1-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.2.0-py2.py3-none-any.whl''>datadog_disk-4.2.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.3.0-py2.py3-none-any.whl''>datadog_disk-4.3.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.4.0-py2.py3-none-any.whl''>datadog_disk-4.4.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.5.0-py2.py3-none-any.whl''>datadog_disk-4.5.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.5.1-py2.py3-none-any.whl''>datadog_disk-4.5.1-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.5.2-py2.py3-none-any.whl''>datadog_disk-4.5.2-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.6.0-py2.py3-none-any.whl''>datadog_disk-4.6.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.7.0-py2.py3-none-any.whl''>datadog_disk-4.7.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.7.1-py2.py3-none-any.whl''>datadog_disk-4.7.1-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.8.0-py2.py3-none-any.whl''>datadog_disk-4.8.0-py2.py3-none-any.whl</a><br
+      />
+
+      <a href=''datadog_disk-4.9.0-py2.py3-none-any.whl''>datadog_disk-4.9.0-py2.py3-none-any.whl</a><br
+      />
+
+      '
+    headers:
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - text/html
+      Date:
+      - Wed, 07 Jun 2023 20:24:45 GMT
+      Last-Modified:
+      - Wed, 07 Jun 2023 18:24:43 GMT
+      Server:
+      - AmazonS3
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-Amz-Cf-Id:
+      - WMMVe1OriCLsxFGecJqi9F6FL7Ci7LGLW49EV41LuMzB08ZNmCM-yg==
+      X-Amz-Cf-Pop:
+      - JFK50-P2
+      X-Cache:
+      - RefreshHit from cloudfront
+      x-amz-server-side-encryption:
+      - AES256
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

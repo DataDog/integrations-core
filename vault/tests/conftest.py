@@ -7,7 +7,6 @@ import time
 
 import pytest
 import requests
-from six import PY2
 
 from datadog_checks.dev import LazyFunction, TempDir, docker_run, run_command
 from datadog_checks.dev.ci import running_on_ci
@@ -21,9 +20,6 @@ from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, VAULT_VERSION, get
 
 @pytest.fixture
 def use_openmetrics(request):
-    if request.param and PY2:
-        pytest.skip('This version of the integration is only available when using Python 3.')
-
     return request.param
 
 

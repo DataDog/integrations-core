@@ -12,12 +12,18 @@ import pytest
 
 from datadog_checks.dev.utils import running_on_windows_ci
 
+# Used in tests as 0 is converted to the default collectio interval.
+CLOSE_TO_ZERO_INTERVAL = 0.0000001
+
+
+def is_always_on():
+    return os.environ["COMPOSE_FOLDER"] == 'compose-ha'
+
+
 windows_ci = pytest.mark.skipif(not running_on_windows_ci(), reason='Test can only be run on Windows CI')
 not_windows_ci = pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
 
-always_on = pytest.mark.skipif(
-    os.environ["COMPOSE_FOLDER"] != 'compose-ha', reason='Test can only be run on AlwaysOn SQLServer instances'
-)
+always_on = pytest.mark.skipif(not is_always_on(), reason='Test can only be run on AlwaysOn SQLServer instances')
 # Do not run in environments that specify Windows ADO drivers. This is mainly important for e2e tests where the agent
 # is running in Docker where we don't bundle any ADO drivers in the container.
 not_windows_ado = pytest.mark.skipif(
@@ -70,14 +76,14 @@ class HighCardinalityQueries:
         """
         cursor = self.get_conn().cursor()
         cursor.execute(
-            'SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'high_cardinality_user_%\''
+            'SELECT COUNT(*) FROM datadog_test-1.sys.database_principals WHERE name LIKE \'high_cardinality_user_%\''
         )
         user_count = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'high_cardinality_schema%\'')
+        cursor.execute('SELECT COUNT(*) FROM datadog_test-1.sys.schemas WHERE name LIKE \'high_cardinality_schema%\'')
         schema_count = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.tables')
+        cursor.execute('SELECT COUNT(*) FROM datadog_test-1.sys.tables')
         table_count = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality')
+        cursor.execute('SELECT COUNT(*) FROM datadog_test-1.dbo.high_cardinality')
         row_count = cursor.fetchone()[0]
         return (
             user_count >= HighCardinalityQueries.EXPECTED_OBJ_COUNT
@@ -88,7 +94,7 @@ class HighCardinalityQueries:
 
     def start_background(self, config=None):
         """
-        Run a set of queries against the table `datadog_test.dbo.high_cardinality` in the background
+        Run a set of queries against the table `datadog_test-1.dbo.high_cardinality` in the background
 
         Args:
             config (dict, optional): Configure how many threads will spin off for each kind of query.
@@ -146,7 +152,7 @@ class HighCardinalityQueries:
         """Creates a high cardinality query by shuffling the columns."""
         columns = copy(self.columns)
         shuffle(columns)
-        return 'SELECT {col} FROM datadog_test.dbo.high_cardinality WHERE id = {id}'.format(
+        return 'SELECT {col} FROM datadog_test-1.dbo.high_cardinality WHERE id = {id}'.format(
             col=','.join(columns), id=randint(1, HighCardinalityQueries.EXPECTED_ROW_COUNT)
         )
 
@@ -154,8 +160,10 @@ class HighCardinalityQueries:
         """Creates a slow running query by trying to match a pattern that may or may not exist."""
         columns = copy(self.columns)
         shuffle(columns)
-        return 'SELECT TOP 10 {col} FROM datadog_test.dbo.high_cardinality WHERE col2_txt LIKE \'%{pattern}%\''.format(
-            col={columns[0]}, pattern=self._create_rand_string()
+        return (
+            'SELECT TOP 10 {col} FROM datadog_test-1.dbo.high_cardinality WHERE col2_txt LIKE \'%{pattern}%\''.format(
+                col={columns[0]}, pattern=self._create_rand_string()
+            )
         )
 
     def create_complex_query(self):
@@ -166,23 +174,23 @@ class HighCardinalityQueries:
         SELECT
             {col}
         FROM
-            datadog_test.dbo.high_cardinality AS hc1
+            datadog_test-1.dbo.high_cardinality AS hc1
             JOIN (
                 SELECT
                     id,
                     COUNT(*) col12_float
                 FROM
-                    datadog_test.dbo.high_cardinality AS hc2
+                    datadog_test-1.dbo.high_cardinality AS hc2
                 WHERE
                     hc2.col1_txt LIKE '%-%'
                     AND hc2.col14_int > (
                         SELECT
                             AVG(hc3.col15_int)
                         FROM
-                            datadog_test.dbo.high_cardinality AS hc3)
+                            datadog_test-1.dbo.high_cardinality AS hc3)
                     GROUP BY
                         hc2.id) AS hc4 ON hc4.id = hc1.id
-            JOIN datadog_test.dbo.high_cardinality AS hc5 ON hc5.id = hc1.id
+            JOIN datadog_test-1.dbo.high_cardinality AS hc5 ON hc5.id = hc1.id
         WHERE
             CAST(hc5.col17_date AS VARCHAR)
             IN('2003-04-23', '2043-09-10', '1996-08-08')
@@ -193,7 +201,7 @@ class HighCardinalityQueries:
         return query.format(col=','.join(['hc1.' + col for col in columns[: randint(1, len(columns) - 1)]]))
 
     def get_conn(self):
-        conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+        conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
             self._db_instance_config['driver'],
             self._db_instance_config['host'],
             self._db_instance_config['username'],
@@ -215,3 +223,36 @@ class HighCardinalityQueries:
     @staticmethod
     def _create_rand_string(length=5):
         return ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(length))
+
+
+def normalize_ids(actual_payload):
+    actual_payload['id'] = 'normalized_value'
+    for schema in actual_payload['schemas']:
+        schema['id'] = 'normalized_value'
+        for table in schema['tables']:
+            table['id'] = 'normalized_value'
+
+
+def normalize_indexes_columns(actual_payload):
+    for schema in actual_payload['schemas']:
+        schema['id'] = 'normalized_value'
+        for table in schema['tables']:
+            if 'indexes' in table:
+                for index in table['indexes']:
+                    column_names = index['column_names']
+                    columns = column_names.split(',')
+                    sorted_columns = sorted(columns)
+                    index['column_names'] = ','.join(sorted_columns)
+
+
+def deep_compare(obj1, obj2):
+    if isinstance(obj1, dict) and isinstance(obj2, dict):
+        if set(obj1.keys()) != set(obj2.keys()):
+            return False
+        return all(deep_compare(obj1[key], obj2[key]) for key in obj1)
+    elif isinstance(obj1, list) and isinstance(obj2, list):
+        if len(obj1) != len(obj2):
+            return False
+        return all(any(deep_compare(item1, item2) for item2 in obj2) for item1 in obj1)
+    else:
+        return obj1 == obj2

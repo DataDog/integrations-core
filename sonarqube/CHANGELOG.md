@@ -1,68 +1,234 @@
 # CHANGELOG - SonarQube
 
-## 2.1.0 / 2022-09-16
+<!-- towncrier release notes start -->
 
-* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+## 5.3.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 5.3.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Add work duration (`WORK_DUR`) metrics ([#20368](https://github.com/DataDog/integrations-core/pull/20368))
+
+## 5.2.1 / 2025-03-19 / Agent 7.65.0
+
+***Fixed***:
+
+* Parse new_* metrics available through sonarqube WEB API. We stopped handling them to avoid crashes in https://github.com/DataDog/integrations-core/pull/8552, but now they're back by popular demand! ([#19574](https://github.com/DataDog/integrations-core/pull/19574))
+
+## 5.2.0 / 2025-01-16 / Agent 7.63.0
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 5.1.0 / 2024-11-28 / Agent 7.61.0
+
+***Added***:
+
+* Add `MAX_PAGES` to Sonarqube API request ([#19149](https://github.com/DataDog/integrations-core/pull/19149))
+
+## 5.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 4.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+
+## 3.2.2 / 2024-05-31 / Agent 7.55.0
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 3.2.1 / 2024-04-26 / Agent 7.54.0
+
+***Fixed***:
+
+* Declare the integration as  Python 2 compatible ([#17323](https://github.com/DataDog/integrations-core/pull/17323))
+
+## 3.2.0 / 2024-02-16 / Agent 7.52.0
+
+***Added***:
+
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 3.1.0 / 2024-01-05 / Agent 7.51.0
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
+## 3.0.0 / 2023-08-10 / Agent 7.48.0
+
+***Changed***:
+
+* Bump the minimum base check version ([#15427](https://github.com/DataDog/integrations-core/pull/15427))
+
+***Added***:
+
+* Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
+
+***Fixed***:
+
+* Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
+
+## 2.2.5 / 2023-07-10 / Agent 7.47.0
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9 ([#14701](https://github.com/DataDog/integrations-core/pull/14701))
+
+## 2.2.4 / 2023-05-26 / Agent 7.46.0
+
+***Fixed***:
+
+* Switch a log from `warn` to `debug` ([#14428](https://github.com/DataDog/integrations-core/pull/14428))
+
+## 2.2.3 / 2023-01-16 / Agent 7.43.0
+
+***Fixed***:
+
+* Support components from paginated endpoint ([#13699](https://github.com/DataDog/integrations-core/pull/13699))
+
+## 2.2.2 / 2022-12-23 / Agent 7.42.0
+
+***Fixed***:
+
+* Fix config spec to allow additionalProperties ([#13512](https://github.com/DataDog/integrations-core/pull/13512))
+
+## 2.2.1 / 2022-12-16
+
+***Fixed***:
+
+* Projects processed in `components` excluded from `components_discovery` ([#13531](https://github.com/DataDog/integrations-core/pull/13531))
+* Fix configuration spec ([#13504](https://github.com/DataDog/integrations-core/pull/13504))
+
+## 2.2.0 / 2022-12-09
+
+***Added***:
+
+* Add autodiscovery feature for components ([#13450](https://github.com/DataDog/integrations-core/pull/13450))
+
+## 2.1.0 / 2022-09-16 / Agent 7.40.0
+
+***Added***:
+
+* Update HTTP config spec templates ([#12890](https://github.com/DataDog/integrations-core/pull/12890))
 
 ## 2.0.2 / 2022-08-05 / Agent 7.39.0
 
-* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+***Fixed***:
+
+* Dependency updates ([#12653](https://github.com/DataDog/integrations-core/pull/12653))
 
 ## 2.0.1 / 2022-04-05 / Agent 7.36.0
 
-* [Fixed] Remove check options from jmx template. See [#11686](https://github.com/DataDog/integrations-core/pull/11686).
-* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+***Fixed***:
+
+* Remove check options from jmx template ([#11686](https://github.com/DataDog/integrations-core/pull/11686))
+* Remove outdated warning in the description for the `tls_ignore_warning` option ([#11591](https://github.com/DataDog/integrations-core/pull/11591))
 
 ## 2.0.0 / 2022-02-19 / Agent 7.35.0
 
-* [Added] Add `pyproject.toml` file. See [#11435](https://github.com/DataDog/integrations-core/pull/11435).
-* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
-* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+***Changed***:
+
+* Add tls_protocols_allowed option documentation ([#11251](https://github.com/DataDog/integrations-core/pull/11251))
+
+***Added***:
+
+* Add `pyproject.toml` file ([#11435](https://github.com/DataDog/integrations-core/pull/11435))
+
+***Fixed***:
+
+* Fix namespace packaging on Python 2 ([#11532](https://github.com/DataDog/integrations-core/pull/11532))
 
 ## 1.5.2 / 2022-01-08 / Agent 7.34.0
 
-* [Fixed] Bump base check dependency. See [#10926](https://github.com/DataDog/integrations-core/pull/10926).
-* [Fixed] Add comment to autogenerated model files. See [#10945](https://github.com/DataDog/integrations-core/pull/10945).
+***Fixed***:
+
+* Bump base check dependency ([#10926](https://github.com/DataDog/integrations-core/pull/10926))
+* Add comment to autogenerated model files ([#10945](https://github.com/DataDog/integrations-core/pull/10945))
 
 ## 1.5.1 / 2021-11-13 / Agent 7.33.0
 
-* [Fixed] Fix description of JMX options. See [#10454](https://github.com/DataDog/integrations-core/pull/10454).
+***Fixed***:
+
+* Fix description of JMX options ([#10454](https://github.com/DataDog/integrations-core/pull/10454))
 
 ## 1.5.0 / 2021-10-04 / Agent 7.32.0
 
-* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
-* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
-* [Added] Disable generic tags. See [#10027](https://github.com/DataDog/integrations-core/pull/10027).
-* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+***Added***:
+
+* Add HTTP option to control the size of streaming responses ([#10183](https://github.com/DataDog/integrations-core/pull/10183))
+* Add allow_redirect option ([#10160](https://github.com/DataDog/integrations-core/pull/10160))
+* Disable generic tags ([#10027](https://github.com/DataDog/integrations-core/pull/10027))
+
+***Fixed***:
+
+* Fix the description of the `allow_redirects` HTTP option ([#10195](https://github.com/DataDog/integrations-core/pull/10195))
 
 ## 1.4.0 / 2021-08-22 / Agent 7.31.0
 
-* [Added] Use `display_default` as a fallback for `default` when validating config models. See [#9739](https://github.com/DataDog/integrations-core/pull/9739).
+***Added***:
+
+* Use `display_default` as a fallback for `default` when validating config models ([#9739](https://github.com/DataDog/integrations-core/pull/9739))
 
 ## 1.3.0 / 2021-07-12 / Agent 7.30.0
 
-* [Added] Enable `new_gc_metrics` JMX config option for new installations. See [#9501](https://github.com/DataDog/integrations-core/pull/9501).
+***Added***:
+
+* Enable `new_gc_metrics` JMX config option for new installations ([#9501](https://github.com/DataDog/integrations-core/pull/9501))
 
 ## 1.2.0 / 2021-05-28 / Agent 7.29.0
 
-* [Added] Add runtime configuration validation. See [#8985](https://github.com/DataDog/integrations-core/pull/8985).
-* [Fixed] Fix defaults for `collect_default_metrics` JMX config option. See [#9441](https://github.com/DataDog/integrations-core/pull/9441).
-* [Fixed] Fix JMX config spec. See [#9364](https://github.com/DataDog/integrations-core/pull/9364).
+***Added***:
+
+* Add runtime configuration validation ([#8985](https://github.com/DataDog/integrations-core/pull/8985))
+
+***Fixed***:
+
+* Fix defaults for `collect_default_metrics` JMX config option ([#9441](https://github.com/DataDog/integrations-core/pull/9441))
+* Fix JMX config spec ([#9364](https://github.com/DataDog/integrations-core/pull/9364))
 
 ## 1.1.2 / 2021-03-12 / Agent 7.27.0
 
-* [Fixed] Fix collection of PendingTime. See [#8817](https://github.com/DataDog/integrations-core/pull/8817).
+***Fixed***:
+
+* Fix collection of PendingTime ([#8817](https://github.com/DataDog/integrations-core/pull/8817))
 
 ## 1.1.1 / 2021-02-16
 
-* [Fixed] Fix automatic discovery of metrics from web API and improve example config documentation. See [#8552](https://github.com/DataDog/integrations-core/pull/8552).
-* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+***Fixed***:
+
+* Fix automatic discovery of metrics from web API and improve example config documentation ([#8552](https://github.com/DataDog/integrations-core/pull/8552))
+* Bump minimum base package version ([#8443](https://github.com/DataDog/integrations-core/pull/8443))
 
 ## 1.1.0 / 2020-12-11 / Agent 7.25.0
 
-* [Added] Document new collect_default_jvm_metrics flag for JMXFetch integrations. See [#8153](https://github.com/DataDog/integrations-core/pull/8153).
+***Added***:
+
+* Document new collect_default_jvm_metrics flag for JMXFetch integrations ([#8153](https://github.com/DataDog/integrations-core/pull/8153))
 
 ## 1.0.0 / 2020-11-20
 
-* [Added] Add SonarQube integration. See [#7807](https://github.com/DataDog/integrations-core/pull/7807).
+***Added***:
 
+* Add SonarQube integration ([#7807](https://github.com/DataDog/integrations-core/pull/7807))

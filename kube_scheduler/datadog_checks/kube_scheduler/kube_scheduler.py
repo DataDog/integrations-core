@@ -13,6 +13,8 @@ from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.http import RequestsWrapper
 
+from .sli_metrics import SliMetricsScraperMixin
+
 DEFAULT_COUNTERS = {
     # Number of HTTP requests, partitioned by status code, method, and host.
     'rest_client_requests_total': 'client.http.requests',
@@ -69,10 +71,19 @@ NEW_1_19_HISTOGRAMS = {
 NEW_1_23_HISTOGRAMS = {
     # (from 1.23) Number of attempts to successfully schedule a pod.
     'scheduler_pod_scheduling_attempts': 'scheduling.pod.scheduling_attempts',
-    # (from 1.23) E2e latency for a pod being scheduled which may include multiple scheduling attempts.
+    # (from 1.23 and deprecated in 1.29.0) E2e latency for a pod being scheduled
+    # which may include multiple scheduling attempts.
     'scheduler_pod_scheduling_duration_seconds': 'scheduling.pod.scheduling_duration',
     # (from 1.23) Scheduling attempt latency in seconds (scheduling algorithm + binding).
     'scheduler_scheduling_attempt_duration_seconds': 'scheduling.attempt_duration',
+}
+
+NEW_1_29_HISTOGRAMS = {
+    # (from 1.29) E2e latency for a pod being scheduled, from the time the pod
+    # enters the scheduling queue and might involve multiple scheduling
+    # attempts.
+    # This replaces the deprecated "scheduler_pod_scheduling_duration_seconds".
+    'scheduler_pod_scheduling_sli_duration_seconds': 'scheduling.pod.scheduling_duration',
 }
 
 TRANSFORM_VALUE_HISTOGRAMS = {
@@ -107,6 +118,10 @@ NEW_1_15_GAUGES = {
     'scheduler_pending_pods': 'pending_pods'
 }
 
+NEW_1_26_GAUGES = {
+    'scheduler_goroutines': 'goroutine_by_scheduling_operation',
+}
+
 DEFAULT_GO_METRICS = {
     'go_gc_duration_seconds': 'gc_duration_seconds',
     'go_goroutines': 'goroutines',
@@ -127,7 +142,7 @@ IGNORE_METRICS = [
 ]
 
 
-class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
+class KubeSchedulerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
     KUBE_SCHEDULER_NAMESPACE = "kube_scheduler"
@@ -159,8 +174,10 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                         DEFAULT_GAUGES,
                         NEW_1_15_GAUGES,
                         DEFAULT_GO_METRICS,
+                        NEW_1_26_GAUGES,
                         DEPRECARED_SUMMARIES,
                         NEW_1_23_HISTOGRAMS,
+                        NEW_1_29_HISTOGRAMS,
                     ],
                     'ignore_metrics': IGNORE_METRICS,
                 }
@@ -178,9 +195,15 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
 
                 instance['health_url'] = url
 
+        inst = instances[0] if instances else None
+        slis_instance = self.create_sli_prometheus_instance(inst)
+        self.slis_scraper_config = self.get_scraper_config(slis_instance)
+        self.detect_sli_endpoint(self.get_http_handler(self.slis_scraper_config), slis_instance.get('prometheus_url'))
+
     def check(self, instance):
         # Get the configuration for this specific instance
         scraper_config = self.get_scraper_config(instance)
+
         # Set up metric_transformers
         transformers = {}
         for metric_from, metric_to in TRANSFORM_VALUE_HISTOGRAMS.items():
@@ -197,6 +220,10 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             self.check_election_status(leader_config)
 
         self._perform_service_check(instance)
+
+        if self._slis_available:
+            self.log.debug('processing kube scheduler sli metrics')
+            self.process(self.slis_scraper_config, metric_transformers=self.sli_transformers)
 
     def _perform_service_check(self, instance):
         url = instance.get('health_url')

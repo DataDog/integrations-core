@@ -1,7 +1,6 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -9,6 +8,7 @@ build-backend = "hatchling.build"
 name = "datadog-oracle"
 description = "The Oracle Database check"
 readme = "README.md"
+requires-python = ">=3.8"
 keywords = [
     "datadog",
     "datadog agent",
@@ -23,29 +23,22 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.12",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=36.5.0",
 ]
 dynamic = [
     "version",
 ]
-
-[project.license]
-text = "BSD-3-Clause"
+license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "cx-oracle==7.3.0; python_version < '3.0'",
-    "cx-oracle==8.3.0; python_version > '3.0'",
-    "jaydebeapi==1.2.3",
-    "jpype1==0.7.0; python_version < '3.0'",
-    "jpype1==1.4.0; python_version > '3.0'",
 ]
+client-only = []
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
@@ -58,8 +51,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

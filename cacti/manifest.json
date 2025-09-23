@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b18f92f2-2aa5-435e-b04e-84ce3538fa2d",
   "app_id": "cacti",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,9 +13,10 @@
     "title": "Cacti",
     "media": [],
     "classifier_tags": [
+      "Category::Developer Tools",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Category::Monitoring",
-      "Category::Log Collection"
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -23,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Cacti",
@@ -40,10 +41,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
-    },
-    "logs": {
-      "source": "cacti"
+      },
+      "source_type_id": 25,
+      "auto_install": true
     }
   }
 }

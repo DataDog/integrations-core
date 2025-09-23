@@ -6,17 +6,15 @@ from __future__ import division
 import os
 import re
 from decimal import ROUND_HALF_UP, Decimal
-from typing import TYPE_CHECKING, Text, Union
-
-from six import PY3, iteritems, text_type
-from six.moves.urllib.parse import urlparse
+from typing import TYPE_CHECKING, Text, Union  # noqa: F401
+from urllib.parse import urlparse
 
 from .constants import MILLISECOND
 
 
 def ensure_bytes(s):
     # type: (Union[Text, bytes]) -> bytes
-    if isinstance(s, text_type):
+    if isinstance(s, str):
         s = s.encode('utf-8')
     return s
 
@@ -32,7 +30,7 @@ def ensure_unicode(s):
 if TYPE_CHECKING:
     to_native_string = str
 else:
-    to_native_string = ensure_unicode if PY3 else ensure_bytes
+    to_native_string = ensure_unicode
 
 # TODO: `to_string` will be deprecated with Agent 6.21/7.21
 to_string = to_native_string
@@ -77,7 +75,7 @@ def total_time_to_temporal_percent(total_time, scale=MILLISECOND):
 
 
 def exclude_undefined_keys(mapping):
-    return {key: value for key, value in iteritems(mapping) if value is not None}
+    return {key: value for key, value in mapping.items() if value is not None}
 
 
 def round_value(value, precision=0, rounding_method=ROUND_HALF_UP):

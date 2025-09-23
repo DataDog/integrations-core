@@ -4,8 +4,6 @@
 
 import re
 
-from six import iteritems
-
 from datadog_checks.base.utils.containers import hash_mutable
 
 from . import exceptions, helpers
@@ -103,7 +101,7 @@ class CiscoTags:
 
         application_meta = []
         application_meta_map = self._edpt_tags_map(edpt)
-        for k, v in iteritems(application_meta_map):
+        for k, v in application_meta_map.items():
             application_meta.append(k + ":" + v)
         tenant_name = application_meta_map.get("tenant")
         app_name = application_meta_map.get("application")
@@ -112,7 +110,7 @@ class CiscoTags:
         # adding meta tags
         endpoint_meta = []
         endpoint_meta_map = self._get_epg_meta_tags_map(tenant_name, app_name, epg_name)
-        for k, v in iteritems(endpoint_meta_map):
+        for k, v in endpoint_meta_map.items():
             endpoint_meta.append(k + ":" + v)
 
         # adding application tags

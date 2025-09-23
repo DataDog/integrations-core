@@ -1,0 +1,56 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "76e1c087-314f-4d90-860e-c6eaee7a6eeb",
+  "app_id": "extrahop",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into ExtraHop detection and investigation logs.",
+    "title": "ExtraHop",
+    "media": [
+      {
+        "caption": "ExtraHop - Detections",
+        "image_url": "images/extrahop_dashboard_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "ExtraHop - Detections",
+        "image_url": "images/extrahop_dashboard_2.png",
+        "media_type": "image"
+      }
+      
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 28531528,
+      "source_type_name": "ExtraHop",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "ExtraHop - Detections": "assets/dashboards/extrahop_detections.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

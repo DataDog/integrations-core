@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.mesos_slave import MesosSlave
@@ -41,7 +40,7 @@ def assert_metrics_covered(aggregator):
 
     expected_tags = ["instance:mytag1", "url:{}/metrics/snapshot".format(URL), "mesos_node:slave"]
 
-    for _, v in iteritems(metrics):
+    for v in metrics.values():
         aggregator.assert_metric(v[0])
         for tag in expected_tags:
             aggregator.assert_metric_has_tag(v[0], tag)

@@ -1,32 +1,39 @@
 {
-    "name": "[Traffic Server] 5xx Errors higher than usual",
-    "type": "query alert",
-    "query": "avg(last_1h):anomalies(avg:traffic_server.process.http.code.5xx_responses{*} by {code}, 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
+  "version": 2,
+  "created_at": "2022-04-21",
+  "last_updated_at": "2022-04-21",
+  "title": "5xx errors number is high",
+  "tags": [
+    "integration:traffic-server"
+  ],
+  "description": "The Apache Traffic Server can have issues that prevent it from fulfilling a client's request. This monitor tracks anomalies in the 5xx HTTP response codes from the Apache Traffic Server to provide insights into unusual server errors.",
+  "definition": {
     "message": "Number of 5xx errors on Traffic Server is at {{value}} which is higher than usual.",
-    "tags": [
-        "integration:traffic_server"
-    ],
+    "name": "[Traffic Server] 5xx Errors higher than usual",
     "options": {
-        "notify_audit": false,
-        "locked": false,
-        "timeout_h": 0,
-        "new_host_delay": 300,
-        "require_full_window": false,
-        "notify_no_data": false,
-        "renotify_interval": 0,
-        "escalation_message": "",
-        "no_data_timeframe": null,
-        "include_tags": true,
-        "thresholds": {
-            "critical": 1,
-            "critical_recovery": 0
-        },
-        "threshold_windows": {
-            "trigger_window": "last_15m",
-            "recovery_window": "last_15m"
-        }
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
     },
-    "recommended_monitor_metadata": {
-        "description": "Notifies when Traffic Server 5xx errors are higher than usual"
-    }
+    "query": "avg(last_1h):anomalies(avg:traffic_server.process.http.code.5xx_responses{*} by {code}, 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
+    "tags": [
+      "integration:traffic_server"
+    ],
+    "type": "query alert"
+  }
 }

@@ -1,33 +1,40 @@
 {
-	"name": "[MySQL] Unusual drop in SELECT query rate on server {{host.name}}",
-	"type": "query alert",
-	"query": "avg(last_1h):anomalies(avg:mysql.performance.com_select{*}, 'basic', 2, direction='below', alert_window='last_15m', interval=20, count_default_zero='true') >= 1",
-	"message": "Get notified of drastic and prolonged drops in SELECT query throughput.",
-	"tags": [
+  "version": 2,
+  "created_at": "2021-02-16",
+  "last_updated_at": "2021-02-16",
+  "title": "SELECT query volume is dropping",
+  "tags": [
+    "integration:mysql"
+  ],
+  "description": "Database performance refers to how efficiently a database system processes and manages data. This anomaly monitor tracks the average number of SELECT queries executed and identifies deviations below the expected norm.",
+  "definition": {
+    "message": "Get notified of drastic and prolonged drops in SELECT query throughput.",
+    "name": "[MySQL] Unusual drop in SELECT query rate on server {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_1h):anomalies(avg:mysql.performance.com_select{*}, 'basic', 2, direction='below', alert_window='last_15m', interval=20, count_default_zero='true') >= 1",
+    "tags": [
       "integration:mysql"
     ],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"critical_recovery": 0
-		},
-		"threshold_windows": {
-			"trigger_window": "last_15m",
-			"recovery_window": "last_15m"
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Notify your team when a drastic drop in SELECT queries occurs."
-	}
+    "type": "query alert"
+  }
 }

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  silverstripe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: silverstripe-image-latest
+    network_mode: host
+    environment:
+      SS_DATABASE_CLASS: MySQLDatabase
+      SS_DATABASE_SERVER: localhost 
+      SS_DATABASE_NAME: silverstripe_db
+      SS_DATABASE_USERNAME: silverstripe_user
+      SS_DATABASE_PASSWORD: your_password
+      SS_DEFAULT_ADMIN_USERNAME: admin
+      SS_DEFAULT_ADMIN_PASSWORD: Admin@123
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    network_mode: host
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: silverstripe_db
+      MYSQL_USER: silverstripe_user
+      MYSQL_PASSWORD: your_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

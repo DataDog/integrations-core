@@ -5,8 +5,6 @@ from __future__ import division
 
 from ipaddress import ip_address
 
-from six import PY2, text_type
-
 # https://github.com/python/cpython/blob/ef516d11c1a0f885dba0aba8cf5366502077cdd4/Lib/ssl.py#L158-L165
 DEFAULT_PROTOCOL_VERSIONS = {'TLSv1.2', 'TLSv1.3'}
 SUPPORTED_PROTOCOL_VERSIONS = {'SSLv3', 'TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3'}
@@ -46,7 +44,7 @@ def get_protocol_versions(versions):
 
 def is_ip_address(hostname):
     try:
-        ip_address(text_type(hostname))
+        ip_address(str(hostname))
     except ValueError:
         return False
 
@@ -59,15 +57,3 @@ def days_to_seconds(days):
 
 def seconds_to_days(seconds):
     return seconds / 60 / 60 / 24
-
-
-if PY2:
-    from contextlib import closing as _closing
-
-    def closing(sock):
-        return _closing(sock)
-
-else:
-
-    def closing(sock):
-        return sock

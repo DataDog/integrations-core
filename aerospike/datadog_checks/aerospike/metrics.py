@@ -10,7 +10,7 @@ METRIC_MAP = {
     'aerospike_namespace_hwm_breached': 'namespace.hwm_breached',
     'aerospike_namespace_memory_free_pct': 'namespace.memory_free_pct',
     'aerospike_namespace_stop_writes': 'namespace.stop_writes',
-    # pmem only avalable when configured:
+    # pmem only available when configured:
     # https://github.com/aerospike/aerospike-prometheus-exporter/issues/20#issuecomment-634476536
     'aerospike_namespace_pmem_available_pct': 'namespace.pmem_available_pct',
     'aerospike_namespace_unavailable_partitions': 'namespace.unavailable_partitions',
@@ -23,8 +23,15 @@ METRIC_MAP = {
     'aerospike_xdr_lag': 'xdr.lag',
     'aerospike_namespace_client_delete_error': 'namespace.client_delete_error',
     'aerospike_namespace_client_read_error': 'namespace.client_read_error',
+    'aerospike_namespace_client_read_success': 'namespace.client_read_success',
+    'aerospike_namespace_client_read_not_found': 'namespace.client_read_not_found',
+    'aerospike_namespace_client_read_timeout': 'namespace.client_read_timeout',
+    'aerospike_namespace_client_read_filtered_out': 'namespace.client_read_filtered_out',
     'aerospike_namespace_client_udf_error': 'namespace.client_udf_error',
     'aerospike_namespace_client_write_error': 'namespace.client_write_error',
+    'aerospike_namespace_client_write_success': 'namespace.client_write_success',
+    'aerospike_namespace_client_write_timeout': 'namespace.client_write_timeout',
+    'aerospike_namespace_client_write_filtered_out': 'namespace.client_write_filtered_out',
     # index_flash_alloc_pct only available in ee configured with index-type flash:
     # https://docs.aerospike.com/reference/metrics#index_flash_alloc_pct
     'aerospike_namespace_index_flash_alloc_pct': 'namespace.index_flash_alloc_pct',
@@ -33,7 +40,7 @@ METRIC_MAP = {
     'aerospike_namespace_scan_basic_error': 'namespace.scan_basic_error',
     'aerospike_namespace_scan_ops_bg_error': 'namespace.scan_ops_bg_error',
     'aerospike_namespace_scan_udf_bg_error': 'namespace.scan_udf_bg_error',
-    # storage_engine metrics avaialble per-device or per-file depending on storage configuration:
+    # storage_engine metrics available per-device or per-file depending on storage configuration:
     # https://github.com/aerospike/aerospike-prometheus-exporter/blob/bf6af43d758c6f96d7d34bf2b8742d3a6df4bfc8/watcher_namespaces.go#L383-L400
     'aerospike_namespace_storage_engine_device_defrag_q': 'namespace.storage_engine_device_defrag_q',
     'aerospike_namespace_storage_engine_file_defrag_q': 'namespace.storage_engine_file_defrag_q',

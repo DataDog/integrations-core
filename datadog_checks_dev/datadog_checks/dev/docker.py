@@ -3,10 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import contextmanager
-from typing import Iterator
-
-from six import string_types
-from six.moves.urllib.parse import urlparse
+from typing import Iterator  # noqa: F401
+from urllib.parse import urlparse
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
@@ -48,7 +46,7 @@ def compose_file_active(compose_file):
     """
     Returns a `bool` indicating whether or not a compose file has any active services.
     """
-    command = ['docker', 'compose', '--compatibility', '-f', compose_file, 'ps']
+    command = ['docker', 'compose', '-f', compose_file, 'ps']
     lines = run_command(command, capture='out', check=True).stdout.strip().splitlines()
 
     return len(lines) > 1
@@ -109,6 +107,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
 @contextmanager
 def docker_run(
     compose_file=None,
+    waith_for_health=False,
     build=False,
     service_name=None,
     up=None,
@@ -123,40 +122,63 @@ def docker_run(
     wrappers=None,
     attempts=None,
     attempts_wait=1,
+    capture=None,
 ):
     """
     A convenient context manager for safely setting up and tearing down Docker environments.
 
-    - **compose_file** (_str_) - A path to a Docker compose file. A custom tear
-      down is not required when using this.
-    - **build** (_bool_) - Whether or not to build images for when `compose_file` is provided
-    - **service_name** (_str_) - Optional name for when ``compose_file`` is provided
-    - **up** (_callable_) - A custom setup callable
-    - **down** (_callable_) - A custom tear down callable. This is required when using a custom setup.
-    - **on_error** (_callable_) - A callable called in case of an unhandled exception
-    - **sleep** (_float_) - Number of seconds to wait before yielding. This occurs after all conditions are successful.
-    - **endpoints** (_List[str]_) - Endpoints to verify access for before yielding. Shorthand for adding
-      `CheckEndpoints(endpoints)` to the `conditions` argument.
-    - **log_patterns** (_List[str|re.Pattern]_) - Regular expression patterns to find in Docker logs before yielding.
-      This is only available when `compose_file` is provided. Shorthand for adding
-      `CheckDockerLogs(compose_file, log_patterns, 'all')` to the `conditions` argument.
-    - **mount_logs** (_bool_) - Whether or not to mount log files in Agent containers based on example logs
-      configuration
-    - **conditions** (_callable_) - A list of callable objects that will be executed before yielding to
-      check for errors
-    - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
-    - **wrappers** (_List[callable]_) - A list of context managers to use during execution
-    - **attempts** (_int_) - Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI
-    - **attempts_wait** (_int_) - Time to wait between attempts
+    Parameters:
+
+        compose_file (str):
+            A path to a Docker compose file. A custom tear
+            down is not required when using this.
+        waith_for_health (bool):
+            Whether or not to wait for the health of the service to be healthy before yielding.
+        build (bool):
+            Whether or not to build images for when `compose_file` is provided
+        service_name (str):
+            Optional name for when ``compose_file`` is provided
+        up (callable):
+            A custom setup callable
+        down (callable):
+            A custom tear down callable. This is required when using a custom setup.
+        on_error (callable):
+            A callable called in case of an unhandled exception
+        sleep (float):
+            Number of seconds to wait before yielding. This occurs after all conditions are successful.
+        endpoints (list[str]):
+            Endpoints to verify access for before yielding. Shorthand for adding
+            `CheckEndpoints(endpoints)` to the `conditions` argument.
+        log_patterns (list[str | re.Pattern]):
+            Regular expression patterns to find in Docker logs before yielding.
+            This is only available when `compose_file` is provided. Shorthand for adding
+            `CheckDockerLogs(compose_file, log_patterns, 'all')` to the `conditions` argument.
+        mount_logs (bool):
+            Whether or not to mount log files in Agent containers based on example logs configuration
+        conditions (callable):
+            A list of callable objects that will be executed before yielding to check for errors
+        env_vars (dict[str, str]):
+            A dictionary to update `os.environ` with during execution
+        wrappers (list[callable]):
+            A list of context managers to use during execution
+        attempts (int):
+            Number of attempts to run `up` and the `conditions` successfully. Defaults to 2 in CI
+        attempts_wait (int):
+            Time to wait between attempts
     """
     if compose_file and up:
         raise TypeError('You must select either a compose file or a custom setup callable, not both.')
 
     if compose_file is not None:
-        if not isinstance(compose_file, string_types):
+        if not isinstance(compose_file, str):
             raise TypeError('The path to the compose file is not a string: {}'.format(repr(compose_file)))
 
-        set_up = ComposeFileUp(compose_file, build=build, service_name=service_name)
+        composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
+        if capture is not None:
+            composeFileArgs['capture'] = capture
+        if waith_for_health:
+            composeFileArgs['waith_for_health'] = waith_for_health
+        set_up = ComposeFileUp(**composeFileArgs)
         if down is not None:
             tear_down = down
         else:
@@ -216,11 +238,23 @@ def docker_run(
 
 
 class ComposeFileUp(LazyFunction):
-    def __init__(self, compose_file, build=False, service_name=None):
+    def __init__(
+        self,
+        compose_file: str,
+        build: bool = False,
+        service_name: str | None = None,
+        capture: str | None = None,
+        waith_for_health: bool = False,
+    ):
         self.compose_file = compose_file
         self.build = build
         self.service_name = service_name
-        self.command = ['docker', 'compose', '--compatibility', '-f', self.compose_file, 'up', '-d']
+        self.capture = capture
+        self.waith_for_health = waith_for_health
+        self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d', '--force-recreate']
+
+        if waith_for_health:
+            self.command.append('--wait')
 
         if self.build:
             self.command.append('--build')
@@ -229,14 +263,17 @@ class ComposeFileUp(LazyFunction):
             self.command.append(self.service_name)
 
     def __call__(self):
-        return run_command(self.command, check=True)
+        args = {'check': True}
+        if self.capture is not None:
+            args['capture'] = self.capture
+        return run_command(self.command, **args)
 
 
 class ComposeFileLogs(LazyFunction):
     def __init__(self, compose_file, check=True):
         self.compose_file = compose_file
         self.check = check
-        self.command = ['docker', 'compose', '--compatibility', '-f', self.compose_file, 'logs']
+        self.command = ['docker', 'compose', '-f', self.compose_file, 'logs']
 
     def __call__(self, exception):
         return run_command(self.command, capture=False, check=self.check)
@@ -249,7 +286,6 @@ class ComposeFileDown(LazyFunction):
         self.command = [
             'docker',
             'compose',
-            '--compatibility',
             '-f',
             self.compose_file,
             'down',
@@ -277,8 +313,8 @@ def _read_example_logs_config(check_root):
 @contextmanager
 def temporarily_stop_service(service, compose_file, check=True):
     # type: (str, str, bool) -> Iterator[None]
-    stop_command = ['docker', 'compose', '--compatibility', '-f', compose_file, 'stop', service]
-    start_command = ['docker', 'compose', '--compatibility', '-f', compose_file, 'start', service]
+    stop_command = ['docker', 'compose', '-f', compose_file, 'stop', service]
+    start_command = ['docker', 'compose', '-f', compose_file, 'start', service]
 
     run_command(stop_command, capture=False, check=check)
     yield

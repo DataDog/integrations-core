@@ -1,4 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-datadog.agent.started,count,,,,,0,agent_metrics,started,
-datadog.agent.running,gauge,,,,,0,agent_metrics,running,
 datadog.agent.python.version,gauge,,,,,0,agent_metrics,py version,
+datadog.agent.running,gauge,,,,,0,agent_metrics,running,
+datadog.agent.started,count,,,,,0,agent_metrics,started,

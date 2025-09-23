@@ -1,0 +1,929 @@
+# HELP kv_allocator_load_based_lease_transfers_follow_the_workload The number times the allocator determined that the lease should be transferred to another replica for locality.
+# TYPE kv_allocator_load_based_lease_transfers_follow_the_workload counter
+kv_allocator_load_based_lease_transfers_follow_the_workload{store="1",node_id="1"} 0
+# HELP kv_tenant_rate_limit_num_tenants Number of tenants currently being tracked
+# TYPE kv_tenant_rate_limit_num_tenants gauge
+kv_tenant_rate_limit_num_tenants{store="1",node_id="1"} 0
+# HELP kv_rangefeed_scheduler_system_queue_size Number of entries in the KV RangeFeed system scheduler queue
+# TYPE kv_rangefeed_scheduler_system_queue_size gauge
+kv_rangefeed_scheduler_system_queue_size{store="1",node_id="1"} 0
+# HELP kv_tenant_rate_limit_read_bytes_admitted Number of read bytes admitted by the rate limiter
+# TYPE kv_tenant_rate_limit_read_bytes_admitted counter
+kv_tenant_rate_limit_read_bytes_admitted{store="1",node_id="1"} 0
+# HELP kvadmission_flow_controller_elastic_requests_bypassed Number of elastic waiting requests that bypassed the flow controller due to disconnecting streams
+# TYPE kvadmission_flow_controller_elastic_requests_bypassed counter
+kvadmission_flow_controller_elastic_requests_bypassed{node_id="1"} 0
+# HELP kvadmission_flow_token_dispatch_coalesced_regular Number of coalesced regular flow token dispatches (where we're informing the sender of a higher log entry being admitted)
+# TYPE kvadmission_flow_token_dispatch_coalesced_regular counter
+kvadmission_flow_token_dispatch_coalesced_regular{node_id="1"} 0
+# HELP kv_prober_write_latency Latency of successful KV write probes
+# TYPE kv_prober_write_latency histogram
+kv_prober_write_latency_bucket{node_id="1",le="10000"} 0
+kv_prober_write_latency_bucket{node_id="1",le="12638.482029342978"} 0
+kv_prober_write_latency_bucket{node_id="1",le="15973.122800602541"} 0
+kv_prober_write_latency_bucket{node_id="1",le="20187.602546790382"} 0
+kv_prober_write_latency_bucket{node_id="1",le="25514.065200312878"} 0
+kv_prober_write_latency_bucket{node_id="1",le="32245.90545296394"} 0
+kv_prober_write_latency_bucket{node_id="1",le="40753.92965871775"} 0
+kv_prober_write_latency_bucket{node_id="1",le="51506.78076168121"} 0
+kv_prober_write_latency_bucket{node_id="1",le="65096.75230458167"} 0
+kv_prober_write_latency_bucket{node_id="1",le="82272.41341700466"} 0
+kv_prober_write_latency_bucket{node_id="1",le="103979.84184814895"} 0
+kv_prober_write_latency_bucket{node_id="1",le="131414.73626117557"} 0
+kv_prober_write_latency_bucket{node_id="1",le="166088.27826277143"} 0
+kv_prober_write_latency_bucket{node_id="1",le="209910.3720108553"} 0
+kv_prober_write_latency_bucket{node_id="1",le="265294.8464431894"} 0
+kv_prober_write_latency_bucket{node_id="1",le="335292.41492495546"} 0
+kv_prober_write_latency_bucket{node_id="1",le="423758.7160604059"} 0
+kv_prober_write_latency_bucket{node_id="1",le="535566.6917706894"} 0
+kv_prober_write_latency_bucket{node_id="1",le="676875.0009458527"} 0
+kv_prober_write_latency_bucket{node_id="1",le="855467.2535565672"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+kv_prober_write_latency_bucket{node_id="1",le="2.182644728397485e+06"} 0
+kv_prober_write_latency_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+kv_prober_write_latency_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+kv_prober_write_latency_bucket{node_id="1",le="4.406236427773566e+06"} 0
+kv_prober_write_latency_bucket{node_id="1",le="5.568813990945262e+06"} 0
+kv_prober_write_latency_bucket{node_id="1",le="7.038135554931545e+06"} 0
+kv_prober_write_latency_bucket{node_id="1",le="8.89513497310822e+06"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.795714494371637e+07"} 0
+kv_prober_write_latency_bucket{node_id="1",le="2.269510536694665e+07"} 0
+kv_prober_write_latency_bucket{node_id="1",le="2.868316813342006e+07"} 0
+kv_prober_write_latency_bucket{node_id="1",le="3.625117049988527e+07"} 0
+kv_prober_write_latency_bucket{node_id="1",le="4.581597669054482e+07"} 0
+kv_prober_write_latency_bucket{node_id="1",le="5.790443980602476e+07"} 0
+kv_prober_write_latency_bucket{node_id="1",le="7.318242219076161e+07"} 0
+kv_prober_write_latency_bucket{node_id="1",le="9.249147277217315e+07"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+kv_prober_write_latency_bucket{node_id="1",le="2.359833466782189e+08"} 0
+kv_prober_write_latency_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+kv_prober_write_latency_bucket{node_id="1",le="3.769390975388353e+08"} 0
+kv_prober_write_latency_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+kv_prober_write_latency_bucket{node_id="1",le="6.020894493336115e+08"} 0
+kv_prober_write_latency_bucket{node_id="1",le="7.609496685459859e+08"} 0
+kv_prober_write_latency_bucket{node_id="1",le="9.61724871115294e+08"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+kv_prober_write_latency_bucket{node_id="1",le="1.941491945743876e+09"} 0
+kv_prober_write_latency_bucket{node_id="1",le="2.453751106639811e+09"} 0
+kv_prober_write_latency_bucket{node_id="1",le="3.10116892657477e+09"} 0
+kv_prober_write_latency_bucket{node_id="1",le="3.919406774847209e+09"} 0
+kv_prober_write_latency_bucket{node_id="1",le="4.953535208959157e+09"} 0
+kv_prober_write_latency_bucket{node_id="1",le="6.260516572014802e+09"} 0
+kv_prober_write_latency_bucket{node_id="1",le="7.912342618981298e+09"} 0
+kv_prober_write_latency_bucket{node_id="1",le="9.99999999999997e+09"} 0
+kv_prober_write_latency_bucket{node_id="1",le="+Inf"} 0
+kv_prober_write_latency_sum{node_id="1"} 0
+kv_prober_write_latency_count{node_id="1"} 0
+# HELP kvadmission_flow_controller_elastic_stream_count Total number of replication streams for elastic requests
+# TYPE kvadmission_flow_controller_elastic_stream_count gauge
+kvadmission_flow_controller_elastic_stream_count{node_id="1"} 0
+# HELP kvadmission_flow_controller_elastic_requests_errored Number of elastic requests that errored out while waiting for flow tokens
+# TYPE kvadmission_flow_controller_elastic_requests_errored counter
+kvadmission_flow_controller_elastic_requests_errored{node_id="1"} 0
+# HELP kv_allocator_load_based_replica_rebalancing_cannot_find_better_candidate The number times the allocator determined that the range was on the best possible stores
+# TYPE kv_allocator_load_based_replica_rebalancing_cannot_find_better_candidate counter
+kv_allocator_load_based_replica_rebalancing_cannot_find_better_candidate{store="1",node_id="1"} 0
+# HELP kv_allocator_load_based_lease_transfers_cannot_find_better_candidate The number times the allocator determined that the lease was on the best possible replica
+# TYPE kv_allocator_load_based_lease_transfers_cannot_find_better_candidate counter
+kv_allocator_load_based_lease_transfers_cannot_find_better_candidate{store="1",node_id="1"} 0
+# HELP kvadmission_flow_controller_elastic_requests_waiting Number of elastic requests waiting for flow tokens
+# TYPE kvadmission_flow_controller_elastic_requests_waiting gauge
+kvadmission_flow_controller_elastic_requests_waiting{node_id="1"} 0
+# HELP kvadmission_flow_controller_regular_requests_admitted Number of regular requests admitted by the flow controller
+# TYPE kvadmission_flow_controller_regular_requests_admitted counter
+kvadmission_flow_controller_regular_requests_admitted{node_id="1"} 121
+# HELP kv_tenant_rate_limit_write_requests_admitted Number of write requests admitted by the rate limiter
+# TYPE kv_tenant_rate_limit_write_requests_admitted counter
+kv_tenant_rate_limit_write_requests_admitted{store="1",node_id="1"} 0
+# HELP kv_loadsplitter_nosplitkey Load-based splitter could not find a split key.
+# TYPE kv_loadsplitter_nosplitkey counter
+kv_loadsplitter_nosplitkey{store="1",node_id="1"} 0
+# HELP kvadmission_flow_token_dispatch_local_regular Number of local regular flow token dispatches
+# TYPE kvadmission_flow_token_dispatch_local_regular counter
+kvadmission_flow_token_dispatch_local_regular{node_id="1"} 0
+# HELP kv_replica_read_batch_evaluate_latency Execution duration for evaluating a BatchRequest on the read-only path after latches have been acquired.\n\nA measurement is recorded regardless of outcome (i.e. also in case of an error). If internal retries occur, each instance is recorded separately.
+# TYPE kv_replica_read_batch_evaluate_latency histogram
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="10000"} 181
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="12638.482029342978"} 249
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="15973.122800602541"} 359
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="20187.602546790382"} 476
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="25514.065200312878"} 630
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="32245.90545296394"} 767
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="40753.92965871775"} 884
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="51506.78076168121"} 975
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="65096.75230458167"} 1024
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="82272.41341700466"} 1055
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="103979.84184814895"} 1069
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="131414.73626117557"} 1074
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="166088.27826277143"} 1080
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="209910.3720108553"} 1084
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="265294.8464431894"} 1089
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="335292.41492495546"} 1090
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="423758.7160604059"} 1090
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="535566.6917706894"} 1090
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="676875.0009458527"} 1091
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="855467.2535565672"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.0811807510766068e+06"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.3664483492953242e+06"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.7269832906594332e+06"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.182644728397485e+06"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.7585316176291797e+06"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="3.4863652276780806e+06"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="4.406236427773566e+06"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="5.568813990945262e+06"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="7.038135554931545e+06"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="8.89513497310822e+06"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.1242100350620849e+07"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.4208308325339198e+07"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.795714494371637e+07"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.269510536694665e+07"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.868316813342006e+07"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="3.625117049988527e+07"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="4.581597669054482e+07"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="5.790443980602476e+07"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="7.318242219076161e+07"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="9.249147277217315e+07"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.1689518164985757e+08"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.4773776525985083e+08"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.8671810912919158e+08"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.359833466782189e+08"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.9824712862168837e+08"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="3.769390975388353e+08"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="4.7639380104013294e+08"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="6.020894493336115e+08"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="7.609496685459859e+08"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="9.61724871115294e+08"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.2154742500762835e+09"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.5361749466718242e+09"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.941491945743876e+09"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.453751106639811e+09"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="3.10116892657477e+09"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="3.919406774847209e+09"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="4.953535208959157e+09"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="6.260516572014802e+09"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="7.912342618981298e+09"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="9.99999999999997e+09"} 1092
+kv_replica_read_batch_evaluate_latency_bucket{store="1",node_id="1",le="+Inf"} 1092
+kv_replica_read_batch_evaluate_latency_sum{store="1",node_id="1"} 3.3212251e+07
+kv_replica_read_batch_evaluate_latency_count{store="1",node_id="1"} 1092
+# HELP kvadmission_flow_handle_streams_connected Number of times we've connected to a stream, at the handle level
+# TYPE kvadmission_flow_handle_streams_connected counter
+kvadmission_flow_handle_streams_connected{node_id="1"} 67
+# HELP kv_protectedts_reconciliation_records_removed number of records removed during reconciliation runs on this node
+# TYPE kv_protectedts_reconciliation_records_removed counter
+kv_protectedts_reconciliation_records_removed{node_id="1"} 0
+# HELP kvadmission_flow_token_dispatch_pending_elastic Number of pending elastic flow token dispatches
+# TYPE kvadmission_flow_token_dispatch_pending_elastic gauge
+kvadmission_flow_token_dispatch_pending_elastic{node_id="1"} 0
+# HELP kv_protectedts_reconciliation_records_processed number of records processed without error during reconciliation on this node
+# TYPE kv_protectedts_reconciliation_records_processed counter
+kv_protectedts_reconciliation_records_processed{node_id="1"} 0
+# HELP kv_replica_circuit_breaker_num_tripped_replicas Number of Replicas for which the per-Replica circuit breaker is currently tripped.\n\nA nonzero value indicates range or replica unavailability, and should be investigated.\nReplicas in this state will fail-fast all inbound requests.\n
+# TYPE kv_replica_circuit_breaker_num_tripped_replicas gauge
+kv_replica_circuit_breaker_num_tripped_replicas{store="1",node_id="1"} 0
+# HELP kvadmission_flow_controller_elastic_wait_duration Latency histogram for time elastic requests spent waiting for flow tokens
+# TYPE kvadmission_flow_controller_elastic_wait_duration histogram
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="10000"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="12638.482029342978"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="15973.122800602541"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="20187.602546790382"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="25514.065200312878"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="32245.90545296394"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="40753.92965871775"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="51506.78076168121"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="65096.75230458167"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="82272.41341700466"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="103979.84184814895"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="131414.73626117557"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="166088.27826277143"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="209910.3720108553"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="265294.8464431894"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="335292.41492495546"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="423758.7160604059"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="535566.6917706894"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="676875.0009458527"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="855467.2535565672"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.182644728397485e+06"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="4.406236427773566e+06"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="5.568813990945262e+06"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="7.038135554931545e+06"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="8.89513497310822e+06"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.795714494371637e+07"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.269510536694665e+07"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.868316813342006e+07"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="3.625117049988527e+07"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="4.581597669054482e+07"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="5.790443980602476e+07"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="7.318242219076161e+07"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="9.249147277217315e+07"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.359833466782189e+08"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="3.769390975388353e+08"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="6.020894493336115e+08"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="7.609496685459859e+08"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="9.61724871115294e+08"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.941491945743876e+09"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.453751106639811e+09"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="3.10116892657477e+09"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="3.919406774847209e+09"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="4.953535208959157e+09"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="6.260516572014802e+09"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="7.912342618981298e+09"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="9.99999999999997e+09"} 0
+kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="+Inf"} 0
+kvadmission_flow_controller_elastic_wait_duration_sum{node_id="1"} 0
+kvadmission_flow_controller_elastic_wait_duration_count{node_id="1"} 0
+# HELP kvadmission_flow_token_dispatch_remote_regular Number of remote regular flow token dispatches
+# TYPE kvadmission_flow_token_dispatch_remote_regular counter
+kvadmission_flow_token_dispatch_remote_regular{node_id="1"} 0
+# HELP kvadmission_flow_handle_regular_requests_admitted Number of regular requests admitted by the flow handle
+# TYPE kvadmission_flow_handle_regular_requests_admitted counter
+kvadmission_flow_handle_regular_requests_admitted{node_id="1"} 121
+# HELP kv_tenant_rate_limit_write_bytes_admitted Number of write bytes admitted by the rate limiter
+# TYPE kv_tenant_rate_limit_write_bytes_admitted counter
+kv_tenant_rate_limit_write_bytes_admitted{store="1",node_id="1"} 0
+# HELP kv_tenant_rate_limit_read_requests_admitted Number of read requests admitted by the rate limiter
+# TYPE kv_tenant_rate_limit_read_requests_admitted counter
+kv_tenant_rate_limit_read_requests_admitted{store="1",node_id="1"} 0
+# HELP kv_prober_read_latency Latency of successful KV read probes
+# TYPE kv_prober_read_latency histogram
+kv_prober_read_latency_bucket{node_id="1",le="10000"} 0
+kv_prober_read_latency_bucket{node_id="1",le="12638.482029342978"} 0
+kv_prober_read_latency_bucket{node_id="1",le="15973.122800602541"} 0
+kv_prober_read_latency_bucket{node_id="1",le="20187.602546790382"} 0
+kv_prober_read_latency_bucket{node_id="1",le="25514.065200312878"} 0
+kv_prober_read_latency_bucket{node_id="1",le="32245.90545296394"} 0
+kv_prober_read_latency_bucket{node_id="1",le="40753.92965871775"} 0
+kv_prober_read_latency_bucket{node_id="1",le="51506.78076168121"} 0
+kv_prober_read_latency_bucket{node_id="1",le="65096.75230458167"} 0
+kv_prober_read_latency_bucket{node_id="1",le="82272.41341700466"} 0
+kv_prober_read_latency_bucket{node_id="1",le="103979.84184814895"} 0
+kv_prober_read_latency_bucket{node_id="1",le="131414.73626117557"} 0
+kv_prober_read_latency_bucket{node_id="1",le="166088.27826277143"} 0
+kv_prober_read_latency_bucket{node_id="1",le="209910.3720108553"} 0
+kv_prober_read_latency_bucket{node_id="1",le="265294.8464431894"} 0
+kv_prober_read_latency_bucket{node_id="1",le="335292.41492495546"} 0
+kv_prober_read_latency_bucket{node_id="1",le="423758.7160604059"} 0
+kv_prober_read_latency_bucket{node_id="1",le="535566.6917706894"} 0
+kv_prober_read_latency_bucket{node_id="1",le="676875.0009458527"} 0
+kv_prober_read_latency_bucket{node_id="1",le="855467.2535565672"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+kv_prober_read_latency_bucket{node_id="1",le="2.182644728397485e+06"} 0
+kv_prober_read_latency_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+kv_prober_read_latency_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+kv_prober_read_latency_bucket{node_id="1",le="4.406236427773566e+06"} 0
+kv_prober_read_latency_bucket{node_id="1",le="5.568813990945262e+06"} 0
+kv_prober_read_latency_bucket{node_id="1",le="7.038135554931545e+06"} 0
+kv_prober_read_latency_bucket{node_id="1",le="8.89513497310822e+06"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.795714494371637e+07"} 0
+kv_prober_read_latency_bucket{node_id="1",le="2.269510536694665e+07"} 0
+kv_prober_read_latency_bucket{node_id="1",le="2.868316813342006e+07"} 0
+kv_prober_read_latency_bucket{node_id="1",le="3.625117049988527e+07"} 0
+kv_prober_read_latency_bucket{node_id="1",le="4.581597669054482e+07"} 0
+kv_prober_read_latency_bucket{node_id="1",le="5.790443980602476e+07"} 0
+kv_prober_read_latency_bucket{node_id="1",le="7.318242219076161e+07"} 0
+kv_prober_read_latency_bucket{node_id="1",le="9.249147277217315e+07"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+kv_prober_read_latency_bucket{node_id="1",le="2.359833466782189e+08"} 0
+kv_prober_read_latency_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+kv_prober_read_latency_bucket{node_id="1",le="3.769390975388353e+08"} 0
+kv_prober_read_latency_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+kv_prober_read_latency_bucket{node_id="1",le="6.020894493336115e+08"} 0
+kv_prober_read_latency_bucket{node_id="1",le="7.609496685459859e+08"} 0
+kv_prober_read_latency_bucket{node_id="1",le="9.61724871115294e+08"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+kv_prober_read_latency_bucket{node_id="1",le="1.941491945743876e+09"} 0
+kv_prober_read_latency_bucket{node_id="1",le="2.453751106639811e+09"} 0
+kv_prober_read_latency_bucket{node_id="1",le="3.10116892657477e+09"} 0
+kv_prober_read_latency_bucket{node_id="1",le="3.919406774847209e+09"} 0
+kv_prober_read_latency_bucket{node_id="1",le="4.953535208959157e+09"} 0
+kv_prober_read_latency_bucket{node_id="1",le="6.260516572014802e+09"} 0
+kv_prober_read_latency_bucket{node_id="1",le="7.912342618981298e+09"} 0
+kv_prober_read_latency_bucket{node_id="1",le="9.99999999999997e+09"} 0
+kv_prober_read_latency_bucket{node_id="1",le="+Inf"} 0
+kv_prober_read_latency_sum{node_id="1"} 0
+kv_prober_read_latency_count{node_id="1"} 0
+# HELP kv_concurrency_max_lock_wait_queue_waiters_for_lock Maximum number of requests actively waiting in any single lock wait-queue
+# TYPE kv_concurrency_max_lock_wait_queue_waiters_for_lock gauge
+kv_concurrency_max_lock_wait_queue_waiters_for_lock{store="1",node_id="1"} 0
+# HELP kv_rangefeed_processors_goroutine Number of active RangeFeed processors using goroutines
+# TYPE kv_rangefeed_processors_goroutine gauge
+kv_rangefeed_processors_goroutine{store="1",node_id="1"} 10
+# HELP kvadmission_flow_controller_elastic_tokens_unaccounted Flow tokens returned by elastic requests that were unaccounted for, across all replication streams
+# TYPE kvadmission_flow_controller_elastic_tokens_unaccounted counter
+kvadmission_flow_controller_elastic_tokens_unaccounted{node_id="1"} 0
+# HELP kv_rangefeed_catchup_scan_nanos Time spent in RangeFeed catchup scan
+# TYPE kv_rangefeed_catchup_scan_nanos counter
+kv_rangefeed_catchup_scan_nanos{store="1",node_id="1"} 242292
+# HELP txn_condensed_intent_spans_rejected KV transactions that have been aborted because they exceeded their intent tracking memory budget (kv.transaction.max_intents_bytes). Rejection is caused by kv.transaction.reject_over_max_intents_budget.
+# HELP kv_rangefeed_scheduler_system_latency KV RangeFeed system scheduler latency
+# TYPE kv_rangefeed_scheduler_system_latency histogram
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="10000"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="12638.482029342978"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="15973.122800602541"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="20187.602546790382"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="25514.065200312878"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="32245.90545296394"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="40753.92965871775"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="51506.78076168121"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="65096.75230458167"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="82272.41341700466"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="103979.84184814895"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="131414.73626117557"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="166088.27826277143"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="209910.3720108553"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="265294.8464431894"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="335292.41492495546"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="423758.7160604059"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="535566.6917706894"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="676875.0009458527"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="855467.2535565672"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.0811807510766068e+06"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.3664483492953242e+06"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.7269832906594332e+06"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="2.182644728397485e+06"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="2.7585316176291797e+06"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="3.4863652276780806e+06"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="4.406236427773566e+06"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="5.568813990945262e+06"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="7.038135554931545e+06"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="8.89513497310822e+06"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.1242100350620849e+07"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.4208308325339198e+07"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.795714494371637e+07"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="2.269510536694665e+07"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="2.868316813342006e+07"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="3.625117049988527e+07"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="4.581597669054482e+07"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="5.790443980602476e+07"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="7.318242219076161e+07"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="9.249147277217315e+07"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.1689518164985757e+08"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.4773776525985083e+08"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.8671810912919158e+08"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="2.359833466782189e+08"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="2.9824712862168837e+08"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="3.769390975388353e+08"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="4.7639380104013294e+08"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="6.020894493336115e+08"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="7.609496685459859e+08"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="9.61724871115294e+08"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.2154742500762835e+09"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.5361749466718242e+09"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="1.941491945743876e+09"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="2.453751106639811e+09"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="3.10116892657477e+09"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="3.919406774847209e+09"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="4.953535208959157e+09"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="6.260516572014802e+09"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="7.912342618981298e+09"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="9.99999999999997e+09"} 0
+kv_rangefeed_scheduler_system_latency_bucket{store="1",node_id="1",le="+Inf"} 0
+kv_rangefeed_scheduler_system_latency_sum{store="1",node_id="1"} 0
+kv_rangefeed_scheduler_system_latency_count{store="1",node_id="1"} 0
+# HELP kv_tenant_rate_limit_current_blocked Number of requests currently blocked by the rate limiter
+# TYPE kv_tenant_rate_limit_current_blocked gauge
+kv_tenant_rate_limit_current_blocked{store="1",node_id="1"} 0
+# HELP kvadmission_flow_handle_regular_wait_duration Latency histogram for time regular requests spent waiting for flow tokens, at the handle level
+# TYPE kvadmission_flow_handle_regular_wait_duration histogram
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="10000"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="12638.482029342978"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="15973.122800602541"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="20187.602546790382"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="25514.065200312878"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="32245.90545296394"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="40753.92965871775"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="51506.78076168121"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="65096.75230458167"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="82272.41341700466"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="103979.84184814895"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="131414.73626117557"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="166088.27826277143"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="209910.3720108553"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="265294.8464431894"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="335292.41492495546"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="423758.7160604059"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="535566.6917706894"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="676875.0009458527"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="855467.2535565672"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.0811807510766068e+06"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.3664483492953242e+06"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.7269832906594332e+06"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.182644728397485e+06"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.7585316176291797e+06"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="3.4863652276780806e+06"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="4.406236427773566e+06"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="5.568813990945262e+06"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="7.038135554931545e+06"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="8.89513497310822e+06"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.1242100350620849e+07"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.4208308325339198e+07"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.795714494371637e+07"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.269510536694665e+07"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.868316813342006e+07"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="3.625117049988527e+07"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="4.581597669054482e+07"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="5.790443980602476e+07"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="7.318242219076161e+07"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="9.249147277217315e+07"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.1689518164985757e+08"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.4773776525985083e+08"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.8671810912919158e+08"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.359833466782189e+08"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.9824712862168837e+08"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="3.769390975388353e+08"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="4.7639380104013294e+08"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="6.020894493336115e+08"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="7.609496685459859e+08"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="9.61724871115294e+08"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.2154742500762835e+09"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.5361749466718242e+09"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.941491945743876e+09"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.453751106639811e+09"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="3.10116892657477e+09"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="3.919406774847209e+09"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="4.953535208959157e+09"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="6.260516572014802e+09"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="7.912342618981298e+09"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="9.99999999999997e+09"} 121
+kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="+Inf"} 121
+kvadmission_flow_handle_regular_wait_duration_sum{node_id="1"} 201126
+kvadmission_flow_handle_regular_wait_duration_count{node_id="1"} 121
+# HELP kvadmission_flow_controller_elastic_requests_admitted Number of elastic requests admitted by the flow controller
+# TYPE kvadmission_flow_controller_elastic_requests_admitted counter
+kvadmission_flow_controller_elastic_requests_admitted{node_id="1"} 0
+# HELP kv_rangefeed_scheduler_normal_queue_size Number of entries in the KV RangeFeed normal scheduler queue
+# TYPE kv_rangefeed_scheduler_normal_queue_size gauge
+kv_rangefeed_scheduler_normal_queue_size{store="1",node_id="1"} 0
+# HELP kvadmission_flow_controller_regular_requests_bypassed Number of regular waiting requests that bypassed the flow controller due to disconnecting streams
+# TYPE kvadmission_flow_controller_regular_requests_bypassed counter
+kvadmission_flow_controller_regular_requests_bypassed{node_id="1"} 0
+# HELP kvadmission_flow_controller_regular_wait_duration Latency histogram for time regular requests spent waiting for flow tokens
+# TYPE kvadmission_flow_controller_regular_wait_duration histogram
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="10000"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="12638.482029342978"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="15973.122800602541"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="20187.602546790382"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="25514.065200312878"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="32245.90545296394"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="40753.92965871775"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="51506.78076168121"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="65096.75230458167"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="82272.41341700466"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="103979.84184814895"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="131414.73626117557"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="166088.27826277143"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="209910.3720108553"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="265294.8464431894"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="335292.41492495546"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="423758.7160604059"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="535566.6917706894"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="676875.0009458527"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="855467.2535565672"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.0811807510766068e+06"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.3664483492953242e+06"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.7269832906594332e+06"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.182644728397485e+06"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.7585316176291797e+06"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="3.4863652276780806e+06"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="4.406236427773566e+06"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="5.568813990945262e+06"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="7.038135554931545e+06"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="8.89513497310822e+06"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.1242100350620849e+07"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.4208308325339198e+07"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.795714494371637e+07"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.269510536694665e+07"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.868316813342006e+07"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="3.625117049988527e+07"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="4.581597669054482e+07"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="5.790443980602476e+07"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="7.318242219076161e+07"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="9.249147277217315e+07"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.1689518164985757e+08"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.4773776525985083e+08"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.8671810912919158e+08"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.359833466782189e+08"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.9824712862168837e+08"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="3.769390975388353e+08"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="4.7639380104013294e+08"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="6.020894493336115e+08"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="7.609496685459859e+08"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="9.61724871115294e+08"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.2154742500762835e+09"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.5361749466718242e+09"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.941491945743876e+09"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.453751106639811e+09"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="3.10116892657477e+09"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="3.919406774847209e+09"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="4.953535208959157e+09"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="6.260516572014802e+09"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="7.912342618981298e+09"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="9.99999999999997e+09"} 121
+kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="+Inf"} 121
+kvadmission_flow_controller_regular_wait_duration_sum{node_id="1"} 13166
+kvadmission_flow_controller_regular_wait_duration_count{node_id="1"} 121
+# HELP kvadmission_flow_controller_regular_tokens_deducted Flow tokens deducted by regular requests, across all replication streams
+# TYPE kvadmission_flow_controller_regular_tokens_deducted counter
+kvadmission_flow_controller_regular_tokens_deducted{node_id="1"} 0
+# HELP kv_tenant_rate_limit_read_batches_admitted Number of read batches admitted by the rate limiter
+# TYPE kv_tenant_rate_limit_read_batches_admitted counter
+kv_tenant_rate_limit_read_batches_admitted{store="1",node_id="1"} 0
+# HELP kv_concurrency_avg_lock_wait_duration_nanos Average lock wait duration across requests currently waiting in lock wait-queues
+# TYPE kv_concurrency_avg_lock_wait_duration_nanos gauge
+kv_concurrency_avg_lock_wait_duration_nanos{store="1",node_id="1"} 0
+# HELP kv_prober_read_failures Number of attempts made to read probe KV that failed, whether due to error or timeout
+# TYPE kv_prober_read_failures counter
+kv_prober_read_failures{node_id="1"} 0
+# HELP kvadmission_flow_controller_regular_stream_count Total number of replication streams for regular requests
+# TYPE kvadmission_flow_controller_regular_stream_count gauge
+kvadmission_flow_controller_regular_stream_count{node_id="1"} 0
+# HELP kv_rangefeed_mem_shared Memory usage by rangefeeds
+# TYPE kv_rangefeed_mem_shared gauge
+kv_rangefeed_mem_shared{node_id="1"} 0
+# HELP kv_rangefeed_scheduler_normal_latency KV RangeFeed normal scheduler latency
+# TYPE kv_rangefeed_scheduler_normal_latency histogram
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="10000"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="12638.482029342978"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="15973.122800602541"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="20187.602546790382"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="25514.065200312878"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="32245.90545296394"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="40753.92965871775"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="51506.78076168121"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="65096.75230458167"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="82272.41341700466"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="103979.84184814895"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="131414.73626117557"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="166088.27826277143"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="209910.3720108553"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="265294.8464431894"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="335292.41492495546"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="423758.7160604059"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="535566.6917706894"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="676875.0009458527"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="855467.2535565672"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.0811807510766068e+06"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.3664483492953242e+06"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.7269832906594332e+06"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="2.182644728397485e+06"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="2.7585316176291797e+06"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="3.4863652276780806e+06"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="4.406236427773566e+06"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="5.568813990945262e+06"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="7.038135554931545e+06"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="8.89513497310822e+06"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.1242100350620849e+07"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.4208308325339198e+07"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.795714494371637e+07"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="2.269510536694665e+07"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="2.868316813342006e+07"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="3.625117049988527e+07"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="4.581597669054482e+07"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="5.790443980602476e+07"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="7.318242219076161e+07"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="9.249147277217315e+07"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.1689518164985757e+08"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.4773776525985083e+08"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.8671810912919158e+08"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="2.359833466782189e+08"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="2.9824712862168837e+08"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="3.769390975388353e+08"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="4.7639380104013294e+08"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="6.020894493336115e+08"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="7.609496685459859e+08"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="9.61724871115294e+08"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.2154742500762835e+09"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.5361749466718242e+09"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="1.941491945743876e+09"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="2.453751106639811e+09"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="3.10116892657477e+09"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="3.919406774847209e+09"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="4.953535208959157e+09"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="6.260516572014802e+09"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="7.912342618981298e+09"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="9.99999999999997e+09"} 0
+kv_rangefeed_scheduler_normal_latency_bucket{store="1",node_id="1",le="+Inf"} 0
+kv_rangefeed_scheduler_normal_latency_sum{store="1",node_id="1"} 0
+kv_rangefeed_scheduler_normal_latency_count{store="1",node_id="1"} 0
+# HELP kv_prober_read_attempts Number of attempts made to read probe KV, regardless of outcome
+# TYPE kv_prober_read_attempts counter
+kv_prober_read_attempts{node_id="1"} 0
+# HELP kvadmission_flow_handle_streams_disconnected Number of times we've disconnected from a stream, at the handle level
+# TYPE kvadmission_flow_handle_streams_disconnected counter
+kvadmission_flow_handle_streams_disconnected{node_id="1"} 0
+# HELP kv_replica_write_batch_evaluate_latency Execution duration for evaluating a BatchRequest on the read-write path after latches have been acquired.\n\nA measurement is recorded regardless of outcome (i.e. also in case of an error). If internal retries occur, each instance is recorded separately.\nNote that the measurement does not include the duration for replicating the evaluated command.
+# TYPE kv_replica_write_batch_evaluate_latency histogram
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="10000"} 38
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="12638.482029342978"} 80
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="15973.122800602541"} 169
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="20187.602546790382"} 244
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="25514.065200312878"} 295
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="32245.90545296394"} 348
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="40753.92965871775"} 430
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="51506.78076168121"} 586
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="65096.75230458167"} 722
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="82272.41341700466"} 831
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="103979.84184814895"} 896
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="131414.73626117557"} 918
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="166088.27826277143"} 938
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="209910.3720108553"} 946
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="265294.8464431894"} 952
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="335292.41492495546"} 958
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="423758.7160604059"} 963
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="535566.6917706894"} 966
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="676875.0009458527"} 968
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="855467.2535565672"} 968
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.0811807510766068e+06"} 968
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.3664483492953242e+06"} 968
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.7269832906594332e+06"} 968
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.182644728397485e+06"} 969
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.7585316176291797e+06"} 970
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="3.4863652276780806e+06"} 971
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="4.406236427773566e+06"} 972
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="5.568813990945262e+06"} 975
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="7.038135554931545e+06"} 975
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="8.89513497310822e+06"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.1242100350620849e+07"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.4208308325339198e+07"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.795714494371637e+07"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.269510536694665e+07"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.868316813342006e+07"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="3.625117049988527e+07"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="4.581597669054482e+07"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="5.790443980602476e+07"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="7.318242219076161e+07"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="9.249147277217315e+07"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.1689518164985757e+08"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.4773776525985083e+08"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.8671810912919158e+08"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.359833466782189e+08"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.9824712862168837e+08"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="3.769390975388353e+08"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="4.7639380104013294e+08"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="6.020894493336115e+08"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="7.609496685459859e+08"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="9.61724871115294e+08"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.2154742500762835e+09"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.5361749466718242e+09"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="1.941491945743876e+09"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="2.453751106639811e+09"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="3.10116892657477e+09"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="3.919406774847209e+09"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="4.953535208959157e+09"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="6.260516572014802e+09"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="7.912342618981298e+09"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="9.99999999999997e+09"} 976
+kv_replica_write_batch_evaluate_latency_bucket{store="1",node_id="1",le="+Inf"} 976
+kv_replica_write_batch_evaluate_latency_sum{store="1",node_id="1"} 8.7225088e+07
+kv_replica_write_batch_evaluate_latency_count{store="1",node_id="1"} 976
+# HELP kv_loadsplitter_popularkey Load-based splitter could not find a split key and the most popular sampled split key occurs in >= 25% of the samples.
+# TYPE kv_loadsplitter_popularkey counter
+kv_loadsplitter_popularkey{store="1",node_id="1"} 0
+# HELP kv_protectedts_reconciliation_num_runs number of successful reconciliation runs on this node
+# TYPE kv_protectedts_reconciliation_num_runs counter
+kv_protectedts_reconciliation_num_runs{node_id="1"} 1
+# HELP kv_concurrency_locks Number of active locks held in lock tables. Does not include replicated locks (intents) that are not held in memory
+# TYPE kv_concurrency_locks gauge
+kv_concurrency_locks{store="1",node_id="1"} 0
+# HELP kvadmission_flow_controller_regular_blocked_stream_count Number of replication streams with no flow tokens available for regular requests
+# TYPE kvadmission_flow_controller_regular_blocked_stream_count gauge
+kvadmission_flow_controller_regular_blocked_stream_count{node_id="1"} 0
+# HELP kvadmission_flow_controller_elastic_tokens_available Flow tokens available for elastic requests, across all replication streams
+# TYPE kvadmission_flow_controller_elastic_tokens_available gauge
+kvadmission_flow_controller_elastic_tokens_available{node_id="1"} 0
+# HELP kvadmission_flow_controller_regular_tokens_unaccounted Flow tokens returned by regular requests that were unaccounted for, across all replication streams
+# TYPE kvadmission_flow_controller_regular_tokens_unaccounted counter
+kvadmission_flow_controller_regular_tokens_unaccounted{node_id="1"} 0
+# HELP rebalancing_replicas_queriespersecond Histogram of average kv-level requests received per second by replicas on the store in the last 30 minutes.
+# HELP kv_allocator_load_based_lease_transfers_missing_stats_for_existing_stores The number times the allocator was missing qps stats for the leaseholder
+# TYPE kv_allocator_load_based_lease_transfers_missing_stats_for_existing_stores counter
+kv_allocator_load_based_lease_transfers_missing_stats_for_existing_stores{store="1",node_id="1"} 0
+# HELP kvadmission_flow_controller_elastic_tokens_deducted Flow tokens deducted by elastic requests, across all replication streams
+# TYPE kvadmission_flow_controller_elastic_tokens_deducted counter
+kvadmission_flow_controller_elastic_tokens_deducted{node_id="1"} 0
+# HELP kvadmission_flow_token_dispatch_pending_nodes Number of nodes pending flow token dispatches
+# TYPE kvadmission_flow_token_dispatch_pending_nodes gauge
+kvadmission_flow_token_dispatch_pending_nodes{node_id="1"} 0
+# HELP rebalancing_queriespersecond Number of kv-level requests received per second by the store, considering the last 30 minutes, as used in rebalancing decisions.
+# HELP kvadmission_flow_handle_elastic_wait_duration Latency histogram for time elastic requests spent waiting for flow tokens, at the handle level
+# TYPE kvadmission_flow_handle_elastic_wait_duration histogram
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="10000"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="12638.482029342978"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="15973.122800602541"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="20187.602546790382"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="25514.065200312878"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="32245.90545296394"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="40753.92965871775"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="51506.78076168121"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="65096.75230458167"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="82272.41341700466"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="103979.84184814895"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="131414.73626117557"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="166088.27826277143"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="209910.3720108553"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="265294.8464431894"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="335292.41492495546"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="423758.7160604059"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="535566.6917706894"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="676875.0009458527"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="855467.2535565672"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.182644728397485e+06"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="4.406236427773566e+06"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="5.568813990945262e+06"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="7.038135554931545e+06"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="8.89513497310822e+06"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.795714494371637e+07"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.269510536694665e+07"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.868316813342006e+07"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="3.625117049988527e+07"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="4.581597669054482e+07"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="5.790443980602476e+07"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="7.318242219076161e+07"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="9.249147277217315e+07"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.359833466782189e+08"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="3.769390975388353e+08"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="6.020894493336115e+08"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="7.609496685459859e+08"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="9.61724871115294e+08"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.941491945743876e+09"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.453751106639811e+09"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="3.10116892657477e+09"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="3.919406774847209e+09"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="4.953535208959157e+09"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="6.260516572014802e+09"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="7.912342618981298e+09"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="9.99999999999997e+09"} 0
+kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="+Inf"} 0
+kvadmission_flow_handle_elastic_wait_duration_sum{node_id="1"} 0
+kvadmission_flow_handle_elastic_wait_duration_count{node_id="1"} 0
+# HELP kvadmission_flow_token_dispatch_pending_regular Number of pending regular flow token dispatches
+# TYPE kvadmission_flow_token_dispatch_pending_regular gauge
+kvadmission_flow_token_dispatch_pending_regular{node_id="1"} 0
+# HELP kv_rangefeed_budget_allocation_failed Number of times RangeFeed failed because memory budget was exceeded
+# TYPE kv_rangefeed_budget_allocation_failed counter
+kv_rangefeed_budget_allocation_failed{store="1",node_id="1"} 0
+# HELP kv_tenant_rate_limit_write_batches_admitted Number of write batches admitted by the rate limiter
+# TYPE kv_tenant_rate_limit_write_batches_admitted counter
+kv_tenant_rate_limit_write_batches_admitted{store="1",node_id="1"} 0
+# HELP kvadmission_flow_token_dispatch_remote_elastic Number of remote elastic flow token dispatches
+# TYPE kvadmission_flow_token_dispatch_remote_elastic counter
+kvadmission_flow_token_dispatch_remote_elastic{node_id="1"} 0
+# HELP kv_allocator_load_based_replica_rebalancing_missing_stats_for_existing_store The number times the allocator was missing the qps stats for the existing store
+# TYPE kv_allocator_load_based_replica_rebalancing_missing_stats_for_existing_store counter
+kv_allocator_load_based_replica_rebalancing_missing_stats_for_existing_store{store="1",node_id="1"} 0
+# HELP kv_allocator_load_based_replica_rebalancing_should_transfer The number times the allocator determined that the replica should be rebalanced to another store for better load distribution
+# TYPE kv_allocator_load_based_replica_rebalancing_should_transfer counter
+kv_allocator_load_based_replica_rebalancing_should_transfer{store="1",node_id="1"} 0
+# HELP kvadmission_flow_handle_regular_requests_waiting Number of regular requests waiting for flow tokens, at the handle level
+# TYPE kvadmission_flow_handle_regular_requests_waiting gauge
+kvadmission_flow_handle_regular_requests_waiting{node_id="1"} 0
+# HELP kv_allocator_load_based_lease_transfers_existing_not_overfull The number times the allocator determined that the lease was not on an overfull store
+# TYPE kv_allocator_load_based_lease_transfers_existing_not_overfull counter
+kv_allocator_load_based_lease_transfers_existing_not_overfull{store="1",node_id="1"} 0
+# HELP kv_concurrency_lock_wait_queue_waiters Number of requests actively waiting in a lock wait-queue
+# TYPE kv_concurrency_lock_wait_queue_waiters gauge
+kv_concurrency_lock_wait_queue_waiters{store="1",node_id="1"} 0
+# HELP kv_allocator_load_based_lease_transfers_should_transfer The number times the allocator determined that the lease should be transferred to another replica for better load distribution
+# TYPE kv_allocator_load_based_lease_transfers_should_transfer counter
+kv_allocator_load_based_lease_transfers_should_transfer{store="1",node_id="1"} 0
+# HELP kvadmission_flow_handle_elastic_requests_errored Number of elastic requests that errored out while waiting for flow tokens, at the handle level
+# TYPE kvadmission_flow_handle_elastic_requests_errored counter
+kvadmission_flow_handle_elastic_requests_errored{node_id="1"} 0
+# HELP kvadmission_flow_controller_regular_requests_errored Number of regular requests that errored out while waiting for flow tokens
+# TYPE kvadmission_flow_controller_regular_requests_errored counter
+kvadmission_flow_controller_regular_requests_errored{node_id="1"} 0
+# HELP kvadmission_flow_controller_elastic_blocked_stream_count Number of replication streams with no flow tokens available for elastic requests
+# TYPE kvadmission_flow_controller_elastic_blocked_stream_count gauge
+kvadmission_flow_controller_elastic_blocked_stream_count{node_id="1"} 0
+# HELP kv_closed_timestamp_max_behind_nanos Largest latency between realtime and replica max closed timestamp
+# TYPE kv_closed_timestamp_max_behind_nanos gauge
+kv_closed_timestamp_max_behind_nanos{store="1",node_id="1"} 3.077860917e+09
+# HELP kv_replica_read_batch_evaluate_without_interleaving_iter Number of read-only batches evaluated without an intent interleaving iter.
+# TYPE kv_replica_read_batch_evaluate_without_interleaving_iter counter
+kv_replica_read_batch_evaluate_without_interleaving_iter{store="1",node_id="1"} 573
+# HELP kvadmission_flow_controller_regular_requests_waiting Number of regular requests waiting for flow tokens
+# TYPE kvadmission_flow_controller_regular_requests_waiting gauge
+kvadmission_flow_controller_regular_requests_waiting{node_id="1"} 0
+# HELP kv_concurrency_avg_lock_hold_duration_nanos Average lock hold duration across locks currently held in lock tables. Does not include replicated locks (intents) that are not held in memory
+# TYPE kv_concurrency_avg_lock_hold_duration_nanos gauge
+kv_concurrency_avg_lock_hold_duration_nanos{store="1",node_id="1"} 0
+# HELP kvadmission_flow_handle_elastic_requests_waiting Number of elastic requests waiting for flow tokens, at the handle level
+# TYPE kvadmission_flow_handle_elastic_requests_waiting gauge
+kvadmission_flow_handle_elastic_requests_waiting{node_id="1"} 0
+# HELP kvadmission_flow_token_dispatch_coalesced_elastic Number of coalesced elastic flow token dispatches (where we're informing the sender of a higher log entry being admitted)
+# TYPE kvadmission_flow_token_dispatch_coalesced_elastic counter
+kvadmission_flow_token_dispatch_coalesced_elastic{node_id="1"} 0
+# HELP kvadmission_flow_handle_regular_requests_errored Number of regular requests that errored out while waiting for flow tokens, at the handle level
+# TYPE kvadmission_flow_handle_regular_requests_errored counter
+kvadmission_flow_handle_regular_requests_errored{node_id="1"} 0
+# HELP kv_rangefeed_mem_system Memory usage by rangefeeds on system ranges
+# TYPE kv_rangefeed_mem_system gauge
+kv_rangefeed_mem_system{node_id="1"} 40960
+# HELP kv_prober_write_attempts Number of attempts made to write probe KV, regardless of outcome
+# TYPE kv_prober_write_attempts counter
+kv_prober_write_attempts{node_id="1"} 0
+# HELP kv_rangefeed_budget_allocation_blocked Number of times RangeFeed waited for budget availability
+# TYPE kv_rangefeed_budget_allocation_blocked counter
+kv_rangefeed_budget_allocation_blocked{store="1",node_id="1"} 0
+# HELP kv_concurrency_locks_with_wait_queues Number of active locks held in lock tables with active wait-queues
+# TYPE kv_concurrency_locks_with_wait_queues gauge
+kv_concurrency_locks_with_wait_queues{store="1",node_id="1"} 0
+# HELP kv_protectedts_reconciliation_errors number of errors encountered during reconciliation runs on this node
+# TYPE kv_protectedts_reconciliation_errors counter
+kv_protectedts_reconciliation_errors{node_id="1"} 0
+# HELP kv_allocator_load_based_lease_transfers_delta_not_significant The number times the allocator determined that the delta between the existing store and the best candidate was not significant
+# TYPE kv_allocator_load_based_lease_transfers_delta_not_significant counter
+kv_allocator_load_based_lease_transfers_delta_not_significant{store="1",node_id="1"} 0
+# HELP kv_prober_write_failures Number of attempts made to write probe KV that failed, whether due to error or timeout
+# TYPE kv_prober_write_failures counter
+kv_prober_write_failures{node_id="1"} 0
+# HELP kv_rangefeed_processors_scheduler Number of active RangeFeed processors using scheduler
+# TYPE kv_rangefeed_processors_scheduler gauge
+kv_rangefeed_processors_scheduler{store="1",node_id="1"} 0
+# HELP kv_prober_write_quarantine_oldest_duration The duration that the oldest range in the write quarantine pool has remained
+# TYPE kv_prober_write_quarantine_oldest_duration gauge
+kv_prober_write_quarantine_oldest_duration{node_id="1"} 0
+# HELP kvadmission_flow_controller_regular_tokens_available Flow tokens available for regular requests, across all replication streams
+# TYPE kvadmission_flow_controller_regular_tokens_available gauge
+kvadmission_flow_controller_regular_tokens_available{node_id="1"} 0
+# HELP kv_prober_planning_attempts Number of attempts at planning out probes made; in order to probe KV we need to plan out which ranges to probe;
+# TYPE kv_prober_planning_attempts counter
+kv_prober_planning_attempts{node_id="1"} 0
+# HELP kv_replica_read_batch_evaluate_dropped_latches_before_eval Number of times read-only batches dropped latches before evaluation.
+# TYPE kv_replica_read_batch_evaluate_dropped_latches_before_eval counter
+kv_replica_read_batch_evaluate_dropped_latches_before_eval{store="1",node_id="1"} 603
+# HELP kvadmission_flow_token_dispatch_local_elastic Number of local elastic flow token dispatches
+# TYPE kvadmission_flow_token_dispatch_local_elastic counter
+kvadmission_flow_token_dispatch_local_elastic{node_id="1"} 0
+# HELP kv_replica_circuit_breaker_num_tripped_events Number of times the per-Replica circuit breakers tripped since process start.
+# TYPE kv_replica_circuit_breaker_num_tripped_events counter
+kv_replica_circuit_breaker_num_tripped_events{store="1",node_id="1"} 0
+# HELP kv_concurrency_max_lock_hold_duration_nanos Maximum length of time any lock in a lock table is held. Does not include replicated locks (intents) that are not held in memory
+# TYPE kv_concurrency_max_lock_hold_duration_nanos gauge
+kv_concurrency_max_lock_hold_duration_nanos{store="1",node_id="1"} 0
+# HELP kv_rangefeed_registrations Number of active RangeFeed registrations
+# TYPE kv_rangefeed_registrations gauge
+kv_rangefeed_registrations{store="1",node_id="1"} 13
+# HELP kvadmission_flow_controller_elastic_tokens_returned Flow tokens returned by elastic requests, across all replication streams
+# TYPE kvadmission_flow_controller_elastic_tokens_returned counter
+kvadmission_flow_controller_elastic_tokens_returned{node_id="1"} 0
+# HELP kvadmission_flow_handle_elastic_requests_admitted Number of elastic requests admitted by the flow handle
+# TYPE kvadmission_flow_handle_elastic_requests_admitted counter
+kvadmission_flow_handle_elastic_requests_admitted{node_id="1"} 0
+# HELP kv_allocator_load_based_replica_rebalancing_existing_not_overfull The number times the allocator determined that none of the range's replicas were on overfull stores
+# TYPE kv_allocator_load_based_replica_rebalancing_existing_not_overfull counter
+kv_allocator_load_based_replica_rebalancing_existing_not_overfull{store="1",node_id="1"} 0
+# HELP kv_prober_planning_failures Number of attempts at planning out probes that failed; in order to probe KV we need to plan out which ranges to probe; if planning fails, then kvprober is not able to send probes to all ranges; consider alerting on this metric as a result
+# TYPE kv_prober_planning_failures counter
+kv_prober_planning_failures{node_id="1"} 0
+# HELP kvadmission_flow_controller_regular_tokens_returned Flow tokens returned by regular requests, across all replication streams
+# TYPE kvadmission_flow_controller_regular_tokens_returned counter
+kvadmission_flow_controller_regular_tokens_returned{node_id="1"} 0
+# HELP kv_concurrency_max_lock_wait_duration_nanos Maximum lock wait duration across requests currently waiting in lock wait-queues
+# TYPE kv_concurrency_max_lock_wait_duration_nanos gauge
+kv_concurrency_max_lock_wait_duration_nanos{store="1",node_id="1"} 0
+# HELP kv_allocator_load_based_replica_rebalancing_delta_not_significant The number times the allocator determined that the delta between an existing store and the best replacement candidate was not high enough
+# TYPE kv_allocator_load_based_replica_rebalancing_delta_not_significant counter
+kv_allocator_load_based_replica_rebalancing_delta_not_significant{store="1",node_id="1"} 0

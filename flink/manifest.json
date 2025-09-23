@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "39d70c50-017c-407a-9117-2055d8e03427",
   "app_id": "flink",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,11 @@
     "title": "Flink",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "flink",
@@ -42,13 +42,27 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "java org.apache.flink.client.python.PythonShellParser",
+        "java org.apache.flink.container.entrypoint.StandaloneApplicationClusterEntryPoint",
+        "java org.apache.flink.kubernetes.entrypoint.KubernetesSessionClusterEntrypoint",
+        "java org.apache.flink.kubernetes.entrypoint.KubernetesApplicationClusterEntrypoint",
+        "java org.apache.flink.kubernetes.taskmanager.KubernetesTaskExecutorRunner",
+        "java org.apache.flink.kubernetes.cli.KubernetesSessionCli",
+        "java org.apache.flink.runtime.taskexecutor.TaskManagerRunner",
+        "java org.apache.flink.runtime.zookeeper.FlinkZooKeeperQuorumPeer",
+        "java org.apache.flink.runtime.webmonitor.history.HistoryServer",
+        "java org.apache.flink.runtime.entrypoint.StandaloneSessionClusterEntrypoint",
+        "java org.apache.flink.table.gateway.SqlGateway",
+        "java org.apache.flink.table.client.SqlClient",
+        "java org.apache.flink.yarn.cli.FlinkYarnSessionCli"
+      ],
+      "source_type_id": 10088,
+      "auto_install": true
     },
     "dashboards": {
       "Flink Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "flink"
     }
   }
 }

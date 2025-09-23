@@ -1,6 +1,5 @@
 ---
 # Inspired by https://github.com/confluentinc/cp-all-in-one/blob/6.2.1-post/cp-all-in-one/docker-compose.yml
-version: '2'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:${CONFLUENT_VERSION}

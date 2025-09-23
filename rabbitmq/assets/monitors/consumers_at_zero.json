@@ -1,0 +1,29 @@
+{
+    "version": 2,
+    "created_at": "2024-05-28",
+    "last_updated_at": "2024-05-28",
+    "title": "RabbitMQ queue has 0 consumers",
+    "tags": [
+        "integration:rabbitmq"
+    ],
+    "description": "Notify your team when RabbitMQ has 0 consumers in a queue.",
+    "definition":{
+        "message": "RabbitMQ currently has 0 consumers in {{rabbitmq_queue.name}} on {{host.name}}. This can lead to message accumulation which can impact application latency and increased memory usage to store the accumulated messages",
+        "name": "[RabbitMQ] Number of consumers is 0 in {{rabbitmq_queue.name}} on {{host.name}}",
+        "options": {
+            "thresholds": {
+                "critical": 1
+            },
+            "notify_audit": false,
+            "notify_no_data": false,
+            "include_tags": true,
+            "new_group_delay": 60
+        },
+        "priority": null,
+        "query": "avg(last_5m):rabbitmq.queue.consumers{*} by {host,rabbitmq_queue} < 1",
+        "tags": [
+            "integration:rabbitmq"
+        ],
+        "type": "query alert"
+    }
+}

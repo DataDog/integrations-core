@@ -1,8 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import clickhouse_driver
-from six import raise_from
+import clickhouse_connect
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
@@ -27,6 +26,8 @@ class ClickhouseCheck(AgentCheck):
         self._read_timeout = float(self.instance.get('read_timeout', 10))
         self._compression = self.instance.get('compression', False)
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
+        self._tls_ca_cert = self.instance.get('tls_ca_cert', None)
+        self._verify = self.instance.get('verify', True)
         self._tags = self.instance.get('tags', [])
 
         # Add global tags
@@ -61,23 +62,30 @@ class ClickhouseCheck(AgentCheck):
         self._query_manager.execute()
         self.collect_version()
 
+    @AgentCheck.metadata_entrypoint
     def collect_version(self):
         version = list(self.execute_query_raw('SELECT version()'))[0][0]
 
         # The version comes in like `19.15.2.2` though sometimes there is no patch part
-        version_parts = {name: part for name, part in zip(('year', 'major', 'minor', 'patch'), version.split('.'))}
+        version_parts = dict(zip(('year', 'major', 'minor', 'patch'), version.split('.')))
 
         self.set_metadata('version', version, scheme='parts', final_scheme='calver', part_map=version_parts)
 
     def execute_query_raw(self, query):
-        return self._client.execute_iter(query)
+        return self._client.query(query).result_rows
 
     def validate_config(self):
         if not self._server:
             raise ConfigurationError('the `server` setting is required')
 
+        # Validate compression type
+        if self._compression and self._compression not in ['lz4', 'zstd', 'br', 'gzip']:
+            raise ConfigurationError(
+                f'Invalid compression type "{self._compression}". Valid values are: lz4, zstd, br, gzip'
+            )
+
     def ping_clickhouse(self):
-        return self._client.connection.ping()
+        return self._client.ping()
 
     def connect(self):
         if self.instance.get('user'):
@@ -97,31 +105,29 @@ class ClickhouseCheck(AgentCheck):
                 self._client = None
 
         try:
-            client = clickhouse_driver.Client(
+            client = clickhouse_connect.get_client(
+                # https://clickhouse.com/docs/integrations/python#connection-arguments
                 host=self._server,
                 port=self._port,
-                user=self._user,
+                username=self._user,
                 password=self._password,
                 database=self._db,
+                secure=self._tls_verify,
                 connect_timeout=self._connect_timeout,
                 send_receive_timeout=self._read_timeout,
-                sync_request_timeout=self._connect_timeout,
-                compression=self._compression,
-                secure=self._tls_verify,
+                client_name=f'datadog-{self.check_id}',
+                compress=self._compression,
+                ca_cert=self._tls_ca_cert,
+                verify=self._verify,
+                # https://clickhouse.com/docs/integrations/python#settings-argument
                 settings={},
-                # Make every client unique for server logs
-                client_name='datadog-{}'.format(self.check_id),
             )
-            client.connection.connect()
         except Exception as e:
             error = 'Unable to connect to ClickHouse: {}'.format(
                 self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))
             )
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
-
-            # When an exception is raised in the context of another one, both will be printed. To avoid
-            # this we set the context to None. https://www.python.org/dev/peps/pep-0409/
-            raise_from(type(e)(error), None)
+            raise type(e)(error) from None
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._client = client

@@ -8,6 +8,8 @@ import random
 import pytest
 import redis
 
+from datadog_checks.dev.utils import get_metadata_metrics
+
 from .common import HOST, PASSWORD, PORT
 
 TEST_KEY = "testkey"
@@ -34,6 +36,7 @@ def test_slowlog(aggregator, dd_run_check, check, redis_instance):
 
     expected_tags = ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'command:LPUSH']
     aggregator.assert_metric('redis.slowlog.micros', tags=expected_tags)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
 def test_custom_slowlog(aggregator, dd_run_check, check, redis_instance):

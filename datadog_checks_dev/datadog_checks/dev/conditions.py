@@ -5,10 +5,8 @@ import re
 import socket
 import time
 from contextlib import closing
-from typing import Callable, Dict, List, Tuple, Union
-
-from six import string_types
-from six.moves.urllib.request import urlopen
+from typing import Any, Callable, Dict, List, Tuple, Union  # noqa: F401
+from urllib.request import urlopen
 
 from .errors import RetryError
 from .structures import LazyFunction
@@ -19,11 +17,11 @@ from .utils import file_exists
 class WaitFor(LazyFunction):
     def __init__(
         self,
-        func,  # type: Callable
-        attempts=60,  # type: int
-        wait=1,  # type: int
-        args=(),  # type: Tuple
-        kwargs=None,  # type: Dict
+        func: Callable,
+        attempts: int = 60,
+        wait: int = 1,
+        args: Tuple = (),
+        kwargs: Dict[str, Any] | None = None,
     ):
         if kwargs is None:
             kwargs = {}
@@ -63,15 +61,17 @@ class WaitFor(LazyFunction):
 class CheckEndpoints(LazyFunction):
     def __init__(
         self,
-        endpoints,  # type: Union[str, List[str]]
-        timeout=1,  # type: int,
-        attempts=60,  # type: int
-        wait=1,  # type: int
+        endpoints: Union[str, List[str]],
+        timeout: int = 1,
+        attempts: int = 60,
+        wait: int = 1,
+        send_request=None,
     ):
-        self.endpoints = [endpoints] if isinstance(endpoints, string_types) else endpoints
+        self.endpoints = [endpoints] if isinstance(endpoints, str) else endpoints
         self.timeout = timeout
         self.attempts = attempts
         self.wait = wait
+        self.send_request = urlopen if send_request is None else send_request
 
     def __call__(self):
         last_endpoint = ''
@@ -81,12 +81,12 @@ class CheckEndpoints(LazyFunction):
             for endpoint in self.endpoints:
                 last_endpoint = endpoint
                 try:
-                    request = urlopen(endpoint, timeout=self.timeout)
+                    response = self.send_request(endpoint, timeout=self.timeout)
                 except Exception as e:
                     last_error = str(e)
                     break
                 else:
-                    status_code = request.getcode()
+                    status_code = response.getcode()
                     if 400 <= status_code < 600:
                         last_error = 'status {}'.format(status_code)
                         break
@@ -95,19 +95,19 @@ class CheckEndpoints(LazyFunction):
 
             time.sleep(self.wait)
         else:
-            raise RetryError('Endpoint: {}\n' 'Error: {}'.format(last_endpoint, last_error))
+            raise RetryError('Endpoint: {}\nError: {}'.format(last_endpoint, last_error))
 
 
 class CheckCommandOutput(LazyFunction):
     def __init__(
         self,
-        command,  # type: Union[str, List[str]]
-        patterns,  # type: Union[str, List[str]]
-        matches=1,  # type: Union[str, int]  #Either 'all' or a number
-        stdout=True,  # type: bool
-        stderr=True,  # type: bool
-        attempts=60,  # type: int
-        wait=1,  # type: int
+        command: Union[str, List[str]],
+        patterns: Union[str, List[str]],
+        matches: Union[str, int] = 1,  # Either 'all' or a number
+        stdout: bool = True,
+        stderr: bool = True,
+        attempts: int = 60,
+        wait: int = 1,
     ):
         """
         Checks if the provided patterns are present in the output of a command
@@ -129,12 +129,10 @@ class CheckCommandOutput(LazyFunction):
         if not (self.stdout or self.stderr):
             raise ValueError('Must capture stdout, stderr, or both.')
 
-        if isinstance(patterns, string_types):
+        if isinstance(patterns, str):
             patterns = [patterns]
 
-        self.patterns = [
-            re.compile(pattern, re.M) if isinstance(pattern, string_types) else pattern for pattern in patterns
-        ]
+        self.patterns = [re.compile(pattern, re.M) if isinstance(pattern, str) else pattern for pattern in patterns]
 
         if matches == 'all':
             self.matches = len(patterns)
@@ -171,11 +169,11 @@ class CheckCommandOutput(LazyFunction):
             patterns = '\t- '.join([''] + [str(p) for p in self.patterns])
             missing_patterns = '\t- '.join([''] + [str(p) for p in missing_patterns])
             raise RetryError(
-                u'Command: {}\nFailed to match `{}` of the patterns.\n'
-                u'Provided patterns: {}\n'
-                u'Missing patterns: {}\n'
-                u'Exit code: {}\n'
-                u'Captured Output: {}'.format(
+                'Command: {}\nFailed to match `{}` of the patterns.\n'
+                'Provided patterns: {}\n'
+                'Missing patterns: {}\n'
+                'Exit code: {}\n'
+                'Captured Output: {}'.format(
                     self.command, self.matches, patterns, missing_patterns, exit_code, log_output
                 )
             )
@@ -184,13 +182,14 @@ class CheckCommandOutput(LazyFunction):
 class CheckDockerLogs(CheckCommandOutput):
     def __init__(
         self,
-        identifier,  # type: str
-        patterns,  # type: Union[str, List[str]]
-        matches=1,  # type: Union[str, int]
-        stdout=True,  # type: bool
-        stderr=True,  # type: bool
-        attempts=60,  # type: int,
-        wait=1,  # type: int
+        identifier: str,
+        patterns: Union[str, List[str]],
+        matches: Union[str, int] = 1,
+        stdout: bool = True,
+        stderr: bool = True,
+        attempts: int = 60,
+        wait: int = 1,
+        service: str | None = None,
     ):
         """
         Checks if the provided patterns are present in docker logs
@@ -202,9 +201,12 @@ class CheckDockerLogs(CheckCommandOutput):
         :param stderr: Whether to search for the provided patterns in stderr
         :param attempts: How many times to try searching for the patterns
         :param wait: How long, in seconds, to wait between attempts
+        :param service: The service name to check the logs for when using docker compose
         """
         if file_exists(identifier):
             command = ['docker', 'compose', '-f', identifier, 'logs']
+            if service:
+                command.append(service)
         else:
             command = ['docker', 'logs', identifier]
 

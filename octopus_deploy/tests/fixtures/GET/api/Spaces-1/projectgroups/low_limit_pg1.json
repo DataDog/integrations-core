@@ -1,0 +1,40 @@
+{
+    "ItemType": "ProjectGroup",
+    "TotalResults": 3,
+    "ItemsPerPage": 2,
+    "NumberOfPages": 2,
+    "LastPageNumber": 1,
+    "Items": [
+      {
+        "Id": "ProjectGroups-1",
+        "Name": "Default Project Group",
+        "Description": "",
+        "EnvironmentIds": [],
+        "RetentionPolicyId": null,
+        "SpaceId": "Spaces-1",
+        "Links": {
+          "Self": "/api/Spaces-1/projectgroups/ProjectGroups-1",
+          "Projects": "/api/Spaces-1/projectgroups/ProjectGroups-1/projects"
+        }
+      },
+      {
+        "Id": "ProjectGroups-3",
+        "Name": "hello",
+        "Description": null,
+        "EnvironmentIds": [],
+        "RetentionPolicyId": null,
+        "SpaceId": "Spaces-1",
+        "Links": {
+          "Self": "/api/Spaces-1/projectgroups/ProjectGroups-3",
+          "Projects": "/api/Spaces-1/projectgroups/ProjectGroups-3/projects"
+        }
+      }
+    ],
+    "Links": {
+      "Self": "/api/Spaces-1/projectgroups?skip=0&take=30",
+      "Template": "/api/Spaces-1/projectgroups{?skip,take,ids,partialName}",
+      "Page.All": "/api/Spaces-1/projectgroups?skip=0&take=2147483647",
+      "Page.Current": "/api/Spaces-1/projectgroups?skip=0&take=30",
+      "Page.Last": "/api/Spaces-1/projectgroups?skip=0&take=30"
+    }
+  }

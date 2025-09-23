@@ -25,7 +25,7 @@ instances:
 
     ## @param password - string - optional
     ## Password to use for the SSH connection.
-    ## If an encrypted SSH private key is specified in `private_key_file`, 
+    ## If an encrypted SSH private key is specified in `private_key_file`,
     ##   the given password will be used to decrypt the key.
     #
     # password: <PASSWORD>
@@ -56,6 +56,15 @@ instances:
     ## Automatically add host key to known hosts when it is missing.
     #
     # add_missing_keys: false
+
+    ## @param force_sha1 - boolean - optional - default: false
+    ## Some older SSH servers only support SHA1 encryption. Moreover, some don't have the `server-sig-algs`
+    ## extension installed, which means they don't tell their clients that they only support SHA1.
+    ## The SSH client assumes SHA2 encryption, so it crashes when connecting to such a server.
+    ## While it's strongly recommended to upgrade the SSH server to support the more secure SHA2, you can force
+    ## the client to use SHA1 encryption by setting this option to 'true'.
+    #
+    # force_sha1: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

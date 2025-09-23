@@ -4,9 +4,9 @@
 import re
 
 import pytest
-from tests.conftest import PRIVATE_KEY_FILE
 
 from datadog_checks.ssh_check import CheckSSH
+from tests.conftest import PRIVATE_KEY_FILE
 
 from . import common
 

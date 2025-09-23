@@ -1,33 +1,40 @@
 {
-	"name": "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}",
-	"type": "query alert",
-	"query": "avg(last_12h):anomalies(avg:active_directory.ldap.client_sessions{*} by {host}, 'agile', 5, direction='both', alert_window='last_15m', interval=120, count_default_zero='true', seasonality='daily') >= 1",
-	"message": "There is an anomalous number of sessions for connected LDAP clients for host: {{host.name}} ",
-	"tags": [
-		"integration:active_directory"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"critical_recovery": 0
-		},
-		"threshold_windows": {
-			"trigger_window": "last_15m",
-			"recovery_window": "last_15m"
-		}
-	},
-	"priority": null,
-    "recommended_monitor_metadata": {
-        "description": "Notifies when Active Directory number of sessions for connected LDAP clients becomes anomalous for a specific host."
-      }
+  "version": 2,
+  "created_at": "2021-04-20",
+  "last_updated_at": "2021-04-20",
+  "title": "Number of sessions for LDAP clients is anomalous",
+  "tags": [
+    "integration:active-directory"
+  ],
+  "description": "Sessions enable LDAP clients to interact with directory servers securely. This monitor detects anomalies in the number of client sessions in Active Directory LDAP to identify unusual activity or issues related to client sessions.",
+  "definition": {
+    "message": "There is an anomalous number of sessions for connected LDAP clients for host: {{host.name}} ",
+    "name": "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_12h):anomalies(avg:active_directory.ldap.client_sessions{*} by {host}, 'agile', 5, direction='both', alert_window='last_15m', interval=120, count_default_zero='true', seasonality='daily') >= 1",
+    "tags": [
+      "integration:active_directory"
+    ],
+    "type": "query alert"
+  }
 }

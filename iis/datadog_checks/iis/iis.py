@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from six import PY3, iteritems
-
 from datadog_checks.base import PDHBaseCheck, is_affirmative
+
+from .service_check import app_pool_service_check, site_service_check
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
@@ -47,7 +47,7 @@ class IIS(PDHBaseCheck):
     APP_POOL = 'app_pool'
 
     def __new__(cls, name, init_config, instances):
-        if PY3 and not is_affirmative(instances[0].get('use_legacy_check_version', False)):
+        if not is_affirmative(instances[0].get('use_legacy_check_version', False)):
             from .check import IISCheckV2
 
             return IISCheckV2(name, init_config, instances)
@@ -82,7 +82,7 @@ class IIS(PDHBaseCheck):
                     self.log.debug(
                         "Unknown IIS counter: %s. Falling back to default submission.", counter.english_class_name
                     )
-                    for instance_name, val in iteritems(counter_values):
+                    for instance_name, val in counter_values.items():
                         tags = list(self._tags.get(self.instance_hash, []))
 
                         if not counter.is_single_instance():
@@ -100,7 +100,7 @@ class IIS(PDHBaseCheck):
         namespace = self.SITE
         remaining_sites = self._remaining_data[namespace]
 
-        for site_name, value in iteritems(counter_values):
+        for site_name, value in counter_values.items():
             is_single_instance = counter.is_single_instance()
             if (
                 not is_single_instance
@@ -125,7 +125,8 @@ class IIS(PDHBaseCheck):
                 self.log.error('Error in metric_func: %s %s %s', dd_name, value, e)
 
             if dd_name == 'iis.uptime':
-                self._report_uptime(namespace, value, tags)
+                status = site_service_check(value)
+                self._report_service_check(namespace, status, tags)
                 if site_name in remaining_sites:
                     self.log.debug('Removing %r from expected sites', site_name)
                     remaining_sites.remove(site_name)
@@ -136,7 +137,7 @@ class IIS(PDHBaseCheck):
         namespace = self.APP_POOL
         remaining_app_pools = self._remaining_data[namespace]
 
-        for app_pool_name, value in iteritems(counter_values):
+        for app_pool_name, value in counter_values.items():
             is_single_instance = counter.is_single_instance()
             if (
                 not is_single_instance
@@ -160,22 +161,21 @@ class IIS(PDHBaseCheck):
             except Exception as e:
                 self.log.error('Error in metric_func: %s %s %s', dd_name, value, e)
 
-            if dd_name == 'iis.app_pool.uptime':
-                self._report_uptime(namespace, value, tags)
+            if dd_name == 'iis.app_pool.state':
+                status = app_pool_service_check(value)
+                self._report_service_check(namespace, status, tags)
                 if app_pool_name in remaining_app_pools:
                     self.log.debug('Removing %r from expected app pools', app_pool_name)
                     remaining_app_pools.remove(app_pool_name)
                 else:
                     self.log.warning('App pool %r not in expected app pools', app_pool_name)
 
-    def _report_uptime(self, namespace, uptime, tags):
-        uptime = int(uptime)
-        status = self.CRITICAL if uptime == 0 else self.OK
-        self.service_check(self.get_service_check_uptime(namespace), status, tags)
+    def _report_service_check(self, namespace, status, tags):
+        self.service_check(self.get_service_check_up(namespace), status, tags)
 
     def _report_unavailable_values(self):
         for namespace, remaining_values in self._remaining_data.items():
-            service_check_uptime = self.get_service_check_uptime(namespace)
+            service_check_uptime = self.get_service_check_up(namespace)
 
             for value in remaining_values:
                 tags = self._get_tags(namespace, value, False)
@@ -206,7 +206,7 @@ class IIS(PDHBaseCheck):
         return 'iis_host:{}'.format(self.normalize_tag(iis_host))
 
     @classmethod
-    def get_service_check_uptime(cls, namespace):
+    def get_service_check_up(cls, namespace):
         return 'iis.{}_up'.format(namespace)
 
     def reset_remaining_data(self):

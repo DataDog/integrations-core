@@ -5,7 +5,7 @@ import json
 import re
 from contextlib import closing, contextmanager
 from copy import deepcopy
-from typing import Any, AnyStr, Iterable, Iterator, Sequence
+from typing import Any, AnyStr, Iterable, Iterator, Sequence  # noqa: F401
 
 try:
     import teradatasql
@@ -74,16 +74,16 @@ class TeradataCheck(AgentCheck, ConfigMixin):
         self._connect_params = json.dumps(
             {
                 'host': self.config.server,
-                'account': self.config.account,
+                'account': self.config.account if self.config.account is not None else '',
                 'database': self.config.database,
                 'dbs_port': str(self.config.port),
                 'logmech': self.config.auth_mechanism,
-                'logdata': self.config.auth_data,
-                'user': self.config.username,
-                'password': self.config.password,
+                'logdata': self.config.auth_data if self.config.auth_data is not None else '',
+                'user': self.config.username if self.config.username is not None else '',
+                'password': self.config.password if self.config.password is not None else '',
                 'https_port': str(self.config.https_port),
-                'sslmode': self.config.ssl_mode,
-                'sslprotocol': self.config.ssl_protocol,
+                'sslmode': self.config.ssl_mode if self.config.ssl_mode is not None else '',
+                'sslprotocol': self.config.ssl_protocol if self.config.ssl_protocol is not None else '',
             }
         )
 
@@ -91,8 +91,9 @@ class TeradataCheck(AgentCheck, ConfigMixin):
             'teradata_server:{}'.format(self.instance.get('server')),
             'teradata_port:{}'.format(self.instance.get('port', 1025)),
         ]
-        self._tags = list(self.config.tags)
-        self._tags.extend(global_tags)
+        if self.config.tags is not None:
+            global_tags.extend(self.config.tags)
+        self._tags = global_tags
         self._query_manager.tags = self._tags
 
         self._tables_filter = create_tables_filter(self.config.tables)

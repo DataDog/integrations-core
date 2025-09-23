@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7e1b6c42-8f40-4f4c-8d58-a3f7f39cb3e5",
   "app_id": "gearman",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,10 @@
     "title": "Gearman",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::macOS",
-      "Category::Processing",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Gearman",
@@ -46,16 +45,15 @@
       "process_signatures": [
         "gearmand",
         "gearman"
-      ]
+      ],
+      "source_type_id": 52,
+      "auto_install": true
     },
     "dashboards": {
       "gearman": "assets/dashboards/gearman_dashboard.json"
     },
     "saved_views": {
       "gearman_processes": "assets/saved_views/gearman_processes.json"
-    },
-    "logs": {
-      "source": "gearman"
     }
   }
 }

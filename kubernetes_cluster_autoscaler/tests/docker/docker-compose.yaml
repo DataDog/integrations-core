@@ -1,0 +1,10 @@
+services:
+
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "8085:8085"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/kubernetes_cluster_autoscaler_metrics.txt:/metrics/metrics

@@ -1,0 +1,138 @@
+# HELP strimzi_reconciliations_duration_seconds The time the reconciliation takes to complete
+# TYPE strimzi_reconciliations_duration_seconds histogram
+strimzi_reconciliations_duration_seconds_bucket{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",le="1.0",} 18.0
+strimzi_reconciliations_duration_seconds_bucket{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",le="5.0",} 18.0
+strimzi_reconciliations_duration_seconds_bucket{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",le="10.0",} 18.0
+strimzi_reconciliations_duration_seconds_bucket{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",le="30.0",} 18.0
+strimzi_reconciliations_duration_seconds_bucket{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",le="60.0",} 18.0
+strimzi_reconciliations_duration_seconds_bucket{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",le="120.0",} 18.0
+strimzi_reconciliations_duration_seconds_bucket{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",le="300.0",} 18.0
+strimzi_reconciliations_duration_seconds_bucket{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",le="+Inf",} 18.0
+strimzi_reconciliations_duration_seconds_count{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 18.0
+strimzi_reconciliations_duration_seconds_sum{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 0.115637747
+# HELP strimzi_reconciliations_duration_seconds_max The time the reconciliation takes to complete
+# TYPE strimzi_reconciliations_duration_seconds_max gauge
+strimzi_reconciliations_duration_seconds_max{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 0.002862291
+# HELP jvm_buffer_memory_used_bytes An estimate of the memory that the Java virtual machine is using for this buffer pool
+# TYPE jvm_buffer_memory_used_bytes gauge
+jvm_buffer_memory_used_bytes{id="mapped - 'non-volatile memory'",} 0.0
+jvm_buffer_memory_used_bytes{id="mapped",} 0.0
+jvm_buffer_memory_used_bytes{id="direct",} 160635.0
+# HELP strimzi_resources Number of custom resources the operator sees
+# TYPE strimzi_resources gauge
+strimzi_resources{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 1.0
+# HELP jvm_classes_unloaded_classes_total The total number of classes unloaded since the Java virtual machine has started execution
+# TYPE jvm_classes_unloaded_classes_total counter
+jvm_classes_unloaded_classes_total 0.0
+# HELP jvm_gc_pause_seconds Time spent in GC pause
+# TYPE jvm_gc_pause_seconds summary
+jvm_gc_pause_seconds_count{action="end of minor GC",cause="Metadata GC Threshold",} 3.0
+jvm_gc_pause_seconds_sum{action="end of minor GC",cause="Metadata GC Threshold",} 0.03
+jvm_gc_pause_seconds_count{action="end of minor GC",cause="G1 Preventive Collection",} 1.0
+jvm_gc_pause_seconds_sum{action="end of minor GC",cause="G1 Preventive Collection",} 0.004
+jvm_gc_pause_seconds_count{action="end of minor GC",cause="G1 Evacuation Pause",} 2.0
+jvm_gc_pause_seconds_sum{action="end of minor GC",cause="G1 Evacuation Pause",} 0.008
+# HELP jvm_gc_pause_seconds_max Time spent in GC pause
+# TYPE jvm_gc_pause_seconds_max gauge
+jvm_gc_pause_seconds_max{action="end of minor GC",cause="Metadata GC Threshold",} 0.0
+jvm_gc_pause_seconds_max{action="end of minor GC",cause="G1 Preventive Collection",} 0.0
+jvm_gc_pause_seconds_max{action="end of minor GC",cause="G1 Evacuation Pause",} 0.0
+# HELP system_load_average_1m The sum of the number of runnable entities queued to available processors and the number of runnable entities running on the available processors averaged over a period of time
+# TYPE system_load_average_1m gauge
+system_load_average_1m 0.28
+# HELP jvm_gc_max_data_size_bytes Max size of long-lived heap memory pool
+# TYPE jvm_gc_max_data_size_bytes gauge
+jvm_gc_max_data_size_bytes 6.723469312E9
+# HELP jvm_memory_used_bytes The amount of used memory
+# TYPE jvm_memory_used_bytes gauge
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",} 1.4196224E7
+jvm_memory_used_bytes{area="heap",id="G1 Survivor Space",} 1667064.0
+jvm_memory_used_bytes{area="heap",id="G1 Old Gen",} 2.5609216E7
+jvm_memory_used_bytes{area="nonheap",id="Metaspace",} 5.0368824E7
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'non-nmethods'",} 1350016.0
+jvm_memory_used_bytes{area="heap",id="G1 Eden Space",} 3.3554432E7
+jvm_memory_used_bytes{area="nonheap",id="Compressed Class Space",} 5632000.0
+jvm_memory_used_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",} 3027712.0
+# HELP jvm_threads_peak_threads The peak live thread count since the Java virtual machine started or peak was reset
+# TYPE jvm_threads_peak_threads gauge
+jvm_threads_peak_threads 82.0
+# HELP jvm_memory_committed_bytes The amount of memory in bytes that is committed for the Java virtual machine to use
+# TYPE jvm_memory_committed_bytes gauge
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",} 1.4221312E7
+jvm_memory_committed_bytes{area="heap",id="G1 Survivor Space",} 4194304.0
+jvm_memory_committed_bytes{area="heap",id="G1 Old Gen",} 5.8720256E7
+jvm_memory_committed_bytes{area="nonheap",id="Metaspace",} 5.0921472E7
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'non-nmethods'",} 2555904.0
+jvm_memory_committed_bytes{area="heap",id="G1 Eden Space",} 6.291456E7
+jvm_memory_committed_bytes{area="nonheap",id="Compressed Class Space",} 5898240.0
+jvm_memory_committed_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",} 3080192.0
+# HELP system_cpu_usage The "recent cpu usage" of the system the application is running in
+# TYPE system_cpu_usage gauge
+system_cpu_usage 7.616661811826391E-4
+# HELP jvm_gc_memory_promoted_bytes_total Count of positive increases in the size of the old generation memory pool before GC to after GC
+# TYPE jvm_gc_memory_promoted_bytes_total counter
+jvm_gc_memory_promoted_bytes_total 3
+# HELP system_cpu_count The number of processors available to the Java virtual machine
+# TYPE system_cpu_count gauge
+system_cpu_count 5.0
+# HELP strimzi_reconciliations_failed_total Number of reconciliations done by the operator for individual resources which failed
+# TYPE strimzi_reconciliations_failed_total counter
+strimzi_reconciliations_failed_total{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 18.0
+# HELP strimzi_reconciliations_locked_total Number of reconciliations skipped because another reconciliation for the same resource was still running
+# TYPE strimzi_reconciliations_locked_total counter
+strimzi_reconciliations_locked_total{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 18.0
+# HELP strimzi_reconciliations_successful_total Number of reconciliations done by the operator for individual resources which were successful
+# TYPE strimzi_reconciliations_successful_total counter
+strimzi_reconciliations_successful_total{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 18.0
+# HELP jvm_buffer_count_buffers An estimate of the number of buffers in the pool
+# TYPE jvm_buffer_count_buffers gauge
+jvm_buffer_count_buffers{id="mapped - 'non-volatile memory'",} 0.0
+jvm_buffer_count_buffers{id="mapped",} 0.0
+jvm_buffer_count_buffers{id="direct",} 20.0
+# HELP jvm_buffer_total_capacity_bytes An estimate of the total capacity of the buffers in this pool
+# TYPE jvm_buffer_total_capacity_bytes gauge
+jvm_buffer_total_capacity_bytes{id="mapped - 'non-volatile memory'",} 0.0
+jvm_buffer_total_capacity_bytes{id="mapped",} 0.0
+jvm_buffer_total_capacity_bytes{id="direct",} 160635.0
+# HELP jvm_gc_live_data_size_bytes Size of long-lived heap memory pool after reclamation
+# TYPE jvm_gc_live_data_size_bytes gauge
+jvm_gc_live_data_size_bytes 0.0
+# HELP jvm_gc_memory_allocated_bytes_total Incremented for an increase in the size of the (young) heap memory pool after one GC to before the next
+# TYPE jvm_gc_memory_allocated_bytes_total counter
+jvm_gc_memory_allocated_bytes_total 1.76160768E8
+# HELP jvm_threads_states_threads The current number of threads
+# TYPE jvm_threads_states_threads gauge
+jvm_threads_states_threads{state="runnable",} 10.0
+jvm_threads_states_threads{state="blocked",} 0.0
+jvm_threads_states_threads{state="waiting",} 55.0
+jvm_threads_states_threads{state="timed-waiting",} 15.0
+jvm_threads_states_threads{state="new",} 0.0
+jvm_threads_states_threads{state="terminated",} 0.0
+# HELP strimzi_reconciliations_periodical_total Number of periodical reconciliations done by the operator
+# TYPE strimzi_reconciliations_periodical_total counter
+strimzi_reconciliations_periodical_total{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 16.0
+# HELP jvm_classes_loaded_classes The number of classes that are currently loaded in the Java virtual machine
+# TYPE jvm_classes_loaded_classes gauge
+jvm_classes_loaded_classes 8993.0
+# HELP jvm_threads_live_threads The current number of live threads including both daemon and non-daemon threads
+# TYPE jvm_threads_live_threads gauge
+jvm_threads_live_threads 80.0
+# HELP process_cpu_usage The "recent cpu usage" for the Java Virtual Machine process
+# TYPE process_cpu_usage gauge
+process_cpu_usage 8.741258741258741E-4
+# HELP jvm_memory_max_bytes The maximum amount of memory in bytes that can be used for memory management
+# TYPE jvm_memory_max_bytes gauge
+jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",} 1.22908672E8
+jvm_memory_max_bytes{area="heap",id="G1 Survivor Space",} -1.0
+jvm_memory_max_bytes{area="heap",id="G1 Old Gen",} 6.723469312E9
+jvm_memory_max_bytes{area="nonheap",id="Metaspace",} -1.0
+jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'non-nmethods'",} 5836800.0
+jvm_memory_max_bytes{area="heap",id="G1 Eden Space",} -1.0
+jvm_memory_max_bytes{area="nonheap",id="Compressed Class Space",} 1.073741824E9
+jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'non-profiled nmethods'",} 1.22912768E8
+# HELP strimzi_reconciliations_total Number of reconciliations done by the operator for individual resources
+# TYPE strimzi_reconciliations_total counter
+strimzi_reconciliations_total{kind="KafkaUser",namespace="kafka",selector="strimzi.io/cluster=my-cluster",} 18.0
+# HELP jvm_threads_daemon_threads The current number of live daemon threads
+# TYPE jvm_threads_daemon_threads gauge
+jvm_threads_daemon_threads 11.0

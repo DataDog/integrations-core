@@ -1,0 +1,49 @@
+{
+  "amphorae": [
+    {
+      "id": "a34dc4b7-b608-4a9d-9fbd-2a4e611475c2",
+      "loadbalancer_id": "4bb7bfb1-83c2-45e8-b0e1-ed3022329115",
+      "compute_id": "ace67097-e457-4044-b05c-be7ac830304a",
+      "lb_network_ip": "192.168.0.132",
+      "vrrp_ip": "172.24.4.50",
+      "ha_ip": "172.24.4.107",
+      "vrrp_port_id": "05b792b4-d027-4e55-aec1-337530cbec3e",
+      "ha_port_id": "c8d33b91-da2d-48e9-a807-04e972e838a1",
+      "cert_expiration": "2023-05-18T14:55:51",
+      "cert_busy": false,
+      "role": "STANDALONE",
+      "status": "ALLOCATED",
+      "vrrp_interface": null,
+      "vrrp_id": 1,
+      "vrrp_priority": null,
+      "cached_zone": "nova",
+      "created_at": "2023-04-18T14:55:51",
+      "updated_at": "2023-04-18T15:01:17",
+      "image_id": "5d8ea403-98e0-4009-a950-0b2b4cf7e938",
+      "compute_flavor": "auto"
+    },
+    {
+      "id": "042bcca4-4d97-47a9-bc04-d88c1e3a4d72",
+      "loadbalancer_id": "ae54877c-b186-4b90-b71c-d331b9e732bc",
+      "compute_id": "dbca52f7-da8b-4c24-aacd-9a62e5c45ab0",
+      "lb_network_ip": "192.168.0.84",
+      "vrrp_ip": "172.24.4.82",
+      "ha_ip": "172.24.4.251",
+      "vrrp_port_id": "4d8a5bf5-211c-464a-a97c-eb30a0bb3879",
+      "ha_port_id": "cf39978a-068e-4f9f-a797-dbbf2dfa0e59",
+      "cert_expiration": "2023-05-20T13:57:35",
+      "cert_busy": false,
+      "role": "STANDALONE",
+      "status": "ALLOCATED",
+      "vrrp_interface": null,
+      "vrrp_id": 1,
+      "vrrp_priority": null,
+      "cached_zone": "nova",
+      "created_at": "2023-04-20T13:57:35",
+      "updated_at": "2023-04-20T14:02:35",
+      "image_id": "5d8ea403-98e0-4009-a950-0b2b4cf7e938",
+      "compute_flavor": "auto"
+    }
+  ],
+  "amphorae_links": []
+}

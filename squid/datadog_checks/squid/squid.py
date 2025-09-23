@@ -5,9 +5,7 @@
 import re
 
 import requests
-from six import iteritems
 
-# project
 from datadog_checks.base import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
@@ -93,14 +91,13 @@ class SquidCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'cachemgr_username': {'name': 'username'}, 'cachemgr_password': {'name': 'password'}}
 
     def check(self, instance):
-
         name, host, port, custom_tags = self.parse_instance(instance)
         tags = ["name:%s" % name]
         # Get the squid counters values
         counters = self.get_counters(host, port, tags + custom_tags)
 
         # Send these values as rate
-        for counter, value in iteritems(counters):
+        for counter, value in counters.items():
             self.rate(counter, value, tags=tags + custom_tags)
 
     def get_counters(self, host, port, tags):

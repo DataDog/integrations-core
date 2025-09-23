@@ -3,9 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import os
+
 import requests
 from dateutil import parser
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
@@ -37,10 +38,17 @@ except ImportError:
 
 # Fargate related constants
 EVENT_TYPE = SOURCE_TYPE_NAME = 'ecs.fargate'
-API_ENDPOINT = 'http://169.254.170.2/v2'
-METADATA_ROUTE = '/metadata'
-STATS_ROUTE = '/stats'
 DEFAULT_TIMEOUT = 5
+
+# Fargate ECS Endpoint v2
+API_ENDPOINT_V2 = 'http://169.254.170.2/v2'
+METADATA_ROUTE_V2 = '/metadata'
+STATS_ROUTE_V2 = '/stats'
+
+# Fargate ECS Endpoint v4
+API_ENDPOINT_V4_ENV_VAR = 'ECS_CONTAINER_METADATA_URI_V4'
+METADATA_ROUTE_V4 = '/task'
+STATS_ROUTE_V4 = '/task/stats'
 
 # Default value is maxed out for some cgroup metrics
 CGROUP_NO_VALUE = 0x7FFFFFFFFFFFF000
@@ -57,7 +65,15 @@ MEMORY_GAUGE_METRICS = [
     'hierarchical_memsw_limit',
 ]
 MEMORY_RATE_METRICS = ['pgpgin', 'pgpgout', 'pgmajfault', 'pgfault']
+# Linux-only IO metrics
 IO_METRICS = {'io_service_bytes_recursive': 'ecs.fargate.io.bytes.', 'io_serviced_recursive': 'ecs.fargate.io.ops.'}
+# Windows-only IO metrics
+STORAGE_STATS_METRICS = {
+    'read_count_normalized': 'ecs.fargate.io.ops.read',
+    'read_size_bytes': 'ecs.fargate.io.bytes.read',
+    'write_count_normalized': 'ecs.fargate.io.ops.write',
+    'write_size_bytes': 'ecs.fargate.io.bytes.write',
+}
 NETWORK_GAUGE_METRICS = {
     'rx_errors': 'ecs.fargate.net.rcvd_errors',
     'tx_errors': 'ecs.fargate.net.sent_errors',
@@ -65,15 +81,37 @@ NETWORK_GAUGE_METRICS = {
     'tx_dropped': 'ecs.fargate.net.packet.out_dropped',
 }
 NETWORK_RATE_METRICS = {'rx_bytes': 'ecs.fargate.net.bytes_rcvd', 'tx_bytes': 'ecs.fargate.net.bytes_sent'}
+TASK_TAGGER_ENTITY_ID = "internal://global-entity-id"
+
+EPHEMERAL_STORAGE_GAUGE_METRICS = {
+    'Utilized': 'ecs.fargate.ephemeral_storage.utilized',
+    'Reserved': 'ecs.fargate.ephemeral_storage.reserved',
+}
 
 
 class FargateCheck(AgentCheck):
-
     HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': DEFAULT_TIMEOUT}}
 
+    def __init__(self, name, init_config, instances):
+        # Fargate metadata endpoint https://docs.aws.amazon.com/AmazonECS/latest/userguide/task-metadata-endpoint-v4-fargate.html
+        self.API_ENDPOINT = os.environ.get(API_ENDPOINT_V4_ENV_VAR)
+
+        if self.API_ENDPOINT is None:
+            # If v4 endpoint is not available, fall back to v2
+            self.API_ENDPOINT = API_ENDPOINT_V2
+            self.METADATA_ROUTE = METADATA_ROUTE_V2
+            self.STATS_ROUTE = STATS_ROUTE_V2
+        else:
+            # Otherwise set v4 routes
+            self.METADATA_ROUTE = METADATA_ROUTE_V4
+            self.STATS_ROUTE = STATS_ROUTE_V4
+
+        super(FargateCheck, self).__init__(name, init_config, instances)
+
     def check(self, _):
-        metadata_endpoint = API_ENDPOINT + METADATA_ROUTE
-        stats_endpoint = API_ENDPOINT + STATS_ROUTE
+        metadata_endpoint = self.API_ENDPOINT + self.METADATA_ROUTE
+        stats_endpoint = self.API_ENDPOINT + self.STATS_ROUTE
+
         custom_tags = self.instance.get('tags', [])
 
         try:
@@ -137,6 +175,31 @@ class FargateCheck(AgentCheck):
             if container.get('Limits', {}).get('CPU', 0) > 0:
                 self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
 
+        # Create task tags
+        task_tags = get_tags(TASK_TAGGER_ENTITY_ID, True) or []
+        # Compatibility with previous versions of the check
+        compat_tags = []
+        for tag in task_tags:
+            if tag.startswith(("task_family:", "task_version:")):
+                compat_tags.append("ecs_" + tag)
+            elif tag.startswith("cluster_name:"):
+                compat_tags.append(tag.replace("cluster_name:", "ecs_cluster:"))
+
+        task_tags = task_tags + compat_tags + custom_tags
+
+        ## Ephemeral Storage Metrics
+        if 'EphemeralStorageMetrics' in metadata:
+            es_metrics = metadata['EphemeralStorageMetrics']
+            for field_name, metric_value in es_metrics.items():
+                metric_name = EPHEMERAL_STORAGE_GAUGE_METRICS.get(field_name)
+                self.gauge(metric_name, metric_value, task_tags)
+
+        if metadata.get('Limits', {}).get('CPU', 0) > 0:
+            self.gauge('ecs.fargate.cpu.task.limit', metadata['Limits']['CPU'] * 10**9, task_tags)
+
+        if metadata.get('Limits', {}).get('Memory', 0) > 0:
+            self.gauge('ecs.fargate.mem.task.limit', metadata['Limits']['Memory'] * 1024**2, task_tags)
+
         try:
             request = self.http.get(stats_endpoint)
         except requests.exceptions.Timeout:
@@ -164,7 +227,7 @@ class FargateCheck(AgentCheck):
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)
 
-        for container_id, container_stats in iteritems(stats):
+        for container_id, container_stats in stats.items():
             if container_id not in exlcuded_cid:
                 self.submit_perf_metrics(container_tags, container_id, container_stats)
 
@@ -272,15 +335,13 @@ class FargateCheck(AgentCheck):
                 self.gauge('ecs.fargate.mem.limit', value, tags)
 
             # I/O metrics
-            for blkio_cat, metric_name in iteritems(IO_METRICS):
+            for blkio_cat, metric_name in IO_METRICS.items():
                 read_counter = write_counter = 0
 
                 blkio_stats = container_stats.get("blkio_stats", {}).get(blkio_cat)
                 # In Windows is always "None" (string), so don't report anything
-                if blkio_stats == 'None':
+                if blkio_stats is None or blkio_stats == 'None':
                     continue
-                elif blkio_stats is None:
-                    blkio_stats = []
 
                 for blkio_stat in blkio_stats:
                     if blkio_stat["op"] == "Read" and "value" in blkio_stat:
@@ -290,15 +351,22 @@ class FargateCheck(AgentCheck):
                 self.rate(metric_name + 'read', read_counter, tags)
                 self.rate(metric_name + 'write', write_counter, tags)
 
+            # Windows I/O metrics
+            storage_stats = container_stats.get('storage_stats', {})
+            for metric, metric_name in STORAGE_STATS_METRICS.items():
+                value = storage_stats.get(metric)
+                if value:
+                    self.rate(metric_name, value, tags)
+
             # Network metrics
             networks = container_stats.get('networks', {})
-            for network_interface, network_stats in iteritems(networks):
+            for network_interface, network_stats in networks.items():
                 network_tags = tags + ["interface:{}".format(network_interface)]
-                for field_name, metric_name in iteritems(NETWORK_GAUGE_METRICS):
+                for field_name, metric_name in NETWORK_GAUGE_METRICS.items():
                     metric_value = network_stats.get(field_name)
                     if metric_value is not None:
                         self.gauge(metric_name, metric_value, network_tags)
-                for field_name, metric_name in iteritems(NETWORK_RATE_METRICS):
+                for field_name, metric_name in NETWORK_RATE_METRICS.items():
                     metric_value = network_stats.get(field_name)
                     if metric_value is not None:
                         self.rate(metric_name, metric_value, network_tags)

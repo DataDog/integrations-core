@@ -9,9 +9,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Sequence, Union
+from types import MappingProxyType
+from typing import Any, Optional, Union
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -19,93 +20,186 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, deprecations, validators
 
 
-class Field(BaseModel):
-    class Config:
-        allow_mutation = False
+class Aws(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    cluster_identifier: Optional[str] = None
+    instance_endpoint: Optional[str] = None
 
-    field_name: Optional[str]
-    name: Optional[str]
-    type: Optional[str]
+
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collect_search_indexes: Optional[bool] = None
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_collections: Optional[float] = None
+    max_depth: Optional[float] = None
+    sample_size: Optional[float] = None
+
+
+class Field(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    field_name: Optional[str] = None
+    name: Optional[str] = None
+    type: Optional[str] = None
 
 
 class CustomQuery(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    database: Optional[str] = None
+    fields: Optional[tuple[Field, ...]] = None
+    metric_prefix: Optional[str] = None
+    query: Optional[MappingProxyType[str, Any]] = None
+    tags: Optional[tuple[str, ...]] = None
 
-    database: Optional[str]
-    fields: Optional[Sequence[Field]]
-    metric_prefix: Optional[str]
-    query: Optional[Mapping[str, Any]]
-    tags: Optional[Sequence[str]]
+
+class DatabaseAutodiscovery(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+    max_collections_per_database: Optional[int] = None
+    max_databases: Optional[int] = None
+    refresh_interval: Optional[int] = None
 
 
 class MetricPatterns(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
 
-    exclude: Optional[Sequence[str]]
-    include: Optional[Sequence[str]]
+
+class MetricsCollectionInterval(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection: Optional[int] = None
+    collections_indexes_stats: Optional[int] = None
+    db_stats: Optional[int] = None
+    session_stats: Optional[int] = None
+    sharded_data_distribution: Optional[int] = None
+
+
+class OperationSamples(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    explain_verbosity: Optional[str] = None
+
+
+class Schemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collect_search_indexes: Optional[bool] = None
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_collections: Optional[float] = None
+    max_depth: Optional[float] = None
+    sample_size: Optional[float] = None
+
+
+class SlowOperations(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    explain_verbosity: Optional[str] = None
+    max_operations: Optional[float] = None
 
 
 class InstanceConfig(BaseModel):
-    class Config:
-        allow_mutation = False
+    model_config = ConfigDict(
+        validate_default=True,
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    add_node_tag_to_events: Optional[bool] = None
+    additional_metrics: Optional[tuple[str, ...]] = None
+    aws: Optional[Aws] = None
+    cluster_name: Optional[str] = None
+    collect_schemas: Optional[CollectSchemas] = None
+    collections: Optional[tuple[str, ...]] = None
+    collections_indexes_stats: Optional[bool] = None
+    connection_scheme: Optional[str] = None
+    custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database: Optional[str] = None
+    database_autodiscovery: Optional[DatabaseAutodiscovery] = None
+    database_instance_collection_interval: Optional[float] = None
+    dbm: Optional[bool] = None
+    dbnames: Optional[tuple[str, ...]] = None
+    dbstats_tag_dbname: Optional[bool] = None
+    disable_generic_tags: Optional[bool] = None
+    empty_default_hostname: Optional[bool] = None
+    free_storage_metrics: Optional[bool] = None
+    hosts: Optional[Union[str, tuple[str, ...]]] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    metrics_collection_interval: Optional[MetricsCollectionInterval] = None
+    min_collection_interval: Optional[float] = None
+    operation_samples: Optional[OperationSamples] = None
+    options: Optional[MappingProxyType[str, Any]] = None
+    password: Optional[str] = None
+    replica_check: Optional[bool] = None
+    reported_database_hostname: Optional[str] = None
+    schemas: Optional[Schemas] = None
+    server: Optional[str] = None
+    service: Optional[str] = None
+    slow_operations: Optional[SlowOperations] = None
+    system_database_stats: Optional[bool] = None
+    tags: Optional[tuple[str, ...]] = None
+    timeout: Optional[int] = None
+    tls: Optional[bool] = None
+    tls_allow_invalid_certificates: Optional[bool] = None
+    tls_allow_invalid_hostnames: Optional[bool] = None
+    tls_ca_file: Optional[str] = None
+    tls_certificate_key_file: Optional[str] = None
+    username: Optional[str] = None
 
-    additional_metrics: Optional[Sequence[str]]
-    collections: Optional[Sequence[str]]
-    collections_indexes_stats: Optional[bool]
-    connection_scheme: Optional[str]
-    custom_queries: Optional[Sequence[CustomQuery]]
-    database: Optional[str]
-    dbnames: Optional[Sequence[str]]
-    disable_generic_tags: Optional[bool]
-    empty_default_hostname: Optional[bool]
-    hosts: Optional[Union[str, Sequence[str]]]
-    metric_patterns: Optional[MetricPatterns]
-    min_collection_interval: Optional[float]
-    options: Optional[Mapping[str, Any]]
-    password: Optional[str]
-    replica_check: Optional[bool]
-    server: Optional[str]
-    service: Optional[str]
-    ssl: Optional[bool]
-    ssl_ca_certs: Optional[str]
-    ssl_cert_reqs: Optional[int]
-    ssl_certfile: Optional[str]
-    ssl_keyfile: Optional[str]
-    ssl_match_hostname: Optional[bool]
-    tags: Optional[Sequence[str]]
-    timeout: Optional[int]
-    tls: Optional[bool]
-    tls_allow_invalid_certificates: Optional[bool]
-    tls_allow_invalid_hostnames: Optional[bool]
-    tls_ca_file: Optional[str]
-    tls_certificate_key_file: Optional[str]
-    username: Optional[str]
-
-    @root_validator(pre=True)
-    def _handle_deprecations(cls, values):
-        validation.utils.handle_deprecations('instances', deprecations.instance(), values)
+    @model_validator(mode='before')
+    def _handle_deprecations(cls, values, info):
+        fields = info.context['configured_fields']
+        validation.utils.handle_deprecations('instances', deprecations.instance(), fields, info.context)
         return values
 
-    @root_validator(pre=True)
+    @model_validator(mode='before')
     def _initial_validation(cls, values):
         return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-    @validator('*', pre=True, always=True)
-    def _ensure_defaults(cls, v, field):
-        if v is not None or field.required:
-            return v
+    @field_validator('*', mode='before')
+    def _validate(cls, value, info):
+        field = cls.model_fields[info.field_name]
+        field_name = field.alias or info.field_name
+        if field_name in info.context['configured_fields']:
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'instance_{info.field_name}', lambda: value)()
 
-        return getattr(defaults, f'instance_{field.name}')(field, v)
+        return validation.utils.make_immutable(value)
 
-    @validator('*')
-    def _run_validations(cls, v, field):
-        if not v:
-            return v
-
-        return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-    @root_validator(pre=False)
-    def _final_validation(cls, values):
-        return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+    @model_validator(mode='after')
+    def _final_validation(cls, model):
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))

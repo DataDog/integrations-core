@@ -1,0 +1,16 @@
+{
+    "ItemType": "Event",
+    "TotalResults": 0,
+    "ItemsPerPage": 0,
+    "NumberOfPages": 1,
+    "LastPageNumber": 0,
+    "Items": [],
+    "Links": {
+      "Self": "/api/events?from=2024-09-23 14:45:00.123000+00:00&to=2024-09-23 14:45:00.123000+00:00&eventCategories=MachineUnhealthy,MachineUnavailable,MachineHealthy,CertificateExpired,DeploymentFailed,DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted",
+      "Template": "/api/events{?skip,regarding,regardingAny,user,users,projects,projectGroups,environments,eventGroups,eventCategories,eventAgents,tags,tenants,from,to,internal,fromAutoId,toAutoId,documentTypes,asCsv,take,ids,spaces,includeSystem,excludeDifference}",
+      "Page.All": "/api/events?from=2024-09-23 14:45:00.123000+00:00&to=2024-09-23 14:45:00.123000+00:00&eventCategories=MachineUnhealthy,MachineUnavailable,MachineHealthy,CertificateExpired,DeploymentFailed,DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted",
+      "Page.Next": "/api/events?from=2024-09-23 14:45:00.123000+00:00&to=2024-09-23 14:45:00.123000+00:00&eventCategories=MachineUnhealthy,MachineUnavailable,MachineHealthy,CertificateExpired,DeploymentFailed,DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted",
+      "Page.Current": "/api/events?from=2024-09-23 14:45:00.123000+00:00&to=2024-09-23 14:45:00.123000+00:00&eventCategories=MachineUnhealthy,MachineUnavailable,MachineHealthy,CertificateExpired,DeploymentFailed,DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted",
+      "Page.Last": "/api/events?from=2024-09-23 14:45:00.123000+00:00&to=2024-09-23 14:45:00.123000+00:00&eventCategories=MachineUnhealthy,MachineUnavailable,MachineHealthy,CertificateExpired,DeploymentFailed,DeploymentSucceeded,LoginFailed,MachineAdded,MachineDeleted"
+    }
+  }

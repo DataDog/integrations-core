@@ -1,168 +1,246 @@
-datadog-active-directory==1.16.0; sys_platform == 'win32'
-datadog-activemq-xml==2.2.0
-datadog-activemq==2.3.1
-datadog-aerospike==1.17.2; sys_platform == 'linux2'
-datadog-airflow==3.2.0
-datadog-amazon-msk==3.2.1
-datadog-ambari==3.2.0; sys_platform != 'win32'
-datadog-apache==4.2.0
-datadog-arangodb==1.3.0
-datadog-aspdotnet==1.12.0; sys_platform == 'win32'
-datadog-avi-vantage==3.2.0
-datadog-azure-iot-edge==3.3.0
-datadog-boundary==1.1.0
-datadog-btrfs==1.14.1; sys_platform != 'win32'
-datadog-cacti==1.11.1; sys_platform == 'linux2'
-datadog-calico==1.1.0
-datadog-cassandra-nodetool==1.11.0
-datadog-cassandra==1.16.0
-datadog-ceph==2.7.0; sys_platform != 'win32'
-datadog-cert-manager==3.0.0
-datadog-checks-base==27.4.2
-datadog-checks-dependency-provider==1.3.0
-datadog-checks-downloader==3.10.0
-datadog-cilium==2.3.0
-datadog-cisco-aci==2.2.0
-datadog-citrix-hypervisor==2.2.0
-datadog-clickhouse==2.8.0
-datadog-cloud-foundry-api==2.2.1
-datadog-cockroachdb==2.4.1
-datadog-confluent-platform==1.8.1
-datadog-consul==2.2.0
-datadog-coredns==2.3.0; sys_platform == 'linux2'
-datadog-couch==5.2.0
-datadog-couchbase==2.2.0
-datadog-crio==2.3.0
-datadog-datadog-cluster-agent==2.4.0
-datadog-directory==1.14.0
-datadog-disk==4.7.1
-datadog-dns-check==2.3.0
-datadog-dotnetclr==1.13.0; sys_platform == 'win32'
-datadog-druid==2.2.0
-datadog-ecs-fargate==3.2.0
-datadog-eks-fargate==3.2.0
-datadog-elastic==5.3.0
-datadog-envoy==2.4.0
-datadog-etcd==3.3.0
-datadog-exchange-server==1.14.0; sys_platform == 'win32'
-datadog-external-dns==2.3.0
-datadog-flink==1.4.0
-datadog-fluentd==2.2.0
-datadog-foundationdb==1.2.0
-datadog-gearmand==2.3.0; sys_platform != 'win32'
-datadog-gitlab-runner==3.3.0
-datadog-gitlab==5.3.0
-datadog-glusterfs==1.5.0; sys_platform == 'linux2'
-datadog-go-expvar==2.2.0
-datadog-gunicorn==2.3.1; sys_platform != 'win32'
-datadog-haproxy==4.4.0
-datadog-harbor==2.2.0
-datadog-hazelcast==2.1.0
-datadog-hdfs-datanode==3.2.0; sys_platform != 'win32'
-datadog-hdfs-namenode==3.2.0; sys_platform != 'win32'
-datadog-hive==1.8.1
-datadog-hivemq==1.6.1
-datadog-http-check==8.1.0
-datadog-hudi==2.1.1
-datadog-hyperv==1.8.0; sys_platform == 'win32'
-datadog-ibm-ace==1.0.3
-datadog-ibm-db2==1.11.2
-datadog-ibm-i==1.5.0; sys_platform != 'win32'
-datadog-ibm-mq==4.0.0
-datadog-ibm-was==2.3.0
-datadog-ignite==2.2.1
-datadog-iis==2.17.0; sys_platform == 'win32'
-datadog-impala==1.0.1
-datadog-istio==4.3.0
-datadog-jboss-wildfly==2.0.1
-datadog-journald==1.1.0
-datadog-kafka-consumer==2.16.1
-datadog-kafka==2.13.0
-datadog-kong==2.2.0
-datadog-kube-apiserver-metrics==3.3.0
-datadog-kube-controller-manager==4.3.0
-datadog-kube-dns==3.3.0
-datadog-kube-metrics-server==2.3.0
-datadog-kube-proxy==5.3.0
-datadog-kube-scheduler==4.5.0
-datadog-kubelet==7.5.1
-datadog-kubernetes-state==7.4.0
-datadog-kyototycoon==2.2.0
-datadog-lighttpd==3.2.0
-datadog-linkerd==3.3.0
-datadog-linux-proc-extras==2.3.0; sys_platform == 'linux2'
-datadog-mapr==1.9.1; sys_platform == 'linux2'
-datadog-mapreduce==3.2.0
-datadog-marathon==2.1.0; sys_platform != 'win32'
-datadog-marklogic==3.2.0
-datadog-mcache==3.3.0; sys_platform != 'win32'
-datadog-mesos-master==3.1.0; sys_platform != 'win32'
-datadog-mesos-slave==3.1.0; sys_platform != 'win32'
-datadog-mongo==4.0.4
-datadog-mysql==9.0.0
-datadog-nagios==1.11.0
-datadog-network==2.9.2
-datadog-nfsstat==1.11.0; sys_platform == 'linux2'
-datadog-nginx-ingress-controller==2.3.0
-datadog-nginx==5.4.0
-datadog-openldap==1.10.0
-datadog-openmetrics==2.3.0
-datadog-openstack-controller==2.1.2
-datadog-openstack==1.13.1
-datadog-oracle==3.9.5
-datadog-pan-firewall==1.1.0
-datadog-pdh-check==1.16.1; sys_platform == 'win32'
-datadog-pgbouncer==4.3.0; sys_platform != 'win32'
-datadog-php-fpm==2.2.0
-datadog-postfix==1.12.0; sys_platform != 'win32'
-datadog-postgres==13.1.0
-datadog-powerdns-recursor==2.2.0
-datadog-presto==2.6.1
-datadog-process==2.3.2
-datadog-prometheus==3.4.0
-datadog-proxysql==4.0.0
-datadog-pulsar==1.2.0
-datadog-rabbitmq==3.2.0
-datadog-redisdb==4.5.2
-datadog-rethinkdb==2.3.1
-datadog-riak==3.2.0
-datadog-riakcs==2.9.0
-datadog-sap-hana==2.2.1
-datadog-scylla==2.3.0
-datadog-sidekiq==1.3.0
-datadog-silk==1.2.0
-datadog-singlestore==1.3.1
-datadog-snmp==5.10.0
-datadog-snowflake==4.4.4
-datadog-solr==1.11.1
-datadog-sonarqube==2.1.0
-datadog-spark==3.1.2
-datadog-sqlserver==10.0.0
-datadog-squid==2.2.0
-datadog-ssh-check==2.3.2
-datadog-statsd==1.10.0
-datadog-supervisord==2.3.0
-datadog-system-core==1.14.0
-datadog-system-swap==1.14.1
-datadog-tcp-check==4.6.0
-datadog-teamcity==2.2.0
-datadog-tenable==1.4.0
-datadog-teradata==1.1.0; sys_platform != 'darwin'
-datadog-tls==2.9.0
-datadog-tokumx==3.2.0
-datadog-tomcat==1.11.1
-datadog-traffic-server==1.1.0
-datadog-twemproxy==1.13.0
-datadog-twistlock==3.2.0
-datadog-varnish==1.14.1
-datadog-vault==3.3.3
-datadog-vertica==3.4.1
-datadog-voltdb==2.1.2
-datadog-vsphere==6.2.0
-datadog-weblogic==1.1.1
-datadog-win32-event-log==2.13.2; sys_platform == 'win32'
-datadog-windows-performance-counters==1.4.0; sys_platform == 'win32'
-datadog-windows-service==4.4.0; sys_platform == 'win32'
-datadog-wmi-check==1.15.1; sys_platform == 'win32'
-datadog-yarn==4.2.0
-datadog-zk==4.2.0; sys_platform != 'win32'
+# DO NOT PASS THIS TO PIP DIRECTLY
+# THIS FILE IS AUTO-GENERATED, DO NOT EDIT BY HAND
+--no-index
+datadog-active-directory==4.3.0; sys_platform == 'win32'
+datadog-activemq-xml==5.1.1
+datadog-activemq==5.0.0
+datadog-aerospike==5.0.1; sys_platform == 'linux2'
+datadog-airflow==7.0.1
+datadog-amazon-msk==7.1.0
+datadog-ambari==6.1.1; sys_platform != 'win32'
+datadog-apache==7.0.1
+datadog-appgate-sdp==2.0.1; sys_platform != 'win32'
+datadog-arangodb==4.0.1
+datadog-argo-rollouts==3.0.1
+datadog-argo-workflows==3.0.1
+datadog-argocd==4.0.1
+datadog-aspdotnet==4.3.0; sys_platform == 'win32'
+datadog-avi-vantage==6.0.1
+datadog-aws-neuron==3.0.1
+datadog-azure-iot-edge==6.1.1
+datadog-bentoml==1.0.0
+datadog-beyondtrust-password-safe==1.0.0
+datadog-boundary==4.0.1
+datadog-btrfs==4.0.0; sys_platform != 'win32'
+datadog-cacti==4.1.0; sys_platform == 'linux2'
+datadog-calico==5.0.1
+datadog-cassandra-nodetool==3.0.0
+datadog-cassandra==3.0.0
+datadog-celery==2.0.1
+datadog-ceph==4.1.0; sys_platform != 'win32'
+datadog-cert-manager==6.0.1
+datadog-checkpoint-quantum-firewall==1.0.0
+datadog-checks-base==37.20.0
+datadog-checks-dependency-provider==3.0.0
+datadog-checks-downloader==8.0.0
+datadog-cilium==6.0.1
+datadog-cisco-aci==4.9.0
+datadog-cisco-secure-firewall==1.0.0
+datadog-cisco-secure-web-appliance==1.0.0
+datadog-citrix-hypervisor==6.0.1
+datadog-clickhouse==5.3.1
+datadog-cloud-foundry-api==5.2.0
+datadog-cloudera==3.2.0
+datadog-cockroachdb==6.0.1
+datadog-confluent-platform==3.0.0
+datadog-consul==5.0.1
+datadog-coredns==6.0.1; sys_platform == 'linux2'
+datadog-couch==9.0.1
+datadog-couchbase==6.0.1
+datadog-crio==5.0.1
+datadog-datadog-cluster-agent==6.0.1
+datadog-datadog-csi-driver==1.0.0; sys_platform != 'win32'
+datadog-dcgm==4.0.1
+datadog-delinea-privilege-manager==1.0.0
+datadog-delinea-secret-server==1.0.0
+datadog-directory==4.1.0
+datadog-disk==7.1.0
+datadog-dns-check==5.1.0
+datadog-dotnetclr==4.3.0; sys_platform == 'win32'
+datadog-druid==5.0.1
+datadog-duckdb==1.0.0
+datadog-ecs-fargate==7.0.1
+datadog-eks-fargate==6.1.1
+datadog-elastic==9.0.1
+datadog-envoy==6.1.0
+datadog-eset-protect==1.0.0
+datadog-esxi==4.0.0
+datadog-etcd==9.0.1
+datadog-exchange-server==4.3.0; sys_platform == 'win32'
+datadog-external-dns==6.0.1
+datadog-falco==2.0.1
+datadog-flink==3.0.0
+datadog-fluentd==5.1.1
+datadog-fluxcd==3.0.1
+datadog-fly-io==3.0.1
+datadog-foundationdb==3.3.1
+datadog-gearmand==5.0.0; sys_platform != 'win32'
+datadog-gitlab-runner==7.0.1
+datadog-gitlab==10.0.1
+datadog-glusterfs==3.0.2; sys_platform == 'linux2'
+datadog-go-expvar==5.0.1
+datadog-gunicorn==4.1.1; sys_platform != 'win32'
+datadog-haproxy==8.0.1
+datadog-harbor==6.0.1
+datadog-hazelcast==6.2.1
+datadog-hdfs-datanode==7.0.1; sys_platform != 'win32'
+datadog-hdfs-namenode==7.0.1; sys_platform != 'win32'
+datadog-hive==2.1.0
+datadog-hivemq==2.1.0
+datadog-http-check==12.1.0
+datadog-hudi==4.0.0
+datadog-hugging-face-tgi==1.0.0
+datadog-hyperv==3.0.0; sys_platform == 'win32'
+datadog-ibm-ace==4.1.1
+datadog-ibm-db2==4.0.1
+datadog-ibm-i==4.1.1; sys_platform != 'win32'
+datadog-ibm-mq==8.4.0
+datadog-ibm-was==5.1.1
+datadog-iboss==1.0.0
+datadog-ignite==3.1.0
+datadog-iis==5.3.0; sys_platform == 'win32'
+datadog-impala==4.0.1
+datadog-infiniband==1.1.0; sys_platform == 'linux2'
+datadog-istio==9.0.1
+datadog-ivanti-connect-secure==1.0.0
+datadog-jboss-wildfly==3.1.0
+datadog-journald==3.0.0
+datadog-juniper-srx-firewall==1.0.0
+datadog-kafka-consumer==6.8.0
+datadog-kafka==4.0.0
+datadog-karpenter==3.0.1
+datadog-keda==2.0.1
+datadog-keycloak==1.0.0
+datadog-kong==6.0.1
+datadog-krakend==1.0.1
+datadog-kube-apiserver-metrics==7.1.0
+datadog-kube-controller-manager==8.0.1
+datadog-kube-dns==7.0.1
+datadog-kube-metrics-server==6.0.1
+datadog-kube-proxy==9.0.1
+datadog-kube-scheduler==7.0.1
+datadog-kubeflow==2.0.1
+datadog-kubelet==10.0.1
+datadog-kubernetes-cluster-autoscaler==3.0.1
+datadog-kubernetes-state==10.1.1
+datadog-kubevirt-api==2.0.1
+datadog-kubevirt-controller==2.0.1
+datadog-kubevirt-handler==2.0.1
+datadog-kuma==2.0.1
+datadog-kyototycoon==4.1.1
+datadog-kyverno==3.0.1
+datadog-lighttpd==5.1.1
+datadog-linkerd==7.0.1
+datadog-linux-audit-logs==1.0.0; sys_platform == 'linux2'
+datadog-linux-proc-extras==4.0.0; sys_platform == 'linux2'
+datadog-litellm==2.0.1
+datadog-lustre==1.0.1
+datadog-mac-audit-logs==1.0.1; sys_platform == 'darwin'
+datadog-mapr==3.0.0; sys_platform == 'linux2'
+datadog-mapreduce==7.0.1
+datadog-marathon==5.0.1; sys_platform != 'win32'
+datadog-marklogic==6.1.3
+datadog-mcache==6.1.0; sys_platform != 'win32'
+datadog-mesos-master==6.0.1; sys_platform != 'win32'
+datadog-mesos-slave==6.0.1; sys_platform != 'win32'
+datadog-microsoft-dns==1.0.0; sys_platform == 'win32'
+datadog-microsoft-sysmon==1.0.0; sys_platform == 'win32'
+datadog-milvus==2.0.1
+datadog-mongo==10.4.0
+datadog-mysql==15.8.0
+datadog-nagios==3.0.0
+datadog-network==5.3.0
+datadog-nfsstat==3.1.0; sys_platform == 'linux2'
+datadog-nginx-ingress-controller==5.0.1
+datadog-nginx==9.0.1
+datadog-nvidia-nim==2.0.1
+datadog-nvidia-triton==3.0.1
+datadog-octopus-deploy==2.0.1
+datadog-openldap==3.0.0
+datadog-openmetrics==7.0.1
+datadog-openstack-controller==9.1.0
+datadog-openstack==4.0.1
+datadog-openvpn==1.0.0
+datadog-oracle==6.0.1
+datadog-ossec-security==2.0.0
+datadog-palo-alto-panorama==1.0.0
+datadog-pan-firewall==3.0.0
+datadog-pdh-check==4.3.0; sys_platform == 'win32'
+datadog-pgbouncer==8.5.0; sys_platform != 'win32'
+datadog-php-fpm==6.0.1
+datadog-ping-federate==2.0.0
+datadog-postfix==3.0.0; sys_platform != 'win32'
+datadog-postgres==23.0.0
+datadog-powerdns-recursor==5.0.1
+datadog-presto==3.1.0
+datadog-process==5.1.0
+datadog-prometheus==6.0.0
+datadog-proxmox==2.0.0
+datadog-proxysql==7.3.0
+datadog-pulsar==3.2.1
+datadog-quarkus==2.0.1
+datadog-rabbitmq==8.1.0
+datadog-ray==3.0.1
+datadog-redisdb==8.1.1
+datadog-rethinkdb==5.1.0
+datadog-riak==5.1.1
+datadog-riakcs==4.8.0
+datadog-sap-hana==5.1.1
+datadog-scylla==5.0.1
+datadog-sidekiq==3.0.0
+datadog-silk==4.1.1
+datadog-silverstripe-cms==1.4.0
+datadog-singlestore==4.2.0
+datadog-slurm==2.0.2; sys_platform == 'linux2'
+datadog-snmp==11.0.0
+datadog-snowflake==7.7.0
+datadog-solr==2.1.0
+datadog-sonarqube==5.3.1
+datadog-sonatype-nexus==2.0.0; sys_platform != 'darwin'
+datadog-sonicwall-firewall==1.0.0
+datadog-spark==7.1.0
+datadog-sqlserver==22.9.0
+datadog-squid==5.0.1
+datadog-ssh-check==4.3.0
+datadog-statsd==3.0.0
+datadog-strimzi==4.0.1
+datadog-supabase==2.0.1
+datadog-supervisord==4.1.0
+datadog-suricata==2.0.0
+datadog-symantec-endpoint-protection==1.0.0
+datadog-system-core==4.0.0
+datadog-system-swap==3.0.0
+datadog-tcp-check==6.0.0
+datadog-teamcity==7.0.1
+datadog-tekton==3.0.1
+datadog-teleport==3.0.1
+datadog-temporal==4.0.1
+datadog-tenable==3.0.0
+datadog-teradata==4.0.1; sys_platform != 'darwin'
+datadog-tibco-ems==2.1.2; sys_platform != 'win32'
+datadog-tls==5.1.0
+datadog-tokumx==3.2.1
+datadog-tomcat==4.0.0
+datadog-torchserve==4.0.1
+datadog-traefik-mesh==3.0.1
+datadog-traffic-server==3.2.1
+datadog-twemproxy==3.0.0
+datadog-twistlock==6.0.1
+datadog-varnish==4.0.0
+datadog-vault==7.0.1
+datadog-velero==3.0.2
+datadog-vertica==6.1.1
+datadog-vllm==3.0.1
+datadog-voltdb==6.0.1
+datadog-vsphere==9.0.1
+datadog-watchguard-firebox==1.0.0
+datadog-wazuh==1.0.0
+datadog-weaviate==4.0.1
+datadog-weblogic==3.0.0
+datadog-win32-event-log==5.3.0; sys_platform == 'win32'
+datadog-windows-performance-counters==3.1.0; sys_platform == 'win32'
+datadog-windows-service==6.3.0; sys_platform == 'win32'
+datadog-wmi-check==3.3.0; sys_platform == 'win32'
+datadog-yarn==8.0.1
+datadog-zeek==1.0.0; sys_platform != 'win32'
+datadog-zk==6.1.1; sys_platform != 'win32'

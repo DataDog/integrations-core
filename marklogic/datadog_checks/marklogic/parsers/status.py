@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List, Tuple  # noqa: F401
 
-from six import iteritems
+from datadog_checks.marklogic.constants import RESOURCE_TYPES
 
-from ..constants import RESOURCE_TYPES
 from .common import build_metric_to_submit, is_metric
 
 
@@ -26,7 +25,7 @@ def parse_per_resource_status_metrics(resource_type, data, tags):
 def parse_summary_status_base_metrics(data, tags):
     #  type: (Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
     relations = data['local-cluster-status']['status-relations']
-    for key, resource_data in iteritems(relations):
+    for key, resource_data in relations.items():
         if not key.endswith('-status'):
             continue
         resource_type = resource_data['typeref']
@@ -40,7 +39,7 @@ def parse_summary_status_base_metrics(data, tags):
 
 def _parse_status_metrics(metric_prefix, metrics, tags):
     #  type: (str, Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
-    for key, data in iteritems(metrics):
+    for key, data in metrics.items():
         if key in ['rate-properties', 'load-properties']:
             prop_type = key[: key.index('-properties')]
             total_key = 'total-' + prop_type

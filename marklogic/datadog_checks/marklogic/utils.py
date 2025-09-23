@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Dict
+from typing import Dict  # noqa: F401
 
-from .config import Config
+from .config import Config  # noqa: F401
 
 
 def is_resource_included(resource, config):

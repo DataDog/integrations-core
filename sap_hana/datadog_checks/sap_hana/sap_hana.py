@@ -5,18 +5,19 @@ from __future__ import division
 
 from collections import defaultdict
 from contextlib import closing
+from datetime import datetime
 from itertools import chain
 
 import certifi
 
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.common import exclude_undefined_keys
+from datadog_checks.base.utils.time import get_timestamp
 
 try:
     from hdbcli.dbapi import Connection as HanaConnection
 except ImportError:
     HanaConnection = None
-from six import iteritems
-from six.moves import zip
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import total_time_to_temporal_percent
@@ -155,6 +156,9 @@ class SapHanaCheck(AgentCheck):
             ]
         )
 
+        if self.logs_enabled:
+            self._default_methods.append(self.query_audit_logs)
+
     def query_master_database(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html
         # Only 1 database
@@ -188,6 +192,26 @@ class SapHanaCheck(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_STATUS, db_status, message=message, tags=tags, hostname=self.get_hana_hostname()
             )
+
+    def query_audit_logs(self):
+        previous_cursor = self.get_log_cursor()
+        previous_timestamp = previous_cursor['timestamp'] if previous_cursor is not None else None
+
+        # https://help.sap.com/docs/SAP_HANA_PLATFORM/4fe29514fd584807ac9f2a04f6754767/d1fe1244d29510148f69be8b0e060dcc.html
+        for audit_log in self.iter_rows(queries.AuditLog(previous_timestamp=previous_timestamp)):
+            data = exclude_undefined_keys(audit_log)
+
+            data['status'] = data.pop('event_level')
+            data['timestamp'] = get_timestamp(data['timestamp'])
+
+            message = '{} {}'.format(data['event_action'], data['event_status'])
+            if 'comment' in data:
+                message += ' | {}'.format(data['comment'])
+            data['message'] = message
+
+            # https://help.sap.com/docs/SAP_HANA_PLATFORM/4fe29514fd584807ac9f2a04f6754767/3f81ccc7e35d44cbbc595c7d552c202a.html
+            new_timestamp = datetime.strftime(audit_log['timestamp'], '%Y-%m-%d %H:%M:%S.%f')
+            self.send_log(data, cursor={'timestamp': new_timestamp})
 
     def query_backup_status(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/783108ba8b8b4c709959220b4535a010.html
@@ -239,7 +263,7 @@ class SapHanaCheck(AgentCheck):
         for conn in self.iter_rows(queries.GlobalSystemConnectionsStatus(schema=self._schema)):
             db_counts[(conn['db_name'], conn['host'], conn['port'])][conn['status'].lower()] += conn['total']
 
-        for (db, host, port), counts in iteritems(db_counts):
+        for (db, host, port), counts in db_counts.items():
             tags = ['db:{}'.format(db), 'hana_port:{}'.format(port)]
             tags.extend(self._tags)
             tags.append('hana_host:{}'.format(host))

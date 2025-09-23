@@ -1,0 +1,24 @@
+# Used on a gpu ec2 instance https://github.com/pytorch/serve/blob/master/docker/README.md
+version: '3.9'
+
+services:
+  torchserve:
+    container_name: torchserve
+    image: pytorch/torchserve:${TORCHSERVE_VERSION}-gpu
+    volumes:
+      - ./torchserve/config.properties:/home/model-server/config.properties
+      - ./torchserve/models:/home/model-server/model-store
+      - $TORCHSERVE_LOG_FOLDER:/var/log/torchserve
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+    environment:
+      - LOG_LOCATION=/var/log/torchserve
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

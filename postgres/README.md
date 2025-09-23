@@ -4,14 +4,15 @@
 
 ## Overview
 
-Get metrics from PostgreSQL in real time to:
+The Postgres integration provides health and performance metrics for your Postgres database in near real-time. Visualize these metrics with the provided dashboard and create monitors to alert your team on PostgreSQL states.
 
-- Visualize and monitor PostgreSQL states.
-- Receive notifications about PostgreSQL failovers and events.
+Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
+
+Postgres versions 9.6-16 are supported.
 
 ## Setup
 
-<div class="alert alert-info">This page describes the Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
+<div class="alert alert-info">This page describes the standard Postgres Agent integration. If you are looking for the Database Monitoring product for Postgres, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
@@ -19,9 +20,13 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 ### Configuration
 
+**Note**: To install Database Monitoring for PostgreSQL, select your hosting solution in the [Database Monitoring documentation][29] for instructions.
+
+Proceed with the following steps in this guide only if you are installing the standard integration alone.
+
 #### Prepare Postgres
 
-To get started with the PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
+To get started with the standard PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
 
 For PostgreSQL version 10 and above, run:
 
@@ -63,7 +68,7 @@ grant SELECT ON pg_stat_activity_dd to datadog;
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
-**Note**: When generating custom metrics that require querying additional tables, you may need to grant the `SELECT` permission on those tables to the `datadog` user. Example: `grant SELECT on <TABLE_NAME> to datadog;`. Check the [FAQ section](#faq) for more information.
+**Note**: When generating custom metrics that require querying additional tables, you may need to grant the `SELECT` permission on those tables to the `datadog` user. Example: `grant SELECT on <TABLE_NAME> to datadog;`. Check the [FAQ section][30] for more information.
 
 #### Host
 
@@ -73,44 +78,90 @@ To configure this check for an Agent running on a host:
 
 1. Edit the `postgres.d/conf.yaml` file to point to your `host` / `port` and set the masters to monitor. See the [sample postgres.d/conf.yaml][3] for all available configuration options.
 
-   ```yaml
-   init_config:
+    ```yaml
+    init_config:
+ 
+    instances:
+      ## @param host - string - required
+      ## The hostname to connect to.
+      ## NOTE: Even if the server name is "localhost", the agent connects to
+      ## PostgreSQL using TCP/IP, unless you also provide a value for the sock key.
+      #
+      - host: localhost
 
-   instances:
-     ## @param host - string - required
-     ## The hostname to connect to.
-     ## NOTE: Even if the server name is "localhost", the agent connects to
-     ## PostgreSQL using TCP/IP, unless you also provide a value for the sock key.
-     #
-     - host: localhost
-
-       ## @param port - integer - required
-       ## Port to use when connecting to PostgreSQL.
-       #
-       port: 5432
-
-       ## @param user - string - required
-       ## Datadog Username created to connect to PostgreSQL.
-       #
-       username: datadog
-
-       ## @param pass - string - required
-       ## Password associated with the Datadog user.
-       #
-       password: "<PASSWORD>"
-
-       ## @param dbname - string - optional - default: postgres
-       ## Name of the PostgresSQL database to monitor.
-       ## Note: If omitted, the default system postgres database is queried.
-       #
-       dbname: "<DB_NAME>"
+        ## @param port - integer - optional - default: 5432
+        ## The port to use when connecting to PostgreSQL.
+        #
+        # port: 5432
+    
+        ## @param username - string - required
+        ## The Datadog username created to connect to PostgreSQL.
+        #
+        username: datadog
+    
+        ## @param password - string - optional
+        ## The password associated with the Datadog user.
+        #
+        # password: <PASSWORD>
+    
+        ## @param dbname - string - optional - default: postgres
+        ## The name of the PostgresSQL database to monitor.
+        ## Note: If omitted, the default system Postgres database is queried.
+        #
+        # dbname: <DBNAME>
    
-       # @param disable_generic_tags - boolean - optional - default: false
-       # The integration will stop sending server tag as is reduntant with host tag
-       disable_generic_tags: true
-   ```
+        # @param disable_generic_tags - boolean - optional - default: false
+        # The integration will stop sending server tag as is redundant with host tag
+        disable_generic_tags: true
+    ```
 
-2. [Restart the Agent][4].
+2. To collect relation metrics, connect the Agent to every logical database. These databases can be discovered automatically, or each one can be listed explicitly in the configuration. 
+   
+    - To discover logical databases automatically on a given instance, enable autodiscovery on that instance:
+
+    ```yaml
+    instances:
+      - host: localhost
+        # port: 5432
+        database_autodiscovery:
+          enabled: true
+          # Optionally, set the include field to specify
+          # a set of databases you are interested in discovering
+          include:
+            - mydb.*
+            - example.*
+        relations:
+          - relation_regex: .*
+    ```
+
+    - Alternatively, you can list each logical database as an instance in the configuration:
+    
+    ```yaml
+    instances:
+      - host: example-service-primary.example-host.com
+        # port: 5432
+        username: datadog
+        password: '<PASSWORD>'
+        relations:
+          - relation_name: products
+          - relation_name: external_seller_products
+      - host: example-service-replica-1.example-host.com
+        # port: 5432
+        username: datadog
+        password: '<PASSWORD>'
+        relations:
+          - relation_regex: inventory_.*
+            relkind:
+              - r
+              - i
+      - host: example-service-replica-2.example-host.com
+        # port: 5432
+        username: datadog
+        password: '<PASSWORD>'
+        relations:
+          - relation_regex: .*
+    ```
+3. [Restart the Agent][4].
 
 ##### Trace collection
 
@@ -120,8 +171,6 @@ Datadog APM integrates with Postgres to see the traces across your distributed s
 2. [Instrument your application that makes requests to Postgres][6].
 
 ##### Log collection
-
-_Available for Agent versions >6.0_
 
 PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. See the PostgreSQL documentation on[Error Reporting and Logging][7] for more information.
 
@@ -333,6 +382,8 @@ To configure this check for an Agent running on ECS:
 
 Set [Autodiscovery Integrations Templates][9] as Docker labels on your application container:
 
+**Annotations v1** (for Datadog Agent < v7.36)
+
 ```json
 {
   "containerDefinitions": [{
@@ -342,6 +393,20 @@ Set [Autodiscovery Integrations Templates][9] as Docker labels on your applicati
       "com.datadoghq.ad.check_names": "[\"postgres\"]",
       "com.datadoghq.ad.init_configs": "[{}]",
       "com.datadoghq.ad.instances": "[{\"host\":\"%%host%%\", \"port\":5432,\"username\":\"datadog\",\"password\":\"<PASSWORD>\"}]"
+    }
+  }]
+}
+```
+
+**Annotations v2** (for Datadog Agent v7.36+)
+
+```json
+{
+  "containerDefinitions": [{
+    "name": "postgres",
+    "image": "postgres:latest",
+    "dockerLabels": {
+      "com.datadoghq.ad.checks": "{\"postgres\": {\"instances\": [{\"host\":\"%%host%%\", \"port\":5432, \"username\":\"postgres\", \"password\":\"<PASSWORD>\"}]}}"
     }
   }]
 }
@@ -427,7 +492,7 @@ Additional helpful documentation, links, and articles:
 - [How to collect and monitor PostgreSQL data with Datadog][26]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: /account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/tracing/send_traces/
@@ -453,3 +518,6 @@ Additional helpful documentation, links, and articles:
 [25]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
 [26]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
 [27]: https://docs.datadoghq.com/agent/docker/apm/
+[28]: https://docs.datadoghq.com/database_monitoring/
+[29]: https://docs.datadoghq.com/database_monitoring/#postgres
+[30]: https://docs.datadoghq.com/integrations/postgres/?tab=host#faq

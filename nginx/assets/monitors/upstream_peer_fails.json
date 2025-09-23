@@ -1,32 +1,39 @@
 {
-	"name": "[NGINX] Upstream peers fails",
-	"type": "query alert",
-	"query": "avg(last_1h):anomalies(avg:nginx.stream.upstream.peers.fails{*} by {upstream}, 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
-	"message": "NGINX upstream peer failures are higher than usual at {{value}}.",
-	"tags": [
-		"integration:nginx"
-  	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": false,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 1,
-			"critical_recovery": 0
-		},
-		"threshold_windows": {
-			"trigger_window": "last_15m",
-			"recovery_window": "last_15m"
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Notify your team when NGINX upstream peer failures are higher than usual"
-	}
+  "version": 2,
+  "created_at": "2020-09-16",
+  "last_updated_at": "2020-10-21",
+  "title": "Upstream peers are failing",
+  "tags": [
+    "integration:nginx"
+  ],
+  "description": "NGINX can be configured to distribute incoming client requests to multiple upstream peers (individual web servers, application servers, or other backend services). This monitor tracks anomalies in the number of failed upstream peers to identify issues.",
+  "definition": {
+    "message": "NGINX upstream peer failures are higher than usual at {{value}}.",
+    "name": "[NGINX] Upstream peers fails",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_1h):anomalies(avg:nginx.stream.upstream.peers.fails{*} by {upstream}, 'basic', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true') >= 1",
+    "tags": [
+      "integration:nginx"
+    ],
+    "type": "query alert"
+  }
 }

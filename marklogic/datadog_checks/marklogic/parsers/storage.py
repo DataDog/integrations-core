@@ -1,9 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, Generator, List, Tuple
-
-from six import iteritems
+from typing import Any, Dict, Generator, List, Tuple  # noqa: F401
 
 from .common import build_metric_to_submit, is_metric
 
@@ -39,7 +37,7 @@ def _parse_storage_metrics(data, tags, include_location_forest):
         host_tags.append('marklogic_host_name:{}'.format(hosts_meta[host_id]))
         for location_data in host_data['locations']['location']:
             location_tags = host_tags + ['storage_path:{}'.format(location_data['path'])]
-            for host_key, host_value in iteritems(location_data):
+            for host_key, host_value in location_data.items():
                 if host_key == 'location-forests':
                     location_value = host_value['location-forest']
                     for forest_data in location_value:
@@ -48,7 +46,7 @@ def _parse_storage_metrics(data, tags, include_location_forest):
                             "forest_name:{}".format(forest_data['nameref']),
                         ]
                         if include_location_forest:
-                            for forest_key, forest_value in iteritems(forest_data):
+                            for forest_key, forest_value in forest_data.items():
                                 if forest_key == 'disk-size':
                                     metric = build_metric_to_submit(
                                         "forests.storage.{}".format(forest_key), forest_value, tags=forest_tags

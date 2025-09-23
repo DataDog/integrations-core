@@ -123,7 +123,7 @@ def test_config_aws():
     http = RequestsWrapper(instance, init_config)
     assert isinstance(http.options['auth'], requests_aws.BotoAWSRequestsAuth)
 
-    with mock.patch('datadog_checks.base.utils.http.requests_aws.BotoAWSRequestsAuth') as m:
+    with mock.patch('datadog_checks.base.utils.http._http_utils.BotoAWSRequestsAuth') as m:
         RequestsWrapper(instance, init_config)
 
         m.assert_called_once_with(aws_host='uri', aws_region='earth', aws_service='saas')
@@ -137,7 +137,7 @@ def test_config_aws_service_remapper():
         'aws_host': {'name': 'aws_host', 'default': 'uri'},
     }
 
-    with mock.patch('datadog_checks.base.utils.http.requests_aws.BotoAWSRequestsAuth') as m:
+    with mock.patch('datadog_checks.base.utils.http._http_utils.BotoAWSRequestsAuth') as m:
         RequestsWrapper(instance, init_config, remapper)
 
         m.assert_called_once_with(aws_host='uri', aws_region='us-east-1', aws_service='es')

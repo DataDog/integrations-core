@@ -85,7 +85,7 @@
         "terminationGracePeriodSeconds": 30,
         "dnsPolicy": "ClusterFirst",
         "nodeSelector": {
-          "beta.kubernetes.io/os": "windows"
+          "kubernetes.io/os": "windows"
         },
         "serviceAccountName": "default",
         "serviceAccount": "default",

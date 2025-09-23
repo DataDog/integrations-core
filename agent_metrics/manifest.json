@@ -15,7 +15,7 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Monitoring"
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -24,7 +24,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Agent Metrics",

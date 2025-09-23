@@ -1,0 +1,67 @@
+{
+	"version": 2,
+	"created_at": "2024-10-23",
+	"last_updated_at": "2024-10-23",
+	"title": "Voice error rate is higher than usual",
+	"description": "The monitor tracks and alerts when the error rate rises when a significant number of calls don't hangup normally. This monitor tracks the error rate for calls via Plivo, ensuring that any spikes in errors are quickly detected to maintain the reliability of calls delivery.",
+	"definition": {
+		"id": 155897451,
+		"name": "Voice calls error rate is higher than usual",
+		"type": "log alert",
+		"query": "formula(\"(query - query1) / query\").last(\"5m\") > 0.1",
+		"message": "{{#is_alert}}\nA high number of Plivo voice calls with a hangup reason other than normal hangup have been detected. Please take necessary steps to manage your Plivo account accordingly.\n{{/is_alert}}",
+		"tags": [
+			"source:plivo",
+			"service:voice"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0.1
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"variables": [
+				{
+					"data_source": "logs",
+					"name": "query",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "count"
+					},
+					"group_by": [],
+					"search": {
+						"query": "source:plivo service:voice"
+					},
+					"storage": "hot"
+				},
+				{
+					"data_source": "logs",
+					"name": "query1",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "count"
+					},
+					"group_by": [],
+					"search": {
+						"query": "source:plivo service:voice @plivo.error.type:4000"
+					},
+					"storage": "hot"
+				}
+			],
+			"groupby_simple_monitor": false
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:plivo"
+	]
+}

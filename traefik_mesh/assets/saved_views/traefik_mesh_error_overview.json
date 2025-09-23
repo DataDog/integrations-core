@@ -1,0 +1,14 @@
+{
+    "name": "Traefik Mesh Error Logs Overview",
+    "query": "source:traefik_mesh status:error",
+    "visible_facets": [
+        "source",
+        "host",
+        "service"
+    ],
+    "type": "logs",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "page": "patterns"
+}

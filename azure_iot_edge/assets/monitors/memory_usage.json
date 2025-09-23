@@ -1,31 +1,38 @@
 {
-	"name": "[Azure IoT Edge] IoT Edge device {{host}} is running out of memory",
-	"type": "query alert",
-	"query": "max(last_1h):avg:azure.iot_edge.edge_agent.used_memory_bytes{*} by {host} / avg:azure.iot_edge.edge_agent.total_memory_bytes{*} by {host}.rollup(max, 60) * 100 > 80",
-	"message": "Please check device {{host}}, as Edge Agent reports usage of more than {{threshold}}% of available RAM for the last hour.",
-	"tags": [
-		"integration:azure_iot_edge"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"silenced": {},
-		"include_tags": true,
-		"no_data_timeframe": null,
-		"require_full_window": true,
-		"new_host_delay": 300,
-		"notify_no_data": false,
-		"renotify_interval": 0,
-		"escalation_message": "",
-		"thresholds": {
-			"critical": 80,
-			"warning": 65,
-			"critical_recovery": 79,
-			"warning_recovery": 64
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Triggers an alert when an IoT Edge device is running out of memory"
-	}
+  "version": 2,
+  "created_at": "2020-10-22",
+  "last_updated_at": "2020-10-22",
+  "title": "Device is running out of memory",
+  "tags": [
+    "integration:azure-iot-edge"
+  ],
+  "description": "An IoT device can approach or exceed the limits of its available physical or virtual memory resources. This monitor tracks the memory utilization to avoid potential memory problems that can impact the device's performance and functionality.",
+  "definition": {
+    "message": "Please check device {{host}}, as Edge Agent reports usage of more than {{threshold}}% of available RAM for the last hour.",
+    "name": "[Azure IoT Edge] IoT Edge device {{host}} is running out of memory",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "silenced": {},
+      "thresholds": {
+        "critical": 80,
+        "critical_recovery": 79,
+        "warning": 65,
+        "warning_recovery": 64
+      },
+      "timeout_h": 0
+    },
+    "query": "max(last_1h):avg:azure.iot_edge.edge_agent.used_memory_bytes{*} by {host} / avg:azure.iot_edge.edge_agent.total_memory_bytes{*} by {host}.rollup(max, 60) * 100 > 80",
+    "tags": [
+      "integration:azure_iot_edge"
+    ],
+    "type": "query alert"
+  }
 }

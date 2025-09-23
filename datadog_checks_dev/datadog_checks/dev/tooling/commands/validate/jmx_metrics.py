@@ -7,8 +7,16 @@ from collections import defaultdict
 import click
 import yaml
 
-from ...testing import process_checks_option
-from ...utils import (
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import (
     complete_valid_checks,
     file_exists,
     get_default_config_spec,
@@ -16,7 +24,6 @@ from ...utils import (
     is_jmx_integration,
     read_file,
 )
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success
 
 
 @click.command('jmx-metrics', context_settings=CONTEXT_SETTINGS, short_help='Validate JMX metrics files')
@@ -88,12 +95,13 @@ def validate_jmx_metrics(check_name, saved_errors, verbose):
             return
 
         domain = include.get('domain')
+        domain_regex = include.get('domain_regex')
         beans = include.get('bean')
-        if (not domain) and (not beans):
-            # Require `domain` or `bean` to be present,
+        if (not domain) and (not domain_regex) and (not beans):
+            # Require `domain`, `domain_regex`, or `bean` to be present,
             # that helps JMXFetch to better scope the beans to retrieve
             saved_errors[(check_name, jmx_metrics_file)].append(
-                f"domain or bean attribute is missing for rule: {include_str}"
+                f"domain, domain_regex or bean attribute is missing for rule: {include_str}"
             )
 
     duplicates = duplicate_bean_check(jmx_metrics_data)

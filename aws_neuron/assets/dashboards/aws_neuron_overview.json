@@ -1,0 +1,1193 @@
+{
+  "title": "AWS Inferentia and AWS Trainium Monitoring Dashboard",
+  "description": "# Description\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your Neuron devices as well as insights into the execution and training of your models, including error rates, latency, and memory usage.\n\n# Useful Links\n\n[AWS Inferentia and AWS Trainium Monitoring Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
+  "widgets": [
+    {
+      "id": 6979231130018708,
+      "definition": {
+        "title": "",
+        "banner_img": "/static/images/integration_dashboard/aws-neuron_hero_1.png",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 56755139831890,
+            "definition": {
+              "type": "note",
+              "content": "# AWS Trainium and AWS Inferentia Monitoring\n\nThis dashboard provides observability for your Inferentia and Trainium instances leveraging the Neuron SDK.\n\nIt shows information about the usage and performance of your AWS machine learning (ML) chips as well as insights into the execution and training of your models, including error rates, latency, and memory usage.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 4721541429420236,
+            "definition": {
+              "type": "note",
+              "content": "# Useful Links\n\n[AWS Inferentia and AWS Trainium Monitoring Integration](https://docs.datadoghq.com/integrations/aws_neuron/)\n\n[AWS Neuron Documentation](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html)",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 5,
+        "height": 7
+      }
+    },
+    {
+      "id": 7083040833221452,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5198931877490734,
+            "definition": {
+              "type": "note",
+              "content": "This overview provides a quick look into the general status and health of your Trainium and Inferentia instances.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 7,
+              "height": 1
+            }
+          },
+          {
+            "id": 8720449453186756,
+            "definition": {
+              "title": "Instance Info",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:aws_neuron.instance_info{$instance_id,$instance_type, $availability_zone, $region, $subnet_id} by {instance_id,instance_type,availability_zone,region,subnet_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "text_formats": [],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "group",
+                        "name": "instance_id",
+                        "order": "asc"
+                      }
+                    ],
+                    "count": 500
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "number",
+                      "alias": "Instances",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 7,
+              "height": 2
+            }
+          },
+          {
+            "id": 7855267612232854,
+            "definition": {
+              "title": "Execution success rate",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:aws_neuron.execution.status.count{status_type:completed, $instance_id, $instance_type, $availability_zone, $region, $subnet_id}.as_rate()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 2819874854268670,
+            "definition": {
+              "title": "Monitors",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:aws_neuron)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 2,
+              "y": 3,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 6464457537294578,
+            "definition": {
+              "title": "Execution error rate",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:aws_neuron.execution.status.count{not status_type:completed}.as_rate()",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 4990133775519788,
+            "definition": {
+              "title": "Average execution latency",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:aws_neuron.execution.latency_seconds{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 2,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 7,
+        "height": 7
+      }
+    },
+    {
+      "id": 6659947028871704,
+      "definition": {
+        "title": "Execution Status",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 468925319074014,
+            "definition": {
+              "type": "note",
+              "content": "Monitoring execution status helps identify the operational state of machine learning models, ensuring they are running as expected. Tracking execution latency provides insights into the performance and efficiency of model inference, helping optimize response times and resource usage.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 1102497452686722,
+            "definition": {
+              "title": "Execution status rates",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Executions success rate",
+                      "style": {
+                        "palette": "green"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Execution error rate",
+                      "style": {
+                        "palette": "red"
+                      },
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:aws_neuron.execution.status.count{status_type:completed , $instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {instance_id}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:aws_neuron.execution.status.count{not status_type:completed and $instance_id AND $instance_type AND $availability_zone AND $region AND $subnet_id} by {instance_id}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 245689066689228,
+            "definition": {
+              "title": "Execution latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "style": {
+                        "palette": "warm"
+                      },
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:aws_neuron.execution.latency_seconds{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {percentile,instance_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "tags",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 8841094143294328,
+      "definition": {
+        "title": "Resource utilization",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5529167122831830,
+            "definition": {
+              "type": "note",
+              "content": "Make the most out of your system by monitoring resource utilization at multiple scales. Tracking NeuronCore utilization helps assess how effectively the model is using the allocated device cores, guiding optimization for better performance. Additionally, the system utilization metrics provide a bird's eye view of the system resources.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 749112045204328,
+            "definition": {
+              "title": "NeuronCore utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "100 * query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:aws_neuron.neuroncore.utilization_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {neuroncore,instance_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "datadog16",
+                    "order_by": "tags",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 96594677820004,
+            "definition": {
+              "title": "Host system utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Memory usage",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "100 * query2 / query3"
+                    },
+                    {
+                      "alias": "vCPU usage",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "100 * query4"
+                    },
+                    {
+                      "alias": "Neuroncore usage",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "100 * query6"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:aws_neuron.system.memory.used_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:aws_neuron.system.memory.total_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:aws_neuron.system.vcpu.usage_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "avg:aws_neuron.neuroncore.utilization_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "datadog16",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "min": "0",
+                "max": "100"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 7322947690579954,
+      "definition": {
+        "title": "vCPU",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4083451820109164,
+            "definition": {
+              "type": "note",
+              "content": "By tracking the Neuron runtime's vCPU usage, you can ensure that your models are efficiently utilizing the allocated resources. Meanwhile, monitoring the overall system vCPU usage helps in identifying potential bottlenecks or underutilization, enabling better resource management and capacity planning across your entire system.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 3715305104834630,
+            "definition": {
+              "title": "Neuron Runtime vCPU usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "100 * query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:aws_neuron.neuron_runtime.vcpu_usage_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {usage_type,instance_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4535539697349626,
+            "definition": {
+              "title": "Host vCPU usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "100 * query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:aws_neuron.system.vcpu.usage_ratio{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {usage_type,instance_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 17,
+        "width": 12,
+        "height": 5,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 4920675792552564,
+      "definition": {
+        "title": "Memory",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7074409510658020,
+            "definition": {
+              "type": "note",
+              "content": "Monitoring the Neuron runtime's memory usage helps ensure that the memory allocated for model execution is efficiently used, avoiding potential bottlenecks. Tracking system memory usage provides a broader view of overall system memory consumption, helping to prevent resource exhaustion and maintain overall system stability.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8032824553753052,
+            "definition": {
+              "title": "Neuron Runtime memory usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "style": {
+                        "palette": "warm"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:aws_neuron.neuron_runtime.memory_used_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {memory_location,instance_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1818540329200970,
+            "definition": {
+              "title": "Host memory usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "on_right_yaxis": true,
+                  "formulas": [
+                    {
+                      "alias": "Memory Usage Bytes",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      },
+                      "style": {
+                        "palette": "orange"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:aws_neuron.system.memory.used_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {instance_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:aws_neuron.system.memory.total_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "on_right_yaxis": false,
+                  "formulas": [
+                    {
+                      "alias": "Memory Usage Percent",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "style": {
+                        "palette": "purple"
+                      },
+                      "formula": "100 * query1 / query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:aws_neuron.system.memory.used_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {instance_id}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:aws_neuron.system.memory.total_bytes{$instance_id, $instance_type, $availability_zone, $region, $subnet_id} by {instance_id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "color_order": "shuffled",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "min": "0",
+                "max": "100"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 22,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 6335068973644062,
+      "definition": {
+        "title": "Logs",
+        "background_color": "green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2270740140504733,
+            "definition": {
+              "type": "note",
+              "content": "When investigating logs, you can refer to the timeseries data to see the ratio of a certain log status to other expected statuses. If you notice an increase in the ratio of error logs, you can refer to the log stream, which is configured to filter erroneous logs.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 3745226166465988,
+            "definition": {
+              "title": "Error log count",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "a"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "a",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:aws_neuron status:error"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count",
+                        "metric": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 8,
+              "height": 4
+            }
+          },
+          {
+            "id": 5222865640613950,
+            "definition": {
+              "title": "Neuron logs",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ],
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:aws_neuron ",
+                    "indexes": [],
+                    "storage": "hot"
+                  }
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 27,
+        "width": 12,
+        "height": 6
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "instance_id",
+      "prefix": "instance_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "instance_type",
+      "prefix": "instance_type",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "availability_zone",
+      "prefix": "availability_zone",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "region",
+      "prefix": "region",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "subnet_id",
+      "prefix": "subnet_id",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
+

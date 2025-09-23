@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b10f1447-4e25-4c76-ab05-911cde5df5c6",
   "app_id": "twistlock",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,15 @@
     "title": "Prisma Cloud Compute Edition",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Security",
+      "Category::Compliance",
+      "Category::Containers",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Network",
+      "Category::Security",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +30,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Twistlock",
@@ -43,13 +46,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10052,
+      "auto_install": true
     },
     "dashboards": {
       "Twistlock": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "twistlock"
     }
   }
 }

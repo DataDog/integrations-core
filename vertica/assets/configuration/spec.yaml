@@ -108,6 +108,7 @@ files:
                       type: tag
                   tags:
                     - test: vertica
+                  metric_prefix: vertica
           - name: client_lib_log_level
             description: |
               Vertica library log level.

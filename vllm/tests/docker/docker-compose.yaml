@@ -1,0 +1,11 @@
+services:
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/vllm_metrics.txt:/usr/share/caddy/metrics
+      - ../fixtures/vllm_version.json:/usr/share/caddy/version
+      - ../fixtures/ray_vllm_metrics.txt:/usr/share/caddy/metrics_prefix

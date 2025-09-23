@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+from urllib.parse import urlparse
 
 import mock
 import pytest
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.http import MockResponse
@@ -32,7 +32,11 @@ def mock_requests_get(url, *args, **kwargs):
 
 @pytest.fixture
 def mock_data():
-    with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+    # Mock requests.get because it is used internally within boto3
+    with (
+        mock.patch('requests.get', side_effect=mock_requests_get, autospec=True),
+        mock.patch('requests.Session.get', side_effect=mock_requests_get),
+    ):
         yield
 
 

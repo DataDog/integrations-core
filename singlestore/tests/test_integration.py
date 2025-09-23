@@ -14,10 +14,10 @@ def test_integration(dd_environment, dd_run_check, datadog_agent, aggregator):
     aggregator.assert_all_metrics_covered()
     version_metadata = {
         'version.scheme': 'semver',
-        'version.major': '7',
-        'version.minor': '5',
-        'version.patch': '9',
-        'version.raw': '7.5.9',
+        'version.major': '8',
+        'version.minor': '9',
+        'version.patch': '19',
+        'version.raw': '8.9.19',
     }
     datadog_agent.assert_metadata('', version_metadata)
     aggregator.assert_service_check(

@@ -1,0 +1,9 @@
+name: Sonicwall Firewall
+files:
+- name: sonicwall_firewall.yaml
+  options:
+  - template: logs
+    example:
+    - type: udp
+      port: <port>
+      source: sonicwall-firewall

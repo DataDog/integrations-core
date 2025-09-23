@@ -1,0 +1,12 @@
+cluster.foo.ext_authz.denied: 0
+cluster.foo.ext_authz.disabled: 1
+cluster.foo.ext_authz.error: 2
+cluster.foo.ext_authz.failure_mode_allowed: 3
+cluster.foo.ext_authz.ok: 4
+cluster.foo.ext_authz.bar.denied: 5
+cluster.foo.ext_authz.bar.disabled: 6
+cluster.foo.ext_authz.bar.error: 7
+cluster.foo.ext_authz.bar.failure_mode_allowed: 8
+cluster.foo.ext_authz.bar.ok: 9
+connection_limit.ingress_http.active_connections: 0
+connection_limit.ingress_http.limited_connections: 0

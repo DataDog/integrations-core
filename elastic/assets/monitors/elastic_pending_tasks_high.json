@@ -1,28 +1,35 @@
 {
-	"name": "[ElasticSearch] Number of pending tasks is high",
-	"type": "query alert",
-	"query": "avg(last_5m):sum:elasticsearch.pending_tasks_total{*} > 15",
-	"message": "Number of pending tasks (all priority) is high: {{value}} tasks",
-	"tags": [
-		"integration:elastic"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 15,
-			"warning": 10
-		}
-	},
-	"recommended_monitor_metadata": {
-		"description": "Get notified when the number of pending tasks is high."
-	}
+  "version": 2,
+  "created_at": "2021-01-08",
+  "last_updated_at": "2021-03-05",
+  "title": "Number of pending tasks is high",
+  "tags": [
+    "integration:elasticsearch"
+  ],
+  "description": "In Elasticsearch, when an operation is submitted but not yet completed it's in a pending state. This monitor tracks the average number of pending tasks in an Elasticsearch cluster to identify periods of high workload and potential performance bottlenecks.",
+  "definition": {
+    "message": "Number of pending tasks (all priority) is high: {{value}} tasks",
+    "name": "[ElasticSearch] Number of pending tasks is high",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 15,
+        "warning": 10
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):sum:elasticsearch.pending_tasks_total{*} > 15",
+    "tags": [
+      "integration:elastic"
+    ],
+    "type": "query alert"
+  }
 }

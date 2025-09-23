@@ -1,7 +1,6 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools<61",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +8,7 @@ build-backend = "hatchling.build"
 name = "datadog-linux-proc-extras"
 description = "The Linux proc extras check"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 keywords = [
     "datadog",
     "datadog agent",
@@ -24,13 +23,12 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.12",
     "Topic :: System :: Monitoring",
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=25.1.0",
+    "datadog-checks-base>=37.0.0",
 ]
 dynamic = [
     "version",
@@ -50,8 +48,6 @@ include = [
     "/datadog_checks",
     "/tests",
     "/manifest.json",
-    "/requirements-dev.txt",
-    "/tox.ini",
 ]
 
 [tool.hatch.build.targets.wheel]

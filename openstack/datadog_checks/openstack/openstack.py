@@ -7,12 +7,11 @@ import copy
 import random
 import re
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from urllib.parse import urljoin
 
 import requests
 import simplejson as json
-from six import iteritems
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, is_affirmative
 
@@ -60,32 +59,30 @@ NOVA_SERVER_METRICS = [
 
 NOVA_SERVER_INTERFACE_SEGMENTS = ['_rx', '_tx']
 
-PROJECT_METRICS = dict(
-    [
-        ("maxImageMeta", "max_image_meta"),
-        ("maxPersonality", "max_personality"),
-        ("maxPersonalitySize", "max_personality_size"),
-        ("maxSecurityGroupRules", "max_security_group_rules"),
-        ("maxSecurityGroups", "max_security_groups"),
-        ("maxServerMeta", "max_server_meta"),
-        ("maxTotalCores", "max_total_cores"),
-        ("maxTotalFloatingIps", "max_total_floating_ips"),
-        ("maxTotalInstances", "max_total_instances"),
-        ("maxTotalKeypairs", "max_total_keypairs"),
-        ("maxTotalRAMSize", "max_total_ram_size"),
-        ("totalImageMetaUsed", "total_image_meta_used"),
-        ("totalPersonalityUsed", "total_personality_used"),
-        ("totalPersonalitySizeUsed", "total_personality_size_used"),
-        ("totalSecurityGroupRulesUsed", "total_security_group_rules_used"),
-        ("totalSecurityGroupsUsed", "total_security_groups_used"),
-        ("totalServerMetaUsed", "total_server_meta_used"),
-        ("totalCoresUsed", "total_cores_used"),
-        ("totalFloatingIpsUsed", "total_floating_ips_used"),
-        ("totalInstancesUsed", "total_instances_used"),
-        ("totalKeypairsUsed", "total_keypairs_used"),
-        ("totalRAMUsed", "total_ram_used"),
-    ]
-)
+PROJECT_METRICS = {
+    "maxImageMeta": "max_image_meta",
+    "maxPersonality": "max_personality",
+    "maxPersonalitySize": "max_personality_size",
+    "maxSecurityGroupRules": "max_security_group_rules",
+    "maxSecurityGroups": "max_security_groups",
+    "maxServerMeta": "max_server_meta",
+    "maxTotalCores": "max_total_cores",
+    "maxTotalFloatingIps": "max_total_floating_ips",
+    "maxTotalInstances": "max_total_instances",
+    "maxTotalKeypairs": "max_total_keypairs",
+    "maxTotalRAMSize": "max_total_ram_size",
+    "totalImageMetaUsed": "total_image_meta_used",
+    "totalPersonalityUsed": "total_personality_used",
+    "totalPersonalitySizeUsed": "total_personality_size_used",
+    "totalSecurityGroupRulesUsed": "total_security_group_rules_used",
+    "totalSecurityGroupsUsed": "total_security_groups_used",
+    "totalServerMetaUsed": "total_server_meta_used",
+    "totalCoresUsed": "total_cores_used",
+    "totalFloatingIpsUsed": "total_floating_ips_used",
+    "totalInstancesUsed": "total_instances_used",
+    "totalKeypairsUsed": "total_keypairs_used",
+    "totalRAMUsed": "total_ram_used",
+}
 
 DIAGNOSTICABLE_STATES = ['ACTIVE']
 
@@ -146,7 +143,7 @@ class OpenStackScope(object):
         auth_url = urljoin(keystone_server_url, "{0}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'Content-Type': 'application/json'}
 
-        resp = requests.post(
+        resp = requests.post(  # SKIP_HTTP_VALIDATION
             auth_url,
             headers=headers,
             data=json.dumps(payload),
@@ -544,9 +541,9 @@ class OpenStackCheck(AgentCheck):
         # Mapping of Nova-managed servers to tags
         self.external_host_tags = {}
 
-        self.exclude_network_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_network_ids', [])])
+        self.exclude_network_id_rules = {re.compile(ex) for ex in init_config.get('exclude_network_ids', [])}
 
-        self.exclude_server_id_rules = set([re.compile(ex) for ex in init_config.get('exclude_server_ids', [])])
+        self.exclude_server_id_rules = {re.compile(ex) for ex in init_config.get('exclude_server_ids', [])}
 
         skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
         self.proxy_config = None if skip_proxy else self.proxies
@@ -690,7 +687,7 @@ class OpenStackCheck(AgentCheck):
             network_ids = [
                 network_id
                 for network_id in all_network_ids
-                if not any([re.match(exclude_id, network_id) for exclude_id in self.exclude_network_id_rules])
+                if not any(re.match(exclude_id, network_id) for exclude_id in self.exclude_network_id_rules)
             ]
         else:
             network_ids = self.init_config.get('network_ids', [])
@@ -854,7 +851,7 @@ class OpenStackCheck(AgentCheck):
         else:
             self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, tags=service_check_tags)
 
-        for label, val in iteritems(hyp):
+        for label, val in hyp.items():
             if label in NOVA_HYPERVISOR_METRICS:
                 metric_label = "openstack.nova.{0}".format(label)
                 self.gauge(metric_label, val, tags=tags)
@@ -891,7 +888,6 @@ class OpenStackCheck(AgentCheck):
 
             # Don't collect Deleted or Shut off VMs on the first run:
             if i_key in self.changes_since_time:
-
                 # Get a list of deleted serversTimestamp used to filter the call to get the list
                 # Need to have admin perms for this to take affect
                 query_params['deleted'] = 'true'
@@ -906,7 +902,7 @@ class OpenStackCheck(AgentCheck):
                 resp = self._make_request_with_auth_fallback(url, headers, params=query_params)
                 servers.extend(resp['servers'])
 
-            self.changes_since_time[i_key] = datetime.utcnow().isoformat()
+            self.changes_since_time[i_key] = datetime.now(timezone.utc).isoformat()
 
         except Exception as e:
             self.warning('Unable to get the list of all servers: %s', e)
@@ -1039,12 +1035,12 @@ class OpenStackCheck(AgentCheck):
         assert entry in ["aggregates", "physical_hosts", "hypervisors"]
         ttl = self.CACHE_TTL.get(entry)
         last_fetch_time = getattr(self, self.FETCH_TIME_ACCESSORS.get(entry))
-        return datetime.utcnow() - last_fetch_time > timedelta(seconds=ttl)
+        return datetime.now(timezone.utc) - last_fetch_time > timedelta(seconds=ttl)
 
     def _get_and_set_aggregate_list(self):
         if not self._aggregate_list or self._is_expired("aggregates"):
             self._aggregate_list = self.get_all_aggregate_hypervisors()
-            self._last_aggregate_fetch_time = datetime.utcnow()
+            self._last_aggregate_fetch_time = datetime.now(timezone.utc)
 
         return self._aggregate_list
 
@@ -1108,7 +1104,6 @@ class OpenStackCheck(AgentCheck):
         try:
             instance_scope = self.get_scope_for_instance(instance)
         except KeyError:
-
             # We're missing a project scope for this instance
             # Let's populate it now
             try:
@@ -1198,7 +1193,7 @@ class OpenStackCheck(AgentCheck):
             #  The scopes we iterate over should all be OpenStackProjectScope
             #  instances
             projects = []
-            for _, scope in iteritems(scope_map):
+            for _, scope in scope_map.items():
                 # Store the scope on the object so we don't have to keep passing it around
                 self._current_scope = scope
 
@@ -1410,7 +1405,7 @@ class OpenStackCheck(AgentCheck):
         """
         self.log.debug("Collecting external_host_tags now")
         external_host_tags = []
-        for k, v in iteritems(self.external_host_tags):
+        for k, v in self.external_host_tags.items():
             external_host_tags.append((k, {SOURCE_TYPE: v}))
 
         self.log.debug("Sending external_host_tags: %s", external_host_tags)

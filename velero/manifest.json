@@ -1,0 +1,70 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "e4199d9b-74fe-4af2-9afb-bbcde0f729f6",
+  "app_id": "velero",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the performance and usage of your Velero deployments.",
+    "title": "Velero",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Cloud",
+      "Category::Kubernetes",
+      "Category::Provisioning",
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 38596867,
+      "source_type_name": "Velero",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "velero.",
+        "check": "velero.backup.attempt.count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "velero"
+      ]
+    },
+    "monitors": {
+      "Backup Failures": "assets/monitors/backup_failures.json",
+      "Restore Failures": "assets/monitors/restore_failures.json",
+      "Backup Staleness": "assets/monitors/backup_staleness.json"
+    },
+    "dashboards": {
+      "Velero Overview": "assets/dashboards/velero_overview.json"
+    },
+    "saved_views": {
+      "Velero Logs Overview": "assets/saved_views/logs_overview.json",
+      "Velero Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

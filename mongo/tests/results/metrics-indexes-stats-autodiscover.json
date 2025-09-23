@@ -1,0 +1,194 @@
+[
+    {
+        "name": "mongodb.collection.indexes.accesses.ops",
+        "type": 0,
+        "value": 1243.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:foo",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.ops",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:bar",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.ops",
+        "type": 0,
+        "value": 1243.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:foo",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.ops",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:bar",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.ops",
+        "type": 0,
+        "value": 1243.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:foo",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.ops",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:bar",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.ops",
+        "type": 0,
+        "value": 1243.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:foo",
+            "db:integration"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.ops",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:bar",
+            "db:integration"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.opsps",
+        "type": 1,
+        "value": 1243.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:foo",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.opsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:bar",
+            "db:test"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.opsps",
+        "type": 1,
+        "value": 1243.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:foo",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.opsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:bar",
+            "db:admin"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.opsps",
+        "type": 1,
+        "value": 1243.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:foo",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.opsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:bar",
+            "db:config"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.opsps",
+        "type": 1,
+        "value": 1243.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:foo",
+            "db:integration"
+        ]
+    },
+    {
+        "name": "mongodb.collection.indexes.accesses.opsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "name:_id_",
+            "index:_id_",
+            "collection:bar",
+            "db:integration"
+        ]
+    }
+]

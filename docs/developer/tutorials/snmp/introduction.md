@@ -80,7 +80,7 @@ The full list of vendor sub-trees can be found here: [SNMP OID 1.3.6.1.4.1](http
 
 | OID               | Label               | Description                                                                                    |
 | ----------------- | ------------------- | ---------------------------------------------------------------------------------------------- |
-| `1.3.6.1.2.1.2`   | `sysObjectId`       | An OID whose value is an OID that represents the device make and model (yes, it's a bit meta). |
+| `1.3.6.1.2.1.1.2` | `sysObjectId`       | An OID whose value is an OID that represents the device make and model (yes, it's a bit meta). |
 | `1.3.6.1.2.1.1.1` | `sysDescr`          | A human-readable, free-form description of the device.                                         |
 | `1.3.6.1.2.1.1.3` | `sysUpTimeInstance` | The device uptime.                                                                             |
 
@@ -100,7 +100,7 @@ The following resources can be useful when working with MIBs:
 
 - [MIB Discovery](http://cric.grenoble.cnrs.fr/Administrateurs/Outils/MIBS/): a search engine for OIDs. Use it to find what an OID corresponds to, which MIB it comes from, what label it is known as, etc.
 - [Circitor MIB files repository](http://circitor.fr/Mibs/Mibs.php): a repository and search engine where one can download actual `.mib` files.
-- [SNMP Labs MIB repository](http://mibs.snmplabs.com/asn1/): alternate repo of many common MIBs. **Note**: this site hosts the underlying MIBs which the `pysnmp-mibs` library (used by the SNMP Python check) actually validates against. Double check any MIB you get from an alternate source with what is in this repo.
+- [SNMP Labs MIB repository](https://github.com/DataDog/mibs.snmplabs.com/tree/master/asn1): alternate repo of many common MIBs. **Note**: this site hosts the underlying MIBs which the `pysnmp-mibs` library (used by the SNMP Python check) actually validates against. Double check any MIB you get from an alternate source with what is in this repo.
 
 ## Learn more
 

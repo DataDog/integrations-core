@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ea3487c9-2c55-417c-bed5-17a42bdf71cf",
   "app_id": "openldap",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,9 +16,9 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
+      "Category::Data Stores",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "OpenLDAP",
@@ -43,13 +43,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10040,
+      "auto_install": true
     },
     "dashboards": {
       "OpenLDAP Overview": "assets/dashboards/openldap_overview.json"
-    },
-    "logs": {
-      "source": "openldap"
     }
   }
 }

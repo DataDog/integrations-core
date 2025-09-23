@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+version = ["8.11", "9.3"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "SOLR_VERSION", value = "8.11.2", if = ["8.11"] },
+  { key = "SOLR_VERSION", value = "9.3.0", if = ["9.3"] },
+]

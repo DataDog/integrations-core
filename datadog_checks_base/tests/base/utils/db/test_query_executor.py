@@ -1,6 +1,10 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
+
+import pytest
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 
@@ -149,3 +153,115 @@ class TestQueryExecutor:
 
         for i in range(num_queries):
             aggregator.assert_metric('test.metric.{}'.format(i), i, metric_type=aggregator.GAUGE, tags=tags)
+
+    def test_query_with_collection_interval(self, aggregator):
+        """Test running a query with a custom collection interval"""
+        collection_interval = 1
+        queries = [
+            {
+                'name': 'query1',
+                'query': 'select 1',
+                'columns': [{'name': 'test.metric_with_interval', 'type': 'gauge'}],
+                'collection_interval': collection_interval,
+            }
+        ]
+
+        check = AgentCheck('test', {}, [{}])
+        qe = QueryExecutor(mock_executor([[1]]), check, queries)
+
+        qe.compile_queries()
+
+        qe.execute()  # First run, should emit a metric
+        time.sleep(0.5 * collection_interval)  # Sleep for less than the collection interval
+        qe.execute()  # Second run, should not emit a metric because the interval hasn't passed
+        time.sleep(0.5 * collection_interval)
+        qe.execute()  # Third run, should emit a metric
+
+        aggregator.assert_metric('test.metric_with_interval', 1, metric_type=aggregator.GAUGE)
+        assert len(aggregator.metrics('test.metric_with_interval')) == 2
+
+        # Reset the aggregator and re-compile query executor
+        aggregator.reset()
+        qe.compile_queries()
+        qe.execute()  # Forth run, re-compile should not reset the last execution time
+        aggregator.assert_metric('test.metric_with_interval', count=0)
+        time.sleep(collection_interval)
+        qe.execute()  # Fifth run, should emit a metric
+        aggregator.assert_metric('test.metric_with_interval', 1, metric_type=aggregator.GAUGE)
+        assert len(aggregator.metrics('test.metric_with_interval')) == 1
+
+    @pytest.mark.parametrize(
+        'collection_interval, expected_exception',
+        [
+            pytest.param(0.5, ValueError, id='invalid interval 0.5s'),  # 0.5s is invalid because it rounds to 0
+            pytest.param(0, ValueError, id='invalid interval 0s'),
+            pytest.param(-1, ValueError, id='invalid interval -1s'),
+            pytest.param('test', ValueError, id='invalid interval not a number'),
+        ],
+    )
+    def test_query_with_collection_interval_with_exception(self, collection_interval, expected_exception):
+        """Test running a query with a custom collection interval"""
+        queries = [
+            {
+                'name': 'query1',
+                'query': 'select 1',
+                'columns': [{'name': 'test.metric_with_interval', 'type': 'gauge'}],
+                'collection_interval': collection_interval,
+            }
+        ]
+
+        check = AgentCheck('test', {}, [{}])
+        qe = QueryExecutor(mock_executor([[1]]), check, queries)
+
+        with pytest.raises(expected_exception):
+            qe.compile_queries()
+
+    @pytest.mark.parametrize(
+        "metric_prefix",
+        [
+            pytest.param(None, id='no_prefix'),
+            pytest.param('custom_prefix', id='custom_prefix'),
+        ],
+    )
+    def test_query_with_metric_prefix(self, aggregator, metric_prefix):
+        queries = [
+            {
+                'metric_prefix': metric_prefix,
+                'name': 'query1',
+                'query': 'select 1',
+                'columns': [{'name': 'metric', 'type': 'gauge'}],
+            }
+        ]
+
+        check = AgentCheck('test', {}, [{}])
+        check.__NAMESPACE__ = 'test_check'
+        qe = QueryExecutor(mock_executor([[1]]), check, queries)
+        qe.compile_queries()
+        qe.execute()
+
+        metric_name = '{}.metric'.format(metric_prefix) if metric_prefix else 'test_check.metric'
+        aggregator.assert_metric(metric_name, 1, metric_type=aggregator.GAUGE)
+
+    @pytest.mark.parametrize(
+        "metric_prefix,expected_exception",
+        [
+            pytest.param(123, ValueError, id='invalid prefix not a string'),
+            pytest.param('', ValueError, id='empty prefix'),
+        ],
+    )
+    def test_query_with_metric_prefix_with_exception(self, metric_prefix, expected_exception):
+        queries = [
+            {
+                'metric_prefix': metric_prefix,
+                'name': 'query1',
+                'query': 'select 1',
+                'columns': [{'name': 'metric', 'type': 'gauge'}],
+            }
+        ]
+
+        check = AgentCheck('test', {}, [{}])
+        check.__NAMESPACE__ = 'test_check'
+        qe = QueryExecutor(mock_executor([[1]]), check, queries)
+
+        with pytest.raises(expected_exception):
+            qe.compile_queries()

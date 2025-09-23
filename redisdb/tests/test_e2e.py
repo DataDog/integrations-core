@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import os
-
 import pytest
 
 from datadog_checks.base import is_affirmative
@@ -10,6 +8,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.redisdb import Redis
 
 from . import common
+from .common import REDIS_VERSION
 
 pytestmark = pytest.mark.e2e
 
@@ -30,6 +29,9 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.mem.lua', count=2, tags=tags)
     aggregator.assert_metric('redis.net.instantaneous_ops_per_sec', count=2, tags=tags)
     aggregator.assert_metric('redis.perf.latest_fork_usec', count=2, tags=tags)
+    aggregator.assert_metric('redis.net.total_connections_received', count=2, tags=tags)
+    aggregator.assert_metric('redis.net.instantaneous_input', count=2, tags=tags)
+    aggregator.assert_metric('redis.net.instantaneous_output', count=2, tags=tags)
     aggregator.assert_metric('redis.keys.evicted', count=2, tags=tags)
     aggregator.assert_metric('redis.net.slaves', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.blocked', count=2, tags=tags)
@@ -46,6 +48,7 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.pubsub.patterns', count=2, tags=tags)
     aggregator.assert_metric('redis.keys.expired', count=2, tags=tags)
     aggregator.assert_metric('redis.info.latency_ms', count=2, tags=tags)
+    aggregator.assert_metric('redis.ping.latency_ms', count=2, tags=tags)
     aggregator.assert_metric('redis.cpu.user', count=1, tags=tags)
     aggregator.assert_metric('redis.cpu.user_children', count=1, tags=tags)
     aggregator.assert_metric('redis.rdb.last_bgsave_time', count=2, tags=tags)
@@ -60,6 +63,11 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.clients.recent_max_input_buffer', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.recent_max_output_buffer', count=2, tags=tags)
     aggregator.assert_metric('redis.mem.overhead', count=2, tags=tags)
+    aggregator.assert_metric('redis.mem.dataset', count=2, tags=tags)
+    aggregator.assert_metric('redis.mem.fragmentation', count=2, tags=tags)
+    aggregator.assert_metric('redis.mem.clients_slaves', count=2, tags=tags)
+    aggregator.assert_metric('redis.mem.clients_normal', count=2, tags=tags)
+    aggregator.assert_metric('redis.mem.scripts', count=2, tags=tags)
 
     if not is_affirmative(common.CLOUD_ENV):
         assert_non_cloud_metrics(aggregator, tags)
@@ -74,12 +82,15 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.key.length', count=2, tags=(['key:test_key1', 'key_type:list'] + tags_with_db))
     aggregator.assert_metric('redis.key.length', count=2, tags=(['key:test_key2', 'key_type:list'] + tags_with_db))
     aggregator.assert_metric('redis.key.length', count=2, tags=(['key:test_key3', 'key_type:list'] + tags_with_db))
+    aggregator.assert_metric(
+        'redis.key.length', count=2, value=2, tags=(['key:test_key4', 'key_type:stream'] + tags_with_db)
+    )
 
     aggregator.assert_metric('redis.replication.delay', count=2)
 
 
 def test_e2e(dd_agent_check, master_instance):
-    redis_version = os.environ.get('REDIS_VERSION').split('.')[0]
+    redis_version = REDIS_VERSION.split('.')[0]
     aggregator = dd_agent_check(master_instance, rate=True)
     assert_common_metrics(aggregator)
 
@@ -92,6 +103,14 @@ def test_e2e(dd_agent_check, master_instance):
     if redis_version == 'latest' or int(redis_version) > 6:
         aggregator.assert_metric('redis.cpu.sys_main_thread', count=1, tags=tags)
         aggregator.assert_metric('redis.cpu.user_main_thread', count=1, tags=tags)
+        aggregator.assert_metric('redis.mem.functions', count=2, tags=tags)
+        aggregator.assert_metric('redis.mem.scripts_eval', count=2, tags=tags)
+        aggregator.assert_metric('redis.mem.total_replication_buffers', count=2, tags=tags)
+        aggregator.assert_metric('redis.mem.vm_eval', count=2, tags=tags)
+        aggregator.assert_metric('redis.mem.vm_functions', count=2, tags=tags)
+        aggregator.assert_metric('redis.mem.vm_total', count=2, tags=tags)
+        aggregator.assert_metric('redis.replication.input_total_bytes', count=2, tags=tags)
+        aggregator.assert_metric('redis.replication.output_total_bytes', count=2, tags=tags)
 
     assert_optional_slowlog_metrics(aggregator)
     aggregator.assert_all_metrics_covered()

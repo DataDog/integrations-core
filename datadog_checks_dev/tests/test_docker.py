@@ -36,11 +36,21 @@ class TestComposeFileActive:
 
 
 class TestDockerRun:
-    def test_compose_file(self):
+    @pytest.mark.parametrize(
+        "capture",
+        [
+            None,
+            True,
+        ],
+    )
+    def test_compose_file(self, capture):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
 
         try:
-            with docker_run(compose_file):
+            args = {}
+            if capture is not None:
+                args['capture'] = capture
+            with docker_run(compose_file, **args):
                 assert compose_file_active(compose_file) is True
             assert compose_file_active(compose_file) is False
         finally:
@@ -56,8 +66,6 @@ class TestDockerRun:
         ],
     )
     def test_retry_on_failed_conditions(self, attempts, expected_call_count):
-        compose_file = os.path.join(DOCKER_DIR, "test_default.yaml")
-
         condition = mock.MagicMock()
         condition.side_effect = Exception("exception")
 
@@ -69,16 +77,19 @@ class TestDockerRun:
                 expected_exception = Exception
 
         with pytest.raises(expected_exception):
-            with docker_run(compose_file, attempts=attempts, conditions=[condition]):
+            with docker_run(
+                up=mock.MagicMock(), down=mock.MagicMock(), attempts=attempts, conditions=[condition], attempts_wait=0
+            ):
                 pass
 
         assert condition.call_count == expected_call_count
 
     def test_retry_condition_failed_only_on_first_run(self):
-        compose_file = os.path.join(DOCKER_DIR, "test_default.yaml")
+        up = mock.MagicMock()
+        up.return_value = ""
 
         condition = mock.MagicMock()
         condition.side_effect = [Exception("exception"), None, None]
 
-        with docker_run(compose_file, attempts=3, conditions=[condition]):
+        with docker_run(up=up, down=mock.MagicMock(), attempts=3, conditions=[condition], attempts_wait=0):
             assert condition.call_count == 2

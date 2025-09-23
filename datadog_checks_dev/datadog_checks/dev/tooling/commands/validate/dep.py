@@ -2,21 +2,29 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from urllib.parse import urlparse
 
 import click
 from packaging.requirements import Requirement
 
-from ....utils import get_next
-from ...constants import get_agent_requirements, get_root
-from ...dependencies import (
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    annotate_errors,
+    echo_failure,
+    echo_success,
+)
+from datadog_checks.dev.tooling.constants import get_agent_requirements, get_root
+from datadog_checks.dev.tooling.dependencies import (
     get_dependency_set,
     read_agent_dependencies,
     read_check_base_dependencies,
     read_check_dependencies,
 )
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_project_file, has_project_file
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, annotate_errors, echo_failure
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_project_file, has_project_file
+from datadog_checks.dev.utils import get_next
 
 
 def get_marker_string(dependency_definition):
@@ -99,7 +107,10 @@ def verify_base_dependency(source, check_name, dependency, force_pinned=True, mi
 
 def verify_dependency(source, name, python_versions, file):
     for dependency_definitions in python_versions.values():
-        if len(dependency_definitions) > 1:
+        # Identify dependencies that are defined multiple times for the same set of environment markers
+        requirements = [Requirement(dep) for dep in dependency_definitions]
+        markers = {req.marker for req in requirements}
+        if len(markers) != len(requirements):
             message = f'Multiple dependency definitions found for dependency `{name}`:\n'
             for dependency_definition, checks in dependency_definitions.items():
                 message += f'    {dependency_definition} from: {format_check_usage([checks])}\n'
@@ -111,6 +122,26 @@ def verify_dependency(source, name, python_versions, file):
         for dependency_definition, checks in dependency_definitions.items():
             requirement = Requirement(dependency_definition)
             specifier_set = requirement.specifier
+
+            # git support: https://pip.pypa.io/en/stable/topics/vcs-support/
+            pip_vcs_support_link = "https://pip.pypa.io/en/stable/topics/vcs-support/"
+            valid_schemes = ["git+file", "git+https", "git+ssh", "git+http", "git+git", "git"]
+
+            if requirement.url:
+                u = urlparse(requirement.url)
+                if u.scheme not in valid_schemes:
+                    message = f'Invalid URL scheme found for dependency `{name}`: {format_check_usage(checks, source)}.\nSupported URL schemes are: {", ".join(valid_schemes)}.\nFor more information, please visit: {pip_vcs_support_link}'  # noqa: E501
+                    echo_failure(message)
+                    annotate_error(file, message)
+                    return False
+                _, _, git_ref = requirement.url.partition("@")
+                if not git_ref:
+                    message = f'Missing git ref for dependency `{name}`: {format_check_usage(checks, source)}. \nFor more information, please visit: {pip_vcs_support_link}'  # noqa: E501
+                    echo_failure(message)
+                    annotate_error(file, message)
+                    return False
+
+                return True
 
             if not specifier_set:
                 message = f'Unpinned version found for dependency `{name}`: {format_check_usage(checks, source)}'
@@ -151,6 +182,7 @@ def dep(check, require_base_check_version, min_base_check_version):
     """
     This command will:
 
+    \b
     * Verify the uniqueness of dependency versions across all checks, or optionally a single check
     * Verify all the dependencies are pinned.
     * Verify the embedded Python environment defined in the base check and requirements
@@ -198,7 +230,10 @@ def dep(check, require_base_check_version, min_base_check_version):
 
             if name not in agent_dependencies:
                 failed = True
-                message = f'Dependency needs to be synced: {name}'
+                message = (
+                    f'Dependency {name} found in the {check_name} integration requirements '
+                    'but not in the agent requirements, run `ddev dep freeze` to sync them.'
+                )
                 echo_failure(message)
                 annotate_error(req_source, message)
 
@@ -211,30 +246,34 @@ def dep(check, require_base_check_version, min_base_check_version):
         ):
             failed = True
 
-    # If validating a single check, whether all Agent dependencies are included in check dependencies is irrelevant.
-    if check is not None:
-        agent_dependencies = {}
-
     for name, python_versions in sorted(agent_dependencies.items()):
         if not verify_dependency('Agent', name, python_versions, agent_dependencies_file):
             failed = True
 
-        if name not in check_dependencies:  # Looks like this fails because of the per check run....
+        # Check that this dependency defined on the agent requirements is actually used
+        # This only makes sense when we take all check dependencies into account
+        if check is None and name not in check_dependencies:
             failed = True
             message = f'Stale dependency needs to be removed by syncing: {name}'
             echo_failure(message)
             annotate_error(agent_dependencies_file, message)
             continue
 
+        # Look for version mismatches for this dependency against individual checks
         agent_dependency_definitions = get_dependency_set(python_versions)
         check_dependency_definitions = get_dependency_set(check_dependencies[name])
 
-        if agent_dependency_definitions != check_dependency_definitions:
+        # Only report mismatches when this dependency is actually present within the checks specified
+        if check_dependency_definitions and not check_dependency_definitions.issubset(agent_dependency_definitions):
             failed = True
             message = (
                 f'Mismatch for dependency `{name}`:\n'
                 f'    Agent: {" | ".join(sorted(agent_dependency_definitions))}\n'
-                f'    Checks: {" | ".join(sorted(check_dependency_definitions))}'
+                f'    Checks: {" | ".join(sorted(check_dependency_definitions))}\n'
+                'If you think the Agent requirements are correct, run:\n'
+                'ddev dep sync\n'
+                'If you think the Checks requirements are correct, run:\n'
+                'ddev dep freeze'
             )
             echo_failure(message)
             annotate_error(agent_dependencies_file, message)
@@ -242,3 +281,4 @@ def dep(check, require_base_check_version, min_base_check_version):
 
         if failed:
             abort()
+    echo_success("All dependencies are valid!")

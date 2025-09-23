@@ -1,0 +1,235 @@
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 9.5988e-05
+go_gc_duration_seconds{quantile="0.25"} 0.000199742
+go_gc_duration_seconds{quantile="0.5"} 0.000231775
+go_gc_duration_seconds{quantile="0.75"} 0.000264393
+go_gc_duration_seconds{quantile="1"} 0.001655567
+go_gc_duration_seconds_sum 0.319729762
+go_gc_duration_seconds_count 1239
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 242
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.22.10"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 1.0470584e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 2.854896064e+09
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.954091e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 2.2730989e+07
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 4.166264e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 1.0470584e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 2.02752e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 1.5671296e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 63905
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 5.791744e+06
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 3.5946496e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.740998907210944e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 2.2794894e+07
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 2400
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 15600
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 247680
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 505920
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.6367352e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 654389
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.80224e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.80224e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 4.5045e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 8
+# HELP podVolume_data_download_cancel_total Total number of canceled downloaded snapshots
+# TYPE podVolume_data_download_cancel_total counter
+podVolume_data_download_cancel_total{node="gke-velero-cluster-2-default-pool-c27ff082-w2r3"} 0
+# HELP podVolume_data_download_failure_total Total number of failed downloaded snapshots
+# TYPE podVolume_data_download_failure_total counter
+podVolume_data_download_failure_total{node="gke-velero-cluster-2-default-pool-c27ff082-w2r3"} 0
+# HELP podVolume_data_download_success_total Total number of successful downloaded snapshots
+# TYPE podVolume_data_download_success_total counter
+podVolume_data_download_success_total{node="gke-velero-cluster-2-default-pool-c27ff082-w2r3"} 0
+# HELP podVolume_data_upload_cancel_total Total number of canceled uploaded snapshots
+# TYPE podVolume_data_upload_cancel_total counter
+podVolume_data_upload_cancel_total{node="gke-velero-cluster-2-default-pool-c27ff082-w2r3"} 0
+# HELP podVolume_data_upload_failure_total Total number of failed uploaded snapshots
+# TYPE podVolume_data_upload_failure_total counter
+podVolume_data_upload_failure_total{node="gke-velero-cluster-2-default-pool-c27ff082-w2r3"} 0
+# HELP podVolume_data_upload_success_total Total number of successful uploaded snapshots
+# TYPE podVolume_data_upload_success_total counter
+podVolume_data_upload_success_total{node="gke-velero-cluster-2-default-pool-c27ff082-w2r3"} 0
+# HELP podVolume_pod_volume_backup_dequeue_count Total number of pod_volume_backup objects dequeued
+# TYPE podVolume_pod_volume_backup_dequeue_count counter
+podVolume_pod_volume_backup_dequeue_count{node="gke-velero-cluster-2-default-pool-c27ff082-w2r3"} 0
+# HELP podVolume_pod_volume_backup_enqueue_count Total number of pod_volume_backup objects enqueued
+# TYPE podVolume_pod_volume_backup_enqueue_count counter
+podVolume_pod_volume_backup_enqueue_count{node="gke-velero-cluster-2-default-pool-c27ff082-w2r3"} 0
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 286.03
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 12
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 8.237056e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.74085160732e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 5.625167872e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 1
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0
+# HELP velero_backup_attempt_total Total number of attempted backups
+# TYPE velero_backup_attempt_total counter
+velero_backup_attempt_total{schedule=""} 1
+# HELP velero_backup_deletion_attempt_total Total number of attempted backup deletions
+# TYPE velero_backup_deletion_attempt_total counter
+velero_backup_deletion_attempt_total{schedule=""} 0
+# HELP velero_backup_deletion_failure_total Total number of failed backup deletions
+# TYPE velero_backup_deletion_failure_total counter
+velero_backup_deletion_failure_total{schedule=""} 0
+# HELP velero_backup_deletion_success_total Total number of successful backup deletions
+# TYPE velero_backup_deletion_success_total counter
+velero_backup_deletion_success_total{schedule=""} 0
+# HELP velero_backup_duration_seconds Time taken to complete backup, in seconds
+# TYPE velero_backup_duration_seconds histogram
+velero_backup_duration_seconds_bucket{schedule="",le="60"} 1
+velero_backup_duration_seconds_bucket{schedule="",le="300"} 1
+velero_backup_duration_seconds_bucket{schedule="",le="600"} 1
+velero_backup_duration_seconds_bucket{schedule="",le="900"} 1
+velero_backup_duration_seconds_bucket{schedule="",le="1800"} 1
+velero_backup_duration_seconds_bucket{schedule="",le="3600"} 1
+velero_backup_duration_seconds_bucket{schedule="",le="7200"} 1
+velero_backup_duration_seconds_bucket{schedule="",le="10800"} 1
+velero_backup_duration_seconds_bucket{schedule="",le="14400"} 1
+velero_backup_duration_seconds_bucket{schedule="",le="+Inf"} 1
+velero_backup_duration_seconds_sum{schedule=""} 7
+velero_backup_duration_seconds_count{schedule=""} 1
+# HELP velero_backup_failure_total Total number of failed backups
+# TYPE velero_backup_failure_total counter
+velero_backup_failure_total{schedule=""} 0
+# HELP velero_backup_items_errors Total number of errors encountered during backup
+# TYPE velero_backup_items_errors gauge
+velero_backup_items_errors{schedule=""} 0
+# HELP velero_backup_items_total Total number of items backed up
+# TYPE velero_backup_items_total gauge
+velero_backup_items_total{schedule=""} 37
+# HELP velero_backup_last_status Last status of the backup. A value of 1 is success, 0 is failure
+# TYPE velero_backup_last_status gauge
+velero_backup_last_status{schedule=""} 1
+# HELP velero_backup_last_successful_timestamp Last time a backup ran successfully, Unix timestamp in seconds
+# TYPE velero_backup_last_successful_timestamp gauge
+velero_backup_last_successful_timestamp{schedule=""} 1.740998683e+09
+# HELP velero_backup_partial_failure_total Total number of partially failed backups
+# TYPE velero_backup_partial_failure_total counter
+velero_backup_partial_failure_total{schedule=""} 0
+# HELP velero_backup_success_total Total number of successful backups
+# TYPE velero_backup_success_total counter
+velero_backup_success_total{schedule=""} 1
+# HELP velero_backup_tarball_size_bytes Size, in bytes, of a backup
+# TYPE velero_backup_tarball_size_bytes gauge
+velero_backup_tarball_size_bytes{schedule=""} 12050
+# HELP velero_backup_total Current number of existent backups
+# TYPE velero_backup_total gauge
+velero_backup_total 1
+# HELP velero_backup_validation_failure_total Total number of validation failed backups
+# TYPE velero_backup_validation_failure_total counter
+velero_backup_validation_failure_total{schedule=""} 0
+# HELP velero_backup_warning_total Total number of warned backups
+# TYPE velero_backup_warning_total counter
+velero_backup_warning_total{schedule=""} 0
+# HELP velero_csi_snapshot_attempt_total Total number of CSI attempted volume snapshots
+# TYPE velero_csi_snapshot_attempt_total counter
+velero_csi_snapshot_attempt_total{backupName="",schedule=""} 0
+# HELP velero_csi_snapshot_failure_total Total number of CSI failed volume snapshots
+# TYPE velero_csi_snapshot_failure_total counter
+velero_csi_snapshot_failure_total{backupName="",schedule=""} 0
+# HELP velero_csi_snapshot_success_total Total number of CSI successful volume snapshots
+# TYPE velero_csi_snapshot_success_total counter
+velero_csi_snapshot_success_total{backupName="",schedule=""} 0
+# HELP velero_restore_attempt_total Total number of attempted restores
+# TYPE velero_restore_attempt_total counter
+velero_restore_attempt_total{schedule=""} 1
+# HELP velero_restore_failed_total Total number of failed restores
+# TYPE velero_restore_failed_total counter
+velero_restore_failed_total{schedule=""} 0
+# HELP velero_restore_partial_failure_total Total number of partially failed restores
+# TYPE velero_restore_partial_failure_total counter
+velero_restore_partial_failure_total{schedule=""} 0
+# HELP velero_restore_success_total Total number of successful restores
+# TYPE velero_restore_success_total counter
+velero_restore_success_total{schedule=""} 1
+# HELP velero_restore_total Current number of existent restores
+# TYPE velero_restore_total gauge
+velero_restore_total 1
+# HELP velero_restore_validation_failed_total Total number of failed restores failing validations
+# TYPE velero_restore_validation_failed_total counter
+velero_restore_validation_failed_total{schedule=""} 0
+# HELP velero_volume_snapshot_attempt_total Total number of attempted volume snapshots
+# TYPE velero_volume_snapshot_attempt_total counter
+velero_volume_snapshot_attempt_total{schedule=""} 1
+# HELP velero_volume_snapshot_failure_total Total number of failed volume snapshots
+# TYPE velero_volume_snapshot_failure_total counter
+velero_volume_snapshot_failure_total{schedule=""} 0
+# HELP velero_volume_snapshot_success_total Total number of successful volume snapshots
+# TYPE velero_volume_snapshot_success_total counter
+velero_volume_snapshot_success_total{schedule=""} 1

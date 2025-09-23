@@ -2,7 +2,7 @@
 This script is expected to run from a CLI, do not import it."""
 import sys
 import json
-from typing import List, Optional, Set
+from typing import List, Optional, Set  # noqa: F401
 import re
 import yaml
 import os
@@ -23,6 +23,9 @@ EXCEPTIONS = {
     'azure-active-directory': [
         ERR_MISSING_LOG_DOC,  # This is a tile only integration, the source is populated by azure directly.
         ERR_NOT_DEFINED_WEB_UI,  # The integration does not have any metrics.
+    ],
+    'aws-fargate': [
+        ERR_UNEXPECTED_LOG_DOC,  # Not collecting logs directly, but has example in its readme
     ],
     'cilium': [
         ERR_UNEXPECTED_LOG_COLLECTION_CAT,  # cilium does not need a pipeline to automatically parse the logs
@@ -68,6 +71,11 @@ class CheckDefinition(object):
         """
         self.dir_name = dir_name
 
+        with open(os.path.join(INTEGRATIONS_CORE, dir_name, f'assets/logs/{dir_name}.yaml'), 'r') as logs_file:
+            logs_data = yaml.load(logs_file)
+            # Log source defined in the assets/logs/dir_name.yaml of the integration
+            self.log_source: Optional[str] = logs_data.get("id")
+
         with open(os.path.join(INTEGRATIONS_CORE, dir_name, "manifest.json"), 'r') as manifest:
             content = json.load(manifest)
             # name of the integration
@@ -76,8 +84,9 @@ class CheckDefinition(object):
             self.log_collection: bool = 'Category::Log Collection' in content.get('tile', {}).get('classifier_tags', [])
             # boolean: whether or not the integration has public facing docs
             self.is_public: bool = content['display_on_public_website']
-            # Log source defined in the manifest.json of the integration
-            self.log_source: Optional[str] = content.get("assets", {}).get("logs", {}).get("source")
+            if self.log_source is None:
+                # Log source defined in the manifest.json of the integration
+                self.log_source = content.get("assets", {}).get("logs", {}).get("source")
 
         # Whether or not this check has a log to metrics mapping defined in web-ui
         self.is_defined_in_web_ui: bool = False

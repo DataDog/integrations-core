@@ -1,0 +1,116 @@
+{
+    "nodes": [
+      {
+        "uuid": "20512deb-e493-4796-a046-5d6e4e072c95",
+        "created_at": "2023-04-06T16:55:34+00:00",
+        "updated_at": "2023-04-06T16:57:38+00:00",
+        "automated_clean": null,
+        "bios_interface": "fake",
+        "boot_interface": "fake",
+        "boot_mode": null,
+        "clean_step": {},
+        "conductor_group": "",
+        "console_enabled": false,
+        "console_interface": "fake",
+        "deploy_interface": "direct",
+        "deploy_step": {},
+        "description": null,
+        "driver": "fake-hardware",
+        "driver_info": {},
+        "driver_internal_info": {
+          "last_power_state_change": "2023-04-06T16:55:42.474124"
+        },
+        "extra": {},
+        "fault": null,
+        "inspection_finished_at": null,
+        "inspection_started_at": null,
+        "inspect_interface": "fake",
+        "instance_info": {},
+        "instance_uuid": null,
+        "last_error": null,
+        "lessee": null,
+        "maintenance": false,
+        "maintenance_reason": null,
+        "management_interface": "fake",
+        "name": "test",
+        "network_data": {},
+        "network_interface": "flat",
+        "owner": "01b21103a92d4997ab09e46ff8346bd5",
+        "power_interface": "fake",
+        "power_state": "power on",
+        "properties": {},
+        "protected": false,
+        "protected_reason": null,
+        "provision_state": "active",
+        "provision_updated_at": "2023-04-06T16:56:21+00:00",
+        "raid_config": {},
+        "raid_interface": "fake",
+        "rescue_interface": "fake",
+        "reservation": null,
+        "resource_class": null,
+        "retired": false,
+        "retired_reason": null,
+        "secure_boot": null,
+        "storage_interface": "noop",
+        "target_power_state": null,
+        "target_provision_state": null,
+        "target_raid_config": {},
+        "traits": [],
+        "vendor_interface": "fake",
+        "links": [
+          {
+            "href": "http://34.141.226.224/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95",
+            "rel": "self"
+          },
+          {
+            "href": "http://34.141.226.224/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95",
+            "rel": "bookmark"
+          }
+        ],
+        "conductor": "agent-integrations-openstack-ironic",
+        "allocation_uuid": null,
+        "chassis_uuid": null,
+        "ports": [
+          {
+            "href": "http://34.141.226.224/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/ports",
+            "rel": "self"
+          },
+          {
+            "href": "http://34.141.226.224/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/ports",
+            "rel": "bookmark"
+          }
+        ],
+        "states": [
+          {
+            "href": "http://34.141.226.224/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/states",
+            "rel": "self"
+          },
+          {
+            "href": "http://34.141.226.224/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/states",
+            "rel": "bookmark"
+          }
+        ],
+        "portgroups": [
+          {
+            "href": "http://34.141.226.224/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/portgroups",
+            "rel": "self"
+          },
+          {
+            "href": "http://34.141.226.224/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/portgroups",
+            "rel": "bookmark"
+          }
+        ],
+        "volume": [
+          {
+            "href": "http://34.141.226.224/baremetal/v1/nodes/20512deb-e493-4796-a046-5d6e4e072c95/volume",
+            "rel": "self"
+          },
+          {
+            "href": "http://34.141.226.224/baremetal/nodes/20512deb-e493-4796-a046-5d6e4e072c95/volume",
+            "rel": "bookmark"
+          }
+        ]
+      }
+    ]
+  }
+  

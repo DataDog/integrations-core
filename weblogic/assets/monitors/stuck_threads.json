@@ -1,28 +1,35 @@
 {
-	"name": "[WebLogic] Work Manager Stuck Threads count has increased {{value}}% over the last hour for server runtime {{serverruntime.name}}, application runtime {{applicationruntime.name}}",
-	"type": "query alert",
-	"query": "change(avg(last_5m),last_1h):avg:weblogic.work_manager_runtime.threads_stuck{*} by {host,serverruntime,applicationruntime} > 25",
-	"message": "{{#is_alert}}\\n\\nALERT: The average number of work manager stuck threads has increased by {{value}}% over the past hour for server runtime:{{serverruntime.name}}, application runtime:{{applicationruntime.name}} on host {{host.name}}.\\n\\n{{/is_alert}} \\n\\n{{#is_warning}}\\n\\nWARNING: The average number of work manager stuck threads has increased by {{value}}% over the past hour for server runtime: {{serverruntime.name}}, application runtime:{{applicationruntime.name}}  on host {{host.name}}.\\n\\n{{/is_warning}}",
-	"tags": [
-		"integration:weblogic"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"silenced": {},
-		"include_tags": true,
-		"thresholds": {
-			"critical": 25,
-			"warning": 15
-		},
-		"require_full_window": false,
-		"notify_no_data": false,
-		"no_data_timeframe": 10,
-		"renotify_interval": 0,
-		"escalation_message": ""
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when the percent change of Work Manager Stuck Threads is high."
-	}
+  "version": 2,
+  "created_at": "2022-03-01",
+  "last_updated_at": "2022-03-01",
+  "title": "Number of stuck thread is high",
+  "tags": [
+    "integration:weblogic"
+  ],
+  "description": "A thread is stuck when it is unable to make progress and complete its task within a reasonable timeframe. This monitor tracks the number of stuck threads to identify issues affecting the performance of the application.",
+  "definition": {
+    "message": "{{#is_alert}}\\n\\nALERT: The average number of work manager stuck threads has increased by {{value}}% over the past hour for server runtime:{{serverruntime.name}}, application runtime:{{applicationruntime.name}} on host {{host.name}}.\\n\\n{{/is_alert}} \\n\\n{{#is_warning}}\\n\\nWARNING: The average number of work manager stuck threads has increased by {{value}}% over the past hour for server runtime: {{serverruntime.name}}, application runtime:{{applicationruntime.name}}  on host {{host.name}}.\\n\\n{{/is_warning}}",
+    "name": "[WebLogic] Work Manager Stuck Threads count has increased {{value}}% over the last hour for server runtime {{serverruntime.name}}, application runtime {{applicationruntime.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "no_data_timeframe": 10,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "silenced": {},
+      "thresholds": {
+        "critical": 25,
+        "warning": 15
+      }
+    },
+    "priority": null,
+    "query": "change(avg(last_5m),last_1h):avg:weblogic.work_manager_runtime.threads_stuck{*} by {host,serverruntime,applicationruntime} > 25",
+    "tags": [
+      "integration:weblogic"
+    ],
+    "type": "query alert"
+  }
 }

@@ -12,11 +12,24 @@
     "title": "Palo Alto Networks Firewall",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Log Collection",
-      "Category::Security"
+      "Category::Network",
+      "Category::OS & System",
+      "Category::Security",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#getting-started-with-the-agent"
+      }
     ]
   },
   "author": {
@@ -25,7 +38,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Palo Alto Networks Firewall",
@@ -38,7 +50,8 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": []
+      "source_type_id": 10155,
+      "auto_install": true
     },
     "dashboards": {
       "Palo Alto Networks Firewall Overview": "assets/dashboards/palo_alto_networks_firewall_overview.json"
@@ -46,9 +59,6 @@
     "saved_views": {
       "High Severity Issues": "assets/saved_views/all_high_severity_issues.json",
       "Authentication Protocol": "assets/saved_views/top_ips_flagged_in_high_severity_threats.json"
-    },
-    "logs": {
-      "source": "pan.firewall"
     }
   }
 }

@@ -1,0 +1,14 @@
+{
+    "name": "Karpenter Logs Overview",
+    "query": "source:karpenter ",
+    "visible_facets": [
+        "source",
+        "host",
+        "service"
+    ],
+    "type": "logs",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "page": "patterns"
+}

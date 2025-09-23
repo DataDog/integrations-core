@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   hazelcast1:
     build:
@@ -8,6 +6,7 @@ services:
       args:
         HAZELCAST_VERSION: ${HAZELCAST_VERSION}
     container_name: hazelcast1
+    platform: linux/amd64
     environment:
       CLASSPATH: /tmp/log4j2/*
       JAVA_OPTS: >-
@@ -79,11 +78,11 @@ services:
       - dd_hazelcast
 
   hazelcast_management_center:
-    image: hazelcast/management-center:${HAZELCAST_VERSION}
+    image: hazelcast/management-center:${HAZELCAST_MANCENTER_VERSION}
     container_name: hazelcast_management_center
     environment:
       MC_CONTEXT_PATH: /
-      MC_INIT_CMD: "./mc-conf.sh cluster add -H=/data -ma hazelcast1:5701,hazelcast2:5701,hazelcast3:5701 -cn dev"
+      MC_INIT_CMD: ${HAZELCAST_MC_INIT_CMD} cluster add -H=/data -ma hazelcast1:5701,hazelcast2:5701,hazelcast3:5701 -cn dev
       JAVA_OPTS: >-
         -Dhazelcast.metrics.enabled=true
         -Dhazelcast.metrics.jmx.enabled=true

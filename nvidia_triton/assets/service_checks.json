@@ -1,0 +1,32 @@
+[
+    {
+        "agent_version": "7.50.0",
+        "integration": "Nvidia Triton",
+        "check": "nvidia_triton.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Nvidia Triton OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Nvidia Triton OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.50.0",
+        "integration": "Nvidia Triton",
+        "check": "nvidia_triton.health.status",
+        "statuses": [
+            "ok",
+            "warning",
+            "critical"
+        ],
+        "groups": [
+            "host"
+                ],
+        "name": "Health Status of Nvidia Triton",
+        "description": "Returns `CRITICAL` if the Server is having a 4xx or 5xx response, `OK` if the response is 200, and `unknown` for everything else."
+    }
+]

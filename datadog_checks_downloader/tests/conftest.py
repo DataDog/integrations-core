@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+import shutil
 
 import pytest
 
@@ -16,7 +18,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--distribution-version",
         action="store",
-        default="1.10.0",
+        default="4.0.0",
         help="The version number of the desired Datadog check.",
     )
     parser.addoption(
@@ -54,6 +56,30 @@ def distribution_name(request):
 def distribution_version(request):
     """Provide distribution_version fixture."""
     return request.config.getoption("--distribution-version")
+
+
+def pytest_generate_tests(metafunc):
+    if "disable_verification" in metafunc.fixturenames:
+        metafunc.parametrize("disable_verification", [False, True])
+
+
+@pytest.fixture(autouse=True)
+def temporary_local_repo(monkeypatch, tmp_path):
+    """
+    This prevents tests from actually modifying the local repo that ships with the code,
+    using a temporary directory instead.
+    """
+    # PY2's os.path prefers strings
+    tmp_path = str(tmp_path)
+
+    from datadog_checks.downloader.download import REPOSITORIES_DIR, REPOSITORY_DIR
+
+    src_dir = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
+    dst_dir = os.path.join(tmp_path, REPOSITORY_DIR)
+
+    shutil.copytree(src_dir, dst_dir)
+    monkeypatch.setattr('datadog_checks.downloader.download.REPOSITORIES_DIR', tmp_path)
+    yield tmp_path
 
 
 def pytest_configure(config):

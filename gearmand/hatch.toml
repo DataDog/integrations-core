@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+version = ["1.1"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "GEARMAND_VERSION", value = "1.1.18" },
+  { key = "DOCKER_TAG", value = "1.1.18-alpine" },
+]

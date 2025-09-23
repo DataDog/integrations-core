@@ -26,7 +26,8 @@ def test_metric_collection_per_category(aggregator, instance, check):
         check = check(instance)
         check.check(instance)
 
-    for metric_name in common.METRICS_ALWAYS_PRESENT:
+    metrics_in_fixture = ['ibm_was.thread_pools.percent_used']
+    for metric_name in common.METRICS_ALWAYS_PRESENT + metrics_in_fixture:
         aggregator.assert_metric(metric_name)
         aggregator.assert_metric_has_tag(metric_name, 'key1:value1')
 

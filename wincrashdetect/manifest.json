@@ -1,0 +1,55 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "44210c4a-0fe6-4702-88bf-d720e492a806",
+  "app_id": "wincrashdetect",
+  "owner": "windows-products",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor your Windows hosts for system crashes.",
+    "title": "Windows Crash Detection",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::OS & System",
+      "Category::Windows",
+      "Offering::Integration"
+    ], 
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/wincrashdetect/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/troubleshoot-windows-blue-screen-errors/"
+      }
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Windows Crash Detection",
+      "configuration": {},
+      "events": {
+        "creates_events": true
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 10389,
+      "auto_install": true
+    },
+    "monitors": {
+      "Windows Crash Detection": "assets/monitors/windows_crash.json"
+    }
+  }
+}

@@ -107,19 +107,20 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Marathon('marathon', init_config, instances=[instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.return_value = mock.MagicMock(status_code=200)
 
         check.check(instance)
 
-        http_wargs = dict(
-            auth=mock.ANY,
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=mock.ANY,
-            verify=mock.ANY,
-            allow_redirects=mock.ANY,
-        )
+        http_wargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://localhost:8080/v2/queue', **http_wargs)

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a4aae6fb-1865-42d0-be03-78e98b7e4b22",
   "app_id": "harbor",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -17,7 +18,7 @@
       "Supported OS::Windows",
       "Category::Containers",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Harbor",
@@ -43,13 +43,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10063,
+      "auto_install": true
     },
     "dashboards": {
       "Harbor Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "harbor"
     }
   }
 }

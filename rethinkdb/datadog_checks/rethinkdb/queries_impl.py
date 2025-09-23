@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import collections
 import itertools
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 import rethinkdb
 
@@ -95,7 +95,7 @@ def get_database_config_metrics(conn):
     """
     query = TABLE_CONFIG.group('db').count()
     num_tables_per_database = query.run(conn)  # type: Dict[str, int]
-    return [(database, num_tables) for database, num_tables in num_tables_per_database.items()]
+    return list(num_tables_per_database.items())
 
 
 def get_database_table_metrics(conn):
@@ -145,10 +145,11 @@ def get_table_config_metrics(conn):
         # [...] -> {table1: [index1_1, index1_2, ...], table2: [index2_1, index2_2, ...]}
         .group('table')
         # {...} -> {table1: num_indexes_1, table2: num_indexes_2, ...}
-        .count().run(conn)
+        .count()
+        .run(conn)
     )  # type: Dict[str, int]
 
-    return [(table_name, secondary_indexes) for table_name, secondary_indexes in secondary_indexes_per_table.items()]
+    return list(secondary_indexes_per_table.items())
 
 
 def get_replica_metrics(conn):
@@ -251,7 +252,8 @@ def get_shard_metrics(conn):
         # Grab table statuses with shards info.
         TABLE_STATUS.pluck('id', {'shards': ['replicas', 'primary_replicas']})
         # table_status -> [shard1, shard2, ...]
-        .concat_map(lambda row: row['shards'].map(lambda shard: row.merge(shard))).without('shards')
+        .concat_map(lambda row: row['shards'].map(lambda shard: row.merge(shard)))
+        .without('shards')
         # Attach table info to shards
         .merge({'table': TABLE_CONFIG.get(r.row['id']).pluck('id', 'db', 'name')})
     ).run(conn)
@@ -298,9 +300,7 @@ def get_current_issues_metrics(conn):
     # NOTE: Need to `.run()` these separately because ReQL does not support putting grouped data in raw
     # expressions yet. See: https://github.com/rethinkdb/rethinkdb/issues/2067
     issues_by_type = current_issues.group('type').count().run(conn)  # type: Dict[str, int]
-    critical_issues_by_type = (
-        current_issues.filter(r.row['critical']).group('type').count().run(conn)
-    )  # type: Dict[str, int]
+    critical_issues_by_type = current_issues.filter(r.row['critical']).group('type').count().run(conn)  # type: Dict[str, int]
 
     # Join manually by job type. Note that groups may not have all job types (eg if there are 0 issues for that type).
     merged = collections.defaultdict(lambda: {'issues': 0, 'critical_issues': 0})  # type: Dict[str, Dict[str, int]]

@@ -62,7 +62,7 @@ def get_config_stubs():
                 'search_string': ['test_1'],
                 'thresholds': {'critical': [1, 5], 'warning': [2, 4]},
             },
-            'mocked_processes': set([1]),
+            'mocked_processes': {1},
         },
         {
             'instance': {
@@ -71,7 +71,7 @@ def get_config_stubs():
                 'search_string': ['test_2'],
                 'thresholds': {'critical': [2, 5], 'warning': [1, 4]},
             },
-            'mocked_processes': set([22, 35]),
+            'mocked_processes': {22, 35},
         },
         {
             'instance': {
@@ -80,7 +80,7 @@ def get_config_stubs():
                 'search_string': ['test_3'],
                 'thresholds': {'critical': [1, 4], 'warning': [2, 5]},
             },
-            'mocked_processes': set([1, 5, 44, 901, 34]),
+            'mocked_processes': {1, 5, 44, 901, 34},
         },
         {
             'instance': {
@@ -89,7 +89,7 @@ def get_config_stubs():
                 'search_string': ['test_4'],
                 'thresholds': {'critical': [1, 4], 'warning': [2, 5]},
             },
-            'mocked_processes': set([3, 7, 2, 9, 34, 72]),
+            'mocked_processes': {3, 7, 2, 9, 34, 72},
         },
         {
             'instance': {
@@ -98,7 +98,7 @@ def get_config_stubs():
                 'search_string': ['test_5'],
                 'tags': ['onetag', 'environment:prod'],
             },
-            'mocked_processes': set([2]),
+            'mocked_processes': {2},
         },
         {
             'instance': {
@@ -107,7 +107,7 @@ def get_config_stubs():
                 'search_string': ['test_6'],
                 'thresholds': {'test': 'test'},
             },
-            'mocked_processes': set([89]),
+            'mocked_processes': {89},
         },
         {
             'instance': {
@@ -116,11 +116,11 @@ def get_config_stubs():
                 'search_string': ['test_7'],
                 'thresholds': {'critical': [2, 4], 'warning': [1, 5]},
             },
-            'mocked_processes': set([1]),
+            'mocked_processes': {1},
         },
-        {'instance': {'name': 'test_8', 'pid': 1}, 'mocked_processes': set([1])},
+        {'instance': {'name': 'test_8', 'pid': 1}, 'mocked_processes': {1}},
         {
             'instance': {'name': 'test_9', 'pid_file': 'process/test/ci/fixtures/test_pid_file'},
-            'mocked_processes': set([1]),
+            'mocked_processes': {1},
         },
     ]

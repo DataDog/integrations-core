@@ -9,7 +9,6 @@ import pytest
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.testing import requires_py2
 from datadog_checks.iis import IIS
 
 from .common import (
@@ -26,7 +25,7 @@ from .common import (
     WIN_SERVICES_MINIMAL_CONFIG,
 )
 
-pytestmark = [requires_py2, pytest.mark.usefixtures('pdh_mocks_fixture')]
+pytestmark = [pytest.mark.usefixtures('pdh_mocks_fixture')]
 
 
 @pytest.fixture(autouse=True)
@@ -36,6 +35,7 @@ def setup_check():
 
 def test_additional_metrics(aggregator, caplog, dd_run_check):
     instance = copy.deepcopy(MINIMAL_INSTANCE)
+    instance["use_legacy_check_version"] = True
     instance['additional_metrics'] = [
         [
             'HTTP Service Request Queues',
@@ -56,7 +56,9 @@ def test_additional_metrics(aggregator, caplog, dd_run_check):
 
 
 def test_basic_check(aggregator, dd_run_check):
-    instance = MINIMAL_INSTANCE
+    instance = copy.deepcopy(MINIMAL_INSTANCE)
+    instance["use_legacy_check_version"] = True
+
     c = IIS(CHECK_NAME, {}, [instance])
     dd_run_check(c)
     iis_host = c.get_iishost()
@@ -69,15 +71,20 @@ def test_basic_check(aggregator, dd_run_check):
 
     for _, namespace, values in namespace_data:
         for value in values:
+            status = IIS.OK
+            if namespace == 'app_pool':
+                # Expect failure b/c pdh mock doesn't support setting values for counters
+                status = IIS.CRITICAL
             aggregator.assert_service_check(
-                'iis.{}_up'.format(namespace), IIS.OK, tags=['{}:{}'.format(namespace, value), iis_host], count=1
+                'iis.{}_up'.format(namespace), status, tags=['{}:{}'.format(namespace, value), iis_host], count=1
             )
 
     aggregator.assert_all_metrics_covered()
 
 
 def test_check_on_specific_websites_and_app_pools(aggregator, dd_run_check):
-    instance = INSTANCE
+    instance = copy.deepcopy(INSTANCE)
+    instance["use_legacy_check_version"] = True
     c = IIS(CHECK_NAME, {}, [instance])
     dd_run_check(c)
     iis_host = c.get_iishost()
@@ -93,8 +100,12 @@ def test_check_on_specific_websites_and_app_pools(aggregator, dd_run_check):
 
     for _, namespace, values in namespace_data:
         for value in values:
+            status = IIS.OK
+            if namespace == 'app_pool':
+                # Expect failure b/c pdh mock doesn't support setting values for counters
+                status = IIS.CRITICAL
             aggregator.assert_service_check(
-                'iis.{}_up'.format(namespace), IIS.OK, tags=['{}:{}'.format(namespace, value), iis_host], count=1
+                'iis.{}_up'.format(namespace), status, tags=['{}:{}'.format(namespace, value), iis_host], count=1
             )
 
     aggregator.assert_service_check('iis.site_up', IIS.CRITICAL, tags=['site:Non_Existing_Website', iis_host], count=1)
@@ -106,7 +117,8 @@ def test_check_on_specific_websites_and_app_pools(aggregator, dd_run_check):
 
 
 def test_service_check_with_invalid_host(aggregator, dd_run_check):
-    instance = INVALID_HOST_INSTANCE
+    instance = copy.deepcopy(INVALID_HOST_INSTANCE)
+    instance["use_legacy_check_version"] = True
     c = IIS(CHECK_NAME, {}, [instance])
     dd_run_check(c)
     iis_host = c.get_iishost()
@@ -119,7 +131,8 @@ def test_check(aggregator, dd_run_check):
     """
     Returns the right metrics and service checks
     """
-    instance = WIN_SERVICES_CONFIG
+    instance = copy.deepcopy(WIN_SERVICES_CONFIG)
+    instance["use_legacy_check_version"] = True
     c = IIS(CHECK_NAME, {}, [instance])
     dd_run_check(c)
     iis_host = c.get_iishost()
@@ -144,9 +157,13 @@ def test_check(aggregator, dd_run_check):
     for _, namespace, values in namespace_data_ok:
         # Exclude `Total`
         for value in values[1:]:
+            status = IIS.OK
+            if namespace == 'app_pool':
+                # Expect failure b/c pdh mock doesn't support setting values for counters
+                status = IIS.CRITICAL
             aggregator.assert_service_check(
                 'iis.{}_up'.format(namespace),
-                IIS.OK,
+                status,
                 tags=['mytag1', 'mytag2', '{}:{}'.format(namespace, value), iis_host],
                 count=1,
             )
@@ -170,7 +187,8 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
     Returns the right metrics and service checks for the `_Total` site
     """
     # Run check
-    instance = WIN_SERVICES_MINIMAL_CONFIG
+    instance = copy.deepcopy(WIN_SERVICES_MINIMAL_CONFIG)
+    instance["use_legacy_check_version"] = True
     c = IIS(CHECK_NAME, {}, [instance])
     dd_run_check(c)
     iis_host = c.get_iishost()
@@ -185,9 +203,13 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
 
     for _, namespace, values in namespace_data:
         for value in values:
+            status = IIS.OK
+            if namespace == 'app_pool':
+                # Expect failure b/c pdh mock doesn't support setting values for counters
+                status = IIS.CRITICAL
             aggregator.assert_service_check(
                 'iis.{}_up'.format(namespace),
-                IIS.OK,
+                status,
                 tags=['mytag1', 'mytag2', '{}:{}'.format(namespace, value), iis_host],
                 count=1,
             )
@@ -196,7 +218,8 @@ def test_check_without_sites_specified(aggregator, dd_run_check):
 
 
 def test_legacy_check_version(aggregator, dd_run_check):
-    instance = WIN_SERVICES_LEGACY_CONFIG
+    instance = copy.deepcopy(WIN_SERVICES_LEGACY_CONFIG)
+    instance["use_legacy_check_version"] = True
     c = IIS(CHECK_NAME, {}, [instance])
     dd_run_check(c)
     iis_host = c.get_iishost()
@@ -210,9 +233,13 @@ def test_legacy_check_version(aggregator, dd_run_check):
 
     for _, namespace, values in namespace_data:
         for value in values:
+            status = IIS.OK
+            if namespace == 'app_pool':
+                # Expect failure b/c pdh mock doesn't support setting values for counters
+                status = IIS.CRITICAL
             aggregator.assert_service_check(
                 'iis.{}_up'.format(namespace),
-                IIS.OK,
+                status,
                 tags=['{}:{}'.format(namespace, value), iis_host],
                 count=1,
             )

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ca1a7870-7d95-40c7-9790-ef6c1e928967",
   "app_id": "docker",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,7 +16,35 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Category::Containers",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Network",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/agent/guide/compose-and-the-datadog-agent"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/the-docker-monitoring-problem"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-monitor-docker-resource-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-collect-docker-metrics"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://www.datadoghq.com/docker-adoption"
+      }
     ]
   },
   "author": {
@@ -24,9 +53,10 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
+      "auto_install": true,
+      "source_type_id": 73,
       "source_type_name": "Docker",
       "process_signatures": [
         "dockerd",
@@ -47,6 +77,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "docker": "assets/dashboards/docker_dashboard.json"
     }
   }
 }

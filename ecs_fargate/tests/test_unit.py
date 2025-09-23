@@ -14,6 +14,7 @@ from datadog_checks.ecs_fargate import FargateCheck
 from .conftest import (
     EXPECTED_CONTAINER_METRICS_LINUX,
     EXPECTED_CONTAINER_METRICS_WINDOWS,
+    EXPECTED_TASK_METRICS,
     EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
     EXTRA_NETWORK_METRICS,
     INSTANCE_TAGS,
@@ -41,7 +42,7 @@ def test_failing_check(check, aggregator, dd_run_check):
     Testing fargate metadata endpoint error.
     """
     with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse('{}', status_code=500)
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', return_value=MockResponse('{}', status_code=500)
     ):
         dd_run_check(check)
 
@@ -54,7 +55,7 @@ def test_invalid_response_check(check, aggregator, dd_run_check):
     Testing invalid fargate metadata payload.
     """
     with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse('{}', status_code=200)
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', return_value=MockResponse('{}', status_code=200)
     ):
         dd_run_check(check)
 
@@ -66,7 +67,9 @@ def test_successful_check_linux(check, aggregator, dd_run_check):
     """
     Testing successful fargate check on Linux.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get_linux):
+    with mock.patch(
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_linux
+    ):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)
@@ -113,6 +116,11 @@ def test_successful_check_linux(check, aggregator, dd_run_check):
         ],
     ]
 
+    task_tags = [
+        # Tagger
+        "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
+    ]
+
     extra_expected_metrics_for_container = [
         EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
         EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
@@ -129,6 +137,9 @@ def test_successful_check_linux(check, aggregator, dd_run_check):
     for metric in EXTRA_NETWORK_METRICS:
         aggregator.assert_metric(metric, count=1)  # 1 network interfaces
 
+    for metric in EXPECTED_TASK_METRICS:
+        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags)
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -137,7 +148,9 @@ def test_successful_check_windows(check, aggregator, dd_run_check):
     """
     Testing successful fargate check on Windows.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get_windows):
+    with mock.patch(
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_windows
+    ):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)
@@ -172,12 +185,20 @@ def test_successful_check_windows(check, aggregator, dd_run_check):
         'docker_name:ecs-redis-datadog-1-dd-agent-8085fa82d1d3ada5a601',
     ]
 
+    task_tags = [
+        # Tagger
+        "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
+    ]
+
     tags = common_tags + container_tags
     for metric in EXPECTED_CONTAINER_METRICS_WINDOWS:
         aggregator.assert_metric(metric, count=1, tags=tags)
 
     for metric in EXTRA_NETWORK_METRICS:
         aggregator.assert_metric(metric, count=1)  # 1 network interfaces
+
+    for metric in EXPECTED_TASK_METRICS:
+        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -187,7 +208,9 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
     """
     Testing successful fargate check.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get_sys_delta):
+    with mock.patch(
+        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_sys_delta
+    ):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
             with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
                 dd_run_check(check)
@@ -234,6 +257,11 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
         ],
     ]
 
+    task_tags = [
+        # Tagger
+        "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
+    ]
+
     extra_expected_metrics_for_container = [
         EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
         EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
@@ -250,6 +278,9 @@ def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
     for metric in EXTRA_NETWORK_METRICS:
         aggregator.assert_metric(metric, count=1)  # 1 network interfaces
 
+    for metric in EXPECTED_TASK_METRICS:
+        aggregator.assert_metric(metric, count=1, tags=common_tags + task_tags)
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -262,19 +293,20 @@ def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check):
     instance = extra_config
     check = FargateCheck('ecs_fargate', {}, instances=[instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.return_value = mock.MagicMock(status_code=200)
 
         dd_run_check(check)
 
-        http_wargs = dict(
-            auth=mock.ANY,
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=mock.ANY,
-            verify=mock.ANY,
-            allow_redirects=mock.ANY,
-        )
+        http_wargs = {
+            'auth': mock.ANY,
+            'cert': mock.ANY,
+            'headers': mock.ANY,
+            'proxies': mock.ANY,
+            'timeout': mock.ANY,
+            'verify': mock.ANY,
+            'allow_redirects': mock.ANY,
+        }
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://169.254.170.2/v2/metadata', **http_wargs)

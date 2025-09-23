@@ -1,0 +1,15 @@
+{
+    "ismaster": true,
+    "maxBsonObjectSize": 16777216,
+    "maxMessageSizeBytes": 48000000,
+    "maxWriteBatchSize": 100000,
+    "localTime": {
+        "$date": 1600348939653
+    },
+    "logicalSessionTimeoutMinutes": 30,
+    "connectionId": 112,
+    "minWireVersion": 0,
+    "maxWireVersion": 21,
+    "readOnly": false,
+    "ok": 1
+  }

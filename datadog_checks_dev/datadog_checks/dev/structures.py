@@ -6,14 +6,11 @@ import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
-import six
-
 from ._env import e2e_active, get_env_vars, remove_env_vars, set_env_vars, tear_down_env
 from .warn import warning
 
 
-@six.add_metaclass(abc.ABCMeta)
-class LazyFunction(object):
+class LazyFunction(abc.ABC):
     """Abstract base class for lazy function calls."""
 
     @abc.abstractmethod
@@ -45,7 +42,7 @@ class EnvVars(dict):
 class TempDir(object):
     all_names = set()
 
-    def __init__(self, name='default', base_directory=None):
+    def __init__(self, name='default', base_directory=None, mode=None):
         key = None
         directory = None
 
@@ -70,6 +67,9 @@ class TempDir(object):
         self.name = name
         self.key = key
         self.directory = os.path.realpath(directory or mkdtemp(dir=base_directory))
+
+        if mode:
+            os.chmod(self.directory, mode)
 
     @classmethod
     def _cleanup(cls, directory):

@@ -38,6 +38,16 @@ files:
       value:
         type: boolean
         example: false
+    - name: use_node_name_as_hostname
+      description: |
+        Whether to use the Consul node name as the hostname. If set to true, 
+        the Agent uses the Consul node name as the hostname. If set to false, 
+        the Agent uses the system hostname and avoids duplicate hostnames.
+        Disabling this causes all the `consul.net.node.*` metrics to be reported 
+        under one host (the host that collects them), and they can be filtered using `consul_node_name`.
+      value:
+        type: boolean
+        example: true
 
     - name: self_leader_check
       description: |
@@ -52,6 +62,7 @@ files:
 
     - name: acl_token
       description: ACL token to use for authentication.
+      secret: true
       value:
         type: string
 
@@ -122,6 +133,15 @@ files:
         display_default: false
         example: true
       enabled: true
+
+    - name: collect_health_checks
+      description: |
+        Whether to enable new service health checks from this instance. Enabling this will
+        also emit an event for every failed service health check.
+      value:
+        type: boolean
+        display_default: false
+        example: true
 
     - template: instances/http
     - template: instances/default

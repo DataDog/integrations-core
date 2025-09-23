@@ -25,7 +25,7 @@ def dd_environment():
 
         with docker_run(
             compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-            env_vars={'HOST_SOCKET_DIR': d},
+            env_vars={'HOST_SOCKET_DIR': d, 'OPENLDAP_CERTS_DIR': os.path.join(HERE, 'compose', 'certs')},
             log_patterns='slapd starting',
         ):
             yield DEFAULT_INSTANCE
@@ -45,5 +45,5 @@ def instance():
 @pytest.fixture
 def instance_ssl():
     instance = deepcopy(DEFAULT_INSTANCE)
-    instance['url'] = 'ldaps://{}:6360'.format(HOST)
+    instance['url'] = 'ldaps://{}:1636'.format(HOST)
     return instance

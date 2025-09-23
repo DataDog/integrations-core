@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from six import iteritems
 
 from datadog_checks.hdfs_datanode import HDFSDataNode
 
@@ -38,7 +37,7 @@ def test_check(aggregator, mocked_request):
         HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.OK, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=1
     )
 
-    for metric, value in iteritems(HDFS_DATANODE_METRICS_VALUES):
+    for metric, value in HDFS_DATANODE_METRICS_VALUES.items():
         aggregator.assert_metric(metric, value=value, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=1)
 
 

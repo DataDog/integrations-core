@@ -1,26 +1,35 @@
 {
-  "name": "[HAProxy] High amount of backend session usage for host: {{host.name}}",
-  "type": "query alert",
-  "query": "avg(last_5m):avg:haproxy.backend.session.pct{*} by {host} > 80",
-  "message": "{{#is_alert}}\n\nALERT: The amount of backend sessions in use for host: {{host.name}} reached {{value}} for a detection threshold of {{threshold}} %\n\nWhen reaching the session limit HAProxy will deny additional clients until resource consumption drops. It could be time to either modify HAProxy’s configuration to allow more sessions, or migrate your HAProxy server to a bigger box.\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: The amount of backend sessions in use for host: {{host.name}} reached {{value}} for a detection threshold of {{threshold}} %\n\n{{/is_warning}} ",
-  "tags": ["integration:haproxy"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": false,
-    "notify_no_data": false,
-    "renotify_interval": 0,
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 80,
-      "warning": 60
-    }
-  },
-  "recommended_monitor_metadata": {
-    "description": "Notifies when HAProxy backend sessions usage is approaching the maximum defined for a specific host."
+  "version": 2,
+  "created_at": "2021-03-01",
+  "last_updated_at": "2021-03-01",
+  "title": "Backend sessions usage is high",
+  "tags": [
+    "integration:haproxy"
+  ],
+  "description": "A backend session represents an active connection between HAProxy and backend servers. This monitor tracks the average session percentage for HAProxy backend servers, on different hosts, to identify performance and availability issues.",
+  "definition": {
+    "message": "{{#is_alert}}\n\nALERT: The amount of backend sessions in use for host: {{host.name}} reached {{value}} for a detection threshold of {{threshold}} %\n\nWhen reaching the session limit HAProxy will deny additional clients until resource consumption drops. It could be time to either modify HAProxy’s configuration to allow more sessions, or migrate your HAProxy server to a bigger box.\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: The amount of backend sessions in use for host: {{host.name}} reached {{value}} for a detection threshold of {{threshold}} %\n\n{{/is_warning}} ",
+    "name": "[HAProxy] High amount of backend session usage for host: {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 80,
+        "warning": 60
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):avg:haproxy.backend.session.pct{*} by {host} > 80",
+    "tags": [
+      "integration:haproxy"
+    ],
+    "type": "query alert"
   }
 }

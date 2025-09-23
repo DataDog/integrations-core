@@ -1,0 +1,23 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+version = ["8.5", "9.3"]
+
+# You can use M1 env if you want to run on M1 processor machine
+# version = ["8.5", "9.3", "M1"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "SONARQUBE_VERSION", value = "8.5", if = ["8.5"] },
+  { key = "DOCKERFILE_VERSION", value = "8+", if = ["8.5"] },
+
+  { key = "SONARQUBE_VERSION", value = "9.3", if = ["9.3"] },
+  { key = "DOCKERFILE_VERSION", value = "8+", if = ["9.3"] },
+
+  { key = "SONARQUBE_VERSION", value = "9.3", if = ["M1"] },
+  { key = "DOCKERFILE_VERSION", value = "M1", if = ["M1"] },
+]
+
+[envs.default.env-vars]
+COMPOSE_FILE = "docker-compose.yaml"

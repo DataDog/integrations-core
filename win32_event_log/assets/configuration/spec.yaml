@@ -1,4 +1,4 @@
-name: Win32
+name: Event Viewer
 files:
 - name: win32_event_log.yaml
   options:
@@ -45,6 +45,28 @@ files:
       value:
         type: string
         example: normal
+    - name: legacy_mode
+      description: |
+        Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+
+        When set to `true`, WMI is used to collect events.
+          /\ WARNING /\
+          This mode, by nature of the underlying technology, is significantly more resource intensive.
+
+        Setting this option to `false` is only supported on Agent versions 7 and above.
+      enabled: true
+      value:
+        type: boolean
+        display_default: true
+        example: false
+    - name: legacy_mode_v2
+      description: |
+        Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+
+        When set to `true`, the Python Event Log API is used to collect events.
+      value:
+        type: boolean
+        example: false
     - template: init_config/default
   - template: instances
     overrides:
@@ -58,8 +80,27 @@ files:
         channel (you cannot subscribe to Analytic or Debug channels).
 
         The path is required if `legacy_mode` is set to `false`.
+
+        The `path` option cannot be used with the `dd_security_events` option.
       value:
         type: string
+    - name: dd_security_events
+      description: |
+        Starting with Agent 7.54, you can automatically send Security Events to Datadog as Logs
+        by using the `dd_security_events` option.
+
+        Supported values:
+          - `low`: sends only the most important and crtical Security events
+          - `high`: sends a higher volume of Security events
+
+        The `dd_security_events` option cannot be used with the `path` option.
+      value:
+        type: string
+        display_default:
+        example: high
+        enum:
+        - high
+        - low
     - name: start
       description: |
         The point at which to start the event subscription.
@@ -110,7 +151,7 @@ files:
           /\ WARNING /\
           Due to a limitation in the Windows events API, the maximum filtering on event IDs is 20 IDs per instance.
           Because of this, you may need to split the ID filtering into multiple instances.
-          
+
         For advanced and more granular filtering, define a `query`.
 
         If `filters` nor `query` is specified, then all events from the subscribed `path` will be collected.
@@ -258,11 +299,6 @@ files:
         of the current user will be used.
       value:
         type: string
-    - name: timeout
-      description: The number of seconds to wait for new event signals.
-      value:
-        type: number
-        example: 5
     - name: payload_size
       description: |
         The number of events to request at a time.
@@ -279,20 +315,36 @@ files:
         This is useful for preventing duplicate events being sent as a consequence of Agent restarts.
       value:
         type: integer
-        display_default: <PAYLOAD_SIZE>
+    - name: legacy_mode_v2
+      description: |
+        Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
+
+        When set to `true`, the Python Event Log API is used to collect events.
+      value:
+        type: boolean
+        example: false
+    - name: timeout
+      description: |
+        The number of seconds to wait for new event signals.
+
+        Note: This is only used when `legacy_mode_v2` is set to `true`.
+        Starting in Agent version 7.50.0 this option is no longer applicable and can be removed.
+      value:
+        type: integer
+        example: 5
     - name: legacy_mode
       description: |
         Whether or not to use a mode of operation that is now unmaintained and will be removed in a future version.
 
-           /\ WARNING /\
-        This mode, by nature of the underlying technology, is significantly more resource intensive.
+        When set to `true`, WMI is used to collect events.
+          /\ WARNING /\
+          This mode, by nature of the underlying technology, is significantly more resource intensive.
 
         Setting this option to `false` is only supported on Agent versions 7 and above.
-      enabled: true
       value:
         type: boolean
         display_default: true
-        example: false
+        example: true
     - name: host
       description: |
         By default, the local machine's event logs are captured. To capture a remote
@@ -352,6 +404,8 @@ files:
         type: array
         items:
           type: string
+        example: 
+          - '1101'
     - name: message_filters
       description: |
         The `message_filters` filter instructs the check to only capture

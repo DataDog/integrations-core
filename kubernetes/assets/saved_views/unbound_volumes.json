@@ -1,0 +1,31 @@
+{
+  "name": "Unbound Volumes",
+  "query": "Filter by: -pv_phase:bound",
+  "page": "container_orchestration_persistent_volumes",
+  "type": "container",
+  "options": {
+    "sort": {
+      "id": "name",
+      "desc": true
+    },
+    "palette": "hostmap_blues",
+    "tab": "overview",
+    "metric": "persistentvolume.uptime",
+    "showNogroupObjects": false,
+    "groups": [],
+    "query": "-tag#pv_phase:bound",
+    "view": "persistentVolume",
+    "columns": [
+      "name",
+      "cluster",
+      "phase",
+      "storage_class",
+      "storage_type",
+      "storage_access_modes",
+      "storage_reclaim_policy",
+      "age",
+      "storage_capacity"
+    ],
+    "paletteFlip": false
+  }
+}

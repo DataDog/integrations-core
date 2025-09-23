@@ -6,6 +6,19 @@ import os
 FIELD_TO_PARSE = object()
 
 
+def get_github_user():
+    return (
+        os.environ.get('DD_GITHUB_USER', '')
+        or os.environ.get('GITHUB_USER', '')
+        # GitHub Actions
+        or os.environ.get('GITHUB_ACTOR', '')
+    )
+
+
+def get_github_token():
+    return os.environ.get('DD_GITHUB_TOKEN', '') or os.environ.get('GH_TOKEN', '') or os.environ.get('GITHUB_TOKEN', '')
+
+
 class ConfigurationError(Exception):
     def __init__(self, *args, location):
         self.location = location
@@ -66,7 +79,7 @@ class RootConfig(LazilyParsedConfig):
             if not isinstance(repo, str):
                 self.raise_error('must be a string')
             elif repo not in self.repos:
-                self.raise_error('unknown repository')
+                self.raise_error(f'unknown Repository: {repo!r}')
 
             self.raw_data['repo'] = repo
             self._field_repo = RepoConfig({'name': repo, 'path': self.repos[repo]}, ('repo',))
@@ -85,7 +98,7 @@ class RootConfig(LazilyParsedConfig):
             if not isinstance(agent, str):
                 self.raise_error('must be a string')
             elif agent not in self.agents:
-                self.raise_error('unknown Agent')
+                self.raise_error(f'unknown Agent: {agent!r}')
 
             self.raw_data['agent'] = agent
             self._field_agent = AgentConfig({'name': agent, 'config': self.agents[agent]}, ('agent',))
@@ -104,7 +117,7 @@ class RootConfig(LazilyParsedConfig):
             if not isinstance(org, str):
                 self.raise_error('must be a string')
             elif org not in self.orgs:
-                self.raise_error('unknown Org')
+                self.raise_error(f'unknown Org: {org!r}')
 
             self.raw_data['org'] = org
             self._field_org = OrgConfig({'name': org, 'config': self.orgs[org]}, ('org',))
@@ -190,13 +203,15 @@ class RootConfig(LazilyParsedConfig):
 
                 self._field_orgs = orgs
             else:
+                from ddev.e2e.agent.constants import AgentEnvVars
+
                 self._field_orgs = self.raw_data['orgs'] = {
                     'default': {
-                        'api_key': os.getenv('DD_API_KEY', ''),
-                        'app_key': os.getenv('DD_APP_KEY', ''),
-                        'site': os.getenv('DD_SITE', ''),
-                        'dd_url': os.getenv('DD_DD_URL', ''),
-                        'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
+                        'api_key': os.getenv(AgentEnvVars.API_KEY, ''),
+                        'app_key': os.getenv(AgentEnvVars.APP_KEY, ''),
+                        'site': os.getenv(AgentEnvVars.SITE, 'datadoghq.com'),
+                        'dd_url': os.getenv(AgentEnvVars.URL, 'https://app.datadoghq.com'),
+                        'log_url': os.getenv(AgentEnvVars.LOGS_URL, ''),
                     },
                 }
 
@@ -447,7 +462,7 @@ class GitHubConfig(LazilyParsedConfig):
 
                 self._field_user = user
             else:
-                self._field_user = self.raw_data['user'] = os.environ.get('DD_GITHUB_USER', '')
+                self._field_user = self.raw_data['user'] = get_github_user()
 
         return self._field_user
 
@@ -466,7 +481,7 @@ class GitHubConfig(LazilyParsedConfig):
 
                 self._field_token = token
             else:
-                self._field_token = self.raw_data['token'] = os.environ.get('DD_GITHUB_TOKEN', '')
+                self._field_token = self.raw_data['token'] = get_github_token()
 
         return self._field_token
 

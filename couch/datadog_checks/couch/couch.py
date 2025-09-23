@@ -5,10 +5,9 @@
 from __future__ import division
 
 import math
+from urllib.parse import quote, urljoin
 
 import requests
-from six import iteritems
-from six.moves.urllib.parse import quote, urljoin
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
@@ -115,14 +114,14 @@ class CouchDB1:
 
     def _create_metric(self, data, tags=None):
         overall_stats = data.get('stats', {})
-        for key, stats in iteritems(overall_stats):
-            for metric, val in iteritems(stats):
+        for key, stats in overall_stats.items():
+            for metric, val in stats.items():
                 if val['current'] is not None:
                     metric_name = '.'.join(['couchdb', key, metric])
                     self.gauge(metric_name, val['current'], tags=tags)
 
-        for db_name, db_stats in iteritems(data.get('databases', {})):
-            for name, val in iteritems(db_stats):
+        for db_name, db_stats in data.get('databases', {}).items():
+            for name, val in db_stats.items():
                 if name in ['doc_count', 'disk_size'] and val is not None:
                     metric_name = '.'.join(['couchdb', 'by_db', name])
                     metric_tags = list(tags)
@@ -152,43 +151,44 @@ class CouchDB1:
 
         couchdb['stats'] = overall_stats
 
-        # Next, get all database names.
-        endpoint = '/_all_dbs/'
+        if self.instance.get("enable_per_db_metrics", True):
+            # Next, get all database names.
+            endpoint = '/_all_dbs/'
 
-        url = urljoin(server, endpoint)
+            url = urljoin(server, endpoint)
 
-        # Get the list of included databases.
-        db_include = self.instance.get('db_include', self.instance.get('db_whitelist'))
-        db_include = set(db_include) if db_include else None
-        self.db_exclude.setdefault(server, [])
-        self.db_exclude[server].extend(self.instance.get('db_exclude', self.instance.get('db_blacklist', [])))
-        databases = set(self.agent_check.get(url, tags)) - set(self.db_exclude[server])
-        databases = databases.intersection(db_include) if db_include else databases
+            # Get the list of included databases.
+            db_include = self.instance.get('db_include', self.instance.get('db_whitelist'))
+            db_include = set(db_include) if db_include else None
+            self.db_exclude.setdefault(server, [])
+            self.db_exclude[server].extend(self.instance.get('db_exclude', self.instance.get('db_blacklist', [])))
+            databases = set(self.agent_check.get(url, tags)) - set(self.db_exclude[server])
+            databases = databases.intersection(db_include) if db_include else databases
 
-        max_dbs_per_check = self.instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
-        if len(databases) > max_dbs_per_check:
-            self.agent_check.warning('Too many databases, only the first %s will be checked.', max_dbs_per_check)
-            databases = list(databases)[:max_dbs_per_check]
+            max_dbs_per_check = self.instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
+            if len(databases) > max_dbs_per_check:
+                self.agent_check.warning('Too many databases, only the first %s will be checked.', max_dbs_per_check)
+                databases = list(databases)[:max_dbs_per_check]
 
-        for dbName in databases:
-            url = urljoin(server, quote(dbName, safe=''))
-            db_stats = None
-            try:
-                db_stats = self.agent_check.get(url, tags)
-            except requests.exceptions.HTTPError as e:
-                couchdb['databases'][dbName] = None
-                if (e.response.status_code == 403) or (e.response.status_code == 401):
-                    self.db_exclude[server].append(dbName)
+            for dbName in databases:
+                url = urljoin(server, quote(dbName, safe=''))
+                db_stats = None
+                try:
+                    db_stats = self.agent_check.get(url, tags)
+                except requests.exceptions.HTTPError as e:
+                    couchdb['databases'][dbName] = None
+                    if (e.response.status_code == 403) or (e.response.status_code == 401):
+                        self.db_exclude[server].append(dbName)
 
-                    self.agent_check.warning(
-                        'Database %s is not readable by the configured user. '
-                        'It will be added to the exclusion list. Please restart the agent to clear.',
-                        dbName,
-                    )
-                    del couchdb['databases'][dbName]
-                    continue
-            if db_stats is not None:
-                couchdb['databases'][dbName] = db_stats
+                        self.agent_check.warning(
+                            'Database %s is not readable by the configured user. '
+                            'It will be added to the exclusion list. Please restart the agent to clear.',
+                            dbName,
+                        )
+                        del couchdb['databases'][dbName]
+                        continue
+                if db_stats is not None:
+                    couchdb['databases'][dbName] = db_stats
         return couchdb
 
 
@@ -203,10 +203,10 @@ class CouchDB2:
         self.instance = agent_check.instance
 
     def _build_metrics(self, data, tags, prefix='couchdb'):
-        for key, value in iteritems(data):
+        for key, value in data.items():
             if "type" in value:
                 if value["type"] == "histogram":
-                    for metric, histo_value in iteritems(value["value"]):
+                    for metric, histo_value in value["value"].items():
                         if metric == "histogram":
                             continue
                         elif metric == "percentile":
@@ -220,7 +220,7 @@ class CouchDB2:
                 self._build_metrics(value, tags, "{0}.{1}".format(prefix, key))
 
     def _build_db_metrics(self, data, tags):
-        for key, value in iteritems(data['sizes']):
+        for key, value in data['sizes'].items():
             self.gauge("couchdb.by_db.{0}_size".format(key), value, tags)
 
         for key in ['doc_del_count', 'doc_count']:
@@ -232,34 +232,43 @@ class CouchDB2:
         ddtags.append("design_document:{0}".format(info['name']))
         ddtags.append("language:{0}".format(data['language']))
 
-        for key, value in iteritems(data['sizes']):
+        for key, value in data['sizes'].items():
             self.gauge("couchdb.by_ddoc.{0}_size".format(key), value, ddtags)
 
-        for key, value in iteritems(data['updates_pending']):
+        for key, value in data['updates_pending'].items():
             self.gauge("couchdb.by_ddoc.{0}_updates_pending".format(key), value, ddtags)
 
         self.gauge("couchdb.by_ddoc.waiting_clients", data['waiting_clients'], ddtags)
 
     def _build_system_metrics(self, data, tags, prefix='couchdb.erlang'):
-        for key, value in iteritems(data):
+        for key, value in data.items():
             if key == "message_queues":
-                for queue, val in iteritems(value):
+                for queue, val in value.items():
                     queue_tags = list(tags)
                     queue_tags.append("queue:{0}".format(queue))
                     if isinstance(val, dict):
-                        if 'count' in val:
-                            self.gauge("{0}.{1}.size".format(prefix, key), val['count'], queue_tags)
+                        if 'max' in val:
+                            self.gauge("{0}.{1}.max".format(prefix, key), val['max'], queue_tags)
+                        if 'min' in val:
+                            self.gauge("{0}.{1}.min".format(prefix, key), val['min'], queue_tags)
+                        if '50' in val:
+                            self.gauge("{0}.{1}.50".format(prefix, key), val['50'], queue_tags)
+                        if '90' in val:
+                            self.gauge("{0}.{1}.90".format(prefix, key), val['90'], queue_tags)
+                        if '99' in val:
+                            self.gauge("{0}.{1}.99".format(prefix, key), val['99'], queue_tags)
                         else:
-                            self.agent_check.log.debug(
-                                "Queue %s does not have a key 'count'. It will be ignored.", queue
-                            )
+                            self.agent_check.log.debug("Queue %s does not have any keys. It will be ignored.", queue)
                     else:
                         self.gauge("{0}.{1}.size".format(prefix, key), val, queue_tags)
             elif key == "distribution":
-                for node, metrics in iteritems(value):
+                for node, metrics in value.items():
                     dist_tags = list(tags)
                     dist_tags.append("node:{0}".format(node))
                     self._build_system_metrics(metrics, dist_tags, "{0}.{1}".format(prefix, key))
+            elif key == "distribution_events":
+                self.agent_check.log.debug("Skipping distribution events")
+                continue
             elif isinstance(value, dict):
                 self._build_system_metrics(value, tags, "{0}.{1}".format(prefix, key))
             else:
@@ -304,7 +313,7 @@ class CouchDB2:
                     if task.get(metric) is not None:
                         self.gauge("{0}.view_compaction.{1}".format(prefix, metric), task[metric], rtags)
 
-        for metric, count in iteritems(counts):
+        for metric, count in counts.items():
             if metric == "database_compaction":
                 metric = "db_compaction"
             self.gauge("{0}.{1}.count".format(prefix, metric), count, tags)
@@ -345,23 +354,24 @@ class CouchDB2:
             self._build_system_metrics(self._get_system_stats(server, name, tags), tags)
             self._build_active_tasks_metrics(self._get_active_tasks(server, name, tags), tags)
 
-            db_include = self.instance.get('db_include', self.instance.get('db_whitelist'))
-            db_exclude = self.instance.get('db_exclude', self.instance.get('db_blacklist', []))
-            scanned_dbs = 0
-            for db in self._get_dbs_to_scan(server, name, tags):
-                if (db_include is None or db in db_include) and (db not in db_exclude):
-                    db_tags = config_tags + ["db:{0}".format(db)]
-                    db_url = urljoin(server, db)
-                    self._build_db_metrics(self.agent_check.get(db_url, db_tags), db_tags)
-                    for dd in self.agent_check.get(
-                        "{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), db_tags
-                    )['rows']:
-                        self._build_dd_metrics(
-                            self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), db_tags), db_tags
-                        )
-                    scanned_dbs += 1
-                    if scanned_dbs >= max_dbs_per_check:
-                        break
+            if self.instance.get("enable_per_db_metrics", True):
+                db_include = self.instance.get('db_include', self.instance.get('db_whitelist'))
+                db_exclude = self.instance.get('db_exclude', self.instance.get('db_blacklist', []))
+                scanned_dbs = 0
+                for db in self._get_dbs_to_scan(server, name, tags):
+                    if (db_include is None or db in db_include) and (db not in db_exclude):
+                        db_tags = config_tags + ["db:{0}".format(db)]
+                        db_url = urljoin(server, db)
+                        self._build_db_metrics(self.agent_check.get(db_url, db_tags), db_tags)
+                        for dd in self.agent_check.get(
+                            "{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), db_tags
+                        )['rows']:
+                            self._build_dd_metrics(
+                                self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), db_tags), db_tags
+                            )
+                        scanned_dbs += 1
+                        if scanned_dbs >= max_dbs_per_check:
+                            break
 
     def _get_node_stats(self, server, name, tags):
         url = urljoin(server, "/_node/{0}/_stats".format(name))

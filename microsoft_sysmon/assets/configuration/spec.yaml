@@ -1,0 +1,11 @@
+name: Microsoft Sysmon
+files:
+- name: microsoft_sysmon.yaml
+  options:
+  - template: logs
+    example:
+    - type: windows_event
+      channel_path: "Microsoft-Windows-Sysmon/Operational"
+      source: microsoft-sysmon
+      service: microsoft-sysmon
+      sourcecategory: windowsevent

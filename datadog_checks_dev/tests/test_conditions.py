@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import sys
+from urllib.response import addinfourl
 
 import pytest
 
@@ -11,6 +12,11 @@ from datadog_checks.dev.errors import RetryError
 from datadog_checks.dev.subprocess import run_command
 
 from .common import not_windows_ci
+
+try:
+    from unittest import mock  # Python 3
+except ImportError:
+    import mock  # Python 2
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
@@ -88,6 +94,20 @@ class TestCheckDockerLogs:
         finally:
             run_command(['docker', 'compose', '-f', compose_file, 'down'], capture=True)
 
+    def test_matches_service(self):
+        compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
+        check_logging_service = CheckDockerLogs(compose_file, 'I am a logging service', service='logging-service')
+        check_vault = CheckDockerLogs(compose_file, 'Vault server started', service='logging-service')
+        try:
+            run_command(['docker', 'compose', '-f', compose_file, 'up', '-d'], check=True)
+            check_logging_service()
+
+            # Only the logs for the specified service should be matched
+            with pytest.raises(RetryError):
+                check_vault()
+        finally:
+            run_command(['docker', 'compose', '-f', compose_file, 'down'], capture=True)
+
 
 class TestCheckEndpoints:
     def test_fail(self):
@@ -97,6 +117,8 @@ class TestCheckEndpoints:
             check_endpoints()
 
     def test_success(self):
-        check_endpoints = CheckEndpoints(['https://google.com', 'https://bing.com'])
+        mock_resp = mock.create_autospec(addinfourl)
+        mock_resp.getcode.return_value = 200
+        check_endpoints = CheckEndpoints(['https://test.com'], send_request=lambda *args, **kwargs: mock_resp)
 
         check_endpoints()

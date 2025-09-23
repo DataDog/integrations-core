@@ -12,12 +12,18 @@
     "title": "Amazon MSK (Agent)",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::AWS",
-      "Category::Messaging",
-      "Category::Processing"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration",
+      "Product::Data Streams Monitoring"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-amazon-msk/"
+      }
     ]
   },
   "author": {
@@ -26,7 +32,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Amazon Kafka",
@@ -43,7 +48,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10080,
+      "auto_install": true
     },
     "dashboards": {
       "Amazon MSK Overview": "assets/dashboards/overview.json"

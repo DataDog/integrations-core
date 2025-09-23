@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
+from typing import Any  # noqa: F401
 
 import pytest
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 
 from .common import CHECK_CONFIG
 from .conftest import CONFLUENT_VERSION

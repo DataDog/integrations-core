@@ -1,0 +1,1200 @@
+{
+    "author_name": "Datadog",
+    "description": "## Quarkus\n\nThis dashboard lets you monitor your applications developed with the Quarkus framework.\n\n**Note: This dashboard only displays out of the box metrics. Tweak it as you add more metrics to your application.**\n\n## Useful Links\n- [Quarkus Homepage](https://quarkus.io/)\n- [How to add metrics in Quarkus](https://quarkus.io/guides/telemetry-micrometer-tutorial#inject-the-meterregistry)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "scope",
+            "prefix": "*"
+        }
+    ],
+    "title": "Quarkus Overview",
+    "widgets": [
+        {
+            "definition": {
+                "background_color": "vivid_pink",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_background": true,
+                            "has_border": false,
+                            "horizontal_align": "center",
+                            "sizing": "contain",
+                            "type": "image",
+                            "url": "/static/images/logos/quarkus_small.svg",
+                            "url_dark_theme": "/static/images/logos/quarkus_reversed_small.svg",
+                            "vertical_align": "center"
+                        },
+                        "id": 6355826195938372,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "## Quarkus\n\nThis dashboard lets you monitor your applications developed with the Quarkus framework.\n\n**Note: This dashboard only displays out of the box metrics. Tweak it as you add more metrics to your application.**\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 5685022835071772,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "## Useful Links\n- [Quarkus Homepage](https://quarkus.io/)\n- [How to add metrics in Quarkus](https://quarkus.io/guides/telemetry-micrometer-tutorial#inject-the-meterregistry)",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8921963557059570,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 3,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 4717263751542750,
+            "layout": {
+                "height": 6,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "See the overall status of your application. The health service check reports whether or not your application is up. The monitor alerts you if the maximum duration for a request exceeds a certain threshold.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 4528647613111842,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "quarkus.openmetrics.health",
+                            "group": "$host",
+                            "group_by": [],
+                            "grouping": "check",
+                            "tags": [],
+                            "time": {
+                                "hide_incomplete_cost_data": true
+                            },
+                            "title": "Quarkus Health Check",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 4975142618182494,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:(integration:quarkus) $host $scope",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "show_status": true,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "Monitor Summary",
+                            "type": "manage_status"
+                        },
+                        "id": 7873059155305294,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 2,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.process.uptime.seconds{$host,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Uptime",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 1731959649530802,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 2737008660122334,
+            "layout": {
+                "height": 6,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_pink",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "HTTP Server",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Inspect the HTTP server that powers your app. See how long requests are taking and which ones take the longest.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 5193429521650892,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.http_server.requests.seconds.max{$host,$scope} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Longest Request",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7305731361762322,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.http_server.requests.seconds.max{$host,$scope} by {uri}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "URIs with Long Requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 2683629281370146,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:quarkus.http_server.requests.seconds.sum{$host,$scope}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:quarkus.http_server.requests.seconds.count{$host,$scope}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "Average Request Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 7863748617868852,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "request"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.http_server.active_requests{$host,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Average Active Requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6228596123664624,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 880646291321010,
+            "layout": {
+                "height": 6,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Workers",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "See how your app's worker pool is handling the load. How many tasks are still pending? How many workers are active or idle?\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8617785027624516,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.worker_pool.queue.size{$host,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Pending Task Queue",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 644854410546956,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.worker_pool.ratio{$host,$scope} by {pool_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Ratio in Use",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1826528368737414,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.worker_pool.active{$host,$scope} by {pool_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Active",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5237208119415806,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.worker_pool.idle{$host,$scope} by {pool_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Idle",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8883107557756766,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 9,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 6903385921046370,
+            "layout": {
+                "height": 4,
+                "width": 12,
+                "x": 0,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Netty",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Netty is the Input/Output framework that powers the HTTP server that powers your app.\nHere you can see how many tasks Netty's executor component has. You can also see how much memory the allocator component is using.\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 4592221964090110,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.netty.eventexecutor.tasks_pending{$host,$scope} by {name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Executor Pending Tasks",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3722024219678152,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.netty.allocator.memory.used{$host,$scope} by {allocator_type}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Allocator Memory Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6066510717608396,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 2292681749961650,
+            "layout": {
+                "height": 4,
+                "width": 12,
+                "x": 0,
+                "y": 10
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "JVM",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Drill down into Java Virtual Machine's resource usage and threads.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 8647935968862592,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.jvm.threads.live_threads{$host,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Live Threads",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3286966128050442,
+                        "layout": {
+                            "height": 2,
+                            "width": 5,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.jvm.buffer.memory_used.bytes{$host,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Memory Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 1310734634712990,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 5,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.jvm.gc.live_data_size.bytes{$host,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Heap Memory After Reclamation",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8783807423028214,
+                        "layout": {
+                            "height": 2,
+                            "width": 5,
+                            "x": 7,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 162577727413360,
+            "layout": {
+                "height": 4,
+                "width": 12,
+                "x": 0,
+                "y": 14
+            }
+        },
+        {
+            "definition": {
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "System",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Compare your application's CPU usage to the system's. See how many files your application has open.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 6766579441141434,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.system.cpu.usage{$host,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Overall CPU Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6869157756021646,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.process.cpu.usage{$host,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Quarkus Process CPU Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7037939574141974,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:quarkus.process.files.open_files{$host,$scope}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Open Files",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3776485991633032,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 7768824260501814,
+            "layout": {
+                "height": 4,
+                "width": 12,
+                "x": 0,
+                "y": 18
+            }
+        },
+        {
+            "definition": {
+                "background_color": "white",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:quarkus $host $scope",
+                                        "sort": {
+                                            "column": "timestamp",
+                                            "order": "desc"
+                                        },
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 2489993328338580,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 7174398085271826,
+            "layout": {
+                "height": 4,
+                "width": 12,
+                "x": 0,
+                "y": 22
+            }
+        }
+    ]
+}

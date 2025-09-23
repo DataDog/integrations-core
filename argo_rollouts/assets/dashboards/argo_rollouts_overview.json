@@ -1,0 +1,1589 @@
+{
+    "author_name": "Datadog",
+    "description": "This dashboard provides a high-level overview of your Argo Rollouts deployment to help monitor your system.",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "argo_rollouts_name",
+            "prefix": "argo_rollouts_name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "argo_rollouts_namespace",
+            "prefix": "argo_rollouts_namespace"
+        }
+    ],
+    "title": "Argo Rollouts Overview",
+    "widgets": [
+        {
+            "definition": {
+                "banner_img": "/static/images/logos/argo-rollouts_large.svg",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "About Airflow",
+                "title_align": "left",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "This dashboard provides a high-level overview of your Argo Rollouts deployment to help monitor your system.\n",
+                            "font_size": "14",
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note"
+                        },
+                        "id": 8764466536847944,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "**Refer to the following resources for more information**\n\n- [Datadog Argo Rollouts documentation](https://docs.datadoghq.com/integrations/argo_rollouts/)\n\n- [Available Argo Rollouts metrics](https://docs.datadoghq.com/integrations/argo_rollouts/#metrics) \n",
+                            "font_size": "14",
+                            "has_padding": false,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 3842495357169892,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 2231814695135660,
+            "layout": {
+                "height": 5,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This is an overview of service checks, monitors and connect statuses of your Argo Rollouts rollouts.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "bottom",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2902990378881522,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "argo_rollouts.openmetrics.health",
+                            "group_by": [
+                                "host",
+                                "endpoint"
+                            ],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "title": "Endpoint Health",
+                            "title_align": "center",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 8408317728958814,
+                        "layout": {
+                            "height": 3,
+                            "width": 2,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "list",
+                            "hide_zero_counts": true,
+                            "query": "tag:integration:argo_rollouts",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "Argo Rollout Monitors",
+                            "type": "manage_status"
+                        },
+                        "id": 6941619982932726,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 2,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 5696881176276130,
+            "layout": {
+                "height": 5,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Rollout Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "orange",
+                            "content": "The Rollout Overview offers a high-level summary of the progress of rollouts by displaying the current phases in which a rollout is currently.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 2723872210367134,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Rollouts",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info{$host AND (phase:completed OR phase:progressing) AND $argo_rollouts_name AND $argo_rollouts_namespace} by {host,phase,argo_rollouts_name,argo_rollouts_namespace}.fill(null).rollup(max)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "green"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Rollouts Paused, Completed or Running",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6969157343069080,
+                        "layout": {
+                            "height": 4,
+                            "width": 8,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "hide_total": false,
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info{(phase:completed OR phase:progressing) AND $argo_rollouts_name AND $argo_rollouts_namespace} by {argo_rollouts_name,argo_rollouts_namespace,phase,host}.fill(null).rollup(max)"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Argo Rollouts Rollout (Progressing and Completed)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 1778634836926366,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Rollouts",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info{$host AND (phase:error OR phase:invalidspec OR phase:timeout OR phase:abort) AND $argo_rollouts_name AND $argo_rollouts_namespace} by {host,phase,argo_rollouts_name,argo_rollouts_namespace}.fill(null).rollup(max)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Rollouts Error, InvalidSpec, Timeout or Aborted",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6607706212612944,
+                        "layout": {
+                            "height": 4,
+                            "width": 8,
+                            "x": 0,
+                            "y": 5
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info{(phase:error OR phase:invalidspec OR phase:paused OR phase:timeout OR phase:abort) AND $argo_rollouts_name AND $argo_rollouts_namespace} by {argo_rollouts_name,argo_rollouts_namespace,phase,host}.fill(null).rollup(max)"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "semantic"
+                                    }
+                                }
+                            ],
+                            "title": "Argo Rollouts Rollout Stopped",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 8839918013555140,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 8,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 5146848120119716,
+            "layout": {
+                "height": 10,
+                "width": 12,
+                "x": 0,
+                "y": 5
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Replica Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "Replica Overview gives insight in the number of replicas that were involved in rollouts.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 1003487880782870,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "# Updated",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info.replicas.updated{$host,$argo_rollouts_name,$argo_rollouts_namespace} by {host,argo_rollouts_name,argo_rollouts_namespace}.rollup(max)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "green"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Replicas Updated",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5404706657024828,
+                        "layout": {
+                            "height": 3,
+                            "width": 5,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info.replicas.updated{$host,$argo_rollouts_name,$argo_rollouts_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": false
+                                }
+                            },
+                            "title": "Updated",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 4821644202297062,
+                        "layout": {
+                            "height": 3,
+                            "width": 1,
+                            "x": 5,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "# Updated",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info.replicas.desired{$host,$argo_rollouts_name,$argo_rollouts_namespace} by {host,argo_rollouts_name,argo_rollouts_namespace}.rollup(max)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "green"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Replicas Updated",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1895722492362954,
+                        "layout": {
+                            "height": 3,
+                            "width": 5,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info.replicas.desired{$host,$argo_rollouts_name,$argo_rollouts_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": false
+                                }
+                            },
+                            "title": "Desired",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 5807411566078004,
+                        "layout": {
+                            "height": 3,
+                            "width": 1,
+                            "x": 11,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "# available",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info.replicas.available{$host,$argo_rollouts_name,$argo_rollouts_namespace} by {host,argo_rollouts_name,argo_rollouts_namespace}.rollup(max)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "blue"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Replicas Available",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7484611690612728,
+                        "layout": {
+                            "height": 3,
+                            "width": 5,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info.replicas.available{$host,$argo_rollouts_name,$argo_rollouts_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": false
+                                }
+                            },
+                            "title": "Available",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2704617443725832,
+                        "layout": {
+                            "height": 3,
+                            "width": 1,
+                            "x": 5,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "# unavailable",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info.replicas.unavailable{$host,$argo_rollouts_name,$argo_rollouts_namespace} by {host,argo_rollouts_name,argo_rollouts_namespace}.rollup(max)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "red"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Replicas Unavailable",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2820819751433312,
+                        "layout": {
+                            "height": 3,
+                            "width": 5,
+                            "x": 6,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.info.replicas.unavailable{$host,$argo_rollouts_name,$argo_rollouts_namespace}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": false
+                                }
+                            },
+                            "title": "Unavailable",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 527311717387890,
+                        "layout": {
+                            "height": 3,
+                            "width": 1,
+                            "x": 11,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 997805704347092,
+            "layout": {
+                "height": 8,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 15
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Analysis and Experiment Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "The Analysis and Experiment metrics provide insights into the outcomes and performance of the analyses and experiments that Argo Rollouts conducts to facilitate progressive delivery.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 6603806841844440,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Analysis",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.analysis.run.info{$host AND $argo_rollouts_name AND $argo_rollouts_namespace AND (phase:pending OR phase:running or phase:successful)} by {host,argo_rollouts_namespace,argo_rollouts_name,phase}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Analysis Pending, Running or Completed",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1748614019823794,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Experiments",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.analysis.run.info{$host AND $argo_rollouts_name AND $argo_rollouts_namespace AND (phase:inconclusive OR phase:error OR phase:failed)} by {host,argo_rollouts_namespace,argo_rollouts_name,phase}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Analysis Failed, Inconclusive or Error",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5006293128307476,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.analysis.run.reconcile.sum{$host,$argo_rollouts_name,$argo_rollouts_namespace} by {host,argo_rollouts_namespace,argo_rollouts_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:argo_rollouts.analysis.run.reconcile.count{$host,$argo_rollouts_name,$argo_rollouts_namespace} by {host,argo_rollouts_name,argo_rollouts_namespace}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Average Analysis Reconciliation Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1736214669065694,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Experiments",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.experiment.info{$host AND $argo_rollouts_name AND $argo_rollouts_namespace AND (phase:pending OR phase:running or phase:successful)} by {host,argo_rollouts_namespace,argo_rollouts_name,phase}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "cool"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Experiments Pending, Running or Completed",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3750982141389870,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Experiments",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.experiment.info{$host AND $argo_rollouts_name AND $argo_rollouts_namespace AND (phase:inconclusive OR phase:error)} by {host,argo_rollouts_namespace,argo_rollouts_name,phase}.fill(null)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "warm"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Experiments Inconclusive or Error",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3912846556942890,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.experiment.reconcile.sum{$host,$argo_rollouts_name,$argo_rollouts_namespace} by {host,argo_rollouts_namespace,argo_rollouts_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:argo_rollouts.experiment.reconcile.count{$host,$argo_rollouts_name,$argo_rollouts_namespace} by {host,argo_rollouts_name,argo_rollouts_namespace}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Average Experiment Reconciliation Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8233517914207714,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 4
+                        }
+                    }
+                ]
+            },
+            "id": 2329173700124070,
+            "layout": {
+                "height": 8,
+                "width": 12,
+                "x": 0,
+                "y": 23
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Reconciliation Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "Argo Rollouts Reconciliation metrics provides insights into the performance of deployment operations.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4657909018135360,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Requests",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.controller.clientset.k8s.request.count{$host, $argo_rollouts_name, $argo_rollouts_namespace} by {host,kind,verb,argo_rollouts_namespace,status_code,argo_rollouts_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Number of Application Reconciliation Requests ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7296055873080438,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Avg Latency",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.reconcile.sum{$host, $argo_rollouts_name, $argo_rollouts_namespace} by {host,argo_rollouts_namespace,argo_rollouts_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:argo_rollouts.rollout.reconcile.count{$host, $argo_rollouts_name, $argo_rollouts_namespace} by {host,argo_rollouts_name,argo_rollouts_namespace}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Average Rollout Reconciliation Latency",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3701979557791958,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Errors",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.rollout.events.count{$host, $argo_rollouts_name, $argo_rollouts_namespace} by {host,argo_rollouts_name,argo_rollouts_namespace}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reconciliation Errors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 415998376020168,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 6806170119417452,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 31
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_green",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Go Runtime Metrics",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "green",
+                            "content": "Argo Rollouts is Golang based. The below metrics display Go runtime metrics that can help troubleshoot performance or bottleneck issues.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 3835605878712382,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Go Routines",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:argo_rollouts.go.goroutines{$host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Number of Go Routines",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3173587465117584,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "Memory",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:argo_rollouts.go.memstats.alloc_bytes{$host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Memory Allocated",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7231946441524838,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "alias": "CPU Seconds",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:argo_rollouts.process.cpu.seconds.count{$host} by {host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CPU Time in Seconds",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2995467774772788,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 5107141145008778,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 36
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Argo Rollouts Logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "orange",
+                            "content": "Argo Rollouts Logs gives near real-time insight on rollout progression through Kubernetes Pod logs.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 2805970512246304,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:argo_rollouts @$argo_rollouts_namespace ",
+                                        "sort": {
+                                            "column": "timestamp",
+                                            "order": "desc"
+                                        },
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "time": {},
+                            "title": "Argo Rollout Log Overview",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 5672390614018542,
+                        "layout": {
+                            "height": 5,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 7020278105163444,
+            "layout": {
+                "height": 7,
+                "width": 12,
+                "x": 0,
+                "y": 41
+            }
+        }
+    ]
+}

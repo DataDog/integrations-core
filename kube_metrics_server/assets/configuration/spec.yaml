@@ -20,3 +20,9 @@ files:
           because of load balancing. In this case, it is recommended to
           enable endpoint checks alongside the service check and use Autodiscovery
           to get the pod IP by setting `prometheus_url` to https://%%host%%:443/metrics
+    - name: health_url
+      description: |
+        URL for the kube-metrics-server health endpoint.
+      value:
+        type: string
+        example: http://localhost:443/livez

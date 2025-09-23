@@ -1,6 +1,9 @@
-import time
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 
-from six.moves.urllib.parse import urlsplit
+import time
+from urllib.parse import urlsplit
 
 from datadog_checks.mongo.api import MongoApi
 from datadog_checks.mongo.collectors.base import MongoCollector
@@ -21,6 +24,7 @@ class ReplicaCollector(MongoCollector):
         super(ReplicaCollector, self).__init__(check, tags)
         self._last_states = check.last_states_by_server
         self.hostname = self.extract_hostname_for_event(self.check._config.clean_server_name)
+        self.deployment_type = self.check.deployment_type
 
     def compatible_with(self, deployment):
         # Can only be run on mongod that are part of a replica set.
@@ -88,9 +92,18 @@ class ReplicaCollector(MongoCollector):
                     'replset:' + replset_name,
                 ],
             }
+
+            if self.check._config.add_node_tag_to_events:
+                event_payload['host'] = self.hostname
+                event_payload['tags'].append('mongo_node:' + node_hostname)
+
             if node_hostname == 'localhost':
                 # Do not submit events with a 'localhost' hostname.
+                if self.check._config.add_node_tag_to_events:
+                    event_payload['tags'][4] = "mongo_node:{}".format(self.hostname)
+
                 event_payload['host'] = self.hostname
+
             self.check.event(event_payload)
 
     def get_votes_config(self, api):
@@ -99,21 +112,21 @@ class ReplicaCollector(MongoCollector):
         raising authentication errors. And because authenticating on an arbiter is not allowed, the workaround
         in that case is to run the command directly on the primary."""
 
-        if api.deployment_type.is_arbiter:
+        if self.deployment_type.is_arbiter:
+            self.log.debug("Current node is arbiter. Collecting the replset from the primary instead.")
             try:
-                api = MongoApi(self.check._config, self.log, replicaset=api.deployment_type.replset_name)
-            except Exception:
+                api = MongoApi(self.check._config, self.log, replicaset=self.deployment_type.replset_name)
+            except Exception as e:
+                self.log.debug(str(e))
                 self.log.warning(
                     "Current node is an arbiter, the extra connection to the primary was unsuccessful."
                     " Votes metrics won't be reported."
                 )
                 return None
-
-        return api['local']['system.replset'].find_one()
+        return api['local']['system.replset'].find_one(max_time_ms=api._timeout)
 
     def collect(self, api):
-        db = api["admin"]
-        status = db.command('replSetGetStatus')
+        status = api.replset_get_status()
         result = {}
 
         # Find nodes: current node (ourself) and the primary
@@ -138,15 +151,17 @@ class ReplicaCollector(MongoCollector):
 
         # Collect the number of votes
         config = self.get_votes_config(api)
-        votes = 0
-        total = 0.0
-        for member in config.get('members', []):
-            total += member.get('votes', 1)
-            if member['_id'] == current['_id']:
-                votes = member.get('votes', 1)
-        result['votes'] = votes
-        result['voteFraction'] = votes / total
-        result['state'] = status['myState']
+        if config:
+            # local.system.replset not available on AWS DocumentDB
+            votes = 0
+            total = 0.0
+            for member in config.get('members', []):
+                total += member.get('votes', 1)
+                if member['_id'] == current['_id']:
+                    votes = member.get('votes', 1)
+            result['votes'] = votes
+            result['voteFraction'] = votes / total
+            result['state'] = status['myState']
         self._submit_payload({'replSet': result})
         if is_primary:
             # Submit events

@@ -87,6 +87,12 @@ jmx_metrics:
           bufferpool-wait-time:
             metric_type: gauge
             alias: kafka.producer.bufferpool_wait_time
+          bufferpool-wait-ratio:
+            metric_type: gauge
+            alias: kafka.producer.bufferpool_wait_ratio
+          bufferpool-wait-time-ns-total:
+            metric_type: gauge
+            alias: kafka.producer.bufferpool_wait_time_ns_total
           batch-size-avg:
             metric_type: gauge
             alias: kafka.producer.batch_size_avg
@@ -286,6 +292,13 @@ jmx_metrics:
           topic: $2
     - include:
         domain: 'kafka.consumer'
+        bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?)'
+        attribute:
+          fetch-rate:
+            metric_type: gauge
+            alias: kafka.consumer.fetch_rate
+    - include:
+        domain: 'kafka.consumer'
         bean_regex: 'kafka\.consumer:type=consumer-fetch-manager-metrics,client-id=(.*?),topic=(.*?)(?:,|$)'
         attribute:
           bytes-consumed-rate:
@@ -411,7 +424,7 @@ jmx_metrics:
             alias: kafka.request.produce.failed.rate
     - include:
         domain: 'kafka.network'
-        bean: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=Produce'
+        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=Produce(?:,version=.*)?'
         attribute:
           Count:
             metric_type: rate
@@ -428,14 +441,14 @@ jmx_metrics:
             alias: kafka.request.produce.time.99percentile
     - include:
         domain: 'kafka.network'
-        bean: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchConsumer'
+        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchConsumer(?:,version=.*)?'
         attribute:
           Count:
             metric_type: rate
             alias: kafka.request.fetch_consumer.rate
     - include:
         domain: 'kafka.network'
-        bean: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchFollower'
+        bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchFollower(?:,version=.*)?'
         attribute:
           Count:
             metric_type: rate

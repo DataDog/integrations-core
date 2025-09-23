@@ -110,18 +110,32 @@ def test_parse_capacity_tags():
     assert parse_capacity_tags(None) == []
     assert parse_capacity_tags("") == []
     res = parse_capacity_tags("aa/pod-1/node-2/aa")
-    assert all([a == b for a, b in zip(res, ['fabric_pod_id:1', 'node_id:2'])])
+    assert all(a == b for a, b in zip(res, ['fabric_pod_id:1', 'node_id:2']))
     res = parse_capacity_tags("aa/pod-/node-2/aa")
-    assert all([a == b for a, b in zip(res, ['node_id:2'])])
+    assert all(a == b for a, b in zip(res, ['node_id:2']))
     res = parse_capacity_tags("aa/pod-1/node-/aa")
-    assert all([a == b for a, b in zip(res, ['fabric_pod_id:1'])])
+    assert all(a == b for a, b in zip(res, ['fabric_pod_id:1']))
 
 
 def test_get_event_tags_from_dn():
     assert get_event_tags_from_dn(None) == []
     assert get_event_tags_from_dn("") == []
     res = get_event_tags_from_dn("aa/ap-AA/epg-BB/pod-1/node-2/ip-CC/cep-DD/BD-EE/aa")
-    assert all([a == b for a, b in zip(res, ['node:2', 'app:AA', 'bd:EE', 'mac:DD', 'ip:CC', 'epg:BB', 'pod:1'])])
+    assert all(
+        a == b
+        for a, b in zip(
+            res,
+            [
+                'node:2',
+                'app:AA',
+                'bd:EE',
+                'mac:DD',
+                'ip:CC',
+                'epg:BB',
+                'pod:1',
+            ],
+        )
+    )
 
 
 def test_get_hostname_from_dn():

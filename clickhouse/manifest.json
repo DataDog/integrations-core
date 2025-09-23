@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "668f43c1-bdd8-4686-bb92-d40f0c48fda9",
   "app_id": "clickhouse",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,13 @@
     "title": "ClickHouse",
     "media": [],
     "classifier_tags": [
+      "Category::Caching",
+      "Category::Data Stores",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "ClickHouse",
@@ -42,13 +44,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10078,
+      "auto_install": true
     },
     "dashboards": {
       "ClickHouse Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "clickhouse"
     }
   }
 }

@@ -1,0 +1,29 @@
+{
+    "total_apps": 4,
+    "apps": [
+        {
+            "id": "o7vx1kl85749k3f1",
+            "name": "example-app-1",
+            "machine_count": 2,
+            "network": "default"
+        },
+        {
+            "id": "4840jpkjkxo1ei63",
+            "name": "example-app-2",
+            "machine_count": 0,
+            "network": "default"
+        },
+        {
+            "id": "zg90akwdv84qvd47",
+            "name": "example-app-3",
+            "machine_count": 2,
+            "network": "default"
+        },
+        {
+            "id": "z4k69d4wp2n5js93",
+            "name": "example-app-4",
+            "machine_count": 1,
+            "network": "default"
+        }
+    ]
+}

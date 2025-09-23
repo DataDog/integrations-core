@@ -1,0 +1,6 @@
+Command: show topics
+                                                               All Msgs            Persistent Msgs
+  Topic Name                        SNFGEIBCTM  Subs  Durs     Msgs    Size        Msgs    Size
+  >                                 ----------     0     0        0     0.0 Kb        0     0.0 Kb
+  sample                            -------+--     1     1        0     0.0 Kb        0     0.0 Kb
+  topic.sample                      -------+--     0     0        0     0.0 Kb        0     0.0 Kb

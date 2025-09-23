@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ed426432-3df4-4ab8-ab2f-a5a85900c59b",
   "app_id": "airflow",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,12 @@
     "title": "Airflow",
     "media": [],
     "classifier_tags": [
+      "Category::Automation",
+      "Category::Log Collection",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Airflow",
@@ -42,13 +43,22 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "airflow"
+      ],
+      "source_type_id": 10083,
+      "auto_install": true
     },
     "dashboards": {
       "Airflow Overview": "assets/dashboards/overview.json"
     },
-    "logs": {
-      "source": "airflow"
+    "saved_views": {
+      "airflow_overview": "assets/saved_views/airflow_overview.json"
+    },
+    "monitors": {
+      "Task instances are failing": "assets/monitors/heartbeat_failures.json",
+      "DAG task ongoing duration is high": "assets/monitors/ongoing_duration.json"
     }
   }
 }

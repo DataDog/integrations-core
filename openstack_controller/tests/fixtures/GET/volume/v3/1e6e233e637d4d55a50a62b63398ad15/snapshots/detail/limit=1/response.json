@@ -1,0 +1,23 @@
+{
+    "snapshots": [
+        {
+            "id": "6e099852-b540-48ad-b01b-92fa6daed7ff",
+            "created_at": "2024-04-15T19:00:59.000000",
+            "updated_at": "2024-04-15T19:01:01.000000",
+            "name": "second_snapshot",
+            "description": "",
+            "volume_id": "2c5d27f7-6f96-4913-81f6-3ab9bd755c51",
+            "status": "available",
+            "size": 1,
+            "metadata": {},
+            "os-extended-snapshot-attributes:project_id": "c09ccb52462d49c89595d2194a367198",
+            "os-extended-snapshot-attributes:progress": "100%"
+        }
+    ],
+    "snapshots_links": [
+        {
+            "rel": "next",
+            "href": "http://127.0.0.1/volume/v3/c09ccb52462d49c89595d2194a367198/snapshots/detail?limit=1&marker=6e099852-b540-48ad-b01b-92fa6daed7ff"
+        }
+    ]
+}

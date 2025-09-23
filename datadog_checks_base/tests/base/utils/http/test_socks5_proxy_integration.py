@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 from requests.exceptions import ConnectTimeout, ProxyError
-from six import PY2
 
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.platform import Platform
@@ -11,7 +10,6 @@ from datadog_checks.dev.ci import running_on_ci, running_on_windows_ci
 
 pytestmark = [
     pytest.mark.integration,
-    pytest.mark.skipif(PY2, reason='Test flakes on py2'),
     pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI'),
     pytest.mark.skipif(running_on_ci(), reason='Test is failing on CI'),
 ]

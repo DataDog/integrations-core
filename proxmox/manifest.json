@@ -1,0 +1,84 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "39909ffc-71f0-4c0c-b75e-9951f1ff7d10",
+  "app_id": "proxmox",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "View performance information about all of your Proxmox resources ",
+    "title": "Proxmox",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::OS & System",
+      "Category::Cloud",
+      "Category::Network",
+      "Category::Event Management",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Events"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 48633189,
+      "source_type_name": "Proxmox",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "proxmox.",
+        "check": [
+          "proxmox.api.up",
+          "proxmox.cpu"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "pmxcfs",
+        "pve-firewall",
+        "pve-ha-crm",
+        "pve-ha-lrm",
+        "pveproxy",
+        "pvedaemon",
+        "pvescheduler",
+        "pvestatd",
+        "qmeventd"
+      ]
+    },
+    "logs": {
+      "source": "proxmox"
+    },
+    "dashboards": {
+      "Proxmox Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "CPU Usage is High on Proxmox VM": "assets/monitors/vm_cpu_usage.json",
+      "CPU Usage is High on Proxmox Node": "assets/monitors/node_cpu_usage.json",
+      "Memory Usage is High on Proxmox VM": "assets/monitors/vm_memory_usage.json",
+      "Memory Usage is High on Proxmox Node": "assets/monitors/node_memory_usage.json"
+    },
+    "saved_views": {
+      "proxmox_api_logs": "assets/saved_views/proxmox_api_logs.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

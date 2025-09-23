@@ -3,11 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from mock import MagicMock, Mock
 from pyVmomi import vim
-from six import iteritems
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -25,6 +24,8 @@ class MockedMOR(Mock):
         # Mocking
         super(MockedMOR, self).__init__(**kwargs)
 
+        self._serverGuid = None
+        self._moId = kwargs.get('moId', None)
         self.name = kwargs.get('name')
         self.parent = None
         self.parent_name = kwargs.get('parent_name', None)
@@ -88,7 +89,7 @@ def assertMOR(check, instance, name=None, spec=None, tags=None, count=None, subs
     instance_name = instance['name']
     candidates = []
 
-    mor_list = [mor for _, mors in iteritems(check.mor_objects_queue._objects_queue[instance_name]) for mor in mors]
+    mor_list = [mor for mors in check.mor_objects_queue._objects_queue[instance_name].values() for mor in mors]
 
     for mor in mor_list:
         if name is not None and name != mor['hostname']:
@@ -131,7 +132,7 @@ def get_mocked_server():
     # mock pyvmomi stuff
     all_mors = create_topology(os.path.join(HERE, 'fixtures', 'vsphere_topology.json'))
     root_folder_mock = next(mor for mor in all_mors if mor.name == "rootFolder")
-    event_mock = MagicMock(createdTime=datetime.utcnow())
+    event_mock = MagicMock(createdTime=datetime.now(timezone.utc))
     eventmanager_mock = MagicMock(latestEvent=event_mock)
     property_collector_mock = MagicMock()
     property_collector_mock.RetrievePropertiesEx.return_value = retrieve_properties_mock(all_mors)
@@ -146,11 +147,11 @@ def get_mocked_server():
 
 def mock_alarm_event(from_status='green', to_status='red', message='Some error', key=0, created_time=None):
     if created_time is None:
-        created_time = datetime.utcnow()
-    vm = MockedMOR(spec='VirtualMachine')
-    dc = MockedMOR(spec="Datacenter")
+        created_time = datetime.now(timezone.utc)
+    vm = MockedMOR(moId="vm1", spec='VirtualMachine')
+    dc = MockedMOR(moId="dc1", spec="Datacenter")
     dc_arg = vim.event.DatacenterEventArgument(datacenter=dc, name='dc1')
-    alarm = MockedMOR(spec="Alarm")
+    alarm = MockedMOR(moId="dc1", spec="Alarm")
     alarm_arg = vim.event.AlarmEventArgument(alarm=alarm, name='alarm1')
     entity = vim.event.ManagedEntityEventArgument(entity=vm, name='vm1')
     event = vim.event.AlarmStatusChangedEvent(

@@ -1,44 +1,143 @@
 # CHANGELOG - IBM i
 
-## 1.5.0 / 2022-10-28
+<!-- towncrier release notes start -->
 
-* [Added] Add `selected_message_queues` flag to filter message queues and improve performances. See [#12808](https://github.com/DataDog/integrations-core/pull/12808).
-* [Fixed] Produce CRITICAL service check if it cannot connect. See [#13114](https://github.com/DataDog/integrations-core/pull/13114).
+## 4.1.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Lift `pyodbc` dependency exclusion for macOS on AArch64/ARM64 ([#20812](https://github.com/DataDog/integrations-core/pull/20812))
+
+## 4.1.0 / 2025-01-25 / Agent 7.63.0
+
+***Added***:
+
+* Update dependencies ([#19430](https://github.com/DataDog/integrations-core/pull/19430))
+
+## 4.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 3.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+
+## 2.2.0 / 2024-02-16 / Agent 7.52.0
+
+***Added***:
+
+* Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
+
+## 2.1.0 / 2024-01-05 / Agent 7.51.0
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Add `cpu_usage.pct` metric from `ELAPSED_CPU_PERCENTAGE` retrieved from query ([#16332](https://github.com/DataDog/integrations-core/pull/16332))
+
+## 2.0.1 / 2023-10-26 / Agent 7.50.0
+
+***Fixed***:
+
+* Bump the `pyodbc` version to 5.0.1 ([#16041](https://github.com/DataDog/integrations-core/pull/16041))
+
+## 2.0.0 / 2023-08-10 / Agent 7.48.0
+
+***Changed***:
+
+* Bump the minimum base check version ([#15427](https://github.com/DataDog/integrations-core/pull/15427))
+
+***Added***:
+
+* Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
+
+***Fixed***:
+
+* Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
+
+## 1.5.1 / 2023-07-10 / Agent 7.47.0
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9 ([#14701](https://github.com/DataDog/integrations-core/pull/14701))
+
+## 1.5.0 / 2022-10-28 / Agent 7.41.0
+
+***Added***:
+
+* Add `selected_message_queues` flag to filter message queues and improve performances ([#12808](https://github.com/DataDog/integrations-core/pull/12808))
+
+***Fixed***:
+
+* Produce CRITICAL service check if it cannot connect ([#13114](https://github.com/DataDog/integrations-core/pull/13114))
 
 ## 1.4.1 / 2022-08-05 / Agent 7.39.0
 
-* [Fixed] Dependency updates. See [#12653](https://github.com/DataDog/integrations-core/pull/12653).
+***Fixed***:
+
+* Dependency updates ([#12653](https://github.com/DataDog/integrations-core/pull/12653))
 
 ## 1.4.0 / 2022-05-15 / Agent 7.37.0
 
-* [Added] Add option to select which queries to run. See [#11806](https://github.com/DataDog/integrations-core/pull/11806).
-* [Fixed] Fix enumerated integer validation. See [#11964](https://github.com/DataDog/integrations-core/pull/11964).
+***Added***:
+
+* Add option to select which queries to run ([#11806](https://github.com/DataDog/integrations-core/pull/11806))
+
+***Fixed***:
+
+* Fix enumerated integer validation ([#11964](https://github.com/DataDog/integrations-core/pull/11964))
 
 ## 1.3.0 / 2022-04-05 / Agent 7.36.0
 
-* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
-* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
+***Added***:
+
+* Upgrade dependencies ([#11726](https://github.com/DataDog/integrations-core/pull/11726))
+* Add metric_patterns options to filter all metric submission by a list of regexes ([#11695](https://github.com/DataDog/integrations-core/pull/11695))
 
 ## 1.2.0 / 2022-02-19 / Agent 7.35.0
 
-* [Added] Add `pyproject.toml` file. See [#11369](https://github.com/DataDog/integrations-core/pull/11369).
-* [Added] Add detailed CPU usage and status metrics. See [#11081](https://github.com/DataDog/integrations-core/pull/11081).
-* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
+***Added***:
+
+* Add `pyproject.toml` file ([#11369](https://github.com/DataDog/integrations-core/pull/11369))
+* Add detailed CPU usage and status metrics ([#11081](https://github.com/DataDog/integrations-core/pull/11081))
+
+***Fixed***:
+
+* Fix namespace packaging on Python 2 ([#11532](https://github.com/DataDog/integrations-core/pull/11532))
 
 ## 1.1.1 / 2022-01-08 / Agent 7.34.0
 
-* [Fixed] Add comment to autogenerated model files. See [#10945](https://github.com/DataDog/integrations-core/pull/10945).
+***Fixed***:
+
+* Add comment to autogenerated model files ([#10945](https://github.com/DataDog/integrations-core/pull/10945))
 
 ## 1.1.0 / 2021-11-13 / Agent 7.33.0
 
-* [Added] Log exceptions for troubleshooting. See [#10368](https://github.com/DataDog/integrations-core/pull/10368).
-* [Added] Add option to override default IBM i hostname. See [#10383](https://github.com/DataDog/integrations-core/pull/10383).
+***Added***:
+
+* Log exceptions for troubleshooting ([#10368](https://github.com/DataDog/integrations-core/pull/10368))
+* Add option to override default IBM i hostname ([#10383](https://github.com/DataDog/integrations-core/pull/10383))
 
 ## 1.0.1 / 2021-10-04 / Agent 7.32.0
 
-* [Fixed] Bump minimum base package. See [#10325](https://github.com/DataDog/integrations-core/pull/10325).
+***Fixed***:
+
+* Bump minimum base package ([#10325](https://github.com/DataDog/integrations-core/pull/10325))
 
 ## 1.0.0 / 2021-09-14
 
-* [Added] Add IBM i integration. See [#9992](https://github.com/DataDog/integrations-core/pull/9992).
+***Added***:
 
+* Add IBM i integration ([#9992](https://github.com/DataDog/integrations-core/pull/9992))

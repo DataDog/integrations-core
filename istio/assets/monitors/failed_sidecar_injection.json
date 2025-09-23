@@ -1,29 +1,36 @@
 {
-	"name": "[Istio] Increased number of failed sidecar injection requests",
-	"type": "query alert",
-	"query": "sum(last_5m):avg:istio.sidecar_injection.requests_total{*}.as_count() - avg:istio.sidecar_injection.success_total{*}.as_count() > 3",
-	"message": "Monitor Istio for failed sidecar injection requests. Increasing failed requests may signify other issues in your Istio mesh and requires attention.",
-	"tags": [
+  "version": 2,
+  "created_at": "2021-01-11",
+  "last_updated_at": "2021-01-11",
+  "title": "Number of failed Istio sidecar injection is high",
+  "tags": [
+    "integration:istio"
+  ],
+  "description": "Increased failed Istio sidecar injections indicate problems in applying sidecar proxies to containers. This can arise from configuration, resource constraints, network connectivity, control plane health, or version mismatches. The monitor highlights a potential issue that needs attention.",
+  "definition": {
+    "message": "Monitor Istio for failed sidecar injection requests. Increasing failed requests may signify other issues in your Istio mesh and requires attention.",
+    "name": "[Istio] Increased number of failed sidecar injection requests",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 3,
+        "warning": 1
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "sum(last_5m):avg:istio.sidecar_injection.requests_total{*}.as_count() - avg:istio.sidecar_injection.success_total{*}.as_count() > 3",
+    "tags": [
       "integration:istio"
     ],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 0,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 3,
-			"warning": 1
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Notify your team when there is more than 1 failed sidecar injection requesst in your Istio integration."
-	}
+    "type": "query alert"
+  }
 }

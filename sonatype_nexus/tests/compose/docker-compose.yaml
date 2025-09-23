@@ -1,0 +1,8 @@
+services:
+  nexus:
+    image: sonatype/nexus3:3.79.0
+    container_name: nexus
+    ports:
+      - "8081:8081"
+    volumes:
+      - /opt/sonatype/sonatype-work/nexus3/admin.password:/opt/sonatype/sonatype-work/nexus3/admin.password

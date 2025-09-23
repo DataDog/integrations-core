@@ -1,31 +1,26 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-# TODO: when we stop invoking Mypy with --py2, remove ignore and use f-strings
-# type: ignore
 from collections import ChainMap
 from contextlib import contextmanager, suppress
 
 import pywintypes
 import win32pdh
 
-from ....config import is_affirmative
-from ....errors import ConfigTypeError, ConfigurationError
-from ....utils.functions import raise_exception
-from ... import AgentCheck
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigTypeError, ConfigurationError
+from datadog_checks.base.utils.functions import raise_exception
+
 from .connection import Connection
 from .counter import PerfObject
-from .refresh import WindowsPerformanceObjectRefresher
 
 
 class PerfCountersBaseCheck(AgentCheck):
-    OBJECT_REFRESHER = WindowsPerformanceObjectRefresher()
     SERVICE_CHECK_HEALTH = 'windows.perf.health'
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
-
-        self.interval = self.OBJECT_REFRESHER.interval
 
         self.enable_health_service_check = is_affirmative(self.instance.get('enable_health_service_check', True))
 
@@ -42,9 +37,6 @@ class PerfCountersBaseCheck(AgentCheck):
         self._static_tags = None
 
         self.check_initializations.append(self.create_connection)
-
-        if self.interval > 0:
-            self.check_initializations.append(self.setup_refresher)
 
         self.check_initializations.append(self.configure_perf_objects)
 
@@ -81,7 +73,7 @@ class PerfCountersBaseCheck(AgentCheck):
             # https://mhammond.github.io/pywin32/win32pdh__CollectQueryData_meth.html
             win32pdh.CollectQueryData(self._connection.query_handle)
         except pywintypes.error as error:
-            message = 'Error querying performance counters: {}'.format(error.strerror)
+            message = f'Error querying performance counters: {error.strerror}'
             self.submit_health_check(self.CRITICAL, message=message)
             self.log.error(message)
             return
@@ -100,19 +92,19 @@ class PerfCountersBaseCheck(AgentCheck):
         config = self.get_config_with_defaults()
         server_tag = config.get('server_tag') or 'server'
         use_localized_counters = is_affirmative(self.init_config.get('use_localized_counters', False))
-        tags = ['{}:{}'.format(server_tag, self._connection.server)]
+        tags = [f'{server_tag}:{self._connection.server}']
         tags.extend(config.get('tags', []))
         self._static_tags = tuple(tags)
 
         for option_name in ('metrics', 'extra_metrics'):
             metric_config = config.get(option_name, {})
             if not isinstance(metric_config, dict):
-                raise ConfigTypeError('Setting `{}` must be a mapping'.format(option_name))
+                raise ConfigTypeError(f'Setting `{option_name}` must be a mapping')
 
             for object_name, object_config in metric_config.items():
                 if not isinstance(object_config, dict):
                     raise ConfigTypeError(
-                        'Performance object `{}` in setting `{}` must be a mapping'.format(object_name, option_name)
+                        f'Performance object `{object_name}` in setting `{option_name}` must be a mapping'
                     )
 
                 perf_object = self.get_perf_object(
@@ -127,13 +119,6 @@ class PerfCountersBaseCheck(AgentCheck):
         self._connection = Connection(self.instance)
         self.log.debug('Setting `server` to `%s`', self._connection.server)
         self._connection.connect()
-
-    def setup_refresher(self):
-        self.OBJECT_REFRESHER.add_server(self._connection.server)
-
-        # Expected for multiple calls
-        with suppress(RuntimeError):
-            self.OBJECT_REFRESHER.start()
 
     def get_perf_object(self, connection, object_name, object_config, use_localized_counters, tags):
         return PerfObject(self, connection, object_name, object_config, use_localized_counters, tags)
@@ -159,8 +144,6 @@ class PerfCountersBaseCheck(AgentCheck):
             self.__NAMESPACE__ = old_namespace
 
     def cancel(self):
-        self.OBJECT_REFRESHER.remove_server(self._connection.server)
-
         for perf_object in self.perf_objects:
             with suppress(Exception):
                 perf_object.clear()
@@ -200,12 +183,12 @@ class PerfCountersBaseCheckWithLegacySupport(PerfCountersBaseCheck):
                 metrics_config = updated_config['metrics'] = {}
                 for object_name, config in default_config['metrics'].items():
                     new_config = config.copy()
-                    new_config['name'] = '{}.{}'.format(self.__NAMESPACE__, new_config['name'])
+                    new_config['name'] = f'{self.__NAMESPACE__}.{new_config["name"]}'
                     metrics_config[object_name] = new_config
 
             # Ensure idempotency in case this method is called multiple times due to configuration errors
             if self.namespace:
-                self.SERVICE_CHECK_HEALTH = '{}.{}'.format(self.__NAMESPACE__, self.SERVICE_CHECK_HEALTH)
+                self.SERVICE_CHECK_HEALTH = f'{self.__NAMESPACE__}.{self.SERVICE_CHECK_HEALTH}'
 
             self.namespace = ''
 

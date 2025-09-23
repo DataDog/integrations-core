@@ -75,3 +75,33 @@ def test_malformed_event(aggregator, instance, dd_run_check, file, log_warning, 
 
     aggregator.assert_event("test_event1", count=0)
     assert log_warning in caplog.text
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_events_test(aggregator, dd_run_check, instance):
+    # Mock timestamps instead of using freezegun
+    # First run to set the initial timestamp to 2012-01-13
+    with mock.patch('datadog_checks.silk.check.get_timestamp', return_value=1326412800) as mock_timestamp:
+        check = SilkCheck('silk', {}, [instance])
+        assert check.latest_event_query == 1326412800
+        mock_timestamp.assert_called_once()
+
+    # Second run to get events between 2012-01-13 and 2012-01-14 and set the timestamp to 2012-01-14
+    # Event 1 is between 2012-01-13 and 2012-01-14
+    with mock.patch('datadog_checks.silk.check.get_timestamp', return_value=1326499200) as mock_timestamp:
+        dd_run_check(check)
+        aggregator.assert_event("Event 1", count=1)
+        aggregator.assert_event("Event 2", count=0)
+        assert check.latest_event_query == 1326499200
+        mock_timestamp.assert_called_once()
+
+    # Third run to get events between 2012-01-14 and 2012-01-15
+    # Event 2 is between 2012-01-14 and 2012-01-15
+    aggregator.reset()
+    with mock.patch('datadog_checks.silk.check.get_timestamp', return_value=1326585600) as mock_timestamp:
+        dd_run_check(check)
+        aggregator.assert_event("Event 1", count=0)
+        aggregator.assert_event("Event 2", count=1)
+        assert check.latest_event_query == 1326585600
+        mock_timestamp.assert_called_once()

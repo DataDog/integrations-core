@@ -34,7 +34,7 @@ def test():
     assert len(model_definitions) == 1
 
     files = model_definitions['test.yaml']
-    assert len(files) == 4
+    assert len(files) == 3
 
     validators_contents, validators_errors = files['validators.py']
     assert not validators_errors
@@ -56,61 +56,46 @@ def test():
         """
     )
 
-    defaults_contents, defaults_errors = files['defaults.py']
-    assert not defaults_errors
-    assert defaults_contents == normalize_yaml(
-        """
-        from datadog_checks.base.utils.models.fields import get_default_field_value
-
-
-        def instance_tags(field, value):
-            return get_default_field_value(field, value)
-        """
-    )
-
     instance_model_contents, instance_model_errors = files['instance.py']
     assert not instance_model_errors
     assert instance_model_contents == normalize_yaml(
         """
         from __future__ import annotations
 
-        from typing import Optional, Sequence
+        from typing import Optional
 
-        from pydantic import BaseModel, root_validator, validator
+        from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
         from datadog_checks.base.utils.functions import identity
         from datadog_checks.base.utils.models import validation
 
-        from . import defaults, validators
+        from . import validators
 
 
         class InstanceConfig(BaseModel):
-            class Config:
-                allow_mutation = False
-
+            model_config = ConfigDict(
+                validate_default=True,
+                arbitrary_types_allowed=True,
+                frozen=True,
+            )
             foo: str
-            tags: Optional[Sequence[str]]
+            tags: Optional[tuple[str, ...]] = None
 
-            @root_validator(pre=True)
+            @model_validator(mode='before')
             def _initial_validation(cls, values):
                 return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
-            @validator('*', pre=True, always=True)
-            def _ensure_defaults(cls, v, field):
-                if v is not None or field.required:
-                    return v
+            @field_validator('*', mode='before')
+            def _validate(cls, value, info):
+                field = cls.model_fields[info.field_name]
+                field_name = field.alias or info.field_name
+                if field_name in info.context['configured_fields']:
+                    value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
 
-                return getattr(defaults, f'instance_{field.name}')(field, v)
+                return validation.utils.make_immutable(value)
 
-            @validator('*')
-            def _run_validations(cls, v, field):
-                if not v:
-                    return v
-
-                return getattr(validators, f'instance_{field.name}', identity)(v, field=field)
-
-            @root_validator(pre=False)
-            def _final_validation(cls, values):
-                return validation.core.finalize_config(getattr(validators, 'finalize_instance', identity)(values))
+            @model_validator(mode='after')
+            def _final_validation(cls, model):
+                return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))
         """
     )

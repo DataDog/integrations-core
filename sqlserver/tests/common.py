@@ -3,6 +3,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from copy import deepcopy
 from itertools import chain
 
 from datadog_checks.dev import get_docker_hostname, get_here
@@ -12,15 +13,21 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
+    DATABASE_BACKUP_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
+    DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DBM_MIGRATED_METRICS,
     INSTANCE_METRICS,
-    INSTANCE_METRICS_TOTAL,
+    INSTANCE_METRICS_DATABASE_AO,
+    INSTANCE_METRICS_DATABASE_SINGLE,
+    TABLE_SIZE_METRICS,
     TASK_SCHEDULER_METRICS,
+    TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
-from datadog_checks.sqlserver.queries import get_query_file_stats
+
+from .utils import is_always_on
 
 
 def get_local_driver():
@@ -30,11 +37,14 @@ def get_local_driver():
     we need to define the 'FreeTDS' driver in odbcinst.ini
     """
     if ON_MACOS:
-        return '/usr/local/lib/libtdsodbc.so'
+        return '/opt/homebrew/Cellar/freetds/1.4.26/lib/libtdsodbc.so'
     elif ON_WINDOWS:
-        return '{ODBC Driver 17 for SQL Server}'
+        return '{ODBC Driver 18 for SQL Server}'
     else:
-        return 'FreeTDS'
+        driver = os.environ.get('LINUX_SQLSERVER_DRIVER')
+        if not driver or driver == 'odbc':
+            return '{ODBC Driver 18 for SQL Server}'
+        return f'{driver}'
 
 
 HOST = get_docker_hostname()
@@ -54,25 +64,44 @@ SERVER_METRICS = [
 ]
 
 SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
+SQLSERVER_ENGINE_EDITION = int(os.environ.get('SQLSERVER_ENGINE_EDITION'))
 
 
-def get_expected_file_stats_metrics():
-    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION)
-    return ["sqlserver." + c["name"] for c in query_file_stats["columns"] if c["type"] != "tag"]
+EXPECTED_FILE_STATS_METRICS = [
+    'sqlserver.files.io_stall',
+    'sqlserver.files.read_io_stall_queued',
+    'sqlserver.files.write_io_stall_queued',
+    'sqlserver.files.read_io_stall',
+    'sqlserver.files.write_io_stall',
+    'sqlserver.files.read_bytes',
+    'sqlserver.files.written_bytes',
+    'sqlserver.files.reads',
+    'sqlserver.files.writes',
+    'sqlserver.files.size_on_disk',
+]
 
+# SQL Server incremental sql fraction metrics require diffs in order to calculate
+# & report the metric, which means this requires a special unit/integration test coverage
+inc_perf_counter_metrics = [
+    ('sqlserver.latches.latch_wait_time', 'Average Latch Wait Time (ms)', ''),
+]
 
-EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
+EXPECTED_INSTANCE_METRICS = [metric for metric in INSTANCE_METRICS if metric not in inc_perf_counter_metrics]
 
 EXPECTED_DEFAULT_METRICS = (
     [
         m[0]
         for m in chain(
-            INSTANCE_METRICS,
+            EXPECTED_INSTANCE_METRICS,
             DBM_MIGRATED_METRICS,
-            INSTANCE_METRICS_TOTAL,
+            INSTANCE_METRICS_DATABASE_SINGLE,
             DATABASE_METRICS,
+            DATABASE_BACKUP_METRICS,
+            TEMPDB_FILE_SPACE_USAGE_METRICS,
+            TABLE_SIZE_METRICS,
         )
     ]
+    + DATABASE_INDEX_METRICS
     + SERVER_METRICS
     + EXPECTED_FILE_STATS_METRICS
 )
@@ -89,9 +118,10 @@ EXPECTED_METRICS = (
     + CUSTOM_METRICS
 )
 
-DBM_MIGRATED_METRICS_NAMES = set(m[0] for m in DBM_MIGRATED_METRICS)
-
+DBM_MIGRATED_METRICS_NAMES = {m[0] for m in DBM_MIGRATED_METRICS}
 EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES]
+DB_PERF_COUNT_METRICS_NAMES_SINGLE = {m[0] for m in INSTANCE_METRICS_DATABASE_SINGLE}
+DB_PERF_COUNT_METRICS_NAMES_AO = {m[0] for m in INSTANCE_METRICS_DATABASE_AO}
 
 # These AO metrics are collected using the new QueryExecutor API instead of BaseSqlServerMetric.
 EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY = [
@@ -105,14 +135,30 @@ EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY = [
     'sqlserver.ao.redo_rate',
     'sqlserver.ao.filestream_send_rate',
 ]
-EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = [
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_REPLICA_COMMON = [
     'sqlserver.ao.is_primary_replica',
     'sqlserver.ao.replica_status',
+]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_QUORUM_COMMON = [
     'sqlserver.ao.quorum_type',
     'sqlserver.ao.quorum_state',
+]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_MEMBER_COMMON = [
     'sqlserver.ao.member.type',
     'sqlserver.ao.member.state',
 ]
+EXPECTED_QUERY_EXECUTOR_AO_METRICS_COMMON = (
+    EXPECTED_QUERY_EXECUTOR_AO_METRICS_REPLICA_COMMON
+    + EXPECTED_QUERY_EXECUTOR_AO_METRICS_QUORUM_COMMON
+    + EXPECTED_QUERY_EXECUTOR_AO_METRICS_MEMBER_COMMON
+)
+
+EXPECTED_AGENT_JOBS_METRICS_COMMON = [
+    'sqlserver.agent.active_jobs.duration',
+    'sqlserver.agent.active_jobs.step_info',
+    'sqlserver.agent.active_session.duration',
+]
+
 # Our test environment does not have failover clustering enabled, so these metrics are not expected.
 # To test them follow this guide:
 # https://cloud.google.com/compute/docs/instances/sql-server/configure-failover-cluster-instance
@@ -136,7 +182,7 @@ INSTANCE_SQL = INSTANCE_SQL_DEFAULTS.copy()
 INSTANCE_SQL.update(
     {
         'connector': 'odbc',
-        'driver': '{ODBC Driver 17 for SQL Server}',
+        'driver': '{ODBC Driver 18 for SQL Server}',
         'include_task_scheduler_metrics': True,
         'include_db_fragmentation_metrics': True,
         'include_fci_metrics': True,
@@ -207,22 +253,76 @@ INIT_CONFIG_ALT_TABLES = {
     ]
 }
 
+OPERATION_TIME_METRICS = [
+    'simple_metrics',
+    'fraction_metrics',
+    'incr_fraction_metrics',
+]
 
-def assert_metrics(aggregator, expected_tags, dbm_enabled=False, hostname=None, database_autodiscovery=False):
+OPERATION_TIME_METRIC_NAME = 'dd.sqlserver.operation.time'
+
+E2E_OPERATION_TIME_METRIC_NAME = [
+    'dd.sqlserver.operation.time.{}'.format(suffix) for suffix in ('avg', 'max', '95percentile', 'count', 'median')
+]
+
+
+def assert_metrics(
+    instance,
+    aggregator,
+    check_tags,
+    service_tags,
+    dbm_enabled=False,
+    hostname=None,
+    database_autodiscovery=False,
+    dbs=None,
+):
     """
     Boilerplate asserting all the expected metrics and service checks.
     Make sure ALL custom metric is tagged by database.
     """
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
     expected_metrics = EXPECTED_METRICS
+    # if dbm is enabled, the integration does not emit certain metrics
+    # as they are emitted from the DBM backend
     if dbm_enabled:
-        dbm_excluded_metrics = [m[0] for m in DBM_MIGRATED_METRICS]
-        expected_metrics = [m for m in EXPECTED_METRICS if m not in dbm_excluded_metrics]
+        expected_metrics = [m for m in expected_metrics if m not in DBM_MIGRATED_METRICS_NAMES]
+
+    if database_autodiscovery:
+        # when autodiscovery is enabled, we should not double emit metrics,
+        # so we should assert for these separately with the proper tags
+        expected_metrics = [m for m in expected_metrics if m not in DB_PERF_COUNT_METRICS_NAMES_SINGLE]
+
+        for dbname in dbs:
+            tags = check_tags + ['database:{}'.format(dbname)]
+            for mname in DB_PERF_COUNT_METRICS_NAMES_SINGLE:
+                aggregator.assert_metric(mname, hostname=hostname, tags=tags)
+            if dbname == 'datadog_test-1' and is_always_on():
+                for mname in DB_PERF_COUNT_METRICS_NAMES_AO:
+                    aggregator.assert_metric(mname, hostname=hostname, tags=tags)
+    else:
+        # master does not have indexes so none of these metrics will be emitted
+        expected_metrics = [m for m in expected_metrics if m not in DATABASE_INDEX_METRICS]
     for mname in expected_metrics:
         assert hostname is not None, "hostname must be explicitly specified for all metrics"
         aggregator.assert_metric(mname, hostname=hostname)
-    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
+    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=service_tags)
+
+    operation_time_metric_tags = check_tags + ['agent_hostname:{}'.format(hostname)]
+    for operation_name in get_operation_time_metrics(instance):
+        aggregator.assert_metric(
+            OPERATION_TIME_METRIC_NAME,
+            tags=['operation:{}'.format(operation_name)] + operation_time_metric_tags,
+            hostname=hostname,
+            count=1,
+        )
+
     aggregator.assert_all_metrics_covered()
-    if not database_autodiscovery:
-        # if we're autodiscovering other databases then there will be duplicate metrics, one per database
-        aggregator.assert_no_duplicate_metrics()
+    aggregator.assert_no_duplicate_metrics()
+
+
+def get_operation_time_metrics(instance):
+    """
+    Return a list of all operation time metrics
+    """
+    operation_time_metrics = deepcopy(OPERATION_TIME_METRICS)
+    return operation_time_metrics

@@ -1,0 +1,1103 @@
+{
+  "title": "Cisco Secure Endpoint - Audit",
+  "description": "This dashboard provides detailed insights into various system activities, allowing comprehensive monitoring and analysis within the Cisco Secure Endpoint console.",
+  "widgets": [
+    {
+      "id": 7977005305479452,
+      "definition": {
+        "type": "image",
+        "url": "https://veruscorp.com/wp-content/uploads/2018/10/cisco-logo-transparent.png",
+        "url_dark_theme": "https://veruscorp.com/wp-content/uploads/2018/10/cisco-logo-transparent.png",
+        "sizing": "contain",
+        "margin": "md",
+        "has_background": true,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 7,
+        "height": 4
+      }
+    },
+    {
+      "id": 895197290009758,
+      "definition": {
+        "title": "Audit Logs Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4749882757073212,
+            "definition": {
+              "title": "Audit Generation Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "count of audit logs",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@created_at"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit $Event $Audit-Log-Type $Audit-Log-User"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 3683481337667528,
+            "definition": {
+              "title": "Total Log Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit $Event $Audit-Log-Type $Audit-Log-User"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 5,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 7,
+        "y": 0,
+        "width": 5,
+        "height": 7
+      }
+    },
+    {
+      "id": 3991714465309958,
+      "definition": {
+        "type": "note",
+        "content": "**Dashboard Overview**\n\n- The Cisco Secure Endpoint Audit dashboard provides detailed insights into various system activities, allowing comprehensive monitoring and analysis within the Cisco Secure Endpoint console. It includes total number of audit logs, total number of login attempts, top active users, top active objects and more.\n\nFor more information, see the [Cisco Secure Endpoint Integration Documentation](https://docs.datadoghq.com/integrations/cisco_secure_endpoint/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 7,
+        "height": 3
+      }
+    },
+    {
+      "id": 6860499387871322,
+      "definition": {
+        "title": "Datadog Cloud SIEM",
+        "title_align": "center",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7831201925879268,
+            "definition": {
+              "type": "note",
+              "content": "\nDatadog Cloud SIEM analyzes and correlates Cisco Secure Endpoint Audit logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 2999615130154060,
+            "definition": {
+              "title": "CRITICALs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bc303c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit status:critical $Event $Audit-Log-Type $Audit-Log-User"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 8598684972837014,
+            "definition": {
+              "title": "HIGHs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#d33043",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit status:high $Event $Audit-Log-Type $Audit-Log-User"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 7134698524366204,
+            "definition": {
+              "title": "Critical Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bc303c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit status:critical $Event $Audit-Log-Type $Audit-Log-User"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 8,
+              "height": 4
+            }
+          },
+          {
+            "id": 2954598030175142,
+            "definition": {
+              "title": "MEDIUMs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#e5a21c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit status:medium $Event $Audit-Log-Type $Audit-Log-User"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 8991496590750314,
+            "definition": {
+              "title": "LOWs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bc303c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit status:low $Event $Audit-Log-Type $Audit-Log-User"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 3,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 2392215481806336,
+            "definition": {
+              "title": "INFOs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#bc303c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit status:info $Event $Audit-Log-Type $Audit-Log-User"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 4,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 1488671728464516,
+            "definition": {
+              "title": "High Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#d33043",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit status:high $Event $Audit-Log-Type $Audit-Log-User"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 1107727324706400,
+            "definition": {
+              "title": "Medium Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "custom_bg_color": "#e5a21c",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit status:medium $Event $Audit-Log-Type $Audit-Log-User"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 12,
+        "height": 10
+      }
+    },
+    {
+      "id": 5002551954081818,
+      "definition": {
+        "title": "Audit Log Details",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5550730642709474,
+            "definition": {
+              "title": "Total Login Attempts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit @evt.name:sso_login $Audit-Log-Type $Audit-Log-User $Event"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "black_on_light_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 7057126546415430,
+            "definition": {
+              "title": "Audit Log Distribution by Event",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@evt.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit $Event $Audit-Log-Type $Audit-Log-User"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "table"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 4
+            }
+          },
+          {
+            "id": 8916415017032334,
+            "definition": {
+              "title": "Audit Log Distribution by Type",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@audit_log_type",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit $Event $Audit-Log-Type $Audit-Log-User"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 5
+            }
+          },
+          {
+            "id": 7537766763497406,
+            "definition": {
+              "title": "Top 10 Active Users",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@usr.name",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit $Event $Audit-Log-Type $Audit-Log-User"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8673719520768006,
+            "definition": {
+              "title": "Top 10 Active Objects",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "logs",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@item",
+                          "limit": 10,
+                          "sort": {
+                            "order": "desc",
+                            "aggregation": "count"
+                          }
+                        }
+                      ],
+                      "search": {
+                        "query": "source:cisco-secure-endpoint service:audit $Event $Audit-Log-Type $Audit-Log-User"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 9,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 7796268612602828,
+            "definition": {
+              "title": "Audit Log Details",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:cisco-secure-endpoint service:audit $Event $Audit-Log-Type $Audit-Log-User",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "evt.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "audit_log_type",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "usr.name",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "item",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "usr.id",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 13,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 17,
+        "width": 12,
+        "height": 18
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "Event",
+      "prefix": "@evt.name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Audit-Log-Type",
+      "prefix": "@audit_log_type",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "Audit-Log-User",
+      "prefix": "@usr.name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

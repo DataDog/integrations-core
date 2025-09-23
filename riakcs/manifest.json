@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "29e6a2b4-7f3a-4243-8e10-d065147c3da0",
   "app_id": "riak-cs",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,7 +16,14 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store"
+      "Category::Data Stores",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability"
+      }
     ]
   },
   "author": {
@@ -24,7 +32,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "RiakCS",
@@ -44,7 +51,9 @@
       },
       "process_signatures": [
         "riak-cs start"
-      ]
+      ],
+      "source_type_id": 110,
+      "auto_install": true
     },
     "dashboards": {
       "riakcs": "assets/dashboards/riakcs_dashboard.json"

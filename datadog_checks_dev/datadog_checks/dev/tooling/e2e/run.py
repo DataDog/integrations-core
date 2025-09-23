@@ -1,14 +1,20 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ..._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
-from ...ci import get_ci_env_vars
-from ...fs import chdir, file_exists, path_join
-from ...subprocess import run_command
-from ..commands.console import echo_debug
-from ..constants import get_root
-from ..utils import get_hatch_file
+import sys
+
+from datadog_checks.dev._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
+from datadog_checks.dev.ci import get_ci_env_vars
+from datadog_checks.dev.fs import chdir, file_exists, path_join
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.commands.console import echo_debug
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.utils import get_hatch_file
+
 from .format import parse_config_from_result
+
+_hatch = [sys.executable, "-m", "hatch", "env", "run", "--env"]
+_tox = [sys.executable, "-m", "tox", "--develop", "-e"]
 
 
 def _execute(check, command, env_vars):
@@ -30,13 +36,13 @@ def _execute(check, command, env_vars):
 def start_environment(check, env):
     env_vars = {E2E_TEAR_DOWN: 'false', 'PYTEST_ADDOPTS': '--exitfirst'}
     if file_exists(get_hatch_file(check)):
-        command = f'hatch env run --env {env} test'
+        command = _hatch + [env, 'test']
     else:
-        command = f'tox --develop -e {env}'
+        command = _tox + [env]
         env_vars['PYTEST_ADDOPTS'] += ' --benchmark-skip'
-        env_vars[
-            'TOX_TESTENV_PASSENV'
-        ] = f'{E2E_TEAR_DOWN} PROGRAM* USERNAME PYTEST_ADDOPTS {" ".join(get_ci_env_vars())}'
+        env_vars['TOX_TESTENV_PASSENV'] = (
+            f'{E2E_TEAR_DOWN} PROGRAM* USERNAME PYTEST_ADDOPTS {" ".join(get_ci_env_vars())}'
+        )
 
     result = _execute(check, command, env_vars)
     return parse_config_from_result(env, result)
@@ -45,14 +51,14 @@ def start_environment(check, env):
 def stop_environment(check, env, metadata=None):
     env_vars = {E2E_SET_UP: 'false', 'PYTEST_ADDOPTS': '--exitfirst'}
     if file_exists(get_hatch_file(check)):
-        command = f'hatch env run --env {env} test'
+        command = _hatch + [env, 'test']
         env_vars['PYTEST_ADDOPTS'] = '--exitfirst'
     else:
-        command = f'tox --develop -e {env}'
+        command = _tox + [env]
         env_vars['PYTEST_ADDOPTS'] += ' --benchmark-skip'
-        env_vars[
-            'TOX_TESTENV_PASSENV'
-        ] = f'{E2E_ENV_VAR_PREFIX}* {E2E_SET_UP} PROGRAM* USERNAME PYTEST_ADDOPTS {" ".join(get_ci_env_vars())}'
+        env_vars['TOX_TESTENV_PASSENV'] = (
+            f'{E2E_ENV_VAR_PREFIX}* {E2E_SET_UP} PROGRAM* USERNAME PYTEST_ADDOPTS {" ".join(get_ci_env_vars())}'
+        )
 
     env_vars.update((metadata or {}).get('env_vars', {}))
 

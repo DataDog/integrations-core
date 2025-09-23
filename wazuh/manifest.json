@@ -1,0 +1,101 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "5b1e3f2f-419d-4d9d-bb00-002b58e28835",
+  "app_id": "wazuh",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into the Wazuh alerts.",
+    "title": "Wazuh",
+    "media": [
+      {
+        "caption": "Wazuh - Cloud Security",
+        "image_url": "images/wazuh-cloud-security.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Wazuh - File Integrity Monitoring",
+        "image_url": "images/wazuh-file-integrity-monitoring.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Wazuh - Malware Detection",
+        "image_url": "images/wazuh-malware-detection.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Wazuh - MITRE ATT&CK",
+        "image_url": "images/wazuh-mitre-attack.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Wazuh - Overview",
+        "image_url": "images/wazuh-overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Wazuh - Security Operations",
+        "image_url": "images/wazuh-security-operations.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Wazuh - System",
+        "image_url": "images/wazuh-system.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Wazuh - Vulnerability Detection",
+        "image_url": "images/wazuh-vulnerability-detection.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Alerting",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 26101213,
+      "source_type_name": "Wazuh",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Wazuh - Overview": "assets/dashboards/wazuh_overview.json",
+      "Wazuh - File Integrity Monitoring": "assets/dashboards/wazuh_file_integrity_monitoring.json",
+      "Wazuh - Malware Detection": "assets/dashboards/wazuh_malware_detection.json",
+      "Wazuh - MITRE ATT&CK": "assets/dashboards/wazuh_MITRE_ATT&CK.json",
+      "Wazuh - Security Operations": "assets/dashboards/wazuh_security_operations.json",
+      "Wazuh - System": "assets/dashboards/wazuh_system.json",
+      "Wazuh - Vulnerability Detection": "assets/dashboards/wazuh_vulnerability_detection.json",
+      "Wazuh - Cloud Security": "assets/dashboards/wazuh_cloud_security.json"
+    },
+    "logs": {
+      "source": "wazuh"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

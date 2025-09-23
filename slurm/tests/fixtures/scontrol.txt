@@ -1,0 +1,4 @@
+PID      JOBID    STEPID   LOCALID GLOBALID
+3771     14       batch    0       0       
+3772     14       batch    -       -    
+3773     15       batch    0       0    

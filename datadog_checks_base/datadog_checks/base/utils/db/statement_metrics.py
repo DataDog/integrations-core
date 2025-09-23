@@ -13,9 +13,7 @@ class StatementMetrics:
 
         - Postgres: pg_stat_statements
         - MySQL: performance_schema.events_statements_summary_by_digest
-        - Oracle: V$SQLAREA
         - SQL Server: sys.dm_exec_query_stats
-        - DB2: mon_db_summary
 
     These tables are monotonically increasing, so the metrics are computed from the difference
     in values between check runs.
@@ -24,7 +22,7 @@ class StatementMetrics:
     def __init__(self):
         self._previous_statements = {}
 
-    def compute_derivative_rows(self, rows, metrics, key):
+    def compute_derivative_rows(self, rows, metrics, key, execution_indicators=None):
         """
         Compute the first derivative of column-based metrics for a given set of rows. This function
         takes the difference of the previous check run's values and the current check run's values
@@ -38,36 +36,31 @@ class StatementMetrics:
 
         This function resets the statement cache so it should only be called once per check run.
 
-        - **rows** (_List[dict]_) - rows from current check run
-        - **metrics** (_List[str]_) - the metrics to compute for each row
-        - **key** (_callable_) - function for an ID which uniquely identifies a row across runs
+        :params rows (_List[dict]_): rows from current check run
+        :params metrics (_List[str]_): the metrics to compute for each row
+        :params key (_callable_): function for an ID which uniquely identifies a row across runs
+        :params execution_indicators (_List[str]_): list of metrics that must change to consider a query as executed.
+            These are typically metrics that increment only when a query actually executes, such as:
+            - PostgreSQL: 'calls' from pg_stat_statements
+            - MySQL: 'exec_count' from performance_schema.events_statements_summary_by_digest
+            - SQL Server: 'execution_count' from sys.dm_exec_query_stats
+            This helps filter out cases where a normalized query was evicted then re-inserted with same call count
+            (usually 1) and slight duration change. In this case, the new normalized query entry should be treated
+            as the baseline for future diffs.
+        :return (_List[dict]_): a list of rows with the first derivative of the metrics
         """
         result = []
-        new_cache = {}
         metrics = set(metrics)
+        if execution_indicators:
+            execution_indicators = set(execution_indicators)
 
-        rows = _merge_duplicate_rows(rows, metrics, key)
-        if len(rows) > 0:
-            dropped_metrics = metrics - set(rows[0].keys())
-            if dropped_metrics:
-                logger.warning(
-                    'Some statement metrics are not available from the table: %s', ','.join(m for m in dropped_metrics)
-                )
+        merged_rows, dropped_metrics = _merge_duplicate_rows(rows, metrics, key)
+        if dropped_metrics:
+            logger.warning(
+                'Some statement metrics are not available from the table: %s', ','.join(m for m in dropped_metrics)
+            )
 
-        for row in rows:
-            row_key = key(row)
-            if row_key in new_cache:
-                logger.error(
-                    'Unexpected collision in cached query metrics. Dropping existing row, row_key=%s new=%s dropped=%s',
-                    row_key,
-                    row,
-                    new_cache[row_key],
-                )
-
-            # Set the row on the new cache to be checked the next run. This should happen for every row, regardless of
-            # whether a metric is submitted for the row during this run or not.
-            new_cache[row_key] = row
-
+        for row_key, row in merged_rows.items():
             prev = self._previous_statements.get(row_key)
             if prev is None:
                 continue
@@ -84,6 +77,12 @@ class StatementMetrics:
             # 2. No changes since the previous run: There is no need to store metrics of 0, since that is implied by
             #    the absence of metrics. On any given check run, most rows will have no difference so this optimization
             #    avoids having to send a lot of unnecessary metrics.
+            #
+            # 3. Execution indicators: If execution_indicators is specified, only consider a query as changed if at
+            #    least one of the execution indicator metrics has changed. This helps filter out cases where an old or
+            #    less frequently executed normalized query was evicted due to the stats table being full, and then
+            #    re-inserted to the stats table with a small call count and slight duration change. In this case,
+            #    the new normalized query entry should be treated as the baseline for future diffs.
 
             diffed_row = {k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()}
 
@@ -94,13 +93,20 @@ class StatementMetrics:
                 # of potentially including truncated rows that exceed previous run counts.
                 continue
 
+            # If execution_indicators is specified, check if any of the execution indicator metrics have changed
+            if execution_indicators:
+                indicator_columns = execution_indicators & metric_columns
+                if not any(diffed_row[k] > 0 for k in indicator_columns):
+                    continue
+
             # No changes to the query; no metric needed
             if all(diffed_row[k] == 0 for k in metric_columns):
                 continue
 
             result.append(diffed_row)
 
-        self._previous_statements = new_cache
+        self._previous_statements.clear()
+        self._previous_statements = merged_rows
 
         return result
 
@@ -111,23 +117,22 @@ def _merge_duplicate_rows(rows, metrics, key):
     with the sum of the stats of all duplicates. This is motivated by database integrations such as postgres
     that can report many instances of a query that are considered the same after the agent normalization.
 
-    - **rows** (_List[dict]_) - rows from current check run
-    - **metrics** (_List[str]_) - the metrics to compute for each row
-    - **key** (_callable_) - function for an ID which uniquely identifies a query row across runs
+    :param rows (_List[dict]_): rows from current check run
+    :param metrics (_List[str]_): the metrics to compute for each row
+    :param key (_callable_): function for an ID which uniquely identifies a query row across runs
+    :return (_Tuple[Dict[str, dict], Set[str]_): a dictionary of merged rows and a set of dropped metrics
     """
-
     queries_by_key = {}
+    dropped_metrics = set()
     for row in rows:
-        merged_row = dict(row)
-
-        query_key = key(merged_row)
-
+        query_key = key(row)
         if query_key in queries_by_key:
-            merged_state = queries_by_key[query_key]
-            queries_by_key[query_key] = {
-                k: merged_row[k] + merged_state[k] if k in metrics else merged_state[k] for k in merged_state.keys()
-            }
+            for metric in metrics:
+                if metric in row:
+                    queries_by_key[query_key][metric] = queries_by_key[query_key].get(metric, 0) + row[metric]
+                else:
+                    dropped_metrics.add(metric)
         else:
-            queries_by_key[query_key] = merged_row
+            queries_by_key[query_key] = row
 
-    return list(queries_by_key.values())
+    return queries_by_key, dropped_metrics

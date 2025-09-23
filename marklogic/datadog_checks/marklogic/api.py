@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: F401
 
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import RequestsWrapper  # noqa: F401
 
 from .constants import BASE_ENDPOINT
 
@@ -43,7 +43,7 @@ class MarkLogicApi(object):
 
         return self.http_get(route, params)
 
-    def get_requests_data(self, resource=None, name=None, group=None):
+    def get_requests_data(self, resource=None, name=None, group=None):  # SKIP_HTTP_VALIDATION
         # type: (str, str, str) -> Dict[str, Any]
         """
         https://docs.marklogic.com/REST/GET/manage/v2/requests

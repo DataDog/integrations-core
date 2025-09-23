@@ -21,7 +21,7 @@ files:
         disable_generic_tags.enabled: True
         disable_generic_tags.description: |
             Generic tags such as `host` will be replaced by `apache_host` to avoid
-            getting mixed with other integraton tags.
+            getting mixed with other integration tags.
   - template: logs
     example:
     - type: file

@@ -2,15 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
-from datadog_checks.dev.tooling.commands.env.check import check_run
-from datadog_checks.dev.tooling.commands.env.edit import edit
-from datadog_checks.dev.tooling.commands.env.ls import ls
-from datadog_checks.dev.tooling.commands.env.prune import prune
-from datadog_checks.dev.tooling.commands.env.reload import reload_env
-from datadog_checks.dev.tooling.commands.env.shell import shell
-from datadog_checks.dev.tooling.commands.env.start import start
-from datadog_checks.dev.tooling.commands.env.stop import stop
-from datadog_checks.dev.tooling.commands.env.test import test
+
+from ddev.cli.env.agent import agent
+from ddev.cli.env.check import check
+from ddev.cli.env.config import config
+from ddev.cli.env.reload import reload_command
+from ddev.cli.env.shell import shell
+from ddev.cli.env.show import show
+from ddev.cli.env.start import start
+from ddev.cli.env.stop import stop
+from ddev.cli.env.test import test_command
 
 
 @click.group(short_help='Manage environments')
@@ -20,12 +21,12 @@ def env():
     """
 
 
-env.add_command(check_run)
-env.add_command(edit)
-env.add_command(ls)
-env.add_command(prune)
-env.add_command(reload_env)
+env.add_command(agent)
+env.add_command(check)
+env.add_command(config)
+env.add_command(reload_command)
 env.add_command(shell)
+env.add_command(show)
 env.add_command(start)
 env.add_command(stop)
-env.add_command(test)
+env.add_command(test_command)

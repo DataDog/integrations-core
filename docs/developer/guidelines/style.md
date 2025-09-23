@@ -46,23 +46,30 @@ A `flake8` plugin for ensuring a consistent logging format. We enable:
 
 ## [Mypy][mypy-github]
 
-A comment-based type checker allowing a mix of dynamic and static typing. This is optional for now. In order to enable `mypy` for a specific integration, open its `tox.ini` file and add the 2 lines in the correct section:
+A comment-based type checker allowing a mix of dynamic and static typing. This is optional for now. In order to enable `mypy` for a specific integration, open its `hatch.toml` file and add the lines in the correct section:
 
 ```
-[testenv]
-dd_check_types = true
-dd_mypy_args = <FLAGS> --py2 datadog_checks/ tests/
+[env.collectors.datadog-checks]
+check-types: true
+mypy-args = [
+    "--py2",
+    "--install-types",
+    "--non-interactive",
+    "datadog_checks/",
+    "tests/",
+]
+mypy-deps = [
+  "types-mock==0.1.5",
+]
 ...
 ```
 
-The `dd_mypy_args` defines the [mypy command line option][mypy-command-line] for this specific integration. `--py2` is here to make sure the integration is Python2.7 compatible. Here are some useful flags you can add:
+The `mypy-args` defines the [mypy command line option][mypy-command-line] for this specific integration. `--py2` is here to make sure the integration is Python2.7 compatible. Here are some useful flags you can add:
 
 - `--check-untyped-defs`: Type-checks the interior of functions without type annotations.
 - `--disallow-untyped-defs`: Disallows defining functions without type annotations or with incomplete type annotations.
 
 The `datadog_checks/ tests/` arguments represent the list of files that `mypy` should type check. Feel free to edit them as desired, including removing `tests/` (if you'd prefer to not type-check the test suite), or targeting specific files (when doing partial type checking).
-
-For a complete example, see the [`datadog_checks_base` tox configuration][datadog-checks-base-tox-ini].
 
 Note that there is a default configuration in the [`mypy.ini`][mypy-ini] file.
 

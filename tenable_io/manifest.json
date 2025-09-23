@@ -1,0 +1,65 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "18788ece-f752-4584-a4e9-6652eaad80b5",
+  "app_id": "tenable-io",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Tenable.io logs.",
+    "title": "Tenable.io",
+    "media": [
+      {
+        "caption": "Tenable.io - Activity Summary",
+        "image_url": "images/tenable_io_activity_summary.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Tenable.io - Vulnerability Summary",
+        "image_url": "images/tenable_io_vulnerability_summary.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Compliance",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 32769000,
+      "source_type_name": "Tenable.io",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Tenable.io - Activity Summary": "assets/dashboards/tenable_io_activity_summary.json",
+      "Tenable.io - Vulnerability Summary": "assets/dashboards/tenable_io_vulnerability_summary.json"
+    },
+    "monitors": {
+      "Automatic asset age out activity detected": "assets/monitors/automatic_asset_age_out_activity.json",
+      "Multiple asset deletion activities detected": "assets/monitors/asset_deletion_activity.json",
+      "Multiple user impersonation activities detected": "assets/monitors/user_impersonation_activity.json"
+    },
+    "logs": {
+      "source": "tenable-io"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

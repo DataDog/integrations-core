@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "created_at": "2023-08-01",
+  "last_updated_at": "2023-08-01",
+  "title": "Sync Jobs are taking a longer time than usual",
+  "tags": [
+    "integration:airbyte"
+  ],
+  "description": "A sync job is an individual invocation of the Airbyte pipeline to synchronize data from a source to a destination data store. This monitor tracks the running time of each of these jobs comparing it to their historic performance.",
+  "definition": {
+    "message": "{{#is_alert}}\n{{value}}% jobs are taking too long to complete which is higher than the threshold of {{ok_threshold}}%.\n{{/is_alert}} \n\n{{#is_recovery}}\nThe share of long-running jobs is back to normal!\n{{/is_recovery}}",
+    "name": "Airbyte: Too Many Long-Running Jobs",
+    "options": {
+      "include_tags": false,
+      "new_host_delay": 300,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "silenced": {},
+      "thresholds": {
+        "critical": 5
+      }
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:airbyte.metrics_reporter.num_unusually_long_syncs{*} / avg:airbyte.metrics_reporter.num_running_jobs{*} * 100 > 5",
+    "restricted_roles": null,
+    "tags": [
+      "integration:airbyte"
+    ],
+    "type": "query alert"
+  }
+}

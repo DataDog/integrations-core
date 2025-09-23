@@ -56,19 +56,17 @@ zk_max_file_descriptor_count    4096
 ```
 
 """
+
 import re
 import socket
 import struct
 from collections import defaultdict
 from contextlib import closing
-from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
+from io import StringIO
 
-from six import PY3, StringIO, iteritems
+from packaging.version import Version
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode, is_affirmative
-
-if PY3:
-    long = int
 
 
 class ZKConnectionFailure(Exception):
@@ -101,7 +99,7 @@ class ZookeeperCheck(AgentCheck):
     # example match:
     # "Zookeeper version: 3.4.10-39d3a4f269333c922ed3db283be479f9deacaa0f, built on 03/23/2017 10:13 GMT"
     # This regex matches the entire version rather than <major>.<minor>.<patch>
-    METADATA_VERSION_PATTERN = re.compile('Zookeeper version: ([^,]+)')
+    METADATA_VERSION_PATTERN = re.compile(r'\w+ version: v?([^,]+)')
     METRIC_TAGGED_PATTERN = re.compile(r'(\w+){(\w+)="(.+)"}\s+(\S+)')
 
     SOURCE_TYPE_NAME = 'zookeeper'
@@ -116,7 +114,10 @@ class ZookeeperCheck(AgentCheck):
         self.host = self.instance.get('host', 'localhost')
         self.port = int(self.instance.get('port', 2181))
         self.timeout = float(self.instance.get('timeout', 3.0))
-        self.expected_mode = (self.instance.get('expected_mode') or '').strip()
+        self.expected_mode = self.instance.get('expected_mode') or []
+        if isinstance(self.expected_mode, str):
+            self.expected_mode = [self.expected_mode]
+        self.expected_mode = [x.strip() for x in self.expected_mode]
         self.base_tags = list(set(self.instance.get('tags', [])))
         self.sc_tags = ["host:{0}".format(self.host), "port:{0}".format(self.port)] + self.base_tags
         self.should_report_instance_mode = is_affirmative(self.instance.get("report_instance_mode", True))
@@ -146,7 +147,7 @@ class ZookeeperCheck(AgentCheck):
                 message = None
             else:
                 status = AgentCheck.WARNING
-                message = u'Response from the server: %s' % ruok
+                message = 'Response from the server: %s' % ruok
         finally:
             self.service_check('zookeeper.ruok', status, message=message, tags=self.sc_tags)
 
@@ -178,16 +179,19 @@ class ZookeeperCheck(AgentCheck):
                 self.report_instance_mode(mode)
 
             if self.expected_mode:
-                if mode == self.expected_mode:
+                if mode in self.expected_mode:
                     status = AgentCheck.OK
                     message = None
                 else:
                     status = AgentCheck.CRITICAL
-                    message = u"Server is in %s mode but check expects %s mode" % (mode, self.expected_mode)
+                    message = "Server is in %s mode but check expects %s mode" % (
+                        mode,
+                        ' or '.join(self.expected_mode),
+                    )
                 self.service_check('zookeeper.mode', status, message=message, tags=self.sc_tags)
 
         # Read metrics from the `mntr` output
-        if zk_version and LooseVersion(zk_version) > LooseVersion("3.4.0"):
+        if zk_version and Version(zk_version) > Version("3.4.0"):
             try:
                 mntr_out = self._send_command('mntr')
             except ZKConnectionFailure:
@@ -220,7 +224,7 @@ class ZookeeperCheck(AgentCheck):
         tags = self.base_tags + ['mode:%s' % mode]
         self.gauge('zookeeper.instances', 1, tags=tags)
         gauges[mode] = 1
-        for k, v in iteritems(gauges):
+        for k, v in gauges.items():
             gauge_name = 'zookeeper.instances.%s' % k
             self.gauge(gauge_name, v, tags=self.base_tags)
 
@@ -229,7 +233,8 @@ class ZookeeperCheck(AgentCheck):
         chunk_size = 1024
         max_reads = 10000
         buf = StringIO()
-        sock.sendall(ensure_bytes(command))
+        # Zookeeper expects a newline character at the end of commands, add it to prevent removal by proxies
+        sock.sendall(ensure_bytes(command + "\n"))
         # Read the response into a StringIO buffer
         chunk = ensure_unicode(sock.recv(chunk_size))
         buf.write(chunk)
@@ -278,7 +283,7 @@ class ZookeeperCheck(AgentCheck):
             # grabs the entire version number for inventories.
             metadata_version = total_match.group(1)
             self.set_metadata('version', metadata_version)
-        has_connections_val = LooseVersion(version) > LooseVersion("3.4.4")
+        has_connections_val = Version(version) > Version("3.4.4")
 
         # Clients:
         buf.readline()  # skip the Clients: header
@@ -302,15 +307,15 @@ class ZookeeperCheck(AgentCheck):
         _, value = buf.readline().split(':')
         # Fixme: This metric name is wrong. It should be removed in a major version of the agent
         # See https://github.com/DataDog/integrations-core/issues/816
-        metrics.append(ZKMetric('zookeeper.bytes_received', long(value.strip())))
-        metrics.append(ZKMetric('zookeeper.packets.received', long(value.strip()), "rate"))
+        metrics.append(ZKMetric('zookeeper.bytes_received', int(value.strip())))
+        metrics.append(ZKMetric('zookeeper.packets.received', int(value.strip()), "rate"))
 
         # Sent: 1324
         _, value = buf.readline().split(':')
         # Fixme: This metric name is wrong. It should be removed in a major version of the agent
         # See https://github.com/DataDog/integrations-core/issues/816
-        metrics.append(ZKMetric('zookeeper.bytes_sent', long(value.strip())))
-        metrics.append(ZKMetric('zookeeper.packets.sent', long(value.strip()), "rate"))
+        metrics.append(ZKMetric('zookeeper.bytes_sent', int(value.strip())))
+        metrics.append(ZKMetric('zookeeper.packets.sent', int(value.strip()), "rate"))
 
         if has_connections_val:
             # Connections: 1
@@ -323,12 +328,12 @@ class ZookeeperCheck(AgentCheck):
 
         # Outstanding: 0
         _, value = buf.readline().split(':')
-        metrics.append(ZKMetric('zookeeper.outstanding_requests', long(value.strip())))
+        metrics.append(ZKMetric('zookeeper.outstanding_requests', int(value.strip())))
 
         # Zxid: 0x1034799c7
         _, value = buf.readline().split(':')
         # Parse as a 64 bit hex int
-        zxid = long(value.strip(), 16)
+        zxid = int(value.strip(), 16)
         # convert to bytes
         zxid_bytes = struct.pack('>q', zxid)
         # the higher order 4 bytes is the epoch
@@ -342,11 +347,11 @@ class ZookeeperCheck(AgentCheck):
         # Mode: leader
         _, value = buf.readline().split(':')
         mode = value.strip().lower()
-        tags = [u'mode:' + mode]
+        tags = ['mode:' + mode]
 
         # Node count: 487
         _, value = buf.readline().split(':')
-        metrics.append(ZKMetric('zookeeper.nodes', long(value.strip())))
+        metrics.append(ZKMetric('zookeeper.nodes', int(value.strip())))
 
         return metrics, tags, mode, version
 

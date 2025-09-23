@@ -1,0 +1,37 @@
+{
+	"version": 2,
+	"created_at": "2024-09-24",
+	"last_updated_at": "2024-09-24",
+	"title": "Expired payout detected",
+	"description": "Expired payouts occur when payout requests are not processed within the designated timeframe, potentially disrupting disbursements and delaying fund transfers. This monitor tracks and alerts on such events, ensuring timely action to maintain operational efficiency.",
+	"definition": {
+		"id": 154507628,
+		"name": "Expired payout detected",
+		"type": "log alert",
+		"query": "logs(\"source:adyen service:payout @evt.name:PAYOUT_EXPIRE\").index(\"*\").rollup(\"count\").by(\"@pspReference\").last(\"5m\") > 0",
+		"message": "{{#is_alert}}\nExpired payouts refer to payout requests that were not processed within the allowed time frame, leading to a failure in completing the transaction.\n\nExpired payout has been detected with pspReference {{log.attributes.pspReference}}, which could impact timely disbursements and may cause delays in fund transfers. This requires immediate attention to ensure smooth operations.\n{{/is_alert}}",
+		"tags": [
+			"source:adyen",
+			"service:payout"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 0,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:adyen"
+	]
+}

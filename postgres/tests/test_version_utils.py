@@ -38,6 +38,9 @@ def test_parse_version():
     version = VersionUtils.parse_version('11nightly3')
     assert version == VersionInfo(11, 0, 0, 'nightly.3')
 
+    v12_3_tde = VersionUtils.parse_version('12.3_TDE_1.0')
+    assert v12_3_tde == VersionInfo(12, 3, 0)
+
 
 def test_throws_exception_for_unknown_version_format():
     with pytest.raises(Exception) as e:
@@ -76,3 +79,10 @@ def test_transform_version():
         'version.scheme': 'semver',
     }
     assert expected == version
+
+
+def test_parse_rds_eol_version():
+    version = '11.22-rds.20241121'
+    v11_22_rds = VersionUtils.parse_version(version)
+
+    assert v11_22_rds == VersionInfo(11, 22, 20241121)

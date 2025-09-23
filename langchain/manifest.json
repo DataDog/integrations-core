@@ -1,0 +1,59 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "7993851f-d36b-40f3-8425-92080f3b9d61",
+  "app_id": "langchain",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Optimize LangChain usage: prompt sampling and performance and cost metrics.",
+    "title": "LangChain",
+    "media": [],
+    "classifier_tags": [
+      "Category::AI/ML",
+      "Category::Developer Tools",
+      "Category::Cost Management",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Traces",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "LangChain",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "langchain.",
+        "check": "langchain.request.duration",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 10372,
+      "auto_install": true
+    },
+    "dashboards": {
+      "LangChain Overview Dashboard": "assets/dashboards/overview_dashboard.json"
+    },
+    "monitors": {
+      "Request duration is increasing": "assets/monitors/request_duration.json",
+      "Error rate is high": "assets/monitors/error_rate.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

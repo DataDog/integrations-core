@@ -61,9 +61,9 @@ We use some [scripts][docs-scripts] to dynamically modify pages before being pro
 
 ## Build
 
-We [configure][root-tox-config] a [tox][tox-github] environment called `docs` that provides all the dependencies necessary to build the documentation.
+We define a hatch environment called `docs` that provides all the dependencies necessary to build the documentation.
 
-To build and view the documentation in your browser, run the [serve](../ddev/cli.md#serve) command (the first invocation may take a few extra moments):
+To build and view the documentation in your browser, run the [serve](../ddev/cli.md#ddev-docs-serve) command (the first invocation may take a few extra moments):
 
 ```
 ddev docs serve
@@ -75,7 +75,7 @@ By default, live reloading is enabled so any modification will be reflected in n
 
 ## Deploy
 
-Our [CI](ci.md#docs) deploys the documentation to [GitHub Pages][github-pages-docs] if any changes occur on commits to the `master` branch.
+Our CI [deploys](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/docs.yml) the documentation to [GitHub Pages][github-pages-docs] if any changes occur on commits to the `master` branch.
 
 !!! danger
     **Never make documentation non-deterministic as it will trigger deploys for every single commit.**

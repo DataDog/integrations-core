@@ -25,6 +25,8 @@ To configure this check for an Agent running on a host:
 
 1. To start collecting your ClickHouse performance data, edit the `clickhouse.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
+*Note*: This integration uses the official `clickhouse-connect` client to connect over HTTP.
+
 2. [Restart the Agent][5].
 
 ##### Log collection
@@ -100,7 +102,7 @@ Need help? Contact [Datadog support][10].
 
 [1]: https://clickhouse.yandex
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[3]: https://app.datadoghq.com/account/settings#agent
+[3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/datadog_checks/clickhouse/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/

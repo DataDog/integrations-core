@@ -13,10 +13,10 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 
 from pyVim import connect
-from pyVmomi import vim  # pylint: disable=E0611
-from pyVmomi import vmodl  # pylint: disable=E0611
-from six import itervalues
-from six.moves import range
+from pyVmomi import (
+    vim,  # pylint: disable=E0611
+    vmodl,  # pylint: disable=E0611
+)
 
 from datadog_checks.base import AgentCheck, ensure_unicode, to_string
 from datadog_checks.base.checks.libs.thread_pool import SENTINEL, Pool
@@ -24,8 +24,8 @@ from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.base.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.base.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.vsphere.event import VSphereEvent
 
-from ..event import VSphereEvent
 from .cache_config import CacheConfig
 from .common import REALTIME_RESOURCES, SOURCE_TYPE
 from .errors import BadConfigError, ConnectionError
@@ -212,7 +212,7 @@ class VSphereLegacyCheck(AgentCheck):
             new_events = event_manager.QueryEvents(query_filter)
             self.log.debug("Got %s events from vCenter event manager", len(new_events))
             for event in new_events:
-                normalized_event = VSphereEvent(event, self.event_config[i_key], tags)
+                normalized_event = VSphereEvent(event, self.event_config[i_key], tags, list(REALTIME_RESOURCES))
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
                 if event_payload is not None:
@@ -409,7 +409,6 @@ class VSphereLegacyCheck(AgentCheck):
         content = server_instance.content
 
         with VSphereLegacyCheck.create_container_view(server_instance, resources) as view_ref:
-
             # Object used to query MORs as well as the attributes we require in one API call
             # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html
             collector = content.propertyCollector
@@ -790,8 +789,7 @@ class VSphereLegacyCheck(AgentCheck):
         if instance.get("all_metrics") is not None and instance.get("collection_level") is not None:
             if log_warning:
                 self.log.warning(
-                    "Using both `all_metrics` and `collection_level` configuration flag."
-                    " `all_metrics` will be ignored."
+                    "Using both `all_metrics` and `collection_level` configuration flag. `all_metrics` will be ignored."
                 )
             return False
 
@@ -949,7 +947,7 @@ class VSphereLegacyCheck(AgentCheck):
         batch_size = self.batch_morlist_size or n_mors
         for batch in mors_batch_method(i_key, batch_size, max_historical_metrics):
             query_specs = []
-            for mor in itervalues(batch):
+            for mor in batch.values():
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
                 if mor['mor_type'] not in REALTIME_RESOURCES and ('metrics' not in mor or not mor['metrics']):

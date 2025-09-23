@@ -1,5 +1,6 @@
-from six import iteritems
-
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.mongo.collectors.base import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
 from datadog_checks.mongo.metrics import TOP_METRICS
@@ -13,14 +14,16 @@ class TopCollector(MongoCollector):
     def compatible_with(self, deployment):
         # Can only be run on mongod nodes, and not on arbiters.
         if isinstance(deployment, MongosDeployment):
+            self.log.debug("Top collector can only be run on mongod nodes, mongos deployment detected.")
             return False
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            self.log.debug("Top collector can only be run on mongod nodes, arbiter node detected.")
             return False
         return True
 
     def collect(self, api):
-        dbtop = api["admin"].command('top')
-        for ns, ns_metrics in iteritems(dbtop['totals']):
+        dbtop = api["admin"].command('top', maxTimeMS=api._timeout)
+        for ns, ns_metrics in dbtop['totals'].items():
             if "." not in ns:
                 continue
 

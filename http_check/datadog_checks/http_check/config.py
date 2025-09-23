@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 
+from requests.structures import CaseInsensitiveDict
+
 from datadog_checks.base import ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.headers import headers as agent_headers
 
@@ -28,6 +30,7 @@ Config = namedtuple(
         'instance_ca_certs',
         'check_hostname',
         'stream',
+        'use_cert_from_response',
     ],
 )
 
@@ -45,9 +48,9 @@ def from_instance(instance, default_ca_certs=None):
     config_headers = instance.get('headers', {})
     default_headers = is_affirmative(instance.get("include_default_headers", True))
     if default_headers:
-        headers = agent_headers({})
+        headers = CaseInsensitiveDict(agent_headers({}))
     else:
-        headers = {}
+        headers = CaseInsensitiveDict({})
     headers.update(config_headers)
     url = instance.get('url')
     if url is not None:
@@ -66,6 +69,9 @@ def from_instance(instance, default_ca_certs=None):
     instance_ca_certs = instance.get('tls_ca_cert', instance.get('ca_certs', default_ca_certs))
     check_hostname = is_affirmative(instance.get('check_hostname', True))
     stream = is_affirmative(instance.get('stream', False))
+    use_cert_from_response = is_affirmative(instance.get('use_cert_from_response', False))
+    if use_cert_from_response:
+        stream = True
 
     return Config(
         url,
@@ -84,4 +90,5 @@ def from_instance(instance, default_ca_certs=None):
         instance_ca_certs,
         check_hostname,
         stream,
+        use_cert_from_response,
     )

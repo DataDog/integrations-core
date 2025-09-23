@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from urllib.parse import quote_plus, unquote_plus, urlencode, urlunparse
 
 import pymongo
-from six.moves.urllib.parse import quote_plus, unquote_plus, urlencode, urlunparse
 
 
 def build_connection_string(hosts, scheme, username=None, password=None, database=None, options=None):
@@ -59,7 +59,7 @@ def parse_mongo_uri(server, sanitize_username=False):
     clean_server_name = decoded_server.replace(password, "*" * 5) if password else decoded_server
 
     if sanitize_username and username:
-        username_pattern = u"{}[@:]".format(re.escape(username))
+        username_pattern = "{}[@:]".format(re.escape(username))
         clean_server_name = re.sub(username_pattern, "", clean_server_name)
 
     return username, password, db_name, nodelist, clean_server_name, auth_source

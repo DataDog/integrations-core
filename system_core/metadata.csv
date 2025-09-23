@@ -24,3 +24,4 @@ system.core.interrupt,gauge,,percent,,[Windows] The percentage of time a given C
 system.core.interrupt.total,gauge,,percent,,[Windows] The percentage of time the whole CPU has spent servicing hardware interrupts,0,system,cpu interrupt total,
 system.core.dpc,gauge,,percent,,[Windows] The percentage of time a given CPU core has spent servicing deferred procedure calls (DPCs),0,system,cpu dpc,
 system.core.dpc.total,gauge,,percent,,[Windows] The percentage of time the whole CPU has spent servicing deferred procedure calls (DPCs),0,system,cpu dpc total,
+system.core.frequency,gauge,,megahertz,,The frequency or clock speed a given CPU,0,system,cpu frequency,

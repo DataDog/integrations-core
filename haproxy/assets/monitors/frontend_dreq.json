@@ -1,30 +1,39 @@
 {
-  "name": "[HAProxy] High number of frontend denied requests for host: {{host.name}}",
-  "type": "query alert",
-  "query": "avg(last_4h):anomalies(avg:haproxy.frontend.denied.req_rate{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
-  "message": "The number of frontend denied requests due to security restrictions for host: {{host.name}} is above normal.\n\nA malicious attacker or misconfigured application could be to blame. More information on designing ACLs for HAProxy can be found in the [Introduction to HAProxy ACLs blog post](https://www.haproxy.com/blog/introduction-to-haproxy-acls/).",
-  "tags": ["integration:haproxy"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": true,
-    "notify_no_data": false,
-    "renotify_interval": 0,
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 1,
-      "critical_recovery": 0
+  "version": 2,
+  "created_at": "2021-03-01",
+  "last_updated_at": "2021-03-01",
+  "title": "Number of frontend denied requests is high",
+  "tags": [
+    "integration:haproxy"
+  ],
+  "description": "A client request can be rejected at the frontend by HAProxy and will not be forwarded to a backend server. This monitor tracks anomalies in the request denial rate for HAProxy frontends, on different hosts, to identify security issues.",
+  "definition": {
+    "message": "The number of frontend denied requests due to security restrictions for host: {{host.name}} is above normal.\n\nA malicious attacker or misconfigured application could be to blame. More information on designing ACLs for HAProxy can be found in the [Introduction to HAProxy ACLs blog post](https://www.haproxy.com/blog/introduction-to-haproxy-acls/).",
+    "name": "[HAProxy] High number of frontend denied requests for host: {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
     },
-    "threshold_windows": {
-      "trigger_window": "last_15m",
-      "recovery_window": "last_15m"
-    }
-  },
-  "recommended_monitor_metadata": {
-    "description": "Notifies when HAProxy denined frontend requests are higher than usual for a specific host."
+    "query": "avg(last_4h):anomalies(avg:haproxy.frontend.denied.req_rate{*} by {host}, 'agile', 2, direction='above', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+    "tags": [
+      "integration:haproxy"
+    ],
+    "type": "query alert"
   }
 }

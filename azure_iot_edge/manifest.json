@@ -12,11 +12,20 @@
     "title": "Azure IoT Edge",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Azure",
-      "Category::Log Collection"
+      "Category::IoT",
+      "Category::Log Collection",
+      "Category::Network",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-azure-iot-edge-with-datadog/"
+      }
     ]
   },
   "author": {
@@ -25,7 +34,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Azure IoT Edge",
@@ -42,19 +50,18 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10125,
+      "auto_install": true
     },
     "dashboards": {
       "azure_iot_edge": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Disk usage": "assets/monitors/disk_usage.json",
-      "Memory usage": "assets/monitors/memory_usage.json",
-      "IoT Hub syncs": "assets/monitors/iothub_syncs.json",
-      "Edge Hub retries": "assets/monitors/edgehub_retries.json"
-    },
-    "logs": {
-      "source": "azure.iot_edge"
+      "Device is running out of disk space": "assets/monitors/disk_usage.json",
+      "Device is running out of memory": "assets/monitors/memory_usage.json",
+      "Unsuccessful syncs are high": "assets/monitors/iothub_syncs.json",
+      "Edge Hub operation retries is higher than usual": "assets/monitors/edgehub_retries.json"
     }
   }
 }

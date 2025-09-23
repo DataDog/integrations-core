@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "0ab23627-c6f5-4ec5-b42c-43b85dc26445",
   "app_id": "foundationdb",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,8 +16,9 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "FoundationDB",
@@ -45,7 +46,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10258,
+      "auto_install": true
     },
     "dashboards": {
       "FoundationDB Latency Probe": "assets/dashboards/foundationdb_latency_probe.json",
@@ -54,15 +57,15 @@
     },
     "monitors": {
       "FoundationDB Status Check": "assets/monitors/service_check.json",
-      "FoundationDB Errors Logged": "assets/monitors/errors_logged.json",
-      "FoundationDB High Durability Lag": "assets/monitors/high_durability_lag.json",
-      "FoundationDB Log Queue Reaching Spill Threshold": "assets/monitors/log_queue_spill.json",
-      "FoundationDB Low Disk Space": "assets/monitors/low_disk_space.json",
-      "FoundationDB High Level Of Conflicted Transactions": "assets/monitors/conflicts.json",
-      "FoundationDB High Level Of Rejected Transactions": "assets/monitors/rejections.json",
-      "FoundationDB Read Latency Probe": "assets/monitors/read_latency_probe.json",
-      "FoundationDB Transaction Commit Latency Probe": "assets/monitors/transaction_commit_latency.json",
-      "FoundationDB Transaction Start Latency Probe": "assets/monitors/transaction_start_latency.json"
+      "High severity errors logs are found": "assets/monitors/errors_logged.json",
+      "High durability lag is detected": "assets/monitors/high_durability_lag.json",
+      "Log queue is approaching the limit": "assets/monitors/log_queue_spill.json",
+      "Disk space is low": "assets/monitors/low_disk_space.json",
+      "Transactions are conflicting": "assets/monitors/conflicts.json",
+      "Transactions are rejected": "assets/monitors/rejections.json",
+      "Read operation took a long time": "assets/monitors/read_latency_probe.json",
+      "Transaction commit latency is high": "assets/monitors/transaction_commit_latency.json",
+      "Transaction start latency is high": "assets/monitors/transaction_start_latency.json"
     },
     "saved_views": {
       "errors": "assets/saved_views/errors.json",

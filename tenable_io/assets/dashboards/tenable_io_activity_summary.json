@@ -1,0 +1,1273 @@
+{
+    "title": "Tenable.io - Activity Summary",
+    "description": "",
+    "widgets": [
+        {
+            "id": 7014870186557608,
+            "definition": {
+                "type": "image",
+                "url": "https://bakotech.eu/uploads/ckeditor/images/Tenable_io-FullColor-RGB-logo.png",
+                "url_dark_theme": "https://bakotech.eu/uploads/ckeditor/images/Tenable_io-FullColor-RGB-logo.png",
+                "sizing": "contain",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7895256893855628,
+            "definition": {
+                "type": "note",
+                "content": "[Tenable.io](https://www.tenable.com/) is a cloud platform for vulnerability discovery, assessment, and prioritization. It enhances visibility through asset discovery and helps organizations manage their security posture effectively.\n\nThis dashboard provides insights into user actions, system events, scans, and security control tasks, such as managing permissions, assigning roles, and other security events.\n\n**Tips:**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n\nFor more information, refer to the [Tenable.io Integration Documentation](https://docs.datadoghq.com/integrations/tenable_io/).",
+                "background_color": "blue",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 1739792392364448,
+            "definition": {
+                "title": "Monitors Summary",
+                "type": "manage_status",
+                "display_format": "countsAndList",
+                "color_preference": "background",
+                "hide_zero_counts": true,
+                "show_status": true,
+                "last_triggered_format": "relative",
+                "query": "tag:tenable-io",
+                "sort": "status,asc",
+                "count": 50,
+                "start": 0,
+                "summary_type": "monitors",
+                "show_priority": false,
+                "show_last_triggered": false
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 1553248567324134,
+            "definition": {
+                "title": "Total Activities",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 3001176777100840,
+            "definition": {
+                "title": "Activities Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Total Events",
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 3,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 3146336004181186,
+            "definition": {
+                "title": "Failed Activities",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity @is_failure:true $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "red_on_white"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 7,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 2057697219630392,
+            "definition": {
+                "title": "Activity Status Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Successful",
+                                "formula": "default_zero(query1)"
+                            },
+                            {
+                                "alias": "Failed",
+                                "formula": "default_zero(query2)"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity @is_failure:false $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity @is_failure:true $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 7,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 7031924779048094,
+            "definition": {
+                "title": "Top Actions",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@evt.name",
+                                        "limit": 100,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_yellow"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 100,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 11,
+                "width": 6,
+                "height": 5
+            }
+        },
+        {
+            "id": 5188498950315626,
+            "definition": {
+                "title": "Top Target Types",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@target.type",
+                                        "limit": 100,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 100,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 11,
+                "width": 6,
+                "height": 5
+            }
+        },
+        {
+            "id": 158815896066932,
+            "definition": {
+                "title": "Activities by Operation",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@operation",
+                                        "limit": 15,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "inline"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 2543708200188273,
+            "definition": {
+                "title": "Activities by Operation Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@operation",
+                                        "limit": 15,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "datadog16",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 16,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 3568076732255006,
+            "definition": {
+                "title": "Target Type Distribution",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@target.type",
+                                        "limit": 100,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "hide_total": true,
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 20,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 2182788275362120,
+            "definition": {
+                "title": "Top User Activities",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 50,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@target.type",
+                                        "limit": 50,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "text_formats": [
+                            [],
+                            [
+                                {
+                                    "match": {
+                                        "type": "is",
+                                        "value": ""
+                                    },
+                                    "palette": "white_on_green"
+                                }
+                            ]
+                        ],
+                        "sort": {
+                            "count": 2500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "custom_bg_color": "#46daf4",
+                                        "palette": "black_on_light_green"
+                                    }
+                                ],
+                                "cell_display_mode": "number",
+                                "alias": "Activity Count",
+                                "formula": "default_zero(query1)"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 6,
+                "y": 20,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6812054976465244,
+            "definition": {
+                "title": "Action Distribution",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@evt.name",
+                                        "limit": 100,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "sort": {
+                            "count": 500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "hide_total": true,
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 24,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 4099881222428970,
+            "definition": {
+                "title": "Top User Actions",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 50,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@evt.name",
+                                        "limit": 50,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "text_formats": [
+                            [],
+                            [
+                                {
+                                    "match": {
+                                        "type": "is",
+                                        "value": ""
+                                    },
+                                    "palette": "white_on_green"
+                                }
+                            ]
+                        ],
+                        "sort": {
+                            "count": 2500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "custom_bg_color": "#46daf4",
+                                        "palette": "black_on_light_green"
+                                    }
+                                ],
+                                "cell_display_mode": "number",
+                                "alias": "Activity Count",
+                                "formula": "default_zero(query1)"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 6,
+                "y": 24,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 101620479009352,
+            "definition": {
+                "title": "Top Activity Users",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 25,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 28,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 2438174763772190,
+            "definition": {
+                "title": "Top Targeted Users",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@target.name",
+                                        "limit": 25,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "default_zero(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "datadog16"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 28,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 7525925955851836,
+            "definition": {
+                "title": "Top User Operations",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:tenable-io service:activity $action_type $operation $target_type $user_name"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 50,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@target.name",
+                                        "limit": 30,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@operation",
+                                        "limit": 5,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc",
+                                            "metric": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "text_formats": [
+                            [],
+                            [
+                                {
+                                    "match": {
+                                        "type": "is",
+                                        "value": ""
+                                    },
+                                    "palette": "white_on_green"
+                                }
+                            ]
+                        ],
+                        "sort": {
+                            "count": 7500,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "custom_bg_color": "#46daf4",
+                                        "palette": "black_on_light_green"
+                                    }
+                                ],
+                                "cell_display_mode": "number",
+                                "alias": "Activity Count",
+                                "formula": "default_zero(query1)"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 6,
+                "y": 28,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 3856122772035544,
+            "definition": {
+                "title": "Activity Log Summary",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:tenable-io service:activity $action_type $operation $target_type $user_name",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "target.type",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "evt.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "usr.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "target.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "is_failure",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "operation",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 32,
+                "width": 12,
+                "height": 5
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "user_name",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "action_type",
+            "prefix": "@evt.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "target_type",
+            "prefix": "@target.type",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "operation",
+            "prefix": "@operation",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

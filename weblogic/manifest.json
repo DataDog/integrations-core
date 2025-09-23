@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "80a8d9e2-48dd-4242-be78-0d929ea1a492",
   "app_id": "weblogic",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,12 @@
     "title": "WebLogic",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::Log Collection",
-      "Category::Web",
-      "Category::Oracle"
+      "Category::Oracle",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "WebLogic",
@@ -46,18 +46,22 @@
       },
       "process_signatures": [
         "java weblogic.Server"
-      ]
+      ],
+      "source_type_id": 10245,
+      "auto_install": true
     },
     "dashboards": {
       "overview": "assets/dashboards/overview.json",
       "metrics": "assets/dashboards/metrics.json"
     },
     "monitors": {
-      "active_threads": "assets/monitors/active_threads.json",
-      "stuck_threads": "assets/monitors/stuck_threads.json"
+      "Number of active thread is high": "assets/monitors/active_threads.json",
+      "Number of stuck thread is high": "assets/monitors/stuck_threads.json"
     },
-    "logs": {
-      "source": "weblogic"
+    "saved_views": {
+      "weblogic_error_logs": "assets/saved_views/error_logs.json",
+      "weblogic_overview": "assets/saved_views/weblogic_overview.json",
+      "weblogic_patterns": "assets/saved_views/weblogic_patterns.json"
     }
   }
 }

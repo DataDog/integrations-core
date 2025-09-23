@@ -1,16 +1,17 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-# flake8: noqa
+# ruff: noqa
 import json
 import os
 import shutil
 
 # How long ddev will wait for GPG to finish, especially when asking dev for signature.
 import securesystemslib.settings
+
 securesystemslib.settings.SUBPROCESS_TIMEOUT = 60
 
-from securesystemslib.gpg.constants import GPG_COMMAND
+from securesystemslib.gpg.constants import gpg_command
 
 from in_toto import runlib
 from securesystemslib.interface import import_rsa_privatekey_from_file
@@ -32,7 +33,6 @@ class NeitherTrackedNorIgnoredFileException(Exception):
     def __init__(self, filename):
         self.filename = filename
 
-
     def __str__(self):
         return f'{self.filename} has neither been tracked nor ignored by git and in-toto!'
 
@@ -40,7 +40,6 @@ class NeitherTrackedNorIgnoredFileException(Exception):
 class UntrackedButIgnoredFileException(Exception):
     def __init__(self, filename):
         self.filename = filename
-
 
     def __str__(self):
         return f'{self.filename} has not been tracked, but it should be ignored by git and in-toto!'
@@ -110,7 +109,7 @@ def update_link_metadata(checks, core_workflow=True):
             products.append(dep_file)
 
     if core_workflow:
-        key_id = get_key_id(GPG_COMMAND)
+        key_id = get_key_id(gpg_command())
 
         # Find this latest signed link metadata file on disk.
         # NOTE: in-toto currently uses the first 8 characters of the signing keyId.

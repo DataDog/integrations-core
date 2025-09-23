@@ -1,0 +1,41 @@
+{
+	"version": 2,
+	"created_at": "2024-10-25",
+	"last_updated_at": "2024-10-25",
+	"title": "Databricks Model Serving - CPU memory usage is higher than usual",
+	"description": "Databricks Model Serving - CPU memory usage is higher than usual",
+	"definition": {
+		"id": 4735343,
+		"name": "[Databricks Model Serving] CPU memory usage across server replicas higher than usual for endpoint: {{endpoint_name.name}}",
+		"type": "query alert",
+		"query": "avg(last_15m):anomalies(avg:databricks.model_serving.mem_usage_percentage{*} by {endpoint_name}, 'basic', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true') >= 1",
+		"message": "The memory usage across server replicas for Databricks model serving endpoint: {{endpoint_name.name}} is at {{value}}, which is higher than usual.",
+		"tags": [
+			"integration:databricks"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 1,
+				"critical_recovery": 0
+			},
+			"notify_audit": false,
+			"require_full_window": false,
+			"renotify_interval": 0,
+			"threshold_windows": {
+				"trigger_window": "last_15m",
+				"recovery_window": "last_15m"
+			},
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"avalanche_window": 10
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:databricks"
+	]
+}

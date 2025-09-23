@@ -4,7 +4,7 @@
 import gc
 import linecache
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from binary import BinaryUnits, convert_units
 
@@ -44,7 +44,7 @@ def get_sign(n):
 
 
 def get_timestamp_filename(prefix):
-    return '{}_{}'.format(prefix, datetime.utcnow().strftime('%Y-%m-%dT%H-%M-%S_%f'))
+    return '{}_{}'.format(prefix, datetime.now(timezone.utc).strftime('%Y-%m-%dT%H-%M-%S_%f'))
 
 
 def parse_package_path(path):

@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 from ddev.repo.core import Repository
+from ddev.utils.fs import Path
 
 
 def test_attributes(local_repo, valid_integration):
@@ -187,3 +190,64 @@ class TestPackageDirectory:
         integration = repo.integrations.get('go-metro')
 
         assert integration.package_directory == local_repo / integration.name / 'datadog_checks' / 'go_metro'
+
+
+class TestPackageFiles:
+    def test_base_package_file(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('datadog_checks_base')
+
+        expected_files = []
+        for root, _, files in os.walk(integration.package_directory):
+            for f in files:
+                if f.endswith(".py"):
+                    expected_files.append(Path(root, f))
+
+        assert list(integration.package_files()) == expected_files
+
+    def test_tile_only_package_file(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('agent_metrics')
+
+        assert not list(integration.package_files())
+
+
+class TestReleaseTagPattern:
+    def test_shipped(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('datadog_checks_base')
+
+        assert integration.release_tag_pattern == r'datadog_checks_base-\d+\.\d+\.\d+'
+
+    def test_ddev(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('ddev')
+
+        assert integration.release_tag_pattern == r'ddev-v\d+\.\d+\.\d+'
+
+
+class TestMetrics:
+    def test_has_metrics(self, fake_repo):
+        integration = fake_repo.integrations.get('dummy')
+
+        metrics = list(integration.metrics)
+        assert len(metrics) == 1
+        metric = metrics[0]
+        assert metric.metric_name == 'dummy.metric'
+        assert metric.metric_type == 'gauge'
+        assert metric.interval == 10
+        assert metric.unit_name == 'seconds'
+        assert metric.per_unit_name == 'object'
+        assert metric.description == 'description'
+        assert metric.orientation == 0
+        assert metric.integration == 'dummy'
+        assert metric.short_name == 'short'
+        assert metric.curated_metric == ''
+
+    def test_has_no_metrics(self, fake_repo):
+        integration = fake_repo.integrations.get('no_metrics')
+        assert not list(integration.metrics)
+
+    def test_has_no_metadata_file(self, fake_repo):
+        integration = fake_repo.integrations.get('no_metadata_file')
+        assert not list(integration.metrics)

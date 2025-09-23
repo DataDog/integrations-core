@@ -1,0 +1,1335 @@
+{
+    "title": "Checkpoint Quantum Firewall - Firewall",
+    "description": "- This dashboard gives insights about firewall related logs.",
+    "widgets": [
+        {
+            "id": 8876398694561790,
+            "definition": {
+                "type": "image",
+                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Check_Point_logo_2022.svg/481px-Check_Point_logo_2022.svg.png",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 119847112732014,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard gives insights about firewall related logs.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 4442551052845354,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Total Events\n2. Events Over Time\n3. Events by Severity\n4. Events by Connection Direction\n5. Events by Action\n6. Events by Protocol\n7. Connections having Internal Source Zone\n8. Connections having Internal Destination Zone\n9. Connections having External Destination Zone\n10. Connections having External Source Zone\n11. Top Clients\n12. Top Destinations\n13. Clients by Inbound Bytes\n14. Clients by Outbound Bytes\n15. Destinations by Inbound Bytes\n16. Destinations by Outbound Bytes\n17. Clients by Inbound Packets\n18. Clients by Outbound Packets\n19. Destinations by Inbound Packets\n20. Destinations by Outbound Packets\n21. Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 6704539831882174,
+            "definition": {
+                "title": "Total Events",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 8424972593509476,
+            "definition": {
+                "title": "Events Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Firewall",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 2,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 6518835350455398,
+            "definition": {
+                "title": "Events by Severity",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@severity",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 2911062522166468,
+            "definition": {
+                "title": "Events by Connection Direction",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@conn_direction",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 5,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 8605820929458636,
+            "definition": {
+                "title": "Events by Action",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@action",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 4043114419626406,
+            "definition": {
+                "title": "Events by Protocol",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@protocol",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 9,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 1080137672070138,
+            "definition": {
+                "title": "Connections having Internal Source Zone ",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall @inzone:Internal $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 6289807510868462,
+            "definition": {
+                "title": "Connections having Internal Destination Zone ",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall @outzone:Internal $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 6,
+                "y": 13,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 705513216722122,
+            "definition": {
+                "title": "Connections having External Destination Zone ",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall @outzone:External $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 1847113820156380,
+            "definition": {
+                "title": "Connections having External Source Zone ",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall @inzone:External $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 6,
+                "y": 16,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5727433590839500,
+            "definition": {
+                "title": "Top Clients",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@src_ip_port",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 19,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 938168125292184,
+            "definition": {
+                "title": "Top Destinations",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@dst_ip_port",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 19,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 5808430353207842,
+            "definition": {
+                "title": "Clients by Inbound Bytes",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@checkpoint.quantum.firewall.client_inbound_bytes"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "sum",
+                                            "metric": "@checkpoint.quantum.firewall.client_inbound_bytes"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "absolute"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 23,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 4943310746121660,
+            "definition": {
+                "title": "Clients by Outbound Bytes",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@checkpoint.quantum.firewall.client_outbound_bytes"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "sum",
+                                            "metric": "@checkpoint.quantum.firewall.client_outbound_bytes"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "absolute"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 23,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 3720687100076388,
+            "definition": {
+                "title": "Destinations by Inbound Bytes",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@network.bytes_read"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.destination.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "sum",
+                                            "metric": "@network.bytes_read"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "absolute"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 23,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 4277111539806390,
+            "definition": {
+                "title": "Destinations by Outbound Bytes",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@network.bytes_written"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.destination.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "sum",
+                                            "metric": "@network.bytes_written"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "absolute"
+                }
+            },
+            "layout": {
+                "x": 9,
+                "y": 23,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 1433689189212052,
+            "definition": {
+                "title": "Clients by Inbound Packets",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@checkpoint.quantum.firewall.client_inbound_packets"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "sum",
+                                            "metric": "@checkpoint.quantum.firewall.client_inbound_packets"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "absolute"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 27,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 5796158611139074,
+            "definition": {
+                "title": "Clients by Outbound Packets",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@checkpoint.quantum.firewall.client_outbound_packets"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "sum",
+                                            "metric": "@checkpoint.quantum.firewall.client_outbound_packets"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "absolute"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 27,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 4079055833365322,
+            "definition": {
+                "title": "Destinations by Inbound Packets",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@checkpoint.quantum.firewall.server_inbound_packets"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.destination.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "sum",
+                                            "metric": "@checkpoint.quantum.firewall.server_inbound_packets"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "absolute"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 27,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 1886588334269734,
+            "definition": {
+                "title": "Destinations by Outbound Packets",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@checkpoint.quantum.firewall.server_outbound_packets"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.destination.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "sum",
+                                            "metric": "@checkpoint.quantum.firewall.server_outbound_packets"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "absolute"
+                }
+            },
+            "layout": {
+                "x": 9,
+                "y": 27,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 4456980918951874,
+            "definition": {
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:checkpoint-quantum-firewall @product:Firewall $Checkpoint_Server $Action $Connection_Direction",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "severity",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "network.client.ip",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "network.destination.ip",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "conn_direction",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "action",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "checkpoint.quantum.firewall.client_inbound_bytes",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "checkpoint.quantum.firewall.client_outbound_bytes",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "checkpoint.quantum.firewall.client_inbound_packets",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "checkpoint.quantum.firewall.client_outbound_packets",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "network.bytes_read",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "network.bytes_written",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "checkpoint.quantum.firewall.server_inbound_packets",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "checkpoint.quantum.firewall.server_outbound_packets",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "protocol",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 31,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Checkpoint_Server",
+            "prefix": "@origin",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Action",
+            "prefix": "@action",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Connection_Direction",
+            "prefix": "@conn_direction",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

@@ -5,9 +5,7 @@
 
 import re
 from collections import defaultdict
-
-from six import iteritems
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
 
@@ -69,7 +67,7 @@ GO_EXPVAR_URL_PATH = "/debug/vars"
 
 class GoExpvar(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
-        'ssl_verify': {'name': 'tls_verify', 'default': None},
+        'ssl_verify': {'name': 'tls_verify', 'default': False},
         'ssl_certfile': {'name': 'tls_cert', 'default': None},
         'ssl_keyfile': {'name': 'tls_private_key', 'default': None},
     }
@@ -269,7 +267,7 @@ class GoExpvar(AgentCheck):
             for new_key, new_content in enumerate(object):
                 yield str(new_key), new_content
         elif isinstance(object, dict):
-            for new_key, new_content in iteritems(object):
+            for new_key, new_content in object.items():
                 yield str(new_key), new_content
         else:
             self.log.warning("Could not parse this object, check the json served by the expvar")

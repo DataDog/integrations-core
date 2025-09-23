@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:12-alpine
+    hostname: airflow-postgres
+    container_name: airflow-postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+ 
+  server:
+    hostname: airflow-server
+    container_name: airflow-server
+    build:
+      context: .
+      args:
+        AIRFLOW_VERSION: ${AIRFLOW_VERSION}
+    environment:
+      # -- API
+      # auth_backend for Airflow 2.1 - https://airflow.apache.org/docs/apache-airflow/2.1.4/configurations-ref.html#auth-backend # noqa
+      # auth backends for Airflow 2.6 - https://airflow.apache.org/docs/apache-airflow/2.6.1/configurations-ref.html#auth-backends # noqa
+      AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+      # -- CORE
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      # -- SCHEDULER
+      AIRFLOW__SCHEDULER__MIN_FILE_PROCESS_INTERVAL: 60
+      # -- ADMIN
+      SECURITY__ADMIN_USERNAME: airflow
+      SECURITY__ADMIN_PASSWORD: airflow
+      # -- DB
+      DB__HOST: postgres
+      DB__PORT: 5432
+      DB__USERNAME: airflow
+      DB__PASSWORD: airflow
+      DB__NAME: airflow
+    volumes:
+      - ./dags:/opt/airflow/dags
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres:
+  server:

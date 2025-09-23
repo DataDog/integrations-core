@@ -1,0 +1,97 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "46e76528-8e93-4a7c-9299-387ce0a905c6",
+  "app_id": "openai",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Optimize OpenAI usage: cost estimates, prompt sampling and performance metrics.",
+    "title": "OpenAI",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "OpenAI Dashboard Usage Trends",
+        "image_url": "images/openai_dash_usage_trends.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "OpenAI Dashboard Samples",
+        "image_url": "images/openai_dash_samples.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "OpenAI Dashboard Tokens and Cost",
+        "image_url": "images/openai_dash_tokens_cost.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "OpenAI Dashboard Cost Usage",
+        "image_url": "images/openai_cost_dashboard_sample.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::AI/ML",
+      "Category::Metrics",
+      "Category::Cost Management",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Traces",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-openai-with-datadog/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/"
+      }
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "OpenAI",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "openai.",
+        "check": [
+          "openai.request.duration",
+          "openai.api.usage.n_requests"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 10348,
+      "auto_install": true
+    },
+    "dashboards": {
+      "OpenAI Overview Dashboard": "assets/dashboards/overview_dashboard.json",
+      "OpenAI Usage Overview": "assets/dashboards/usage_overview_dashboard.json",
+      "OpenAI Cost Overview": "assets/dashboards/cost_overview_dashboard.json",
+      "OpenAI Admin Usage Overview": "assets/dashboards/usage_admin_overview_dashboard.json"
+    },
+    "monitors": {
+      "OpenAI API usage is approaching rate limit": "assets/monitors/request_limits.json",
+      "OpenAI tokens usage is approaching rate limit": "assets/monitors/tokens_limits.json",
+      "Token usage is abnormally high": "assets/monitors/api_token_usage.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

@@ -1,0 +1,48 @@
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+    ## @param SILVERSTRIPE_DATABASE_TYPE - string - required
+    ## Silverstripe Database Type (MySQL or PostgreSQL).
+    #
+  - SILVERSTRIPE_DATABASE_TYPE: <DATABASE_TYPE>
+
+    ## @param SILVERSTRIPE_DATABASE_NAME - string - required
+    ## Silverstripe Database Name.
+    #
+    SILVERSTRIPE_DATABASE_NAME: <DATABASE_NAME>
+
+    ## @param SILVERSTRIPE_DATABASE_SERVER_IP - string - required
+    ## Silverstripe Database Server IP.
+    #
+    SILVERSTRIPE_DATABASE_SERVER_IP: <IP_ADDRESS>
+
+    ## @param SILVERSTRIPE_DATABASE_PORT - integer - required
+    ## Silverstripe Database Port.
+    #
+    SILVERSTRIPE_DATABASE_PORT: 5432
+
+    ## @param SILVERSTRIPE_DATABASE_USERNAME - string - required
+    ## Silverstripe Database Username.
+    #
+    SILVERSTRIPE_DATABASE_USERNAME: <USERNAME>
+
+    ## @param SILVERSTRIPE_DATABASE_PASSWORD - string - required
+    ## Silverstripe Database Password.
+    #
+    SILVERSTRIPE_DATABASE_PASSWORD: <PASSWORD>
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param min_collection_interval - number - required
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    min_collection_interval: 15

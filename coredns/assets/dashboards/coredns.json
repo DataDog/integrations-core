@@ -664,7 +664,5 @@
     "layout_type": "ordered",
     "is_read_only": false,
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "8ps-i7i-ux9"
+    "reflow_type": "fixed"
   }
-  

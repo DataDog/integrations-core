@@ -1,0 +1,14 @@
+{
+    "name": "Slurm Logs Overview",
+    "query": "source:slurm",
+    "visible_facets": [
+        "status",
+        "service",
+        "host"
+    ],
+    "type": "logs",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "page": "patterns"
+}

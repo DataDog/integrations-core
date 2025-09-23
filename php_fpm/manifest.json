@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "34faabdb-8545-4a45-a8bd-be0f979e99e7",
   "app_id": "php-fpm",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -13,10 +14,10 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Web",
-      "Category::Autodiscovery"
+      "Category::Metrics",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "PHP-FPM",
@@ -53,7 +53,9 @@
         "restart php-fpm",
         "systemctl restart php-fpm.service",
         "php7.0-fpm.service"
-      ]
+      ],
+      "source_type_id": 117,
+      "auto_install": true
     },
     "dashboards": {
       "php-fpm": "assets/dashboards/php-fpm_dashboard.json"

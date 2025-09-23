@@ -1,0 +1,9 @@
+[env.collectors.datadog-checks]
+check-types = false
+
+mypy-deps = [
+  "types-PyMySQL==1.1.0.1",
+]
+
+[[envs.default.matrix]]
+python = ["3.12"]

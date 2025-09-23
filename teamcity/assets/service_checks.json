@@ -1,1 +1,75 @@
-[]
+[
+    {
+        "agent_version": "7.42.0",
+        "integration": "Teamcity",
+        "check": "teamcity.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.42.0",
+        "integration": "Teamcity",
+        "check": "teamcity.build.status",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "build_config",
+            "server",
+            "type"
+        ],
+        "name": "TeamCity build status health",
+        "description": "Returns `CRITICAL` if the finished build has a status of FAILURE. Returns `OK` otherwise. Only emitted by the TeamCity REST instance."
+    },
+    {
+        "agent_version": "7.42.0",
+        "integration": "Teamcity",
+        "check": "teamcity.build.problems",
+        "statuses": [
+            "ok",
+            "warning"
+        ],
+        "groups": [
+            "host",
+            "build_config",
+            "project_id",
+            "server",
+            "type",
+            "problem_type",
+            "problem_identity"
+        ],
+        "name": "TeamCity build problem health",
+        "description": "Returns `WARNING` if the finished build has encountered a problem. Returns `OK` otherwise. Only emitted by the TeamCity REST instance."
+    },
+    {
+        "agent_version": "7.42.0",
+        "integration": "Teamcity",
+        "check": "teamcity.test.results",
+        "statuses": [
+            "ok",
+            "warning",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "build_config",
+            "project_id",
+            "server",
+            "type",
+            "test_status",
+            "test_name"
+        ],
+        "name": "TeamCity build tests status health",
+        "description": "Returns `CRITICAL` if the finished build test has encountered a problem, `WARNING` if it has encountered a warning, or `UNKNOWN` if it has encountered an unknown problem. Returns `OK` otherwise. Only emitted by the TeamCity REST instance."
+    }
+]

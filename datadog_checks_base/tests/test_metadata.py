@@ -4,11 +4,10 @@
 import logging
 import re
 from collections import OrderedDict
-from typing import Any
+from typing import Any  # noqa: F401
 
 import mock
 import pytest
-from six import PY3
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 
@@ -27,7 +26,7 @@ class TestAttribute:
     def test_no_check_id_error(self):
         check = AgentCheck('test', {}, [{}])
 
-        with mock.patch('datadog_checks.base.checks.base.using_stub_aggregator', False):
+        with mock.patch('datadog_checks.base.checks.base.AGENT_RUNNING', True):
             with pytest.raises(RuntimeError):
                 check.set_metadata('foo', 'bar')
 
@@ -57,15 +56,11 @@ class TestRaw:
     def test_encoding(self):
         check = AgentCheck('test', {}, [{}])
         check.check_id = 'test:123'
-        if PY3:
-            constructor = ensure_bytes
-            finalizer = ensure_unicode
-        else:
-            constructor = ensure_unicode
-            finalizer = ensure_bytes
+        constructor = ensure_bytes
+        finalizer = ensure_unicode
 
-        name = constructor(u'nam\u00E9')
-        value = constructor(u'valu\u00E9')
+        name = constructor('nam\u00e9')
+        value = constructor('valu\u00e9')
 
         with mock.patch(SET_CHECK_METADATA_METHOD) as m:
             check.set_metadata(name, value)

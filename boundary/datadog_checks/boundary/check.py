@@ -43,4 +43,9 @@ class BoundaryCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     @cached_property
     def controller_health_tags(self):
-        return [f'endpoint:{self.config.health_endpoint}', *self.config.tags]
+        tags = [f'endpoint:{self.config.health_endpoint}']
+
+        if self.config.tags:
+            tags.extend(self.config.tags)
+
+        return tags

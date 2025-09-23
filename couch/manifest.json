@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "0a7006e2-c76d-4ef0-8af7-347bad2db768",
   "app_id": "couchdb",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,19 @@
     "title": "CouchDB",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Data Store",
+      "Category::Caching",
+      "Category::Data Stores",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog"
+      }
     ]
   },
   "author": {
@@ -26,7 +34,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "CouchDB",
@@ -37,7 +44,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "couch.",
+        "prefix": "couchdb.",
         "check": [
           "couchdb.couchdb.request_time.n",
           "couchdb.couchdb.request_time"
@@ -49,7 +56,9 @@
       },
       "process_signatures": [
         "couchjs"
-      ]
+      ],
+      "source_type_id": 20,
+      "auto_install": true
     },
     "dashboards": {
       "couchdb": "assets/dashboards/CouchDB-overview_dashboard.json",
@@ -57,9 +66,6 @@
     },
     "saved_views": {
       "couchdb_processes": "assets/saved_views/couchdb_processes.json"
-    },
-    "logs": {
-      "source": "couchdb"
     }
   }
 }

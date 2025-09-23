@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "783d0088-b478-4b3c-9654-ec4fbfefc18d",
   "app_id": "snmp-juniper",
+  "owner": "network-device-monitoring-core",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,14 +13,23 @@
     "title": "Juniper Networks",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Monitoring",
-      "Category::Notification",
       "Category::Network",
-      "Category::Autodiscovery",
-      "Category::SNMP"
+      "Category::Notifications",
+      "Category::SNMP",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-snmp-with-datadog/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-juniper-network-devices-with-datadog/"
+      }
     ]
   },
   "author": {
@@ -28,7 +38,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Juniper Networks",
@@ -38,7 +47,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10146,
+      "auto_install": true
     }
   }
 }

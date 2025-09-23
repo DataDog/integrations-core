@@ -1,0 +1,233 @@
+{
+	"inprog" : [
+		{
+			"type" : "op",
+			"host" : "4f0ba4c34dd2:27017",
+			"desc" : "fsyncLockWorker",
+			"active" : true,
+			"currentOpTime" : "2024-01-03T00:31:08.530+00:00",
+			"opid" : 68235,
+			"op" : "none",
+			"ns" : "",
+			"command" : {
+				
+			},
+			"numYields" : 0,
+			"locks" : {
+				"ParallelBatchWriterMode" : "r",
+				"FeatureCompatibilityVersion" : "r",
+				"ReplicationStateTransition" : "w",
+				"Global" : "R"
+			},
+			"waitingForLock" : false,
+			"lockStats" : {
+				"ParallelBatchWriterMode" : {
+					"acquireCount" : {
+						"r" : 1
+					}
+				},
+				"FeatureCompatibilityVersion" : {
+					"acquireCount" : {
+						"r" : 1
+					}
+				},
+				"ReplicationStateTransition" : {
+					"acquireCount" : {
+						"w" : 1
+					}
+				},
+				"Global" : {
+					"acquireCount" : {
+						"R" : 1
+					}
+				}
+			},
+			"waitingForFlowControl" : false,
+			"flowControlStats" : {
+				
+			}
+		},
+		{
+			"type" : "op",
+			"host" : "4f0ba4c34dd2:27017",
+			"desc" : "conn4",
+			"connectionId" : 4,
+			"client" : "192.168.208.1:59392",
+			"appName" : "datadog-agent",
+			"clientMetadata" : {
+				"driver" : {
+					"name" : "PyMongo",
+					"version" : "4.3.3"
+				},
+				"os" : {
+					"type" : "Linux",
+					"name" : "Linux",
+					"architecture" : "aarch64",
+					"version" : "5.10.104-linuxkit"
+				},
+				"platform" : "CPython 3.11.5.final.0",
+				"application" : {
+					"name" : "datadog-agent"
+				}
+			},
+			"active" : true,
+			"currentOpTime" : "2024-01-03T00:31:08.530+00:00",
+			"threaded" : true,
+			"opid" : 130990,
+			"secs_running" : 7,
+			"microsecs_running" : 798689,
+			"op" : "command",
+			"ns" : "admin.$cmd",
+			"command" : {
+				"hello" : 1,
+				"topologyVersion" : {
+					"processId" : "65946ee2c9769148effaf9df",
+					"counter" : 0
+				},
+				"maxAwaitTimeMS" : 10000,
+				"$db" : "admin"
+			},
+			"numYields" : 0,
+			"waitingForLatch" : {
+				"timestamp" : "2024-01-03T00:31:01.533Z",
+				"captureName" : "AnonymousLatch"
+			},
+			"locks" : {
+				
+			},
+			"waitingForLock" : false,
+			"lockStats" : {
+				
+			},
+			"waitingForFlowControl" : false,
+			"flowControlStats" : {
+				
+			}
+		},
+		{
+			"type" : "op",
+			"host" : "4f0ba4c34dd2:27017",
+			"desc" : "Checkpointer",
+			"active" : true,
+			"currentOpTime" : "2024-01-03T00:31:08.530+00:00",
+			"opid" : 130781,
+			"op" : "none",
+			"ns" : "",
+			"command" : {
+				
+			},
+			"numYields" : 0,
+			"locks" : {
+				
+			},
+			"waitingForLock" : false,
+			"lockStats" : {
+				
+			},
+			"waitingForFlowControl" : false,
+			"flowControlStats" : {
+				
+			}
+		},
+		{
+			"type" : "op",
+			"host" : "4f0ba4c34dd2:27017",
+			"desc" : "JournalFlusher",
+			"active" : true,
+			"currentOpTime" : "2024-01-03T00:31:08.530+00:00",
+			"opid" : 131089,
+			"op" : "none",
+			"ns" : "",
+			"command" : {
+				
+			},
+			"numYields" : 0,
+			"locks" : {
+				
+			},
+			"waitingForLock" : false,
+			"lockStats" : {
+				
+			},
+			"waitingForFlowControl" : false,
+			"flowControlStats" : {
+				
+			}
+		},
+		{
+			"type" : "op",
+			"host" : "4f0ba4c34dd2:27017",
+			"desc" : "conn23",
+			"connectionId" : 23,
+			"client" : "127.0.0.1:54310",
+			"appName" : "MongoDB Shell",
+			"clientMetadata" : {
+				"application" : {
+					"name" : "MongoDB Shell"
+				},
+				"driver" : {
+					"name" : "MongoDB Internal Client",
+					"version" : "5.0.20"
+				},
+				"os" : {
+					"type" : "Linux",
+					"name" : "Ubuntu",
+					"architecture" : "aarch64",
+					"version" : "20.04"
+				}
+			},
+			"active" : true,
+			"currentOpTime" : "2024-01-03T00:31:08.530+00:00",
+			"threaded" : true,
+			"opid" : 131091,
+			"lsid" : {
+				"id" : "4ab932b1-66c0-4a1e-89e9-ed5e6cdd7619",
+				"uid" : "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU="
+			},
+			"secs_running" : 0,
+			"microsecs_running" : 26,
+			"op" : "command",
+			"ns" : "admin.$cmd.aggregate",
+			"command" : {
+				"aggregate" : 1,
+				"pipeline" : [
+					{
+						"$currentOp" : {
+							"allUsers" : true,
+							"idleConnections" : false,
+							"truncateOps" : false
+						}
+					},
+					{
+						"$match" : {
+							
+						}
+					}
+				],
+				"cursor" : {
+					
+				},
+				"lsid" : {
+					"id" : "4ab932b1-66c0-4a1e-89e9-ed5e6cdd7619"
+				},
+				"$readPreference" : {
+					"mode" : "primaryPreferred"
+				},
+				"$db" : "admin"
+			},
+			"numYields" : 0,
+			"locks" : {
+				
+			},
+			"waitingForLock" : false,
+			"lockStats" : {
+				
+			},
+			"waitingForFlowControl" : false,
+			"flowControlStats" : {
+				
+			}
+		}
+	],
+    "ok": 1.0
+}

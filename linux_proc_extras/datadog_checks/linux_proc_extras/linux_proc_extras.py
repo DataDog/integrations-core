@@ -5,8 +5,6 @@
 
 from collections import defaultdict
 
-from six import iteritems
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
@@ -53,7 +51,7 @@ class MoreUnixCheck(AgentCheck):
             "interrupts_info": "interrupts",
         }
 
-        for key, path in iteritems(self.proc_path_map):
+        for key, path in self.proc_path_map.items():
             self.proc_path_map[key] = "{procfs}/{path}".format(procfs=proc_location, path=path)
 
     def get_inode_info(self):

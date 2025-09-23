@@ -1,0 +1,60 @@
+{
+    "nodes": [
+        {
+            "uuid": "bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+            "created_at": "2023-04-06T15:27:05+00:00",
+            "updated_at": "2023-04-11T19:10:40+00:00",
+            "console_enabled": false,
+            "driver": "ipmi",
+            "driver_info": {
+              "ipmi_address": "10.164.0.32",
+              "ipmi_username": "admin",
+              "ipmi_password": "******",
+              "ipmi_port": 6231
+            },
+            "extra": {},
+            "instance_info": {},
+            "instance_uuid": null,
+            "last_error": "During sync_power_state, max retries exceeded for node bd7a61bb-5fe0-4c93-9628-55e312f9ef0e, node state None does not match expected state 'power on'. Updating DB state to 'None' Switching node to maintenance mode. Error: IPMI call failed: power status.",
+            "maintenance": true,
+            "maintenance_reason": "During sync_power_state, max retries exceeded for node bd7a61bb-5fe0-4c93-9628-55e312f9ef0e, node state None does not match expected state 'power on'. Updating DB state to 'None' Switching node to maintenance mode. Error: IPMI call failed: power status.",
+            "power_state": null,
+            "properties": {
+              "cpu_arch": "x86_64",
+              "capabilities": "boot_mode:uefi",
+              "vendor": "unknown",
+              "root_device": {
+                "vendor": "0x1af4"
+              }
+            },
+            "provision_state": null,
+            "provision_updated_at": "2023-04-06T15:33:46+00:00",
+            "reservation": null,
+            "target_power_state": null,
+            "target_provision_state": null,
+            "links": [
+              {
+                "href": "http://34.141.226.224/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+                "rel": "self"
+              },
+              {
+                "href": "http://34.141.226.224/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+                "rel": "bookmark"
+              }
+            ],
+            "chassis_uuid": "64c4893f-6a49-4b2c-b5d8-ab955367b504",
+            "ports": [
+              {
+                "href": "http://34.141.226.224/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
+                "rel": "self"
+              },
+              {
+                "href": "http://34.141.226.224/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
+                "rel": "bookmark"
+              }
+            ]
+        }
+    ],
+    "next": "http://34.141.226.224/baremetal/v1/nodes/detail?sort_key=id&sort_dir=asc&limit=1&marker=bd7a61bb-5fe0-4c93-9628-55e312f9ef0e"
+  }
+  

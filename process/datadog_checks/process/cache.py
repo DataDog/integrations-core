@@ -37,7 +37,7 @@ class ProcessListCache(object):
         # threads getting a `yes` result at once
         with self.write_lock():
             if self._should_refresh():
-                self.elements = [proc for proc in psutil.process_iter(attrs=['pid', 'name'])]
+                self.elements = list(psutil.process_iter(attrs=['pid', 'name']))
                 self.last_ts = time.time()
                 return True
             else:

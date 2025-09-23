@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "01aee33c-0c85-4800-ab79-c02a25da04fa",
   "app_id": "zookeeper",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,9 +16,9 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Category::Orchestration",
-      "Category::Notification",
+      "Category::Notifications",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "ZooKeeper",
@@ -47,16 +47,15 @@
       "process_signatures": [
         "zkServer.sh start",
         "java zoo.cfg"
-      ]
+      ],
+      "source_type_id": 48,
+      "auto_install": true
     },
     "dashboards": {
       "zookeeper": "assets/dashboards/zookeeper_dashboard.json"
     },
     "saved_views": {
       "zookeeper_processes": "assets/saved_views/zookeeper_processes.json"
-    },
-    "logs": {
-      "source": "zookeeper"
     }
   }
 }

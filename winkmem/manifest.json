@@ -13,7 +13,9 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Windows",
-      "Category::OS & System"
+      "Category::OS & System",
+      "Category::Windows",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -22,7 +24,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Windows Kernel Memory",
@@ -37,7 +38,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10254,
+      "auto_install": true
     }
   }
 }

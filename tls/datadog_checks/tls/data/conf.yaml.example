@@ -133,7 +133,7 @@ instances:
     ## irc, postgres, mysql, lmtp, nntp, sieve, and ldap.
     ##
     ## Currently this checks supports only the below protocols:
-    ##   postgres
+    ##   postgres, mysql
     #
     # start_tls: <START_TLS>
 
@@ -220,3 +220,13 @@ instances:
     ## Verifies that the server's cert hostname matches the one requested.
     #
     # tls_validate_hostname: true
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256

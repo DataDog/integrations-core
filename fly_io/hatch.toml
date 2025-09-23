@@ -1,0 +1,19 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+setup = ["caddy"]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+setup = ["lab"]
+
+[envs.default.overrides]
+name."caddy".e2e-env = { value = true }
+matrix.setup.e2e-env = { value = true, if = ["lab"], env = ["FLY_ORG_SLUG", "FLY_ACCESS_TOKEN"] }
+matrix.setup.env-vars = [
+  { key = "USE_FLY_LAB", value = "True", if = ["lab"] },
+]
+
+[envs.default]
+e2e-env = false

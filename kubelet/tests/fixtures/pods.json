@@ -177,6 +177,27 @@
                         "containerID": "docker://580cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05"
                     }
                 ],
+                "initContainerStatuses": [
+                    {
+                        "name": "init",
+                        "state": {
+                            "terminated": {
+                                "exitCode": 0,
+                                "startedAt": "2024-02-27T19:30:39Z",
+                                "finishedAt": "2024-02-27T19:30:49Z",
+                                "reason": "Completed",
+                                "containerID": "docker://1d1f139dc1c9d49010512744df34740abcfaadf9930d3afd85afbf5fccfadbd6"
+                            }
+                        },
+                        "lastState": {},
+                        "ready": true,
+                        "restartCount": 0,
+                        "image": "docker.io/library/alpine:latest",
+                        "imageID": "docker.io/library/alpine@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b",
+                        "containerID": "docker://1d1f139dc1c9d49010512744df34740abcfaadf9930d3afd85afbf5fccfadbd6",
+                        "started": false
+                    }
+                ],
                 "podIP": "10.8.2.4",
                 "startTime": "2018-02-13T14:57:17Z",
                 "hostIP": "10.132.0.4",
@@ -388,6 +409,29 @@
                         ],
                         "imagePullPolicy": "IfNotPresent",
                         "resources": {}
+                    }
+                ],
+                "initContainers": [
+                    {
+                        "terminationMessagePath": "/dev/termination-log",
+                        "name": "init",
+                        "image": "alpine:latest",
+                        "terminationMessagePolicy": "File",
+                        "command": [
+                            "/bin/sh",
+                            "-c",
+                            "sleep 10s"
+                        ],
+                        "imagePullPolicy": "IfNotPresent",
+                        "resources": {
+                            "requests": {
+                                "cpu": "50m",
+                                "memory": "100Mi"
+                            },
+                            "limits": {
+                                "memory": "150Mi"
+                            }
+                        }
                     }
                 ],
                 "nodeName": "gke-haissam-default-pool-be5066f1-wnvn"
@@ -723,6 +767,23 @@
                         "containerID": "docker://a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"
                     }
                 ],
+                "initContainerStatuses": [
+                    {
+                        "containerID": "docker://80bd9ebe296615341c68d571e843d800fb4a75bef696d858065572ab4e49920c",
+                        "image": "docker.io/library/alpine:latest",
+                        "imageID": "docker.io/library/alpine@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b",
+                        "lastState": {},
+                        "name": "running-init",
+                        "ready": false,
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2024-02-28T19:29:12Z"
+                            }
+                        }
+                    }
+                ],
                 "podIP": "10.8.2.3",
                 "startTime": "2018-02-13T15:15:43Z",
                 "hostIP": "10.132.0.4",
@@ -860,6 +921,29 @@
                         "resources": {
                             "requests": {
                                 "cpu": "100m"
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [
+                    {
+                        "terminationMessagePath": "/dev/termination-log",
+                        "name": "running-init",
+                        "image": "alpine:latest",
+                        "terminationMessagePolicy": "File",
+                        "command": [
+                            "/bin/sh",
+                            "-c",
+                            "sleep 10s"
+                        ],
+                        "imagePullPolicy": "IfNotPresent",
+                        "resources": {
+                            "requests": {
+                                "cpu": "50m",
+                                "memory": "100Mi"
+                            },
+                            "limits": {
+                                "memory": "150Mi"
                             }
                         }
                     }
@@ -1463,12 +1547,33 @@
                         "claimName": "www-web-2"
                     }
                 }, {
-                    "name": "default-token-s7dz6",
-                    "secret": {
-                        "secretName": "default-token-s7dz6",
-                        "defaultMode": 420
+                    "name": "ephemeralvolume",
+                    "ephemeral": {
+                        "volumeClaimTemplate": {
+                            "metadata": {
+                                "labels": {
+                                    "abc": "efg"
+                                }
+                            },
+                            "spec": {
+                                "accessModes": [ "ReadWriteOnce" ],
+                                "storageClassName": "any",
+                                "resources":{
+                                    "requests":{
+                                        "storage": "1Gi"
+                                    }
+                                }
+                            }
+                        }
                     }
-                }],
+                },
+                    {
+                        "name": "default-token-s7dz6",
+                        "secret": {
+                            "secretName": "default-token-s7dz6",
+                            "defaultMode": 420
+                        }
+                    }],
                 "containers": [{
                     "name": "nginx",
                     "image": "gcr.io/google_containers/nginx-slim:0.8",
@@ -1696,6 +1801,362 @@
                     "containerID": "docker://db494caafb4ef3120af2b550fe3e8b5bc2ab3dc5201fbdc34d8e238331b8e7b7"
                 }],
                 "qosClass": "Burstable"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "ad.datadoghq.com/tolerate-unready": "true",
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Pod\",\"metadata\":{\"annotations\":{\"ad.datadoghq.com/tolerate-unready\":\"true\"},\"labels\":{\"admission.datadoghq.com/enabled\":\"true\"},\"name\":\"sidecar-second\",\"namespace\":\"default\"},\"spec\":{\"containers\":[{\"command\":[\"/bin/sh\",\"-c\",\"sleep 60m\"],\"image\":\"alpine:latest\",\"imagePullPolicy\":\"IfNotPresent\",\"name\":\"alpine\"}],\"initContainers\":[{\"command\":[\"/bin/sh\",\"-c\",\"sleep 10s\"],\"image\":\"alpine:latest\",\"imagePullPolicy\":\"IfNotPresent\",\"name\":\"init\"},{\"command\":[\"/bin/sh\",\"-c\",\"sleep 120m\"],\"image\":\"alpine:latest\",\"imagePullPolicy\":\"IfNotPresent\",\"name\":\"sidecar\"}],\"restartPolicy\":\"Always\"}}\n"
+                },
+                "creationTimestamp": "2024-02-28T19:29:01Z",
+                "labels": {
+                    "admission.datadoghq.com/enabled": "true"
+                },
+                "name": "sidecar-second",
+                "namespace": "default",
+                "resourceVersion": "187112",
+                "uid": "d2dfd16e-e829-4f66-91d5-f9233ca7332b"
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "command": [
+                            "/bin/sh",
+                            "-c",
+                            "sleep 60m"
+                        ],
+                        "env": [
+                            {
+                                "name": "DD_INSTRUMENTATION_INSTALL_ID",
+                                "value": "c4aecf29-52c0-4d37-a6f0-3d9c31cdb17d"
+                            },
+                            {
+                                "name": "DD_INSTRUMENTATION_INSTALL_TIME",
+                                "value": "1709061991"
+                            },
+                            {
+                                "name": "DD_ENTITY_ID",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.uid"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "DD_DOGSTATSD_URL",
+                                "value": "unix:///var/run/datadog/dsd.socket"
+                            },
+                            {
+                                "name": "DD_TRACE_AGENT_URL",
+                                "value": "unix:///var/run/datadog/apm.socket"
+                            }
+                        ],
+                        "image": "alpine:latest",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "alpine",
+                        "resources": {},
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-ffm7z",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/var/run/datadog",
+                                "name": "datadog",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "initContainers": [
+                    {
+                        "command": [
+                            "/bin/sh",
+                            "-c",
+                            "sleep 10s"
+                        ],
+                        "env": [
+                            {
+                                "name": "DD_INSTRUMENTATION_INSTALL_ID",
+                                "value": "c4aecf29-52c0-4d37-a6f0-3d9c31cdb17d"
+                            },
+                            {
+                                "name": "DD_INSTRUMENTATION_INSTALL_TIME",
+                                "value": "1709061991"
+                            },
+                            {
+                                "name": "DD_ENTITY_ID",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.uid"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "DD_DOGSTATSD_URL",
+                                "value": "unix:///var/run/datadog/dsd.socket"
+                            },
+                            {
+                                "name": "DD_TRACE_AGENT_URL",
+                                "value": "unix:///var/run/datadog/apm.socket"
+                            }
+                        ],
+                        "image": "alpine:latest",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "init",
+                        "resources": {
+                            "requests": {
+                                "cpu": "50m",
+                                "memory": "100Mi"
+                            },
+                            "limits": {
+                                "memory": "150Mi"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-ffm7z",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/var/run/datadog",
+                                "name": "datadog",
+                                "readOnly": true
+                            }
+                        ]
+                    },
+                    {
+                        "command": [
+                            "/bin/sh",
+                            "-c",
+                            "sleep 120m"
+                        ],
+                        "env": [
+                            {
+                                "name": "DD_INSTRUMENTATION_INSTALL_ID",
+                                "value": "c4aecf29-52c0-4d37-a6f0-3d9c31cdb17d"
+                            },
+                            {
+                                "name": "DD_INSTRUMENTATION_INSTALL_TIME",
+                                "value": "1709061991"
+                            },
+                            {
+                                "name": "DD_ENTITY_ID",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.uid"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "DD_DOGSTATSD_URL",
+                                "value": "unix:///var/run/datadog/dsd.socket"
+                            },
+                            {
+                                "name": "DD_TRACE_AGENT_URL",
+                                "value": "unix:///var/run/datadog/apm.socket"
+                            }
+                        ],
+                        "image": "alpine:latest",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "sidecar",
+                        "resources": {},
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-ffm7z",
+                                "readOnly": true
+                            },
+                            {
+                                "mountPath": "/var/run/datadog",
+                                "name": "datadog",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "nodeName": "steve-containerd-new",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "kube-api-access-ffm7z",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "hostPath": {
+                            "path": "/var/run/datadog",
+                            "type": "DirectoryOrCreate"
+                        },
+                        "name": "datadog"
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2024-02-28T19:29:01Z",
+                        "message": "containers with incomplete status: [sidecar]",
+                        "reason": "ContainersNotInitialized",
+                        "status": "False",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2024-02-28T19:29:01Z",
+                        "message": "containers with unready status: [alpine]",
+                        "reason": "ContainersNotReady",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2024-02-28T19:29:01Z",
+                        "message": "containers with unready status: [alpine]",
+                        "reason": "ContainersNotReady",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2024-02-28T19:29:01Z",
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "image": "alpine:latest",
+                        "imageID": "",
+                        "lastState": {},
+                        "name": "alpine",
+                        "ready": false,
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "waiting": {
+                                "reason": "PodInitializing"
+                            }
+                        }
+                    }
+                ],
+                "hostIP": "172.17.0.2",
+                "initContainerStatuses": [
+                    {
+                        "containerID": "containerd://21c0e1ea113978138d91b5a1e1360bd136c3dc761f6b154c3360d25fc182ac67",
+                        "image": "docker.io/library/alpine:latest",
+                        "imageID": "docker.io/library/alpine@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b",
+                        "lastState": {},
+                        "name": "init",
+                        "ready": true,
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "containerd://21c0e1ea113978138d91b5a1e1360bd136c3dc761f6b154c3360d25fc182ac67",
+                                "exitCode": 0,
+                                "finishedAt": "2024-02-28T19:29:12Z",
+                                "reason": "Completed",
+                                "startedAt": "2024-02-28T19:29:02Z"
+                            }
+                        }
+                    },
+                    {
+                        "containerID": "containerd://80bd9ebe296615341c68d571e843d800fb4a75bef696d858065572ab4e49920b",
+                        "image": "docker.io/library/alpine:latest",
+                        "imageID": "docker.io/library/alpine@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b",
+                        "lastState": {},
+                        "name": "sidecar",
+                        "ready": false,
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2024-02-28T19:29:12Z"
+                            }
+                        }
+                    }
+                ],
+                "phase": "Pending",
+                "podIP": "10.244.0.122",
+                "podIPs": [
+                    {
+                        "ip": "10.244.0.122"
+                    }
+                ],
+                "qosClass": "BestEffort",
+                "startTime": "2024-02-28T19:29:01Z"
             }
         }
     ],

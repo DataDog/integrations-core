@@ -3,13 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 from collections import defaultdict
+from urllib.parse import urljoin
 
 import requests
-from six import PY2
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
+from .check import EnvoyCheckV2
 from .errors import UnknownMetric, UnknownTags
 from .parser import parse_histogram, parse_metric
 from .utils import _get_server_info
@@ -27,15 +27,6 @@ class Envoy(AgentCheck):
         instance = instances[0]
 
         if 'openmetrics_endpoint' in instance:
-            if PY2:
-                raise ConfigurationError(
-                    "This version of the integration is only available when using py3. "
-                    "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                    "for more information or use the older style config."
-                )
-            # TODO: when we drop Python 2 move this import up top
-            from .check import EnvoyCheckV2
-
             return EnvoyCheckV2(name, init_config, instances)
         else:
             return super(Envoy, cls).__new__(cls)
@@ -53,16 +44,36 @@ class Envoy(AgentCheck):
         if self.stats_url is None:
             raise ConfigurationError('Envoy configuration setting `stats_url` is required')
 
-        included_metrics = set(
-            re.sub(r'^envoy\\?\.', '', s, 1)
-            for s in self.instance.get('included_metrics', self.instance.get('metric_whitelist', []))
-        )
+        self.custom_tags.append("endpoint:{}".format(self.stats_url))
+
+        included_metrics = {
+            re.sub(r'^envoy\\?\.', '', s, 1)  # noqa: B034
+            for s in self.instance.get(
+                'included_metrics',
+                self.instance.get(
+                    'metric_whitelist',
+                    self.instance.get(
+                        'include_metrics',
+                        [],
+                    ),
+                ),
+            )
+        }
         self.config_included_metrics = [re.compile(pattern) for pattern in included_metrics]
 
-        excluded_metrics = set(
-            re.sub(r'^envoy\\?\.', '', s, 1)
-            for s in self.instance.get('excluded_metrics', self.instance.get('metric_blacklist', []))
-        )
+        excluded_metrics = {
+            re.sub(r'^envoy\\?\.', '', s, 1)  # noqa: B034
+            for s in self.instance.get(
+                'excluded_metrics',
+                self.instance.get(
+                    'metric_blacklist',
+                    self.instance.get(
+                        'exclude_metrics',
+                        [],
+                    ),
+                ),
+            )
+        }
         self.config_excluded_metrics = [re.compile(pattern) for pattern in excluded_metrics]
 
         # The memory implications here are unclear to me. We may want a bloom filter
@@ -129,7 +140,6 @@ class Envoy(AgentCheck):
                 continue
 
             tags.extend(self.custom_tags)
-
             try:
                 value = int(value)
                 get_method(self, method)(metric, value, tags=tags)

@@ -1,0 +1,6 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+oci.oke.apiserver_request_count,count,60,request,,Number of requests received by the Kubernetes API Server.,0,oracle_container_engine_for_kubernetes_-_oke,,
+oci.oke.apiserver_response_count,count,60,response,,"Number of different non-200 responses (that is, error responses) sent from the Kubernetes API server.",0,oracle_container_engine_for_kubernetes_-_oke,,
+oci.oke.kubernetes_node_condition,gauge,60,node,,"Number of worker nodes in different conditions, as indicated by the Kubernetes API server.",0,oracle_container_engine_for_kubernetes_-_oke,,
+oci.oke.node_state,gauge,60,node,,Number of compute nodes in different states.,0,oracle_container_engine_for_kubernetes_-_oke,,
+oci.oke.unschedulable_pods,gauge,60,,,Number of pods that the Kubernetes scheduler is unable to schedule. Not available in clusters running versions of Kubernetes prior to version 1.15.x.,0,oracle_container_engine_for_kubernetes_-_oke,,

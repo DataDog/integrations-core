@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5e8c3b5f-278f-4423-90d9-969c06a478eb",
   "app_id": "singlestore",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,11 +13,13 @@
     "title": "SingleStore",
     "media": [],
     "classifier_tags": [
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Category::Network",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "SingleStore",
@@ -45,18 +47,17 @@
       },
       "process_signatures": [
         "memsqld"
-      ]
+      ],
+      "source_type_id": 10215,
+      "auto_install": true
     },
     "dashboards": {
       "Singlestore Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[SingleStore] License expiration": "assets/monitors/license_expiration.json",
-      "[SingleStore] Read failures rate": "assets/monitors/read_failures.json",
-      "[SingleStore] Write failures rate": "assets/monitors/write_failures.json"
-    },
-    "logs": {
-      "source": "singlestore"
+      "License will expire soon": "assets/monitors/license_expiration.json",
+      "Read queries failure rate is high": "assets/monitors/read_failures.json",
+      "Write queries failure rate is high": "assets/monitors/write_failures.json"
     }
   }
 }

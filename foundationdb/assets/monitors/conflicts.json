@@ -1,29 +1,36 @@
 {
-	"name": "FoundationDB High Level of Conflicted Transactions",
-	"type": "query alert",
-	"query": "avg(last_5m):100 * ( avg:foundationdb.workload.transactions.conflicted.hz{*} / avg:foundationdb.workload.transactions.started.hz{*} ) > 10",
-	"message": "A significant proportion of transactions started are ending up in a conflicted state. This may indicate a query design problem.",
-	"tags": [
-		"integration:fdb"
-	],
-	"options": {
-		"notify_audit": false,
-		"locked": false,
-		"timeout_h": 24,
-		"new_host_delay": 300,
-		"require_full_window": true,
-		"notify_no_data": false,
-		"renotify_interval": "0",
-		"escalation_message": "",
-		"no_data_timeframe": null,
-		"include_tags": true,
-		"thresholds": {
-			"critical": 10,
-			"warning": 5
-		}
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when a significant portion of transactions started are ending up in a conflicted state."
-	}
+  "version": 2,
+  "created_at": "2022-03-14",
+  "last_updated_at": "2022-05-25",
+  "title": "Transactions are conflicting",
+  "tags": [
+    "integration:foundationdb"
+  ],
+  "description": "Transaction conflicts happen where multiple transactions contend for the same resources. This monitor tracks the conflict rate in FoundationDB to indicate issues with data concurrency that may impact system performance or data consistency.",
+  "definition": {
+    "message": "A significant proportion of transactions started are ending up in a conflicted state. This may indicate a query design problem.",
+    "name": "FoundationDB High Level of Conflicted Transactions",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 10,
+        "warning": 5
+      },
+      "timeout_h": 24
+    },
+    "priority": null,
+    "query": "avg(last_5m):100 * ( avg:foundationdb.workload.transactions.conflicted.hz{*} / avg:foundationdb.workload.transactions.started.hz{*} ) > 10",
+    "tags": [
+      "integration:fdb"
+    ],
+    "type": "query alert"
+  }
 }

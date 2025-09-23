@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "created_at": "2021-01-08",
+  "last_updated_at": "2021-01-08",
+  "title": "Database is not online",
+  "tags": [
+    "integration:sql-server"
+  ],
+  "description": "A Database in SQL Servers can have different states ranging from operational to corruption or error states. This monitor tracks the state across different databases and identifies situations where SQL Server databases are not in a healthy state.",
+  "definition": {
+    "message": "SQLServer database is not online for the last 5 minutes",
+    "name": "[SQLServer] Database is not online",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0
+      },
+      "timeout_h": 0
+    },
+    "query": "avg(last_5m):avg:sqlserver.database.state{*} > 0",
+    "tags": [
+      "integration:sql-server"
+    ],
+    "type": "query alert"
+  }
+}

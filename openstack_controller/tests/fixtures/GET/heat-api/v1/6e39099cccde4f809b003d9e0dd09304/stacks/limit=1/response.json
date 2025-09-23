@@ -1,0 +1,31 @@
+{
+    "stacks": [
+        {
+            "id": "0a90fd9f-b411-440d-9e75-960c0bc88c54",
+            "links": [
+                {
+                    "href": "http://127.0.0.1/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks/teststack1/0a90fd9f-b411-440d-9e75-960c0bc88c54",
+                    "rel": "self"
+                }
+            ],
+            "project": "1e6e233e637d4d55a50a62b63398ad15",
+            "stack_name": "teststack1",
+            "description": "",
+            "stack_status": "CREATE_FAILED",
+            "stack_status_reason": "Resource CREATE failed: ValueError: resources.hello_world: nics are required after microversion 2.36",
+            "creation_time": "2024-05-14T14:09:41Z",
+            "updated_time": null,
+            "deletion_time": null,
+            "stack_owner": "admin",
+            "parent": null,
+            "stack_user_project_id": "8de984c5dde144f6847ac5c44c9ca709",
+            "tags": null
+        }
+    ],
+    "links": [
+        {
+            "rel": "next",
+            "href": "http://127.0.0.1/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks?limit=1&marker=0a90fd9f-b411-440d-9e75-960c0bc88c54"
+        }
+    ]
+}

@@ -3,11 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev.testing import requires_py3
-
 from .utils import get_check
-
-pytestmark = [requires_py3]
 
 
 class TestPrometheusEndpoint:
@@ -421,9 +417,11 @@ class TestUseLatestSpec:
         check = get_check({'use_latest_spec': True})
         check.configure_scrapers()
         scraper = check.scrapers['test']
-        assert scraper.http.options['headers']['Accept'] == 'application/openmetrics-text; version=0.0.1; charset=utf-8'
+        assert scraper.http.options['headers']['Accept'] == (
+            'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
+        )
 
-    def test_plain_text_spec(self, dd_run_check):
+    def test_dynamic_spec(self, dd_run_check):
         check = get_check({'use_latest_spec': False})
         check.configure_scrapers()
         scraper = check.scrapers['test']

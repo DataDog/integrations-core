@@ -12,10 +12,18 @@
     "title": "vSphere",
     "media": [],
     "classifier_tags": [
+      "Category::Cloud",
+      "Category::Network",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Cloud"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers"
+      }
     ]
   },
   "author": {
@@ -24,7 +32,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "vSphere",
@@ -36,16 +43,22 @@
       },
       "metrics": {
         "prefix": "vsphere.",
-        "check": "vsphere.vm.count",
+        "check": [
+          "vsphere.cpu.usage.avg",
+          "vsphere.vm.count"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 85,
+      "auto_install": true
     },
     "dashboards": {
       "vsphere-overview": "assets/dashboards/vsphere_overview.json",
-      "VMware vSphere TKG - Overview": "assets/dashboards/vmware_vsphere_tkg_-_overview.json"
+      "VMware vSphere TKG - Overview": "assets/dashboards/vmware_vsphere_tkg_-_overview.json",
+      "VMware vSphere - Property Metrics": "assets/dashboards/vmware_vsphere-_property_metrics.json"
     }
   }
 }

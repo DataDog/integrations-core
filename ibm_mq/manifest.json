@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d29a1df9-6038-41f5-b017-82bf45f58767",
   "app_id": "ibm-mq",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,13 +13,19 @@
     "title": "IBM MQ",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Messaging",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Message Queues",
+      "Category::Network",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog"
+      }
     ]
   },
   "author": {
@@ -27,7 +34,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "IBM MQ",
@@ -44,13 +50,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10049,
+      "auto_install": true
     },
     "dashboards": {
       "IBM MQ": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "ibm_mq"
     }
   }
 }

@@ -1,7 +1,7 @@
 # Default metrics collected by this check. You should not have to modify this.
 jmx_metrics:
     - include:
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: ThreadPool
         attribute:
           maxThreads:
@@ -13,8 +13,11 @@ jmx_metrics:
           currentThreadsBusy:
             alias: tomcat.threads.busy
             metric_type: gauge
+          minSpareThreads:
+            alias: tomcat.threads.min
+            metric_type: gauge
     - include:
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: GlobalRequestProcessor
         attribute:
           bytesSent:
@@ -32,11 +35,14 @@ jmx_metrics:
           maxTime:
             alias: tomcat.max_time
             metric_type: gauge
+          minTime:
+            alias: tomcat.min_time
+            metric_type: gauge
           processingTime:
             alias: tomcat.processing_time
             metric_type: counter
     - include:
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         j2eeType: Servlet
         attribute:
           processingTime:
@@ -48,20 +54,14 @@ jmx_metrics:
           requestCount:
             alias: tomcat.servlet.request_count
             metric_type: counter
+          maxTime:
+            alias: tomcat.servlet.max_time
+            metric_type: gauge
+          minTime:
+            alias: tomcat.servlet.min_time
+            metric_type: gauge
     - include:
-        # Deprecated metric available in Tomcat 7
-        # https://github.com/apache/tomcat/blob/7.0.x/java/org/apache/catalina/core/StandardContext.java#L5293-L5297
-        domain: Catalina
-        type: Cache
-        attribute:
-          accessCount:
-            alias: tomcat.cache.access_count
-            metric_type: counter
-          hitsCounts:
-            alias: tomcat.cache.hits_count
-            metric_type: counter
-    - include:
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: StringCache
         attribute:
           accessCount:
@@ -70,9 +70,15 @@ jmx_metrics:
           hitCount:
             alias: tomcat.string_cache.hit_count
             metric_type: counter
+          size:
+            alias: tomcat.string_cache.size
+            metric_type: gauge
+          maxSize:
+            alias: tomcat.string_cache.max_size
+            metric_type: gauge
     - include:
         # Example Bean: `Catalina:type=WebResourceRoot,host=localhost,context=/docs,name=Cache`
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: WebResourceRoot
         name: Cache
         attribute:
@@ -83,7 +89,7 @@ jmx_metrics:
             alias: tomcat.web.cache.lookup_count
             metric_type: counter
     - include:
-        domain: Catalina
+        domain_regex: Catalina|Tomcat
         type: JspMonitor
         attribute:
           jspCount:
@@ -92,3 +98,25 @@ jmx_metrics:
           jspReloadCount:
             alias: tomcat.jsp.reload_count
             metric_type: counter
+    - include:
+        domain_regex: Catalina|Tomcat
+        type: DataSource
+        attribute:
+          active:
+            alias: tomcat.jdbc.connection_pool.active
+            metric_type: gauge
+          maxActive:
+            alias: tomcat.jdbc.connection_pool.max_active
+            metric_type: gauge
+          idle:
+            alias: tomcat.jdbc.connection_pool.idle
+            metric_type: gauge
+          maxIdle:
+            alias: tomcat.jdbc.connection_pool.max_idle
+            metric_type: gauge
+          minIdle:
+            alias: tomcat.jdbc.connection_pool.min_idle
+            metric_type: gauge
+          size:
+            alias: tomcat.jdbc.connection_pool.size
+            metric_type: gauge

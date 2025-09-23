@@ -1,2 +1,2 @@
 {license_header}
-__version__ = '0.0.1'
+__version__ = '{starting_version}'

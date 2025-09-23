@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import difflib
 
+import pytest
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs import similar
 from datadog_checks.base.stubs.aggregator import AggregatorStub
@@ -24,6 +26,10 @@ class TestSimilarAssertionMessages(object):
         expected_msg = '''
     Expected:
         MetricStub(name='test.similar_metric', type=None, value=None, tags=None, hostname=None, device=None, flush_first_value=None)
+Difference to closest:
+        Expected name: test.similar_metric
+        Found test.most_similar_metric
+
 Similar submitted:
 Score   Most similar
 0.88    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None, flush_first_value=False)
@@ -214,3 +220,33 @@ Score   Most similar
         assert similar_histogram_bucket[3][1].name == 'histogram.bucket4'  # value/monotonic/tag match
         assert similar_histogram_bucket[4][1].name == 'histogram.bucket5'  # value/monotonic match
         assert similar_histogram_bucket[5][1].name == 'histogram.bucket0'  # no match
+
+    @pytest.mark.parametrize(
+        "expected, closest, diff",
+        [
+            pytest.param({'a': 1, 'b': 2}, {'a': 1, 'b': 3}, [('b', 2, 3)], id="different value in closest"),
+            pytest.param({'a': 1}, {'b': 3}, [('a', 1, None)], id="missing key in closest"),
+            pytest.param({'a': 1}, {'a': 1}, [], id="no difference"),
+            pytest.param({'a': 1}, {}, [('a', 1, None)], id="missing key in empty closest"),
+            pytest.param({}, {'a': 1}, [], id="empty expected and extra key in closest"),
+            pytest.param({}, {}, [], id="empty"),
+        ],
+    )
+    def test_dict_diff(self, expected, closest, diff):
+        assert similar.dict_diff(expected, closest) == diff
+
+    @pytest.mark.parametrize(
+        "expected, closest, diff",
+        [
+            pytest.param(
+                ['a:1', 'b:2'], ['a:1', 'c:2'], [('b', '2', None), ('c', None, '2')], id="missing tag and extra tag"
+            ),
+            pytest.param(['a:1', 'b:2'], ['a:2', 'b:2'], [('a', '1', '2')], id="different value in closest"),
+            pytest.param(['a:1'], ['a:1'], [], id="no difference"),
+            pytest.param([], [], [], id="empty lists"),
+            pytest.param(['a:1'], [], [("a", "1", None)], id="missing tag in empty closest"),
+            pytest.param([], ['a:1'], [("a", None, "1")], id="empty expected extra tag in closest"),
+        ],
+    )
+    def test_tags_diff(self, expected, closest, diff):
+        assert similar.tags_diff(expected, closest) == diff

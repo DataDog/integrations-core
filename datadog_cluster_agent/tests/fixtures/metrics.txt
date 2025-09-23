@@ -1,12 +1,19 @@
 # HELP admission_webhooks_certificate_expiry Time left before the certificate expires in hours.
 # TYPE admission_webhooks_certificate_expiry gauge
 admission_webhooks_certificate_expiry 11.083180892013889
-# HELP admission_webhooks_mutation_attempts Number of pod mutation attempts by mutation type (agent config, standard tags).
+# HELP admission_webhooks_mutation_attempts Number of pod mutation attempts by mutation type
 # TYPE admission_webhooks_mutation_attempts gauge
-admission_webhooks_mutation_attempts{mutation_type="agent_config"} 100
-# HELP admission_webhooks_mutation_errors Number of mutation failures by mutation type (agent config, standard tags).
-# TYPE admission_webhooks_mutation_errors gauge
-admission_webhooks_mutation_errors{mutation_type="agent_config"} 1
+admission_webhooks_mutation_attempts{error="",injected="false",mutation_type="agent_sidecar",status="success"} 1
+admission_webhooks_mutation_attempts{error="",injected="false",mutation_type="cws_exec_instrumentation",status="success"} 1
+admission_webhooks_mutation_attempts{error="",injected="false",mutation_type="lib_injection",status="success"} 1
+admission_webhooks_mutation_attempts{error="",injected="false",mutation_type="standard_tags",status="success"} 2
+admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="agent_config",status="success"} 2
+admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="agent_sidecar",status="success"} 1
+admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="cws_pod_instrumentation",status="success"} 2
+admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="lib_injection",status="success"} 1
+# HELP admission_webhooks_validation_attempts Number of pod validation attempts by validation type
+# TYPE admission_webhooks_validation_attempts gauge
+admission_webhooks_validation_attempts{error="",validated="true",webhook_name="kubernetes_audit",status="success"} 1
 # HELP admission_webhooks_reconcile_errors Number of reconcile errors per controller.
 # TYPE admission_webhooks_reconcile_errors gauge
 admission_webhooks_reconcile_errors{controller="secrets"} 5
@@ -14,7 +21,23 @@ admission_webhooks_reconcile_errors{controller="secrets"} 5
 # TYPE admission_webhooks_reconcile_success gauge
 admission_webhooks_reconcile_success{controller="secrets"} 221
 admission_webhooks_reconcile_success{controller="webhooks"} 7
-# HELP admission_webhooks_webhooks_received Number of mutation webhook requests received.
+# HELP admission_webhooks_response_duration Webhook response duration distribution (in seconds).
+# TYPE admission_webhooks_response_duration histogram
+admission_webhooks_response_duration_bucket{le="0.005"} 65
+admission_webhooks_response_duration_bucket{le="0.01"} 102
+admission_webhooks_response_duration_bucket{le="0.025"} 108
+admission_webhooks_response_duration_bucket{le="0.05"} 108
+admission_webhooks_response_duration_bucket{le="0.1"} 108
+admission_webhooks_response_duration_bucket{le="0.25"} 108
+admission_webhooks_response_duration_bucket{le="0.5"} 108
+admission_webhooks_response_duration_bucket{le="1"} 108
+admission_webhooks_response_duration_bucket{le="2.5"} 108
+admission_webhooks_response_duration_bucket{le="5"} 108
+admission_webhooks_response_duration_bucket{le="10"} 108
+admission_webhooks_response_duration_bucket{le="+Inf"} 108
+admission_webhooks_response_duration_sum 0.4897835529999999
+admission_webhooks_response_duration_count 108
+# HELP admission_webhooks_webhooks_received Number of webhook requests received.
 # TYPE admission_webhooks_webhooks_received gauge
 admission_webhooks_webhooks_received 300
 # HELP aggregator__dogstatsd_contexts Count the number of dogstatsd contexts in the aggregator
@@ -82,10 +105,45 @@ compressor__total_payloads 12
 # HELP datadog_requests Counter of requests made to Datadog
 # TYPE datadog_requests counter
 datadog_requests{join_leader="true",status="error"} 2
+datadog_requests{join_leader="true",status="rate_limit_error"} 2
 datadog_requests{join_leader="true",status="success"} 13006
 # HELP external_metrics Number of external metrics tagged.
 # TYPE external_metrics gauge
 external_metrics{join_leader="true"} 100
+# HELP external_metrics_api_elapsed Count of API Requests received
+# TYPE external_metrics_api_elapsed histogram
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.005"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.01"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.025"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.05"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.1"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.25"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="0.5"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="1"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="2.5"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="5"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="10"} 0
+external_metrics_api_elapsed_bucket{handler="get",in_error="true",namespace="datadog",le="+Inf"} 24
+external_metrics_api_elapsed_sum{handler="get",in_error="true",namespace="datadog"} 1.696529e+07
+external_metrics_api_elapsed_count{handler="get",in_error="true",namespace="datadog"} 24
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.005"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.01"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.025"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.05"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.1"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.25"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="0.5"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="1"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="2.5"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="5"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="10"} 0
+external_metrics_api_elapsed_bucket{handler="list",in_error="false",namespace="",le="+Inf"} 97
+external_metrics_api_elapsed_sum{handler="list",in_error="false",namespace=""} 4.8232774e+07
+external_metrics_api_elapsed_count{handler="list",in_error="false",namespace=""} 97
+# HELP external_metrics_api_requests Count of API Requests received
+# TYPE external_metrics_api_requests gauge
+external_metrics_api_requests{handler="get",in_error="true",namespace="datadog"} 24
+external_metrics_api_requests{handler="list",in_error="false",namespace=""} 97
 # HELP external_metrics_datadog_metrics The label valid is true if the DatadogMetric CR is valid, false otherwise
 # TYPE external_metrics_datadog_metrics gauge
 external_metrics_datadog_metrics{join_leader="true",name="dcaautogen-776576e7e4e1d57e7df8d30d63fdabe2c60edc",namespace="default",valid="false"} 1
@@ -262,6 +320,9 @@ rate_limit_queries_period{endpoint="/api/v1/query",join_leader="true"} 3600
 # HELP rate_limit_queries_remaining number of queries remaining before next reset
 # TYPE rate_limit_queries_remaining gauge
 rate_limit_queries_remaining{endpoint="/api/v1/query",join_leader="true"} 5473
+# HELP rate_limit_queries_remaining_min minimum number of queries remaining before next reset observed during an expiration interval of 2*refresh period
+# TYPE rate_limit_queries_remaining_min gauge
+rate_limit_queries_remaining_min{endpoint="/api/v1/query",join_leader="true"} 248
 # HELP rate_limit_queries_reset number of seconds before next reset
 # TYPE rate_limit_queries_reset gauge
 rate_limit_queries_reset{endpoint="/api/v1/query",join_leader="true"} 414
@@ -316,6 +377,9 @@ cluster_checks_configs_info{check_id="http_check:kubernetes:c964669d244288ea",jo
 cluster_checks_configs_info{check_id="http_check:nginx 1:c89937d23c8b01a0",join_leader="true",node="datadog-clusterchecks-779dfcd7bf-jm4mz"} 1
 cluster_checks_configs_info{check_id="http_check:nginx 2:89d07d5d897f5241",join_leader="true",node="datadog-clusterchecks-779dfcd7bf-hxjwg"} 1
 cluster_checks_configs_info{check_id="http_check:nginx 3:8f889113ed52b58e",join_leader="true",node="datadog-clusterchecks-779dfcd7bf-hxjwg"} 1
+# HELP cluster_checks_unscheduled_check Number of check configurations not scheduled.
+# TYPE cluster_checks_unscheduled_check gauge
+cluster_checks_unscheduled_check{config_name="kubernetes_state_core",config_source="file:/etc/datadog-agent/conf.d/kubernetes_state_core.yaml.default",join_leader="true"} 1
 # HELP autodiscovery_errors Number of Autodiscovery errors by provider.
 # TYPE autodiscovery_errors gauge
 autodiscovery_errors{provider="kubernetes-services"} 1
@@ -366,9 +430,75 @@ admission_webhooks_library_injection_attempts{injected="true",language="java"} 4
 # HELP admission_webhooks_library_injection_errors Number of library injection failures by language
 # TYPE admission_webhooks_library_injection_errors counter
 admission_webhooks_library_injection_errors{language="java"} 1
+# HELP admission_webhooks_cws_response_duration Distribution of CWS mutating webhook response durations per type operation.
+# TYPE admission_webhooks_cws_response_duration histogram
+admission_webhooks_cws_response_duration_bucket{le="0.005"} 65
+admission_webhooks_cws_response_duration_bucket{le="0.01"} 102
+admission_webhooks_cws_response_duration_bucket{le="0.025"} 108
+admission_webhooks_cws_response_duration_bucket{le="0.05"} 108
+admission_webhooks_cws_response_duration_bucket{le="0.1"} 108
+admission_webhooks_cws_response_duration_bucket{le="0.25"} 108
+admission_webhooks_cws_response_duration_bucket{le="0.5"} 108
+admission_webhooks_cws_response_duration_bucket{le="1"} 108
+admission_webhooks_cws_response_duration_bucket{le="2.5"} 108
+admission_webhooks_cws_response_duration_bucket{le="5"} 108
+admission_webhooks_cws_response_duration_bucket{le="10"} 108
+admission_webhooks_cws_response_duration_bucket{le="+Inf"} 108
+admission_webhooks_cws_response_duration_sum 0.4897835529999999
+admission_webhooks_cws_response_duration_count 108
+# HELP admission_webhooks_cws_exec_mutation_attempts Number of CWS exec mutation attempts by reason and status.
+# TYPE admission_webhooks_cws_exec_mutation_attempts counter
+admission_webhooks_cws_exec_mutation_attempts{injected="false",reason="remote_copy_failed"} 1
+admission_webhooks_cws_exec_mutation_attempts{injected="true",reason="remote_copy_failed"} 4
+# HELP admission_webhooks_cws_pod_mutation_attempts Number of CWS pod mutation attempts by reason and status.
+# TYPE admission_webhooks_cws_pod_mutation_attempts counter
+admission_webhooks_cws_pod_mutation_attempts{injected="false",reason="no_instrumentation_needed"} 1
+admission_webhooks_cws_pod_mutation_attempts{injected="true",reason="no_instrumentation_needed"} 4
 # HELP kubernetes_apiserver_emitted_events Number of events emitted by the check.
 # TYPE kubernetes_apiserver_emitted_events counter
 kubernetes_apiserver_emitted_events{kind="ConfigMap",type="Normal"} 7
 # HELP kubernetes_apiserver_kube_events Number of Kubernetes events received by the check.
 # TYPE kubernetes_apiserver_kube_events counter
 kubernetes_apiserver_kube_events{component="",kind="Pod",reason="FailedScheduling",type="Warning"} 10424
+# HELP admission_webhooks_patcher_attempts Number of patch attempts.
+# TYPE admission_webhooks_patcher_attempts counter
+admission_webhooks_patcher_attempts 6
+# HELP admission_webhooks_patcher_completed Number of completed patch attempts.
+# TYPE admission_webhooks_patcher_completed counter
+admission_webhooks_patcher_completed 1
+# HELP admission_webhooks_patcher_errors Number of patch errors.
+# TYPE admission_webhooks_patcher_errors counter
+admission_webhooks_patcher_errors 2
+# HELP admission_webhooks_rc_provider_configs Number of valid remote configurations.
+# TYPE admission_webhooks_rc_provider_configs gauge
+admission_webhooks_rc_provider_configs 2
+# HELP admission_webhooks_rc_provider_configs_invalid Number of invalid remote configurations.
+# TYPE admission_webhooks_rc_provider_configs_invalid gauge
+admission_webhooks_rc_provider_configs_invalid 1
+# HELP language_detection_dca_handler_processed_requests Tracks the number of requests processed by the handler
+# TYPE language_detection_dca_handler_processed_requests counter
+language_detection_dca_handler_processed_requests{status="success"} 3
+# HELP language_detection_patcher_patches Tracks the number of patch requests sent by the patcher to the kubernetes api server
+# TYPE language_detection_patcher_patches counter
+language_detection_patcher_patches{namespace="default",owner_kind="Deployment",owner_name="dummy-dsd-app-java",status="error"} 1
+language_detection_patcher_patches{namespace="default",owner_kind="Deployment",owner_name="dummy-dsd-app-java",status="retry"} 1
+language_detection_patcher_patches{namespace="default",owner_kind="Deployment",owner_name="dummy-python-app",status="success"} 1
+# HELP tagger_stored_entities Number of entities in the store.
+# TYPE tagger_stored_entities gauge
+tagger_stored_entities{prefix="internal",source="workloadmeta-static"} 1
+# HELP tagger_updated_entities Number of updates made to entities.
+# TYPE tagger_updated_entities counter
+tagger_updated_entities 2
+# HELP workloadmeta_events_received Number of events received by the workloadmeta store.
+# TYPE workloadmeta_events_received counter
+workloadmeta_events_received{kind="kubernetes_node",source="kubeapiserver"} 1
+# HELP workloadmeta_notifications_sent Number of notifications sent by workloadmeta to its subscribers
+# TYPE workloadmeta_notifications_sent counter
+workloadmeta_notifications_sent{status="success",subscriber_name="tagger-workloadmeta"} 1
+# HELP workloadmeta_pull_duration The time it takes to pull from the collectors (in seconds)
+# HELP workloadmeta_stored_entities Number of entities in the store.
+# TYPE workloadmeta_stored_entities gauge
+workloadmeta_stored_entities{kind="kubernetes_node",source="kubeapiserver"} 1
+# HELP workloadmeta_subscribers Number of subscribers.
+# TYPE workloadmeta_subscribers gauge
+workloadmeta_subscribers 2

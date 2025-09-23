@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 import mock
 import pytest
@@ -82,7 +82,6 @@ def test_excluded_host_tags(vsphere, instance, aggregator):
         "datadog_checks.vsphere.legacy.vsphere_legacy.VSphereLegacyCheck._collect_mors_and_attributes",
         return_value=mocked_mors_attrs,
     ):
-
         server_instance = vsphere._get_server_instance(instance)
         result = MagicMock()
         result.value = [23.4]
@@ -97,7 +96,7 @@ def test_excluded_host_tags(vsphere, instance, aggregator):
 
         # vsphere_host tag not in external metadata
         for host, source_tags in ext_host_tags:
-            if host == u"mocked_vm":
+            if host == "mocked_vm":
                 tags = source_tags["vsphere"]
                 for tag in tags:
                     assert "vsphere_host:" not in tag
@@ -352,9 +351,12 @@ def test__cache_morlist_raw(vsphere, instance):
 
 def test_use_guest_hostname(vsphere, instance):
     # Default value
-    with mock.patch(
-        "datadog_checks.vsphere.legacy.vsphere_legacy.VSphereLegacyCheck._get_all_objs"
-    ) as mock_get_all_objs, mock.patch("datadog_checks.vsphere.legacy.vsphere_legacy.vmodl"):
+    with (
+        mock.patch(
+            "datadog_checks.vsphere.legacy.vsphere_legacy.VSphereLegacyCheck._get_all_objs"
+        ) as mock_get_all_objs,
+        mock.patch("datadog_checks.vsphere.legacy.vsphere_legacy.vmodl"),
+    ):
         vsphere._cache_morlist_raw(instance)
         # Default value
         assert not mock_get_all_objs.call_args[1]["use_guest_hostname"]
@@ -365,7 +367,6 @@ def test_use_guest_hostname(vsphere, instance):
         assert mock_get_all_objs.call_args[1]["use_guest_hostname"]
 
     with mock.patch("datadog_checks.vsphere.legacy.vsphere_legacy.vmodl"):
-
         # Discover hosts and virtual machines
         instance["use_guest_hostname"] = True
         vsphere._cache_morlist_raw(instance)
@@ -698,7 +699,7 @@ def test__should_cache(instance):
 
 
 def migrated_event():
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     vm = MockedMOR(spec='VirtualMachine', name='vm1')
     vm_arg = vim.event.VmEventArgument(vm=vm)
     host = MockedMOR(spec='HostSystem')

@@ -1,0 +1,2455 @@
+# HELP schedules_CHANGEFEED_succeeded Number of CHANGEFEED jobs succeeded
+# TYPE schedules_CHANGEFEED_succeeded counter
+schedules_CHANGEFEED_succeeded{node_id="1"} 0
+# HELP schedules_round_jobs_started The number of jobs started
+# TYPE schedules_round_jobs_started gauge
+schedules_round_jobs_started{node_id="1"} 0
+# HELP schedules_BACKUP_succeeded Number of BACKUP jobs succeeded
+# TYPE schedules_BACKUP_succeeded counter
+schedules_BACKUP_succeeded{node_id="1"} 0
+# HELP schedules_scheduled_schema_telemetry_executor_started Number of scheduled-schema-telemetry-executor jobs started
+# TYPE schedules_scheduled_schema_telemetry_executor_started counter
+schedules_scheduled_schema_telemetry_executor_started{node_id="1"} 0
+# HELP schedules_CHANGEFEED_started Number of CHANGEFEED jobs started
+# TYPE schedules_CHANGEFEED_started counter
+schedules_CHANGEFEED_started{node_id="1"} 0
+# HELP schedules_CHANGEFEED_failed Number of CHANGEFEED jobs failed
+# TYPE schedules_CHANGEFEED_failed counter
+schedules_CHANGEFEED_failed{node_id="1"} 0
+# HELP schedules_round_reschedule_skip The number of schedules rescheduled due to SKIP policy
+# TYPE schedules_round_reschedule_skip gauge
+schedules_round_reschedule_skip{node_id="1"} 0
+# HELP schedules_BACKUP_started Number of BACKUP jobs started
+# TYPE schedules_BACKUP_started counter
+schedules_BACKUP_started{node_id="1"} 0
+# HELP schedules_scheduled_row_level_ttl_executor_failed Number of scheduled-row-level-ttl-executor jobs failed
+# TYPE schedules_scheduled_row_level_ttl_executor_failed counter
+schedules_scheduled_row_level_ttl_executor_failed{node_id="1"} 0
+# HELP schedules_round_reschedule_wait The number of schedules rescheduled due to WAIT policy
+# TYPE schedules_round_reschedule_wait gauge
+schedules_round_reschedule_wait{node_id="1"} 0
+# HELP schedules_scheduled_schema_telemetry_executor_failed Number of scheduled-schema-telemetry-executor jobs failed
+# TYPE schedules_scheduled_schema_telemetry_executor_failed counter
+schedules_scheduled_schema_telemetry_executor_failed{node_id="1"} 0
+# HELP schedules_BACKUP_protected_age_sec The age of the oldest PTS record protected by BACKUP schedules
+# TYPE schedules_BACKUP_protected_age_sec gauge
+schedules_BACKUP_protected_age_sec{node_id="1"} 0
+# HELP schedules_scheduled_row_level_ttl_executor_started Number of scheduled-row-level-ttl-executor jobs started
+# TYPE schedules_scheduled_row_level_ttl_executor_started counter
+schedules_scheduled_row_level_ttl_executor_started{node_id="1"} 0
+# HELP schedules_BACKUP_protected_record_count Number of PTS records held by BACKUP schedules
+# TYPE schedules_BACKUP_protected_record_count gauge
+schedules_BACKUP_protected_record_count{node_id="1"} 0
+# HELP schedules_BACKUP_last_completed_time The unix timestamp of the most recently completed backup by a schedule specified as maintaining this metric
+# TYPE schedules_BACKUP_last_completed_time gauge
+schedules_BACKUP_last_completed_time{node_id="1"} 0
+# HELP schedules_scheduled_schema_telemetry_executor_succeeded Number of scheduled-schema-telemetry-executor jobs succeeded
+# TYPE schedules_scheduled_schema_telemetry_executor_succeeded counter
+schedules_scheduled_schema_telemetry_executor_succeeded{node_id="1"} 0
+# HELP schedules_error Number of schedules which did not execute successfully
+# TYPE schedules_error gauge
+schedules_error{node_id="1"} 0
+# HELP schedules_scheduled_sql_stats_compaction_executor_succeeded Number of scheduled-sql-stats-compaction-executor jobs succeeded
+# TYPE schedules_scheduled_sql_stats_compaction_executor_succeeded counter
+schedules_scheduled_sql_stats_compaction_executor_succeeded{node_id="1"} 0
+# HELP schedules_scheduled_row_level_ttl_executor_succeeded Number of scheduled-row-level-ttl-executor jobs succeeded
+# TYPE schedules_scheduled_row_level_ttl_executor_succeeded counter
+schedules_scheduled_row_level_ttl_executor_succeeded{node_id="1"} 0
+# HELP schedules_scheduled_sql_stats_compaction_executor_started Number of scheduled-sql-stats-compaction-executor jobs started
+# TYPE schedules_scheduled_sql_stats_compaction_executor_started counter
+schedules_scheduled_sql_stats_compaction_executor_started{node_id="1"} 0
+# HELP schedules_BACKUP_failed Number of BACKUP jobs failed
+# TYPE schedules_BACKUP_failed counter
+schedules_BACKUP_failed{node_id="1"} 0
+# HELP schedules_scheduled_sql_stats_compaction_executor_failed Number of scheduled-sql-stats-compaction-executor jobs failed
+# TYPE schedules_scheduled_sql_stats_compaction_executor_failed counter
+schedules_scheduled_sql_stats_compaction_executor_failed{node_id="1"} 0
+# HELP schedules_malformed Number of malformed schedules
+# TYPE schedules_malformed gauge
+schedules_malformed{node_id="1"} 0
+# HELP spanconfig_kvsubscriber_protected_record_count Number of protected timestamp records, as seen by KV
+# TYPE spanconfig_kvsubscriber_protected_record_count gauge
+spanconfig_kvsubscriber_protected_record_count{node_id="1"} 0
+# HELP spanconfig_kvsubscriber_oldest_protected_record_nanos Difference between the current time and the oldest protected timestamp (sudden drops indicate a record being released; an ever increasing number indicates that the oldest record is around and preventing GC if > configured GC TTL)
+# TYPE spanconfig_kvsubscriber_oldest_protected_record_nanos gauge
+spanconfig_kvsubscriber_oldest_protected_record_nanos{node_id="1"} 0
+# HELP spanconfig_kvsubscriber_update_behind_nanos Difference between the current time and when the KVSubscriber received its last update (an ever increasing number indicates that we're no longer receiving updates)
+# TYPE spanconfig_kvsubscriber_update_behind_nanos gauge
+spanconfig_kvsubscriber_update_behind_nanos{node_id="1"} 3.041243126e+09
+# HELP sql_guardrails_transaction_rows_written_log_count Number of transactions logged because of transaction_rows_written_log guardrail
+# TYPE sql_guardrails_transaction_rows_written_log_count counter
+sql_guardrails_transaction_rows_written_log_count{node_id="1"} 0
+# HELP sql_restart_savepoint_count_internal Number of `SAVEPOINT cockroach_restart` statements successfully executed (internal queries)
+# TYPE sql_restart_savepoint_count_internal counter
+sql_restart_savepoint_count_internal{node_id="1"} 0
+# HELP sql_query_started_count_internal Number of SQL queries started (internal queries)
+# TYPE sql_query_started_count_internal counter
+sql_query_started_count_internal{node_id="1"} 695
+# HELP sql_distsql_exec_latency_internal Latency of DistSQL statement execution (internal queries)
+# TYPE sql_distsql_exec_latency_internal histogram
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="10000"} 0
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="12638.482029342978"} 0
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="15973.122800602541"} 0
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="20187.602546790382"} 0
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="25514.065200312878"} 0
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="32245.90545296394"} 0
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="40753.92965871775"} 0
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="51506.78076168121"} 0
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="65096.75230458167"} 0
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="82272.41341700466"} 0
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="103979.84184814895"} 3
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="131414.73626117557"} 12
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="166088.27826277143"} 30
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="209910.3720108553"} 46
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="265294.8464431894"} 54
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="335292.41492495546"} 58
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="423758.7160604059"} 59
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="535566.6917706894"} 59
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="676875.0009458527"} 60
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="855467.2535565672"} 62
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.0811807510766068e+06"} 64
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.3664483492953242e+06"} 64
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.7269832906594332e+06"} 64
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="2.182644728397485e+06"} 65
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="2.7585316176291797e+06"} 65
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="3.4863652276780806e+06"} 65
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="4.406236427773566e+06"} 65
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="5.568813990945262e+06"} 65
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="7.038135554931545e+06"} 67
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="8.89513497310822e+06"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.1242100350620849e+07"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.4208308325339198e+07"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.795714494371637e+07"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="2.269510536694665e+07"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="2.868316813342006e+07"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="3.625117049988527e+07"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="4.581597669054482e+07"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="5.790443980602476e+07"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="7.318242219076161e+07"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="9.249147277217315e+07"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.1689518164985757e+08"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.4773776525985083e+08"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.8671810912919158e+08"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="2.359833466782189e+08"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="2.9824712862168837e+08"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="3.769390975388353e+08"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="4.7639380104013294e+08"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="6.020894493336115e+08"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="7.609496685459859e+08"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="9.61724871115294e+08"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.2154742500762835e+09"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.5361749466718242e+09"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="1.941491945743876e+09"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="2.453751106639811e+09"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="3.10116892657477e+09"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="3.919406774847209e+09"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="4.953535208959157e+09"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="6.260516572014802e+09"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="7.912342618981298e+09"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="9.99999999999997e+09"} 69
+sql_distsql_exec_latency_internal_bucket{node_id="1",le="+Inf"} 69
+sql_distsql_exec_latency_internal_sum{node_id="1"} 4.4654626e+07
+sql_distsql_exec_latency_internal_count{node_id="1"} 69
+# HELP sql_pre_serve_mem_max Memory usage for SQL connections prior to routing the connection to the target SQL server
+# TYPE sql_pre_serve_mem_max histogram
+sql_pre_serve_mem_max_bucket{node_id="1",le="1"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="8000"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="28885.126301127955"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="104293.81517901426"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="376567.50298404036"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="1.359649985574298e+06"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="4.909207694830051e+06"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="1.7725385537954405e+07"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="6.399999999999999e+07"} 0
+sql_pre_serve_mem_max_bucket{node_id="1",le="+Inf"} 0
+sql_pre_serve_mem_max_sum{node_id="1"} 0
+sql_pre_serve_mem_max_count{node_id="1"} 0
+# HELP sql_pre_serve_mem_cur Current memory usage for SQL connections prior to routing the connection to the target SQL server
+# TYPE sql_pre_serve_mem_cur gauge
+sql_pre_serve_mem_cur{node_id="1"} 0
+# HELP sql_stats_discarded_current Number of fingerprint statistics being discarded
+# TYPE sql_stats_discarded_current counter
+sql_stats_discarded_current{node_id="1"} 0
+# HELP sql_schema_invalid_objects Gauge of detected invalid objects within the system.descriptor table (measured by querying crdb_internal.invalid_objects)
+# TYPE sql_schema_invalid_objects gauge
+sql_schema_invalid_objects{node_id="1"} 0
+# HELP sql_copy_started_count Number of COPY SQL statements started
+# TYPE sql_copy_started_count counter
+sql_copy_started_count{node_id="1"} 0
+# HELP sql_bytesout Number of SQL bytes sent
+# TYPE sql_bytesout counter
+sql_bytesout{node_id="1"} 1033
+# HELP sql_distsql_service_latency Latency of DistSQL request execution
+# TYPE sql_distsql_service_latency histogram
+sql_distsql_service_latency_bucket{node_id="1",le="10000"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="12638.482029342978"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="15973.122800602541"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="20187.602546790382"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="25514.065200312878"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="32245.90545296394"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="40753.92965871775"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="51506.78076168121"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="65096.75230458167"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="82272.41341700466"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="103979.84184814895"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="131414.73626117557"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="166088.27826277143"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="209910.3720108553"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="265294.8464431894"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="335292.41492495546"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="423758.7160604059"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="535566.6917706894"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="676875.0009458527"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="855467.2535565672"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="2.182644728397485e+06"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="4.406236427773566e+06"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="5.568813990945262e+06"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="7.038135554931545e+06"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="8.89513497310822e+06"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.795714494371637e+07"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="2.269510536694665e+07"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="2.868316813342006e+07"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="3.625117049988527e+07"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="4.581597669054482e+07"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="5.790443980602476e+07"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="7.318242219076161e+07"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="9.249147277217315e+07"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="2.359833466782189e+08"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="3.769390975388353e+08"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="6.020894493336115e+08"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="7.609496685459859e+08"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="9.61724871115294e+08"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="1.941491945743876e+09"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="2.453751106639811e+09"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="3.10116892657477e+09"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="3.919406774847209e+09"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="4.953535208959157e+09"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="6.260516572014802e+09"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="7.912342618981298e+09"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="9.99999999999997e+09"} 0
+sql_distsql_service_latency_bucket{node_id="1",le="+Inf"} 0
+sql_distsql_service_latency_sum{node_id="1"} 0
+sql_distsql_service_latency_count{node_id="1"} 0
+# HELP sql_misc_started_count_internal Number of other SQL statements started (internal queries)
+# TYPE sql_misc_started_count_internal counter
+sql_misc_started_count_internal{node_id="1"} 20
+# HELP sql_guardrails_max_row_size_err_count_internal Number of rows observed violating sql.guardrails.max_row_size_err (internal queries)
+# TYPE sql_guardrails_max_row_size_err_count_internal counter
+sql_guardrails_max_row_size_err_count_internal{node_id="1"} 0
+# HELP sql_restart_savepoint_count Number of `SAVEPOINT cockroach_restart` statements successfully executed
+# TYPE sql_restart_savepoint_count counter
+sql_restart_savepoint_count{node_id="1"} 0
+# HELP sql_stats_txn_stats_collection_duration Time took in nanoseconds to collect transaction stats
+# TYPE sql_stats_txn_stats_collection_duration histogram
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="10000"} 107
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="12638.482029342978"} 107
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="15973.122800602541"} 107
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="20187.602546790382"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="25514.065200312878"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="32245.90545296394"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="40753.92965871775"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="51506.78076168121"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="65096.75230458167"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="82272.41341700466"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="103979.84184814895"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="131414.73626117557"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="166088.27826277143"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="209910.3720108553"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="265294.8464431894"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="335292.41492495546"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="423758.7160604059"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="535566.6917706894"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="676875.0009458527"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="855467.2535565672"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.0811807510766068e+06"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.3664483492953242e+06"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.7269832906594332e+06"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="2.182644728397485e+06"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="2.7585316176291797e+06"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="3.4863652276780806e+06"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="4.406236427773566e+06"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="5.568813990945262e+06"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="7.038135554931545e+06"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="8.89513497310822e+06"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.1242100350620849e+07"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.4208308325339198e+07"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.795714494371637e+07"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="2.269510536694665e+07"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="2.868316813342006e+07"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="3.625117049988527e+07"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="4.581597669054482e+07"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="5.790443980602476e+07"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="7.318242219076161e+07"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="9.249147277217315e+07"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.1689518164985757e+08"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.4773776525985083e+08"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.8671810912919158e+08"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="2.359833466782189e+08"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="2.9824712862168837e+08"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="3.769390975388353e+08"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="4.7639380104013294e+08"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="6.020894493336115e+08"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="7.609496685459859e+08"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="9.61724871115294e+08"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.2154742500762835e+09"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.5361749466718242e+09"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="1.941491945743876e+09"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="2.453751106639811e+09"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="3.10116892657477e+09"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="3.919406774847209e+09"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="4.953535208959157e+09"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="6.260516572014802e+09"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="7.912342618981298e+09"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="9.99999999999997e+09"} 108
+sql_stats_txn_stats_collection_duration_bucket{node_id="1",le="+Inf"} 108
+sql_stats_txn_stats_collection_duration_sum{node_id="1"} 419040
+sql_stats_txn_stats_collection_duration_count{node_id="1"} 108
+# HELP sql_conns Number of open SQL connections
+# TYPE sql_conns gauge
+sql_conns{node_id="1"} 0
+# HELP sql_pre_serve_bytesin Number of SQL bytes received prior to routing the connection to the target SQL server
+# TYPE sql_pre_serve_bytesin counter
+sql_pre_serve_bytesin{node_id="1"} 142
+# HELP sql_txn_rollback_count Number of SQL transaction ROLLBACK statements successfully executed
+# TYPE sql_txn_rollback_count counter
+sql_txn_rollback_count{node_id="1"} 0
+# HELP sql_optimizer_fallback_count Number of statements which the cost-based optimizer was unable to plan
+# TYPE sql_optimizer_fallback_count counter
+sql_optimizer_fallback_count{node_id="1"} 0
+# HELP sql_bytesin Number of SQL bytes received
+# TYPE sql_bytesin counter
+sql_bytesin{node_id="1"} 55
+# HELP sql_feature_flag_denial Counter of the number of statements denied by a feature flag
+# TYPE sql_feature_flag_denial counter
+sql_feature_flag_denial{node_id="1"} 0
+# HELP sql_distsql_select_count_internal Number of DistSQL SELECT statements (internal queries)
+# TYPE sql_distsql_select_count_internal counter
+sql_distsql_select_count_internal{node_id="1"} 69
+# HELP sql_txn_latency_internal Latency of SQL transactions (internal queries)
+# TYPE sql_txn_latency_internal histogram
+sql_txn_latency_internal_bucket{node_id="1",le="10000"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="12638.482029342978"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="15973.122800602541"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="20187.602546790382"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="25514.065200312878"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="32245.90545296394"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="40753.92965871775"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="51506.78076168121"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="65096.75230458167"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="82272.41341700466"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="103979.84184814895"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="131414.73626117557"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="166088.27826277143"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="209910.3720108553"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="265294.8464431894"} 0
+sql_txn_latency_internal_bucket{node_id="1",le="335292.41492495546"} 6
+sql_txn_latency_internal_bucket{node_id="1",le="423758.7160604059"} 20
+sql_txn_latency_internal_bucket{node_id="1",le="535566.6917706894"} 25
+sql_txn_latency_internal_bucket{node_id="1",le="676875.0009458527"} 29
+sql_txn_latency_internal_bucket{node_id="1",le="855467.2535565672"} 38
+sql_txn_latency_internal_bucket{node_id="1",le="1.0811807510766068e+06"} 61
+sql_txn_latency_internal_bucket{node_id="1",le="1.3664483492953242e+06"} 69
+sql_txn_latency_internal_bucket{node_id="1",le="1.7269832906594332e+06"} 79
+sql_txn_latency_internal_bucket{node_id="1",le="2.182644728397485e+06"} 86
+sql_txn_latency_internal_bucket{node_id="1",le="2.7585316176291797e+06"} 93
+sql_txn_latency_internal_bucket{node_id="1",le="3.4863652276780806e+06"} 100
+sql_txn_latency_internal_bucket{node_id="1",le="4.406236427773566e+06"} 103
+sql_txn_latency_internal_bucket{node_id="1",le="5.568813990945262e+06"} 103
+sql_txn_latency_internal_bucket{node_id="1",le="7.038135554931545e+06"} 103
+sql_txn_latency_internal_bucket{node_id="1",le="8.89513497310822e+06"} 103
+sql_txn_latency_internal_bucket{node_id="1",le="1.1242100350620849e+07"} 104
+sql_txn_latency_internal_bucket{node_id="1",le="1.4208308325339198e+07"} 105
+sql_txn_latency_internal_bucket{node_id="1",le="1.795714494371637e+07"} 105
+sql_txn_latency_internal_bucket{node_id="1",le="2.269510536694665e+07"} 105
+sql_txn_latency_internal_bucket{node_id="1",le="2.868316813342006e+07"} 105
+sql_txn_latency_internal_bucket{node_id="1",le="3.625117049988527e+07"} 105
+sql_txn_latency_internal_bucket{node_id="1",le="4.581597669054482e+07"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="5.790443980602476e+07"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="7.318242219076161e+07"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="9.249147277217315e+07"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="1.1689518164985757e+08"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="1.4773776525985083e+08"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="1.8671810912919158e+08"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="2.359833466782189e+08"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="2.9824712862168837e+08"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="3.769390975388353e+08"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="4.7639380104013294e+08"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="6.020894493336115e+08"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="7.609496685459859e+08"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="9.61724871115294e+08"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="1.2154742500762835e+09"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="1.5361749466718242e+09"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="1.941491945743876e+09"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="2.453751106639811e+09"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="3.10116892657477e+09"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="3.919406774847209e+09"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="4.953535208959157e+09"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="6.260516572014802e+09"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="7.912342618981298e+09"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="9.99999999999997e+09"} 107
+sql_txn_latency_internal_bucket{node_id="1",le="+Inf"} 107
+sql_txn_latency_internal_sum{node_id="1"} 2.29970456e+08
+sql_txn_latency_internal_count{node_id="1"} 107
+# HELP sql_distsql_queries_total Number of SQL queries executed
+# TYPE sql_distsql_queries_total counter
+sql_distsql_queries_total{node_id="1"} 709
+# HELP sql_mem_internal_max Memory usage per sql statement for internal
+# TYPE sql_mem_internal_max histogram
+sql_mem_internal_max_bucket{node_id="1",le="1"} 0
+sql_mem_internal_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_internal_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_internal_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_internal_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_internal_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_internal_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_internal_max_bucket{node_id="1",le="8000"} 683
+sql_mem_internal_max_bucket{node_id="1",le="28885.126301127955"} 683
+sql_mem_internal_max_bucket{node_id="1",le="104293.81517901426"} 683
+sql_mem_internal_max_bucket{node_id="1",le="376567.50298404036"} 683
+sql_mem_internal_max_bucket{node_id="1",le="1.359649985574298e+06"} 683
+sql_mem_internal_max_bucket{node_id="1",le="4.909207694830051e+06"} 683
+sql_mem_internal_max_bucket{node_id="1",le="1.7725385537954405e+07"} 683
+sql_mem_internal_max_bucket{node_id="1",le="6.399999999999999e+07"} 683
+sql_mem_internal_max_bucket{node_id="1",le="+Inf"} 683
+sql_mem_internal_max_sum{node_id="1"} 3.182342e+06
+sql_mem_internal_max_count{node_id="1"} 683
+# HELP sql_stats_flush_duration Time took to in nanoseconds to complete SQL Stats flush
+# TYPE sql_stats_flush_duration histogram
+sql_stats_flush_duration_bucket{node_id="1",le="10000"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="12638.482029342978"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="15973.122800602541"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="20187.602546790382"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="25514.065200312878"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="32245.90545296394"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="40753.92965871775"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="51506.78076168121"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="65096.75230458167"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="82272.41341700466"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="103979.84184814895"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="131414.73626117557"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="166088.27826277143"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="209910.3720108553"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="265294.8464431894"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="335292.41492495546"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="423758.7160604059"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="535566.6917706894"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="676875.0009458527"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="855467.2535565672"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="2.182644728397485e+06"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="4.406236427773566e+06"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="5.568813990945262e+06"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="7.038135554931545e+06"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="8.89513497310822e+06"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.795714494371637e+07"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="2.269510536694665e+07"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="2.868316813342006e+07"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="3.625117049988527e+07"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="4.581597669054482e+07"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="5.790443980602476e+07"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="7.318242219076161e+07"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="9.249147277217315e+07"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="2.359833466782189e+08"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="3.769390975388353e+08"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="6.020894493336115e+08"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="7.609496685459859e+08"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="9.61724871115294e+08"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="1.941491945743876e+09"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="2.453751106639811e+09"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="3.10116892657477e+09"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="3.919406774847209e+09"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="4.953535208959157e+09"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="6.260516572014802e+09"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="7.912342618981298e+09"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="9.99999999999997e+09"} 0
+sql_stats_flush_duration_bucket{node_id="1",le="+Inf"} 0
+sql_stats_flush_duration_sum{node_id="1"} 0
+sql_stats_flush_duration_count{node_id="1"} 0
+# HELP sql_update_started_count_internal Number of SQL UPDATE statements started (internal queries)
+# TYPE sql_update_started_count_internal counter
+sql_update_started_count_internal{node_id="1"} 44
+# HELP sql_txn_latency Latency of SQL transactions
+# TYPE sql_txn_latency histogram
+sql_txn_latency_bucket{node_id="1",le="10000"} 0
+sql_txn_latency_bucket{node_id="1",le="12638.482029342978"} 0
+sql_txn_latency_bucket{node_id="1",le="15973.122800602541"} 0
+sql_txn_latency_bucket{node_id="1",le="20187.602546790382"} 0
+sql_txn_latency_bucket{node_id="1",le="25514.065200312878"} 0
+sql_txn_latency_bucket{node_id="1",le="32245.90545296394"} 0
+sql_txn_latency_bucket{node_id="1",le="40753.92965871775"} 0
+sql_txn_latency_bucket{node_id="1",le="51506.78076168121"} 0
+sql_txn_latency_bucket{node_id="1",le="65096.75230458167"} 0
+sql_txn_latency_bucket{node_id="1",le="82272.41341700466"} 0
+sql_txn_latency_bucket{node_id="1",le="103979.84184814895"} 0
+sql_txn_latency_bucket{node_id="1",le="131414.73626117557"} 0
+sql_txn_latency_bucket{node_id="1",le="166088.27826277143"} 0
+sql_txn_latency_bucket{node_id="1",le="209910.3720108553"} 0
+sql_txn_latency_bucket{node_id="1",le="265294.8464431894"} 0
+sql_txn_latency_bucket{node_id="1",le="335292.41492495546"} 0
+sql_txn_latency_bucket{node_id="1",le="423758.7160604059"} 0
+sql_txn_latency_bucket{node_id="1",le="535566.6917706894"} 0
+sql_txn_latency_bucket{node_id="1",le="676875.0009458527"} 0
+sql_txn_latency_bucket{node_id="1",le="855467.2535565672"} 0
+sql_txn_latency_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+sql_txn_latency_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+sql_txn_latency_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+sql_txn_latency_bucket{node_id="1",le="2.182644728397485e+06"} 1
+sql_txn_latency_bucket{node_id="1",le="2.7585316176291797e+06"} 1
+sql_txn_latency_bucket{node_id="1",le="3.4863652276780806e+06"} 1
+sql_txn_latency_bucket{node_id="1",le="4.406236427773566e+06"} 1
+sql_txn_latency_bucket{node_id="1",le="5.568813990945262e+06"} 1
+sql_txn_latency_bucket{node_id="1",le="7.038135554931545e+06"} 1
+sql_txn_latency_bucket{node_id="1",le="8.89513497310822e+06"} 1
+sql_txn_latency_bucket{node_id="1",le="1.1242100350620849e+07"} 1
+sql_txn_latency_bucket{node_id="1",le="1.4208308325339198e+07"} 1
+sql_txn_latency_bucket{node_id="1",le="1.795714494371637e+07"} 1
+sql_txn_latency_bucket{node_id="1",le="2.269510536694665e+07"} 1
+sql_txn_latency_bucket{node_id="1",le="2.868316813342006e+07"} 1
+sql_txn_latency_bucket{node_id="1",le="3.625117049988527e+07"} 1
+sql_txn_latency_bucket{node_id="1",le="4.581597669054482e+07"} 1
+sql_txn_latency_bucket{node_id="1",le="5.790443980602476e+07"} 1
+sql_txn_latency_bucket{node_id="1",le="7.318242219076161e+07"} 1
+sql_txn_latency_bucket{node_id="1",le="9.249147277217315e+07"} 1
+sql_txn_latency_bucket{node_id="1",le="1.1689518164985757e+08"} 1
+sql_txn_latency_bucket{node_id="1",le="1.4773776525985083e+08"} 1
+sql_txn_latency_bucket{node_id="1",le="1.8671810912919158e+08"} 1
+sql_txn_latency_bucket{node_id="1",le="2.359833466782189e+08"} 1
+sql_txn_latency_bucket{node_id="1",le="2.9824712862168837e+08"} 1
+sql_txn_latency_bucket{node_id="1",le="3.769390975388353e+08"} 1
+sql_txn_latency_bucket{node_id="1",le="4.7639380104013294e+08"} 1
+sql_txn_latency_bucket{node_id="1",le="6.020894493336115e+08"} 1
+sql_txn_latency_bucket{node_id="1",le="7.609496685459859e+08"} 1
+sql_txn_latency_bucket{node_id="1",le="9.61724871115294e+08"} 1
+sql_txn_latency_bucket{node_id="1",le="1.2154742500762835e+09"} 1
+sql_txn_latency_bucket{node_id="1",le="1.5361749466718242e+09"} 1
+sql_txn_latency_bucket{node_id="1",le="1.941491945743876e+09"} 1
+sql_txn_latency_bucket{node_id="1",le="2.453751106639811e+09"} 1
+sql_txn_latency_bucket{node_id="1",le="3.10116892657477e+09"} 1
+sql_txn_latency_bucket{node_id="1",le="3.919406774847209e+09"} 1
+sql_txn_latency_bucket{node_id="1",le="4.953535208959157e+09"} 1
+sql_txn_latency_bucket{node_id="1",le="6.260516572014802e+09"} 1
+sql_txn_latency_bucket{node_id="1",le="7.912342618981298e+09"} 1
+sql_txn_latency_bucket{node_id="1",le="9.99999999999997e+09"} 1
+sql_txn_latency_bucket{node_id="1",le="+Inf"} 1
+sql_txn_latency_sum{node_id="1"} 2.073375e+06
+sql_txn_latency_count{node_id="1"} 1
+# HELP sql_delete_started_count_internal Number of SQL DELETE statements started (internal queries)
+# TYPE sql_delete_started_count_internal counter
+sql_delete_started_count_internal{node_id="1"} 106
+# HELP sql_distsql_dist_query_rerun_locally_failure_count Total number of cases when the local rerun of a distributed query resulted in an error
+# TYPE sql_distsql_dist_query_rerun_locally_failure_count counter
+sql_distsql_dist_query_rerun_locally_failure_count{node_id="1"} 0
+# HELP sql_txns_open Number of currently open user SQL transactions
+# TYPE sql_txns_open gauge
+sql_txns_open{node_id="1"} 0
+# HELP sql_optimizer_fallback_count_internal Number of statements which the cost-based optimizer was unable to plan (internal queries)
+# TYPE sql_optimizer_fallback_count_internal counter
+sql_optimizer_fallback_count_internal{node_id="1"} 0
+# HELP sql_mem_internal_session_prepared_max Memory usage by prepared statements per sql session for internal
+# TYPE sql_mem_internal_session_prepared_max histogram
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="1"} 0
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="8000"} 639
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="28885.126301127955"} 639
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="104293.81517901426"} 639
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="376567.50298404036"} 639
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="1.359649985574298e+06"} 639
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="4.909207694830051e+06"} 639
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="1.7725385537954405e+07"} 639
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="6.399999999999999e+07"} 639
+sql_mem_internal_session_prepared_max_bucket{node_id="1",le="+Inf"} 639
+sql_mem_internal_session_prepared_max_sum{node_id="1"} 2.595073e+06
+sql_mem_internal_session_prepared_max_count{node_id="1"} 639
+# HELP sql_txn_commit_started_count_internal Number of SQL transaction COMMIT statements started (internal queries)
+# TYPE sql_txn_commit_started_count_internal counter
+sql_txn_commit_started_count_internal{node_id="1"} 0
+# HELP sql_mem_sql_session_prepared_max Memory usage by prepared statements per sql session for sql
+# TYPE sql_mem_sql_session_prepared_max histogram
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="1"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="8000"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="28885.126301127955"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="104293.81517901426"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="376567.50298404036"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="1.359649985574298e+06"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="4.909207694830051e+06"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="1.7725385537954405e+07"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="6.399999999999999e+07"} 0
+sql_mem_sql_session_prepared_max_bucket{node_id="1",le="+Inf"} 0
+sql_mem_sql_session_prepared_max_sum{node_id="1"} 0
+sql_mem_sql_session_prepared_max_count{node_id="1"} 0
+# HELP sql_query_count_internal Number of SQL queries executed (internal queries)
+# TYPE sql_query_count_internal counter
+sql_query_count_internal{node_id="1"} 695
+# HELP sql_service_latency_internal Latency of SQL request execution (internal queries)
+# TYPE sql_service_latency_internal histogram
+sql_service_latency_internal_bucket{node_id="1",le="10000"} 0
+sql_service_latency_internal_bucket{node_id="1",le="12638.482029342978"} 0
+sql_service_latency_internal_bucket{node_id="1",le="15973.122800602541"} 0
+sql_service_latency_internal_bucket{node_id="1",le="20187.602546790382"} 0
+sql_service_latency_internal_bucket{node_id="1",le="25514.065200312878"} 0
+sql_service_latency_internal_bucket{node_id="1",le="32245.90545296394"} 0
+sql_service_latency_internal_bucket{node_id="1",le="40753.92965871775"} 0
+sql_service_latency_internal_bucket{node_id="1",le="51506.78076168121"} 0
+sql_service_latency_internal_bucket{node_id="1",le="65096.75230458167"} 0
+sql_service_latency_internal_bucket{node_id="1",le="82272.41341700466"} 0
+sql_service_latency_internal_bucket{node_id="1",le="103979.84184814895"} 1
+sql_service_latency_internal_bucket{node_id="1",le="131414.73626117557"} 14
+sql_service_latency_internal_bucket{node_id="1",le="166088.27826277143"} 36
+sql_service_latency_internal_bucket{node_id="1",le="209910.3720108553"} 68
+sql_service_latency_internal_bucket{node_id="1",le="265294.8464431894"} 150
+sql_service_latency_internal_bucket{node_id="1",le="335292.41492495546"} 259
+sql_service_latency_internal_bucket{node_id="1",le="423758.7160604059"} 323
+sql_service_latency_internal_bucket{node_id="1",le="535566.6917706894"} 373
+sql_service_latency_internal_bucket{node_id="1",le="676875.0009458527"} 456
+sql_service_latency_internal_bucket{node_id="1",le="855467.2535565672"} 533
+sql_service_latency_internal_bucket{node_id="1",le="1.0811807510766068e+06"} 580
+sql_service_latency_internal_bucket{node_id="1",le="1.3664483492953242e+06"} 589
+sql_service_latency_internal_bucket{node_id="1",le="1.7269832906594332e+06"} 596
+sql_service_latency_internal_bucket{node_id="1",le="2.182644728397485e+06"} 600
+sql_service_latency_internal_bucket{node_id="1",le="2.7585316176291797e+06"} 616
+sql_service_latency_internal_bucket{node_id="1",le="3.4863652276780806e+06"} 623
+sql_service_latency_internal_bucket{node_id="1",le="4.406236427773566e+06"} 632
+sql_service_latency_internal_bucket{node_id="1",le="5.568813990945262e+06"} 644
+sql_service_latency_internal_bucket{node_id="1",le="7.038135554931545e+06"} 664
+sql_service_latency_internal_bucket{node_id="1",le="8.89513497310822e+06"} 667
+sql_service_latency_internal_bucket{node_id="1",le="1.1242100350620849e+07"} 670
+sql_service_latency_internal_bucket{node_id="1",le="1.4208308325339198e+07"} 671
+sql_service_latency_internal_bucket{node_id="1",le="1.795714494371637e+07"} 671
+sql_service_latency_internal_bucket{node_id="1",le="2.269510536694665e+07"} 671
+sql_service_latency_internal_bucket{node_id="1",le="2.868316813342006e+07"} 671
+sql_service_latency_internal_bucket{node_id="1",le="3.625117049988527e+07"} 671
+sql_service_latency_internal_bucket{node_id="1",le="4.581597669054482e+07"} 673
+sql_service_latency_internal_bucket{node_id="1",le="5.790443980602476e+07"} 673
+sql_service_latency_internal_bucket{node_id="1",le="7.318242219076161e+07"} 674
+sql_service_latency_internal_bucket{node_id="1",le="9.249147277217315e+07"} 674
+sql_service_latency_internal_bucket{node_id="1",le="1.1689518164985757e+08"} 674
+sql_service_latency_internal_bucket{node_id="1",le="1.4773776525985083e+08"} 674
+sql_service_latency_internal_bucket{node_id="1",le="1.8671810912919158e+08"} 674
+sql_service_latency_internal_bucket{node_id="1",le="2.359833466782189e+08"} 674
+sql_service_latency_internal_bucket{node_id="1",le="2.9824712862168837e+08"} 674
+sql_service_latency_internal_bucket{node_id="1",le="3.769390975388353e+08"} 674
+sql_service_latency_internal_bucket{node_id="1",le="4.7639380104013294e+08"} 674
+sql_service_latency_internal_bucket{node_id="1",le="6.020894493336115e+08"} 674
+sql_service_latency_internal_bucket{node_id="1",le="7.609496685459859e+08"} 674
+sql_service_latency_internal_bucket{node_id="1",le="9.61724871115294e+08"} 674
+sql_service_latency_internal_bucket{node_id="1",le="1.2154742500762835e+09"} 674
+sql_service_latency_internal_bucket{node_id="1",le="1.5361749466718242e+09"} 674
+sql_service_latency_internal_bucket{node_id="1",le="1.941491945743876e+09"} 674
+sql_service_latency_internal_bucket{node_id="1",le="2.453751106639811e+09"} 674
+sql_service_latency_internal_bucket{node_id="1",le="3.10116892657477e+09"} 674
+sql_service_latency_internal_bucket{node_id="1",le="3.919406774847209e+09"} 674
+sql_service_latency_internal_bucket{node_id="1",le="4.953535208959157e+09"} 674
+sql_service_latency_internal_bucket{node_id="1",le="6.260516572014802e+09"} 674
+sql_service_latency_internal_bucket{node_id="1",le="7.912342618981298e+09"} 674
+sql_service_latency_internal_bucket{node_id="1",le="9.99999999999997e+09"} 674
+sql_service_latency_internal_bucket{node_id="1",le="+Inf"} 674
+sql_service_latency_internal_sum{node_id="1"} 7.83800281e+08
+sql_service_latency_internal_count{node_id="1"} 674
+# HELP sql_hydrated_schema_cache_misses counter on the number of cache misses
+# TYPE sql_hydrated_schema_cache_misses counter
+sql_hydrated_schema_cache_misses{node_id="1"} 0
+# HELP sql_ddl_count_internal Number of SQL DDL statements successfully executed (internal queries)
+# TYPE sql_ddl_count_internal counter
+sql_ddl_count_internal{node_id="1"} 2
+# HELP sql_stats_reported_mem_current Current memory usage for reported fingerprint storage
+# TYPE sql_stats_reported_mem_current gauge
+sql_stats_reported_mem_current{node_id="1"} 0
+# HELP sql_txn_commit_count Number of SQL transaction COMMIT statements successfully executed
+# TYPE sql_txn_commit_count counter
+sql_txn_commit_count{node_id="1"} 0
+# HELP sql_txn_commit_count_internal Number of SQL transaction COMMIT statements successfully executed (internal queries)
+# TYPE sql_txn_commit_count_internal counter
+sql_txn_commit_count_internal{node_id="1"} 0
+# HELP sql_optimizer_plan_cache_misses Number of non-prepared statements for which a cached plan was not used
+# TYPE sql_optimizer_plan_cache_misses counter
+sql_optimizer_plan_cache_misses{node_id="1"} 1
+# HELP sql_mem_sql_session_current Current sql session memory usage for sql
+# TYPE sql_mem_sql_session_current gauge
+sql_mem_sql_session_current{node_id="1"} 0
+# HELP sql_hydrated_type_cache_misses counter on the number of cache misses
+# TYPE sql_hydrated_type_cache_misses counter
+sql_hydrated_type_cache_misses{node_id="1"} 0
+# HELP sql_pgwire_cancel_ignored Number of pgwire query cancel requests that were ignored due to rate limiting
+# TYPE sql_pgwire_cancel_ignored counter
+sql_pgwire_cancel_ignored{node_id="1"} 0
+# HELP sql_update_started_count Number of SQL UPDATE statements started
+# TYPE sql_update_started_count counter
+sql_update_started_count{node_id="1"} 0
+# HELP sql_stats_cleanup_rows_removed Number of stale statistics rows that are removed
+# TYPE sql_stats_cleanup_rows_removed counter
+sql_stats_cleanup_rows_removed{node_id="1"} 0
+# HELP sql_txn_begin_started_count Number of SQL transaction BEGIN statements started
+# TYPE sql_txn_begin_started_count counter
+sql_txn_begin_started_count{node_id="1"} 0
+# HELP sql_savepoint_started_count_internal Number of SQL SAVEPOINT statements started (internal queries)
+# TYPE sql_savepoint_started_count_internal counter
+sql_savepoint_started_count_internal{node_id="1"} 0
+# HELP sql_guardrails_transaction_rows_read_err_count_internal Number of transactions errored because of transaction_rows_read_err guardrail (internal queries)
+# TYPE sql_guardrails_transaction_rows_read_err_count_internal counter
+sql_guardrails_transaction_rows_read_err_count_internal{node_id="1"} 0
+# HELP sql_temp_object_cleaner_active_cleaners number of cleaner tasks currently running on this node
+# TYPE sql_temp_object_cleaner_active_cleaners gauge
+sql_temp_object_cleaner_active_cleaners{node_id="1"} 0
+# HELP sql_update_count_internal Number of SQL UPDATE statements successfully executed (internal queries)
+# TYPE sql_update_count_internal counter
+sql_update_count_internal{node_id="1"} 44
+# HELP sql_query_started_count Number of SQL queries started
+# TYPE sql_query_started_count counter
+sql_query_started_count{node_id="1"} 1
+# HELP sql_leases_active The number of outstanding SQL schema leases.
+# TYPE sql_leases_active gauge
+sql_leases_active{node_id="1"} 21
+# HELP sql_statements_active_internal Number of currently active user SQL statements (internal queries)
+# TYPE sql_statements_active_internal gauge
+sql_statements_active_internal{node_id="1"} 0
+# HELP sql_contention_resolver_queue_size Length of queued unresolved contention events
+# TYPE sql_contention_resolver_queue_size gauge
+sql_contention_resolver_queue_size{node_id="1"} 2
+# HELP sql_restart_savepoint_started_count_internal Number of `SAVEPOINT cockroach_restart` statements started (internal queries)
+# TYPE sql_restart_savepoint_started_count_internal counter
+sql_restart_savepoint_started_count_internal{node_id="1"} 0
+# HELP sql_contention_txn_id_cache_miss Number of cache misses
+# TYPE sql_contention_txn_id_cache_miss counter
+sql_contention_txn_id_cache_miss{node_id="1"} 0
+# HELP sql_select_count_internal Number of SQL SELECT statements successfully executed (internal queries)
+# TYPE sql_select_count_internal counter
+sql_select_count_internal{node_id="1"} 348
+# HELP sql_copy_nonatomic_started_count Number of non-atomic COPY SQL statements started
+# TYPE sql_copy_nonatomic_started_count counter
+sql_copy_nonatomic_started_count{node_id="1"} 0
+# HELP sql_savepoint_count_internal Number of SQL SAVEPOINT statements successfully executed (internal queries)
+# TYPE sql_savepoint_count_internal counter
+sql_savepoint_count_internal{node_id="1"} 0
+# HELP sql_select_started_count_internal Number of SQL SELECT statements started (internal queries)
+# TYPE sql_select_started_count_internal counter
+sql_select_started_count_internal{node_id="1"} 348
+# HELP sql_savepoint_started_count Number of SQL SAVEPOINT statements started
+# TYPE sql_savepoint_started_count counter
+sql_savepoint_started_count{node_id="1"} 0
+# HELP sql_distsql_exec_latency Latency of DistSQL statement execution
+# TYPE sql_distsql_exec_latency histogram
+sql_distsql_exec_latency_bucket{node_id="1",le="10000"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="12638.482029342978"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="15973.122800602541"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="20187.602546790382"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="25514.065200312878"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="32245.90545296394"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="40753.92965871775"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="51506.78076168121"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="65096.75230458167"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="82272.41341700466"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="103979.84184814895"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="131414.73626117557"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="166088.27826277143"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="209910.3720108553"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="265294.8464431894"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="335292.41492495546"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="423758.7160604059"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="535566.6917706894"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="676875.0009458527"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="855467.2535565672"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="2.182644728397485e+06"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="4.406236427773566e+06"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="5.568813990945262e+06"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="7.038135554931545e+06"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="8.89513497310822e+06"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.795714494371637e+07"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="2.269510536694665e+07"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="2.868316813342006e+07"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="3.625117049988527e+07"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="4.581597669054482e+07"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="5.790443980602476e+07"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="7.318242219076161e+07"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="9.249147277217315e+07"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="2.359833466782189e+08"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="3.769390975388353e+08"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="6.020894493336115e+08"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="7.609496685459859e+08"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="9.61724871115294e+08"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="1.941491945743876e+09"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="2.453751106639811e+09"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="3.10116892657477e+09"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="3.919406774847209e+09"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="4.953535208959157e+09"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="6.260516572014802e+09"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="7.912342618981298e+09"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="9.99999999999997e+09"} 0
+sql_distsql_exec_latency_bucket{node_id="1",le="+Inf"} 0
+sql_distsql_exec_latency_sum{node_id="1"} 0
+sql_distsql_exec_latency_count{node_id="1"} 0
+# HELP sql_ddl_count Number of SQL DDL statements successfully executed
+# TYPE sql_ddl_count counter
+sql_ddl_count{node_id="1"} 0
+# HELP sql_mem_internal_txn_current Current sql transaction memory usage for internal
+# TYPE sql_mem_internal_txn_current gauge
+sql_mem_internal_txn_current{node_id="1"} 0
+# HELP sql_delete_count_internal Number of SQL DELETE statements successfully executed (internal queries)
+# TYPE sql_delete_count_internal counter
+sql_delete_count_internal{node_id="1"} 106
+# HELP sql_copy_nonatomic_started_count_internal Number of non-atomic COPY SQL statements started (internal queries)
+# TYPE sql_copy_nonatomic_started_count_internal counter
+sql_copy_nonatomic_started_count_internal{node_id="1"} 0
+# HELP sql_guardrails_transaction_rows_read_log_count Number of transactions logged because of transaction_rows_read_log guardrail
+# TYPE sql_guardrails_transaction_rows_read_log_count counter
+sql_guardrails_transaction_rows_read_log_count{node_id="1"} 0
+# HELP sql_misc_count_internal Number of other SQL statements successfully executed (internal queries)
+# TYPE sql_misc_count_internal counter
+sql_misc_count_internal{node_id="1"} 20
+# HELP sql_insert_started_count_internal Number of SQL INSERT statements started (internal queries)
+# TYPE sql_insert_started_count_internal counter
+sql_insert_started_count_internal{node_id="1"} 175
+# HELP sql_txn_rollback_started_count Number of SQL transaction ROLLBACK statements started
+# TYPE sql_txn_rollback_started_count counter
+sql_txn_rollback_started_count{node_id="1"} 0
+# HELP sql_insights_anomaly_detection_memory Current memory used to support anomaly detection
+# TYPE sql_insights_anomaly_detection_memory gauge
+sql_insights_anomaly_detection_memory{node_id="1"} 0
+# HELP sql_savepoint_rollback_count_internal Number of `ROLLBACK TO SAVEPOINT` statements successfully executed (internal queries)
+# TYPE sql_savepoint_rollback_count_internal counter
+sql_savepoint_rollback_count_internal{node_id="1"} 0
+# HELP sql_pgwire_cancel_successful Number of pgwire query cancel requests that were successful
+# TYPE sql_pgwire_cancel_successful counter
+sql_pgwire_cancel_successful{node_id="1"} 0
+# HELP sql_restart_savepoint_release_started_count_internal Number of `RELEASE SAVEPOINT cockroach_restart` statements started (internal queries)
+# TYPE sql_restart_savepoint_release_started_count_internal counter
+sql_restart_savepoint_release_started_count_internal{node_id="1"} 0
+# HELP sql_hydrated_type_cache_hits counter on the number of cache hits
+# TYPE sql_hydrated_type_cache_hits counter
+sql_hydrated_type_cache_hits{node_id="1"} 0
+# HELP sql_savepoint_release_started_count_internal Number of `RELEASE SAVEPOINT` statements started (internal queries)
+# TYPE sql_savepoint_release_started_count_internal counter
+sql_savepoint_release_started_count_internal{node_id="1"} 0
+# HELP sql_savepoint_release_count Number of `RELEASE SAVEPOINT` statements successfully executed
+# TYPE sql_savepoint_release_count counter
+sql_savepoint_release_count{node_id="1"} 0
+# HELP sql_copy_started_count_internal Number of COPY SQL statements started (internal queries)
+# TYPE sql_copy_started_count_internal counter
+sql_copy_started_count_internal{node_id="1"} 0
+# HELP sql_ddl_started_count_internal Number of SQL DDL statements started (internal queries)
+# TYPE sql_ddl_started_count_internal counter
+sql_ddl_started_count_internal{node_id="1"} 2
+# HELP sql_schema_changer_successes Counter of the number of schema changer resumes which succeed
+# TYPE sql_schema_changer_successes counter
+sql_schema_changer_successes{node_id="1"} 0
+# HELP sql_distsql_flows_total Number of distributed SQL flows executed
+# TYPE sql_distsql_flows_total counter
+sql_distsql_flows_total{node_id="1"} 0
+# HELP sql_disk_distsql_spilled_bytes_written Number of bytes written to temporary disk storage as a result of spilling
+# TYPE sql_disk_distsql_spilled_bytes_written counter
+sql_disk_distsql_spilled_bytes_written{node_id="1"} 0
+# HELP sql_query_count Number of SQL queries executed
+# TYPE sql_query_count counter
+sql_query_count{node_id="1"} 1
+# HELP sql_mem_distsql_max Memory usage per sql statement for distsql
+# TYPE sql_mem_distsql_max histogram
+sql_mem_distsql_max_bucket{node_id="1",le="1"} 0
+sql_mem_distsql_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_distsql_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_distsql_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_distsql_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_distsql_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_distsql_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_distsql_max_bucket{node_id="1",le="8000"} 451
+sql_mem_distsql_max_bucket{node_id="1",le="28885.126301127955"} 451
+sql_mem_distsql_max_bucket{node_id="1",le="104293.81517901426"} 451
+sql_mem_distsql_max_bucket{node_id="1",le="376567.50298404036"} 451
+sql_mem_distsql_max_bucket{node_id="1",le="1.359649985574298e+06"} 451
+sql_mem_distsql_max_bucket{node_id="1",le="4.909207694830051e+06"} 451
+sql_mem_distsql_max_bucket{node_id="1",le="1.7725385537954405e+07"} 451
+sql_mem_distsql_max_bucket{node_id="1",le="6.399999999999999e+07"} 451
+sql_mem_distsql_max_bucket{node_id="1",le="+Inf"} 451
+sql_mem_distsql_max_sum{node_id="1"} 2.053372e+06
+sql_mem_distsql_max_count{node_id="1"} 451
+# HELP sql_guardrails_max_row_size_log_count_internal Number of rows observed violating sql.guardrails.max_row_size_log (internal queries)
+# TYPE sql_guardrails_max_row_size_log_count_internal counter
+sql_guardrails_max_row_size_log_count_internal{node_id="1"} 0
+# HELP sql_ddl_started_count Number of SQL DDL statements started
+# TYPE sql_ddl_started_count counter
+sql_ddl_started_count{node_id="1"} 0
+# HELP sql_restart_savepoint_rollback_count Number of `ROLLBACK TO SAVEPOINT cockroach_restart` statements successfully executed
+# TYPE sql_restart_savepoint_rollback_count counter
+sql_restart_savepoint_rollback_count{node_id="1"} 0
+# HELP sql_guardrails_transaction_rows_written_log_count_internal Number of transactions logged because of transaction_rows_written_log guardrail (internal queries)
+# TYPE sql_guardrails_transaction_rows_written_log_count_internal counter
+sql_guardrails_transaction_rows_written_log_count_internal{node_id="1"} 0
+# HELP sql_misc_started_count Number of other SQL statements started
+# TYPE sql_misc_started_count counter
+sql_misc_started_count{node_id="1"} 0
+# HELP sql_schema_changer_retry_errors Counter of the number of retriable errors experienced by the schema changer
+# TYPE sql_schema_changer_retry_errors counter
+sql_schema_changer_retry_errors{node_id="1"} 0
+# HELP sql_pgwire_cancel_total Number of pgwire query cancel requests
+# TYPE sql_pgwire_cancel_total counter
+sql_pgwire_cancel_total{node_id="1"} 0
+# HELP sql_insert_started_count Number of SQL INSERT statements started
+# TYPE sql_insert_started_count counter
+sql_insert_started_count{node_id="1"} 0
+# HELP sql_service_latency Latency of SQL request execution
+# TYPE sql_service_latency histogram
+sql_service_latency_bucket{node_id="1",le="10000"} 0
+sql_service_latency_bucket{node_id="1",le="12638.482029342978"} 0
+sql_service_latency_bucket{node_id="1",le="15973.122800602541"} 0
+sql_service_latency_bucket{node_id="1",le="20187.602546790382"} 0
+sql_service_latency_bucket{node_id="1",le="25514.065200312878"} 0
+sql_service_latency_bucket{node_id="1",le="32245.90545296394"} 0
+sql_service_latency_bucket{node_id="1",le="40753.92965871775"} 0
+sql_service_latency_bucket{node_id="1",le="51506.78076168121"} 0
+sql_service_latency_bucket{node_id="1",le="65096.75230458167"} 0
+sql_service_latency_bucket{node_id="1",le="82272.41341700466"} 0
+sql_service_latency_bucket{node_id="1",le="103979.84184814895"} 0
+sql_service_latency_bucket{node_id="1",le="131414.73626117557"} 0
+sql_service_latency_bucket{node_id="1",le="166088.27826277143"} 0
+sql_service_latency_bucket{node_id="1",le="209910.3720108553"} 0
+sql_service_latency_bucket{node_id="1",le="265294.8464431894"} 0
+sql_service_latency_bucket{node_id="1",le="335292.41492495546"} 0
+sql_service_latency_bucket{node_id="1",le="423758.7160604059"} 0
+sql_service_latency_bucket{node_id="1",le="535566.6917706894"} 0
+sql_service_latency_bucket{node_id="1",le="676875.0009458527"} 0
+sql_service_latency_bucket{node_id="1",le="855467.2535565672"} 0
+sql_service_latency_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+sql_service_latency_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+sql_service_latency_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+sql_service_latency_bucket{node_id="1",le="2.182644728397485e+06"} 1
+sql_service_latency_bucket{node_id="1",le="2.7585316176291797e+06"} 1
+sql_service_latency_bucket{node_id="1",le="3.4863652276780806e+06"} 1
+sql_service_latency_bucket{node_id="1",le="4.406236427773566e+06"} 1
+sql_service_latency_bucket{node_id="1",le="5.568813990945262e+06"} 1
+sql_service_latency_bucket{node_id="1",le="7.038135554931545e+06"} 1
+sql_service_latency_bucket{node_id="1",le="8.89513497310822e+06"} 1
+sql_service_latency_bucket{node_id="1",le="1.1242100350620849e+07"} 1
+sql_service_latency_bucket{node_id="1",le="1.4208308325339198e+07"} 1
+sql_service_latency_bucket{node_id="1",le="1.795714494371637e+07"} 1
+sql_service_latency_bucket{node_id="1",le="2.269510536694665e+07"} 1
+sql_service_latency_bucket{node_id="1",le="2.868316813342006e+07"} 1
+sql_service_latency_bucket{node_id="1",le="3.625117049988527e+07"} 1
+sql_service_latency_bucket{node_id="1",le="4.581597669054482e+07"} 1
+sql_service_latency_bucket{node_id="1",le="5.790443980602476e+07"} 1
+sql_service_latency_bucket{node_id="1",le="7.318242219076161e+07"} 1
+sql_service_latency_bucket{node_id="1",le="9.249147277217315e+07"} 1
+sql_service_latency_bucket{node_id="1",le="1.1689518164985757e+08"} 1
+sql_service_latency_bucket{node_id="1",le="1.4773776525985083e+08"} 1
+sql_service_latency_bucket{node_id="1",le="1.8671810912919158e+08"} 1
+sql_service_latency_bucket{node_id="1",le="2.359833466782189e+08"} 1
+sql_service_latency_bucket{node_id="1",le="2.9824712862168837e+08"} 1
+sql_service_latency_bucket{node_id="1",le="3.769390975388353e+08"} 1
+sql_service_latency_bucket{node_id="1",le="4.7639380104013294e+08"} 1
+sql_service_latency_bucket{node_id="1",le="6.020894493336115e+08"} 1
+sql_service_latency_bucket{node_id="1",le="7.609496685459859e+08"} 1
+sql_service_latency_bucket{node_id="1",le="9.61724871115294e+08"} 1
+sql_service_latency_bucket{node_id="1",le="1.2154742500762835e+09"} 1
+sql_service_latency_bucket{node_id="1",le="1.5361749466718242e+09"} 1
+sql_service_latency_bucket{node_id="1",le="1.941491945743876e+09"} 1
+sql_service_latency_bucket{node_id="1",le="2.453751106639811e+09"} 1
+sql_service_latency_bucket{node_id="1",le="3.10116892657477e+09"} 1
+sql_service_latency_bucket{node_id="1",le="3.919406774847209e+09"} 1
+sql_service_latency_bucket{node_id="1",le="4.953535208959157e+09"} 1
+sql_service_latency_bucket{node_id="1",le="6.260516572014802e+09"} 1
+sql_service_latency_bucket{node_id="1",le="7.912342618981298e+09"} 1
+sql_service_latency_bucket{node_id="1",le="9.99999999999997e+09"} 1
+sql_service_latency_bucket{node_id="1",le="+Inf"} 1
+sql_service_latency_sum{node_id="1"} 2.024083e+06
+sql_service_latency_count{node_id="1"} 1
+# HELP sql_restart_savepoint_release_count_internal Number of `RELEASE SAVEPOINT cockroach_restart` statements successfully executed (internal queries)
+# TYPE sql_restart_savepoint_release_count_internal counter
+sql_restart_savepoint_release_count_internal{node_id="1"} 0
+# HELP sql_txns_open_internal Number of currently open user SQL transactions (internal queries)
+# TYPE sql_txns_open_internal gauge
+sql_txns_open_internal{node_id="1"} 0
+# HELP sql_savepoint_rollback_started_count Number of `ROLLBACK TO SAVEPOINT` statements started
+# TYPE sql_savepoint_rollback_started_count counter
+sql_savepoint_rollback_started_count{node_id="1"} 0
+# HELP sql_temp_object_cleaner_schemas_deletion_error number of errored schema deletions by the temp object cleaner on this node
+# TYPE sql_temp_object_cleaner_schemas_deletion_error counter
+sql_temp_object_cleaner_schemas_deletion_error{node_id="1"} 0
+# HELP sql_guardrails_transaction_rows_read_log_count_internal Number of transactions logged because of transaction_rows_read_log guardrail (internal queries)
+# TYPE sql_guardrails_transaction_rows_read_log_count_internal counter
+sql_guardrails_transaction_rows_read_log_count_internal{node_id="1"} 0
+# HELP sql_mem_internal_current Current sql statement memory usage for internal
+# TYPE sql_mem_internal_current gauge
+sql_mem_internal_current{node_id="1"} 0
+# HELP sql_mem_internal_session_current Current sql session memory usage for internal
+# TYPE sql_mem_internal_session_current gauge
+sql_mem_internal_session_current{node_id="1"} 0
+# HELP sql_delete_started_count Number of SQL DELETE statements started
+# TYPE sql_delete_started_count counter
+sql_delete_started_count{node_id="1"} 0
+# HELP sql_schema_changer_permanent_errors Counter of the number of permanent errors experienced by the schema changer
+# TYPE sql_schema_changer_permanent_errors counter
+sql_schema_changer_permanent_errors{node_id="1"} 0
+# HELP sql_failure_count_internal Number of statements resulting in a planning or runtime error (internal queries)
+# TYPE sql_failure_count_internal counter
+sql_failure_count_internal{node_id="1"} 0
+# HELP sql_statements_active Number of currently active user SQL statements
+# TYPE sql_statements_active gauge
+sql_statements_active{node_id="1"} 0
+# HELP sql_failure_count Number of statements resulting in a planning or runtime error
+# TYPE sql_failure_count counter
+sql_failure_count{node_id="1"} 0
+# HELP sql_mem_bulk_current Current sql statement memory usage for bulk operations
+# TYPE sql_mem_bulk_current gauge
+sql_mem_bulk_current{node_id="1"} 0
+# HELP sql_update_count Number of SQL UPDATE statements successfully executed
+# TYPE sql_update_count counter
+sql_update_count{node_id="1"} 0
+# HELP sql_restart_savepoint_release_started_count Number of `RELEASE SAVEPOINT cockroach_restart` statements started
+# TYPE sql_restart_savepoint_release_started_count counter
+sql_restart_savepoint_release_started_count{node_id="1"} 0
+# HELP sql_restart_savepoint_rollback_count_internal Number of `ROLLBACK TO SAVEPOINT cockroach_restart` statements successfully executed (internal queries)
+# TYPE sql_restart_savepoint_rollback_count_internal counter
+sql_restart_savepoint_rollback_count_internal{node_id="1"} 0
+# HELP sql_copy_nonatomic_count_internal Number of non-atomic COPY SQL statements successfully executed (internal queries)
+# TYPE sql_copy_nonatomic_count_internal counter
+sql_copy_nonatomic_count_internal{node_id="1"} 0
+# HELP sql_restart_savepoint_started_count Number of `SAVEPOINT cockroach_restart` statements started
+# TYPE sql_restart_savepoint_started_count counter
+sql_restart_savepoint_started_count{node_id="1"} 0
+# HELP sql_hydrated_table_cache_hits counter on the number of cache hits
+# TYPE sql_hydrated_table_cache_hits counter
+sql_hydrated_table_cache_hits{node_id="1"} 0
+# HELP sql_optimizer_plan_cache_misses_internal Number of non-prepared statements for which a cached plan was not used (internal queries)
+# TYPE sql_optimizer_plan_cache_misses_internal counter
+sql_optimizer_plan_cache_misses_internal{node_id="1"} 88
+# HELP sql_copy_count Number of COPY SQL statements successfully executed
+# TYPE sql_copy_count counter
+sql_copy_count{node_id="1"} 0
+# HELP sql_savepoint_rollback_started_count_internal Number of `ROLLBACK TO SAVEPOINT` statements started (internal queries)
+# TYPE sql_savepoint_rollback_started_count_internal counter
+sql_savepoint_rollback_started_count_internal{node_id="1"} 0
+# HELP sql_distsql_queries_spilled Number of queries that have spilled to disk
+# TYPE sql_distsql_queries_spilled counter
+sql_distsql_queries_spilled{node_id="1"} 0
+# HELP sql_new_conns Number of SQL connections created
+# TYPE sql_new_conns counter
+sql_new_conns{node_id="1"} 2
+# HELP sql_mem_sql_current Current sql statement memory usage for sql
+# TYPE sql_mem_sql_current gauge
+sql_mem_sql_current{node_id="1"} 0
+# HELP sql_select_count Number of SQL SELECT statements successfully executed
+# TYPE sql_select_count counter
+sql_select_count{node_id="1"} 1
+# HELP sql_restart_savepoint_release_count Number of `RELEASE SAVEPOINT cockroach_restart` statements successfully executed
+# TYPE sql_restart_savepoint_release_count counter
+sql_restart_savepoint_release_count{node_id="1"} 0
+# HELP sql_pre_serve_bytesout Number of SQL bytes sent prior to routing the connection to the target SQL server
+# TYPE sql_pre_serve_bytesout counter
+sql_pre_serve_bytesout{node_id="1"} 0
+# HELP sql_txn_begin_started_count_internal Number of SQL transaction BEGIN statements started (internal queries)
+# TYPE sql_txn_begin_started_count_internal counter
+sql_txn_begin_started_count_internal{node_id="1"} 0
+# HELP sql_txn_contended_count Number of SQL transactions experienced contention
+# TYPE sql_txn_contended_count counter
+sql_txn_contended_count{node_id="1"} 0
+# HELP sql_guardrails_full_scan_rejected_count_internal Number of full table or index scans that have been rejected because of `disallow_full_table_scans` guardrail (internal queries)
+# TYPE sql_guardrails_full_scan_rejected_count_internal counter
+sql_guardrails_full_scan_rejected_count_internal{node_id="1"} 0
+# HELP sql_optimizer_plan_cache_hits_internal Number of non-prepared statements for which a cached plan was used (internal queries)
+# TYPE sql_optimizer_plan_cache_hits_internal counter
+sql_optimizer_plan_cache_hits_internal{node_id="1"} 585
+# HELP sql_guardrails_transaction_rows_written_err_count_internal Number of transactions errored because of transaction_rows_written_err guardrail (internal queries)
+# TYPE sql_guardrails_transaction_rows_written_err_count_internal counter
+sql_guardrails_transaction_rows_written_err_count_internal{node_id="1"} 0
+# HELP sql_guardrails_transaction_rows_written_err_count Number of transactions errored because of transaction_rows_written_err guardrail
+# TYPE sql_guardrails_transaction_rows_written_err_count counter
+sql_guardrails_transaction_rows_written_err_count{node_id="1"} 0
+# HELP sql_copy_count_internal Number of COPY SQL statements successfully executed (internal queries)
+# TYPE sql_copy_count_internal counter
+sql_copy_count_internal{node_id="1"} 0
+# HELP sql_distsql_contended_queries_count Number of SQL queries that experienced contention
+# TYPE sql_distsql_contended_queries_count counter
+sql_distsql_contended_queries_count{node_id="1"} 2
+# HELP sql_hydrated_udf_cache_hits counter on the number of cache hits
+# TYPE sql_hydrated_udf_cache_hits counter
+sql_hydrated_udf_cache_hits{node_id="1"} 0
+# HELP sql_conn_latency Latency to establish and authenticate a SQL connection
+# TYPE sql_conn_latency histogram
+sql_conn_latency_bucket{node_id="1",le="10000"} 0
+sql_conn_latency_bucket{node_id="1",le="12638.482029342978"} 0
+sql_conn_latency_bucket{node_id="1",le="15973.122800602541"} 0
+sql_conn_latency_bucket{node_id="1",le="20187.602546790382"} 0
+sql_conn_latency_bucket{node_id="1",le="25514.065200312878"} 0
+sql_conn_latency_bucket{node_id="1",le="32245.90545296394"} 0
+sql_conn_latency_bucket{node_id="1",le="40753.92965871775"} 0
+sql_conn_latency_bucket{node_id="1",le="51506.78076168121"} 0
+sql_conn_latency_bucket{node_id="1",le="65096.75230458167"} 0
+sql_conn_latency_bucket{node_id="1",le="82272.41341700466"} 0
+sql_conn_latency_bucket{node_id="1",le="103979.84184814895"} 0
+sql_conn_latency_bucket{node_id="1",le="131414.73626117557"} 0
+sql_conn_latency_bucket{node_id="1",le="166088.27826277143"} 1
+sql_conn_latency_bucket{node_id="1",le="209910.3720108553"} 1
+sql_conn_latency_bucket{node_id="1",le="265294.8464431894"} 1
+sql_conn_latency_bucket{node_id="1",le="335292.41492495546"} 2
+sql_conn_latency_bucket{node_id="1",le="423758.7160604059"} 2
+sql_conn_latency_bucket{node_id="1",le="535566.6917706894"} 2
+sql_conn_latency_bucket{node_id="1",le="676875.0009458527"} 2
+sql_conn_latency_bucket{node_id="1",le="855467.2535565672"} 2
+sql_conn_latency_bucket{node_id="1",le="1.0811807510766068e+06"} 2
+sql_conn_latency_bucket{node_id="1",le="1.3664483492953242e+06"} 2
+sql_conn_latency_bucket{node_id="1",le="1.7269832906594332e+06"} 2
+sql_conn_latency_bucket{node_id="1",le="2.182644728397485e+06"} 2
+sql_conn_latency_bucket{node_id="1",le="2.7585316176291797e+06"} 2
+sql_conn_latency_bucket{node_id="1",le="3.4863652276780806e+06"} 2
+sql_conn_latency_bucket{node_id="1",le="4.406236427773566e+06"} 2
+sql_conn_latency_bucket{node_id="1",le="5.568813990945262e+06"} 2
+sql_conn_latency_bucket{node_id="1",le="7.038135554931545e+06"} 2
+sql_conn_latency_bucket{node_id="1",le="8.89513497310822e+06"} 2
+sql_conn_latency_bucket{node_id="1",le="1.1242100350620849e+07"} 2
+sql_conn_latency_bucket{node_id="1",le="1.4208308325339198e+07"} 2
+sql_conn_latency_bucket{node_id="1",le="1.795714494371637e+07"} 2
+sql_conn_latency_bucket{node_id="1",le="2.269510536694665e+07"} 2
+sql_conn_latency_bucket{node_id="1",le="2.868316813342006e+07"} 2
+sql_conn_latency_bucket{node_id="1",le="3.625117049988527e+07"} 2
+sql_conn_latency_bucket{node_id="1",le="4.581597669054482e+07"} 2
+sql_conn_latency_bucket{node_id="1",le="5.790443980602476e+07"} 2
+sql_conn_latency_bucket{node_id="1",le="7.318242219076161e+07"} 2
+sql_conn_latency_bucket{node_id="1",le="9.249147277217315e+07"} 2
+sql_conn_latency_bucket{node_id="1",le="1.1689518164985757e+08"} 2
+sql_conn_latency_bucket{node_id="1",le="1.4773776525985083e+08"} 2
+sql_conn_latency_bucket{node_id="1",le="1.8671810912919158e+08"} 2
+sql_conn_latency_bucket{node_id="1",le="2.359833466782189e+08"} 2
+sql_conn_latency_bucket{node_id="1",le="2.9824712862168837e+08"} 2
+sql_conn_latency_bucket{node_id="1",le="3.769390975388353e+08"} 2
+sql_conn_latency_bucket{node_id="1",le="4.7639380104013294e+08"} 2
+sql_conn_latency_bucket{node_id="1",le="6.020894493336115e+08"} 2
+sql_conn_latency_bucket{node_id="1",le="7.609496685459859e+08"} 2
+sql_conn_latency_bucket{node_id="1",le="9.61724871115294e+08"} 2
+sql_conn_latency_bucket{node_id="1",le="1.2154742500762835e+09"} 2
+sql_conn_latency_bucket{node_id="1",le="1.5361749466718242e+09"} 2
+sql_conn_latency_bucket{node_id="1",le="1.941491945743876e+09"} 2
+sql_conn_latency_bucket{node_id="1",le="2.453751106639811e+09"} 2
+sql_conn_latency_bucket{node_id="1",le="3.10116892657477e+09"} 2
+sql_conn_latency_bucket{node_id="1",le="3.919406774847209e+09"} 2
+sql_conn_latency_bucket{node_id="1",le="4.953535208959157e+09"} 2
+sql_conn_latency_bucket{node_id="1",le="6.260516572014802e+09"} 2
+sql_conn_latency_bucket{node_id="1",le="7.912342618981298e+09"} 2
+sql_conn_latency_bucket{node_id="1",le="9.99999999999997e+09"} 2
+sql_conn_latency_bucket{node_id="1",le="+Inf"} 2
+sql_conn_latency_sum{node_id="1"} 451666
+sql_conn_latency_count{node_id="1"} 2
+# HELP sql_savepoint_count Number of SQL SAVEPOINT statements successfully executed
+# TYPE sql_savepoint_count counter
+sql_savepoint_count{node_id="1"} 0
+# HELP sql_optimizer_plan_cache_hits Number of non-prepared statements for which a cached plan was used
+# TYPE sql_optimizer_plan_cache_hits counter
+sql_optimizer_plan_cache_hits{node_id="1"} 0
+# HELP sql_select_started_count Number of SQL SELECT statements started
+# TYPE sql_select_started_count counter
+sql_select_started_count{node_id="1"} 1
+# HELP sql_mem_sql_max Memory usage per sql statement for sql
+# TYPE sql_mem_sql_max histogram
+sql_mem_sql_max_bucket{node_id="1",le="1"} 0
+sql_mem_sql_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_sql_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_sql_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_sql_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_sql_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_sql_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_sql_max_bucket{node_id="1",le="8000"} 1
+sql_mem_sql_max_bucket{node_id="1",le="28885.126301127955"} 1
+sql_mem_sql_max_bucket{node_id="1",le="104293.81517901426"} 1
+sql_mem_sql_max_bucket{node_id="1",le="376567.50298404036"} 1
+sql_mem_sql_max_bucket{node_id="1",le="1.359649985574298e+06"} 1
+sql_mem_sql_max_bucket{node_id="1",le="4.909207694830051e+06"} 1
+sql_mem_sql_max_bucket{node_id="1",le="1.7725385537954405e+07"} 1
+sql_mem_sql_max_bucket{node_id="1",le="6.399999999999999e+07"} 1
+sql_mem_sql_max_bucket{node_id="1",le="+Inf"} 1
+sql_mem_sql_max_sum{node_id="1"} 4311
+sql_mem_sql_max_count{node_id="1"} 1
+# HELP sql_disk_distsql_spilled_bytes_read Number of bytes read from temporary disk storage as a result of spilling
+# TYPE sql_disk_distsql_spilled_bytes_read counter
+sql_disk_distsql_spilled_bytes_read{node_id="1"} 0
+# HELP sql_distsql_flows_active Number of distributed SQL flows currently active
+# TYPE sql_distsql_flows_active gauge
+sql_distsql_flows_active{node_id="1"} 0
+# HELP sql_distsql_dist_query_rerun_locally_count Total number of cases when distributed query error resulted in a local rerun
+# TYPE sql_distsql_dist_query_rerun_locally_count counter
+sql_distsql_dist_query_rerun_locally_count{node_id="1"} 0
+# HELP sql_hydrated_table_cache_misses counter on the number of cache misses
+# TYPE sql_hydrated_table_cache_misses counter
+sql_hydrated_table_cache_misses{node_id="1"} 0
+# HELP sql_stats_flush_error Number of errors encountered when flushing SQL Stats
+# TYPE sql_stats_flush_error counter
+sql_stats_flush_error{node_id="1"} 0
+# HELP sql_mem_internal_txn_max Memory usage per sql transaction for internal
+# TYPE sql_mem_internal_txn_max histogram
+sql_mem_internal_txn_max_bucket{node_id="1",le="1"} 0
+sql_mem_internal_txn_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_internal_txn_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_internal_txn_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_internal_txn_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_internal_txn_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_internal_txn_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_internal_txn_max_bucket{node_id="1",le="8000"} 850
+sql_mem_internal_txn_max_bucket{node_id="1",le="28885.126301127955"} 850
+sql_mem_internal_txn_max_bucket{node_id="1",le="104293.81517901426"} 850
+sql_mem_internal_txn_max_bucket{node_id="1",le="376567.50298404036"} 850
+sql_mem_internal_txn_max_bucket{node_id="1",le="1.359649985574298e+06"} 850
+sql_mem_internal_txn_max_bucket{node_id="1",le="4.909207694830051e+06"} 850
+sql_mem_internal_txn_max_bucket{node_id="1",le="1.7725385537954405e+07"} 850
+sql_mem_internal_txn_max_bucket{node_id="1",le="6.399999999999999e+07"} 850
+sql_mem_internal_txn_max_bucket{node_id="1",le="+Inf"} 850
+sql_mem_internal_txn_max_sum{node_id="1"} 3.88124e+06
+sql_mem_internal_txn_max_count{node_id="1"} 850
+# HELP sql_savepoint_rollback_count Number of `ROLLBACK TO SAVEPOINT` statements successfully executed
+# TYPE sql_savepoint_rollback_count counter
+sql_savepoint_rollback_count{node_id="1"} 0
+# HELP sql_guardrails_full_scan_rejected_count Number of full table or index scans that have been rejected because of `disallow_full_table_scans` guardrail
+# TYPE sql_guardrails_full_scan_rejected_count counter
+sql_guardrails_full_scan_rejected_count{node_id="1"} 0
+# HELP sql_conns_waiting_to_hash Number of SQL connection attempts that are being throttled in order to limit password hashing concurrency
+# TYPE sql_conns_waiting_to_hash gauge
+sql_conns_waiting_to_hash{node_id="1"} 0
+# HELP sql_hydrated_udf_cache_misses counter on the number of cache misses
+# TYPE sql_hydrated_udf_cache_misses counter
+sql_hydrated_udf_cache_misses{node_id="1"} 0
+# HELP sql_txn_abort_count Number of SQL transaction abort errors
+# TYPE sql_txn_abort_count counter
+sql_txn_abort_count{node_id="1"} 0
+# HELP sql_contention_txn_id_cache_read Number of cache read
+# TYPE sql_contention_txn_id_cache_read counter
+sql_contention_txn_id_cache_read{node_id="1"} 0
+# HELP sql_exec_latency_internal Latency of SQL statement execution (internal queries)
+# TYPE sql_exec_latency_internal histogram
+sql_exec_latency_internal_bucket{node_id="1",le="10000"} 0
+sql_exec_latency_internal_bucket{node_id="1",le="12638.482029342978"} 0
+sql_exec_latency_internal_bucket{node_id="1",le="15973.122800602541"} 0
+sql_exec_latency_internal_bucket{node_id="1",le="20187.602546790382"} 0
+sql_exec_latency_internal_bucket{node_id="1",le="25514.065200312878"} 0
+sql_exec_latency_internal_bucket{node_id="1",le="32245.90545296394"} 0
+sql_exec_latency_internal_bucket{node_id="1",le="40753.92965871775"} 0
+sql_exec_latency_internal_bucket{node_id="1",le="51506.78076168121"} 0
+sql_exec_latency_internal_bucket{node_id="1",le="65096.75230458167"} 0
+sql_exec_latency_internal_bucket{node_id="1",le="82272.41341700466"} 1
+sql_exec_latency_internal_bucket{node_id="1",le="103979.84184814895"} 21
+sql_exec_latency_internal_bucket{node_id="1",le="131414.73626117557"} 77
+sql_exec_latency_internal_bucket{node_id="1",le="166088.27826277143"} 184
+sql_exec_latency_internal_bucket{node_id="1",le="209910.3720108553"} 274
+sql_exec_latency_internal_bucket{node_id="1",le="265294.8464431894"} 337
+sql_exec_latency_internal_bucket{node_id="1",le="335292.41492495546"} 393
+sql_exec_latency_internal_bucket{node_id="1",le="423758.7160604059"} 439
+sql_exec_latency_internal_bucket{node_id="1",le="535566.6917706894"} 483
+sql_exec_latency_internal_bucket{node_id="1",le="676875.0009458527"} 539
+sql_exec_latency_internal_bucket{node_id="1",le="855467.2535565672"} 576
+sql_exec_latency_internal_bucket{node_id="1",le="1.0811807510766068e+06"} 600
+sql_exec_latency_internal_bucket{node_id="1",le="1.3664483492953242e+06"} 605
+sql_exec_latency_internal_bucket{node_id="1",le="1.7269832906594332e+06"} 607
+sql_exec_latency_internal_bucket{node_id="1",le="2.182644728397485e+06"} 613
+sql_exec_latency_internal_bucket{node_id="1",le="2.7585316176291797e+06"} 623
+sql_exec_latency_internal_bucket{node_id="1",le="3.4863652276780806e+06"} 629
+sql_exec_latency_internal_bucket{node_id="1",le="4.406236427773566e+06"} 635
+sql_exec_latency_internal_bucket{node_id="1",le="5.568813990945262e+06"} 647
+sql_exec_latency_internal_bucket{node_id="1",le="7.038135554931545e+06"} 666
+sql_exec_latency_internal_bucket{node_id="1",le="8.89513497310822e+06"} 670
+sql_exec_latency_internal_bucket{node_id="1",le="1.1242100350620849e+07"} 672
+sql_exec_latency_internal_bucket{node_id="1",le="1.4208308325339198e+07"} 672
+sql_exec_latency_internal_bucket{node_id="1",le="1.795714494371637e+07"} 672
+sql_exec_latency_internal_bucket{node_id="1",le="2.269510536694665e+07"} 672
+sql_exec_latency_internal_bucket{node_id="1",le="2.868316813342006e+07"} 672
+sql_exec_latency_internal_bucket{node_id="1",le="3.625117049988527e+07"} 673
+sql_exec_latency_internal_bucket{node_id="1",le="4.581597669054482e+07"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="5.790443980602476e+07"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="7.318242219076161e+07"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="9.249147277217315e+07"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="1.1689518164985757e+08"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="1.4773776525985083e+08"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="1.8671810912919158e+08"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="2.359833466782189e+08"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="2.9824712862168837e+08"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="3.769390975388353e+08"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="4.7639380104013294e+08"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="6.020894493336115e+08"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="7.609496685459859e+08"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="9.61724871115294e+08"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="1.2154742500762835e+09"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="1.5361749466718242e+09"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="1.941491945743876e+09"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="2.453751106639811e+09"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="3.10116892657477e+09"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="3.919406774847209e+09"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="4.953535208959157e+09"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="6.260516572014802e+09"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="7.912342618981298e+09"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="9.99999999999997e+09"} 674
+sql_exec_latency_internal_bucket{node_id="1",le="+Inf"} 674
+sql_exec_latency_internal_sum{node_id="1"} 5.89443375e+08
+sql_exec_latency_internal_count{node_id="1"} 674
+# HELP sql_contention_resolver_retries Number of times transaction id resolution has been retried
+# TYPE sql_contention_resolver_retries counter
+sql_contention_resolver_retries{node_id="1"} 0
+# HELP sql_conn_failures Number of SQL connection failures
+# TYPE sql_conn_failures counter
+sql_conn_failures{node_id="1"} 0
+# HELP sql_distsql_vec_openfds Current number of open file descriptors used by vectorized external storage
+# TYPE sql_distsql_vec_openfds gauge
+sql_distsql_vec_openfds{node_id="1"} 0
+# HELP sql_pre_serve_conn_failures Number of SQL connection failures prior to routing the connection to the target SQL server
+# TYPE sql_pre_serve_conn_failures counter
+sql_pre_serve_conn_failures{node_id="1"} 0
+# HELP sql_distsql_service_latency_internal Latency of DistSQL request execution (internal queries)
+# TYPE sql_distsql_service_latency_internal histogram
+sql_distsql_service_latency_internal_bucket{node_id="1",le="10000"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="12638.482029342978"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="15973.122800602541"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="20187.602546790382"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="25514.065200312878"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="32245.90545296394"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="40753.92965871775"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="51506.78076168121"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="65096.75230458167"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="82272.41341700466"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="103979.84184814895"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="131414.73626117557"} 0
+sql_distsql_service_latency_internal_bucket{node_id="1",le="166088.27826277143"} 2
+sql_distsql_service_latency_internal_bucket{node_id="1",le="209910.3720108553"} 4
+sql_distsql_service_latency_internal_bucket{node_id="1",le="265294.8464431894"} 26
+sql_distsql_service_latency_internal_bucket{node_id="1",le="335292.41492495546"} 39
+sql_distsql_service_latency_internal_bucket{node_id="1",le="423758.7160604059"} 49
+sql_distsql_service_latency_internal_bucket{node_id="1",le="535566.6917706894"} 51
+sql_distsql_service_latency_internal_bucket{node_id="1",le="676875.0009458527"} 55
+sql_distsql_service_latency_internal_bucket{node_id="1",le="855467.2535565672"} 56
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.0811807510766068e+06"} 58
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.3664483492953242e+06"} 59
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.7269832906594332e+06"} 59
+sql_distsql_service_latency_internal_bucket{node_id="1",le="2.182644728397485e+06"} 59
+sql_distsql_service_latency_internal_bucket{node_id="1",le="2.7585316176291797e+06"} 64
+sql_distsql_service_latency_internal_bucket{node_id="1",le="3.4863652276780806e+06"} 65
+sql_distsql_service_latency_internal_bucket{node_id="1",le="4.406236427773566e+06"} 65
+sql_distsql_service_latency_internal_bucket{node_id="1",le="5.568813990945262e+06"} 65
+sql_distsql_service_latency_internal_bucket{node_id="1",le="7.038135554931545e+06"} 66
+sql_distsql_service_latency_internal_bucket{node_id="1",le="8.89513497310822e+06"} 68
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.1242100350620849e+07"} 68
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.4208308325339198e+07"} 68
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.795714494371637e+07"} 68
+sql_distsql_service_latency_internal_bucket{node_id="1",le="2.269510536694665e+07"} 68
+sql_distsql_service_latency_internal_bucket{node_id="1",le="2.868316813342006e+07"} 68
+sql_distsql_service_latency_internal_bucket{node_id="1",le="3.625117049988527e+07"} 68
+sql_distsql_service_latency_internal_bucket{node_id="1",le="4.581597669054482e+07"} 68
+sql_distsql_service_latency_internal_bucket{node_id="1",le="5.790443980602476e+07"} 68
+sql_distsql_service_latency_internal_bucket{node_id="1",le="7.318242219076161e+07"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="9.249147277217315e+07"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.1689518164985757e+08"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.4773776525985083e+08"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.8671810912919158e+08"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="2.359833466782189e+08"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="2.9824712862168837e+08"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="3.769390975388353e+08"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="4.7639380104013294e+08"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="6.020894493336115e+08"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="7.609496685459859e+08"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="9.61724871115294e+08"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.2154742500762835e+09"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.5361749466718242e+09"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="1.941491945743876e+09"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="2.453751106639811e+09"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="3.10116892657477e+09"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="3.919406774847209e+09"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="4.953535208959157e+09"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="6.260516572014802e+09"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="7.912342618981298e+09"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="9.99999999999997e+09"} 69
+sql_distsql_service_latency_internal_bucket{node_id="1",le="+Inf"} 69
+sql_distsql_service_latency_internal_sum{node_id="1"} 1.25878626e+08
+sql_distsql_service_latency_internal_count{node_id="1"} 69
+# HELP sql_guardrails_max_row_size_log_count Number of rows observed violating sql.guardrails.max_row_size_log
+# TYPE sql_guardrails_max_row_size_log_count counter
+sql_guardrails_max_row_size_log_count{node_id="1"} 0
+# HELP sql_mem_conns_max Memory usage per sql statement for conns
+# TYPE sql_mem_conns_max histogram
+sql_mem_conns_max_bucket{node_id="1",le="1"} 0
+sql_mem_conns_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_conns_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_conns_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_conns_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_conns_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_conns_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_conns_max_bucket{node_id="1",le="8000"} 0
+sql_mem_conns_max_bucket{node_id="1",le="28885.126301127955"} 0
+sql_mem_conns_max_bucket{node_id="1",le="104293.81517901426"} 0
+sql_mem_conns_max_bucket{node_id="1",le="376567.50298404036"} 0
+sql_mem_conns_max_bucket{node_id="1",le="1.359649985574298e+06"} 0
+sql_mem_conns_max_bucket{node_id="1",le="4.909207694830051e+06"} 0
+sql_mem_conns_max_bucket{node_id="1",le="1.7725385537954405e+07"} 0
+sql_mem_conns_max_bucket{node_id="1",le="6.399999999999999e+07"} 0
+sql_mem_conns_max_bucket{node_id="1",le="+Inf"} 0
+sql_mem_conns_max_sum{node_id="1"} 0
+sql_mem_conns_max_count{node_id="1"} 0
+# HELP sql_stats_mem_max Memory usage for fingerprint storage
+# TYPE sql_stats_mem_max histogram
+sql_stats_mem_max_bucket{node_id="1",le="1"} 0
+sql_stats_mem_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_stats_mem_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_stats_mem_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_stats_mem_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_stats_mem_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_stats_mem_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_stats_mem_max_bucket{node_id="1",le="8000"} 0
+sql_stats_mem_max_bucket{node_id="1",le="28885.126301127955"} 0
+sql_stats_mem_max_bucket{node_id="1",le="104293.81517901426"} 0
+sql_stats_mem_max_bucket{node_id="1",le="376567.50298404036"} 0
+sql_stats_mem_max_bucket{node_id="1",le="1.359649985574298e+06"} 0
+sql_stats_mem_max_bucket{node_id="1",le="4.909207694830051e+06"} 0
+sql_stats_mem_max_bucket{node_id="1",le="1.7725385537954405e+07"} 0
+sql_stats_mem_max_bucket{node_id="1",le="6.399999999999999e+07"} 0
+sql_stats_mem_max_bucket{node_id="1",le="+Inf"} 0
+sql_stats_mem_max_sum{node_id="1"} 0
+sql_stats_mem_max_count{node_id="1"} 0
+# HELP sql_mem_conns_current Current sql statement memory usage for conns
+# TYPE sql_mem_conns_current gauge
+sql_mem_conns_current{node_id="1"} 0
+# HELP sql_guardrails_max_row_size_err_count Number of rows observed violating sql.guardrails.max_row_size_err
+# TYPE sql_guardrails_max_row_size_err_count counter
+sql_guardrails_max_row_size_err_count{node_id="1"} 0
+# HELP sql_mem_root_max Memory usage per sql statement for root
+# TYPE sql_mem_root_max histogram
+sql_mem_root_max_bucket{node_id="1",le="1"} 0
+sql_mem_root_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_root_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_root_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_root_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_root_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_root_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_root_max_bucket{node_id="1",le="8000"} 0
+sql_mem_root_max_bucket{node_id="1",le="28885.126301127955"} 0
+sql_mem_root_max_bucket{node_id="1",le="104293.81517901426"} 0
+sql_mem_root_max_bucket{node_id="1",le="376567.50298404036"} 0
+sql_mem_root_max_bucket{node_id="1",le="1.359649985574298e+06"} 0
+sql_mem_root_max_bucket{node_id="1",le="4.909207694830051e+06"} 0
+sql_mem_root_max_bucket{node_id="1",le="1.7725385537954405e+07"} 0
+sql_mem_root_max_bucket{node_id="1",le="6.399999999999999e+07"} 0
+sql_mem_root_max_bucket{node_id="1",le="+Inf"} 0
+sql_mem_root_max_sum{node_id="1"} 0
+sql_mem_root_max_count{node_id="1"} 0
+# HELP sql_savepoint_release_started_count Number of `RELEASE SAVEPOINT` statements started
+# TYPE sql_savepoint_release_started_count counter
+sql_savepoint_release_started_count{node_id="1"} 0
+# HELP sql_full_scan_count Number of full table or index scans
+# TYPE sql_full_scan_count counter
+sql_full_scan_count{node_id="1"} 0
+# HELP sql_stats_mem_current Current memory usage for fingerprint storage
+# TYPE sql_stats_mem_current gauge
+sql_stats_mem_current{node_id="1"} 593920
+# HELP sql_mem_bulk_max Memory usage per sql statement for bulk operations
+# TYPE sql_mem_bulk_max histogram
+sql_mem_bulk_max_bucket{node_id="1",le="1"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="8000"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="28885.126301127955"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="104293.81517901426"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="376567.50298404036"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="1.359649985574298e+06"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="4.909207694830051e+06"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="1.7725385537954405e+07"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="6.399999999999999e+07"} 0
+sql_mem_bulk_max_bucket{node_id="1",le="+Inf"} 0
+sql_mem_bulk_max_sum{node_id="1"} 0
+sql_mem_bulk_max_count{node_id="1"} 0
+# HELP sql_insights_anomaly_detection_evictions Evictions of fingerprint latency summaries due to memory pressure
+# TYPE sql_insights_anomaly_detection_evictions counter
+sql_insights_anomaly_detection_evictions{node_id="1"} 0
+# HELP sql_stats_flush_count Number of times SQL Stats are flushed to persistent storage
+# TYPE sql_stats_flush_count counter
+sql_stats_flush_count{node_id="1"} 0
+# HELP sql_insert_count_internal Number of SQL INSERT statements successfully executed (internal queries)
+# TYPE sql_insert_count_internal counter
+sql_insert_count_internal{node_id="1"} 175
+# HELP sql_disk_distsql_current Current sql statement disk usage for distsql
+# TYPE sql_disk_distsql_current gauge
+sql_disk_distsql_current{node_id="1"} 0
+# HELP sql_copy_nonatomic_count Number of non-atomic COPY SQL statements successfully executed
+# TYPE sql_copy_nonatomic_count counter
+sql_copy_nonatomic_count{node_id="1"} 0
+# HELP sql_txn_rollback_started_count_internal Number of SQL transaction ROLLBACK statements started (internal queries)
+# TYPE sql_txn_rollback_started_count_internal counter
+sql_txn_rollback_started_count_internal{node_id="1"} 0
+# HELP sql_misc_count Number of other SQL statements successfully executed
+# TYPE sql_misc_count counter
+sql_misc_count{node_id="1"} 0
+# HELP sql_insert_count Number of SQL INSERT statements successfully executed
+# TYPE sql_insert_count counter
+sql_insert_count{node_id="1"} 0
+# HELP sql_schema_changer_running Gauge of currently running schema changes
+# TYPE sql_schema_changer_running gauge
+sql_schema_changer_running{node_id="1"} 0
+# HELP sql_txn_abort_count_internal Number of SQL transaction abort errors (internal queries)
+# TYPE sql_txn_abort_count_internal counter
+sql_txn_abort_count_internal{node_id="1"} 0
+# HELP sql_temp_object_cleaner_schemas_deletion_success number of successful schema deletions by the temp object cleaner on this node
+# TYPE sql_temp_object_cleaner_schemas_deletion_success counter
+sql_temp_object_cleaner_schemas_deletion_success{node_id="1"} 0
+# HELP sql_mem_sql_txn_current Current sql transaction memory usage for sql
+# TYPE sql_mem_sql_txn_current gauge
+sql_mem_sql_txn_current{node_id="1"} 0
+# HELP sql_mem_sql_txn_max Memory usage per sql transaction for sql
+# TYPE sql_mem_sql_txn_max histogram
+sql_mem_sql_txn_max_bucket{node_id="1",le="1"} 0
+sql_mem_sql_txn_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_sql_txn_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_sql_txn_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_sql_txn_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_sql_txn_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_sql_txn_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_sql_txn_max_bucket{node_id="1",le="8000"} 2
+sql_mem_sql_txn_max_bucket{node_id="1",le="28885.126301127955"} 2
+sql_mem_sql_txn_max_bucket{node_id="1",le="104293.81517901426"} 2
+sql_mem_sql_txn_max_bucket{node_id="1",le="376567.50298404036"} 2
+sql_mem_sql_txn_max_bucket{node_id="1",le="1.359649985574298e+06"} 2
+sql_mem_sql_txn_max_bucket{node_id="1",le="4.909207694830051e+06"} 2
+sql_mem_sql_txn_max_bucket{node_id="1",le="1.7725385537954405e+07"} 2
+sql_mem_sql_txn_max_bucket{node_id="1",le="6.399999999999999e+07"} 2
+sql_mem_sql_txn_max_bucket{node_id="1",le="+Inf"} 2
+sql_mem_sql_txn_max_sum{node_id="1"} 8020
+sql_mem_sql_txn_max_count{node_id="1"} 2
+# HELP sql_txn_contended_count_internal Number of SQL transactions experienced contention (internal queries)
+# TYPE sql_txn_contended_count_internal counter
+sql_txn_contended_count_internal{node_id="1"} 0
+# HELP sql_txn_rollback_count_internal Number of SQL transaction ROLLBACK statements successfully executed (internal queries)
+# TYPE sql_txn_rollback_count_internal counter
+sql_txn_rollback_count_internal{node_id="1"} 0
+# HELP sql_txn_begin_count Number of SQL transaction BEGIN statements successfully executed
+# TYPE sql_txn_begin_count counter
+sql_txn_begin_count{node_id="1"} 0
+# HELP sql_temp_object_cleaner_schemas_to_delete number of schemas to be deleted by the temp object cleaner on this node
+# TYPE sql_temp_object_cleaner_schemas_to_delete counter
+sql_temp_object_cleaner_schemas_to_delete{node_id="1"} 0
+# HELP sql_mem_sql_session_prepared_current Current sql session memory usage by prepared statements for sql
+# TYPE sql_mem_sql_session_prepared_current gauge
+sql_mem_sql_session_prepared_current{node_id="1"} 0
+# HELP sql_txn_commit_started_count Number of SQL transaction COMMIT statements started
+# TYPE sql_txn_commit_started_count counter
+sql_txn_commit_started_count{node_id="1"} 0
+# HELP sql_insights_anomaly_detection_fingerprints Current number of statement fingerprints being monitored for anomaly detection
+# TYPE sql_insights_anomaly_detection_fingerprints gauge
+sql_insights_anomaly_detection_fingerprints{node_id="1"} 0
+# HELP sql_mem_internal_session_prepared_current Current sql session memory usage by prepared statements for internal
+# TYPE sql_mem_internal_session_prepared_current gauge
+sql_mem_internal_session_prepared_current{node_id="1"} 0
+# HELP sql_stats_reported_mem_max Memory usage for reported fingerprint storage
+# TYPE sql_stats_reported_mem_max histogram
+sql_stats_reported_mem_max_bucket{node_id="1",le="1"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="8000"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="28885.126301127955"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="104293.81517901426"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="376567.50298404036"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="1.359649985574298e+06"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="4.909207694830051e+06"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="1.7725385537954405e+07"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="6.399999999999999e+07"} 0
+sql_stats_reported_mem_max_bucket{node_id="1",le="+Inf"} 0
+sql_stats_reported_mem_max_sum{node_id="1"} 0
+sql_stats_reported_mem_max_count{node_id="1"} 0
+# HELP sql_distsql_select_count Number of DistSQL SELECT statements
+# TYPE sql_distsql_select_count counter
+sql_distsql_select_count{node_id="1"} 0
+# HELP sql_savepoint_release_count_internal Number of `RELEASE SAVEPOINT` statements successfully executed (internal queries)
+# TYPE sql_savepoint_release_count_internal counter
+sql_savepoint_release_count_internal{node_id="1"} 0
+# HELP sql_exec_latency Latency of SQL statement execution
+# TYPE sql_exec_latency histogram
+sql_exec_latency_bucket{node_id="1",le="10000"} 0
+sql_exec_latency_bucket{node_id="1",le="12638.482029342978"} 0
+sql_exec_latency_bucket{node_id="1",le="15973.122800602541"} 0
+sql_exec_latency_bucket{node_id="1",le="20187.602546790382"} 0
+sql_exec_latency_bucket{node_id="1",le="25514.065200312878"} 0
+sql_exec_latency_bucket{node_id="1",le="32245.90545296394"} 0
+sql_exec_latency_bucket{node_id="1",le="40753.92965871775"} 0
+sql_exec_latency_bucket{node_id="1",le="51506.78076168121"} 0
+sql_exec_latency_bucket{node_id="1",le="65096.75230458167"} 0
+sql_exec_latency_bucket{node_id="1",le="82272.41341700466"} 0
+sql_exec_latency_bucket{node_id="1",le="103979.84184814895"} 0
+sql_exec_latency_bucket{node_id="1",le="131414.73626117557"} 0
+sql_exec_latency_bucket{node_id="1",le="166088.27826277143"} 0
+sql_exec_latency_bucket{node_id="1",le="209910.3720108553"} 0
+sql_exec_latency_bucket{node_id="1",le="265294.8464431894"} 0
+sql_exec_latency_bucket{node_id="1",le="335292.41492495546"} 0
+sql_exec_latency_bucket{node_id="1",le="423758.7160604059"} 0
+sql_exec_latency_bucket{node_id="1",le="535566.6917706894"} 0
+sql_exec_latency_bucket{node_id="1",le="676875.0009458527"} 0
+sql_exec_latency_bucket{node_id="1",le="855467.2535565672"} 0
+sql_exec_latency_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+sql_exec_latency_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+sql_exec_latency_bucket{node_id="1",le="1.7269832906594332e+06"} 1
+sql_exec_latency_bucket{node_id="1",le="2.182644728397485e+06"} 1
+sql_exec_latency_bucket{node_id="1",le="2.7585316176291797e+06"} 1
+sql_exec_latency_bucket{node_id="1",le="3.4863652276780806e+06"} 1
+sql_exec_latency_bucket{node_id="1",le="4.406236427773566e+06"} 1
+sql_exec_latency_bucket{node_id="1",le="5.568813990945262e+06"} 1
+sql_exec_latency_bucket{node_id="1",le="7.038135554931545e+06"} 1
+sql_exec_latency_bucket{node_id="1",le="8.89513497310822e+06"} 1
+sql_exec_latency_bucket{node_id="1",le="1.1242100350620849e+07"} 1
+sql_exec_latency_bucket{node_id="1",le="1.4208308325339198e+07"} 1
+sql_exec_latency_bucket{node_id="1",le="1.795714494371637e+07"} 1
+sql_exec_latency_bucket{node_id="1",le="2.269510536694665e+07"} 1
+sql_exec_latency_bucket{node_id="1",le="2.868316813342006e+07"} 1
+sql_exec_latency_bucket{node_id="1",le="3.625117049988527e+07"} 1
+sql_exec_latency_bucket{node_id="1",le="4.581597669054482e+07"} 1
+sql_exec_latency_bucket{node_id="1",le="5.790443980602476e+07"} 1
+sql_exec_latency_bucket{node_id="1",le="7.318242219076161e+07"} 1
+sql_exec_latency_bucket{node_id="1",le="9.249147277217315e+07"} 1
+sql_exec_latency_bucket{node_id="1",le="1.1689518164985757e+08"} 1
+sql_exec_latency_bucket{node_id="1",le="1.4773776525985083e+08"} 1
+sql_exec_latency_bucket{node_id="1",le="1.8671810912919158e+08"} 1
+sql_exec_latency_bucket{node_id="1",le="2.359833466782189e+08"} 1
+sql_exec_latency_bucket{node_id="1",le="2.9824712862168837e+08"} 1
+sql_exec_latency_bucket{node_id="1",le="3.769390975388353e+08"} 1
+sql_exec_latency_bucket{node_id="1",le="4.7639380104013294e+08"} 1
+sql_exec_latency_bucket{node_id="1",le="6.020894493336115e+08"} 1
+sql_exec_latency_bucket{node_id="1",le="7.609496685459859e+08"} 1
+sql_exec_latency_bucket{node_id="1",le="9.61724871115294e+08"} 1
+sql_exec_latency_bucket{node_id="1",le="1.2154742500762835e+09"} 1
+sql_exec_latency_bucket{node_id="1",le="1.5361749466718242e+09"} 1
+sql_exec_latency_bucket{node_id="1",le="1.941491945743876e+09"} 1
+sql_exec_latency_bucket{node_id="1",le="2.453751106639811e+09"} 1
+sql_exec_latency_bucket{node_id="1",le="3.10116892657477e+09"} 1
+sql_exec_latency_bucket{node_id="1",le="3.919406774847209e+09"} 1
+sql_exec_latency_bucket{node_id="1",le="4.953535208959157e+09"} 1
+sql_exec_latency_bucket{node_id="1",le="6.260516572014802e+09"} 1
+sql_exec_latency_bucket{node_id="1",le="7.912342618981298e+09"} 1
+sql_exec_latency_bucket{node_id="1",le="9.99999999999997e+09"} 1
+sql_exec_latency_bucket{node_id="1",le="+Inf"} 1
+sql_exec_latency_sum{node_id="1"} 1.699042e+06
+sql_exec_latency_count{node_id="1"} 1
+# HELP sql_pre_serve_new_conns Number of SQL connections created prior to routing the connection to the target SQL server
+# TYPE sql_pre_serve_new_conns counter
+sql_pre_serve_new_conns{node_id="1"} 2
+# HELP sql_restart_savepoint_rollback_started_count_internal Number of `ROLLBACK TO SAVEPOINT cockroach_restart` statements started (internal queries)
+# TYPE sql_restart_savepoint_rollback_started_count_internal counter
+sql_restart_savepoint_rollback_started_count_internal{node_id="1"} 0
+# HELP sql_contention_resolver_failed_resolutions Number of failed transaction ID resolution attempts
+# TYPE sql_contention_resolver_failed_resolutions counter
+sql_contention_resolver_failed_resolutions{node_id="1"} 0
+# HELP sql_restart_savepoint_rollback_started_count Number of `ROLLBACK TO SAVEPOINT cockroach_restart` statements started
+# TYPE sql_restart_savepoint_rollback_started_count counter
+sql_restart_savepoint_rollback_started_count{node_id="1"} 0
+# HELP sql_hydrated_schema_cache_hits counter on the number of cache hits
+# TYPE sql_hydrated_schema_cache_hits counter
+sql_hydrated_schema_cache_hits{node_id="1"} 0
+# HELP sql_txn_begin_count_internal Number of SQL transaction BEGIN statements successfully executed (internal queries)
+# TYPE sql_txn_begin_count_internal counter
+sql_txn_begin_count_internal{node_id="1"} 0
+# HELP sql_mem_sql_session_max Memory usage per sql session for sql
+# TYPE sql_mem_sql_session_max histogram
+sql_mem_sql_session_max_bucket{node_id="1",le="1"} 0
+sql_mem_sql_session_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_sql_session_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_sql_session_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_sql_session_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_sql_session_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_sql_session_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_sql_session_max_bucket{node_id="1",le="8000"} 1
+sql_mem_sql_session_max_bucket{node_id="1",le="28885.126301127955"} 1
+sql_mem_sql_session_max_bucket{node_id="1",le="104293.81517901426"} 1
+sql_mem_sql_session_max_bucket{node_id="1",le="376567.50298404036"} 1
+sql_mem_sql_session_max_bucket{node_id="1",le="1.359649985574298e+06"} 1
+sql_mem_sql_session_max_bucket{node_id="1",le="4.909207694830051e+06"} 1
+sql_mem_sql_session_max_bucket{node_id="1",le="1.7725385537954405e+07"} 1
+sql_mem_sql_session_max_bucket{node_id="1",le="6.399999999999999e+07"} 1
+sql_mem_sql_session_max_bucket{node_id="1",le="+Inf"} 1
+sql_mem_sql_session_max_sum{node_id="1"} 4010
+sql_mem_sql_session_max_count{node_id="1"} 1
+# HELP sql_disk_distsql_max Disk usage per sql statement for distsql
+# TYPE sql_disk_distsql_max histogram
+sql_disk_distsql_max_bucket{node_id="1",le="1"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="8000"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="28885.126301127955"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="104293.81517901426"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="376567.50298404036"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="1.359649985574298e+06"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="4.909207694830051e+06"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="1.7725385537954405e+07"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="6.399999999999999e+07"} 0
+sql_disk_distsql_max_bucket{node_id="1",le="+Inf"} 0
+sql_disk_distsql_max_sum{node_id="1"} 0
+sql_disk_distsql_max_count{node_id="1"} 0
+# HELP sql_distsql_queries_active Number of SQL queries currently active
+# TYPE sql_distsql_queries_active gauge
+sql_distsql_queries_active{node_id="1"} 0
+# HELP sql_mem_distsql_current Current sql statement memory usage for distsql
+# TYPE sql_mem_distsql_current gauge
+sql_mem_distsql_current{node_id="1"} 0
+# HELP sql_guardrails_transaction_rows_read_err_count Number of transactions errored because of transaction_rows_read_err guardrail
+# TYPE sql_guardrails_transaction_rows_read_err_count counter
+sql_guardrails_transaction_rows_read_err_count{node_id="1"} 0
+# HELP sql_mem_root_current Current sql statement memory usage for root
+# TYPE sql_mem_root_current gauge
+sql_mem_root_current{node_id="1"} 1.64864e+06
+# HELP sql_full_scan_count_internal Number of full table or index scans (internal queries)
+# TYPE sql_full_scan_count_internal counter
+sql_full_scan_count_internal{node_id="1"} 23
+# HELP sql_delete_count Number of SQL DELETE statements successfully executed
+# TYPE sql_delete_count counter
+sql_delete_count{node_id="1"} 0
+# HELP sql_mem_internal_session_max Memory usage per sql session for internal
+# TYPE sql_mem_internal_session_max histogram
+sql_mem_internal_session_max_bucket{node_id="1",le="1"} 0
+sql_mem_internal_session_max_bucket{node_id="1",le="3.6106407876409947"} 0
+sql_mem_internal_session_max_bucket{node_id="1",le="13.036726897376782"} 0
+sql_mem_internal_session_max_bucket{node_id="1",le="47.07093787300505"} 0
+sql_mem_internal_session_max_bucket{node_id="1",le="169.95624819678727"} 0
+sql_mem_internal_session_max_bucket{node_id="1",le="613.6509618537564"} 0
+sql_mem_internal_session_max_bucket{node_id="1",le="2215.673192244301"} 0
+sql_mem_internal_session_max_bucket{node_id="1",le="8000"} 657
+sql_mem_internal_session_max_bucket{node_id="1",le="28885.126301127955"} 657
+sql_mem_internal_session_max_bucket{node_id="1",le="104293.81517901426"} 657
+sql_mem_internal_session_max_bucket{node_id="1",le="376567.50298404036"} 657
+sql_mem_internal_session_max_bucket{node_id="1",le="1.359649985574298e+06"} 657
+sql_mem_internal_session_max_bucket{node_id="1",le="4.909207694830051e+06"} 657
+sql_mem_internal_session_max_bucket{node_id="1",le="1.7725385537954405e+07"} 657
+sql_mem_internal_session_max_bucket{node_id="1",le="6.399999999999999e+07"} 657
+sql_mem_internal_session_max_bucket{node_id="1",le="+Inf"} 657
+sql_mem_internal_session_max_sum{node_id="1"} 2.923288e+06
+sql_mem_internal_session_max_count{node_id="1"} 657
+# HELP sqlliveness_is_alive_cache_hits Number of calls to IsAlive that return from the cache
+# TYPE sqlliveness_is_alive_cache_hits counter
+sqlliveness_is_alive_cache_hits{node_id="1"} 18
+# HELP sqlliveness_sessions_deleted Number of expired sessions which have been deleted
+# TYPE sqlliveness_sessions_deleted counter
+sqlliveness_sessions_deleted{node_id="1"} 0
+# HELP sqlliveness_is_alive_cache_misses Number of calls to IsAlive that do not return from the cache
+# TYPE sqlliveness_is_alive_cache_misses counter
+sqlliveness_is_alive_cache_misses{node_id="1"} 1
+# HELP sqlliveness_write_failures Number of update or insert calls which have failed
+# TYPE sqlliveness_write_failures counter
+sqlliveness_write_failures{node_id="1"} 0
+# HELP sqlliveness_write_successes Number of update or insert calls successfully performed
+# TYPE sqlliveness_write_successes counter
+sqlliveness_write_successes{node_id="1"} 8
+# HELP sqlliveness_sessions_deletion_runs Number of calls to delete sessions which have been performed
+# TYPE sqlliveness_sessions_deletion_runs counter
+sqlliveness_sessions_deletion_runs{node_id="1"} 0
+# HELP storage_batch_commit_l0_stall_duration Cumulative time spent in a write stall due to high read amplification in L0, for batch commit. See storage.AggregatedBatchCommitStats for details.
+# TYPE storage_batch_commit_l0_stall_duration gauge
+storage_batch_commit_l0_stall_duration{store="1",node_id="1"} 0
+# HELP storage_disk_slow Number of instances of disk operations taking longer than 10s
+# TYPE storage_disk_slow gauge
+storage_disk_slow{store="1",node_id="1"} 0
+# HELP storage_l5_level_score Compaction score of level 5
+# TYPE storage_l5_level_score gauge
+storage_l5_level_score{store="1",node_id="1"} 0
+# HELP storage_l3_level_size Size of the SSTables in level 3
+# TYPE storage_l3_level_size gauge
+storage_l3_level_size{store="1",node_id="1"} 0
+# HELP storage_l3_bytes_ingested Number of bytes ingested directly into Level 3
+# TYPE storage_l3_bytes_ingested gauge
+storage_l3_bytes_ingested{store="1",node_id="1"} 0
+# HELP storage_secondary_cache_reads_partial_hit The number of reads where some data returned was read from the secondary cache
+# TYPE storage_secondary_cache_reads_partial_hit gauge
+storage_secondary_cache_reads_partial_hit{store="1",node_id="1"} 0
+# HELP storage_l4_bytes_ingested Number of bytes ingested directly into Level 4
+# TYPE storage_l4_bytes_ingested gauge
+storage_l4_bytes_ingested{store="1",node_id="1"} 0
+# HELP storage_l5_level_size Size of the SSTables in level 5
+# TYPE storage_l5_level_size gauge
+storage_l5_level_size{store="1",node_id="1"} 0
+# HELP storage_single_delete_ineffectual Number of SingleDeletes that were ineffectual
+# TYPE storage_single_delete_ineffectual gauge
+storage_single_delete_ineffectual{store="1",node_id="1"} 0
+# HELP storage_shared_storage_write Bytes written to external storage
+# TYPE storage_shared_storage_write gauge
+storage_shared_storage_write{store="1",node_id="1"} 0
+# HELP storage_l6_level_size Size of the SSTables in level 6
+# TYPE storage_l6_level_size gauge
+storage_l6_level_size{store="1",node_id="1"} 0
+# HELP storage_single_delete_invariant_violation Number of SingleDelete invariant violations
+# TYPE storage_single_delete_invariant_violation gauge
+storage_single_delete_invariant_violation{store="1",node_id="1"} 0
+# HELP storage_l6_level_score Compaction score of level 6
+# TYPE storage_l6_level_score gauge
+storage_l6_level_score{store="1",node_id="1"} 0
+# HELP storage_l0_bytes_ingested Number of bytes ingested directly into Level 0
+# TYPE storage_l0_bytes_ingested gauge
+storage_l0_bytes_ingested{store="1",node_id="1"} 0
+# HELP storage_flush_ingest_table_bytes Bytes ingested via flushes (flushable ingestions)
+# TYPE storage_flush_ingest_table_bytes gauge
+storage_flush_ingest_table_bytes{store="1",node_id="1"} 0
+# HELP storage_keys_range_key_set_count Approximate count of RangeKeySet internal keys across the storage engine.
+# TYPE storage_keys_range_key_set_count gauge
+storage_keys_range_key_set_count{store="1",node_id="1"} 0
+# HELP storage_batch_commit_wal_rotation_duration Cumulative time spent waiting for WAL rotation, for batch commit. See storage.AggregatedBatchCommitStats for details.
+# TYPE storage_batch_commit_wal_rotation_duration gauge
+storage_batch_commit_wal_rotation_duration{store="1",node_id="1"} 4.5945e+06
+# HELP storage_wal_bytes_in The number of logical bytes the storage engine has written to the WAL
+# TYPE storage_wal_bytes_in gauge
+storage_wal_bytes_in{store="1",node_id="1"} 3.609572e+06
+# HELP storage_iterator_internal_seeks Cumulative count of seeks performed internally within storage engine iterators.\n\nA value high relative to 'storage.iterator.external.seeks'\nis a good indication that there's an accumulation of garbage\ninternally within the storage engine.\n\nSee storage.AggregatedIteratorStats for details.
+# TYPE storage_iterator_internal_seeks gauge
+storage_iterator_internal_seeks{store="1",node_id="1"} 14357
+# HELP storage_l0_sublevels Number of Level 0 sublevels
+# TYPE storage_l0_sublevels gauge
+storage_l0_sublevels{store="1",node_id="1"} 0
+# HELP storage_secondary_cache_size The number of sstable bytes stored in the secondary cache
+# TYPE storage_secondary_cache_size gauge
+storage_secondary_cache_size{store="1",node_id="1"} 0
+# HELP storage_batch_commit_commit_wait_duration Cumulative time spent waiting for WAL sync, for batch commit. See storage.AggregatedBatchCommitStats for details.
+# TYPE storage_batch_commit_commit_wait_duration gauge
+storage_batch_commit_commit_wait_duration{store="1",node_id="1"} 5.43973167e+08
+# HELP storage_l0_bytes_flushed Number of bytes flushed (from memtables) into Level 0
+# TYPE storage_l0_bytes_flushed gauge
+storage_l0_bytes_flushed{store="1",node_id="1"} 0
+# HELP storage_l6_bytes_ingested Number of bytes ingested directly into Level 6
+# TYPE storage_l6_bytes_ingested gauge
+storage_l6_bytes_ingested{store="1",node_id="1"} 0
+# HELP storage_batch_commit_mem_stall_duration Cumulative time spent in a write stall due to too many memtables, for batch commit. See storage.AggregatedBatchCommitStats for details.
+# TYPE storage_batch_commit_mem_stall_duration gauge
+storage_batch_commit_mem_stall_duration{store="1",node_id="1"} 0
+# HELP storage_l0_num_files Number of SSTables in Level 0
+# TYPE storage_l0_num_files gauge
+storage_l0_num_files{store="1",node_id="1"} 0
+# HELP storage_secondary_cache_write_back_failures The number of times writing a cache block to the secondary cache failed
+# TYPE storage_secondary_cache_write_back_failures gauge
+storage_secondary_cache_write_back_failures{store="1",node_id="1"} 0
+# HELP storage_ingest_count Number of successful ingestions performed
+# TYPE storage_ingest_count gauge
+storage_ingest_count{store="1",node_id="1"} 0
+# HELP storage_iterator_block_load_cached_bytes Bytes loaded by storage engine iterators from the block cache. See storage.AggregatedIteratorStats for details.
+# TYPE storage_iterator_block_load_cached_bytes gauge
+storage_iterator_block_load_cached_bytes{store="1",node_id="1"} 0
+# HELP storage_l3_level_score Compaction score of level 3
+# TYPE storage_l3_level_score gauge
+storage_l3_level_score{store="1",node_id="1"} 0
+# HELP storage_l0_level_size Size of the SSTables in level 0
+# TYPE storage_l0_level_size gauge
+storage_l0_level_size{store="1",node_id="1"} 0
+# HELP storage_l1_level_size Size of the SSTables in level 1
+# TYPE storage_l1_level_size gauge
+storage_l1_level_size{store="1",node_id="1"} 0
+# HELP storage_wal_bytes_written The number of bytes the storage engine has written to the WAL
+# TYPE storage_wal_bytes_written gauge
+storage_wal_bytes_written{store="1",node_id="1"} 3.638959e+06
+# HELP storage_l1_level_score Compaction score of level 1
+# TYPE storage_l1_level_score gauge
+storage_l1_level_score{store="1",node_id="1"} 0
+# HELP storage_l2_level_score Compaction score of level 2
+# TYPE storage_l2_level_score gauge
+storage_l2_level_score{store="1",node_id="1"} 0
+# HELP storage_batch_commit_count Count of batch commits. See storage.AggregatedBatchCommitStats for details.
+# TYPE storage_batch_commit_count gauge
+storage_batch_commit_count{store="1",node_id="1"} 2618
+# HELP storage_shared_storage_read Bytes read from shared storage
+# TYPE storage_shared_storage_read gauge
+storage_shared_storage_read{store="1",node_id="1"} 0
+# HELP storage_iterator_external_steps Cumulative count of steps performed on storage engine iterators. See storage.AggregatedIteratorStats for details.
+# TYPE storage_iterator_external_steps gauge
+storage_iterator_external_steps{store="1",node_id="1"} 11454
+# HELP storage_compactions_keys_pinned_bytes Cumulative size of storage engine KVs written to sstables during flushes and compactions due to open LSM snapshots.\n\nVarious subsystems of CockroachDB take LSM snapshots to maintain a consistent view\nof the database over an extended duration. In order to maintain the consistent view,\nflushes and compactions within the storage engine must preserve keys that otherwise\nwould have been dropped. This increases write amplification, and introduces keys\nthat must be skipped during iteration. This metric records the cumulative number of\nbytes preserved during flushes and compactions over the lifetime of the process.\n
+# TYPE storage_compactions_keys_pinned_bytes gauge
+storage_compactions_keys_pinned_bytes{store="1",node_id="1"} 0
+# HELP storage_l2_bytes_ingested Number of bytes ingested directly into Level 2
+# TYPE storage_l2_bytes_ingested gauge
+storage_l2_bytes_ingested{store="1",node_id="1"} 0
+# HELP storage_iterator_block_load_bytes Bytes loaded by storage engine iterators (possibly cached). See storage.AggregatedIteratorStats for details.
+# TYPE storage_iterator_block_load_bytes gauge
+storage_iterator_block_load_bytes{store="1",node_id="1"} 0
+# HELP storage_write_stall_nanos Total write stall duration in nanos
+# TYPE storage_write_stall_nanos gauge
+storage_write_stall_nanos{store="1",node_id="1"} 0
+# HELP storage_l0_level_score Compaction score of level 0
+# TYPE storage_l0_level_score gauge
+storage_l0_level_score{store="1",node_id="1"} 0
+# HELP storage_batch_commit_duration Cumulative time spent in batch commit. See storage.AggregatedBatchCommitStats for details.
+# TYPE storage_batch_commit_duration gauge
+storage_batch_commit_duration{store="1",node_id="1"} 5.72314771e+08
+# HELP storage_flush_ingest_table_count Tables ingested via flushes (flushable ingestions)
+# TYPE storage_flush_ingest_table_count gauge
+storage_flush_ingest_table_count{store="1",node_id="1"} 0
+# HELP storage_disk_stalled Number of instances of disk operations taking longer than 20s
+# TYPE storage_disk_stalled gauge
+storage_disk_stalled{store="1",node_id="1"} 0
+# HELP storage_l5_bytes_ingested Number of bytes ingested directly into Level 5
+# TYPE storage_l5_bytes_ingested gauge
+storage_l5_bytes_ingested{store="1",node_id="1"} 0
+# HELP storage_secondary_cache_evictions The number of times a cache block was evicted from the secondary cache
+# TYPE storage_secondary_cache_evictions gauge
+storage_secondary_cache_evictions{store="1",node_id="1"} 0
+# HELP storage_secondary_cache_reads_no_hit The number of reads where no data returned was read from the secondary cache
+# TYPE storage_secondary_cache_reads_no_hit gauge
+storage_secondary_cache_reads_no_hit{store="1",node_id="1"} 0
+# HELP storage_write_stalls Number of instances of intentional write stalls to backpressure incoming writes
+# TYPE storage_write_stalls gauge
+storage_write_stalls{store="1",node_id="1"} 0
+# HELP storage_queue_store_failures Number of replicas which failed processing in replica queues due to retryable store errors
+# TYPE storage_queue_store_failures counter
+storage_queue_store_failures{store="1",node_id="1"} 0
+# HELP storage_l4_level_size Size of the SSTables in level 4
+# TYPE storage_l4_level_size gauge
+storage_l4_level_size{store="1",node_id="1"} 0
+# HELP storage_iterator_external_seeks Cumulative count of seeks performed on storage engine iterators. See storage.AggregatedIteratorStats for details.
+# TYPE storage_iterator_external_seeks gauge
+storage_iterator_external_seeks{store="1",node_id="1"} 14493
+# HELP storage_secondary_cache_reads_total The number of reads from the secondary cache
+# TYPE storage_secondary_cache_reads_total gauge
+storage_secondary_cache_reads_total{store="1",node_id="1"} 0
+# HELP storage_secondary_cache_reads_full_hit The number of reads where all data returned was read from the secondary cache
+# TYPE storage_secondary_cache_reads_full_hit gauge
+storage_secondary_cache_reads_full_hit{store="1",node_id="1"} 0
+# HELP storage_flush_ingest_count Flushes performing an ingest (flushable ingestions)
+# TYPE storage_flush_ingest_count gauge
+storage_flush_ingest_count{store="1",node_id="1"} 0
+# HELP storage_l4_level_score Compaction score of level 4
+# TYPE storage_l4_level_score gauge
+storage_l4_level_score{store="1",node_id="1"} 0
+# HELP storage_flush_utilization The percentage of time the storage engine is actively flushing memtables to disk.
+# TYPE storage_flush_utilization gauge
+storage_flush_utilization{store="1",node_id="1"} 0
+# HELP storage_iterator_block_load_read_duration Cumulative time storage engine iterators spent loading blocks from durable storage. See storage.AggregatedIteratorStats for details.
+# TYPE storage_iterator_block_load_read_duration gauge
+storage_iterator_block_load_read_duration{store="1",node_id="1"} 0
+# HELP storage_compactions_keys_pinned_count Cumulative count of storage engine KVs written to sstables during flushes and compactions due to open LSM snapshots.\n\nVarious subsystems of CockroachDB take LSM snapshots to maintain a consistent view\nof the database over an extended duration. In order to maintain the consistent view,\nflushes and compactions within the storage engine must preserve keys that otherwise\nwould have been dropped. This increases write amplification, and introduces keys\nthat must be skipped during iteration. This metric records the cumulative count of\nKVs preserved during flushes and compactions over the lifetime of the process.\n
+# TYPE storage_compactions_keys_pinned_count gauge
+storage_compactions_keys_pinned_count{store="1",node_id="1"} 0
+# HELP storage_keys_tombstone_count Approximate count of DEL, SINGLEDEL and RANGEDEL internal keys across the storage engine.
+# TYPE storage_keys_tombstone_count gauge
+storage_keys_tombstone_count{store="1",node_id="1"} 0
+# HELP storage_compactions_duration Cumulative sum of all compaction durations.\n\nThe rate of this value provides the effective compaction concurrency of a store,\nwhich can be useful to determine whether the maximum compaction concurrency is\nfully utilized.
+# TYPE storage_compactions_duration gauge
+storage_compactions_duration{store="1",node_id="1"} 0
+# HELP storage_batch_commit_wal_queue_wait_duration Cumulative time spent waiting for memory blocks in the WAL queue, for batch commit. See storage.AggregatedBatchCommitStats for details.
+# TYPE storage_batch_commit_wal_queue_wait_duration gauge
+storage_batch_commit_wal_queue_wait_duration{store="1",node_id="1"} 0
+# HELP storage_marked_for_compaction_files Count of SSTables marked for compaction
+# TYPE storage_marked_for_compaction_files gauge
+storage_marked_for_compaction_files{store="1",node_id="1"} 0
+# HELP storage_l1_bytes_ingested Number of bytes ingested directly into Level 1
+# TYPE storage_l1_bytes_ingested gauge
+storage_l1_bytes_ingested{store="1",node_id="1"} 0
+# HELP storage_secondary_cache_reads_multi_block The number of secondary cache reads that require reading data from 2+ cache blocks
+# TYPE storage_secondary_cache_reads_multi_block gauge
+storage_secondary_cache_reads_multi_block{store="1",node_id="1"} 0
+# HELP storage_secondary_cache_reads_multi_shard The number of secondary cache reads that require reading data from 2+ shards
+# TYPE storage_secondary_cache_reads_multi_shard gauge
+storage_secondary_cache_reads_multi_shard{store="1",node_id="1"} 0
+# HELP storage_iterator_internal_steps Cumulative count of steps performed internally within storage engine iterators.\n\nA value high relative to 'storage.iterator.external.steps'\nis a good indication that there's an accumulation of garbage\ninternally within the storage engine.\n\nSee storage.AggregatedIteratorStats for more details.
+# TYPE storage_iterator_internal_steps gauge
+storage_iterator_internal_steps{store="1",node_id="1"} 36919
+# HELP storage_wal_fsync_latency The write ahead log fsync latency
+# TYPE storage_wal_fsync_latency histogram
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="0"} 0
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="100000"} 0
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="200000"} 0
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="300000"} 141
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="400000"} 575
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="500000"} 755
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="600000"} 805
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="700000"} 824
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="800000"} 841
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="900000"} 851
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1e+06"} 857
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.1e+06"} 869
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.2e+06"} 882
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.3e+06"} 890
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.4e+06"} 892
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.5e+06"} 905
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.6e+06"} 910
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.7e+06"} 915
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.8e+06"} 920
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.9e+06"} 923
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2e+06"} 928
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.1e+06"} 930
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.2e+06"} 937
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.3e+06"} 940
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.4e+06"} 943
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.5e+06"} 943
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.6e+06"} 945
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.7e+06"} 946
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.8e+06"} 951
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.9e+06"} 954
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3e+06"} 956
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.1e+06"} 958
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.2e+06"} 959
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.3e+06"} 959
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.4e+06"} 959
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.5e+06"} 959
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.6e+06"} 959
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.7e+06"} 961
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.8e+06"} 961
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.9e+06"} 961
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4e+06"} 962
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.1e+06"} 962
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.2e+06"} 964
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.3e+06"} 965
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.4e+06"} 966
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.5e+06"} 968
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.6e+06"} 968
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.7e+06"} 968
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.8e+06"} 968
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.9e+06"} 968
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="5e+06"} 968
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="5.83899311868826e+06"} 971
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="6.818768128017771e+06"} 972
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="7.96294803548532e+06"} 973
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="9.299119756734196e+06"} 974
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.0859499253885806e+07"} 976
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.2681708283167902e+07"} 977
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.480968147972586e+07"} 978
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.729472565001685e+07"} 978
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.019675681200995e+07"} 978
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.3585744809029274e+07"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.7543400327811852e+07"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.216514499587388e+07"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.7562412058503546e+07"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.386533310618702e+07"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="5.1225875631198876e+07"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="5.982150706187017e+07"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="6.985947361676422e+07"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="8.158179714469407e+07"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="9.527111042761806e+07"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.1125747163933024e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.299263222609407e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.5172778032362124e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.771874930446937e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.0691931052111807e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.4164008605130553e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.821869599305625e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.295375434436228e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.848334897033495e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.494080196437294e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="5.248180668366109e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="6.128818161644493e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="7.157225414306766e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="8.358197988607587e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="9.760692108022752e+08"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.1398522810475934e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.3311179250716026e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.5544776809311366e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="1.8153168964222786e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.1199245732896428e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.4756449991152744e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="2.8910548228298182e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.376169843250763e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="3.9426864964528055e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="4.604263864386612e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="5.376853004155689e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="6.279081538292673e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="7.332702778754684e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="8.563120213306977e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="9.999999999999958e+09"} 979
+storage_wal_fsync_latency_bucket{store="1",node_id="1",le="+Inf"} 979
+storage_wal_fsync_latency_sum{store="1",node_id="1"} 6.56158715e+08
+storage_wal_fsync_latency_count{store="1",node_id="1"} 979
+# HELP storage_batch_commit_sem_wait_duration Cumulative time spent in semaphore wait, for batch commit. See storage.AggregatedBatchCommitStats for details.
+# TYPE storage_batch_commit_sem_wait_duration gauge
+storage_batch_commit_sem_wait_duration{store="1",node_id="1"} 542052
+# HELP storage_l2_level_size Size of the SSTables in level 2
+# TYPE storage_l2_level_size gauge
+storage_l2_level_size{store="1",node_id="1"} 0
+# HELP storage_checkpoints The number of checkpoint directories found in storage.\n\nThis is the number of directories found in the auxiliary/checkpoints directory.\nEach represents an immutable point-in-time storage engine checkpoint. They are\ncheap (consisting mostly of hard links), but over time they effectively become a\nfull copy of the old state, which increases their relative cost. Checkpoints\nmust be deleted once acted upon (e.g. copied elsewhere or investigated).\n\nA likely cause of having a checkpoint is that one of the ranges in this store\nhad inconsistent data among its replicas. Such checkpoint directories are\nlocated in auxiliary/checkpoints/rN_at_M, where N is the range ID, and M is the\nRaft applied index at which this checkpoint was taken.
+# TYPE storage_checkpoints gauge
+storage_checkpoints{store="1",node_id="1"} 0
+# HELP storage_secondary_cache_count The count of cache blocks in the secondary cache (not sstable blocks)
+# TYPE storage_secondary_cache_count gauge
+storage_secondary_cache_count{store="1",node_id="1"} 0
+# HELP sys_host_disk_read_count Disk read operations across all disks since this process started
+# TYPE sys_host_disk_read_count gauge
+sys_host_disk_read_count{node_id="1"} 3
+# HELP sys_host_disk_io_time Time spent reading from or writing to all disks since this process started
+# TYPE sys_host_disk_io_time gauge
+sys_host_disk_io_time{node_id="1"} 1.103e+09
+# HELP sys_cpu_sys_percent Current system cpu percentage consumed by the CRDB process
+# TYPE sys_cpu_sys_percent gauge
+sys_cpu_sys_percent{node_id="1"} 0.016997704618069983
+# HELP sys_host_net_recv_packets Packets received on all network interfaces since this process started
+# TYPE sys_host_net_recv_packets gauge
+sys_host_net_recv_packets{node_id="1"} 329
+# HELP sys_uptime Process uptime
+# TYPE sys_uptime gauge
+sys_uptime{node_id="1"} 30
+# HELP sys_host_disk_write_bytes Bytes written to all disks since this process started
+# TYPE sys_host_disk_write_bytes gauge
+sys_host_disk_write_bytes{node_id="1"} 3.3910784e+07
+# HELP sys_cpu_user_percent Current user cpu percentage consumed by the CRDB process
+# TYPE sys_cpu_user_percent gauge
+sys_cpu_user_percent{node_id="1"} 0.07299014335994758
+# HELP sys_runnable_goroutines_per_cpu Average number of goroutines that are waiting to run, normalized by number of cores
+# TYPE sys_runnable_goroutines_per_cpu gauge
+sys_runnable_goroutines_per_cpu{node_id="1"} 0
+# HELP sys_cpu_host_combined_percent_normalized Current user+system cpu percentage across the whole machine, normalized 0-1 by number of cores
+# TYPE sys_cpu_host_combined_percent_normalized gauge
+sys_cpu_host_combined_percent_normalized{node_id="1"} 0.015997839640536454
+# HELP sys_host_net_recv_err Error receiving packets on all network interfaces since this process started (as reported by the OS)
+# TYPE sys_host_net_recv_err gauge
+sys_host_net_recv_err{node_id="1"} 0
+# HELP sys_gc_pause_percent Current GC pause percentage
+# TYPE sys_gc_pause_percent gauge
+sys_gc_pause_percent{node_id="1"} 1.7726806159687433e-05
+# HELP sys_cgocalls Total number of cgo calls
+# TYPE sys_cgocalls gauge
+sys_cgocalls{node_id="1"} 129
+# HELP sys_host_disk_iopsinprogress IO operations currently in progress on this host
+# TYPE sys_host_disk_iopsinprogress gauge
+sys_host_disk_iopsinprogress{node_id="1"} 0
+# HELP sys_fd_softlimit Process open FD soft limit
+# TYPE sys_fd_softlimit gauge
+sys_fd_softlimit{node_id="1"} 1.048576e+06
+# HELP sys_host_net_recv_drop Receiving packets that got dropped on all network interfaces since this process started (as reported by the OS)
+# TYPE sys_host_net_recv_drop gauge
+sys_host_net_recv_drop{node_id="1"} 0
+# HELP sys_go_allocbytes Current bytes of memory allocated by go
+# TYPE sys_go_allocbytes gauge
+sys_go_allocbytes{node_id="1"} 1.32509616e+08
+# HELP sys_cgo_allocbytes Current bytes of memory allocated by cgo
+# TYPE sys_cgo_allocbytes gauge
+sys_cgo_allocbytes{node_id="1"} 1.0138496e+07
+# HELP sys_host_net_send_packets Packets sent on all network interfaces since this process started
+# TYPE sys_host_net_send_packets gauge
+sys_host_net_send_packets{node_id="1"} 374
+# HELP sys_host_disk_read_time Time spent reading from all disks since this process started
+# TYPE sys_host_disk_read_time gauge
+sys_host_disk_read_time{node_id="1"} 1e+06
+# HELP sys_totalmem Total memory (both free and used)
+# TYPE sys_totalmem gauge
+sys_totalmem{node_id="1"} 3.3616191488e+10
+# HELP sys_rss Current process RSS
+# TYPE sys_rss gauge
+sys_rss{node_id="1"} 3.25173248e+08
+# HELP sys_host_net_send_err Error on sending packets on all network interfaces since this process started (as reported by the OS)
+# TYPE sys_host_net_send_err gauge
+sys_host_net_send_err{node_id="1"} 0
+# HELP sys_gc_pause_ns Total GC pause
+# TYPE sys_gc_pause_ns gauge
+sys_gc_pause_ns{node_id="1"} 2.873374e+06
+# HELP sys_cpu_now_ns The time when CPU measurements were taken, as nanoseconds since epoch
+# TYPE sys_cpu_now_ns gauge
+sys_cpu_now_ns{node_id="1"} 1.7104276943727785e+18
+# HELP sys_cpu_user_ns Total user cpu time consumed by the CRDB process
+# TYPE sys_cpu_user_ns gauge
+sys_cpu_user_ns{node_id="1"} 2.48e+09
+# HELP sys_host_net_send_drop Sending packets that got dropped on all network interfaces since this process started (as reported by the OS)
+# TYPE sys_host_net_send_drop gauge
+sys_host_net_send_drop{node_id="1"} 0
+# HELP sys_host_disk_write_count Disk write operations across all disks since this process started
+# TYPE sys_host_disk_write_count gauge
+sys_host_disk_write_count{node_id="1"} 3626
+# HELP sys_host_net_send_bytes Bytes sent on all network interfaces since this process started
+# TYPE sys_host_net_send_bytes gauge
+sys_host_net_send_bytes{node_id="1"} 1.610123e+06
+# HELP sys_go_totalbytes Total bytes of memory allocated by go, but not released
+# TYPE sys_go_totalbytes gauge
+sys_go_totalbytes{node_id="1"} 1.96300072e+08
+# HELP sys_gc_count Total number of GC runs
+# TYPE sys_gc_count gauge
+sys_gc_count{node_id="1"} 11
+# HELP sys_fd_open Process open file descriptors
+# TYPE sys_fd_open gauge
+sys_fd_open{node_id="1"} 35
+# HELP sys_cgo_totalbytes Total bytes of memory allocated by cgo, but not released
+# TYPE sys_cgo_totalbytes gauge
+sys_cgo_totalbytes{node_id="1"} 1.9267584e+07
+# HELP sys_cpu_combined_percent_normalized Current user+system cpu percentage consumed by the CRDB process, normalized 0-1 by number of cores
+# TYPE sys_cpu_combined_percent_normalized gauge
+sys_cpu_combined_percent_normalized{node_id="1"} 0.012855406854002509
+# HELP sys_host_net_recv_bytes Bytes received on all network interfaces since this process started
+# TYPE sys_host_net_recv_bytes gauge
+sys_host_net_recv_bytes{node_id="1"} 41413
+# HELP sys_host_disk_write_time Time spent writing to all disks since this process started
+# TYPE sys_host_disk_write_time gauge
+sys_host_disk_write_time{node_id="1"} 1.011e+09
+# HELP sys_host_disk_weightedio_time Weighted time spent reading from or writing to to all disks since this process started
+# TYPE sys_host_disk_weightedio_time gauge
+sys_host_disk_weightedio_time{node_id="1"} 1.284e+09
+# HELP sys_goroutines Current number of goroutines
+# TYPE sys_goroutines gauge
+sys_goroutines{node_id="1"} 409
+# HELP sys_host_disk_read_bytes Bytes read from all disks since this process started
+# TYPE sys_host_disk_read_bytes gauge
+sys_host_disk_read_bytes{node_id="1"} 270336
+# HELP sys_cpu_sys_ns Total system cpu time consumed by the CRDB process
+# TYPE sys_cpu_sys_ns gauge
+sys_cpu_sys_ns{node_id="1"} 7.1e+08
+# HELP tenant_consumption_sql_pods_cpu_seconds Total amount of CPU used by SQL pods
+# TYPE tenant_consumption_sql_pods_cpu_seconds gauge
+tenant_consumption_sql_pods_cpu_seconds{node_id="1"} 0
+# HELP tenant_consumption_write_requests Total number of KV write requests
+# TYPE tenant_consumption_write_requests gauge
+tenant_consumption_write_requests{node_id="1"} 0
+# HELP tenant_consumption_write_batches Total number of KV write batches
+# TYPE tenant_consumption_write_batches gauge
+tenant_consumption_write_batches{node_id="1"} 0
+# HELP tenant_consumption_read_bytes Total number of bytes read from KV
+# TYPE tenant_consumption_read_bytes gauge
+tenant_consumption_read_bytes{node_id="1"} 0
+# HELP tenant_consumption_cross_region_network_ru Total number of RUs charged for cross-region network traffic
+# TYPE tenant_consumption_cross_region_network_ru counter
+tenant_consumption_cross_region_network_ru{node_id="1"} 0
+# HELP tenant_consumption_write_bytes Total number of bytes written to KV
+# TYPE tenant_consumption_write_bytes gauge
+tenant_consumption_write_bytes{node_id="1"} 0
+# HELP tenant_consumption_read_requests Total number of KV read requests
+# TYPE tenant_consumption_read_requests gauge
+tenant_consumption_read_requests{node_id="1"} 0
+# HELP tenant_consumption_request_units Total RU consumption
+# TYPE tenant_consumption_request_units counter
+tenant_consumption_request_units{node_id="1"} 0
+# HELP tenant_consumption_external_io_ingress_bytes Total number of bytes read from external services such as cloud storage providers
+# TYPE tenant_consumption_external_io_ingress_bytes gauge
+tenant_consumption_external_io_ingress_bytes{node_id="1"} 0
+# HELP tenant_consumption_kv_request_units RU consumption attributable to KV
+# TYPE tenant_consumption_kv_request_units counter
+tenant_consumption_kv_request_units{node_id="1"} 0
+# HELP tenant_consumption_external_io_egress_bytes Total number of bytes written to external services such as cloud storage providers
+# TYPE tenant_consumption_external_io_egress_bytes gauge
+tenant_consumption_external_io_egress_bytes{node_id="1"} 0
+# HELP tenant_consumption_read_batches Total number of KV read batches
+# TYPE tenant_consumption_read_batches gauge
+tenant_consumption_read_batches{node_id="1"} 0
+# HELP tenant_consumption_pgwire_egress_bytes Total number of bytes transferred from a SQL pod to the client
+# TYPE tenant_consumption_pgwire_egress_bytes gauge
+tenant_consumption_pgwire_egress_bytes{node_id="1"} 0
+# HELP txn_commit_waits_before_commit_trigger Number of KV transactions that had to commit-wait on the server before committing because they had a commit trigger
+# TYPE txn_commit_waits_before_commit_trigger counter
+txn_commit_waits_before_commit_trigger{store="1",node_id="1"} 0
+# HELP txn_restarts_writetoooldmulti Number of restarts due to multiple concurrent writers committing first
+# TYPE txn_restarts_writetoooldmulti counter
+txn_restarts_writetoooldmulti{node_id="1"} 0
+# HELP txn_restarts_txnaborted Number of restarts due to an abort by a concurrent transaction (usually due to deadlock)
+# TYPE txn_restarts_txnaborted counter
+txn_restarts_txnaborted{node_id="1"} 0
+# HELP txn_restarts_commitdeadlineexceeded Number of restarts due to a transaction exceeding its deadline
+# TYPE txn_restarts_commitdeadlineexceeded counter
+txn_restarts_commitdeadlineexceeded{node_id="1"} 0
+# HELP txn_rollbacks_async_failed Number of KV transaction that failed to send abort asynchronously which is not always retried
+# TYPE txn_rollbacks_async_failed counter
+txn_rollbacks_async_failed{node_id="1"} 0
+# HELP txn_refresh_fail_with_condensed_spans Number of failed client-side refreshes for transactions whose read tracking lost fidelity because of condensing. Such a failure could be a false conflict. Failures counted here are also counted in txn.refresh.fail, and the respective transactions are also counted in txn.refresh.memory_limit_exceeded.
+# TYPE txn_refresh_fail_with_condensed_spans counter
+txn_refresh_fail_with_condensed_spans{node_id="1"} 0
+# HELP txn_restarts_serializable Number of restarts due to a forwarded commit timestamp and isolation=SERIALIZABLE
+# TYPE txn_restarts_serializable counter
+txn_restarts_serializable{node_id="1"} 1
+# HELP txn_refresh_success Number of successful client-side transaction refreshes. A refresh may be preemptive or reactive. A reactive refresh is performed after a request throws an error because a refresh is needed for it to succeed. In these cases, the request will be re-issued as an auto-retry (see txn.refresh.auto_retries) after the refresh succeeds.
+# TYPE txn_refresh_success counter
+txn_refresh_success{node_id="1"} 0
+# HELP txn_server_side_retry_write_evaluation_success Number of write batches that were successfully refreshed server side
+# TYPE txn_server_side_retry_write_evaluation_success counter
+txn_server_side_retry_write_evaluation_success{store="1",node_id="1"} 0
+# HELP txn_parallelcommits Number of KV transaction parallel commit attempts
+# TYPE txn_parallelcommits counter
+txn_parallelcommits{node_id="1"} 140
+# HELP txn_restarts Number of restarted KV transactions
+# TYPE txn_restarts histogram
+txn_restarts_bucket{node_id="1",le="1"} 1
+txn_restarts_bucket{node_id="1",le="2"} 1
+txn_restarts_bucket{node_id="1",le="4"} 1
+txn_restarts_bucket{node_id="1",le="8"} 1
+txn_restarts_bucket{node_id="1",le="16"} 1
+txn_restarts_bucket{node_id="1",le="32"} 1
+txn_restarts_bucket{node_id="1",le="64"} 1
+txn_restarts_bucket{node_id="1",le="128"} 1
+txn_restarts_bucket{node_id="1",le="256"} 1
+txn_restarts_bucket{node_id="1",le="512"} 1
+txn_restarts_bucket{node_id="1",le="1024"} 1
+txn_restarts_bucket{node_id="1",le="+Inf"} 1
+txn_restarts_sum{node_id="1"} 1
+txn_restarts_count{node_id="1"} 1
+# HELP txn_condensed_intent_spans KV transactions that have exceeded their intent tracking memory budget (kv.transaction.max_intents_bytes). See also txn.condensed_intent_spans_gauge for a gauge of such transactions currently running.
+# TYPE txn_condensed_intent_spans counter
+txn_condensed_intent_spans{node_id="1"} 0
+# HELP txn_restarts_txnpush Number of restarts due to a transaction push failure
+# TYPE txn_restarts_txnpush counter
+txn_restarts_txnpush{node_id="1"} 0
+# HELP txn_restarts_writetooold Number of restarts due to a concurrent writer committing first
+# TYPE txn_restarts_writetooold counter
+txn_restarts_writetooold{node_id="1"} 0
+# HELP txn_durations KV transaction durations
+# TYPE txn_durations histogram
+txn_durations_bucket{node_id="1",le="10000"} 0
+txn_durations_bucket{node_id="1",le="12638.482029342978"} 0
+txn_durations_bucket{node_id="1",le="15973.122800602541"} 0
+txn_durations_bucket{node_id="1",le="20187.602546790382"} 3
+txn_durations_bucket{node_id="1",le="25514.065200312878"} 3
+txn_durations_bucket{node_id="1",le="32245.90545296394"} 3
+txn_durations_bucket{node_id="1",le="40753.92965871775"} 7
+txn_durations_bucket{node_id="1",le="51506.78076168121"} 8
+txn_durations_bucket{node_id="1",le="65096.75230458167"} 8
+txn_durations_bucket{node_id="1",le="82272.41341700466"} 13
+txn_durations_bucket{node_id="1",le="103979.84184814895"} 15
+txn_durations_bucket{node_id="1",le="131414.73626117557"} 39
+txn_durations_bucket{node_id="1",le="166088.27826277143"} 53
+txn_durations_bucket{node_id="1",le="209910.3720108553"} 61
+txn_durations_bucket{node_id="1",le="265294.8464431894"} 72
+txn_durations_bucket{node_id="1",le="335292.41492495546"} 74
+txn_durations_bucket{node_id="1",le="423758.7160604059"} 75
+txn_durations_bucket{node_id="1",le="535566.6917706894"} 84
+txn_durations_bucket{node_id="1",le="676875.0009458527"} 96
+txn_durations_bucket{node_id="1",le="855467.2535565672"} 106
+txn_durations_bucket{node_id="1",le="1.0811807510766068e+06"} 130
+txn_durations_bucket{node_id="1",le="1.3664483492953242e+06"} 150
+txn_durations_bucket{node_id="1",le="1.7269832906594332e+06"} 170
+txn_durations_bucket{node_id="1",le="2.182644728397485e+06"} 183
+txn_durations_bucket{node_id="1",le="2.7585316176291797e+06"} 199
+txn_durations_bucket{node_id="1",le="3.4863652276780806e+06"} 218
+txn_durations_bucket{node_id="1",le="4.406236427773566e+06"} 236
+txn_durations_bucket{node_id="1",le="5.568813990945262e+06"} 250
+txn_durations_bucket{node_id="1",le="7.038135554931545e+06"} 279
+txn_durations_bucket{node_id="1",le="8.89513497310822e+06"} 300
+txn_durations_bucket{node_id="1",le="1.1242100350620849e+07"} 305
+txn_durations_bucket{node_id="1",le="1.4208308325339198e+07"} 308
+txn_durations_bucket{node_id="1",le="1.795714494371637e+07"} 312
+txn_durations_bucket{node_id="1",le="2.269510536694665e+07"} 315
+txn_durations_bucket{node_id="1",le="2.868316813342006e+07"} 316
+txn_durations_bucket{node_id="1",le="3.625117049988527e+07"} 318
+txn_durations_bucket{node_id="1",le="4.581597669054482e+07"} 318
+txn_durations_bucket{node_id="1",le="5.790443980602476e+07"} 319
+txn_durations_bucket{node_id="1",le="7.318242219076161e+07"} 319
+txn_durations_bucket{node_id="1",le="9.249147277217315e+07"} 319
+txn_durations_bucket{node_id="1",le="1.1689518164985757e+08"} 319
+txn_durations_bucket{node_id="1",le="1.4773776525985083e+08"} 319
+txn_durations_bucket{node_id="1",le="1.8671810912919158e+08"} 319
+txn_durations_bucket{node_id="1",le="2.359833466782189e+08"} 319
+txn_durations_bucket{node_id="1",le="2.9824712862168837e+08"} 319
+txn_durations_bucket{node_id="1",le="3.769390975388353e+08"} 319
+txn_durations_bucket{node_id="1",le="4.7639380104013294e+08"} 319
+txn_durations_bucket{node_id="1",le="6.020894493336115e+08"} 319
+txn_durations_bucket{node_id="1",le="7.609496685459859e+08"} 319
+txn_durations_bucket{node_id="1",le="9.61724871115294e+08"} 319
+txn_durations_bucket{node_id="1",le="1.2154742500762835e+09"} 319
+txn_durations_bucket{node_id="1",le="1.5361749466718242e+09"} 319
+txn_durations_bucket{node_id="1",le="1.941491945743876e+09"} 319
+txn_durations_bucket{node_id="1",le="2.453751106639811e+09"} 319
+txn_durations_bucket{node_id="1",le="3.10116892657477e+09"} 319
+txn_durations_bucket{node_id="1",le="3.919406774847209e+09"} 319
+txn_durations_bucket{node_id="1",le="4.953535208959157e+09"} 319
+txn_durations_bucket{node_id="1",le="6.260516572014802e+09"} 319
+txn_durations_bucket{node_id="1",le="7.912342618981298e+09"} 319
+txn_durations_bucket{node_id="1",le="9.99999999999997e+09"} 319
+txn_durations_bucket{node_id="1",le="+Inf"} 319
+txn_durations_sum{node_id="1"} 1.076326031e+09
+txn_durations_count{node_id="1"} 319
+# HELP txn_restarts_asyncwritefailure Number of restarts due to async consensus writes that failed to leave intents
+# TYPE txn_restarts_asyncwritefailure counter
+txn_restarts_asyncwritefailure{node_id="1"} 0
+# HELP txn_refresh_success_server_side Number of successful server-side transaction refreshes
+# TYPE txn_refresh_success_server_side counter
+txn_refresh_success_server_side{node_id="1"} 0
+# HELP txn_aborts Number of aborted KV transactions
+# TYPE txn_aborts counter
+txn_aborts{node_id="1"} 1
+# HELP txn_server_side_retry_uncertainty_interval_error_failure Number of batches that ran into uncertainty interval errors that were not successfully refreshed server side
+# TYPE txn_server_side_retry_uncertainty_interval_error_failure counter
+txn_server_side_retry_uncertainty_interval_error_failure{store="1",node_id="1"} 0
+# HELP txn_server_side_retry_write_evaluation_failure Number of write batches that were not successfully refreshed server side
+# TYPE txn_server_side_retry_write_evaluation_failure counter
+txn_server_side_retry_write_evaluation_failure{store="1",node_id="1"} 1
+# HELP txn_refresh_memory_limit_exceeded Number of transaction which exceed the refresh span bytes limit, causing their read spans to be condensed
+# TYPE txn_refresh_memory_limit_exceeded counter
+txn_refresh_memory_limit_exceeded{node_id="1"} 0
+# HELP txn_condensed_intent_spans_rejected KV transactions that have been aborted because they exceeded their intent tracking memory budget (kv.transaction.max_intents_bytes). Rejection is caused by kv.transaction.reject_over_max_intents_budget.
+# TYPE txn_condensed_intent_spans_rejected counter
+txn_condensed_intent_spans_rejected{node_id="1"} 0
+# HELP txn_server_side_1PC_success Number of batches that attempted to commit using 1PC and succeeded
+# TYPE txn_server_side_1PC_success counter
+txn_server_side_1PC_success{store="1",node_id="1"} 45
+# HELP txn_parallelcommits_auto_retries Number of commit tries after successful failed parallel commit attempts
+# TYPE txn_parallelcommits_auto_retries counter
+txn_parallelcommits_auto_retries{node_id="1"} 0
+# HELP txn_refresh_fail Number of failed client-side transaction refreshes
+# TYPE txn_refresh_fail counter
+txn_refresh_fail{node_id="1"} 1
+# HELP txn_server_side_1PC_failure Number of batches that attempted to commit using 1PC and failed
+# TYPE txn_server_side_1PC_failure counter
+txn_server_side_1PC_failure{store="1",node_id="1"} 0
+# HELP txn_server_side_retry_uncertainty_interval_error_success Number of batches that ran into uncertainty interval errors that were successfully refreshed server side
+# TYPE txn_server_side_retry_uncertainty_interval_error_success counter
+txn_server_side_retry_uncertainty_interval_error_success{store="1",node_id="1"} 0
+# HELP txn_commits1PC Number of KV transaction one-phase commit attempts
+# TYPE txn_commits1PC counter
+txn_commits1PC{node_id="1"} 45
+# HELP txn_rollbacks_failed Number of KV transaction that failed to send final abort
+# TYPE txn_rollbacks_failed counter
+txn_rollbacks_failed{node_id="1"} 0
+# HELP txn_restarts_unknown Number of restarts due to a unknown reasons
+# TYPE txn_restarts_unknown counter
+txn_restarts_unknown{node_id="1"} 0
+# HELP txn_condensed_intent_spans_gauge KV transactions currently running that have exceeded their intent tracking memory budget (kv.transaction.max_intents_bytes). See also txn.condensed_intent_spans for a perpetual counter/rate.
+# TYPE txn_condensed_intent_spans_gauge gauge
+txn_condensed_intent_spans_gauge{node_id="1"} 0
+# HELP txn_restarts_readwithinuncertainty Number of restarts due to reading a new value within the uncertainty interval
+# TYPE txn_restarts_readwithinuncertainty counter
+txn_restarts_readwithinuncertainty{node_id="1"} 0
+# HELP txn_refresh_auto_retries Number of request retries after successful client-side refreshes
+# TYPE txn_refresh_auto_retries counter
+txn_refresh_auto_retries{node_id="1"} 0
+# HELP txn_server_side_retry_read_evaluation_failure Number of read batches that were not successfully refreshed server side
+# TYPE txn_server_side_retry_read_evaluation_failure counter
+txn_server_side_retry_read_evaluation_failure{store="1",node_id="1"} 43
+# HELP txn_commits Number of committed KV transactions (including 1PC)
+# TYPE txn_commits counter
+txn_commits{node_id="1"} 3093
+# HELP txn_commit_waits Number of KV transactions that had to commit-wait on commit in order to ensure linearizability. This generally happens to transactions writing to global ranges.
+# TYPE txn_commit_waits counter
+txn_commit_waits{node_id="1"} 0
+# HELP txn_server_side_retry_read_evaluation_success Number of read batches that were successfully refreshed server side
+# TYPE txn_server_side_retry_read_evaluation_success counter
+txn_server_side_retry_read_evaluation_success{store="1",node_id="1"} 0

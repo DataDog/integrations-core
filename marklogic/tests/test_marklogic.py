@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
+import re
+from typing import Any  # noqa: F401
 
 import mock
 import pytest
 from packaging import version
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.marklogic import MarklogicCheck
 
@@ -20,7 +21,12 @@ from .common import (
     assert_metrics,
     assert_service_checks,
 )
-from .metrics import RESOURCE_STATUS_DATABASE_METRICS, RESOURCE_STORAGE_FOREST_METRICS, STORAGE_HOST_METRICS
+from .metrics import (
+    OPTIONAL_METRICS,
+    RESOURCE_STATUS_DATABASE_METRICS,
+    RESOURCE_STORAGE_FOREST_METRICS,
+    STORAGE_HOST_METRICS,
+)
 
 
 @pytest.mark.integration
@@ -87,6 +93,9 @@ def test_check_with_filters(aggregator):
     ]:
         aggregator.assert_metric(metric, tags=COMMON_TAGS + ['server_name:Admin', 'group_name:Default'], count=1)
 
+    for metric in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
     aggregator.assert_all_metrics_covered()
 
     # Service checks
@@ -105,7 +114,14 @@ def test_metadata_integration(aggregator, datadog_agent):
     c.check_id = 'test:123'
     c.check(INSTANCE)
 
-    parsed_version = version.parse(MARKLOGIC_VERSION)
+    if MARKLOGIC_VERSION.startswith("10."):
+        expected_version = "10.0-10"
+    elif MARKLOGIC_VERSION.startswith("11."):
+        expected_version = "11.0-3"
+    else:
+        expected_version = MARKLOGIC_VERSION
+
+    parsed_version = version.parse(expected_version)
     version_metadata = {
         'version.scheme': 'marklogic',
         'version.major': str(parsed_version.major),
@@ -160,7 +176,7 @@ def test_submit_health_service_checks(aggregator, caplog):
             'marklogic.database.health',
             MarklogicCheck.UNKNOWN,
             tags=['foo:bar', 'database_name:Fab'],
-            message='UNKNOWN (unknown): No message.',
+            message=re.escape('UNKNOWN (unknown): No message.'),
             count=1,
         )
         aggregator.assert_service_check(

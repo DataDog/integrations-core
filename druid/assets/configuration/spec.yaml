@@ -9,11 +9,11 @@ files:
   - template: instances
     options:
     - name: url
-      description: url used to connect to the Druid instance.
+      description: coordinator url used to connect to the Druid instance.
       required: true
       value:
         type: string
-        example: <DRUID_INSTANCE_URL>
+        example: <DRUID_COORDINATOR_URL>
     - template: instances/http
     - template: instances/default
   - template: logs

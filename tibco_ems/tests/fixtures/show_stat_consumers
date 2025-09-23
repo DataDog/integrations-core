@@ -1,0 +1,4 @@
+Command: show stat consumers
+                                                     Total Count      Rate/Second
+User       Conn  T  Destination                      Msgs   Size      Msgs   Size
+admin         2  Q  $TMP$.tibemsd.1669EC51B3.1          1    2.4 Kb      0    0.6 Kb

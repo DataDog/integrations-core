@@ -1452,6 +1452,5 @@
     "layout_type": "ordered",
     "is_read_only": false,
     "notify_list": [],
-    "reflow_type": "fixed",
-    "id": "rpw-diq-3wa"
+    "reflow_type": "fixed"
 }

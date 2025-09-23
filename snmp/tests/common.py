@@ -11,7 +11,6 @@ import sys
 from collections import defaultdict
 
 import pytest
-from six import iteritems
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.common import get_docker_hostname, to_native_string
@@ -219,15 +218,17 @@ def generate_container_instance_config(metrics):
     }
 
 
-def generate_container_profile_config(profile):
+def generate_container_profile_config(community_string, profile=None):
     conf = copy.deepcopy(SNMP_CONF)
     conf['ip_address'] = get_container_ip(SNMP_CONTAINER_NAME)
 
     init_config = {}
 
     instance = generate_instance_config([], template=conf)
-    instance['community_string'] = profile
+    instance['community_string'] = community_string
     instance['enforce_mib_constraints'] = False
+    if profile is not None:
+        instance['profile'] = profile
     return {
         'init_config': init_config,
         'instances': [instance],
@@ -236,7 +237,7 @@ def generate_container_profile_config(profile):
 
 def generate_container_profile_config_with_ad(profile):
     host = socket.gethostbyname(get_container_ip(SNMP_CONTAINER_NAME))
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    network = ipaddress.ip_network('{}/29'.format(host), strict=False).with_prefixlen
     conf = {
         # Make sure the check handles bytes
         'network_address': to_native_string(network),
@@ -284,6 +285,13 @@ def assert_common_metrics(aggregator, tags=None, is_e2e=False, loader=None):
 
 
 def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False, loader=None):
+    if is_e2e and loader == 'core':
+        aggregator.assert_metric('snmp.device.reachable', metric_type=aggregator.GAUGE, tags=tags, at_least=1, value=1)
+        aggregator.assert_metric(
+            'snmp.device.unreachable', metric_type=aggregator.GAUGE, tags=tags, at_least=1, value=0
+        )
+        aggregator.assert_metric('snmp.interface.status', metric_type=aggregator.GAUGE, tags=tags, at_least=0, value=1)
+
     monotonic_type = aggregator.MONOTONIC_COUNT
     if is_e2e:
         monotonic_type = aggregator.COUNT
@@ -293,6 +301,11 @@ def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False, loader=
     aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, tags=tags)
     aggregator.assert_metric('datadog.snmp.check_interval', metric_type=monotonic_type, tags=tags)
     aggregator.assert_metric('datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags)
+    if loader == 'core':
+        # request_type tag can be get, getbulk, or getnext
+        aggregator.assert_metric_has_tag_prefix('datadog.snmp.requests', tag_prefix='request_type:get')
+        for tag in tags:
+            aggregator.assert_metric_has_tag('datadog.snmp.requests', tag)
 
 
 def assert_common_device_metrics(
@@ -327,7 +340,7 @@ def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
     """
     aggregator = dd_agent_check(*args, **kwargs)
     new_agg_metrics = defaultdict(list)
-    for metric_name, metric_list in iteritems(aggregator._metrics):
+    for metric_name, metric_list in aggregator._metrics.items():
         new_metrics = []
         for metric in metric_list:
             # metric is a Namedtuple, to modify namedtuple fields we need to use `._replace()`
@@ -337,3 +350,7 @@ def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
 
     aggregator._metrics = new_agg_metrics
     return aggregator
+
+
+def get_agent_hostname():
+    return socket.gethostname().lower()

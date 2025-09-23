@@ -25,7 +25,7 @@ JMX_METRICS = [
 ]
 JMX_METRICS.extend(JVM_E2E_METRICS_NEW)
 
-WEB_METRICS = [
+WEB_OLD_METRICS = [
     'sonarqube.complexity.cognitive_complexity',
     'sonarqube.complexity.complexity',
     'sonarqube.coverage.coverage',
@@ -64,4 +64,12 @@ WEB_METRICS = [
     'sonarqube.size.statements',
 ]
 
-ALL_METRICS = WEB_METRICS + JMX_METRICS
+WEB_NEW_METRICS = [
+    # This is an example of a metric with a 'periods' field.
+    'sonarqube.issues.new_blocker_violations',
+    # This is an example of a metric with a 'period' field.
+    'sonarqube.security.new_vulnerabilities',
+]
+WEB_METRICS = WEB_OLD_METRICS + WEB_NEW_METRICS
+
+ALL_METRICS = WEB_OLD_METRICS + JMX_METRICS

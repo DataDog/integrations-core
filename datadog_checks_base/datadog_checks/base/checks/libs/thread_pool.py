@@ -20,13 +20,12 @@
 # The methods of a Pool object use all these concepts and expose
 # them to their caller in a very simple way.
 
-# flake8: noqa
+# ruff: noqa
 
 import sys
 import threading
 import traceback
-
-from six.moves import queue, range
+import queue
 
 # Item pushed on the work queue to tell the worker threads to terminate
 SENTINEL = "QUIT"

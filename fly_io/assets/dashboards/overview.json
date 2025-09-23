@@ -1,0 +1,1362 @@
+{
+    "author_name": "Datadog",
+    "description": "**Fly.io**\n\nThis dashboard provides an overview of your [Fly.io](https://fly.io/) deployment, including the apps, machines, and volumes in your environment.\n\n**Useful Links**\n* [Integration Docs](https://docs.datadoghq.com/integrations/fly_io)\n* [Fly.io Docs](https://fly.io/docs/)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "fly_org",
+            "prefix": "fly_org"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "machine",
+            "prefix": "host"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "app_name",
+            "prefix": "app_name"
+        }
+    ],
+    "title": "Fly.io Overview ",
+    "widgets": [
+        {
+            "definition": {
+                "banner_img": "/static/images/logos/fly-io_large.svg",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "New group",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Fly.io**\n\nThis dashboard provides an overview of your [Fly.io](https://fly.io/) deployment, including the apps, machines, and volumes in your environment.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5478983280988798,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "white",
+                            "content": "**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/fly_io)\n* [Fly.io Docs](https://fly.io/docs/)",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 6394363111995732,
+                        "layout": {
+                            "height": 3,
+                            "width": 3,
+                            "x": 3,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 5398344842010224,
+            "layout": {
+                "height": 6,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "palette": "white_on_green",
+                                            "value": 1
+                                        },
+                                        {
+                                            "comparator": "<",
+                                            "palette": "white_on_red",
+                                            "value": 1
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fly_io.machines_api.up{$fly_org}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Machines API Health",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3369490420336308,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "fly_io.openmetrics.health",
+                            "group_by": [
+                                "endpoint"
+                            ],
+                            "grouping": "cluster",
+                            "tags": [],
+                            "title": "Openmetrics Endpoint Health",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 2317759384518034,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.app.count{$fly_org,$app_name} by {app_name,app_status}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "App status overview",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 8433590741889224,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 7752646698053128,
+            "layout": {
+                "height": 6,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Machines Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "# CPUs",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fly_io.machine.cpus.count{$fly_org,$machine,$app_name} by {host,cpu_kind,app_name,app_id,instance_id,machine_region}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Machines",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 7886785954454142,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "no_group_hosts": true,
+                            "no_metric_hosts": true,
+                            "node_type": "host",
+                            "requests": {
+                                "fill": {
+                                    "q": "avg:fly_io.instance.cpu.count{$fly_org,$machine,$app_name} by {host}"
+                                }
+                            },
+                            "scope": [
+                                "$fly_org"
+                            ],
+                            "style": {
+                                "palette": "green_to_orange",
+                                "palette_flip": false
+                            },
+                            "title": "Fly machines",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "hostmap"
+                        },
+                        "id": 4062105193485202,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fly_io.machine.memory{$fly_org,$machine,$app_name} by {host,app_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Machine Memory",
+                            "type": "treemap"
+                        },
+                        "id": 8212032116081586,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "Machine Details",
+                            "font_size": "18",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 4691253393175544,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 6
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.instance.net.recv_bytes.count{$fly_org,$machine,$app_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:fly_io.instance.net.sent_bytes.count{$fly_org,$machine,$app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Sent and Received Bytes",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8350889492898876,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fly_io.instance.load.avg{$fly_org,$machine,$app_name} by {host,minutes}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Instance Load Average",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8822151808156498,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.instance.cpu.count{$fly_org,$machine,$app_name} by {host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "CPU time ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 655879726427876,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.instance.disk.time_reading.count{$fly_org,$machine,$app_name}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:fly_io.instance.disk.time_reading.count{$fly_org,$machine,$app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Time Reading and Writing to Disk",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8197717241836616,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 9
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Available",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Free",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Total",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "active",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fly_io.instance.memory.mem_available{$fly_org,$machine,$app_name} by {host}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fly_io.instance.memory.mem_free{$fly_org,$machine,$app_name} by {host}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:fly_io.instance.memory.mem_total{$fly_org,$machine,$app_name} by {host}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query4",
+                                            "query": "avg:fly_io.instance.memory.active{$fly_org,$machine,$app_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Memory",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 4906023098278980,
+                        "layout": {
+                            "height": 2,
+                            "width": 8,
+                            "x": 0,
+                            "y": 11
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fly_io.instance.memory.swap_free{$fly_org,$machine,$app_name} by {host}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fly_io.instance.memory.swap_total{$fly_org,$machine,$app_name} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Total and Free Swap Memory",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8445600846876546,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 11
+                        }
+                    }
+                ]
+            },
+            "id": 6518790764913386,
+            "layout": {
+                "height": 14,
+                "width": 12,
+                "x": 0,
+                "y": 6
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Apps Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "APP",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fly_io.app.count{$fly_org,$app_name} by {app_id,app_network,app_name,app_status,fly_org}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "All Fly.io Apps",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 6781816693390570,
+                        "layout": {
+                            "height": 3,
+                            "width": 7,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.app.http_responses.count{$fly_org,$app_name} by {status,app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "semantic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "HTTP Responses by Status, App",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 864193918558810,
+                        "layout": {
+                            "height": 3,
+                            "width": 5,
+                            "x": 7,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.app.tcp_disconnects.count{$fly_org,$app_name} by {app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "TCP Disconnects",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 3635220070731838,
+                        "layout": {
+                            "height": 2,
+                            "width": 7,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.app.tcp_connects.count{$fly_org,$app_name} by {app_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "TCP Connects",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5860860858042418,
+                        "layout": {
+                            "height": 2,
+                            "width": 5,
+                            "x": 7,
+                            "y": 3
+                        }
+                    }
+                ]
+            },
+            "id": 2592161647104182,
+            "layout": {
+                "height": 6,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 20
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Volumes Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "FREE",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "AVAILABLE",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "COUNT",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fly_io.volume.blocks_free{$fly_org,$app_name} by {volume_name,attached_machine_id,volume_id,fstype,app_name,fly_zone}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fly_io.volume.blocks_avail{$fly_org,$app_name} by {volume_name,attached_machine_id,volume_id,fstype,app_name,fly_zone}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "avg:fly_io.volume.blocks.count{$fly_org,$app_name} by {volume_name,attached_machine_id,volume_id,fstype,app_name,fly_zone}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Blocks Count ",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 536829933946510,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.volume.created{$fly_org,$app_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            },
+                            "title": "Volumes Created",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6979953072757420,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fly_io.volume.size{$fly_org,$app_name} by {volume_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "Volume Size",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 3931914033083830,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "ENCRYPTED",
+                                            "cell_display_mode": "bar",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fly_io.volume.encrypted{$fly_org,$app_name} by {volume_name,fstype}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "title": "Is Volume Encrypted?",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 5528969630878270,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 2334998541778104,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 26
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_purple",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Edge",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.edge.data_in.count{$app_name} by {proxy_id}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Data In",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2078927603375710,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.edge.data_out.count{$app_name} by {proxy_id}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Data Out",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7658038603161128,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.edge.tcp_connects.count{$app_name} by {proxy_id}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "TCP Connects",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8509028684795014,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fly_io.edge.tcp_disconnects.count{$app_name} by {proxy_id}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "TCP Disconnects",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1090949896423012,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 6205857847648688,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 31
+            }
+        }
+    ]
+}

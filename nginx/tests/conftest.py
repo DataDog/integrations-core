@@ -82,3 +82,13 @@ def instance_vts():
         'use_vts': True,
         'disable_generic_tags': True,
     }
+
+
+@pytest.fixture(scope='session')
+def mocked_instance_vts():
+    return {
+        'tags': TAGS,
+        'nginx_status_url': 'http://{}:{}/vts_status'.format(HOST, PORT),
+        'use_vts': True,
+        'disable_generic_tags': True,
+    }

@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+from bisect import bisect
+
 from .utils import byte_to_mebibyte, ms_to_second
 
 # Metrics definition format is a dictionary mapping:
@@ -289,27 +292,282 @@ STATS_METRICS = {
     'elasticsearch.fs.total.available_in_bytes': ('gauge', 'fs.total.available_in_bytes'),
 }
 
-ADDITIONAL_METRICS_POST_7_9_0 = {
-    'elasticsearch.indexing_pressure.memory.current.coordinating_in_bytes': (
-        'gauge',
-        'indexing_pressure.memory.current.coordinating_in_bytes',
-    ),
-    'elasticsearch.indexing_pressure.memory.current.primary_in_bytes': (
-        'gauge',
-        'indexing_pressure.memory.current.primary_in_bytes',
-    ),
-    'elasticsearch.indexing_pressure.memory.current.replica_in_bytes': (
-        'gauge',
-        'indexing_pressure.memory.current.replica_in_bytes',
-    ),
+ADDITIONAL_METRICS_BY_VERSION = {
+    (0, 90, 5): {
+        'elasticsearch.search.fetch.open_contexts': ('gauge', 'indices.search.open_contexts'),
+        'elasticsearch.fielddata.size': ('gauge', 'indices.fielddata.memory_size_in_bytes'),
+        'elasticsearch.fielddata.evictions': ('gauge', 'indices.fielddata.evictions'),
+        'elasticsearch.fielddata.evictions.count': ('monotonic_count', 'indices.fielddata.evictions'),
+    },
+    (1, 0, 0): {
+        'elasticsearch.indices.translog.size_in_bytes': ('gauge', 'indices.translog.size_in_bytes'),
+        'elasticsearch.indices.translog.operations': ('gauge', 'indices.translog.operations'),
+    },
+    (1, 3, 0): {
+        'elasticsearch.indices.segments.index_writer_memory_in_bytes': (
+            'gauge',
+            'indices.segments.index_writer_memory_in_bytes',
+        ),
+        'elasticsearch.indices.segments.version_map_memory_in_bytes': (
+            'gauge',
+            'indices.segments.version_map_memory_in_bytes',
+        ),
+    },
+    (1, 4, 0): {
+        'elasticsearch.indices.indexing.throttle_time': (
+            'rate',
+            'indices.indexing.throttle_time_in_millis',
+            lambda ms: ms_to_second(ms),
+        ),
+        'elasticsearch.indices.indexing.throttle_time.count': (
+            'monotonic_count',
+            'indices.indexing.throttle_time_in_millis',
+            lambda ms: ms_to_second(ms),
+        ),
+        'elasticsearch.indices.query_cache.memory_size_in_bytes': (
+            'gauge',
+            'indices.query_cache.memory_size_in_bytes',
+        ),
+        'elasticsearch.indices.query_cache.hit_count': ('rate', 'indices.query_cache.hit_count'),
+        'elasticsearch.indices.query_cache.hit_count.count': ('monotonic_count', 'indices.query_cache.hit_count'),
+        'elasticsearch.indices.query_cache.miss_count': ('rate', 'indices.query_cache.miss_count'),
+        'elasticsearch.indices.query_cache.miss_count.total': ('monotonic_count', 'indices.query_cache.miss_count'),
+        'elasticsearch.indices.query_cache.evictions': ('rate', 'indices.query_cache.evictions'),
+        'elasticsearch.indices.query_cache.evictions.count': ('monotonic_count', 'indices.query_cache.evictions'),
+        'elasticsearch.indices.segments.index_writer_max_memory_in_bytes': (
+            'gauge',
+            'indices.segments.index_writer_max_memory_in_bytes',
+        ),
+        'elasticsearch.indices.segments.fixed_bit_set_memory_in_bytes': (
+            'gauge',
+            'indices.segments.fixed_bit_set_memory_in_bytes',
+        ),
+        'elasticsearch.breakers.fielddata.estimated_size_in_bytes': (
+            'gauge',
+            'breakers.fielddata.estimated_size_in_bytes',
+        ),
+        'elasticsearch.breakers.fielddata.overhead': ('gauge', 'breakers.fielddata.overhead'),
+        'elasticsearch.breakers.fielddata.tripped': ('rate', 'breakers.fielddata.tripped'),
+        'elasticsearch.breakers.parent.estimated_size_in_bytes': (
+            'gauge',
+            'breakers.parent.estimated_size_in_bytes',
+        ),
+        'elasticsearch.breakers.parent.overhead': ('gauge', 'breakers.parent.overhead'),
+        'elasticsearch.breakers.parent.tripped': ('rate', 'breakers.parent.tripped'),
+        'elasticsearch.breakers.request.estimated_size_in_bytes': (
+            'gauge',
+            'breakers.request.estimated_size_in_bytes',
+        ),
+        'elasticsearch.breakers.request.overhead': ('gauge', 'breakers.request.overhead'),
+        'elasticsearch.breakers.request.tripped': ('rate', 'breakers.request.tripped'),
+    },
+    (1, 5, 0): {
+        'elasticsearch.indices.recovery.current_as_source': ('gauge', 'indices.recovery.current_as_source'),
+        'elasticsearch.indices.recovery.current_as_target': ('gauge', 'indices.recovery.current_as_target'),
+        'elasticsearch.indices.recovery.throttle_time': (
+            'rate',
+            'indices.recovery.throttle_time_in_millis',
+            lambda ms: ms_to_second(ms),
+        ),
+        'elasticsearch.indices.recovery.throttle_time.count': (
+            'monotonic_count',
+            'indices.recovery.throttle_time_in_millis',
+            lambda ms: ms_to_second(ms),
+        ),
+    },
+    (1, 6, 0): {
+        'elasticsearch.thread_pool.fetch_shard_started.active': ('gauge', 'thread_pool.fetch_shard_started.active'),
+        'elasticsearch.thread_pool.fetch_shard_started.threads': (
+            'gauge',
+            'thread_pool.fetch_shard_started.threads',
+        ),
+        'elasticsearch.thread_pool.fetch_shard_started.queue': ('gauge', 'thread_pool.fetch_shard_started.queue'),
+        'elasticsearch.thread_pool.fetch_shard_started.rejected': (
+            'rate',
+            'thread_pool.fetch_shard_started.rejected',
+        ),
+        'elasticsearch.thread_pool.fetch_shard_store.active': ('gauge', 'thread_pool.fetch_shard_store.active'),
+        'elasticsearch.thread_pool.fetch_shard_store.threads': ('gauge', 'thread_pool.fetch_shard_store.threads'),
+        'elasticsearch.thread_pool.fetch_shard_store.queue': ('gauge', 'thread_pool.fetch_shard_store.queue'),
+        'elasticsearch.thread_pool.fetch_shard_store.rejected': ('rate', 'thread_pool.fetch_shard_store.rejected'),
+    },
+    (2, 0, 0): {
+        # Some of these may very well exist in previous ES versions, but not worth the time/effort
+        # to find where they were introduced
+        'elasticsearch.indices.query_cache.cache_size': ('gauge', 'indices.query_cache.cache_size'),
+        'elasticsearch.indices.query_cache.cache_count': ('monotonic_count', 'indices.query_cache.cache_count'),
+        'elasticsearch.indices.query_cache.total_count': ('monotonic_count', 'indices.query_cache.total_count'),
+        'elasticsearch.indices.segments.doc_values_memory_in_bytes': (
+            'gauge',
+            'indices.segments.doc_values_memory_in_bytes',
+        ),
+        'elasticsearch.indices.segments.norms_memory_in_bytes': ('gauge', 'indices.segments.norms_memory_in_bytes'),
+        'elasticsearch.indices.segments.stored_fields_memory_in_bytes': (
+            'gauge',
+            'indices.segments.stored_fields_memory_in_bytes',
+        ),
+        'elasticsearch.indices.segments.term_vectors_memory_in_bytes': (
+            'gauge',
+            'indices.segments.term_vectors_memory_in_bytes',
+        ),
+        'elasticsearch.indices.segments.terms_memory_in_bytes': ('gauge', 'indices.segments.terms_memory_in_bytes'),
+        'elasticsearch.indices.request_cache.memory_size_in_bytes': (
+            'gauge',
+            'indices.request_cache.memory_size_in_bytes',
+        ),
+        'elasticsearch.indices.request_cache.evictions': ('rate', 'indices.request_cache.evictions'),
+        'elasticsearch.indices.request_cache.evictions.count': (
+            'monotonic_count',
+            'indices.request_cache.evictions',
+        ),
+        'elasticsearch.indices.request_cache.hit_count': ('rate', 'indices.request_cache.hit_count'),
+        'elasticsearch.indices.request_cache.hit_count.count': (
+            'monotonic_count',
+            'indices.request_cache.hit_count',
+        ),
+        'elasticsearch.indices.request_cache.miss_count': ('rate', 'indices.request_cache.miss_count'),
+        'elasticsearch.indices.request_cache.miss_count.count': (
+            'monotonic_count',
+            'indices.request_cache.miss_count',
+        ),
+    },
+    (2, 1, 0): {
+        'elasticsearch.indices.indexing.index_failed.count': ('monotonic_count', 'indices.indexing.index_failed'),
+        'elasticsearch.indices.indexing.index_failed': ('rate', 'indices.indexing.index_failed'),
+        'elasticsearch.thread_pool.force_merge.active': ('gauge', 'thread_pool.force_merge.active'),
+        'elasticsearch.thread_pool.force_merge.threads': ('gauge', 'thread_pool.force_merge.threads'),
+        'elasticsearch.thread_pool.force_merge.queue': ('gauge', 'thread_pool.force_merge.queue'),
+        'elasticsearch.thread_pool.force_merge.rejected': ('rate', 'thread_pool.force_merge.rejected'),
+        'elasticsearch.thread_pool.force_merge.rejected.count': (
+            'monotonic_count',
+            'thread_pool.force_merge.rejected',
+        ),
+    },
+    (5, 0, 0): {
+        'elasticsearch.fs.total.disk_io_op': ('rate', 'fs.io_stats.total.operations'),
+        'elasticsearch.fs.total.disk_reads': ('rate', 'fs.io_stats.total.read_operations'),
+        'elasticsearch.fs.total.disk_writes': ('rate', 'fs.io_stats.total.write_operations'),
+        'elasticsearch.fs.total.disk_read_size_in_bytes': ('gauge', 'fs.io_stats.total.read_kilobytes'),
+        'elasticsearch.fs.total.disk_write_size_in_bytes': ('gauge', 'fs.io_stats.total.write_kilobytes'),
+        'elasticsearch.search.scroll.total': ('gauge', 'indices.search.scroll_total'),
+        'elasticsearch.search.scroll.total.count': ('monotonic_count', 'indices.search.scroll_total'),
+        'elasticsearch.search.scroll.time': (
+            'gauge',
+            'indices.search.scroll_time_in_millis',
+            lambda ms: ms_to_second(ms),
+        ),
+        'elasticsearch.search.scroll.time.count': (
+            'monotonic_count',
+            'indices.search.scroll_time_in_millis',
+            lambda ms: ms_to_second(ms),
+        ),
+        'elasticsearch.search.scroll.current': ('gauge', 'indices.search.scroll_current'),
+    },
+    (6, 3, 0): {
+        'elasticsearch.thread_pool.write.active': ('gauge', 'thread_pool.write.active'),
+        'elasticsearch.thread_pool.write.threads': ('gauge', 'thread_pool.write.threads'),
+        'elasticsearch.thread_pool.write.threads.count': ('monotonic_count', 'thread_pool.write.threads'),
+        'elasticsearch.thread_pool.write.queue': ('gauge', 'thread_pool.write.queue'),
+        'elasticsearch.thread_pool.write.rejected': ('rate', 'thread_pool.write.rejected'),
+        'elasticsearch.thread_pool.write.rejected.count': ('monotonic_count', 'thread_pool.write.rejected'),
+        'elasticsearch.thread_pool.write.completed': ('rate', 'thread_pool.write.completed'),
+        'elasticsearch.thread_pool.write.completed.count': ('monotonic_count', 'thread_pool.write.completed'),
+    },
+    (7, 2, 0): {
+        'elasticsearch.refresh.external.total': ('gauge', 'indices.refresh.external_total'),
+        'elasticsearch.refresh.external.total.time': (
+            'gauge',
+            'indices.refresh.external_total_time_in_millis',
+            lambda ms: ms_to_second(ms),
+        ),
+    },
+    (7, 9, 0): {
+        'elasticsearch.indexing_pressure.memory.current.coordinating_in_bytes': (
+            'gauge',
+            'indexing_pressure.memory.current.coordinating_in_bytes',
+        ),
+        'elasticsearch.indexing_pressure.memory.current.primary_in_bytes': (
+            'gauge',
+            'indexing_pressure.memory.current.primary_in_bytes',
+        ),
+        'elasticsearch.indexing_pressure.memory.current.replica_in_bytes': (
+            'gauge',
+            'indexing_pressure.memory.current.replica_in_bytes',
+        ),
+        'elasticsearch.indexing_pressure.memory.current.all_in_bytes': (
+            'gauge',
+            'indexing_pressure.memory.current.all_in_bytes',
+        ),
+        'elasticsearch.indexing_pressure.memory.current.combined_coordinating_and_primary_in_bytes': (
+            'gauge',
+            'indexing_pressure.memory.current.combined_coordinating_and_primary_in_bytes',
+        ),
+        'elasticsearch.indexing_pressure.memory.total.coordinating_in_bytes': (
+            'gauge',
+            'indexing_pressure.memory.total.coordinating_in_bytes',
+        ),
+        'elasticsearch.indexing_pressure.memory.total.primary_in_bytes': (
+            'gauge',
+            'indexing_pressure.memory.total.primary_in_bytes',
+        ),
+        'elasticsearch.indexing_pressure.memory.total.replica_in_bytes': (
+            'gauge',
+            'indexing_pressure.memory.total.replica_in_bytes',
+        ),
+        'elasticsearch.indexing_pressure.memory.total.all_in_bytes': (
+            'gauge',
+            'indexing_pressure.memory.total.all_in_bytes',
+        ),
+        'elasticsearch.indexing_pressure.memory.total.combined_coordinating_and_primary_in_bytes': (
+            'gauge',
+            'indexing_pressure.memory.total.combined_coordinating_and_primary_in_bytes',
+        ),
+        'elasticsearch.indexing_pressure.memory.total.coordinating_rejections': (
+            'gauge',
+            'indexing_pressure.memory.total.coordinating_rejections',
+        ),
+        'elasticsearch.indexing_pressure.memory.total.primary_rejections': (
+            'gauge',
+            'indexing_pressure.memory.total.primary_rejections',
+        ),
+        'elasticsearch.indexing_pressure.memory.total.replica_rejections': (
+            'gauge',
+            'indexing_pressure.memory.total.replica_rejections',
+        ),
+    },
+    (7, 10, 0): {
+        "elasticsearch.indexing_pressure.memory.limit_in_bytes": (
+            "gauge",
+            "indexing_pressure.memory.limit_in_bytes",
+        ),
+    },
+    (8, 0, 0): {
+        # The in_flight_requests stat has been renamed inflight_requests in logs and diagnostic APIs.
+        # https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking_80_rest_api_changes
+        'elasticsearch.breakers.inflight_requests.tripped': ('gauge', 'breakers.inflight_requests.tripped'),
+        'elasticsearch.breakers.inflight_requests.overhead': ('gauge', 'breakers.inflight_requests.overhead'),
+        'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
+            'gauge',
+            'breakers.inflight_requests.estimated_size_in_bytes',
+        ),
+    },
 }
+VERSIONS_THAT_ADD_METRICS = sorted(ADDITIONAL_METRICS_BY_VERSION)
 
-ADDITIONAL_METRICS_POST_7_2_0 = {
-    'elasticsearch.refresh.external.total': ('gauge', 'indices.refresh.external_total'),
-    'elasticsearch.refresh.external.total.time': (
+# These metrics have been deleted on ES8
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html
+ADDITIONAL_METRIC_PRE_8_0_0 = {
+    'elasticsearch.thread_pool.listener.active': ('gauge', 'thread_pool.listener.active'),
+    'elasticsearch.thread_pool.listener.threads': ('gauge', 'thread_pool.listener.threads'),
+    'elasticsearch.thread_pool.listener.threads.count': ('monotonic_count', 'thread_pool.listener.threads'),
+    'elasticsearch.thread_pool.listener.queue': ('gauge', 'thread_pool.listener.queue'),
+    'elasticsearch.thread_pool.listener.rejected': ('rate', 'thread_pool.listener.rejected'),
+    'elasticsearch.thread_pool.listener.rejected.count': ('monotonic_count', 'thread_pool.listener.rejected'),
+    'elasticsearch.breakers.inflight_requests.tripped': ('gauge', 'breakers.in_flight_requests.tripped'),
+    'elasticsearch.breakers.inflight_requests.overhead': ('gauge', 'breakers.in_flight_requests.overhead'),
+    'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
         'gauge',
-        'indices.refresh.external_total_time_in_millis',
-        lambda ms: ms_to_second(ms),
+        'breakers.in_flight_requests.estimated_size_in_bytes',
     ),
 }
 
@@ -348,6 +606,11 @@ INDEX_STATS_METRICS = {
     'elasticsearch.index.primary_store_size': ('gauge', 'primary_store_size'),
     'elasticsearch.index.store_size': ('gauge', 'store_size'),
 }
+INDEX_SEARCH_STATS = [
+    ('elasticsearch.index.search.query.total', 'total.search.query_total'),
+    ('elasticsearch.index.search.query.time', 'total.search.query_time_in_millis'),
+]
+
 
 JVM_METRICS_POST_0_90_10 = {
     'jvm.gc.collectors.young.count': ('gauge', 'jvm.gc.collectors.young.collection_count'),
@@ -397,12 +660,6 @@ JVM_METRICS_PRE_0_90_10 = {
     'jvm.gc.collection_time': ('gauge', 'jvm.gc.collection_time_in_millis', lambda ms: ms_to_second(ms)),
 }
 
-ADDITIONAL_METRICS_POST_0_90_5 = {
-    'elasticsearch.search.fetch.open_contexts': ('gauge', 'indices.search.open_contexts'),
-    'elasticsearch.fielddata.size': ('gauge', 'indices.fielddata.memory_size_in_bytes'),
-    'elasticsearch.fielddata.evictions': ('gauge', 'indices.fielddata.evictions'),
-    'elasticsearch.fielddata.evictions.count': ('monotonic_count', 'indices.fielddata.evictions'),
-}
 
 ADDITIONAL_METRICS_POST_0_90_5_PRE_2_0 = {
     'elasticsearch.cache.filter.evictions': ('gauge', 'indices.filter_cache.evictions'),
@@ -419,11 +676,6 @@ ADDITIONAL_METRICS_PRE_0_90_5 = {
     'elasticsearch.cache.filter.size': ('gauge', 'indices.cache.filter_size_in_bytes'),
 }
 
-ADDITIONAL_METRICS_POST_1_0_0 = {
-    'elasticsearch.indices.translog.size_in_bytes': ('gauge', 'indices.translog.size_in_bytes'),
-    'elasticsearch.indices.translog.operations': ('gauge', 'indices.translog.operations'),
-}
-
 # Stats are only valid for v1.x
 ADDITIONAL_METRICS_1_x = {
     'elasticsearch.fs.total.disk_reads': ('rate', 'fs.total.disk_reads'),
@@ -434,85 +686,6 @@ ADDITIONAL_METRICS_1_x = {
     'elasticsearch.fs.total.disk_io_size_in_bytes': ('gauge', 'fs.total.disk_io_size_in_bytes'),
 }
 
-ADDITIONAL_METRICS_POST_1_3_0 = {
-    'elasticsearch.indices.segments.index_writer_memory_in_bytes': (
-        'gauge',
-        'indices.segments.index_writer_memory_in_bytes',
-    ),
-    'elasticsearch.indices.segments.version_map_memory_in_bytes': (
-        'gauge',
-        'indices.segments.version_map_memory_in_bytes',
-    ),
-}
-
-ADDITIONAL_METRICS_POST_1_4_0 = {
-    'elasticsearch.indices.indexing.throttle_time': (
-        'rate',
-        'indices.indexing.throttle_time_in_millis',
-        lambda ms: ms_to_second(ms),
-    ),
-    'elasticsearch.indices.indexing.throttle_time.count': (
-        'monotonic_count',
-        'indices.indexing.throttle_time_in_millis',
-        lambda ms: ms_to_second(ms),
-    ),
-    'elasticsearch.indices.query_cache.memory_size_in_bytes': ('gauge', 'indices.query_cache.memory_size_in_bytes'),
-    'elasticsearch.indices.query_cache.hit_count': ('rate', 'indices.query_cache.hit_count'),
-    'elasticsearch.indices.query_cache.hit_count.count': ('monotonic_count', 'indices.query_cache.hit_count'),
-    'elasticsearch.indices.query_cache.miss_count': ('rate', 'indices.query_cache.miss_count'),
-    'elasticsearch.indices.query_cache.miss_count.total': ('monotonic_count', 'indices.query_cache.miss_count'),
-    'elasticsearch.indices.query_cache.evictions': ('rate', 'indices.query_cache.evictions'),
-    'elasticsearch.indices.query_cache.evictions.count': ('monotonic_count', 'indices.query_cache.evictions'),
-    'elasticsearch.indices.segments.index_writer_max_memory_in_bytes': (
-        'gauge',
-        'indices.segments.index_writer_max_memory_in_bytes',
-    ),
-    'elasticsearch.indices.segments.fixed_bit_set_memory_in_bytes': (
-        'gauge',
-        'indices.segments.fixed_bit_set_memory_in_bytes',
-    ),
-    'elasticsearch.breakers.fielddata.estimated_size_in_bytes': ('gauge', 'breakers.fielddata.estimated_size_in_bytes'),
-    'elasticsearch.breakers.fielddata.overhead': ('gauge', 'breakers.fielddata.overhead'),
-    'elasticsearch.breakers.fielddata.tripped': ('rate', 'breakers.fielddata.tripped'),
-    'elasticsearch.breakers.parent.estimated_size_in_bytes': ('gauge', 'breakers.parent.estimated_size_in_bytes'),
-    'elasticsearch.breakers.parent.overhead': ('gauge', 'breakers.parent.overhead'),
-    'elasticsearch.breakers.parent.tripped': ('rate', 'breakers.parent.tripped'),
-    'elasticsearch.breakers.request.estimated_size_in_bytes': ('gauge', 'breakers.request.estimated_size_in_bytes'),
-    'elasticsearch.breakers.request.overhead': ('gauge', 'breakers.request.overhead'),
-    'elasticsearch.breakers.request.tripped': ('rate', 'breakers.request.tripped'),
-    'elasticsearch.thread_pool.listener.active': ('gauge', 'thread_pool.listener.active'),
-    'elasticsearch.thread_pool.listener.threads': ('gauge', 'thread_pool.listener.threads'),
-    'elasticsearch.thread_pool.listener.threads.count': ('monotonic_count', 'thread_pool.listener.threads'),
-    'elasticsearch.thread_pool.listener.queue': ('gauge', 'thread_pool.listener.queue'),
-    'elasticsearch.thread_pool.listener.rejected': ('rate', 'thread_pool.listener.rejected'),
-    'elasticsearch.thread_pool.listener.rejected.count': ('monotonic_count', 'thread_pool.listener.rejected'),
-}
-
-ADDITIONAL_METRICS_POST_1_5_0 = {
-    'elasticsearch.indices.recovery.current_as_source': ('gauge', 'indices.recovery.current_as_source'),
-    'elasticsearch.indices.recovery.current_as_target': ('gauge', 'indices.recovery.current_as_target'),
-    'elasticsearch.indices.recovery.throttle_time': (
-        'rate',
-        'indices.recovery.throttle_time_in_millis',
-        lambda ms: ms_to_second(ms),
-    ),
-    'elasticsearch.indices.recovery.throttle_time.count': (
-        'monotonic_count',
-        'indices.recovery.throttle_time_in_millis',
-        lambda ms: ms_to_second(ms),
-    ),
-}
-
-ADDITIONAL_METRICS_POST_1_6_0 = {
-    'elasticsearch.thread_pool.fetch_shard_started.active': ('gauge', 'thread_pool.fetch_shard_started.active'),
-    'elasticsearch.thread_pool.fetch_shard_started.threads': ('gauge', 'thread_pool.fetch_shard_started.threads'),
-    'elasticsearch.thread_pool.fetch_shard_started.queue': ('gauge', 'thread_pool.fetch_shard_started.queue'),
-    'elasticsearch.thread_pool.fetch_shard_started.rejected': ('rate', 'thread_pool.fetch_shard_started.rejected'),
-    'elasticsearch.thread_pool.fetch_shard_store.active': ('gauge', 'thread_pool.fetch_shard_store.active'),
-    'elasticsearch.thread_pool.fetch_shard_store.threads': ('gauge', 'thread_pool.fetch_shard_store.threads'),
-    'elasticsearch.thread_pool.fetch_shard_store.queue': ('gauge', 'thread_pool.fetch_shard_store.queue'),
-    'elasticsearch.thread_pool.fetch_shard_store.rejected': ('rate', 'thread_pool.fetch_shard_store.rejected'),
-}
 
 ADDITIONAL_METRICS_PRE_2_0 = {
     'elasticsearch.thread_pool.merge.active': ('gauge', 'thread_pool.merge.active'),
@@ -521,67 +694,6 @@ ADDITIONAL_METRICS_PRE_2_0 = {
     'elasticsearch.thread_pool.merge.rejected': ('rate', 'thread_pool.merge.rejected'),
 }
 
-ADDITIONAL_METRICS_POST_2_0 = {
-    # Some of these may very well exist in previous ES versions, but not worth the time/effort
-    # to find where they were introduced
-    'elasticsearch.indices.query_cache.cache_size': ('gauge', 'indices.query_cache.cache_size'),
-    'elasticsearch.indices.query_cache.cache_count': ('rate', 'indices.query_cache.cache_count'),
-    'elasticsearch.indices.query_cache.total_count': ('rate', 'indices.query_cache.total_count'),
-    'elasticsearch.indices.segments.doc_values_memory_in_bytes': (
-        'gauge',
-        'indices.segments.doc_values_memory_in_bytes',
-    ),
-    'elasticsearch.indices.segments.norms_memory_in_bytes': ('gauge', 'indices.segments.norms_memory_in_bytes'),
-    'elasticsearch.indices.segments.stored_fields_memory_in_bytes': (
-        'gauge',
-        'indices.segments.stored_fields_memory_in_bytes',
-    ),
-    'elasticsearch.indices.segments.term_vectors_memory_in_bytes': (
-        'gauge',
-        'indices.segments.term_vectors_memory_in_bytes',
-    ),
-    'elasticsearch.indices.segments.terms_memory_in_bytes': ('gauge', 'indices.segments.terms_memory_in_bytes'),
-    'elasticsearch.indices.request_cache.memory_size_in_bytes': ('gauge', 'indices.request_cache.memory_size_in_bytes'),
-    'elasticsearch.indices.request_cache.evictions': ('rate', 'indices.request_cache.evictions'),
-    'elasticsearch.indices.request_cache.evictions.count': ('monotonic_count', 'indices.request_cache.evictions'),
-    'elasticsearch.indices.request_cache.hit_count': ('rate', 'indices.request_cache.hit_count'),
-    'elasticsearch.indices.request_cache.hit_count.count': ('monotonic_count', 'indices.request_cache.hit_count'),
-    'elasticsearch.indices.request_cache.miss_count': ('rate', 'indices.request_cache.miss_count'),
-    'elasticsearch.indices.request_cache.miss_count.count': ('monotonic_count', 'indices.request_cache.miss_count'),
-}
-
-ADDITIONAL_METRICS_POST_2_1 = {
-    'elasticsearch.indices.indexing.index_failed.count': ('monotonic_count', 'indices.indexing.index_failed'),
-    'elasticsearch.indices.indexing.index_failed': ('rate', 'indices.indexing.index_failed'),
-    'elasticsearch.thread_pool.force_merge.active': ('gauge', 'thread_pool.force_merge.active'),
-    'elasticsearch.thread_pool.force_merge.threads': ('gauge', 'thread_pool.force_merge.threads'),
-    'elasticsearch.thread_pool.force_merge.queue': ('gauge', 'thread_pool.force_merge.queue'),
-    'elasticsearch.thread_pool.force_merge.rejected': ('rate', 'thread_pool.force_merge.rejected'),
-    'elasticsearch.thread_pool.force_merge.rejected.count': ('monotonic_count', 'thread_pool.force_merge.rejected'),
-}
-
-ADDITIONAL_METRICS_5_x = {
-    'elasticsearch.fs.total.disk_io_op': ('rate', 'fs.io_stats.total.operations'),
-    'elasticsearch.fs.total.disk_reads': ('rate', 'fs.io_stats.total.read_operations'),
-    'elasticsearch.fs.total.disk_writes': ('rate', 'fs.io_stats.total.write_operations'),
-    'elasticsearch.fs.total.disk_read_size_in_bytes': ('gauge', 'fs.io_stats.total.read_kilobytes'),
-    'elasticsearch.fs.total.disk_write_size_in_bytes': ('gauge', 'fs.io_stats.total.write_kilobytes'),
-    'elasticsearch.breakers.inflight_requests.tripped': ('gauge', 'breakers.in_flight_requests.tripped'),
-    'elasticsearch.breakers.inflight_requests.overhead': ('gauge', 'breakers.in_flight_requests.overhead'),
-    'elasticsearch.breakers.inflight_requests.estimated_size_in_bytes': (
-        'gauge',
-        'breakers.in_flight_requests.estimated_size_in_bytes',
-    ),
-    'elasticsearch.search.scroll.total': ('gauge', 'indices.search.scroll_total'),
-    'elasticsearch.search.scroll.total.count': ('monotonic_count', 'indices.search.scroll_total'),
-    'elasticsearch.search.scroll.time': ('gauge', 'indices.search.scroll_time_in_millis', lambda ms: ms_to_second(ms)),
-    'elasticsearch.search.scroll.time.count': (
-        'monotonic_count',
-        'indices.search.scroll_time_in_millis',
-        lambda ms: ms_to_second(ms),
-    ),
-    'elasticsearch.search.scroll.current': ('gauge', 'indices.search.scroll_current'),
-}
 
 ADDITIONAL_METRICS_PRE_6_3 = {
     'elasticsearch.thread_pool.bulk.active': ('gauge', 'thread_pool.bulk.active'),
@@ -594,16 +706,6 @@ ADDITIONAL_METRICS_PRE_6_3 = {
     'elasticsearch.thread_pool.bulk.completed.count': ('monotonic_count', 'thread_pool.bulk.completed'),
 }
 
-ADDITIONAL_METRICS_POST_6_3 = {
-    'elasticsearch.thread_pool.write.active': ('gauge', 'thread_pool.write.active'),
-    'elasticsearch.thread_pool.write.threads': ('gauge', 'thread_pool.write.threads'),
-    'elasticsearch.thread_pool.write.threads.count': ('monotonic_count', 'thread_pool.write.threads'),
-    'elasticsearch.thread_pool.write.queue': ('gauge', 'thread_pool.write.queue'),
-    'elasticsearch.thread_pool.write.rejected': ('rate', 'thread_pool.write.rejected'),
-    'elasticsearch.thread_pool.write.rejected.count': ('monotonic_count', 'thread_pool.write.rejected'),
-    'elasticsearch.thread_pool.write.completed': ('rate', 'thread_pool.write.completed'),
-    'elasticsearch.thread_pool.write.completed.count': ('monotonic_count', 'thread_pool.write.completed'),
-}
 
 CLUSTER_HEALTH_METRICS = {
     'elasticsearch.number_of_nodes': ('gauge', 'number_of_nodes'),
@@ -672,6 +774,10 @@ CAT_ALLOCATION_METRICS = {
     'elasticsearch.disk.percent': ('gauge', 'disk_percent'),
 }
 
+TEMPLATE_METRICS = {
+    'elasticsearch.templates.count': ('gauge', 'templates', lambda templates: len(templates)),
+}
+
 
 def stats_for_version(version, jvm_rate=False):
     """
@@ -688,13 +794,8 @@ def stats_for_version(version, jvm_rate=False):
         metrics.update(JVM_METRICS_PRE_0_90_10)
 
     # Additional Stats metrics
-    if version >= [0, 90, 5]:
-        metrics.update(ADDITIONAL_METRICS_POST_0_90_5)
-    else:
+    if version < [0, 90, 5]:
         metrics.update(ADDITIONAL_METRICS_PRE_0_90_5)
-
-    if version >= [1, 0, 0]:
-        metrics.update(ADDITIONAL_METRICS_POST_1_0_0)
 
     if version < [2, 0, 0]:
         metrics.update(ADDITIONAL_METRICS_PRE_2_0)
@@ -703,43 +804,17 @@ def stats_for_version(version, jvm_rate=False):
         if version >= [1, 0, 0]:
             metrics.update(ADDITIONAL_METRICS_1_x)
 
-    if version >= [1, 3, 0]:
-        metrics.update(ADDITIONAL_METRICS_POST_1_3_0)
-
-    if version >= [1, 4, 0]:
-        metrics.update(ADDITIONAL_METRICS_POST_1_4_0)
-
-    if version >= [1, 5, 0]:
-        metrics.update(ADDITIONAL_METRICS_POST_1_5_0)
-
-    if version >= [1, 6, 0]:
-        metrics.update(ADDITIONAL_METRICS_POST_1_6_0)
-
-    if version >= [2, 0, 0]:
-        metrics.update(ADDITIONAL_METRICS_POST_2_0)
-
-    if version >= [2, 1, 0]:
-        metrics.update(ADDITIONAL_METRICS_POST_2_1)
-
-    if version >= [5, 0, 0]:
-        metrics.update(ADDITIONAL_METRICS_5_x)
-
     if version < [5, 0, 0]:
         metrics.update(ADDITIONAL_METRICS_PRE_5_0_0)
-
-    if version >= [6, 3, 0]:
-        metrics.update(ADDITIONAL_METRICS_POST_6_3)
-    else:
+    if version < [6, 3, 0]:
         metrics.update(ADDITIONAL_METRICS_PRE_6_3)
-
     if version < [7, 0, 0]:
         metrics.update(ADDITIONAL_METRICS_PRE_7_0_0)
+    if version < [8, 0, 0]:
+        metrics.update(ADDITIONAL_METRIC_PRE_8_0_0)
 
-    if version >= [7, 2, 0]:
-        metrics.update(ADDITIONAL_METRICS_POST_7_2_0)
-
-    if version >= [7, 9, 0]:
-        metrics.update(ADDITIONAL_METRICS_POST_7_9_0)
+    for ver in VERSIONS_THAT_ADD_METRICS[: bisect(VERSIONS_THAT_ADD_METRICS, tuple(version))]:
+        metrics.update(ADDITIONAL_METRICS_BY_VERSION[ver])
 
     return metrics
 

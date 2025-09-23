@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict  # noqa: F401
 
 import pytest
 
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.traffic_server import TrafficServerCheck
 
@@ -51,7 +51,6 @@ def test_check_cant_reach_url(aggregator, instance_bad_url, dd_run_check):
 
 
 def test_invalid_config(instance_no_url):
-
     with pytest.raises(Exception, match='Must specify a traffic_server_url'):
         TrafficServerCheck('traffic_server', {}, [instance_no_url])
 

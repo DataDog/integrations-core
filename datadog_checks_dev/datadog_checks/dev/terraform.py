@@ -8,17 +8,11 @@ import shutil
 from contextlib import contextmanager
 
 import pytest
-from six import PY3
 
 from .env import environment_run
 from .fs import chdir, copy_dir_contents, copy_path, get_here, path_join
 from .structures import LazyFunction, TempDir
 from .subprocess import run_command
-
-if PY3:
-    from shutil import which
-else:
-    from shutilwhich import which
 
 TEMPLATES_DIR = path_join(get_here(), 'tooling', 'templates', 'terraform')
 
@@ -41,16 +35,23 @@ def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_va
     """
     A convenient context manager for safely setting up and tearing down Terraform environments.
 
-    - **directory** (_str_) - A path containing Terraform files
-    - **sleep** (_float_) - Number of seconds to wait before yielding. This occurs after all conditions are successful.
-    - **endpoints** (_List[str]_) - Endpoints to verify access for before yielding. Shorthand for adding
-      `CheckEndpoints(endpoints)` to the `conditions` argument.
-    - **conditions** (_callable_) - A list of callable objects that will be executed before yielding to
-      check for errors
-    - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
-    - **wrappers** (_List[callable]_) - A list of context managers to use during execution
+    Parameters:
+
+        directory (str):
+            A path containing Terraform files
+        sleep (float):
+            Number of seconds to wait before yielding. This occurs after all conditions are successful.
+        endpoints (list[str]):
+            Endpoints to verify access for before yielding. Shorthand for adding
+            `CheckEndpoints(endpoints)` to the `conditions` argument.
+        conditions (list[callable]):
+            A list of callable objects that will be executed before yielding to check for errors
+        env_vars (dict[str, str]):
+            A dictionary to update `os.environ` with during execution
+        wrappers (list[callable]):
+            A list of context managers to use during execution
     """
-    if not which('terraform'):
+    if not shutil.which('terraform'):
         pytest.skip('Terraform not available')
 
     set_up = TerraformUp(directory)

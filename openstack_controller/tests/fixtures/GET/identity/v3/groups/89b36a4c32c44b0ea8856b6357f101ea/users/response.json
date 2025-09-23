@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": "78205c506b534738bc851d3e189a00c3",
+      "name": "admin",
+      "domain_id": "default",
+      "enabled": true,
+      "password_expires_at": null,
+      "options": {},
+      "links": {
+        "self": "http://10.164.0.11/identity/v3/users/78205c506b534738bc851d3e189a00c3"
+      }
+    }
+  ],
+  "links": {
+    "next": null,
+    "self": "http://10.164.0.11/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users",
+    "previous": null
+  }
+}

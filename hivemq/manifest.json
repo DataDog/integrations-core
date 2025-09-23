@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ba1769d1-c71b-4cf1-8169-8ce3b66629dd",
   "app_id": "hivemq",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,19 @@
     "title": "HiveMQ",
     "media": [],
     "classifier_tags": [
+      "Category::IoT",
+      "Category::Log Collection",
+      "Category::Message Queues",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Messaging",
-      "Category::Processing",
-      "Category::Log Collection"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/hivemq-opentelemetry-monitor-iot-applications/"
+      }
     ]
   },
   "author": {
@@ -26,7 +34,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "HiveMQ",
@@ -43,13 +50,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10101,
+      "auto_install": true
     },
     "dashboards": {
       "HiveMQ": "assets/dashboards/hivemq.json"
-    },
-    "logs": {
-      "source": "hivemq"
     }
   }
 }

@@ -13,10 +13,20 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Monitoring",
-      "Category::Autodiscovery"
+      "Category::Metrics",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/agent/openmetrics/"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/developers/openmetrics/"
+      }
     ]
   },
   "author": {
@@ -25,7 +35,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "OpenMetrics",
@@ -37,7 +46,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10045,
+      "auto_install": true
     }
   }
 }

@@ -23,7 +23,7 @@ def test_get_agent_release_requirements():
 
 def test_get_agent_requirements():
     with mock.patch('datadog_checks.dev.tooling.constants.get_root', return_value='foo'):
-        expected = os.path.join('foo', 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in')
+        expected = os.path.join('foo', 'agent_requirements.in')
         assert get_agent_requirements() == expected
 
 

@@ -1,0 +1,146 @@
+{
+    "nodes": [
+      {
+        "uuid": "bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+        "created_at": "2023-04-06T15:27:05+00:00",
+        "updated_at": "2023-04-11T19:10:40+00:00",
+        "automated_clean": null,
+        "bios_interface": "no-bios",
+        "boot_interface": "ipxe",
+        "boot_mode": null,
+        "clean_step": {},
+        "conductor_group": "",
+        "console_enabled": false,
+        "console_interface": "no-console",
+        "deploy_interface": "direct",
+        "deploy_step": {},
+        "description": null,
+        "driver": "ipmi",
+        "driver_info": {
+          "ipmi_address": "10.164.0.32",
+          "ipmi_username": "admin",
+          "ipmi_password": "******",
+          "ipmi_port": 6231
+        },
+        "driver_internal_info": {
+          "clean_steps": null,
+          "agent_erase_devices_iterations": 1,
+          "agent_erase_devices_zeroize": true,
+          "agent_continue_if_secure_erase_failed": false,
+          "agent_continue_if_ata_erase_failed": false,
+          "agent_enable_nvme_secure_erase": true,
+          "agent_enable_ata_secure_erase": true,
+          "disk_erasure_concurrency": 4,
+          "agent_erase_skip_read_only": false,
+          "last_power_state_change": "2023-04-06T16:54:04.258902",
+          "agent_version": "9.5.0.dev4",
+          "agent_last_heartbeat": "2023-04-06T15:32:56.433647",
+          "hardware_manager_version": {
+            "generic_hardware_manager": "1.1"
+          },
+          "agent_cached_clean_steps_refreshed": "2023-04-06T15:32:49.508661"
+        },
+        "extra": {},
+        "fault": "power failure",
+        "inspection_finished_at": null,
+        "inspection_started_at": null,
+        "inspect_interface": "no-inspect",
+        "instance_info": {},
+        "instance_uuid": null,
+        "last_error": "During sync_power_state, max retries exceeded for node bd7a61bb-5fe0-4c93-9628-55e312f9ef0e, node state None does not match expected state 'power on'. Updating DB state to 'None' Switching node to maintenance mode. Error: IPMI call failed: power status.",
+        "lessee": null,
+        "maintenance": true,
+        "maintenance_reason": "During sync_power_state, max retries exceeded for node bd7a61bb-5fe0-4c93-9628-55e312f9ef0e, node state None does not match expected state 'power on'. Updating DB state to 'None' Switching node to maintenance mode. Error: IPMI call failed: power status.",
+        "management_interface": "ipmitool",
+        "name": "node-1",
+        "network_data": {},
+        "network_interface": "flat",
+        "owner": "01b21103a92d4997ab09e46ff8346bd5",
+        "power_interface": "ipmitool",
+        "power_state": null,
+        "properties": {
+          "cpu_arch": "x86_64",
+          "capabilities": "boot_mode:uefi",
+          "vendor": "unknown",
+          "root_device": {
+            "vendor": "0x1af4"
+          }
+        },
+        "protected": false,
+        "protected_reason": null,
+        "provision_state": "available",
+        "provision_updated_at": "2023-04-06T15:33:46+00:00",
+        "raid_config": {},
+        "raid_interface": "no-raid",
+        "rescue_interface": "no-rescue",
+        "reservation": null,
+        "resource_class": "baremetal",
+        "retired": false,
+        "retired_reason": null,
+        "secure_boot": null,
+        "storage_interface": "noop",
+        "target_power_state": null,
+        "target_provision_state": null,
+        "target_raid_config": {},
+        "traits": [
+          "CUSTOM_GOLD"
+        ],
+        "vendor_interface": "ipmitool",
+        "links": [
+          {
+            "href": "http://34.141.226.224/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+            "rel": "self"
+          },
+          {
+            "href": "http://34.141.226.224/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e",
+            "rel": "bookmark"
+          }
+        ],
+        "conductor": "agent-integrations-openstack-ironic",
+        "allocation_uuid": null,
+        "chassis_uuid": "64c4893f-6a49-4b2c-b5d8-ab955367b504",
+        "ports": [
+          {
+            "href": "http://34.141.226.224/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
+            "rel": "self"
+          },
+          {
+            "href": "http://34.141.226.224/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/ports",
+            "rel": "bookmark"
+          }
+        ],
+        "states": [
+          {
+            "href": "http://34.141.226.224/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/states",
+            "rel": "self"
+          },
+          {
+            "href": "http://34.141.226.224/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/states",
+            "rel": "bookmark"
+          }
+        ],
+        "portgroups": [
+          {
+            "href": "http://34.141.226.224/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/portgroups",
+            "rel": "self"
+          },
+          {
+            "href": "http://34.141.226.224/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/portgroups",
+            "rel": "bookmark"
+          }
+        ],
+        "volume": [
+          {
+            "href": "http://34.141.226.224/baremetal/v1/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/volume",
+            "rel": "self"
+          },
+          {
+            "href": "http://34.141.226.224/baremetal/nodes/bd7a61bb-5fe0-4c93-9628-55e312f9ef0e/volume",
+            "rel": "bookmark"
+          }
+        ]
+      }
+    ],
+    "next": "http://34.141.226.224/baremetal/v1/nodes/detail?sort_key=id&sort_dir=asc&limit=1&marker=bd7a61bb-5fe0-4c93-9628-55e312f9ef0e"
+  }
+  

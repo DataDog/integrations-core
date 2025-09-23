@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import threading
 
-from six import iteritems
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
@@ -15,7 +13,7 @@ from .config import IBMMQConfig
 from .process_matcher import QueueManagerProcessMatcher
 
 try:
-    from typing import Any, Dict, List
+    from typing import Any, Dict, List  # noqa: F401
 except ImportError:
     pass
 
@@ -71,14 +69,20 @@ class IbmMqCheck(AgentCheck):
             queue_manager = connection.get_queue_manager_connection(self._config, self.log)
             self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self._config.tags, hostname=self._config.hostname)
         except Exception as e:
-            self.warning("cannot connect to queue manager: %s", e)
+            message = 'cannot connect to queue manager: {}'.format(e)
+            self.warning(message)
             self.service_check(
-                self.SERVICE_CHECK, AgentCheck.CRITICAL, self._config.tags, hostname=self._config.hostname
+                self.SERVICE_CHECK,
+                AgentCheck.CRITICAL,
+                self._config.tags,
+                message=message,
+                hostname=self._config.hostname,
             )
             self.service_check(
                 QueueMetricCollector.QUEUE_MANAGER_SERVICE_CHECK,
                 AgentCheck.CRITICAL,
                 self._config.tags,
+                message=message,
                 hostname=self._config.hostname,
             )
             self.reset_queue_manager_process_match()
@@ -115,7 +119,7 @@ class IbmMqCheck(AgentCheck):
 
     def send_metrics_from_properties(self, properties, metrics_map, prefix, tags):
         # type: (Dict, Dict, str, List[str]) -> None
-        for metric_name, (pymqi_type, metric_type) in iteritems(metrics_map):
+        for metric_name, (pymqi_type, metric_type) in metrics_map.items():
             metric_full_name = '{}.{}'.format(prefix, metric_name)
             if pymqi_type not in properties:
                 self.log.debug("MQ type `%s` not found in properties for metric `%s` and tags `%s`", metric_name, tags)

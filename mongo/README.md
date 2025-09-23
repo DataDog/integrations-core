@@ -11,9 +11,13 @@ Connect MongoDB to Datadog in order to:
 
 You can also create your own metrics using custom `find`, `count` and `aggregate` queries.
 
-**Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters.
+Enable [Database Monitoring][28] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides live and historical query snapshots, slow query metrics, database load, operation execution plans, and collections insights.
+
+**Note**: MongoDB v3.0+ is required for this integration. Integration of MongoDB Atlas with Datadog is only available on M10+ clusters. This integration also supports Alibaba ApsaraDB and Amazon DocumentDB Instance-Based clusters. DocumentDB Elastic clusters are not supported because they only expose the cluster (mongos) endpoints.
 
 ## Setup
+
+<div class="alert alert-info">This page describes the standard MongoDB Agent integration. If you are looking for the Database Monitoring product for MongoDB, see <a href="https://docs.datadoghq.com/database_monitoring" target="_blank">Datadog Database Monitoring</a>.</div>
 
 ### Installation
 
@@ -21,13 +25,15 @@ The MongoDB check is included in the [Datadog Agent][2] package. No additional i
 
 ### Architecture
 
-Most low-level metrics (uptime, storage size etc.) needs to be collected on every mongod node. Other higher-level metrics (collection/index statistics etc.) should be collected only once. For these reasons the way you configure the Agents depends on how your mongo cluster is deployed.
+**Note**: To install Database Monitoring for MongoDB, select your hosting solution in the [Database Monitoring documentation][29] for instructions.
+
+Most low-level metrics (uptime, storage size etc.) need to be collected on every `mongod` node. Other higher-level metrics (collection/index statistics, etc.) should be collected only once. For these reasons, the way you configure the Agents depends on how your MongoDB cluster is deployed.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Standalone" xxx -->
 #### Standalone
 
-To configure this integration for a single node MongoDB deployment:
+To configure this integration for a single-node MongoDB deployment:
 
 ##### Prepare MongoDB
 In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
@@ -37,26 +43,28 @@ In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` d
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
 
-# On MongoDB 2.x, use the addUser command.
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-
-# On MongoDB 3.x or higher, use the createUser command.
+# Create the user for the Datadog Agent.
 db.createUser({
   "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
   "roles": [
     { role: "read", db: "admin" },
     { role: "clusterMonitor", db: "admin" },
-    { role: "read", db: "local" }
+    { role: "read", db: "local" },
+    # Grant additional read-only access to the database you want to collect collection/index statistics from.
+    { role: "read", db: "mydb" },
+    { role: "read", db: "myanotherdb" },
+    # Alternatively, grant read-only access to all databases.
+    { role: "readAnyDatabase", db: "admin" }
   ]
 })
 ```
 
 ##### Configure the agents
-You only need a single agent, preferably running on the same node, to collect all the available mongo metrics. See below for configuration options.
+You only need a single agent, preferably running on the same node, to collect all the available MongoDB metrics. See below for configuration options.
 <!-- xxz tab xxx -->
-<!-- xxx tab "ReplicaSet" xxx -->
-#### ReplicaSet
+<!-- xxx tab "Replica Set" xxx -->
+#### Replica set
 
 To configure this integration for a MongoDB replica set:
 
@@ -68,24 +76,53 @@ In a Mongo shell, authenticate to the primary and create a read-only user for th
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
 
-# On MongoDB 2.x, use the addUser command.
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-
-# On MongoDB 3.x or higher, use the createUser command.
+# Create the user for the Datadog Agent.
 db.createUser({
   "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
   "roles": [
     { role: "read", db: "admin" },
     { role: "clusterMonitor", db: "admin" },
-    { role: "read", db: "local" }
+    { role: "read", db: "local" },
+    # Grant additional read-only access to the database you want to collect collection/index statistics from.
+    { role: "read", db: "mydb" },
+    { role: "read", db: "myanotherdb" },
+    # Alternatively, grant read-only access to all databases.
+    { role: "readAnyDatabase", db: "admin" }
   ]
 })
 ```
 
 ##### Configure the agents
-You need to configure one check instance for each member. See below for configuration options.
-**Note**: Monitoring of arbiter nodes is not supported remotely as mentioned in [MongoDB documentation][3]. Yet, any status change of an arbiter node is reported by the Agent connected to the primary.
+
+Install the Datadog Agent on each host in the MongoDB replica set and configure the Agent to connect to the replica on that host (`localhost`). Running an Agent on each host results in lower latency and execution times, and ensures that data is still connected in the event a host fails.
+
+For example, on the primary node:
+
+```yaml
+init_config:
+instances:
+  - hosts:
+      - mongo-primary:27017
+```
+
+On the secondary node:
+
+```yaml
+init_config:
+instances:
+  - hosts:
+      - mongo-secondary:27017
+```
+
+On the tertiary node:
+
+```yaml
+init_config:
+instances:
+  - hosts:
+      - mongo-tertiary:27017
+```
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Sharding" xxx -->
@@ -101,10 +138,7 @@ For each shard in your cluster, connect to the primary of the replica set and cr
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
 
-# On MongoDB 2.x, use the addUser command.
-db.addUser("datadog", "<UNIQUEPASSWORD>", true)
-
-# On MongoDB 3.x or higher, use the createUser command.
+# Create the user for the Datadog Agent.
 db.createUser({
   "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
@@ -178,6 +212,81 @@ To configure this check for an Agent running on a host:
        #
        options:
          authSource: admin
+   ```
+
+2. [Restart the Agent][6].
+
+##### Database Autodiscovery
+
+Starting from Datadog Agent v7.56, you can enable database autodiscovery to automatically collect metrics from all your databases on the MongoDB instance. 
+Please note that database autodiscovery is disabled by default. Read access to the autodiscovered databases is required to collect metrics from them.
+To enable it, add the following configuration to your `mongo.d/conf.yaml` file:
+
+```yaml
+   init_config:
+
+   instances:
+       ## @param hosts - list of strings - required
+       ## Hosts to collect metrics from, as is appropriate for your deployment topology.
+       ## E.g. for a standalone deployment, specify the hostname and port of the mongod instance.
+       ## For replica sets or sharded clusters, see instructions in the sample conf.yaml.
+       ## Only specify multiple hosts when connecting through mongos
+       #
+     - hosts:
+         - <HOST>:<PORT>
+
+       ## @param username - string - optional
+       ## The username to use for authentication.
+       #
+       username: datadog
+
+       ## @param password - string - optional
+       ## The password to use for authentication.
+       #
+       password: <UNIQUE_PASSWORD>
+
+       ## @param options - mapping - optional
+       ## Connection options. For a complete list, see:
+       ## https://docs.mongodb.com/manual/reference/connection-string/#connections-connection-options
+       #
+       options:
+         authSource: admin
+
+       ## @param database_autodiscovery - mapping - optional
+       ## Enable database autodiscovery to automatically collect metrics from all your MongoDB databases.
+       #
+       database_autodiscovery:
+         ## @param enabled - boolean - required
+         ## Enable database autodiscovery.
+         #
+         enabled: true
+
+         ## @param include - list of strings - optional
+         ## List of databases to include in the autodiscovery. Use regular expressions to match multiple databases.
+         ## For example, to include all databases starting with "mydb", use "^mydb.*".
+         ## By default, include is set to ".*" and all databases are included.
+         #
+         include:
+            - "^mydb.*"
+
+         ## @param exclude - list of strings - optional
+         ## List of databases to exclude from the autodiscovery. Use regular expressions to match multiple databases.
+         ## For example, to exclude all databases starting with "mydb", use "^mydb.*".
+         ## When the exclude list conflicts with include list, the exclude list takes precedence.
+         #
+         exclude:
+            - "^mydb2.*"
+            - "admin$"
+
+         ## @param max_databases - integer - optional
+         ## Maximum number of databases to collect metrics from. The default value is 100.
+         #
+         max_databases: 100
+
+         ## @param refresh_interval - integer - optional
+         ## Interval in seconds to refresh the list of databases. The default value is 600 seconds.
+         #
+         refresh_interval: 600
    ```
 
 2. [Restart the Agent][6].
@@ -281,9 +390,9 @@ metadata:
     ad.datadoghq.com/mongo.instances: |
       [
         {
-          "hosts": ["%%host%%:%%port%%"], 
-          "username": "datadog", 
-          "password": "<UNIQUEPASSWORD>", 
+          "hosts": ["%%host%%:%%port%%"],
+          "username": "datadog",
+          "password": "<UNIQUEPASSWORD>",
           "database": "<DATABASE>"
         }
       ]
@@ -306,9 +415,9 @@ metadata:
           "init_config": {},
           "instances": [
             {
-              "hosts": ["%%host%%:%%port%%"], 
-              "username": "datadog", 
-              "password": "<UNIQUEPASSWORD>", 
+              "hosts": ["%%host%%:%%port%%"],
+              "username": "datadog",
+              "password": "<UNIQUEPASSWORD>",
               "database": "<DATABASE>"
             }
           ]
@@ -432,23 +541,28 @@ See [metadata.csv][22] for a list of metrics provided by this check.
 
 See the [MongoDB 3.0 Manual][23] for more detailed descriptions of some of these metrics.
 
-**NOTE**: The following metrics are NOT collected by default, use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
+#### Additional metrics
 
-| metric prefix            | what to add to `additional_metrics` to collect it |
-| ------------------------ | ------------------------------------------------- |
-| mongodb.collection       | collection                                        |
-| mongodb.commands         | top                                               |
-| mongodb.getmore          | top                                               |
-| mongodb.insert           | top                                               |
-| mongodb.queries          | top                                               |
-| mongodb.readLock         | top                                               |
-| mongodb.writeLock        | top                                               |
-| mongodb.remove           | top                                               |
-| mongodb.total            | top                                               |
-| mongodb.update           | top                                               |
-| mongodb.writeLock        | top                                               |
-| mongodb.tcmalloc         | tcmalloc                                          |
-| mongodb.metrics.commands | metrics.commands                                  |
+The following metrics are **not** collected by default. Use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
+
+| metric prefix                     | what to add to `additional_metrics` to collect it |
+| --------------------------------- | ------------------------------------------------- |
+| mongodb.collection                | collection                                        |
+| mongodb.usage.commands            | top                                               |
+| mongodb.usage.getmore             | top                                               |
+| mongodb.usage.insert              | top                                               |
+| mongodb.usage.queries             | top                                               |
+| mongodb.usage.readLock            | top                                               |
+| mongodb.usage.writeLock           | top                                               |
+| mongodb.usage.remove              | top                                               |
+| mongodb.usage.total               | top                                               |
+| mongodb.usage.update              | top                                               |
+| mongodb.usage.writeLock           | top                                               |
+| mongodb.tcmalloc                  | tcmalloc                                          |
+| mongodb.metrics.commands          | metrics.commands                                  |
+| mongodb.chunks.jumbo              | jumbo_chunks                                      |
+| mongodb.chunks.total              | jumbo_chunks                                      |
+| mongodb.sharded_data_distribution | sharded_data_distribution                         |
 
 ### Events
 
@@ -471,7 +585,7 @@ Additional helpful documentation, links, and articles:
 - [Monitoring MongoDB performance metrics (MMAP)][27]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: /account/settings/agent/latest
 [3]: https://docs.mongodb.com/manual/core/replica-set-arbiter/#authentication
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/mongo/datadog_checks/mongo/data/conf.yaml.example
@@ -497,3 +611,5 @@ Additional helpful documentation, links, and articles:
 [25]: https://docs.datadoghq.com/help/
 [26]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
 [27]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
+[28]: https://docs.datadoghq.com/database_monitoring/
+[29]: https://docs.datadoghq.com/database_monitoring/#mongodb

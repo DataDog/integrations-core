@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "44e491e1-f7c3-447a-b597-e740196479e0",
   "app_id": "powerdns",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,13 +13,13 @@
     "title": "Power DNS Recursor",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Web",
+      "Category::Caching",
+      "Category::Log Collection",
       "Category::Network",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -27,7 +28,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "PowerDNS Recursor",
@@ -48,16 +48,15 @@
       "process_signatures": [
         "pdns_server",
         "systemctl start pdns@"
-      ]
+      ],
+      "source_type_id": 144,
+      "auto_install": true
     },
     "dashboards": {
       "powerdns": "assets/dashboards/powerdns_dashboard.json"
     },
     "saved_views": {
       "powerdns_processes": "assets/saved_views/powerdns_processes.json"
-    },
-    "logs": {
-      "source": "powerdns"
     }
   }
 }

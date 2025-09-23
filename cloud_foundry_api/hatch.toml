@@ -1,0 +1,12 @@
+[env.collectors.datadog-checks]
+check-types = false
+
+mypy-deps = [
+    "types-mock==0.1.5",
+]
+
+[envs.default]
+e2e-env = false
+
+[[envs.default.matrix]]
+python = ["3.12"]

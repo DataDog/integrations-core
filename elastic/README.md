@@ -1,6 +1,6 @@
 # Elasticsearch Integration
 
-![Elastic search dashboard][1]
+![Elasticsearch dashboard][1]
 
 ## Overview
 
@@ -36,6 +36,16 @@ To configure this check for an Agent running on a host:
      ## fetch statistics from the nodes and information about the cluster health.
      #
      - url: http://localhost:9200
+
+      ## @param username - string - optional
+      ## The username to use if services are behind basic or digest auth.
+      #
+      # username: <USERNAME>
+
+      ## @param password - string - optional
+      ## The password to use if services are behind basic or NTLM auth.
+      #
+      # password: <PASSWORD>
    ```
 
     **Notes**:
@@ -59,7 +69,9 @@ To configure this check for an Agent running on a host:
       - To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
       - All requests to the Amazon ES configuration API must be signed. See the [Making and signing OpenSearch Service requests][6] for details.
       - The `aws` auth type relies on [boto3][7] to automatically gather AWS credentials from `.aws/credentials`. Use `auth_type: basic` in the `conf.yaml` and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
-      - You must create a user and a role (if you don't already have them) in Elasticsearch with the proper permissions to monitor. This can be done through the REST API offered by Elasticsearch, or through the Kibana UI. Include the following properties in the created role:
+      - You must create a user and a role (if you don't already have them) in Elasticsearch with the proper permissions to monitor. This can be done through the REST API offered by Elasticsearch, or through the Kibana UI.
+      - If you have enabled security features in Elasticsearch, you can use `monitor` or `manage` privilege while using the API to make the calls to the Elasticsearch indices.
+      - Include the following properties in the created role:
         ```json
         name = "datadog"
         indices {
@@ -77,11 +89,23 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][8].
 
-###### Custom Queries
+###### Custom queries
 
-The ElasticSearch integration allows you to collect custom metrics through custom queries by using the `custom_queries` configuration option. 
+The Elasticsearch integration allows you to collect custom metrics through custom queries by using the `custom_queries` configuration option. A custom query endpoint can collect multiple metrics and tags.
 
-**Note:** When running custom queries, use a read only account to ensure that the ElasticSearch instance does not change.
+Each custom query has the following parameters:
+
+- `endpoint` (required): The Elasticsearch API endpoint to query.
+- `data_path` (required): The JSON path up to (not including) the metric. Cannot contain wildcards. For example: if you are querying for the size of a parent circuit breaker, and the full path is `breakers.parent.estimated_size_in_bytes`, then the `data_path` is `breakers.parent`.
+- `columns` (required): A list representing the data to be collected from the JSON query. Each item in this list includes:
+   - `value_path` (required): The JSON path from the `data_path` to the metric. This path can include string keys and list indices. For example: if you are querying for the size of a parent circuit breaker, and the full path is `breakers.parent.estimated_size_in_bytes`, then the `value_path` is `estimated_size_in_bytes`.
+   - `name` (required): The full metric name sent to Datadog. If you also set `type` to `tag`, then every metric collected by this query is tagged with this name.
+   - `type` (optional): Designates the type of data sent. Possible values: `gauge`, `monotonic_count`, `rate`, `tag`. Defaults to `gauge`.
+- `payload` (optional): If declared, turns the GET request into a POST request. Use YAML formatting and a read-only user when writing custom queries with a payload.
+
+**Note:** When running custom queries, use a read only account to ensure that the Elasticsearch instance does not change.
+
+Examples:
 
 ```yaml
 custom_queries:
@@ -103,12 +127,27 @@ custom_queries:
 ```
 The custom query sends as a `GET` request. If you use an optional `payload` parameter, the request sends as a `POST` request. 
 
+`value_path` may either be string keys or list indices. Example:
+```json
+{
+  "foo": {
+    "bar": [
+      "result0",
+      "result1"
+    ]
+  }
+}
+```
+
+`value_path: foo.bar.1` returns the value `result1`.
+
+
 ##### Trace collection
 
 Datadog APM integrates with Elasticsearch to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:
 
 1. [Enable trace collection in Datadog][9].
-2. [Instrument your application that makes requests to ElasticSearch][10].
+2. [Instrument your application that makes requests to Elasticsearch][10].
 
 ##### Log collection
 
@@ -393,6 +432,8 @@ By default, not all of the following metrics are sent by the Agent. To send all 
 - `pshard_stats` sends **elasticsearch.primaries.\*** and **elasticsearch.indices.count** metrics
 - `index_stats` sends **elasticsearch.index.\*** metrics
 - `pending_task_stats` sends **elasticsearch.pending\_\*** metrics
+- `slm_stats` sends **elasticsearch.slm.\*** metrics
+- `cat_allocation_stats` sends **elasticsearch.disk.\*** metrics
 
 ### Metrics
 
@@ -417,7 +458,7 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/elastic/datadog_checks/elastic/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags?tab=noncontainerizedenvironments#file-location

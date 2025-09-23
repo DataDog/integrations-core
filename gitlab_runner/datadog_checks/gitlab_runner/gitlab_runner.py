@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from copy import deepcopy
+from urllib.parse import urlparse
 
 import requests
-from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException

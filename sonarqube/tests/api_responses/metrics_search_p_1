@@ -1,0 +1,1016 @@
+{
+	"metrics": [{
+		"id": "AYTSamBUhdvoa3XoFHiE",
+		"key": "new_technical_debt",
+		"type": "WORK_DUR",
+		"name": "Added Technical Debt",
+		"description": "Added technical debt",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhr",
+		"key": "blocker_violations",
+		"type": "INT",
+		"name": "Blocker Issues",
+		"description": "Blocker issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh9",
+		"key": "bugs",
+		"type": "INT",
+		"name": "Bugs",
+		"description": "Bugs",
+		"domain": "Reliability",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHg6",
+		"key": "classes",
+		"type": "INT",
+		"name": "Classes",
+		"description": "Classes",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh7",
+		"key": "code_smells",
+		"type": "INT",
+		"name": "Code Smells",
+		"description": "Code Smells",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhN",
+		"key": "cognitive_complexity",
+		"type": "INT",
+		"name": "Cognitive Complexity",
+		"description": "Cognitive complexity",
+		"domain": "Complexity",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBQhdvoa3XoFHhB",
+		"key": "comment_lines",
+		"type": "INT",
+		"name": "Comment Lines",
+		"description": "Number of comment lines",
+		"domain": "Size",
+		"direction": 1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBQhdvoa3XoFHhC",
+		"key": "comment_lines_density",
+		"type": "PERCENT",
+		"name": "Comments (%)",
+		"description": "Comments balanced by ncloc + comment lines",
+		"domain": "Size",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBWhdvoa3XoFHid",
+		"key": "comment_lines_data",
+		"type": "DATA",
+		"name": "comment_lines_data",
+		"domain": "Size",
+		"direction": 0,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhI",
+		"key": "class_complexity",
+		"type": "FLOAT",
+		"name": "Complexity / Class",
+		"description": "Complexity average by class",
+		"domain": "Complexity",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": true,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBRhdvoa3XoFHhG",
+		"key": "file_complexity",
+		"type": "FLOAT",
+		"name": "Complexity / File",
+		"description": "Complexity average by file",
+		"domain": "Complexity",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": true,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhK",
+		"key": "function_complexity",
+		"type": "FLOAT",
+		"name": "Complexity / Function",
+		"description": "Complexity average by function",
+		"domain": "Complexity",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": true,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhH",
+		"key": "complexity_in_classes",
+		"type": "INT",
+		"name": "Complexity in Classes",
+		"description": "Cyclomatic complexity in classes",
+		"domain": "Complexity",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhJ",
+		"key": "complexity_in_functions",
+		"type": "INT",
+		"name": "Complexity in Functions",
+		"description": "Cyclomatic complexity in functions",
+		"domain": "Complexity",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhg",
+		"key": "branch_coverage",
+		"type": "PERCENT",
+		"name": "Condition Coverage",
+		"description": "Condition coverage",
+		"domain": "Coverage",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhh",
+		"key": "new_branch_coverage",
+		"type": "PERCENT",
+		"name": "Condition Coverage on New Code",
+		"description": "Condition coverage of new/changed code",
+		"domain": "Coverage",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhc",
+		"key": "conditions_to_cover",
+		"type": "INT",
+		"name": "Conditions to Cover",
+		"description": "Conditions to cover",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhd",
+		"key": "new_conditions_to_cover",
+		"type": "INT",
+		"name": "Conditions to Cover on New Code",
+		"description": "Conditions to cover on new code",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh6",
+		"key": "confirmed_issues",
+		"type": "INT",
+		"name": "Confirmed Issues",
+		"description": "Confirmed issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhU",
+		"key": "coverage",
+		"type": "PERCENT",
+		"name": "Coverage",
+		"description": "Coverage by tests",
+		"domain": "Coverage",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhV",
+		"key": "new_coverage",
+		"type": "PERCENT",
+		"name": "Coverage on New Code",
+		"description": "Coverage of new/changed code",
+		"domain": "Coverage",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHhs",
+		"key": "critical_violations",
+		"type": "INT",
+		"name": "Critical Issues",
+		"description": "Critical issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBRhdvoa3XoFHhF",
+		"key": "complexity",
+		"type": "INT",
+		"name": "Cyclomatic Complexity",
+		"description": "Cyclomatic complexity",
+		"domain": "Complexity",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBWhdvoa3XoFHii",
+		"key": "last_commit_date",
+		"type": "MILLISEC",
+		"name": "Date of Last Commit",
+		"domain": "SCM",
+		"direction": 0,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiH",
+		"key": "development_cost",
+		"type": "STRING",
+		"name": "Development Cost",
+		"description": "Development cost",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": true
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiI",
+		"key": "new_development_cost",
+		"type": "FLOAT",
+		"name": "Development Cost on New Code",
+		"description": "Development cost on new code",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": true,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHg8",
+		"key": "directories",
+		"type": "INT",
+		"name": "Directories",
+		"description": "Directories",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhk",
+		"key": "duplicated_blocks",
+		"type": "INT",
+		"name": "Duplicated Blocks",
+		"description": "Duplicated blocks",
+		"domain": "Duplications",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhl",
+		"key": "new_duplicated_blocks",
+		"type": "INT",
+		"name": "Duplicated Blocks on New Code",
+		"description": "Duplicated blocks on new code",
+		"domain": "Duplications",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhm",
+		"key": "duplicated_files",
+		"type": "INT",
+		"name": "Duplicated Files",
+		"description": "Duplicated files",
+		"domain": "Duplications",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhi",
+		"key": "duplicated_lines",
+		"type": "INT",
+		"name": "Duplicated Lines",
+		"description": "Duplicated lines",
+		"domain": "Duplications",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhn",
+		"key": "duplicated_lines_density",
+		"type": "PERCENT",
+		"name": "Duplicated Lines (%)",
+		"description": "Duplicated lines balanced by statements",
+		"domain": "Duplications",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBThdvoa3XoFHho",
+		"key": "new_duplicated_lines_density",
+		"type": "PERCENT",
+		"name": "Duplicated Lines (%) on New Code",
+		"description": "Duplicated lines (%) on new code balanced by statements",
+		"domain": "Duplications",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhj",
+		"key": "new_duplicated_lines",
+		"type": "INT",
+		"name": "Duplicated Lines on New Code",
+		"description": "Duplicated Lines on New Code",
+		"domain": "Duplications",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhp",
+		"key": "duplications_data",
+		"type": "DATA",
+		"name": "Duplication Details",
+		"description": "Duplications details",
+		"domain": "Duplications",
+		"direction": 0,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiL",
+		"key": "effort_to_reach_maintainability_rating_a",
+		"type": "WORK_DUR",
+		"name": "Effort to Reach Maintainability Rating A",
+		"description": "Effort to reach maintainability rating A",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBWhdvoa3XoFHie",
+		"key": "executable_lines_data",
+		"type": "DATA",
+		"name": "executable_lines_data",
+		"domain": "Coverage",
+		"direction": 0,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh2",
+		"key": "false_positive_issues",
+		"type": "INT",
+		"name": "False Positive Issues",
+		"description": "False positive issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhM",
+		"key": "file_complexity_distribution",
+		"type": "DISTRIB",
+		"name": "File Distribution / Complexity",
+		"description": "Files distribution /complexity",
+		"domain": "Complexity",
+		"direction": 0,
+		"qualitative": true,
+		"hidden": true
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHg7",
+		"key": "files",
+		"type": "INT",
+		"name": "Files",
+		"description": "Number of files",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhL",
+		"key": "function_complexity_distribution",
+		"type": "DISTRIB",
+		"name": "Function Distribution / Complexity",
+		"description": "Functions distribution /complexity",
+		"domain": "Complexity",
+		"direction": 0,
+		"qualitative": true,
+		"hidden": true
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHg9",
+		"key": "functions",
+		"type": "INT",
+		"name": "Functions",
+		"description": "Functions",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBOhdvoa3XoFHg1",
+		"key": "generated_lines",
+		"type": "INT",
+		"name": "Generated Lines",
+		"description": "Number of generated lines",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHg5",
+		"key": "generated_ncloc",
+		"type": "INT",
+		"name": "Generated Lines of Code",
+		"description": "Generated non Commenting Lines of Code",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHhv",
+		"key": "info_violations",
+		"type": "INT",
+		"name": "Info Issues",
+		"description": "Info issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhq",
+		"key": "violations",
+		"type": "INT",
+		"name": "Issues",
+		"description": "Issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBThdvoa3XoFHha",
+		"key": "line_coverage",
+		"type": "PERCENT",
+		"name": "Line Coverage",
+		"description": "Line coverage",
+		"domain": "Coverage",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBThdvoa3XoFHhb",
+		"key": "new_line_coverage",
+		"type": "PERCENT",
+		"name": "Line Coverage on New Code",
+		"description": "Line coverage of added/changed code",
+		"domain": "Coverage",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBOhdvoa3XoFHg0",
+		"key": "lines",
+		"type": "INT",
+		"name": "Lines",
+		"description": "Lines",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHg2",
+		"key": "ncloc",
+		"type": "INT",
+		"name": "Lines of Code",
+		"description": "Non commenting lines of code",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHg4",
+		"key": "ncloc_language_distribution",
+		"type": "DATA",
+		"name": "Lines of Code Per Language",
+		"description": "Non Commenting Lines of Code Distributed By Language",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhW",
+		"key": "lines_to_cover",
+		"type": "INT",
+		"name": "Lines to Cover",
+		"description": "Lines to cover",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhX",
+		"key": "new_lines_to_cover",
+		"type": "INT",
+		"name": "Lines to Cover on New Code",
+		"description": "Lines to cover on new code",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiF",
+		"key": "sqale_rating",
+		"type": "RATING",
+		"name": "Maintainability Rating",
+		"description": "A-to-E rating based on the technical debt ratio",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiG",
+		"key": "new_maintainability_rating",
+		"type": "RATING",
+		"name": "Maintainability Rating on New Code",
+		"description": "Maintainability rating on new code",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHht",
+		"key": "major_violations",
+		"type": "INT",
+		"name": "Major Issues",
+		"description": "Major issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHhu",
+		"key": "minor_violations",
+		"type": "INT",
+		"name": "Minor Issues",
+		"description": "Minor issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBWhdvoa3XoFHic",
+		"key": "ncloc_data",
+		"type": "DATA",
+		"name": "ncloc_data",
+		"domain": "Size",
+		"direction": 0,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHhx",
+		"key": "new_blocker_violations",
+		"type": "INT",
+		"name": "New Blocker Issues",
+		"description": "New Blocker issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh-",
+		"key": "new_bugs",
+		"type": "INT",
+		"name": "New Bugs",
+		"description": "New Bugs",
+		"domain": "Reliability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh8",
+		"key": "new_code_smells",
+		"type": "INT",
+		"name": "New Code Smells",
+		"description": "New Code Smells",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHhy",
+		"key": "new_critical_violations",
+		"type": "INT",
+		"name": "New Critical Issues",
+		"description": "New Critical issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh1",
+		"key": "new_info_violations",
+		"type": "INT",
+		"name": "New Info Issues",
+		"description": "New Info issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHhw",
+		"key": "new_violations",
+		"type": "INT",
+		"name": "New Issues",
+		"description": "New issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHg3",
+		"key": "new_lines",
+		"type": "INT",
+		"name": "New Lines",
+		"description": "New lines",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHhz",
+		"key": "new_major_violations",
+		"type": "INT",
+		"name": "New Major Issues",
+		"description": "New Major issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh0",
+		"key": "new_minor_violations",
+		"type": "INT",
+		"name": "New Minor Issues",
+		"description": "New Minor issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHiC",
+		"key": "new_security_hotspots",
+		"type": "INT",
+		"name": "New Security Hotspots",
+		"description": "New Security Hotspots",
+		"domain": "SecurityReview",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHiA",
+		"key": "new_vulnerabilities",
+		"type": "INT",
+		"name": "New Vulnerabilities",
+		"description": "New Vulnerabilities",
+		"domain": "Security",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBWhdvoa3XoFHij",
+		"key": "unanalyzed_c",
+		"type": "INT",
+		"name": "Number of unanalyzed c files",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBWhdvoa3XoFHik",
+		"key": "unanalyzed_cpp",
+		"type": "INT",
+		"name": "Number of unanalyzed c++ files",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh4",
+		"key": "open_issues",
+		"type": "INT",
+		"name": "Open Issues",
+		"description": "Open issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBWhdvoa3XoFHih",
+		"key": "quality_profiles",
+		"type": "DATA",
+		"name": "Profiles",
+		"description": "Details of quality profiles used during analysis",
+		"domain": "General",
+		"direction": 0,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHhA",
+		"key": "projects",
+		"type": "INT",
+		"name": "Project branches",
+		"description": "Number of project branches",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHg_",
+		"key": "public_api",
+		"type": "INT",
+		"name": "Public API",
+		"description": "Public API",
+		"domain": "Documentation",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBQhdvoa3XoFHhD",
+		"key": "public_documented_api_density",
+		"type": "PERCENT",
+		"name": "Public Documented API (%)",
+		"description": "Public documented classes and functions balanced by ncloc",
+		"domain": "Documentation",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": true,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBRhdvoa3XoFHhE",
+		"key": "public_undocumented_api",
+		"type": "INT",
+		"name": "Public Undocumented API",
+		"description": "Public undocumented classes, functions and variables",
+		"domain": "Documentation",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": true
+	}, {
+		"id": "AYTSamBWhdvoa3XoFHig",
+		"key": "quality_gate_details",
+		"type": "DATA",
+		"name": "Quality Gate Details",
+		"description": "The project detailed status with regard to its quality gate",
+		"domain": "General",
+		"direction": 0,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBWhdvoa3XoFHif",
+		"key": "alert_status",
+		"type": "LEVEL",
+		"name": "Quality Gate Status",
+		"description": "The project status with regard to its quality gate.",
+		"domain": "Releasability",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiO",
+		"key": "reliability_rating",
+		"type": "RATING",
+		"name": "Reliability Rating",
+		"description": "Reliability rating",
+		"domain": "Reliability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiP",
+		"key": "new_reliability_rating",
+		"type": "RATING",
+		"name": "Reliability Rating on New Code",
+		"description": "Reliability rating on new code",
+		"domain": "Reliability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiM",
+		"key": "reliability_remediation_effort",
+		"type": "WORK_DUR",
+		"name": "Reliability Remediation Effort",
+		"description": "Reliability Remediation Effort",
+		"domain": "Reliability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiN",
+		"key": "new_reliability_remediation_effort",
+		"type": "WORK_DUR",
+		"name": "Reliability Remediation Effort on New Code",
+		"description": "Reliability remediation effort on new code",
+		"domain": "Reliability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHh5",
+		"key": "reopened_issues",
+		"type": "INT",
+		"name": "Reopened Issues",
+		"description": "Reopened issues",
+		"domain": "Issues",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHiB",
+		"key": "security_hotspots",
+		"type": "INT",
+		"name": "Security Hotspots",
+		"description": "Security Hotspots",
+		"domain": "SecurityReview",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiW",
+		"key": "security_hotspots_reviewed",
+		"type": "PERCENT",
+		"name": "Security Hotspots Reviewed",
+		"description": "Percentage of Security Hotspots Reviewed",
+		"domain": "SecurityReview",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiX",
+		"key": "new_security_hotspots_reviewed",
+		"type": "PERCENT",
+		"name": "Security Hotspots Reviewed on New Code",
+		"description": "Percentage of Security Hotspots Reviewed on New Code",
+		"domain": "SecurityReview",
+		"direction": 1,
+		"qualitative": true,
+		"hidden": false,
+		"decimalScale": 1
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiS",
+		"key": "security_rating",
+		"type": "RATING",
+		"name": "Security Rating",
+		"description": "Security rating",
+		"domain": "Security",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiT",
+		"key": "new_security_rating",
+		"type": "RATING",
+		"name": "Security Rating on New Code",
+		"description": "Security rating on new code",
+		"domain": "Security",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiQ",
+		"key": "security_remediation_effort",
+		"type": "WORK_DUR",
+		"name": "Security Remediation Effort",
+		"description": "Security remediation effort",
+		"domain": "Security",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiR",
+		"key": "new_security_remediation_effort",
+		"type": "WORK_DUR",
+		"name": "Security Remediation Effort on New Code",
+		"description": "Security remediation effort on new code",
+		"domain": "Security",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiU",
+		"key": "security_review_rating",
+		"type": "RATING",
+		"name": "Security Review Rating",
+		"description": "Security Review Rating",
+		"domain": "SecurityReview",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiV",
+		"key": "new_security_review_rating",
+		"type": "RATING",
+		"name": "Security Review Rating on New Code",
+		"description": "Security Review Rating on New Code",
+		"domain": "SecurityReview",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiY",
+		"key": "security_hotspots_reviewed_status",
+		"type": "INT",
+		"name": "Security Review Reviewed Status",
+		"description": "Security Review Reviewed Status",
+		"domain": "SecurityReview",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHia",
+		"key": "new_security_hotspots_reviewed_status",
+		"type": "INT",
+		"name": "Security Review Reviewed Status on New Code",
+		"description": "Security Review Reviewed Status on New Code",
+		"domain": "SecurityReview",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBVhdvoa3XoFHiZ",
+		"key": "security_hotspots_to_review_status",
+		"type": "INT",
+		"name": "Security Review To Review Status",
+		"description": "Security Review To Review Status",
+		"domain": "SecurityReview",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBWhdvoa3XoFHib",
+		"key": "new_security_hotspots_to_review_status",
+		"type": "INT",
+		"name": "Security Review To Review Status on New Code",
+		"description": "Security Review To Review Status on New Code",
+		"domain": "SecurityReview",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": true
+	}, {
+		"id": "AYTSamBShdvoa3XoFHhR",
+		"key": "skipped_tests",
+		"type": "INT",
+		"name": "Skipped Unit Tests",
+		"description": "Number of skipped unit tests",
+		"domain": "Coverage",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}, {
+		"id": "AYTSamBPhdvoa3XoFHg-",
+		"key": "statements",
+		"type": "INT",
+		"name": "Statements",
+		"description": "Number of statements",
+		"domain": "Size",
+		"direction": -1,
+		"qualitative": false,
+		"hidden": false
+	}, {
+		"id": "AYTSamBUhdvoa3XoFHiD",
+		"key": "sqale_index",
+		"type": "WORK_DUR",
+		"name": "Technical Debt",
+		"description": "Total effort (in hours) to fix all the issues on the component and therefore to comply to all the requirements.",
+		"domain": "Maintainability",
+		"direction": -1,
+		"qualitative": true,
+		"hidden": false
+	}],
+	"total": 114,
+	"p": 1,
+	"ps": 100
+}

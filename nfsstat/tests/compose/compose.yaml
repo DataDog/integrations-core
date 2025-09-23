@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   nfs-server:
     image: itsthenetwork/nfs-server-alpine:12
@@ -13,7 +11,7 @@ services:
       - ./nfs-share:/nfs-share
 
   nfs-client:
-    image: debian:9
+    image: debian:11
     # The container must be privileged to mount a volume
     # cap_add: sys_admin is not enough for the CI
     privileged: true

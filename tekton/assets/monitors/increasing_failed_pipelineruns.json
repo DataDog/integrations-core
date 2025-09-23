@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2024-02-26",
+  "last_updated_at": "2024-02-26",
+  "title": "Increasing number of failed PipelineRuns",
+  "tags": [
+    "integration:tekton"
+  ],
+  "description": "A significant number of failed PipelineRuns can be the sign of an underlying bigger issue within your cluster. This monitor tracks changes in the number of failed Pipelines in your cluster and warns you if the number is increasing.",
+  "definition": {
+    "message": "The number of failed Pipelines is increasing.",
+    "name": "[Tekton] Increasing number of failed Pipelines",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 360,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "thresholds": {
+        "critical": 50,
+        "warning": 30
+      },
+      "timeout_h": 0
+    },
+    "query": "change(sum(last_5m),last_1h):sum:tekton.pipelines_controller.pipelinerun.count{status:failed}.as_count() > 50",
+    "tags": [
+      "integration:tekton"
+    ],
+    "type": "query alert"
+  }
+}

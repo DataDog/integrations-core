@@ -1,17 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import logging
-from typing import Any, Callable, Dict, List, Set
-
-from six import iteritems
+import logging  # noqa: F401
+from typing import Any, Callable, Dict, List, Set  # noqa: F401
 
 from datadog_checks.base import AgentCheck, to_string
-from datadog_checks.base.types import ServiceCheck
+from datadog_checks.base.types import ServiceCheck  # noqa: F401
+from datadog_checks.ibm_mq import metrics
+from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
 from datadog_checks.ibm_mq.metrics import GAUGE
-
-from .. import metrics
-from ..config import IBMMQConfig
 
 try:
     import pymqi
@@ -22,6 +19,12 @@ else:
     # Since pymqi is not be available/installed on win/macOS when running e2e,
     # we load the following constants only pymqi import succeed
     SUPPORTED_QUEUE_TYPES = [pymqi.CMQC.MQQT_LOCAL, pymqi.CMQC.MQQT_MODEL]
+
+    # https://www.ibm.com/docs/en/ibm-mq/9.3?topic=queues-usage-mqlong
+    KNOWN_USAGES = {
+        pymqi.CMQC.MQUS_NORMAL: 'normal',
+        pymqi.CMQC.MQUS_TRANSMISSION: 'transmission',
+    }
 
 
 class QueueMetricCollector(object):
@@ -34,9 +37,7 @@ class QueueMetricCollector(object):
         self.service_check = service_check  # type: Callable[[str, ServiceCheck, List[str]], None]
         self.warning = warning  # type: Callable
         self.send_metric = send_metric  # type: Callable[[str, str, Any, List[str]], None]
-        self.send_metrics_from_properties = (
-            send_metrics_from_properties
-        )  # type: Callable[[Dict, Dict, str, List[str]], None]
+        self.send_metrics_from_properties = send_metrics_from_properties  # type: Callable[[Dict, Dict, str, List[str]], None]
         self.log = log  # type: logging.LoggerAdapter
         self.user_provided_queues = set(self.config.queues)  # type: Set[str]
 
@@ -52,31 +53,40 @@ class QueueMetricCollector(object):
                     queue_tags.extend(q_tags)
 
             try:
-                self.queue_stats(queue_manager, queue_name, queue_tags)
+                enriched_tags = self.queue_stats(queue_manager, queue_name, queue_tags)
                 # some system queues don't have PCF metrics
                 # so we don't collect those metrics from those queues
                 if queue_name not in self.config.DISALLOWED_QUEUES:
-                    self.get_pcf_queue_status_metrics(queue_manager, queue_name, queue_tags)
+                    self.get_pcf_queue_status_metrics(queue_manager, queue_name, enriched_tags)
 
                     # if collect queue reset metrics is disabled, skip this
                     if self.config.collect_reset_queue_metrics:
-                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
+                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, enriched_tags)
                 self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags, hostname=self.config.hostname)
             except Exception as e:
                 self.warning('Cannot connect to queue %s: %s', queue_name, e)
                 self.service_check(
-                    self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags, hostname=self.config.hostname
+                    self.QUEUE_SERVICE_CHECK,
+                    AgentCheck.CRITICAL,
+                    queue_tags,
+                    message=str(e),
+                    hostname=self.config.hostname,
                 )
 
     def discover_queues(self, queue_manager):
         # type: (pymqi.QueueManager) -> Set[str]
+
+        _discover = (
+            self._discover_queues_via_names if self.config.auto_discover_queues_via_names else self._discover_queues
+        )
+
         discovered_queues = set()
         if self.config.auto_discover_queues and not self.config.queue_patterns or self.config.queue_regex:
-            discovered_queues.update(self._discover_queues(queue_manager, '*'))
+            discovered_queues.update(_discover(queue_manager, '*'))
 
         if self.config.queue_patterns:
             for pattern in self.config.queue_patterns:
-                discovered_queues.update(self._discover_queues(queue_manager, pattern))
+                discovered_queues.update(_discover(queue_manager, pattern))
 
         if self.config.queue_regex:
             keep_queues = set()
@@ -94,6 +104,7 @@ class QueueMetricCollector(object):
 
     def _discover_queues(self, queue_manager, mq_pattern_filter):
         # type: (pymqi.QueueManager, str) -> List[str]
+        self.log.debug("Using _discover_queues to discover queues")
         queues = []
 
         for queue_type in SUPPORTED_QUEUE_TYPES:
@@ -136,11 +147,85 @@ class QueueMetricCollector(object):
 
         return queues
 
+    def _discover_queues_via_names(self, queue_manager, mq_pattern_filter):
+        # type: (pymqi.QueueManager, str) -> List[str]
+        self.log.debug("Using _discover_queues_via_names to discover queues")
+        queues = []
+
+        for queue_type in SUPPORTED_QUEUE_TYPES:
+            args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
+            pcf = None
+            try:
+                pcf = pymqi.PCFExecute(
+                    queue_manager, response_wait_interval=self.config.timeout, convert=self.config.convert_endianness
+                )
+                # Use MQCMD_INQUIRE_Q_NAMES to get only the queue names rather than the full queue info
+                response = pcf.MQCMD_INQUIRE_Q_NAMES(args)
+                queue_names = response[0].get(pymqi.CMQCFC.MQCACF_Q_NAMES, []) if response else []
+                for queue in queue_names:
+                    queue_name = to_string(queue).strip()
+                    if not queue_name:
+                        self.log.debug('Discovered queue with empty name, skipping.')
+                        continue
+                    # For each queue name inquire the queue info
+                    inquire_args = {
+                        pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name),
+                        pymqi.CMQC.MQIA_Q_TYPE: queue_type,
+                    }
+                    try:
+                        queue_info_response = pcf.MQCMD_INQUIRE_Q(inquire_args)
+                        if queue_info_response:
+                            self.log.debug("Discovered queue: %s", queue_name)
+                            queues.append(queue_name)
+                    except pymqi.MQMIError as e:
+                        # Don't warn if no messages, see:
+                        # https://github.com/dsuch/pymqi/blob/v1.12.0/docs/examples.rst#how-to-wait-for-multiple-messages
+                        if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_NO_MSG_AVAILABLE:
+                            self.log.debug("No queue info available for queue %s", queue_name)
+                        elif e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQC.MQRC_UNKNOWN_OBJECT_NAME:
+                            self.log.debug("No matching queue of type %d for queue %s", queue_type, queue_name)
+                        else:
+                            self.log.debug("Error inquiring queue %s: %s", queue_name, e)
+                            self._submit_discovery_error_metric(e, [f"queue:{queue_name}"])
+                self.log.debug("%s queues discovered", str(len(queues)))
+            except pymqi.MQMIError as e:
+                self.log.debug("Error inquiring queue names for pattern %s: %s", mq_pattern_filter, e)
+                self._submit_discovery_error_metric(e, [f"queue_pattern:{mq_pattern_filter}"])
+            except Exception as e:
+                self.log.debug("Error retrieving queue info for %s: %s", mq_pattern_filter, e)
+            finally:
+                # Close internal reply queue to prevent filling up a dead-letter queue.
+                # https://github.com/dsuch/pymqi/blob/084ab0b2638f9d27303a2844badc76635c4ad6de/code/pymqi/__init__.py#L2892-L2902
+                # https://dsuch.github.io/pymqi/examples.html#how-to-specify-dynamic-reply-to-queues
+                if pcf is not None:
+                    pcf.disconnect()
+
+        if not queues:
+            self.warning("No matching queue of type MQQT_LOCAL or MQQT_REMOTE for pattern %s", mq_pattern_filter)
+
+        return queues
+
+    def _submit_discovery_error_metric(self, error, tags):
+        error_tags = list(tags)
+        reason = getattr(error, "reason", None)
+        if reason is not None:
+            error_tags.append(f"ibm_error_code:{reason}")
+        error_str = None
+        if hasattr(error, "errorAsString"):
+            try:
+                error_str = error.errorAsString()
+            except Exception:
+                error_str = None
+        if error_str and ":" in error_str:
+            error_name = error_str.split(":")[-1].strip()
+            error_tags.append(f"ibm_error:{error_name}")
+        self.send_metric(GAUGE, "ibm_mq.queue.discovery.error", 1, tags=error_tags)
+
     def queue_manager_stats(self, queue_manager, tags):
         """
         Get stats from the queue manager
         """
-        for mname, pymqi_value in iteritems(metrics.queue_manager_metrics()):
+        for mname, pymqi_value in metrics.queue_manager_metrics().items():
             try:
                 m = queue_manager.inquire(pymqi_value)
                 mname = '{}.queue_manager.{}'.format(metrics.METRIC_PREFIX, mname)
@@ -149,13 +234,18 @@ class QueueMetricCollector(object):
             except pymqi.Error as e:
                 self.warning("Error getting queue manager stats: %s", e)
                 self.service_check(
-                    self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.CRITICAL, tags, hostname=self.config.hostname
+                    self.QUEUE_MANAGER_SERVICE_CHECK,
+                    AgentCheck.CRITICAL,
+                    tags,
+                    message=str(e),
+                    hostname=self.config.hostname,
                 )
 
     def queue_stats(self, queue_manager, queue_name, tags):
         """
         Grab stats from queues
         """
+        enriched_tags = list(tags)
         pcf = None
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
@@ -173,13 +263,17 @@ class QueueMetricCollector(object):
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
-                self._submit_queue_stats(queue_info, queue_name, tags)
+                usage = KNOWN_USAGES.get(queue_info.get(pymqi.CMQC.MQIA_USAGE), 'unknown')
+                enriched_tags.append('queue_usage:{}'.format(usage))
+                self._submit_queue_stats(queue_info, queue_name, enriched_tags)
         finally:
             if pcf is not None:
                 pcf.disconnect()
 
+        return enriched_tags
+
     def _submit_queue_stats(self, queue_info, queue_name, tags):
-        for metric_suffix, mq_attr in iteritems(metrics.queue_metrics()):
+        for metric_suffix, mq_attr in metrics.queue_metrics().items():
             metric_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, metric_suffix)
             if callable(mq_attr):
                 metric_value = mq_attr(queue_info)
@@ -216,7 +310,7 @@ class QueueMetricCollector(object):
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
-                for mname, values in iteritems(metrics.pcf_metrics()):
+                for mname, values in metrics.pcf_metrics().items():
                     metric_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, mname)
                     try:
                         if callable(values):
@@ -224,10 +318,10 @@ class QueueMetricCollector(object):
                             if metric_value is not None:
                                 self.send_metric(GAUGE, metric_name, metric_value, tags=tags)
                             else:
-                                msg = """
-                                    Unable to get %s. Turn on queue level monitoring to access these metrics for %s.
-                                    Check `DISPLAY QSTATUS(%s) MONITOR`.
-                                    """
+                                msg = (
+                                    "Unable to get %s. Turn on queue level monitoring to access these metrics for %s."
+                                    " Check `DISPLAY QSTATUS(%s) MONITOR`."
+                                )
                                 self.log.debug(msg, metric_name, queue_name, queue_name)
                         else:
                             failure_value = values['failure']

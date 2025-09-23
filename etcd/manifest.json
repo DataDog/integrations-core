@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7f16875b-4aa8-44e3-adff-63622c234253",
   "app_id": "etcd",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -18,8 +19,26 @@
       "Category::Orchestration",
       "Category::Containers",
       "Category::Configuration & Deployment",
-      "Category::Autodiscovery",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-etcd-performance"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-etcd-with-datadog/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/etcd-monitoring-tools/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/etcd-key-metrics/"
+      }
     ]
   },
   "author": {
@@ -28,7 +47,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "etcd",
@@ -51,7 +69,9 @@
       },
       "process_signatures": [
         "etcd"
-      ]
+      ],
+      "source_type_id": 111,
+      "auto_install": true
     },
     "dashboards": {
       "Etcd Overview": "assets/dashboards/etcd_overview.json",
@@ -60,9 +80,6 @@
     "saved_views": {
       "etcd_overview": "assets/saved_views/etcd_overview.json",
       "etcd_processes": "assets/saved_views/etcd_processes.json"
-    },
-    "logs": {
-      "source": "etcd"
     }
   }
 }

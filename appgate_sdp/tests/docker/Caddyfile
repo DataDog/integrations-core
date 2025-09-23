@@ -1,0 +1,4 @@
+:5556 {
+	root * /metrics
+	file_server
+}

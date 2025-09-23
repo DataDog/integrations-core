@@ -32,9 +32,10 @@ VTS_METRIC_MAP = {
     'nginx.upstream.weight': 'nginx.upstream.peers.weight',
     'nginx.upstream.backup': 'nginx.upstream.peers.backup',
     'nginx.upstream.down': 'nginx.upstream.peers.health_checks.last_passed',
+    'nginx.upstream.responseMsec': 'nginx.upstream.peers.response_time',
 }
 
-# NGNINX Plus metrics that are sent as both a count and gauge for backwards compatibility
+# NGINX Plus metrics that are sent as both a count and gauge for backwards compatibility
 # The count metrics will have _count appended to their names
 METRICS_SEND_AS_COUNT = [
     'nginx.upstream.peers.responses.1xx',
@@ -112,11 +113,11 @@ METRICS_SEND_AS_COUNT = [
     'nginx.upstream.peers.unavail',
 ]
 
-# NGNINX Plus metrics that are sent as both a histogram and gauge for backwards compatibility
+# NGINX Plus metrics that are sent as both a histogram and gauge for backwards compatibility
 # The histogram metrics will have _histogram appended to their names
 METRICS_SEND_AS_HISTOGRAM = {'nginx.upstream.peers.response_time', 'nginx.stream.upstream.peers.response_time'}
 
-# NGNINX Plus metrics that are sent as only a count.
+# NGINX Plus metrics that are sent as only a count.
 # These metrics will not have _count appended to their names
 COUNT_METRICS = [
     'nginx.location_zone.responses.total',

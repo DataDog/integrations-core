@@ -1,0 +1,41 @@
+name: KubeVirt Controller
+files:
+  - name: kubevirt_controller.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/openmetrics
+      - template: instances
+        options:
+          - name: kubevirt_controller_metrics_endpoint
+            description: |
+              URL to the KubeVirt Controller Service /metrics endpoint.
+            value:
+              display_default: null
+              example: https://10.244.0.38:443/metrics
+              type: string
+          - name: kubevirt_controller_healthz_endpoint
+            description: |
+              URL to check the KubeVirt Controller /healthz endpoint.
+            value:
+              display_default: null
+              example: https://10.244.0.38:443/healthz
+              type: string
+          - name: kube_namespace
+            description: |
+              The namespace where the KubeVirt Controller is running. (Provided by autodiscovery template variables)
+            value:
+              display_default: null
+              example: kubevirt
+              type: string
+          - name: kube_pod_name
+            description: |
+              The name of the KubeVirt Controller pod. (Provided by autodiscovery template variables)
+            value:
+              display_default: null
+              example: virt-controller-id-1234
+              type: string
+          - template: instances/openmetrics
+            overrides:
+              openmetrics_endpoint.required: false
+              openmetrics_endpoint.hidden: true

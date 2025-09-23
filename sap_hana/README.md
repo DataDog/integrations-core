@@ -14,13 +14,13 @@ The SAP HANA check is included in the [Datadog Agent][2] package. To use this in
 For Unix:
 
 ```text
-sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install hdbcli==2.10.15
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install hdbcli==2.21.28
 ```
 
 For Windows:
 
 ```text
-"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.10.15
+"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.21.28
 ```
 
 #### Prepare HANA
@@ -91,6 +91,34 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 2. [Restart the Agent][5].
 
+#### Log collection
+
+1. In your SAP HANA database, to make sure you can read audit logs, run the following command:
+
+    ```shell
+    GRANT AUDIT READ TO DD_MONITOR;
+    GRANT SELECT ON SYS.AUDIT_LOG TO DD_MONITOR
+    ```
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `sap_hana.d/conf.yaml` file to start collecting your SAP HANA logs, adjusting the `service` value to configure them for your environment:
+
+   ```yaml
+   logs:
+     - type: integration
+       source: sap_hana
+       service: sap_hana
+   ```
+
+    See the [sample sap_hana.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
+
 ### Validation
 
 Run the [Agent's status subcommand][6] and look for `sap_hana` under the Checks section.
@@ -115,7 +143,7 @@ Need help? Contact [Datadog support][9].
 
 
 [1]: https://www.sap.com/products/hana.html
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: /account/settings/agent/latest
 [3]: https://help.sap.com/viewer/0eec0d68141541d1b07893a39944924e/2.0.02/en-US/d12c86af7cb442d1b9f8520e2aba7758.html
 [4]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/datadog_checks/sap_hana/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent

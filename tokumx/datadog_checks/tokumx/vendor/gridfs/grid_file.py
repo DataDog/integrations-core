@@ -276,7 +276,7 @@ class GridIn(object):
 
             self._file['md5'] = self._file["md5"].hexdigest()
             self._file["length"] = self._position
-            self._file["uploadDate"] = datetime.datetime.utcnow()
+            self._file["uploadDate"] = datetime.datetime.now(datetime.timezone.utc)
 
             return self._coll.files.insert_one(self._file)
         except DuplicateKeyError:

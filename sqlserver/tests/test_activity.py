@@ -1,4 +1,7 @@
-# -*- coding: utf-8 -*-
+# (C) Datadog, Inc. 2021-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from __future__ import unicode_literals
 
 import concurrent
@@ -6,6 +9,7 @@ import datetime
 import json
 import os
 import re
+import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
@@ -15,11 +19,14 @@ import pytest
 from dateutil import parser
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS
-from datadog_checks.sqlserver.utils import is_statement_proc
+from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
+from datadog_checks.sqlserver.const import (
+    STATIC_INFO_SERVERNAME,
+)
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
 from .conftest import DEFAULT_TIMEOUT
 
 try:
@@ -48,26 +55,53 @@ def dbm_instance(instance_docker):
     }
     # do not need query_metrics for these tests
     instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['procedure_metrics'] = {'enabled': False}
+    instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize("use_autocommit", [True, False])
 @pytest.mark.parametrize(
-    "database,query,match_pattern,is_proc",
+    "database,query,match_pattern,is_proc,comments,collect_raw_query_statement,expected_raw_statement",
     [
         [
-            "datadog_test",
-            "SELECT * FROM ϑings",
+            "datadog_test-1",
+            "/*test=foo*/ SELECT * FROM ϑings",
             r"SELECT \* FROM ϑings",
             False,
+            ["/*test=foo*/"],
+            False,
+            None,
         ],
         [
-            "datadog_test",
+            "datadog_test-1",
             "EXEC bobProc",
             r"SELECT \* FROM ϑings",
             True,
+            [],
+            False,
+            None,
+        ],
+        [
+            "datadog_test-1",
+            "SELECT * FROM ϑings WHERE name = 'test'",
+            r"SELECT \* FROM \[ϑings\] WHERE \[name\]=\@1",
+            False,
+            [],
+            True,
+            "SELECT * FROM ϑings WHERE name = 'test'",
+        ],
+        [
+            "datadog_test-1",
+            "EXEC fredProcParams @Name = 'test'",
+            r"SELECT \* FROM ϑings WHERE name like \@Name",
+            True,
+            [],
+            True,
+            "EXEC fredProcParams @Name = 'test'",
         ],
     ],
 )
@@ -76,56 +110,88 @@ def test_collect_load_activity(
     instance_docker,
     dd_run_check,
     dbm_instance,
+    datadog_agent,
     use_autocommit,
     database,
     query,
     match_pattern,
     is_proc,
+    comments,
+    collect_raw_query_statement,
+    expected_raw_statement,
 ):
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    instance = copy(dbm_instance)
+    instance_tags = set(instance.get('tags', []))
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    expected_instance_tags.add("database_hostname:stubbed.hostname")
+    expected_instance_tags.add("database_instance:stubbed.hostname")
+    expected_instance_tags.add("ddagenthostname:stubbed.hostname")
+    expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
+    if collect_raw_query_statement:
+        instance["collect_raw_query_statement"] = {"enabled": True}
+        expected_instance_tags.add("raw_query_statement:enabled")
+    check = SQLServer(CHECK_NAME, {}, [instance])
     blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
     fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=use_autocommit)
     bob_conn = _get_conn_for_user(instance_docker, "bob")
 
     def run_test_query(c, q):
         cur = c.cursor()
-        cur.execute("USE {}".format(database))
+        cur.execute("USE [{}]".format(database))
+        # 0xFF can't be decoded to Unicode, which makes it good test data,
+        # since Unicode is a default format
+        cur.execute("SET CONTEXT_INFO 0xff")
         cur.execute(q)
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps(
+            {
+                'query': sql_query,
+                'metadata': {
+                    'tables_csv': 'ϑings',
+                    'commands': ['SELECT'],
+                    'comments': comments,
+                },
+            }
+        )
+
+    def _run_query_with_mock_obfuscator(c, q):
+        # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+            mock_agent.side_effect = _obfuscate_sql
+            run_test_query(c, q)
 
     # run the test query once before the blocking test to ensure that if it's
     # a procedure then it is populated in the sys.dm_exec_procedure_stats table
     # the first time a procedure is run we won't know it's a procedure because
     # it won't appear in that stats table
-    run_test_query(fred_conn, query)
+    _run_query_with_mock_obfuscator(fred_conn, query)
 
     # bob's query blocks until the tx is completed
-    run_test_query(bob_conn, blocking_query)
+    _run_query_with_mock_obfuscator(bob_conn, blocking_query)
 
     # fred's query will get blocked by bob, so it needs
     # to be run asynchronously
     executor = concurrent.futures.ThreadPoolExecutor(1)
-    f_q = executor.submit(run_test_query, fred_conn, query)
+    f_q = executor.submit(_run_query_with_mock_obfuscator, fred_conn, query)
     while not f_q.running():
         if f_q.done():
             break
-        print("waiting on fred's query to execute")
         time.sleep(1)
 
-    # both queries were kicked off, so run the check
     dd_run_check(check)
     # commit and close bob's transaction
     bob_conn.commit()
     bob_conn.close()
 
     while not f_q.done():
-        print("blocking query finished, waiting for fred's query to complete")
         time.sleep(1)
     # clean up fred's connection
     # and shutdown executor
     fred_conn.close()
     executor.shutdown(wait=True)
 
-    expected_instance_tags = set(dbm_instance.get('tags', []))
+    expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
@@ -137,11 +203,11 @@ def test_collect_load_activity(
     assert event['ddagentversion'], "missing ddagentversion"
     assert set(event['ddtags']) == expected_instance_tags, "wrong instance tags activity"
     assert type(event['collection_interval']) in (float, int), "invalid collection_interval"
-
-    assert len(event['sqlserver_activity']) == 1, "should have collected exactly one activity row"
+    assert len(event['sqlserver_activity']) == 2, "should have collected exactly two activity rows"
+    event['sqlserver_activity'].sort(key=lambda r: r.get('blocking_session_id', 0))
     # the second query should be fred's, which is currently blocked on
     # bob who is holding a table lock
-    blocked_row = event['sqlserver_activity'][0]
+    blocked_row = event['sqlserver_activity'][1]
     # assert the data that was collected is correct
     assert blocked_row['user_name'] == "fred", "incorrect user_name"
     assert blocked_row['session_status'] == "running", "incorrect session_status"
@@ -151,18 +217,33 @@ def test_collect_load_activity(
     assert 'statement_text' not in blocked_row, "statement_text field should not be forwarded"
     if is_proc:
         assert blocked_row['procedure_signature'], "missing procedure signature"
+        assert blocked_row['procedure_name'], "missing procedure name"
     assert re.match(match_pattern, blocked_row['text'], re.IGNORECASE), "incorrect blocked query"
-    assert blocked_row['database_name'] == "datadog_test", "incorrect database_name"
+    assert blocked_row['database_name'] == "datadog_test-1", "incorrect database_name"
+    assert blocked_row['context_info'] == "ff", "incorrect context_info"
     assert blocked_row['id'], "missing session id"
     assert blocked_row['now'], "missing current timestamp"
     assert blocked_row['last_request_start_time'], "missing last_request_start_time"
     assert blocked_row['now'], "missing current time"
+    assert blocked_row['dd_comments'] == comments, "missing expected comments"
     # assert that the current timestamp is being collected as an ISO timestamp with TZ info
     assert parser.isoparse(blocked_row['now']).tzinfo, "current timestamp not formatted correctly"
     assert blocked_row["query_start"], "missing query_start"
+    assert blocked_row["is_user_process"], "missing is_user_process"
     assert parser.isoparse(blocked_row["query_start"]).tzinfo, "query_start timestamp not formatted correctly"
     for r in DM_EXEC_REQUESTS_COLS:
         assert r in blocked_row
+    if collect_raw_query_statement:
+        dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+        rqt_events = [s for s in dbm_samples if s['dbm_type'] == "rqt"]
+        assert rqt_events is not None
+        matched_rqt_event = [s for s in rqt_events if s['db']['statement'] == expected_raw_statement]
+        assert len(matched_rqt_event) == 1
+        assert matched_rqt_event[0]['db']['query_signature'], "missing query_signature"
+        assert matched_rqt_event[0]['db']['raw_query_signature'], "missing raw_query_signature"
+        assert matched_rqt_event[0]['sqlserver']['query_hash'], "missing query_hash"
+        assert blocked_row['raw_query_signature'] == matched_rqt_event[0]['db']['raw_query_signature']
+        assert 'raw_statement' not in blocked_row
 
     # assert connections collection
     assert len(event['sqlserver_connections']) > 0
@@ -181,14 +262,165 @@ def test_collect_load_activity(
     assert b_conn['connections'] >= 1
     assert b_conn['status'] == "sleeping"
     assert f_conn['connections'] >= 1
-    assert f_conn['status'] == "running"
+    assert f_conn['status'] == "running" or f_conn['status'] == "sleeping"
 
     # internal debug metrics
     aggregator.assert_metric(
-        "dd.sqlserver.operation.time",
-        tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity']
-        + _expected_dbm_instance_tags(dbm_instance),
+        OPERATION_TIME_METRIC_NAME,
+        tags=['agent_hostname:stubbed.hostname', 'operation:collect_activity'] + _expected_dbm_instance_tags(check),
     )
+
+
+@pytest.mark.flaky
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
+@pytest.mark.skipif(running_on_windows_ci(), reason="Test disabled due to failure impacting master pipeline")
+def test_activity_nested_blocking_transactions(
+    aggregator,
+    instance_docker,
+    dd_run_check,
+    dbm_instance,
+):
+    """
+    Test to ensure the check captures a scenario where a blocking idle transaction
+    is collected through activity. An open transaction which completes its current
+    request but has not committed can still hold a row-level lock preventing subsequent
+    sessions from updating. It is important that the Agent captures these cases to show
+    the complete picture and the last executed query responsible for the lock.
+    """
+
+    TABLE_NAME = "##LockTest{}".format(str(int(time.time() * 1000)))
+
+    QUERIES_SETUP = (
+        """
+        CREATE TABLE {}
+        (
+            id int,
+            name varchar(10),
+            city varchar(20)
+        )""".format(TABLE_NAME),
+        "INSERT INTO {} VALUES (1001, 'tire', 'sfo')".format(TABLE_NAME),
+        "INSERT INTO {} VALUES (1002, 'wisth', 'nyc')".format(TABLE_NAME),
+        "INSERT INTO {} VALUES (1003, 'tire', 'aus')".format(TABLE_NAME),
+        "COMMIT",
+    )
+
+    QUERY1 = """UPDATE {} SET [name] = 'west' WHERE [id] = 1001""".format(TABLE_NAME)
+    QUERY2 = """UPDATE {} SET [name] = 'fast' WHERE [id] = 1001""".format(TABLE_NAME)
+    QUERY3 = """UPDATE {} SET [city] = 'blow' WHERE [id] = 1001""".format(TABLE_NAME)
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    conn1 = _get_conn_for_user(instance_docker, "fred", _autocommit=False)
+    conn2 = _get_conn_for_user(instance_docker, "bob", _autocommit=False)
+    conn3 = _get_conn_for_user(instance_docker, "fred", _autocommit=False)
+
+    close_conns = threading.Event()
+
+    def run_queries(conn, queries):
+        cur = conn.cursor()
+        cur.execute("USE [{}]".format("datadog_test-1"))
+        cur.execute("BEGIN TRANSACTION")
+        for q in queries:
+            try:
+                cur.execute(q)
+            except pyodbc.OperationalError:
+                # This is expected since the query (might be) blocked
+                pass
+        # Do not allow the conn to be garbage collected and closed until the global lock is released
+        while not close_conns.is_set():
+            time.sleep(0.1)
+        cur.execute("COMMIT")
+
+    # Setup
+    cur = conn1.cursor()
+    for q in QUERIES_SETUP:
+        cur.execute(q)
+
+    # Transaction 1
+    t1 = threading.Thread(target=run_queries, args=(conn1, [QUERY1]))
+    # Transaction 2
+    t2 = threading.Thread(target=run_queries, args=(conn2, [QUERY2]))
+    # Transaction 3
+    t3 = threading.Thread(target=run_queries, args=(conn3, [QUERY3]))
+
+    t1.start()
+    time.sleep(0.3)
+    t2.start()
+    time.sleep(0.3)
+    t3.start()
+
+    try:
+        dd_run_check(check)
+        dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    finally:
+        close_conns.set()  # Release the threads
+
+    # All 3 connections are expected
+    assert dbm_activity and 'sqlserver_activity' in dbm_activity[0]
+    assert len(dbm_activity[0]['sqlserver_activity']) == 3
+
+    activity = dbm_activity[0]['sqlserver_activity']
+    activity = sorted(activity, key=lambda a: a.get('blocking_session_id', 0))
+
+    root_blocker = activity[0]
+    tx2 = activity[1]
+    tx3 = activity[2]
+
+    # Expect to capture the root blocker, which would have a sleeping transaction but no
+    # associated sys.dm_exec_requests.
+    assert root_blocker["user_name"] == "fred"
+    assert root_blocker["session_status"] == "sleeping"
+    assert root_blocker["database_name"] == "datadog_test-1"
+    assert root_blocker["last_request_start_time"]
+    assert root_blocker["client_port"]
+    assert root_blocker["client_address"]
+    assert root_blocker["host_name"]
+    # Expect to capture the query signature for the root blocker
+    # query text is not captured from the req dmv
+    # but available in the connection dmv with most_recent_sql_handle
+    assert root_blocker["query_signature"]
+    # we do not capture requests for sleeping sessions
+    assert "blocking_session_id" not in root_blocker
+    assert "request_status" not in root_blocker
+    assert "query_start" not in root_blocker
+
+    # TX2 should be blocked by the root blocker TX1, TX3 should be blocked by TX2
+    assert tx2["blocking_session_id"] == root_blocker["id"]
+    assert tx3["blocking_session_id"] == tx2["id"]
+    # TX2 and TX3 should be running
+    assert tx2["session_status"] == "running"
+    assert tx3["session_status"] == "running"
+    # verify other essential fields are present
+    assert tx2["user_name"] == "bob"
+    assert tx2["database_name"] == "datadog_test-1"
+    assert tx2["last_request_start_time"]
+    assert tx2["client_port"]
+    assert tx2["client_address"]
+    assert tx2["host_name"]
+    assert tx2["query_signature"]
+    assert tx2["request_status"]
+    assert tx2["query_start"]
+    assert tx2["query_hash"]
+    assert tx2["query_plan_hash"]
+
+    assert tx3["user_name"] == "fred"
+    assert tx3["database_name"] == "datadog_test-1"
+    assert tx3["last_request_start_time"]
+    assert tx3["client_port"]
+    assert tx3["client_address"]
+    assert tx3["host_name"]
+    assert tx3["query_signature"]
+    assert tx3["request_status"]
+    assert tx3["query_start"]
+    assert tx3["query_hash"]
+    assert tx3["query_plan_hash"]
+
+    assert isinstance(tx2["query_hash"], str)
+    assert isinstance(tx2["query_plan_hash"], str)
+    assert isinstance(tx3["query_hash"], str)
+    assert isinstance(tx3["query_plan_hash"], str)
+
+    for t in [t1, t2, t3]:
+        t.join()
 
 
 @pytest.mark.integration
@@ -201,8 +433,8 @@ def test_collect_load_activity(
             {'tables': ['ϑings'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
         ),
         (
-            {'tables_csv': '', 'commands': None, 'comments': None},
-            {'tables': None, 'commands': None, 'comments': None},
+            {'tables_csv': '', 'commands': None, 'comments': ['-- Test comment']},
+            {'tables': None, 'commands': None, 'comments': ['-- Test comment']},
         ),
     ],
 )
@@ -222,7 +454,7 @@ def test_activity_metadata(
 
     def _run_test_query(conn, q):
         cur = conn.cursor()
-        cur.execute("USE {}".format("datadog_test"))
+        cur.execute("USE [{}]".format("datadog_test-1"))
         cur.execute(q)
 
     def _obfuscate_sql(sql_query, options=None):
@@ -244,7 +476,6 @@ def test_activity_metadata(
     while not f_q.running():
         if f_q.done():
             break
-        print("waiting on fred's query to execute")
         time.sleep(1)
 
     dd_run_check(check)
@@ -253,7 +484,6 @@ def test_activity_metadata(
     bob_conn.close()
 
     while not f_q.done():
-        print("blocking query finished, waiting for fred's query to complete")
         time.sleep(1)
 
     fred_conn.close()
@@ -297,15 +527,15 @@ def test_activity_reported_hostname(
 
 
 def new_time():
-    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330)
+    return datetime.datetime(2021, 9, 23, 23, 21, 21, 669330).isoformat()
 
 
 def old_time():
-    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330)
+    return datetime.datetime(2021, 9, 22, 22, 21, 21, 669330).isoformat()
 
 
 def very_old_time():
-    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330)
+    return datetime.datetime(2021, 9, 20, 23, 21, 21, 669330).isoformat()
 
 
 @pytest.mark.parametrize(
@@ -414,6 +644,141 @@ def test_truncate_on_max_size_bytes(dbm_instance, datadog_agent, rows, expected_
             assert result_rows[index]['user_name'] == user
 
 
+@pytest.mark.unit
+def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_agent):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        large_comment = "/* " + "a" * 5000 + " */"
+        statement_text = "SELECT * FROM ϑings"
+        procedure_text = f"CREATE PROCEDURE dbo.sp_test {large_comment} AS BEGIN {statement_text} END;"
+        metadata = {
+            'tables_csv': 'ϑings',
+            'commands': ['SELECT'],
+            'comments': [large_comment],
+        }
+        rows = [
+            {
+                "user_name": "newbob",
+                "id": 1,
+                "statement_text": statement_text,
+                "text": procedure_text,
+                "query_start": new_time(),
+                "procedure_name": "sp_test",
+                "schema_name": "dbo",
+            },
+        ]
+        # the first call to obfuscate query text will succeed
+        # the second call to obfuscate procedure text will fail
+        mock_agent.side_effect = [
+            json.dumps({'query': statement_text, 'metadata': metadata}),
+            Exception("failed to obfuscate"),
+        ]
+        result_rows = check.activity._normalize_queries_and_filter_rows(rows, 10000)
+        # procedure text obfuscation will fail but the activity row will still be collected
+        assert len(result_rows) == 1
+        assert result_rows[0]['text'] == statement_text
+        assert result_rows[0]['is_proc'] is True
+        assert result_rows[0]['procedure_signature'] == '__procedure_obfuscation_error__'
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "stored_procedure_characters_limit",
+    [
+        500,
+        1000,
+        2000,
+    ],
+)
+def test_activity_stored_procedure_characters_limit(
+    aggregator,
+    instance_docker,
+    dd_run_check,
+    dbm_instance,
+    datadog_agent,
+    stored_procedure_characters_limit,
+):
+    dbm_instance['stored_procedure_characters_limit'] = stored_procedure_characters_limit
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    def _obfuscate_sql(sql_query, options=None):
+        if "PROCEDURE procedureWithLargeCommment" in sql_query and len(sql_query) >= stored_procedure_characters_limit:
+            raise Exception("failed to obfuscate")
+        return json.dumps(
+            {
+                'query': sql_query,
+                'metadata': {
+                    'tables_csv': 'ϑings',
+                    'commands': ['SELECT'],
+                    'comments': [],
+                },
+            }
+        )
+
+    blocking_query = "INSERT INTO ϑings WITH (TABLOCK, HOLDLOCK) (name) VALUES ('puppy')"
+    fred_conn = _get_conn_for_user(instance_docker, "fred", _autocommit=True)
+    bob_conn = _get_conn_for_user(instance_docker, "bob")
+
+    def run_test_query(c, q):
+        cur = c.cursor()
+        cur.execute("USE [datadog_test-1]")
+        cur.execute(q)
+
+    run_test_query(fred_conn, "EXEC procedureWithLargeCommment")
+
+    # bob's query blocks until the tx is completed
+    run_test_query(bob_conn, blocking_query)
+
+    # fred's query will get blocked by bob, so it needs
+    # to be run asynchronously
+    executor = concurrent.futures.ThreadPoolExecutor(1)
+    f_q = executor.submit(run_test_query, fred_conn, "EXEC procedureWithLargeCommment")
+    while not f_q.running():
+        if f_q.done():
+            break
+        time.sleep(1)
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        dd_run_check(check)
+
+    # commit and close bob's transaction
+    bob_conn.commit()
+    bob_conn.close()
+
+    while not f_q.done():
+        time.sleep(1)
+    # clean up fred's connection
+    # and shutdown executor
+    fred_conn.close()
+    executor.shutdown(wait=True)
+
+    executor = concurrent.futures.ThreadPoolExecutor(1)
+    b_q = executor.submit(run_test_query, bob_conn)
+    while not b_q.running():
+        if b_q.done():
+            break
+        time.sleep(1)
+
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    assert dbm_activity, "should have collected at least one activity"
+
+    matching_activity = []
+    for event in dbm_activity:
+        for activity in event['sqlserver_activity']:
+            if activity['query_signature'] == "2fa838aee8217d23":
+                matching_activity.append(activity)
+    assert len(matching_activity) == 1
+    assert matching_activity[0]['is_proc'] is True
+    assert matching_activity[0]['procedure_name'].lower() == "dbo.procedurewithlargecommment"
+    assert matching_activity[0]['text'] == "SELECT * FROM ϑings"
+    # this is a hacky way of asserting that the procedure signature is present
+    # when stored_procedure_characters_limit is set to a large value
+    if stored_procedure_characters_limit > 500:
+        assert "procedure_signature" in matching_activity[0]
+
+
 @pytest.mark.parametrize(
     "file",
     [
@@ -432,89 +797,7 @@ def test_get_estimated_row_size_bytes(dbm_instance, file):
     assert abs((actual_size - computed_size) / float(actual_size)) <= 0.10
 
 
-@pytest.mark.parametrize(
-    "query,is_proc",
-    [
-        [
-            """\
-            CREATE PROCEDURE bobProcedure
-            BEGIN
-                SELECT name FROM bob
-            END;
-            """,
-            True,
-        ],
-        [
-            """\
-            CREATE PROC bobProcedure
-            BEGIN
-                SELECT name FROM bob
-            END;
-            """,
-            True,
-        ],
-        [
-            """\
-            create procedure bobProcedureLowercase
-            begin
-                select name from bob
-            end;
-            """,
-            True,
-        ],
-        [
-            """\
-            /* my sql is very fun */
-            CREATE PROCEDURE bobProcedure
-            BEGIN
-                SELECT name FROM bob
-            END;
-            """,
-            True,
-        ],
-        [
-            """\
-            CREATE /* this is fun! */ PROC bobProcedure
-            BEGIN
-                SELECT name FROM bob
-            END;
-            """,
-            True,
-        ],
-        [
-            """\
-            -- this is a comment!
-            CREATE
-            -- additional comment here!
-            PROCEDURE bobProcedure
-            BEGIN
-                SELECT name FROM bob
-            END;
-            """,
-            True,
-        ],
-        [
-            "CREATE TABLE bob_table",
-            False,
-        ],
-        [
-            "Exec procedure",
-            False,
-        ],
-        [
-            "CREATEprocedure",
-            False,
-        ],
-        [
-            "procedure create",
-            False,
-        ],
-    ],
-)
-def test_is_statement_procedure(query, is_proc):
-    assert is_statement_proc(query) == is_proc
-
-
+@pytest.mark.integration
 def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     # test the activity collection loop rate limit
     collection_interval = 0.1
@@ -537,7 +820,7 @@ def _load_test_activity_json(filename):
 
 def _get_conn_for_user(instance_docker, user, _autocommit=False):
     # Make DB connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], user, "Password12!"
     )
     conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=_autocommit)
@@ -545,10 +828,17 @@ def _get_conn_for_user(instance_docker, user, _autocommit=False):
     return conn
 
 
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags']
+def _expected_dbm_instance_tags(check):
+    return check._config.tags + [
+        "database_hostname:{}".format("stubbed.hostname"),
+        "database_instance:{}".format("stubbed.hostname"),
+        "ddagenthostname:{}".format("stubbed.hostname"),
+        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
+        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+    ]
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize("activity_enabled", [True, False])
 def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
     dbm_instance['query_activity'] = {'enabled': activity_enabled, 'run_sync': False}
@@ -562,6 +852,19 @@ def test_async_job_enabled(dd_run_check, dbm_instance, activity_enabled):
         assert check.activity._job_loop_future is None
 
 
+@pytest.mark.parametrize(
+    "input,expected",
+    [
+        (b'0xBA61D813C4878164', '307842413631443831334334383738313634'),
+        (b'0x0000000000000000', '307830303030303030303030303030303030'),
+    ],
+)
+def test_hash_to_hex(input, expected):
+    output = _hash_to_hex(input)
+    assert output == expected
+    assert type(output) == str
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
@@ -571,7 +874,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check.activity._job_loop_future.result()
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
-        tags=['job:query-activity'] + _expected_dbm_instance_tags(dbm_instance),
+        tags=['job:query-activity'] + _expected_dbm_instance_tags(check),
         hostname='',
     )
 
@@ -590,5 +893,98 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     # be created in the first place
     aggregator.assert_metric(
         "dd.sqlserver.async_job.cancel",
-        tags=_expected_dbm_instance_tags(dbm_instance) + ['job:query-activity'],
+        tags=_expected_dbm_instance_tags(check) + ['job:query-activity'],
     )
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        pytest.param(
+            {
+                'now': '2023-10-06T12:11:16.167-07:00',
+                'query_start': '2023-10-06T12:11:16.167-07:00',
+                'user_name': 'shopper',
+                'last_request_start_time': datetime.datetime(2023, 10, 6, 12, 11, 16, 167000),
+                'id': 70,
+                'database_name': 'dbmorders_1',
+                'session_status': 'running',
+                'request_status': 'runnable',
+                'statement_text': None,
+                'text': None,
+                'client_port': 54708,
+                'client_address': '127.0.0.1',
+                'host_name': 'sqlserver-25542ca5-764d9496f4-mk7fv',
+                'program_name': 'go-mssqldb',
+                'command': 'SELECT',
+                'blocking_session_id': 0,
+                'wait_type': None,
+                'wait_time': 0,
+                'last_wait_type': 'SOS_SCHEDULER_YIELD',
+                'wait_resource': '',
+                'open_transaction_count': 0,
+                'transaction_id': 15567746,
+                'percent_complete': 0.0,
+                'estimated_completion_time': 0,
+                'cpu_time': 3,
+                'total_elapsed_time': 10,
+                'reads': 0,
+                'writes': 0,
+                'logical_reads': 80,
+                'transaction_isolation_level': 2,
+                'lock_timeout': -1,
+                'deadlock_priority': 0,
+                'row_count': 1,
+                'query_hash': b'f\x8b\xa3Xc\xb3T\xfb',
+                'query_plan_hash': b'\xb0qh9\x0c\xa9\xa3\xb8',
+                'client_interface_name': 'Microsoft JDBC Driver 7.2',
+            },
+            id="no_statement_text",
+        ),
+        pytest.param(
+            {
+                'now': '2023-10-06T19:36:10.550+00:00',
+                'query_start': '2023-10-06T19:36:10.483+00:00',
+                'user_name': 'datadog',
+                'last_request_start_time': datetime.datetime(2023, 10, 6, 19, 36, 10, 483000),
+                'id': 161,
+                'database_name': 'master',
+                'session_status': 'running',
+                'request_status': 'runnable',
+                'statement_text': "SELECT * from orders",
+                'client_port': 48416,
+                'client_address': '10.135.98.65',
+                'host_name': 'sqlserver-9e8c6bf5-78fdd7765f-wr4g5',
+                'program_name': '',
+                'command': 'SELECT',
+                'blocking_session_id': 0,
+                'wait_type': None,
+                'wait_time': 0,
+                'last_wait_type': 'SOS_SCHEDULER_YIELD',
+                'wait_resource': '',
+                'open_transaction_count': 0,
+                'transaction_id': 966590372257,
+                'percent_complete': 0.0,
+                'estimated_completion_time': 0,
+                'cpu_time': 23,
+                'total_elapsed_time': 72,
+                'reads': 0,
+                'writes': 0,
+                'logical_reads': 98,
+                'transaction_isolation_level': 1,
+                'lock_timeout': -1,
+                'deadlock_priority': 0,
+                'row_count': 0,
+                'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
+                'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+                'client_interface_name': 'Microsoft JDBC Driver 7.2',
+            },
+            id="with_statement_text",
+        ),
+    ],
+)
+def test_sanitize_activity_row(dbm_instance, row):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    row = check.activity._obfuscate_and_sanitize_row(row)
+    assert isinstance(row['query_hash'], str)
+    assert isinstance(row['query_plan_hash'], str)

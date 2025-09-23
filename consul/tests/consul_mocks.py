@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
 
-from six import iteritems
-
 MOCK_CONFIG = {'url': 'http://localhost:8500', 'catalog_checks': True}
 MOCK_CONFIG_DISABLE_SERVICE_TAG = {
     'url': 'http://localhost:8500',
@@ -30,7 +28,7 @@ MOCK_CONFIG_NETWORK_LATENCY_CHECKS = {
 
 
 def mock_check(check, mocks):
-    for f_name, m in iteritems(mocks):
+    for f_name, m in mocks.items():
         if not hasattr(check, f_name):
             continue
         else:
@@ -313,10 +311,10 @@ def mock_get_health_check(_):
         {
             "ModifyIndex": 75214492,
             "CreateIndex": 75214492,
-            "Node": "node-1",
+            "Node": "node-2",
             "CheckID": "server-loadbalancer",
             "Name": "Service 'server-loadbalancer' check",
-            "Status": "critical",
+            "Status": "passing",
             "Notes": "",
             "Output": "CheckHttp CRITICAL: Request error: Connection refused - connect(2) for \"localhost\" port 80\n",
             "ServiceID": "server-loadbalancer",
@@ -325,10 +323,10 @@ def mock_get_health_check(_):
         {
             "ModifyIndex": 75214492,
             "CreateIndex": 75214492,
-            "Node": "node-2",
+            "Node": "node-1",
             "CheckID": "server-loadbalancer",
             "Name": "Service 'server-loadbalancer' check",
-            "Status": "passing",
+            "Status": "critical",
             "Notes": "",
             "Output": "CheckHttp CRITICAL: Request error: Connection refused - connect(2) for \"localhost\" port 80\n",
             "ServiceID": "server-loadbalancer",

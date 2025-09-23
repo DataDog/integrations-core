@@ -1,0 +1,36 @@
+{
+    "task_instances": [
+      {
+        "dag_id": "tutorial",
+        "dag_run_id": "manual__2024-02-09T19:18:19.519278+00:00",
+        "duration": null,
+        "end_date": null,
+        "execution_date": "2024-02-09T19:18:19.519278+00:00",
+        "executor_config": "{}",
+        "hostname": "b8f096f45644",
+        "map_index": -1,
+        "max_tries": 3,
+        "note": null,
+        "operator": "BashOperator",
+        "pid": 48,
+        "pool": "default_pool",
+        "pool_slots": 1,
+        "priority_weight": 1,
+        "queue": "default",
+        "queued_when": null,
+        "rendered_fields": {
+          "bash_command": "sleep 30",
+          "env": null
+        },
+        "sla_miss": null,
+        "start_date": "2024-02-09T19:18:19.819536+00:00",
+        "state": "running",
+        "task_id": "sleep",
+        "trigger": null,
+        "triggerer_job": null,
+        "try_number": 1,
+        "unixname": "default"
+      }
+    ],
+    "total_entries": 1
+  }

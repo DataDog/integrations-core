@@ -51,7 +51,8 @@ class PortForwardUp(LazyFunction):
                     'kubectl',
                     'port-forward',
                     '--address',
-                    ip,
+                    # Explicitly add localhost to avoid getting a popup each time we use this
+                    'localhost,{}'.format(ip),
                     '--namespace',
                     self.namespace,
                     "{}/{}".format(self.resource, self.resource_name),

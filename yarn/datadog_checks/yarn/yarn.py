@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from urllib.parse import urljoin, urlsplit, urlunsplit
+
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, SSLError, Timeout
-from six import iteritems
-from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.errors import ConfigurationError
@@ -80,6 +80,7 @@ YARN_CLUSTER_METRICS = {
     'lostNodes': ('yarn.metrics.lost_nodes', GAUGE),
     'unhealthyNodes': ('yarn.metrics.unhealthy_nodes', GAUGE),
     'decommissionedNodes': ('yarn.metrics.decommissioned_nodes', GAUGE),
+    'decommissioningNodes': ('yarn.metrics.decommissioning_nodes', GAUGE),
     'rebootedNodes': ('yarn.metrics.rebooted_nodes', GAUGE),
 }
 
@@ -153,6 +154,18 @@ YARN_QUEUE_METRICS = {
     'maxApplicationsPerUser': ('yarn.queue.max_applications_per_user', GAUGE),
 }
 
+APPLICATION_STATES = {
+    'ALL',
+    'NEW',
+    'NEW_SAVING',
+    'SUBMITTED',
+    'ACCEPTED',
+    'RUNNING',
+    'FINISHED',
+    'FAILED',
+    'KILLED',
+}
+
 
 class YarnCheck(AgentCheck):
     """
@@ -174,7 +187,6 @@ class YarnCheck(AgentCheck):
             raise ConfigurationError("Invalid mapping: {}".format(e))
 
     def check(self, instance):
-
         # Get properties from conf file
         rm_address = instance.get('resourcemanager_uri', DEFAULT_RM_URI)
         app_tags = instance.get('application_tags', {})
@@ -185,7 +197,7 @@ class YarnCheck(AgentCheck):
             app_tags = {}
 
         filtered_app_tags = {}
-        for dd_prefix, yarn_key in iteritems(app_tags):
+        for dd_prefix, yarn_key in app_tags.items():
             if yarn_key in self._ALLOWED_APPLICATION_TAGS:
                 filtered_app_tags[dd_prefix] = yarn_key
         app_tags = filtered_app_tags
@@ -234,26 +246,52 @@ class YarnCheck(AgentCheck):
         """
         Get metrics for running applications
         """
+
+        # init_config.collect_apps_states_list < init_config.collect_apps_all_states
+        # < instance.collect_apps_states_list < instance.collect_apps_all_states
+
+        collect_apps_all_states = is_affirmative(
+            self.instance.get(
+                'collect_apps_all_states', is_affirmative(self.init_config.get('collect_apps_all_states', False))
+            )
+        )
+
+        collect_apps_states_list = self.instance.get(
+            'collect_apps_states_list', self.init_config.get('collect_apps_states_list', ['RUNNING'])
+        )
+        collect_apps_states_list = [state.upper() for state in collect_apps_states_list]
+
+        if collect_apps_all_states:
+            if collect_apps_states_list:
+                self.log.warning(
+                    "Detected configured collect_apps_states and collect_apps_all_states values, "
+                    "overriding collect_apps_states to collect all application states"
+                )
+            collect_apps_states_list = APPLICATION_STATES
+
         metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags)
 
         if metrics_json and metrics_json.get('apps') and metrics_json['apps'].get('app') is not None:
             for app_json in metrics_json['apps']['app']:
-                tags = self._get_app_tags(app_json, app_tags) + addl_tags
+                app_state = app_json['state']
+                tags = self._get_app_tags(app_json, app_tags)
+                tags.extend(addl_tags)
+                tags.append('state:{}'.format(app_state))
 
-                if app_json['state'] == YARN_APPLICATION_RUNNING:
+                if app_state in collect_apps_states_list:
                     self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
                     self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 
                 self.service_check(
                     APPLICATION_STATUS_SERVICE_CHECK,
-                    self.application_status_mapping.get(app_json['state'], AgentCheck.UNKNOWN),
+                    self.application_status_mapping.get(app_state, AgentCheck.UNKNOWN),
                     tags=tags,
                 )
 
     def _get_app_tags(self, app_json, app_tags):
         split_app_tags = self.instance.get('split_yarn_application_tags', DEFAULT_SPLIT_YARN_APPLICATION_TAGS)
         tags = []
-        for dd_tag, yarn_key in iteritems(app_tags):
+        for dd_tag, yarn_key in app_tags.items():
             try:
                 val = app_json[yarn_key]
                 if val:
@@ -302,7 +340,7 @@ class YarnCheck(AgentCheck):
                 tags.extend(addl_tags)
 
                 self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
-                version = node_json.get('version')
+                version = node_json.get('version', node_json.get('hadoopVersion'))
                 if not version_set and version:
                     self.set_metadata('version', version)
                     version_set = True
@@ -377,7 +415,7 @@ class YarnCheck(AgentCheck):
         """
         Parse the JSON response and set the metrics
         """
-        for dict_path, metric in iteritems(yarn_metrics):
+        for dict_path, metric in yarn_metrics.items():
             metric_name, metric_type = metric
 
             metric_value = self._get_value_from_json(dict_path, metrics_json)
@@ -426,7 +464,7 @@ class YarnCheck(AgentCheck):
 
         # Add kwargs as arguments
         if kwargs:
-            query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(kwargs)])
+            query = '&'.join(['{}={}'.format(key, value) for key, value in kwargs.items()])
             url = urljoin(url, '?' + query)
 
         try:

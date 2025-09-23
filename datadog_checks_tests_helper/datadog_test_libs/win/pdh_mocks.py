@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import winreg
 from collections import defaultdict
 
 import mock
 import pytest
-from six import PY3
-from six.moves import winreg
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,10 +18,7 @@ counters_index = defaultdict(list)
 
 @pytest.fixture
 def pdh_mocks_fixture():
-    if PY3:
-        regqueryvalueex = mock.patch('winreg.QueryValueEx', mock_QueryValueEx)
-    else:
-        regqueryvalueex = mock.patch('_winreg.QueryValueEx', mock_QueryValueEx)
+    regqueryvalueex = mock.patch('winreg.QueryValueEx', mock_QueryValueEx)
 
     pdhlookupbyindex = mock.patch('win32pdh.LookupPerfNameByIndex', mock_LookupPerfNameByIndex)
     pdhenumobjectitems = mock.patch('win32pdh.EnumObjectItems', mock_EnumObjectItems)
@@ -32,10 +28,7 @@ def pdh_mocks_fixture():
     pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
     pdhvalidatepath = mock.patch('win32pdh.ValidatePath', mock_ValidatePath)
 
-    yield regqueryvalueex.start(), pdhlookupbyindex.start(), \
-        pdhenumobjectitems.start(),  pdhmakecounterpath.start(), \
-        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start(), \
-        pdhvalidatepath.start()
+    yield regqueryvalueex.start(), pdhlookupbyindex.start(), pdhenumobjectitems.start(), pdhmakecounterpath.start(), pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start(), pdhvalidatepath.start()  # noqa: E501
 
     regqueryvalueex.stop()
     pdhlookupbyindex.stop()
@@ -49,10 +42,7 @@ def pdh_mocks_fixture():
 
 @pytest.fixture
 def pdh_mocks_fixture_bad_perf_strings():
-    if PY3:
-        regqueryvalueex = mock.patch('winreg.QueryValueEx', mock_QueryValueExWithRaise)
-    else:
-        regqueryvalueex = mock.patch('_winreg.QueryValueEx', mock_QueryValueExWithRaise)
+    regqueryvalueex = mock.patch('winreg.QueryValueEx', mock_QueryValueExWithRaise)
 
     pdhlookupbyindex = mock.patch('win32pdh.LookupPerfNameByIndex', mock_LookupPerfNameByIndex)
     pdhenumobjectitems = mock.patch('win32pdh.EnumObjectItems', mock_EnumObjectItems)
@@ -62,10 +52,7 @@ def pdh_mocks_fixture_bad_perf_strings():
     pdhcollectquerydata = mock.patch('win32pdh.CollectQueryData', mock_CollectQueryData)
     pdhvalidatepath = mock.patch('win32pdh.ValidatePath', mock_ValidatePath)
 
-    yield regqueryvalueex.start(), pdhlookupbyindex.start(), \
-        pdhenumobjectitems.start(),  pdhmakecounterpath.start(), \
-        pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start(), \
-        pdhvalidatepath.start()
+    yield regqueryvalueex.start(), pdhlookupbyindex.start(), pdhenumobjectitems.start(), pdhmakecounterpath.start(), pdhaddcounter.start(), pdhgetformattedcountervalue.start(), pdhcollectquerydata.start(), pdhvalidatepath.start()  # noqa: E501
 
     regqueryvalueex.stop()
     pdhlookupbyindex.stop()
@@ -159,7 +146,7 @@ def load_registry_values(fname):
     idx = 0
     idx_max = len(idx_array)
     while idx < idx_max:
-        ctr_index[int(idx_array[idx])] = idx_array[idx+1]
+        ctr_index[int(idx_array[idx])] = idx_array[idx + 1]
         idx += 2
     return idx_array, ctr_index
 

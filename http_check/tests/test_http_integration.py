@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
-
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 import sys
 from collections import OrderedDict
 
 import mock
 import pytest
-from six import PY2
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.http_check import HTTPCheck
@@ -33,8 +31,48 @@ from .conftest import mock_get_ca_certs_path
 def test_check_cert_expiration_up(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://valid.mock/'}
+    http_check.instance = instance
 
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.OK
+    assert days_left > 0
+    assert seconds_left > 0
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_up_via_proxy(http_check_via_proxy):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://valid.mock/'}
+    http_check_via_proxy.instance = instance
+
+    status, days_left, seconds_left, msg = http_check_via_proxy.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.OK, msg
+    assert days_left > 0
+    assert seconds_left > 0
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_up_tls_verify_false(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://valid.mock/', 'tls_verify': False}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.UNKNOWN
+    assert "Empty or no certificate found" in msg
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_up_tls_verify_false_tls_retrieve_non_validated_cert_true(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://valid.mock/', 'tls_verify': False, "tls_retrieve_non_validated_cert": True}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
     assert status == AgentCheck.OK
     assert days_left > 0
     assert seconds_left > 0
@@ -44,17 +82,12 @@ def test_check_cert_expiration_up(http_check):
 def test_cert_expiration_no_cert(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://valid.mock/'}
+    http_check.instance = instance
 
-    with mock.patch('ssl.SSLSocket.getpeercert', return_value={}):
-
+    with mock.patch('ssl.SSLSocket.getpeercert', return_value=None):
         status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
         assert status == AgentCheck.UNKNOWN
-        expected_msg = 'Exception(\'Empty or no certificate found.\')'
-        if PY2:
-            expected_msg = (
-                'ValueError(\'empty or no certificate, match_hostname needs a SSL socket '
-                'or SSL context with either CERT_OPTIONAL or CERT_REQUIRED\',)'
-            )
+        expected_msg = 'Empty or no certificate found.'
         assert msg == expected_msg
 
 
@@ -62,6 +95,7 @@ def test_cert_expiration_no_cert(http_check):
 def test_check_cert_expiration_bad_hostname(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://wronghost.mock/'}
+    http_check.instance = instance
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.UNKNOWN
     assert days_left is None
@@ -73,6 +107,7 @@ def test_check_cert_expiration_bad_hostname(http_check):
 def test_check_cert_expiration_site_down(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://this.does.not.exist.foo'}
+    http_check.instance = instance
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     assert status == AgentCheck.UNKNOWN
     assert days_left is None
@@ -83,6 +118,7 @@ def test_check_cert_expiration_site_down(http_check):
 def test_check_cert_expiration_cert_expired(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://expired.mock/'}
+    http_check.instance = instance
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
     if sys.version_info[0] < 3:
         # Python 2 returns ambiguous "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed"
@@ -134,9 +170,85 @@ def test_check_cert_expiration_warning(http_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_self_signed(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://selfsigned.mock/'}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.UNKNOWN
+    assert re.search("certificate verify failed: self[- ]signed certificate", msg)
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_self_signed_tls_verify_false_tls_retrieve_non_validated_cert_true(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://selfsigned.mock/', 'tls_verify': False, "tls_retrieve_non_validated_cert": True}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.OK
+    assert days_left > 0
+    assert seconds_left > 0
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_self_signed_tls_verify_false_tls_retrieve_non_validated_cert_false(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://selfsigned.mock/', 'tls_verify': False, "tls_retrieve_non_validated_cert": False}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.UNKNOWN
+    assert "Empty or no certificate found" in msg
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_self_signed_tls_verify_false_tls_retrieve_non_validated_cert_default(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://selfsigned.mock/', 'tls_verify': False}
+    http_check.instance = instance
+
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.UNKNOWN
+    assert "Empty or no certificate found" in msg
+
+
+@pytest.mark.usefixtures("dd_environment")
 def test_check_ssl(aggregator, http_check):
     # Run the check for all the instances in the config
     for instance in CONFIG_SSL_ONLY['instances']:
+        http_check.check(instance)
+
+    good_cert_tags = ['url:https://valid.mock:443', 'instance:good_cert']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=good_cert_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.OK, tags=good_cert_tags, count=1)
+
+    expiring_soon_cert_tags = ['url:https://valid.mock', 'instance:cert_exp_soon']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expiring_soon_cert_tags, count=1)
+    aggregator.assert_service_check(
+        HTTPCheck.SC_SSL_CERT, status=HTTPCheck.WARNING, tags=expiring_soon_cert_tags, count=1
+    )
+
+    critical_cert_tags = ['url:https://valid.mock', 'instance:cert_critical']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=critical_cert_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.CRITICAL, tags=critical_cert_tags, count=1)
+
+    connection_err_tags = ['url:https://thereisnosuchlink.com', 'instance:conn_error']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=connection_err_tags, count=1)
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, tags=connection_err_tags, count=1)
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_check_ssl_use_cert_from_response(aggregator, http_check):
+    # Run the check for all the instances in the config
+    for instance in CONFIG_SSL_ONLY['instances']:
+        instance = instance.copy()
+        instance['use_cert_from_response'] = True
         http_check.check(instance)
 
     good_cert_tags = ['url:https://valid.mock:443', 'instance:good_cert']
@@ -185,9 +297,13 @@ def test_check_tsl_ca_cert(aggregator, dd_run_check):
 @pytest.mark.usefixtures("dd_environment")
 def test_check_ssl_expire_error(aggregator, dd_run_check):
     with mock.patch('ssl.SSLSocket.getpeercert', side_effect=Exception()):
-        # Run the check for the one instance configured with days left
-        http_check = HTTPCheck('', {}, [CONFIG_EXPIRED_SSL['instances'][0]])
-        dd_run_check(http_check)
+        with mock.patch(
+            'datadog_checks.http_check.http_check.get_ca_certs_path',
+            new=lambda: os.path.join(HERE, 'fixtures', 'cacert.pem'),
+        ):
+            # Run the check for the one instance configured with days left
+            http_check = HTTPCheck('', {}, [CONFIG_EXPIRED_SSL['instances'][0]])
+            dd_run_check(http_check)
 
     expired_cert_tags = ['url:https://valid.mock', 'instance:expired_cert']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=expired_cert_tags, count=1)
@@ -207,7 +323,6 @@ def test_check_ssl_expire_error_secs(aggregator, http_check):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_check_hostname_override(aggregator, http_check):
-
     # Run the check for all the instances in the config
     for instance in CONFIG_CUSTOM_NAME['instances']:
         http_check.check(instance)
@@ -296,7 +411,6 @@ def test_service_check_instance_name_normalization(aggregator, http_check):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_dont_check_expiration(aggregator, http_check):
-
     # Run the check for the one instance
     instance = CONFIG_DONT_CHECK_EXP['instances'][0]
     http_check.check(instance)
@@ -310,7 +424,6 @@ def test_dont_check_expiration(aggregator, http_check):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_data_methods(aggregator, http_check):
-
     # Run the check once for both POST configs
     for instance in CONFIG_DATA_METHOD['instances']:
         http_check.check(instance)
@@ -328,7 +441,7 @@ def test_data_methods(aggregator, http_check):
         aggregator.reset()
 
 
-def test_unexisting_ca_cert_should_throw_error(aggregator, dd_run_check):
+def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
     instance = {
         'name': 'Test Web VM HTTPS SSL',
         'url': 'https://foo.bar.net/',
@@ -340,11 +453,14 @@ def test_unexisting_ca_cert_should_throw_error(aggregator, dd_run_check):
         'skip_proxy': 'false',
     }
 
-    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
-
-    dd_run_check(check)
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL)
-    assert 'invalid path: /tmp/unexisting.crt' in aggregator._service_checks[HTTPCheck.SC_STATUS][0].message
+    with (
+        mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning,
+        mock.patch('requests.Session.get'),
+    ):
+        check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+        dd_run_check(check)
+        mock_warning.assert_called()
+        assert any(instance['tls_ca_cert'] in arg for arg in mock_warning.call_args)
 
 
 def test_instance_auth_token(dd_run_check):
@@ -402,7 +518,6 @@ def test_instance_auth_token(dd_run_check):
     ],
 )
 def test_expected_headers(dd_run_check, instance, expected_headers):
-
     check = HTTPCheck('http_check', {'ca_certs': mock_get_ca_certs_path()}, [instance])
     dd_run_check(check)
     assert expected_headers == check.http.options['headers']
@@ -454,3 +569,53 @@ def test_tls_config_ok(dd_run_check, instance, check_hostname):
     )
     tls_context = check.get_tls_context()
     assert tls_context.check_hostname is check_hostname
+
+
+@pytest.mark.parametrize(
+    'headers',
+    [
+        pytest.param({'content-type': 'application/json'}),
+        pytest.param({'Content-Type': 'application/json'}),
+        pytest.param({'CONTENT-TYPE': 'text/html'}),
+        pytest.param({}),
+    ],
+)
+def test_case_insensitive_header_content_type(dd_run_check, headers):
+    """
+    Test that `Content-Type` is accessible from the headers dict regardless of letter case.
+    We're only testing `Content-Type` for a non-GET method because that's the only header field
+    that applies a default header value if omitted.
+    """
+    instance = {
+        'name': 'foobar',
+        'url': 'http://something.com',
+        'method': 'POST',
+        'headers': headers,
+        'data': {'foo': 'bar'},
+    }
+    default_headers = {
+        'User-Agent': 'Datadog Agent/0.0.0',
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip, deflate',
+        'Content-Type': 'application/x-www-form-urlencoded',
+    }
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    dd_run_check(check)
+
+    if headers == {}:
+        assert check.http.options["headers"] == default_headers
+    else:
+        assert check.http.options["headers"] == headers
+
+
+def test_http_response_status_code_accepts_int_value(aggregator, dd_run_check):
+    instance = {
+        'name': 'foobar',
+        'url': 'http://something.com',
+        'http_response_status_code': 404,
+    }
+    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+
+    dd_run_check(check)
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL)

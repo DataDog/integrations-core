@@ -4,7 +4,6 @@
 import mock
 import pytest
 import requests
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
@@ -26,11 +25,11 @@ def test_check(check, instance, aggregator):
     ):
         metrics.update(d)
 
-    for _, v in iteritems(check.FRAMEWORK_METRICS):
+    for v in check.FRAMEWORK_METRICS.values():
         aggregator.assert_metric(v[0])
-    for _, v in iteritems(metrics):
+    for v in metrics.values():
         aggregator.assert_metric(v[0])
-    for _, v in iteritems(check.ROLE_RESOURCES_METRICS):
+    for v in check.ROLE_RESOURCES_METRICS.values():
         aggregator.assert_metric(v[0])
 
     aggregator.assert_metric('mesos.cluster.total_frameworks')
@@ -153,7 +152,8 @@ def test_can_connect_service_check(
 ):
     check = MesosMaster('mesos_master', {}, [instance])
 
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.side_effect = request_mock_side_effects
 
         try:

@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   php:
     image: php:7-fpm

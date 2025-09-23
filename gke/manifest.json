@@ -9,14 +9,33 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "GKE is a platform for running and orchestrating containerized applications.",
-    "title": "Google Kubernetes Engine",
+    "title": "Google Kubernetes Engine, Agent Integration",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Containers",
-      "Category::Orchestration"
+      "Category::Orchestration",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/gke-autopilot-monitoring/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-google-kubernetes-engine/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-tau-t2a-gke-workloads-with-datadog-arm-support/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/gke-dashboards-integration-improvements/"
+      }
     ]
   },
   "author": {
@@ -25,7 +44,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Google Kubernetes Engine",

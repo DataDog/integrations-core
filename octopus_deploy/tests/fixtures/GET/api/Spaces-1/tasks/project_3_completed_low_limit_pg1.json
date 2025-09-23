@@ -1,0 +1,120 @@
+{
+    "ItemType": "Task",
+    "TotalResults": 3,
+    "ItemsPerPage": 30,
+    "NumberOfPages": 1,
+    "LastPageNumber": 0,
+    "TotalCounts": {
+      "Canceled": 0,
+      "Cancelling": 0,
+      "Executing": 0,
+      "Failed": 13,
+      "Queued": 0,
+      "Success": 1783,
+      "TimedOut": 0,
+      "Interrupted": 0
+    },
+    "TotalCountsInOtherSpaces": {
+      "Canceled": 0,
+      "Cancelling": 0,
+      "Executing": 0,
+      "Failed": 0,
+      "Queued": 0,
+      "Success": 0,
+      "TimedOut": 0,
+      "Interrupted": 0
+    },
+    "Items": [
+      {
+        "Id": "ServerTasks-1847",
+        "SpaceId": "Spaces-1",
+        "Name": "Deploy",
+        "Description": "Deploy test release 0.0.2 to Development",
+        "Arguments": {
+          "DeploymentId": "Deployments-19"
+        },
+        "State": "Failed",
+        "Completed": "Monday, 23 September 2024 3:10:03 PM +00:00",
+        "QueueTime": "2024-09-23T14:42:30.123+00:00",
+        "QueueTimeExpiry": null,
+        "StartTime": "2024-09-23T14:44:20.123+00:00",
+        "LastUpdatedTime": "2024-09-23T15:10:03.262+00:00",
+        "CompletedTime": "2024-09-23T14:45:10.123+00:00",
+        "ServerNode": "OctopusServerNodes-50c3dfbarc82",
+        "Duration": "6 seconds",
+        "ErrorMessage": "The deployment failed because one or more steps failed. Please see the deployment log for details.",
+        "HasBeenPickedUpByProcessor": true,
+        "IsCompleted": true,
+        "FinishedSuccessfully": false,
+        "HasPendingInterruptions": false,
+        "CanRerun": false,
+        "HasWarningsOrErrors": true,
+        "UnmetPreconditions": null,
+        "ProjectId": "Projects-3",
+        "Links": {
+          "Self": "/api/tasks/ServerTasks-1847",
+          "Web": "/app#/Spaces-1/tasks/ServerTasks-1847",
+          "Raw": "/api/tasks/ServerTasks-1847/raw",
+          "Rerun": "/api/tasks/rerun/ServerTasks-1847",
+          "Cancel": "/api/tasks/ServerTasks-1847/cancel",
+          "State": "/api/tasks/ServerTasks-1847/state",
+          "BlockedBy": "/api/tasks/ServerTasks-1847/blockedby",
+          "QueuedBehind": "/api/tasks/ServerTasks-1847/queued-behind{?skip,take}",
+          "Details": "/api/tasks/ServerTasks-1847/details{?verbose,tail,ranges}",
+          "StatusMessages": "/api/tasks/ServerTasks-1847/status/messages",
+          "Prioritize": "/api/tasks/ServerTasks-1847/prioritize",
+          "Artifacts": "/api/Spaces-1/artifacts?regarding=ServerTasks-1847",
+          "Interruptions": "/api/Spaces-1/interruptions?regarding=ServerTasks-1847"
+        }
+      },
+      {
+        "Id": "ServerTasks-1846",
+        "SpaceId": "Spaces-1",
+        "Name": "Deploy",
+        "Description": "Deploy test release 0.0.1 to Staging",
+        "Arguments": {
+          "DeploymentId": "Deployments-18"
+        },
+        "State": "Success",
+        "Completed": "Monday, 23 September 2024 3:00:28 PM +00:00",
+        "QueueTime": "2024-09-23T14:42:50.123+00:00",
+        "QueueTimeExpiry": null,
+        "StartTime": "2024-09-23T14:44:20.123+00:00",
+        "LastUpdatedTime": "2024-09-23T15:00:28.272+00:00",
+        "CompletedTime": "2024-09-23T14:45:14.123+00:00",
+        "ServerNode": "OctopusServerNodes-50c3dfbarc82",
+        "Duration": "2 seconds",
+        "ErrorMessage": "",
+        "HasBeenPickedUpByProcessor": true,
+        "IsCompleted": true,
+        "FinishedSuccessfully": true,
+        "HasPendingInterruptions": false,
+        "CanRerun": false,
+        "HasWarningsOrErrors": false,
+        "UnmetPreconditions": null,
+        "ProjectId": "Projects-3",
+        "Links": {
+          "Self": "/api/tasks/ServerTasks-1846",
+          "Web": "/app#/Spaces-1/tasks/ServerTasks-1846",
+          "Raw": "/api/tasks/ServerTasks-1846/raw",
+          "Rerun": "/api/tasks/rerun/ServerTasks-1846",
+          "Cancel": "/api/tasks/ServerTasks-1846/cancel",
+          "State": "/api/tasks/ServerTasks-1846/state",
+          "BlockedBy": "/api/tasks/ServerTasks-1846/blockedby",
+          "QueuedBehind": "/api/tasks/ServerTasks-1846/queued-behind{?skip,take}",
+          "Details": "/api/tasks/ServerTasks-1846/details{?verbose,tail,ranges}",
+          "StatusMessages": "/api/tasks/ServerTasks-1846/status/messages",
+          "Prioritize": "/api/tasks/ServerTasks-1846/prioritize",
+          "Artifacts": "/api/Spaces-1/artifacts?regarding=ServerTasks-1846",
+          "Interruptions": "/api/Spaces-1/interruptions?regarding=ServerTasks-1846"
+        }
+      }
+    ],
+    "Links": {
+      "Self": "/api/tasks?skip=0&take=30",
+      "Template": "/api/tasks{?skip,active,environment,tenant,runbook,project,name,node,running,states,hasPendingInterruptions,hasWarningsOrErrors,take,ids,partialName,spaces,includeSystem,description,fromCompletedDate,toCompletedDate,fromQueueDate,toQueueDate,fromStartDate,toStartDate}",
+      "Page.All": "/api/tasks?skip=0&take=2147483647",
+      "Page.Current": "/api/tasks?skip=0&take=30",
+      "Page.Last": "/api/tasks?skip=0&take=30"
+    }
+  }

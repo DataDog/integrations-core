@@ -1,0 +1,29 @@
+{
+	"version": 2,
+	"created_at": "2024-08-05",
+	"last_updated_at": "2024-08-05",
+	"title": "Neuron Runtime vCPU usage",
+	"description": "This monitor tracks the virtual CPU (vCPU) usage of the Neuron runtime. Consistently high vCPU usage can lead to slower execution times and resource contention. Monitoring this metric helps ensure the system runs efficiently and prevents performance bottlenecks.",
+	"definition": {
+		"name": "The Neuron Runtime has high vCPU usage on {{instance_id.name}}",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:aws_neuron.neuron_runtime.vcpu_usage_ratio{*} by {instance_id} > 0.8",
+		"message": "{{#is_alert}}The average vCPU usage on {{instance_id.name}} has been {{value}} over the past 5 minutes.{{/is_alert}}\n{{#is_recovery}}The average vCPU usage of {{instance_id.name}} has recovered below the threshold of {{threshold}}.{{/is_recovery}}",
+		"tags": [
+			"integration:aws_neuron"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 0.8,
+				"warning": 0.7
+			},
+			"notify_audit": false,
+			"include_tags": true,
+			"new_group_delay": 60
+		},
+		"priority": 3
+	},
+	"tags": [
+		"integration:aws-neuron"
+	]
+}

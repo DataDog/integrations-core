@@ -3,14 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from typing import Iterator
+from typing import Iterator  # noqa: F401
 
 import mock
 import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.voltdb.types import Instance
+from datadog_checks.voltdb.types import Instance  # noqa: F401
 
 from . import common
 from .utils import CreateSchema, EnsureExpectedMetricsShowUp
@@ -26,7 +26,9 @@ def dd_environment(instance):
         schema = f.read()
 
     conditions = [
-        CheckDockerLogs(compose_file, patterns=['Server completed initialization']),
+        CheckDockerLogs(compose_file, patterns=['Server completed initialization'], service='voltdb0'),
+        CheckDockerLogs(compose_file, patterns=['Server completed initialization'], service='voltdb1'),
+        CheckDockerLogs(compose_file, patterns=['Server completed initialization'], service='voltdb2'),
         CreateSchema(compose_file, schema, container_name='voltdb0'),
         EnsureExpectedMetricsShowUp(instance),
     ]

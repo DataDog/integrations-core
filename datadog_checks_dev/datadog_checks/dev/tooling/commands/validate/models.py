@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ....fs import (
+from datadog_checks.dev.fs import (
     chdir,
     dir_exists,
     ensure_parent_dir_exists,
@@ -13,20 +13,7 @@ from ....fs import (
     read_file_lines,
     write_file_lines,
 )
-from ...configuration import ConfigSpec
-from ...configuration.consumers import ModelConsumer
-from ...constants import get_root
-from ...manifest_utils import Manifest
-from ...testing import process_checks_option
-from ...utils import (
-    CUSTOM_FILES,
-    complete_valid_checks,
-    get_config_models_documentation,
-    get_license_header,
-    get_models_location,
-    get_version_string,
-)
-from ..console import (
+from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
     abort,
     annotate_display_queue,
@@ -36,8 +23,25 @@ from ..console import (
     echo_info,
     echo_success,
 )
+from datadog_checks.dev.tooling.configuration import ConfigSpec
+from datadog_checks.dev.tooling.configuration.consumers import ModelConsumer
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import (
+    CUSTOM_FILES,
+    complete_valid_checks,
+    get_config_models_documentation,
+    get_license_header,
+    get_models_location,
+    get_version_string,
+)
 
 LICENSE_HEADER = "(C) Datadog, Inc."
+
+INTEGRATIONS_WITHOUT_MODELS = {
+    'snmp',  # Deprecated
+    'tokumx',  # Python 2 only
+}
 
 
 def standardize_new_lines(lines):
@@ -77,9 +81,11 @@ def models(ctx, check, sync, verbose):
     checks, an 'all' or empty `check` value will validate all README files.
     """
     root = get_root()
-    community_check = ctx.obj['repo_choice'] not in ('core', 'internal')
+    is_community_check = ctx.obj['repo_choice'] not in ('core', 'internal')
+    is_core_check = ctx.obj['repo_choice'] == 'core'
 
-    checks = process_checks_option(check, source='valid_checks', extend_changed=True)
+    checks = set(process_checks_option(check, source='valid_checks', extend_changed=True))
+
     echo_info(f"Validating data models for {len(checks)} checks ...")
 
     specs_failed = {}
@@ -91,19 +97,19 @@ def models(ctx, check, sync, verbose):
 
     code_formatter = ModelConsumer.create_code_formatter()
 
-    for check in checks:
+    if is_core_check:
+        checks = checks.difference(INTEGRATIONS_WITHOUT_MODELS)
+
+    for check in sorted(checks):
         display_queue = {}
         if check == 'datadog_checks_base':
             spec_path = path_join(root, 'datadog_checks_base', 'tests', 'models', 'data', 'spec.yaml')
             source = 'test'
             version = '0.0.1'
         else:
-            manifest = Manifest.load_manifest(check)
-            if not manifest:
-                echo_debug(f"Skipping validation for check: {check}; can't process manifest")
-                continue
-            spec_path = manifest.get_config_spec()
+            spec_path = path_join(root, check, 'assets', 'configuration', 'spec.yaml')
             if not file_exists(spec_path):
+                echo_debug(f"Skipping validation for check: {check}; 'spec.yaml' file doesn't exist")
                 continue
 
             source = check
@@ -126,8 +132,7 @@ def models(ctx, check, sync, verbose):
         else:
             models_location = get_models_location(check)
 
-            # TODO: Remove when all integrations have models
-            if not sync and not dir_exists(models_location):
+            if not sync and not dir_exists(models_location) and not is_core_check:
                 continue
 
         model_consumer = ModelConsumer(spec.data, code_formatter)
@@ -165,7 +170,7 @@ def models(ctx, check, sync, verbose):
                     # validators.py and deprecations.py are custom files, they should only be rendered the first time
                     continue
 
-            if not community_check:
+            if not is_community_check:
                 expected_model_file_lines.extend(license_header_lines)
 
             if model_file not in CUSTOM_FILES:
@@ -175,13 +180,18 @@ def models(ctx, check, sync, verbose):
 
             # If we're re-generating a file, we should ensure we do not change the license date
             # We also want to handle the case where there is no license header
-            if not community_check:
+            if not is_community_check:
                 if len(current_model_file_lines) > 0 and LICENSE_HEADER in current_model_file_lines[0]:
                     expected_model_file_lines[0] = current_model_file_lines[0]
 
             if not current_model_file_lines or not content_matches(current_model_file_lines, expected_model_file_lines):
                 if sync:
-                    echo_info(f'Writing data model file to `{model_file_path}`')
+                    check_display_queue.append(
+                        (
+                            echo_info,
+                            f'Writing data model file to `{model_file_path}`',
+                        )
+                    )
                     ensure_parent_dir_exists(model_file_path)
                     write_file_lines(model_file_path, expected_model_file_lines)
                 else:
@@ -205,24 +215,24 @@ def models(ctx, check, sync, verbose):
                 for func, message in queue:
                     func(message, indent=True)
 
-    specs_failed = len(specs_failed)
-    files_failed = len(files_failed)
-    files_passed = num_files - files_failed
+    specs_failed_count = len(specs_failed)
+    files_failed_count = len(files_failed)
+    files_passed_count = num_files - files_failed_count
 
-    if specs_failed or files_failed:
+    if specs_failed_count or files_failed_count:
         click.echo()
 
-    if specs_failed:
+    if specs_failed_count:
         echo_failure(f'Specs with errors: {specs_failed}')
 
-    if files_failed:
-        echo_failure(f'Files with errors: {files_failed}')
+    if files_failed_count:
+        echo_failure(f'Files with errors: {files_failed_count}')
 
-    if files_passed:
-        if specs_failed or files_failed:
-            echo_success(f'Files valid: {files_passed}')
+    if files_passed_count:
+        if specs_failed_count or files_failed_count:
+            echo_success(f'Files valid: {files_passed_count}')
         else:
             echo_success(f'All {num_files} data model files are in sync!')
 
-    if specs_failed or files_failed:
+    if specs_failed_count or files_failed_count:
         abort()

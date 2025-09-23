@@ -5,16 +5,18 @@
 Utilities functions abstracting common operations, specially designed to be used
 by Integrations within tests.
 """
+
 import csv
 import inspect
+import json
 import os
 import platform
 import socket
 from contextlib import closing, contextmanager
 from io import open
+from urllib.request import urlopen
 
 import yaml
-from six.moves.urllib.request import urlopen
 
 from .ci import running_on_ci, running_on_gh_actions, running_on_windows_ci  # noqa: F401
 from .fs import basepath, file_exists, get_parent_dir, path_join, read_file
@@ -27,7 +29,7 @@ GH_ANNOTATION_LEVELS = ['warning', 'error']
 
 
 def get_active_env():
-    return os.environ.get('TOX_ENV_NAME') or os.environ['HATCH_ENV_ACTIVE']
+    return os.environ['HATCH_ENV_ACTIVE']
 
 
 def ensure_bytes(s):
@@ -137,6 +139,24 @@ def get_metadata_metrics():
         for row in csv.DictReader(f):
             metrics[row['metric_name']] = row
     return metrics
+
+
+def get_service_checks(depth=1):
+    # If it's called directly we can use depth=1, otherwise the caller should pass the correct depth
+    check_root = find_check_root(depth=depth)
+    service_checks_path = os.path.join(check_root, 'assets', 'service_checks.json')
+
+    with open(service_checks_path) as f:
+        return json.load(f)
+
+
+def assert_service_checks(aggregator):
+    # The stub is in the base check, and we don't want to bump the min version for testing purposes
+    # Remove this function when all checks are using a base check that includes this function, or we
+    # manage to move the aggregator somewhere else
+    if hasattr(aggregator, 'assert_service_checks'):
+        # We use depth=2 since this function is called from the check and calls another one
+        aggregator.assert_service_checks(get_service_checks(depth=2))
 
 
 def get_hostname():

@@ -12,6 +12,11 @@ def initialize_instance(values, **kwargs):
     if not values.get('server') or not values.get('username'):
         raise ValueError('Oracle host and user are needed')
 
+    if values.get('jdbc_driver_path') and values.get('use_instant_client'):
+        raise ValueError(
+            'Oracle Instant Client and Oracle JDBC configured. Use either `use_instant_client` or `jdbc_driver_path`'
+        )
+
     protocol = values.get('protocol', 'TCP')
     if not protocol or protocol.upper() not in VALID_PROTOCOLS:
         raise ValueError('Protocol %s is not valid, must either be TCP or TCPS' % protocol)

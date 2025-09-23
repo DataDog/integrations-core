@@ -1,0 +1,463 @@
+[
+  {
+    "httpRequest": {
+      "path": "/guestAuth/app/rest/buildTypes",
+      "queryStringParameters": {
+        "locator": [
+          "project(id:SampleProject)"
+        ]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "count": 1,
+        "href": "/app/rest/buildTypes?locator=project(id:SampleProject)",
+        "buildType": [
+          {
+            "id": "SampleProject_Build",
+            "name": "Build",
+            "projectName": "Sample Project",
+            "projectdId": "SampleProject",
+            "href": "/app/rest/buildTypes/id:SampleProject_Build",
+            "webUrl": "http://localhost:8111/viewType.html?buildTypeId=SampleProject_Build"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/guestAuth/app/rest/projects"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "count": 1,
+        "href": "/guestAuth/app/rest/projects",
+        "project": [
+          {
+            "id": "SampleProject",
+            "name": "Sample Project",
+            "parentProjectId": "_Root",
+            "href": "/app/rest/projects/id:SampleProject",
+            "webUrl": "http://localhost:8111/project.html?projectId=SampleProject"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/guestAuth/app/rest/builds/",
+      "queryStringParameters": {
+        "locator": [
+          "buildType:SampleProject_Build,project:SampleProject,count:1"
+        ]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "count": 1,
+        "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,count:1",
+        "nextHref": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,count:1,start:1",
+        "build": [
+          {
+            "id": 1,
+            "buildTypeId": "SampleProject_Build",
+            "number": "1",
+            "status": "SUCCESS",
+            "state": "finished",
+            "branchName": "main",
+            "defaultBranch": "true",
+            "href": "/guestAuth/app/rest/builds/id:1",
+            "webUrl": "http://localhost:8111/viewLog.html?buildId=1&buildTypeId=SampleProject_Build"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/guestAuth/app/rest/builds/",
+      "queryStringParameters": {
+        "locator": [
+          "buildType:SampleProject_Empty_Builds,project:SampleProject,count:1"
+        ]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "count": 1,
+        "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Empty_Builds,count:1",
+        "nextHref": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Empty_Builds,count:1,start:1",
+        "build": []
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "\\/guestAuth\\/app\\/rest\\/buildTypes\\/id:(.*?)\\/settings"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "count": 3,
+        "property": [
+          {
+            "name": "allowPersonalBuildTriggering",
+            "value": "false"
+          },
+          {
+            "name": "buildNumberCounter",
+            "value": "10"
+          },
+          {
+            "name": "maximumNumberOfBuilds",
+            "value": "1"
+          }
+        ],
+        "href": "/guestAuth/app/rest/buildTypes/settings"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "\\/guestAuth\\/app\\/rest\\/buildTypes\\/id:(.*)"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "id": "SampleProject_Build",
+        "name": "Build",
+        "projectName": "Sample Project",
+        "projectId": "SampleProject",
+        "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,sinceBuild:id:0,state:finished",
+        "webUrl": "http://localhost:8111/viewType.html?buildTypeId=SampleProject_Build"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/guestAuth/app/rest/builds/",
+      "queryStringParameters": {
+        "locator": [
+          "buildType:SampleProject_Build,sinceBuild:id:1,state:finished,defaultFilter:false"
+        ]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "count": 1,
+        "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,sinceBuild:id:1,state:finished",
+        "build": [
+          {
+            "id": 2,
+            "buildTypeId": "SampleProject_Build",
+            "number": "2",
+            "status": "SUCCESS",
+            "state": "finished",
+            "href": "/guestAuth/app/rest/builds/id:1",
+            "webUrl": "http://localhost:8111/viewLog.html?buildId=1&buildTypeId=SampleProject_Build"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/guestAuth/app/rest/builds/",
+      "queryStringParameters": {
+        "locator": [
+          "buildType:SampleProject_Build,sinceBuild:id:2,state:finished,defaultFilter:false"
+        ]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "count": 0,
+        "href": "/guestAuth/app/rest/builds/?locator=buildType:SampleProject_Build,sinceBuild:id:2,state:finished"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/guestAuth/app/rest/server"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "versionMajor": "2022",
+        "versionMinor": "8",
+        "buildNumber": "115573",
+        "buildDate": "20220803T000000+0000"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "\\/guestAuth\\/app\\/rest\\/builds\\/buildId:(.*?)\\/statistics"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "count": "41",
+        "property": [
+          {
+            "name": "ArtifactsSize",
+            "value": "47339"
+          },
+          {
+            "name": "BuildDuration",
+            "value": "11840"
+          },
+          {
+            "name": "BuildDurationNetTime",
+            "value": "11403"
+          },
+          {
+            "name": "buildStageDuration:artifactsPublishing",
+            "value": "170"
+          },
+          {
+            "name": "buildStageDuration:buildFinishing",
+            "value": "11"
+          },
+          {
+            "name": "buildStageDuration:buildStepRUNNER_1",
+            "value": "6132"
+          },
+          {
+            "name": "buildStageDuration:buildStepRUNNER_2",
+            "value": "5271"
+          },
+          {
+            "name": "buildStageDuration:firstStepPreparation",
+            "value": "3"
+          },
+          {
+            "name": "buildStageDuration:sourcesUpdate",
+            "value": "118"
+          },
+          {
+            "name": "buildStageDuration:toolsUpdating",
+            "value": "1"
+          },
+          {
+            "name": "BuildTestStatus",
+            "value": "3"
+          },
+          {
+            "name": "FailedTestCount",
+            "value": "1"
+          },
+          {
+            "name": "InspectionStatsE",
+            "value": "0"
+          },
+          {
+            "name": "InspectionStatsW",
+            "value": "0"
+          },
+          {
+            "name": "PassedTestCount",
+            "value": "1"
+          },
+          {
+            "name": "queueWaitReason:Build_settings_have_not_been_finalized",
+            "value": "10"
+          },
+          {
+            "name": "queueWaitReason:Waiting_for_the_build_queue_distribution_process",
+            "value": "20"
+          },
+          {
+            "name": "serverSideBuildFinishing",
+            "value": "9"
+          },
+          {
+            "name": "SuccessRate",
+            "value": "0"
+          },
+          {
+            "name": "TimeSpentInQueue",
+            "value": "10"
+          },
+          {
+            "name": "TotalTestCount",
+            "value": "2"
+          },
+          {
+            "name": "CodeCoverageB",
+            "value": "90"
+          },
+          {
+            "name": "CodeCoverageC",
+            "value": "87"
+          },
+          {
+            "name": "CodeCoverageL",
+            "value": "65"
+          },
+          {
+            "name": "CodeCoverageM",
+            "value": "88"
+          },
+          {
+            "name": "CodeCoverageR",
+            "value": "70"
+          },
+          {
+            "name": "CodeCoverageS",
+            "value": "56"
+          },
+          {
+            "name": "CodeCoverageAbsBCovered",
+            "value": "90"
+          },
+          {
+            "name": "CodeCoverageAbsBTotal",
+            "value": "87"
+          },
+          {
+            "name": "CodeCoverageAbsCCovered",
+            "value": "65"
+          },
+          {
+            "name": "CodeCoverageAbsCTotal",
+            "value": "88"
+          },
+          {
+            "name": "CodeCoverageAbsLCovered",
+            "value": "70"
+          },
+          {
+            "name": "CodeCoverageAbsLTotal",
+            "value": "56"
+          },
+          {
+            "name": "CodeCoverageAbsMCovered",
+            "value": "90"
+          },
+          {
+            "name": "CodeCoverageAbsMTotal",
+            "value": "87"
+          },
+          {
+            "name": "CodeCoverageAbsRCovered",
+            "value": "65"
+          },
+          {
+            "name": "CodeCoverageAbsRTotal",
+            "value": "88"
+          },
+          {
+            "name": "CodeCoverageAbsSCovered",
+            "value": "70"
+          },
+          {
+            "name": "CodeCoverageAbsSTotal",
+            "value": "56"
+          },
+          {
+            "name": "DuplicatorStats",
+            "value": "2"
+          },
+          {
+            "name": "IgnoredTestCount",
+            "value": "3"
+          },
+          {
+            "name": "VisibleArtifactsSize",
+            "value": "389"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/guestAuth/app/rest/testOccurrences",
+      "queryStringParameters": {
+        "locator": [
+          "build:2"
+        ]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "count": "6",
+        "href": "http://localhost:8111/app/rest/testOccurrences?locator=build:232",
+        "passed": "2",
+        "testOccurrence": [
+          {
+            "id": "build:(id:232),id:237",
+            "name": "tests.test_foo.test_bar",
+            "status": "SUCCESS",
+            "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:237"
+          },
+          {
+            "id": "build:(id:232),id:238",
+            "name": "tests.test_foo.test_bop",
+            "status": "FAILURE",
+            "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:238"
+          },
+          {
+            "id": "build:(id:232),id:239",
+            "name": "tests.test_bar.test_foo",
+            "status": "NORMAL",
+            "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:239"
+          },
+          {
+            "id": "build:(id:232),id:240",
+            "name": "tests.test_bar.test_zip",
+            "status": "UNKNOWN",
+            "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:240"
+          },
+          {
+            "id": "build:(id:232),id:241",
+            "name": "tests.test_bar.test_zap",
+            "status": "ERROR",
+            "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:241"
+          },
+          {
+            "id": "build:(id:232),id:242",
+            "name": "tests.test_zip.test_bar",
+            "status": "WARNING",
+            "href": "/guestAuth/app/rest/testOccurrences/build:(id:232),id:242"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/guestAuth/app/rest/problemOccurrences",
+      "queryStringParameters": {
+        "locator": [
+          "build:(id:2)"
+        ]
+      }
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "count": "1",
+        "href": "http://localhost:8111/app/rest/problemOccurrences?locator=build:(id:2)",
+        "problemOccurrence": [
+          {
+            "id": "build:(id:2),problem:(id:1)",
+            "type": "TC_EXIT_CODE",
+            "identity": "python_build_error_identity",
+            "href": "/guestAuth/app/rest/problemOccurrences/build:(id:2),problem:(id:1)"
+          }
+        ]
+      }
+    }
+  }
+]

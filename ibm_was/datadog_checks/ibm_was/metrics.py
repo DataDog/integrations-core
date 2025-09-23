@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # Mapping of the Statistic type to which attribute contains the metric value
-# noqa E501 IBM Docs https://www.ibm.com/support/knowledgecenter/en/SSAW57_8.5.5/com.ibm.websphere.nd.multiplatform.doc/ae/rprf_dataclass.html
+# noqa E501 IBM Docs https://www.ibm.com/docs/en/was-nd/9.0.5?topic=pmi-data-classification
 METRIC_VALUE_FIELDS = {
     'AverageStatistic': 'count',
     'BoundedRangeStatistic': 'value',
@@ -14,7 +14,7 @@ METRIC_VALUE_FIELDS = {
 }
 
 # Mapping the Name of the Stat object to the metric prefix
-# noqa E501 IBM Docs - https://www.ibm.com/support/knowledgecenter/en/SSAW57_8.5.5/com.ibm.websphere.nd.multiplatform.doc/ae/rprf_dataorg.html
+# noqa E501 IBM Docs - https://www.ibm.com/docs/en/was-nd/9.0.5?topic=pmi-data-organization
 METRIC_CATEGORIES = {
     'JVM Runtime': 'jvm',
     'JDBC Connection Pools': 'jdbc',

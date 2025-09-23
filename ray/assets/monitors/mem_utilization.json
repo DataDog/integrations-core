@@ -1,0 +1,32 @@
+{
+    "version": 2,
+    "created_at": "2023-12-13",
+    "last_updated_at": "2023-12-13",
+    "title": "High Memory Usage",
+    "description": "Running Ray machine learning or data processing workloads can be computationally intensive. This monitor notifies you when the Ray.io node is running low on available memory.",
+    "definition": {
+        "id": 136348497,
+        "name": "High Memory Usage on Ray.io Node",
+        "type": "query alert",
+        "query": "avg(last_5m):100 * avg:ray.node.mem.available{*} / avg:ray.node.mem.total{*} < 5",
+        "message": "{{#is_alert}} \nThere is less than {{value}}% memory available.\n\n{{/is_alert}}\n\n{{#is_warning}}\nThere is less than {{value}}% memory available.\n\n{{/is_warning}}",
+        "tags": [],
+        "options": {
+            "thresholds": {
+                "critical": 5,
+                "warning": 10
+            },
+            "notify_audit": false,
+            "include_tags": false,
+            "notify_no_data": false,
+            "avalanche_window": 10,
+            "new_host_delay": 300,
+            "silenced": {}
+        },
+        "priority": null,
+        "restricted_roles": null
+    },
+    "tags": [
+        "integration:ray"
+    ]
+}

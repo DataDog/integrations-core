@@ -29,6 +29,11 @@ files:
 
         Do not specify more than one host here unless you are connecting to a mongos instance
         and you want to balance requests performed by the agent to multiple mongos instances.
+        
+        If you need to monitor multiple mongos instances and are using version 7.39 or later of the Agent, 
+        configure the integration to disable directConnection, which is enabled by default starting in 4.0.2. 
+        This can be done by setting options.directConnection to 'false'.
+        
       value:
         example:
         - <HOST>:<PORT>
@@ -69,21 +74,292 @@ files:
         For a complete list of available connection options, see:
         https://docs.mongodb.com/manual/reference/connection-string/#connections-connection-options
 
-        NOTE: For monitoring replica set, do not use the replSet parameter as the Agent expects to always
+        NOTE: For monitoring replica set, do not use the replicaSet parameter as the Agent expects to always
         connect to the same host. Instead configure one check instance for each node.
       value:
         type: object
         properties: []
     - name: dbnames
+      deprecation:
+        Agent version: "7.56.0"
+        Migration: |
+          dbnames is deprecated. Set database_autodiscovery.enabled to true to enable database autodiscovery.
+          Use database_autodiscovery.include or database_autodiscovery.exclude to include or exclude
+          specific databases to collect metrics from.
       description: |
-        Set a list of the names of all databases to collect metrics from.
-        If this key does not exist, all metrics from all databases on the server will be collected.
+        Set a list of the names of all databases to collect dbstats metrics from.
+        If this key does not exist, all dbstats metrics from all databases on the server will be collected.
       value:
         type: array
         items:
           type: string
         example:
           [ one_database, other_database ]
+    - name: database_autodiscovery
+      description: |
+        Define the configuration for database autodiscovery.
+        Complete this section if you want to auto-discover databases on this MongoDB instance.
+      options:
+        - name: enabled
+          description: Enable database autodiscovery.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: max_databases
+          description: The maximum number of databases this host should monitor.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
+        - name: include
+          description: |
+            Regular expression for database names to include as part of
+            database autodiscovery.
+            Will report metrics for databases that are found in this instance,
+            ignores databases listed but not found.
+            Character casing is ignored. The regular expressions start matching from
+            the beginning, so to match anywhere, prepend `.*`. For exact matches append `$`.
+            Defaults to `.*` to include everything.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "mydatabase$"
+              - "orders.*"
+            display_default:
+              - ".*"
+        - name: exclude
+          description: |
+            Regular expression for database names to exclude as part of `database_autodiscovery`.
+            Character casing is ignored. The regular expressions start matching from the beginning,
+            so to match anywhere, prepend `.*`. For exact matches append `$`.
+            In case of conflicts, database exclusion via `exclude` takes precedence over
+            those found via `include`
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "admin$"
+              - "config$"
+              - "local$"
+            display_default:
+              - "admin$"
+              - "config$"
+              - "local$"
+        - name: max_collections_per_database
+          description: |
+            The maximum number of collections to collect metrics from per database.
+            Defaults to 100.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
+        - name: refresh_interval
+          description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
+          value:
+            type: integer
+            example: 600
+            display_default: 600
+    - name: dbm
+      description: |
+        Set to `true` enable Database Monitoring.
+      enabled: false
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: cluster_name
+      description: |
+        The name of the cluster to which the monitored MongoDB instance belongs.
+        Used to group MongoDB instances in a MongoDB cluster.
+        Please note that the cluster name must be unique for each MongoDB cluster.
+        
+        Required when `dbm` is enabled.
+      value:
+        type: string
+    - name: reported_database_hostname
+      description: |
+        Set the reported database hostname for the connected mongodb instance. This value overrides the mongodb hostname 
+        detected by the Agent from mongodb admin command serverStatus. It can be useful to set a custom hostname
+        when connecting to a remote database through a proxy.
+      value:
+        type: string
+    - name: database_instance_collection_interval
+      hidden: true
+      description: |
+        Set the database instance collection interval (in seconds). The database instance collection sends
+        basic information about the database instance along with a signal that it still exists.
+        This collection does not involve any additional queries to the database.
+      value:
+        type: number
+        example: 300
+        display_default: false
+    - name: operation_samples
+      description: Configure collection of MongoDB operation samples and explain plans.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of operation samples. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the operation samples collection interval in seconds. Each collection involves capturing
+            current operations with $currentOp aggregation pipeline and explain plans for each operation.
+          value:
+            type: number
+            example: 10
+        - name: explain_verbosity
+          description: |
+            Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+            'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'queryPlanner'.
+            Use 'executionStats' to collect the execution details of the winning plan.
+            Use 'allPlansExecution' to include partial execution data captured during plan selection.
+            To disable explain plans completely, set this option to 'disabled'.
+
+            NOTE: Setting this option to 'executionStats' or 'allPlansExecution' may impact performance
+            as it requires the execution of the query to collect additional execution and plan data.
+          value:
+            type: string
+            example: queryPlanner
+    - name: slow_operations
+      description: Configure collection of MongoDB slow operations.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of slow operations. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the slow operations collection interval in seconds. Each collection involves capturing
+            profiled slow operations from sys.profile collection or from the Slow Query log.
+          value:
+            type: number
+            example: 10
+        - name: max_operations
+          description: |
+            Set the maximum number of slow operations to collect per interval.
+          value:
+            type: number
+            example: 1000
+        - name: explain_verbosity
+          description: |
+            Set the verbosity level of explain plans. The verbosity level can be either 'queryPlanner',
+            'executionStats', 'allPlansExecution' or 'disabled'. The default value is 'queryPlanner'.
+            Use 'executionStats' to collect the execution details of the winning plan.
+            Use 'allPlansExecution' to include partial execution data captured during plan selection.
+            To disable explain plans completely, set this option to 'disabled'.
+
+            NOTE: Setting this option to 'executionStats' or 'allPlansExecution' may impact performance
+            as it requires the execution of the query to collect additional execution and plan data.
+          value:
+            type: string
+            example: queryPlanner
+    - name: collect_schemas
+      description: Configure collection of MongoDB schemas (inferred) by sampling documents.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of schemas. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the schemas collection interval in seconds. Each collection involves sampling documents
+            from collections and inferring schemas.
+          value:
+            type: number
+            example: 3600
+        - name: sample_size
+          description: |
+            Set the sample size for each collection. The sample size is the number of documents to sample
+            from each collection.
+            NOTE: Increasing the sample size for better schema inference accuracy may impact performance.
+          value:
+            type: number
+            example: 10
+        - name: max_collections
+          description: |
+            Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
+            per database is bounded by `database_autodiscovery.max_collections_per_database`. By setting this option, you
+            are adding an additional limit to the total number of collections across all monitored databases that schemas
+            will be collected from. By default, this option is not set.
+          value:
+            type: number
+            display_default: null
+            example: 300
+        - name: max_depth
+          description: |
+            Set the maximum depth of nested documents to sample.
+          value:
+            type: number
+            example: 5
+        - name: collect_search_indexes
+          description: |
+            Set to `true` to collect search indexes for each collection.
+            NOTE: This option is only applicable to MongoDB Atlas clusters.
+          value:
+            type: boolean
+            example: false
+    - name: schemas
+      deprecation:
+        Agent version: 7.69.0
+        Migration: Use `collect_schemas` instead.
+      description: |
+        DEPRECATED: Use `collect_schemas` instead.
+        Configure collection of MongoDB schemas (inferred) by sampling documents.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of schemas. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the schemas collection interval in seconds. Each collection involves sampling documents
+            from collections and inferring schemas.
+          value:
+            type: number
+            example: 3600
+        - name: sample_size
+          description: |
+            Set the sample size for each collection. The sample size is the number of documents to sample
+            from each collection.
+            NOTE: Increasing the sample size for better schema inference accuracy may impact performance.
+          value:
+            type: number
+            example: 10
+        - name: max_collections
+          description: |
+            Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
+            per database is bounded by `database_autodiscovery.max_collections_per_database`. By setting this option, you
+            are adding an additional limit to the total number of collections across all monitored databases that schemas
+            will be collected from. By default, this option is not set.
+          value:
+            type: number
+            display_default: null
+            example: 300
+        - name: max_depth
+          description: |
+            Set the maximum depth of nested documents to sample.
+          value:
+            type: number
+            example: 5
+        - name: collect_search_indexes
+          description: |
+            Set to `true` to collect search indexes for each collection.
+            NOTE: This option is only applicable to MongoDB Atlas clusters.
+          value:
+            type: boolean
+            example: false
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
@@ -93,44 +369,11 @@ files:
         example: true
     - name: timeout
       description: |
-        Controls connectTimeoutMS, serverSelectionTimeoutMS and socketTimeoutMS
-        see http://api.mongodb.com/python/3.4.0/api/pymongo/mongo_client.html
+        Controls connectTimeoutMS, serverSelectionTimeoutMS, socketTimeoutMS and timeoutMS
+        see https://pymongo.readthedocs.io/en/stable/api/pymongo/mongo_client.html
       value:
         type: integer
         example: 30
-    - name: ssl
-      description: If `True`, create the connection to the server using SSL.
-      value:
-        type: boolean
-        example: false
-    - name: ssl_keyfile
-      description: Path to the private key file used to identify the local connection against Mongodb.
-      value:
-        type: string
-    - name: ssl_certfile
-      required: false
-      description: Path to the certificate file used to identify the local connection against Mongodb.
-      value:
-        type: string
-    - name: ssl_cert_reqs
-      description: |
-        Specifies whether a certificate is required from the other side of the connection, and whether it will be
-        validated if provided.
-        Possible values:
-          * 0 for ssl.CERT_NONE (certificates ignored)
-          * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
-          * 2 for ssl.CERT_REQUIRED (required and validated)
-      value:
-        type: integer
-    - name: ssl_ca_certs
-      description: Path to the ca_certs file.
-      value:
-        type: string
-    - name: ssl_match_hostname
-      description: If `False`, disables SSL hostname verification.
-      value:
-        type: boolean
-        example: true
     - name: tls
       description: If `True`, create the connection to the server using transport layer security.
       value:
@@ -163,6 +406,12 @@ files:
       value:
         type: boolean
         example: false
+    - name: dbstats_tag_dbname
+      description: |
+        Whether or not to include the 'dbname' as a tag for dbstat metrics
+      value:
+        type: boolean
+        example: true
     - name: additional_metrics
       description: |
         By default, the check collects a sample of metrics from MongoDB.
@@ -173,12 +422,51 @@ files:
           * `top` - Usage statistics for each collection
           * `collection` - Metrics of the specified collections
           * `jumbo_chunks` - Count and percentage of jumbo chunks. Ignored on mongod instances.
+          * `sharded_data_distribution` - Distribution of data in sharded collections.
       value:
         type: array
         items:
           type: string
         example:
-          [metrics.commands, tcmalloc, top, collection, jumbo_chunks]
+          [metrics.commands, tcmalloc, top, collection, jumbo_chunks, sharded_data_distribution]
+    - name: metrics_collection_interval
+      description: |
+        The interval in seconds at which to collect certain types of metrics.
+      hidden: true
+      options:
+        - name: collection
+          description: |
+            The interval in seconds at which to collect collection metrics.
+            Only applicable when `collection` is added to `additional_metrics`.
+          value:
+            type: integer
+            example: 300
+        - name: collections_indexes_stats
+          description: |
+            The interval in seconds at which to collect collection indexes stats metrics.
+            Only applicable when `collections_indexes_stats` is set to `true`.
+          value:
+            type: integer
+            example: 300
+        - name: sharded_data_distribution
+          description: |
+            The interval in seconds at which to collect sharded data distribution metrics.
+            Only applicable when `sharded_data_distribution` is added to `additional_metrics`.
+          value:
+            type: integer
+            example: 300
+        - name: db_stats
+          description: |
+            The interval in seconds at which to collect db stats metrics.
+          value:
+            type: integer
+            example: 15
+        - name: session_stats
+          description: |
+            The interval in seconds at which to collect session stats metrics.
+          value:
+            type: integer
+            example: 15
     - name: collections
       description: |
         Collect metrics on specific collections from the database specified
@@ -187,6 +475,9 @@ files:
          * `db:<DB_NAME>` e.g. `db:<DB_NAME>`
          * `collection:<COLLECTION_NAME>` e.g. `collection:<COLLECTION_NAME>`
         Each collection generates many metrics, up to 8 + the number of indices on the collection for each collection.
+
+        NOTE: This option is ignored when database_autodiscovery is enabled. 
+        Metrics are collected for all authorized collections on autodiscovered databases.
       value:
         type: array
         items:
@@ -200,12 +491,46 @@ files:
       value:
         type: boolean
         example: false
+    - name: system_database_stats
+      description: |
+        Enable or disable the collection of database stats, collection stats, and index stats for system databases 
+        (`admin`, `local`, and `config`).
+        By default, this option is enabled (`true`), meaning stats for system databases are collected. 
+        Set to `false` to disable collection of stats for all system databases.
+      value:
+        type: boolean
+        example: true
+    - name: free_storage_metrics
+      description: |
+        Enabled or disable the collection of free storage metrics.
+        By default, this option is enabled (`true`), meaning free storage metrics are collected. 
+        Set to `false` to disable collection of free storage metrics.
+
+        Note: If the instance has a large number of collections or indexes, obtaining free space usage data may cause 
+        processing delays and high CPU usage on the instance.
+        https://www.mongodb.com/docs/manual/reference/command/dbStats/#std-label-dbStats-freeStorage
+      value:
+        type: boolean
+        example: true
+        display_default: true
+    - name: add_node_tag_to_events
+      description: |
+        Adds the Mongo node to events as a tag rather than creating a seperate host for the event.
+      hidden: true
+      value:
+        type: boolean
+        example: true
     - name: custom_queries
       description: |
         Define custom queries to collect custom metrics on your Mongo
         Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.
         You can add `run_on_secondary: true` for each query that you want to run on both primaries and secondaries.
         See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
+        Note: For MongoDB date types you can use functions matching any of these regular expressions:
+        "ISODate\(\s*\'(.*?)\'\s*\)" (e.g. "ISODate('2022-12-15T08:26:00.969Z')")
+        "ISODate\(\s*\)|Date\(\s*\)" (e.g. "Date()")
+        "new\s*Date\(ISODate\(\s*\)\.getTime\(\s*\)((\s*[+\-*\/]\s*(\d+))*)\s*\)" 
+          (e.g. "new Date(ISODate().getTime() - 60 * 1000)")
       value:
         type: array
         items:
@@ -242,6 +567,36 @@ files:
                 type: <METRIC_TYPE>
             tags:
               - test:mongodb
+    - name: aws
+      description: |
+        This block defines the configuration for Amazon DocumentDB instances.
+
+        Complete this section if you have installed the Datadog AWS Integration
+        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
+        with DocumentDB integration telemetry.
+
+        These values are only applied when `dbm: true` option is set.
+      options:
+        - name: instance_endpoint
+          description: |
+            Equal to the Endpoint.Address of the instance the agent is connecting to.
+            This value is optional if the value of `host` is already configured to the instance endpoint.
+
+            For more information on instance endpoints,
+            see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_Endpoint.html
+          value:
+            type: string
+            example: mydocdb.c0xa1xvklawc.us-east-1.docdb.amazonaws.com
+        - name: cluster_identifier
+          description: |
+            Equal to the Cluster identifier of the instance the agent is connecting to.
+            This value is optional if the value of `cluster_name` is already configured to the cluster identifier.
+
+            For more information on cluster identifiers,
+            see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_DBCluster.html
+          value:
+            type: string
+            example: mydocdb
     - name: server
       deprecation:
         Agent version: "8.0.0"

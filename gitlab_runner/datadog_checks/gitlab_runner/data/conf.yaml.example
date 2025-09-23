@@ -109,11 +109,11 @@ instances:
     #
     # prometheus_metrics_prefix: <PREFIX>_
 
-    ## @param health_service_check - boolean - optional - default: true
+    ## @param health_service_check - boolean - optional - default: false
     ## Send a service check reporting about the health of the Prometheus endpoint.
     ## The service check is named <NAMESPACE>.prometheus.health
     #
-    # health_service_check: true
+    # health_service_check: false
 
     ## @param label_to_hostname - string - optional
     ## Override the hostname with the value of one label.
@@ -157,10 +157,10 @@ instances:
     #
     # send_distribution_buckets: false
 
-    ## @param send_monotonic_counter - boolean - optional - default: true
+    ## @param send_monotonic_counter - boolean - optional - default: false
     ## Set send_monotonic_counter to true to send counters as monotonic counter.
     #
-    # send_monotonic_counter: true
+    # send_monotonic_counter: false
 
     ## @param send_distribution_counts_as_monotonic - boolean - optional - default: false
     ## If set to true, sends histograms and summary counters as monotonic counters (instead of gauges).
@@ -272,7 +272,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -295,7 +295,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
@@ -393,6 +393,11 @@ instances:
     ##     client_secret (required): The client secret.
     ##     basic_auth: Whether the provider expects credentials to be transmitted in
     ##                 an HTTP Basic Auth header. The default is: false
+    ##     options: Mapping of additional options to pass to the provider, such as the audience
+    ##              or the scope. For example:
+    ##                 options:
+    ##                   audience: https://example.com
+    ##                   scope: read:example
     ##
     ## The available writers are:
     ##
@@ -471,8 +476,8 @@ instances:
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
     ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
@@ -489,6 +494,16 @@ instances:
     #   - SSLv3
     #   - TLSv1.2
     #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
 
     ## @param headers - mapping - optional
     ## The headers parameter allows you to send specific headers with every request.

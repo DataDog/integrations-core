@@ -35,7 +35,7 @@ See the [sample http_check.d/conf.yaml][3] for a full list and description of av
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `name`                           | Name of your Http check instance. This is presented as a tag on the Service Checks.                                                                                                                                                              |
 | `url`                            | The URL to test.                                                                                                                                                                                                                                 |
-| `timeout`                        | The time in seconds to allow for a response.                                                                                                                                                                                                     |
+| `timeout`                        | The time in seconds to allow for a response. The default is `10`.                                                                                                                                                                               |
 | `method`                         | The HTTP method to use for the check.                                                                                                                                                                                                            |
 | `data`                           | Use this parameter to specify a body for a request with a POST, PUT, DELETE, or PATCH method. SOAP requests are supported if you use the POST method and supply an XML string as the data parameter.                                             |
 | `headers`                        | This parameter allows you to send additional headers with the request. See the [example YAML file][3] for additional information and caveats.                                                                                                    |
@@ -49,6 +49,7 @@ See the [sample http_check.d/conf.yaml][3] for a full list and description of av
 | `tls_ignore_warning`             | If `tls_verify` is set to `true`, it disables any security warnings from the SSL connection.                                                                                                                                                     |
 | `tls_ca_cert`                    | This setting allows you to override the default certificate path as specified in `init_config`                                                                                                                                                   |
 | `check_certificate_expiration`   | When `check_certificate_expiration` is enabled, the service check checks the expiration date of the SSL certificate. **Note**: This causes the SSL certificate to be validated, regardless of the value of the `tls_verify` setting. |
+| `tls_retrieve_non_validated_cert`| If `tls_verify` is set to `false` and if `check_certificate_expiration` is `true`, setting this to `true` allows the certificate to be examined for an expiration date.                                                                          |
 | `days_warning` & `days_critical` | When `check_certificate_expiration` is enabled, these settings raise a warning or critical alert when the SSL certificate is within the specified number of days from expiration.                                                                |
 | `ssl_server_name`                | When `check_certificate_expiration` is enabled, this setting specifies the hostname of the service to connect to and it also overrides the host to match with if check_hostname is enabled.                                                      |
 | `check_hostname`                 | If set to `true` the check log a warning if the checked `url` hostname is different than the SSL certificate hostname.                                                                                                                           |
@@ -78,13 +79,13 @@ See [service_checks.json][10] for a list of service checks provided by this inte
 
 To disable `http.ssl_cert`, set `check_certificate_expiration` to false.
 
-**Note:** To set an alert on these service checks, create a [Network Monitor][11].
+**Note:** To monitor HTTP error codes (such as 404) or view the first 400 characters of an HTTP response, create a [Network Monitor][11] based on these service checks.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][12].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/developers/write_agent_check/#collection-interval

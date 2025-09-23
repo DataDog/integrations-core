@@ -1,9 +1,13 @@
+# This workflow cannot create labels! It assumes the labels it attaches already exist.
+# Please reach out to @DataDog/agent-integrations if you need to create a new label.
 name: Reusable Labeler Workflow
 
 on:
   workflow_call:
     secrets:
-      repo-token:
+      app-id:
+        required: true
+      private-key:
         required: true
 
 jobs:
@@ -13,10 +17,28 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Create token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+        id: token-generator
+        with:
+          app-id: ${{ secrets.app-id }}
+          private-key: ${{ secrets.private-key }}
+          repositories: integrations-core
       - name: Add labels
-        uses: actions/labeler@v4
+        uses: actions/labeler@ac9175f8a1f3625fd0d4fb234536d26811351594 # v4.3.0
         with:
           configuration-path: .github/workflows/config/labeler.yml
-          repo-token: "${{ secrets.repo-token }}"
+          repo-token: "${{ steps.token-generator.outputs.token }}"
           sync-labels: ""   # workaround for sync-labels bug:
                             # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
+      - name: Add team labels
+        run: |
+          jq -r '.event.pull_request.requested_teams[].name' <<< "$GITHUB_CONTEXT" | while read -r team; do
+            team_normalized=$(echo "$team" | sed 's/ /-/g')
+            gh pr edit $NUMBER --add-label "team/$team_normalized"
+          done
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          GITHUB_TOKEN: "${{ steps.token-generator.outputs.token }}"
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.number }}

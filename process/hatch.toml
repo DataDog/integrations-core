@@ -1,0 +1,6 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+
+[envs.bench]

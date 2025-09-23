@@ -1,0 +1,70 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "276c2367-72a9-4f50-95d6-998e4b2ca0df",
+  "app_id": "linux-audit-logs",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Linux audit logs.",
+    "title": "Linux Audit Logs",
+    "media": [
+      {
+        "caption": "Linux Audit Logs - Overview",
+        "image_url": "images/linux_audit_logs_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Linux Audit Logs - Overview",
+        "image_url": "images/linux_audit_logs_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Linux Audit Logs - Overview",
+        "image_url": "images/linux_audit_logs_overview_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Linux Audit Logs - Overview",
+        "image_url": "images/linux_audit_logs_overview_4.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Network",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 42347665,
+      "source_type_name": "Linux Audit Logs",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Linux Audit Logs - Overview": "assets/dashboards/linux_audit_logs_overview.json"
+    },
+    "logs": {
+      "source": "linux-audit-logs"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

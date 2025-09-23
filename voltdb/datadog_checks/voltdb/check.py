@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, List, Optional, cast
+from typing import Any, List, Optional, cast  # noqa: F401
 
-import requests
-from six import raise_from
+import requests  # noqa: F401
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
@@ -52,7 +51,7 @@ class VoltDBCheck(AgentCheck):
                 pass
             else:
                 message += ' (details: {})'.format(details)
-            raise_from(Exception(message), exc)
+            raise Exception(message) from exc
 
     def _fetch_version(self):
         # type: () -> Optional[str]

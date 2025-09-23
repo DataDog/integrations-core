@@ -1,0 +1,1593 @@
+{
+    "slug": "gitlab-deployment-manager",
+    "name": "Manage Gitlab Deployments",
+    "description": "View, retry, or cancel deployments in Gitlab",
+    "definition": {
+        "name": "Manage Gitlab Deployments",
+        "description": "View, retry, or cancel deployments in Gitlab",
+        "components": [
+            {
+                "events": [],
+                "name": "grid0",
+                "properties": {
+                    "children": [
+                        {
+                            "events": [],
+                            "name": "gridCell1",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "environmentField",
+                                        "properties": {
+                                            "defaultValue": "All",
+                                            "isDisabled": false,
+                                            "isMultiselect": "false",
+                                            "isVisible": "true",
+                                            "label": "Environment",
+                                            "options": "${['All',...new Set(listProjectDeployments.rawOutputs?.deployments?.map(i => i.environment.name))]}",
+                                            "placeholder": "Select value"
+                                        },
+                                        "type": "select"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 7,
+                                        "width": 3,
+                                        "x": 3,
+                                        "y": 25
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell2",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "statusField",
+                                        "properties": {
+                                            "defaultValue": "All",
+                                            "isDisabled": false,
+                                            "isMultiselect": "false",
+                                            "isVisible": "true",
+                                            "label": "Status",
+                                            "options": "${['All', ...new Set(listProjectDeployments.rawOutputs?.deployments?.map(i => i.status))]}",
+                                            "placeholder": "Select value"
+                                        },
+                                        "type": "select"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 7,
+                                        "width": 3,
+                                        "x": 6,
+                                        "y": 25
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell4",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "total",
+                                        "properties": {
+                                            "isDisabled": false,
+                                            "isLoading": "false",
+                                            "isVisible": "true",
+                                            "label": "Total",
+                                            "size": "sm",
+                                            "style": "blue",
+                                            "unit": "deployments",
+                                            "value": "${listProjectDeployments?.rawOutputs.deployments.length}"
+                                        },
+                                        "type": "calloutValue"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 10,
+                                        "width": 4,
+                                        "x": 8,
+                                        "y": 15
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell5",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [
+                                            {
+                                                "name": "click",
+                                                "queryName": "listProjectDeployments",
+                                                "type": "triggerQuery"
+                                            }
+                                        ],
+                                        "name": "refresh",
+                                        "properties": {
+                                            "isBorderless": false,
+                                            "isDisabled": false,
+                                            "isLoading": "false",
+                                            "isPrimary": true,
+                                            "isVisible": "true",
+                                            "label": "Refresh",
+                                            "level": "default"
+                                        },
+                                        "type": "button"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 4,
+                                        "width": 2,
+                                        "x": 10,
+                                        "y": 28
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell6",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "header",
+                                        "properties": {
+                                            "content": "# Gitlab Deployment Manager\nHey ${global?.user.name} 👋, use this app to view, retry, or cancel deployments in Gitlab. Input a given Gitlab project ID to get started.",
+                                            "contentType": "markdown",
+                                            "isVisible": "true",
+                                            "textAlign": "left",
+                                            "verticalAlign": "center"
+                                        },
+                                        "type": "text"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 9,
+                                        "width": 11,
+                                        "x": 1,
+                                        "y": 1
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell4_copy",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "lastDeployTime",
+                                        "properties": {
+                                            "isDisabled": false,
+                                            "isLoading": "false",
+                                            "isVisible": "true",
+                                            "label": "Last Deploy Time",
+                                            "size": "sm",
+                                            "style": "purple",
+                                            "unit": "",
+                                            "value": "${listProjectDeployments.rawOutputs?.deployments[0].updated_at}"
+                                        },
+                                        "type": "calloutValue"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 10,
+                                        "width": 4,
+                                        "x": 0,
+                                        "y": 15
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell4_copy1",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "lastDeployStatus",
+                                        "properties": {
+                                            "isDisabled": false,
+                                            "isLoading": "false",
+                                            "isVisible": "true",
+                                            "label": "Last Deploy Status",
+                                            "size": "sm",
+                                            "style": "green",
+                                            "unit": "",
+                                            "value": "${listProjectDeployments.rawOutputs?.deployments[0].status}"
+                                        },
+                                        "type": "calloutValue"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 10,
+                                        "width": 4,
+                                        "x": 4,
+                                        "y": 15
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "modal0",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "grid1",
+                                        "properties": {
+                                            "children": [
+                                                {
+                                                    "events": [],
+                                                    "name": "gridCell7",
+                                                    "properties": {
+                                                        "children": [
+                                                            {
+                                                                "events": [],
+                                                                "name": "text2",
+                                                                "properties": {
+                                                                    "content": "## ✅ You've successfully triggered a retry for this pipeline",
+                                                                    "contentType": "markdown",
+                                                                    "isVisible": true,
+                                                                    "textAlign": "center",
+                                                                    "verticalAlign": "center"
+                                                                },
+                                                                "type": "text"
+                                                            }
+                                                        ],
+                                                        "isVisible": "true",
+                                                        "layout": {
+                                                            "default": {
+                                                                "height": 7,
+                                                                "width": 12,
+                                                                "x": 0,
+                                                                "y": 11
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "gridCell"
+                                                }
+                                            ]
+                                        },
+                                        "type": "grid"
+                                    }
+                                ],
+                                "isVisible": true,
+                                "size": "sm",
+                                "title": "Pipeline retry initiated"
+                            },
+                            "type": "modal"
+                        },
+                        {
+                            "events": [],
+                            "name": "modal1",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "grid1_copy",
+                                        "properties": {
+                                            "children": [
+                                                {
+                                                    "events": [],
+                                                    "name": "gridCell7_copy",
+                                                    "properties": {
+                                                        "children": [
+                                                            {
+                                                                "events": [],
+                                                                "name": "text2_copy",
+                                                                "properties": {
+                                                                    "content": "## ✅ You've successfully canceled this pipeline",
+                                                                    "contentType": "markdown",
+                                                                    "isVisible": true,
+                                                                    "textAlign": "center",
+                                                                    "verticalAlign": "center"
+                                                                },
+                                                                "type": "text"
+                                                            }
+                                                        ],
+                                                        "isVisible": "true",
+                                                        "layout": {
+                                                            "default": {
+                                                                "height": 7,
+                                                                "width": 12,
+                                                                "x": 0,
+                                                                "y": 12
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "gridCell"
+                                                }
+                                            ]
+                                        },
+                                        "type": "grid"
+                                    }
+                                ],
+                                "isVisible": true,
+                                "size": "sm",
+                                "title": "Pipeline canceled"
+                            },
+                            "type": "modal"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell0_copy",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [
+                                            {
+                                                "name": "tableRowClick",
+                                                "type": "setStateVariableValue",
+                                                "value": "${table0.selectedRow.content.id}",
+                                                "variableName": "pipeline_Id"
+                                            }
+                                        ],
+                                        "name": "table0_copy",
+                                        "properties": {
+                                            "columns": [
+                                                {
+                                                    "dataPath": "links",
+                                                    "disableSortBy": false,
+                                                    "formatter": {
+                                                        "type": "link"
+                                                    },
+                                                    "header": "Pipeline ID",
+                                                    "id": "b4eed74c-96d6-406c-b08d-422f0c7f0ada"
+                                                },
+                                                {
+                                                    "dataPath": "deployable.commit.message",
+                                                    "disableSortBy": false,
+                                                    "header": "Commit",
+                                                    "id": "0f6bb71a-02bd-418a-a68b-b6b62da39ae1"
+                                                },
+                                                {
+                                                    "dataPath": "status",
+                                                    "disableSortBy": false,
+                                                    "formatter": {
+                                                        "defaultLevel": "default",
+                                                        "isSoft": true,
+                                                        "options": [
+                                                            {
+                                                                "level": "success",
+                                                                "value": "Success"
+                                                            },
+                                                            {
+                                                                "level": "danger",
+                                                                "value": "Failed"
+                                                            }
+                                                        ],
+                                                        "type": "pill"
+                                                    },
+                                                    "header": "status",
+                                                    "id": "4941147b-e076-4981-9dd0-f62964c4d18a"
+                                                },
+                                                {
+                                                    "dataPath": "created_at",
+                                                    "disableSortBy": false,
+                                                    "formatter": {
+                                                        "format": "SMALL",
+                                                        "type": "formatted_time"
+                                                    },
+                                                    "header": "created_at",
+                                                    "id": "1da8cdbd-67d3-4337-a3e5-c302bf18d259"
+                                                },
+                                                {
+                                                    "dataPath": "id",
+                                                    "header": "id",
+                                                    "id": "de153561-4aa4-4ef7-8180-bbad680515a7",
+                                                    "isHidden": true
+                                                },
+                                                {
+                                                    "dataPath": "iid",
+                                                    "header": "iid",
+                                                    "id": "6df343f4-b28c-4a7b-a3a6-a2172cf15d7b",
+                                                    "isHidden": true
+                                                },
+                                                {
+                                                    "dataPath": "environment.name",
+                                                    "disableSortBy": false,
+                                                    "formatter": {
+                                                        "type": "tags"
+                                                    },
+                                                    "header": "environment",
+                                                    "id": "9931afe1-161c-473d-8d65-c68171cb4f13"
+                                                },
+                                                {
+                                                    "dataPath": "sha",
+                                                    "disableSortBy": false,
+                                                    "formatter": {
+                                                        "type": "tags"
+                                                    },
+                                                    "header": "sha",
+                                                    "id": "7eededfb-962c-4d6c-a6c5-e688c832e4e0",
+                                                    "isHidden": true
+                                                },
+                                                {
+                                                    "dataPath": "ref",
+                                                    "disableSortBy": false,
+                                                    "formatter": {
+                                                        "type": "tags"
+                                                    },
+                                                    "header": "Branch",
+                                                    "id": "c0d2e0e2-7fbb-46fa-a681-34470d78645d"
+                                                },
+                                                {
+                                                    "dataPath": "updated_at",
+                                                    "header": "updated_at",
+                                                    "id": "c9953f6c-5318-4992-bcb9-6f4aed422215",
+                                                    "isHidden": true
+                                                },
+                                                {
+                                                    "dataPath": "user.name",
+                                                    "disableSortBy": false,
+                                                    "header": "user",
+                                                    "id": "dd3a6054-2d26-41ee-aeaf-584bd027f25f"
+                                                }
+                                            ],
+                                            "data": "${listProjectDeployments?.outputs}",
+                                            "isLoading": "${listProjectDeployments?.isLoading}",
+                                            "isScrollable": "vertical",
+                                            "isVisible": "true",
+                                            "isWrappable": true,
+                                            "pageSize": "10",
+                                            "paginationType": "client_side",
+                                            "rowButtons": [
+                                                {
+                                                    "events": [
+                                                        {
+                                                            "name": "click",
+                                                            "queryName": "retryPipeline",
+                                                            "type": "triggerQuery"
+                                                        }
+                                                    ],
+                                                    "name": "button0",
+                                                    "properties": {
+                                                        "isBorderless": false,
+                                                        "isDisabled": false,
+                                                        "isPrimary": true,
+                                                        "isVisible": true,
+                                                        "label": "Retry",
+                                                        "level": "default"
+                                                    },
+                                                    "type": "button"
+                                                },
+                                                {
+                                                    "events": [
+                                                        {
+                                                            "name": "click",
+                                                            "queryName": "cancelPipeline",
+                                                            "type": "triggerQuery"
+                                                        }
+                                                    ],
+                                                    "name": "button1",
+                                                    "properties": {
+                                                        "isBorderless": false,
+                                                        "isDisabled": false,
+                                                        "isPrimary": false,
+                                                        "isVisible": true,
+                                                        "label": "Cancel",
+                                                        "level": "danger"
+                                                    },
+                                                    "type": "button"
+                                                }
+                                            ],
+                                            "summary": true,
+                                            "totalCount": 20
+                                        },
+                                        "type": "table"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 71,
+                                        "width": 12,
+                                        "x": 0,
+                                        "y": 34
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell0",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "projectId",
+                                        "properties": {
+                                            "defaultValue": "",
+                                            "isDisabled": false,
+                                            "isVisible": true,
+                                            "label": "Project ID",
+                                            "placeholder": "Enter a project ID or path"
+                                        },
+                                        "type": "textInput"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 7,
+                                        "width": 3,
+                                        "x": 0,
+                                        "y": 25
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell3",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "integrationLogo0",
+                                        "properties": {
+                                            "horizontalAlign": "center",
+                                            "integrationId": "gitlab",
+                                            "isLoading": false,
+                                            "isVisible": true,
+                                            "verticalAlign": "center"
+                                        },
+                                        "type": "integrationLogo"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 11,
+                                        "width": 1,
+                                        "x": 0,
+                                        "y": 0
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
+                        }
+                    ]
+                },
+                "type": "grid"
+            }
+        ],
+        "queries": [
+            {
+                "name": "listProjectDeployments",
+                "type": "action",
+                "properties": {
+                    "outputs": "${((outputs) => {return outputs.deployments\n  .filter(deployment => (\n    (environmentField.value === 'All' || deployment.environment?.name === environmentField.value) &&\n    (statusField.value === 'All' || deployment.status === statusField.value)\n  ))\n  .map(deployment => {\n    // Check if deployable and pipeline exist to avoid errors\n    if (deployment.deployable?.pipeline) {\n      const { id, web_url } = deployment.deployable.pipeline;\n\n      // Return a new object with the original deployment and the 'links' field\n      return {\n        ...deployment,\n        links: {\n          label: id,\n          href: web_url\n        }\n      };\n    }\n\n    // If no pipeline, return the deployment as is\n    return deployment;\n  });\n})(self.rawOutputs)}",
+                    "spec": {
+                        "connectionId": "INTEGRATION_DEMO",
+                        "fqn": "com.datadoghq.gitlab.getProjectDeployments",
+                        "inputs": {
+                            "environment": "${environmentField.value}",
+                            "projectId": "${projectId}",
+                            "status": "${statusField.value}"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "cancelPipeline",
+                "type": "action",
+                "properties": {
+                    "onlyTriggerManually": true,
+                    "requiresConfirmation": true,
+                    "spec": {
+                        "fqn": "com.datadoghq.http.request",
+                        "connectionId": "INTEGRATION_DEMO",
+                        "inputs": {
+                            "url": "https://gitlab.example.com/api/v4/projects/${listProjectDeployments.spec.inputs.projectId}/pipelines/${pipeline_Id.value}/cancel",
+                            "verb": "POST"
+                        }
+                    }
+                },
+                "events": [
+                    {
+                        "modalName": "modal1",
+                        "name": "executionFinished",
+                        "type": "openModal"
+                    }
+                ]
+            },
+            {
+                "name": "retryPipeline",
+                "type": "action",
+                "properties": {
+                    "onlyTriggerManually": true,
+                    "requiresConfirmation": true,
+                    "spec": {
+                        "fqn": "com.datadoghq.http.request",
+                        "connectionId": "INTEGRATION_DEMO",
+                        "inputs": {
+                            "url": "https://gitlab.example.com/api/v4/projects/${listProjectDeployments.spec.inputs.projectId}/pipelines/${pipeline_Id.value}",
+                            "verb": "POST"
+                        }
+                    }
+                },
+                "events": [
+                    {
+                        "modalName": "modal0",
+                        "name": "executionFinished",
+                        "type": "openModal"
+                    }
+                ]
+            },
+            {
+                "name": "pipeline_Id",
+                "type": "stateVariable",
+                "properties": {
+                    "defaultValue": ""
+                }
+            },
+            {
+                "name": "dataTransform0",
+                "type": "dataTransform",
+                "properties": {
+                    "outputs": "${(() => {function filterDeployments(deployments, environment, status, createdDate) {\n  if (!createdDate || !createdDate.start || !createdDate.end) {\n    throw new Error(\"Invalid createdDate structure. Ensure it has both 'start' and 'end' properties.\");\n  }\n\n  const startDate = new Date(createdDate.start); // Convert start timestamp to Date\n  const endDate = new Date(createdDate.end); // Convert end timestamp to Date\n\n  return deployments.filter(deployment => {\n    const deploymentDate = new Date(deployment.created_at);\n\n    // Check if the deployment matches the environment, status, and falls within the date range\n    return deployment.environment.name === environment && \n           deployment.status === status &&\n           deploymentDate >= startDate && \n           deploymentDate <= endDate;\n  });\n}\n\n// Ensure the values are present and valid before calling the function\nif (listProjectDeployments?.outputs?.deployments && \n    environmentField?.value && \n    statusField?.value && \n    createdDate?.value) {\n  \n  return filterDeployments(listProjectDeployments.outputs.deployments, \n                           environmentField.value, \n                           statusField.value, \n                           createdDate.value);\n} else {\n  throw new Error(\"Missing required inputs for filtering deployments.\");\n}})()}"
+                }
+            }
+        ],
+        "rootInstanceName": "grid0"
+    },
+    "mocked_outputs": {
+        "cancelPipeline": {
+            "id": "46",
+            "iid": "11",
+            "project_id": "1",
+            "status": "pending",
+            "ref": "main",
+            "web_url": "https://example.com/foo/bar/pipelines/46"
+        },
+        "listProjectDeployments": {
+            "deployments": [
+                {
+                    "id": 2329478,
+                    "iid": 1,
+                    "ref": "mael/lambda-static-hash",
+                    "sha": "b17546a8421d842a144ebb91816b621cbb7c8030",
+                    "created_at": "2023-05-17T10:12:40.425Z",
+                    "updated_at": "May 24, 5:23pm",
+                    "user": {
+                        "id": 1,
+                        "name": "Noah Williams",
+                        "username": "noah.williams",
+                        "state": "active",
+                        "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
+                        "web_url": "http://gitlab.dev/root",
+                        "created_at": "2015-12-21T13:14:24.077Z"
+                    },
+                    "environment": {
+                        "id": 3072,
+                        "name": "preview/lambdas/mael-lambda-static-hash",
+                        "slug": "preview-lambdas-m-cxdy92",
+                        "external_url": null,
+                        "created_at": "2023-05-17T10:12:38.660Z",
+                        "updated_at": "2023-06-12T12:49:27.548Z"
+                    },
+                    "deployable": {
+                        "id": 268600461,
+                        "status": "Success",
+                        "stage": "test",
+                        "name": "preview-lambdas",
+                        "ref": "mael/lambda-static-hash",
+                        "tag": false,
+                        "coverage": null,
+                        "allow_failure": true,
+                        "created_at": "2023-05-17T10:12:38.716Z",
+                        "started_at": "2023-05-17T10:12:42.789Z",
+                        "finished_at": "2023-05-17T10:15:06.717Z",
+                        "erased_at": null,
+                        "duration": 143.927748,
+                        "queued_duration": 0.100544,
+                        "user": {
+                            "name": "Noah Garcia"
+                        },
+                        "commit": {
+                            "id": "b17546a8421d842a144ebb91816b621cbb7c8030",
+                            "short_id": "b17546a8",
+                            "created_at": "2023-05-17T12:11:59.000+02:00",
+                            "parent_ids": [
+                                "fa3a76a0317ed420bcf8e17b6ee75a152ff6c5a0"
+                            ],
+                            "title": "Fixes the environment name",
+                            "message": "Fixes the environment name\n",
+                            "author_name": "Max Nison",
+                            "author_email": "max@domain.com",
+                            "authored_date": "2023-05-17T12:11:59.000+02:00",
+                            "committer_name": "Max Nison",
+                            "committer_email": "max@domain.com",
+                            "committed_date": "2023-05-17T12:11:59.000+02:00",
+                            "trailers": {},
+                            "extended_trailers": {},
+                            "web_url": "https://gitlab.example/Owner/Repo/-/commit/b17546a8421d842a144ebb91816b621cbb7c8030"
+                        },
+                        "pipeline": {
+                            "id": 15907902,
+                            "iid": 735179,
+                            "project_id": 881,
+                            "sha": "b17546a8421d842a144ebb91816b621cbb7c8030",
+                            "ref": "mael/lambda-static-hash",
+                            "status": "failed",
+                            "source": "push",
+                            "created_at": "2023-05-17T10:12:38.699Z",
+                            "updated_at": "2023-05-17T12:07:28.473Z",
+                            "web_url": "https://gitlab.example/Owner/Repo/-/pipelines/15907902"
+                        },
+                        "web_url": "https://gitlab.example/Owner/Repo/-/jobs/268600461",
+                        "project": {
+                            "ci_job_token_scope_enabled": false
+                        },
+                        "artifacts": [
+                            {
+                                "file_type": "trace",
+                                "size": 104362,
+                                "filename": "job.log",
+                                "file_format": null
+                            }
+                        ],
+                        "runner": null,
+                        "artifacts_expire_at": null,
+                        "archived": false,
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
+                    },
+                    "status": "Success"
+                },
+                {
+                    "id": 2340258,
+                    "iid": 2,
+                    "ref": "mael/package",
+                    "sha": "2070e080de9d2356b1684499a19407f4f46b466d",
+                    "created_at": "2023-05-24T18:52:59.792Z",
+                    "updated_at": "2023-05-24T18:55:35.202Z",
+                    "user": {
+                        "name": "Quinn Allen"
+                    },
+                    "environment": {
+                        "id": 3105,
+                        "name": "preview/lambdas/mael-package",
+                        "slug": "preview-lambdas-m-2oq2vp",
+                        "external_url": null,
+                        "created_at": "2023-05-24T18:30:03.650Z",
+                        "updated_at": "2023-05-24T19:29:15.319Z"
+                    },
+                    "deployable": {
+                        "id": 271769326,
+                        "status": "Success",
+                        "stage": "test",
+                        "name": "preview-lambdas",
+                        "ref": "mael/package",
+                        "tag": false,
+                        "coverage": null,
+                        "allow_failure": true,
+                        "created_at": "2023-05-24T18:52:57.876Z",
+                        "started_at": "2023-05-24T18:53:01.781Z",
+                        "finished_at": "2023-05-24T18:55:35.129Z",
+                        "erased_at": null,
+                        "duration": 153.347696,
+                        "queued_duration": 0.054702,
+                        "user": {
+                            "name": "Noah Garcia"
+                        },
+                        "commit": {
+                            "id": "2070e080de9d2356b1684499a19407f4f46b466d",
+                            "short_id": "2070e080",
+                            "created_at": "2023-05-24T14:50:39.000-04:00",
+                            "parent_ids": [
+                                "15baec6944ee9c3d0d9f71dce53e85360ff9a728"
+                            ],
+                            "title": "update",
+                            "message": "update\n",
+                            "author_name": "Max Nison",
+                            "author_email": "max@domain.com",
+                            "authored_date": "2023-05-24T14:50:39.000-04:00",
+                            "committer_name": "Max Nison",
+                            "committer_email": "max@domain.com",
+                            "committed_date": "2023-05-24T14:50:39.000-04:00",
+                            "trailers": {},
+                            "extended_trailers": {},
+                            "web_url": "https://gitlab.example/Owner/Repo/-/commit/2070e080de9d2356b1684499a19407f4f46b466d"
+                        },
+                        "pipeline": {
+                            "id": 16145833,
+                            "iid": 753312,
+                            "project_id": 881,
+                            "sha": "2070e080de9d2356b1684499a19407f4f46b466d",
+                            "ref": "mael/package",
+                            "status": "canceled",
+                            "source": "push",
+                            "created_at": "2023-05-24T18:52:57.849Z",
+                            "updated_at": "2023-05-24T19:13:34.183Z",
+                            "web_url": "https://gitlab.example/Owner/Repo/-/pipelines/16145833"
+                        },
+                        "web_url": "https://gitlab.example/Owner/Repo/-/jobs/271769326",
+                        "project": {
+                            "ci_job_token_scope_enabled": false
+                        },
+                        "artifacts": [
+                            {
+                                "file_type": "trace",
+                                "size": 107934,
+                                "filename": "job.log",
+                                "file_format": null
+                            }
+                        ],
+                        "runner": null,
+                        "artifacts_expire_at": null,
+                        "archived": false,
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
+                    },
+                    "status": "Success"
+                },
+                {
+                    "id": 2340530,
+                    "iid": 3,
+                    "ref": "mael/package",
+                    "sha": "7e9e49f5f8f9ccd5768447bd89befc481ac9456b",
+                    "created_at": "2023-05-24T19:11:59.520Z",
+                    "updated_at": "2023-05-24T19:14:25.696Z",
+                    "user": {
+                        "name": "Bill Smith"
+                    },
+                    "environment": {
+                        "id": 3105,
+                        "name": "preview/lambdas/mael-package",
+                        "slug": "preview-lambdas-m-2oq2vp",
+                        "external_url": null,
+                        "created_at": "2023-05-24T18:30:03.650Z",
+                        "updated_at": "2023-05-24T19:29:15.319Z"
+                    },
+                    "deployable": {
+                        "id": 271786033,
+                        "status": "Success",
+                        "stage": "test",
+                        "name": "preview-lambdas",
+                        "ref": "mael/package",
+                        "tag": false,
+                        "coverage": null,
+                        "allow_failure": true,
+                        "created_at": "2023-05-24T19:11:57.300Z",
+                        "started_at": "2023-05-24T19:12:02.340Z",
+                        "finished_at": "2023-05-24T19:14:25.670Z",
+                        "erased_at": null,
+                        "duration": 143.329527,
+                        "queued_duration": 0.098601,
+                        "user": {
+                            "name": "Carlos Salazar"
+                        },
+                        "commit": {
+                            "id": "7e9e49f5f8f9ccd5768447bd89befc481ac9456b",
+                            "short_id": "7e9e49f5",
+                            "created_at": "2023-05-24T15:11:12.000-04:00",
+                            "parent_ids": [
+                                "2070e080de9d2356b1684499a19407f4f46b466d"
+                            ],
+                            "title": "package",
+                            "message": "package\n",
+                            "author_name": "Max Nison",
+                            "author_email": "max@domain.com",
+                            "authored_date": "2023-05-24T15:11:12.000-04:00",
+                            "committer_name": "Max Nison",
+                            "committer_email": "max@domain.com",
+                            "committed_date": "2023-05-24T15:11:12.000-04:00",
+                            "trailers": {},
+                            "extended_trailers": {},
+                            "web_url": "https://gitlab.example/Owner/Repo/-/commit/7e9e49f5f8f9ccd5768447bd89befc481ac9456b"
+                        },
+                        "pipeline": {
+                            "id": 16147207,
+                            "iid": 753364,
+                            "project_id": 881,
+                            "sha": "7e9e49f5f8f9ccd5768447bd89befc481ac9456b",
+                            "ref": "mael/package",
+                            "status": "Success",
+                            "source": "push",
+                            "created_at": "2023-05-24T19:11:57.279Z",
+                            "updated_at": "2023-05-24T19:30:48.825Z",
+                            "web_url": "https://gitlab.example/Owner/Repo/-/pipelines/16147207"
+                        },
+                        "web_url": "https://gitlab.example/Owner/Repo/-/jobs/271786033",
+                        "project": {
+                            "ci_job_token_scope_enabled": false
+                        },
+                        "artifacts": [
+                            {
+                                "file_type": "trace",
+                                "size": 104277,
+                                "filename": "job.log",
+                                "file_format": null
+                            }
+                        ],
+                        "runner": null,
+                        "artifacts_expire_at": null,
+                        "archived": false,
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
+                    },
+                    "status": "Success"
+                },
+                {
+                    "id": 2340699,
+                    "iid": 4,
+                    "ref": "mael/lambda-static-hash",
+                    "sha": "7e9e49f5f8f9ccd5768447bd89befc481ac9456b",
+                    "created_at": "2023-05-24T19:32:21.007Z",
+                    "updated_at": "2023-05-24T19:35:01.534Z",
+                    "user": {
+                        "name": "Noah Garcia"
+                    },
+                    "environment": {
+                        "id": 3072,
+                        "name": "preview/lambdas/mael-lambda-static-hash",
+                        "slug": "preview-lambdas-m-cxdy92",
+                        "external_url": null,
+                        "created_at": "2023-05-17T10:12:38.660Z",
+                        "updated_at": "2023-06-12T12:49:27.548Z"
+                    },
+                    "deployable": {
+                        "id": 271797999,
+                        "status": "Success",
+                        "stage": "test",
+                        "name": "preview-lambdas",
+                        "ref": "mael/lambda-static-hash",
+                        "tag": false,
+                        "coverage": null,
+                        "allow_failure": true,
+                        "created_at": "2023-05-24T19:32:19.455Z",
+                        "started_at": "2023-05-24T19:32:22.082Z",
+                        "finished_at": "2023-05-24T19:35:01.517Z",
+                        "erased_at": null,
+                        "duration": 159.434956,
+                        "queued_duration": 0.118463,
+                        "user": {
+                            "name": "Noah Garcia"
+                        },
+                        "commit": {
+                            "id": "7e9e49f5f8f9ccd5768447bd89befc481ac9456b",
+                            "short_id": "7e9e49f5",
+                            "created_at": "2023-05-24T15:11:12.000-04:00",
+                            "parent_ids": [
+                                "2070e080de9d2356b1684499a19407f4f46b466d"
+                            ],
+                            "title": "package",
+                            "message": "package\n",
+                            "author_name": "Max Nison",
+                            "author_email": "max@domain.com",
+                            "authored_date": "2023-05-24T15:11:12.000-04:00",
+                            "committer_name": "Max Nison",
+                            "committer_email": "max@domain.com",
+                            "committed_date": "2023-05-24T15:11:12.000-04:00",
+                            "trailers": {},
+                            "extended_trailers": {},
+                            "web_url": "https://gitlab.example/Owner/Repo/-/commit/7e9e49f5f8f9ccd5768447bd89befc481ac9456b"
+                        },
+                        "pipeline": {
+                            "id": 16148028,
+                            "iid": 753423,
+                            "project_id": 881,
+                            "sha": "7e9e49f5f8f9ccd5768447bd89befc481ac9456b",
+                            "ref": "mael/lambda-static-hash",
+                            "status": "canceled",
+                            "source": "push",
+                            "created_at": "2023-05-24T19:32:19.440Z",
+                            "updated_at": "2023-05-24T19:37:10.325Z",
+                            "web_url": "https://gitlab.example/Owner/Repo/-/pipelines/16148028"
+                        },
+                        "web_url": "https://gitlab.example/Owner/Repo/-/jobs/271797999",
+                        "project": {
+                            "ci_job_token_scope_enabled": false
+                        },
+                        "artifacts": [
+                            {
+                                "file_type": "trace",
+                                "size": 108009,
+                                "filename": "job.log",
+                                "file_format": null
+                            }
+                        ],
+                        "runner": null,
+                        "artifacts_expire_at": null,
+                        "archived": false,
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
+                    },
+                    "status": "Success"
+                },
+                {
+                    "id": 2340714,
+                    "iid": 5,
+                    "ref": "mael/lambda-static-hash",
+                    "sha": "ad664a78379ef7bb3f1ec8ab224013240d09dc0a",
+                    "created_at": "2023-05-24T19:35:38.582Z",
+                    "updated_at": "2023-05-24T19:38:10.459Z",
+                    "user": {
+                        "name": "Quinn Allen"
+                    },
+                    "environment": {
+                        "id": 3072,
+                        "name": "preview/lambdas/mael-lambda-static-hash",
+                        "slug": "preview-lambdas-m-cxdy92",
+                        "external_url": null,
+                        "created_at": "2023-05-17T10:12:38.660Z",
+                        "updated_at": "2023-06-12T12:49:27.548Z"
+                    },
+                    "deployable": {
+                        "id": 271799368,
+                        "status": "Success",
+                        "stage": "test",
+                        "name": "preview-lambdas",
+                        "ref": "mael/lambda-static-hash",
+                        "tag": false,
+                        "coverage": null,
+                        "allow_failure": true,
+                        "created_at": "2023-05-24T19:35:36.952Z",
+                        "started_at": "2023-05-24T19:35:39.631Z",
+                        "finished_at": "2023-05-24T19:38:10.438Z",
+                        "erased_at": null,
+                        "duration": 150.807618,
+                        "queued_duration": 0.038929,
+                        "user": {
+                            "name": "Noah Garcia"
+                        },
+                        "commit": {
+                            "id": "ad664a78379ef7bb3f1ec8ab224013240d09dc0a",
+                            "short_id": "ad664a78",
+                            "created_at": "2023-05-24T15:34:50.000-04:00",
+                            "parent_ids": [
+                                "7e9e49f5f8f9ccd5768447bd89befc481ac9456b",
+                                "e135684a4e4d45ff676a0608317b89761f161282"
+                            ],
+                            "title": "Merge branch preprod into mael/lambda-static-hash",
+                            "message": "Merge branch preprod into mael/lambda-static-hash",
+                            "author_name": "Max Nison",
+                            "author_email": "max@domain.com",
+                            "authored_date": "2023-05-24T15:34:50.000-04:00",
+                            "committer_name": "GitHub",
+                            "committer_email": "noreply@github.com",
+                            "committed_date": "2023-05-24T15:34:50.000-04:00",
+                            "trailers": {},
+                            "extended_trailers": {},
+                            "web_url": "https://gitlab.example/Owner/Repo/-/commit/ad664a78379ef7bb3f1ec8ab224013240d09dc0a"
+                        },
+                        "pipeline": {
+                            "id": 16148312,
+                            "iid": 753434,
+                            "project_id": 881,
+                            "sha": "ad664a78379ef7bb3f1ec8ab224013240d09dc0a",
+                            "ref": "mael/lambda-static-hash",
+                            "status": "Success",
+                            "source": "push",
+                            "created_at": "2023-05-24T19:35:36.937Z",
+                            "updated_at": "2023-05-24T19:54:49.125Z",
+                            "web_url": "https://gitlab.example/Owner/Repo/-/pipelines/16148312"
+                        },
+                        "web_url": "https://gitlab.example/Owner/Repo/-/jobs/271799368",
+                        "project": {
+                            "ci_job_token_scope_enabled": false
+                        },
+                        "artifacts": [
+                            {
+                                "file_type": "trace",
+                                "size": 103714,
+                                "filename": "job.log",
+                                "file_format": null
+                            }
+                        ],
+                        "runner": null,
+                        "artifacts_expire_at": null,
+                        "archived": false,
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
+                    },
+                    "status": "Success"
+                },
+                {
+                    "id": 2340964,
+                    "iid": 6,
+                    "ref": "mael/lambda-static-hash",
+                    "sha": "961147b9da603a959d27d518483b3d46b9f28f26",
+                    "created_at": "2023-05-24T21:23:45.444Z",
+                    "updated_at": "2023-05-24T21:30:11.779Z",
+                    "user": {
+                        "name": "Jillian Johnson"
+                    },
+                    "environment": {
+                        "id": 3072,
+                        "name": "preview/lambdas/mael-lambda-static-hash",
+                        "slug": "preview-lambdas-m-cxdy92",
+                        "external_url": null,
+                        "created_at": "2023-05-17T10:12:38.660Z",
+                        "updated_at": "2023-06-12T12:49:27.548Z"
+                    },
+                    "deployable": {
+                        "id": 271857719,
+                        "status": "Success",
+                        "stage": "test",
+                        "name": "preview-lambdas",
+                        "ref": "mael/lambda-static-hash",
+                        "tag": false,
+                        "coverage": null,
+                        "allow_failure": false,
+                        "created_at": "2023-05-24T21:23:43.687Z",
+                        "started_at": "2023-05-24T21:23:46.769Z",
+                        "finished_at": "2023-05-24T21:30:11.762Z",
+                        "erased_at": null,
+                        "duration": 384.992906,
+                        "queued_duration": 0.057734,
+                        "user": null,
+                        "commit": {
+                            "id": "961147b9da603a959d27d518483b3d46b9f28f26",
+                            "short_id": "961147b9",
+                            "created_at": "2023-05-24T17:21:39.000-04:00",
+                            "parent_ids": [
+                                "ad664a78379ef7bb3f1ec8ab224013240d09dc0a"
+                            ],
+                            "title": "Removes allowed_to_fail",
+                            "message": "Removes allowed_to_fail\n",
+                            "author_name": "Max Nison",
+                            "author_email": "max@domain.com",
+                            "authored_date": "2023-05-24T17:21:39.000-04:00",
+                            "committer_name": "Max Nison",
+                            "committer_email": "max@domain.com",
+                            "committed_date": "2023-05-24T17:21:39.000-04:00",
+                            "trailers": {},
+                            "extended_trailers": {},
+                            "web_url": "https://gitlab.example/Owner/Repo/-/commit/961147b9da603a959d27d518483b3d46b9f28f26"
+                        },
+                        "pipeline": {
+                            "id": 16153164,
+                            "iid": 753714,
+                            "project_id": 881,
+                            "sha": "961147b9da603a959d27d518483b3d46b9f28f26",
+                            "ref": "mael/lambda-static-hash",
+                            "status": "Success",
+                            "source": "push",
+                            "created_at": "2023-05-24T21:23:43.674Z",
+                            "updated_at": "2023-05-24T21:47:26.788Z",
+                            "web_url": "https://gitlab.example/Owner/Repo/-/pipelines/16153164"
+                        },
+                        "web_url": "https://gitlab.example/Owner/Repo/-/jobs/271857719",
+                        "project": {
+                            "ci_job_token_scope_enabled": false
+                        },
+                        "artifacts": [
+                            {
+                                "file_type": "trace",
+                                "size": 103683,
+                                "filename": "job.log",
+                                "file_format": null
+                            }
+                        ],
+                        "runner": null,
+                        "artifacts_expire_at": null,
+                        "archived": false,
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
+                    },
+                    "status": "Success"
+                },
+                {
+                    "id": 2365110,
+                    "iid": 7,
+                    "ref": "mael/lambda-static-hash",
+                    "sha": "6f1c049834b267931b204937cf3cc35fb881b415",
+                    "created_at": "2023-06-12T07:50:59.522Z",
+                    "updated_at": "2023-06-12T07:53:40.028Z",
+                    "user": {
+                        "name": "Carlos Salazar"
+                    },
+                    "environment": {
+                        "id": 3072,
+                        "name": "preview/lambdas/mael-lambda-static-hash",
+                        "slug": "preview-lambdas-m-cxdy92",
+                        "external_url": null,
+                        "created_at": "2023-05-17T10:12:38.660Z",
+                        "updated_at": "2023-06-12T12:49:27.548Z"
+                    },
+                    "deployable": {
+                        "id": 279721841,
+                        "status": "Success",
+                        "stage": "test",
+                        "name": "preview-lambdas",
+                        "ref": "mael/lambda-static-hash",
+                        "tag": false,
+                        "coverage": null,
+                        "allow_failure": false,
+                        "created_at": "2023-06-12T07:50:57.618Z",
+                        "started_at": "2023-06-12T07:51:01.015Z",
+                        "finished_at": "2023-06-12T07:53:39.982Z",
+                        "erased_at": null,
+                        "duration": 158.966477,
+                        "queued_duration": 0.129042,
+                        "user": null,
+                        "commit": {
+                            "id": "6f1c049834b267931b204937cf3cc35fb881b415",
+                            "short_id": "6f1c0498",
+                            "created_at": "2023-06-12T09:50:19.000+02:00",
+                            "parent_ids": [
+                                "961147b9da603a959d27d518483b3d46b9f28f26",
+                                "7bc80a87bce3065a70c4162edcbb11e46c76cb08"
+                            ],
+                            "title": "Merge branch preprod into mael/lambda-static-hash",
+                            "message": "Merge branch preprod into mael/lambda-static-hash",
+                            "author_name": "Max Nison",
+                            "author_email": "max@domain.com",
+                            "authored_date": "2023-06-12T09:50:19.000+02:00",
+                            "committer_name": "GitHub",
+                            "committer_email": "noreply@github.com",
+                            "committed_date": "2023-06-12T09:50:19.000+02:00",
+                            "trailers": {},
+                            "extended_trailers": {},
+                            "web_url": "https://gitlab.example/Owner/Repo/-/commit/6f1c049834b267931b204937cf3cc35fb881b415"
+                        },
+                        "pipeline": {
+                            "id": 16690796,
+                            "iid": 802491,
+                            "project_id": 881,
+                            "sha": "6f1c049834b267931b204937cf3cc35fb881b415",
+                            "ref": "mael/lambda-static-hash",
+                            "status": "Success",
+                            "source": "push",
+                            "created_at": "2023-06-12T07:50:57.594Z",
+                            "updated_at": "2023-06-12T12:49:28.047Z",
+                            "web_url": "https://gitlab.example/Owner/Repo/-/pipelines/16690796"
+                        },
+                        "web_url": "https://gitlab.example/Owner/Repo/-/jobs/279721841",
+                        "project": {
+                            "ci_job_token_scope_enabled": false
+                        },
+                        "artifacts": [
+                            {
+                                "file_type": "trace",
+                                "size": 111282,
+                                "filename": "job.log",
+                                "file_format": null
+                            }
+                        ],
+                        "runner": null,
+                        "artifacts_expire_at": null,
+                        "archived": false,
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
+                    },
+                    "status": "Success"
+                },
+                {
+                    "id": 2365541,
+                    "iid": 8,
+                    "ref": "guyllian.gomez/packages-inspector-jira-status-deps",
+                    "sha": "af2b52e22117af66ed8cc033dbf35948f12e5859",
+                    "created_at": "2023-06-12T14:51:47.170Z",
+                    "updated_at": "2023-06-12T14:54:47.660Z",
+                    "user": {
+                        "name": "Casandra Johnson"
+                    },
+                    "environment": {
+                        "id": 3172,
+                        "name": "preview/lambdas/guyllian-gomez-packages-inspector-jira-status-deps",
+                        "slug": "preview-lambdas-g-gsg3cn",
+                        "external_url": null,
+                        "created_at": "2023-06-12T14:51:44.757Z",
+                        "updated_at": "2023-06-13T08:07:44.784Z"
+                    },
+                    "deployable": {
+                        "id": 280053609,
+                        "status": "Success",
+                        "stage": "test",
+                        "name": "preview-lambdas",
+                        "ref": "guyllian.gomez/packages-inspector-jira-status-deps",
+                        "tag": false,
+                        "coverage": null,
+                        "allow_failure": false,
+                        "created_at": "2023-06-12T14:51:44.848Z",
+                        "started_at": "2023-06-12T14:51:49.328Z",
+                        "finished_at": "2023-06-12T14:54:47.610Z",
+                        "erased_at": null,
+                        "duration": 178.282427,
+                        "queued_duration": 0.386012,
+                        "user": null,
+                        "commit": {
+                            "id": "af2b52e22117af66ed8cc033dbf35948f12e5859",
+                            "short_id": "af2b52e2",
+                            "created_at": "2023-06-12T16:50:05.000+02:00",
+                            "parent_ids": [
+                                "6e36cf3dfa3cbf3b3972cb99c88c78bb661ab781"
+                            ],
+                            "title": "Add Jira statuses in the dependency and used by list of the side panel",
+                            "message": "Add Jira statuses in the dependency and used by list of the side panel\n",
+                            "author_name": "Guyllian Gomez",
+                            "author_email": "guyllian.gomez@datadoghq.com",
+                            "authored_date": "2023-06-09T14:47:29.000+02:00",
+                            "committer_name": "Guyllian Gomez",
+                            "committer_email": "guyllian.gomez@datadoghq.com",
+                            "committed_date": "2023-06-12T16:50:05.000+02:00",
+                            "trailers": {},
+                            "extended_trailers": {},
+                            "web_url": "https://gitlab.example/Owner/Repo/-/commit/af2b52e22117af66ed8cc033dbf35948f12e5859"
+                        },
+                        "pipeline": {
+                            "id": 16707792,
+                            "iid": 804848,
+                            "project_id": 881,
+                            "sha": "af2b52e22117af66ed8cc033dbf35948f12e5859",
+                            "ref": "guyllian.gomez/packages-inspector-jira-status-deps",
+                            "status": "canceled",
+                            "source": "push",
+                            "created_at": "2023-06-12T14:51:44.817Z",
+                            "updated_at": "2023-06-12T15:05:39.429Z",
+                            "web_url": "https://gitlab.example/Owner/Repo/-/pipelines/16707792"
+                        },
+                        "web_url": "https://gitlab.example/Owner/Repo/-/jobs/280053609",
+                        "project": {
+                            "ci_job_token_scope_enabled": false
+                        },
+                        "artifacts": [
+                            {
+                                "file_type": "trace",
+                                "size": 115539,
+                                "filename": "job.log",
+                                "file_format": null
+                            }
+                        ],
+                        "runner": null,
+                        "artifacts_expire_at": null,
+                        "archived": false,
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
+                    },
+                    "status": "Success"
+                },
+                {
+                    "id": 2365563,
+                    "iid": 9,
+                    "ref": "morgane.figard/typecheck_packages",
+                    "sha": "c09a991ce1102db26fc893b5f10d1f1a8b68b7d9",
+                    "created_at": "2023-06-12T15:03:08.458Z",
+                    "updated_at": "2023-06-12T15:06:19.080Z",
+                    "user": {
+                        "name": "Robert Allen"
+                    },
+                    "environment": {
+                        "id": 3171,
+                        "name": "preview/lambdas/morgane-figard-typecheck-packages",
+                        "slug": "preview-lambdas-m-y9hl2s",
+                        "external_url": null,
+                        "created_at": "2023-06-12T14:21:23.587Z",
+                        "updated_at": "2023-06-14T08:42:32.808Z"
+                    },
+                    "deployable": {
+                        "id": 280071507,
+                        "status": "Success",
+                        "stage": "test",
+                        "name": "preview-lambdas",
+                        "ref": "morgane.figard/typecheck_packages",
+                        "tag": false,
+                        "coverage": null,
+                        "allow_failure": false,
+                        "created_at": "2023-06-12T15:03:06.585Z",
+                        "started_at": "2023-06-12T15:03:11.227Z",
+                        "finished_at": "2023-06-12T15:06:18.856Z",
+                        "erased_at": null,
+                        "duration": 187.629292,
+                        "queued_duration": 0.626641,
+                        "user": null,
+                        "commit": {
+                            "id": "c09a991ce1102db26fc893b5f10d1f1a8b68b7d9",
+                            "short_id": "c09a991c",
+                            "created_at": "2023-06-12T17:02:04.000+02:00",
+                            "parent_ids": [
+                                "c27d8ae409492bbba86e9e59b283b9e302e1fffe"
+                            ],
+                            "title": "✅ Fix typecheck for tsconfig.json",
+                            "message": "✅ Fix typecheck for tsconfig.json\n",
+                            "author_name": "Morgane Figard",
+                            "author_email": "morgane.figard@datadoghq.com",
+                            "authored_date": "2023-06-12T17:02:04.000+02:00",
+                            "committer_name": "Morgane Figard",
+                            "committer_email": "morgane.figard@datadoghq.com",
+                            "committed_date": "2023-06-12T17:02:04.000+02:00",
+                            "trailers": {},
+                            "extended_trailers": {},
+                            "web_url": "https://gitlab.example/Owner/Repo/-/commit/c09a991ce1102db26fc893b5f10d1f1a8b68b7d9"
+                        },
+                        "pipeline": {
+                            "id": 16708835,
+                            "iid": 804936,
+                            "project_id": 881,
+                            "sha": "c09a991ce1102db26fc893b5f10d1f1a8b68b7d9",
+                            "ref": "morgane.figard/typecheck_packages",
+                            "status": "failed",
+                            "source": "push",
+                            "created_at": "2023-06-12T15:03:06.570Z",
+                            "updated_at": "2023-06-12T15:54:26.722Z",
+                            "web_url": "https://gitlab.example/Owner/Repo/-/pipelines/16708835"
+                        },
+                        "web_url": "https://gitlab.example/Owner/Repo/-/jobs/280071507",
+                        "project": {
+                            "ci_job_token_scope_enabled": false
+                        },
+                        "artifacts": [
+                            {
+                                "file_type": "trace",
+                                "size": 114950,
+                                "filename": "job.log",
+                                "file_format": null
+                            }
+                        ],
+                        "runner": null,
+                        "artifacts_expire_at": null,
+                        "archived": false,
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
+                    },
+                    "status": "Success"
+                },
+                {
+                    "id": 2365564,
+                    "iid": 10,
+                    "ref": "guyllian.gomez/packages-inspector-jira-status-deps",
+                    "sha": "e5d7b36816d09a9099972785603a9551f4fd1389",
+                    "created_at": "2023-06-12T15:03:45.503Z",
+                    "updated_at": "2023-06-12T15:06:48.526Z",
+                    "user": {
+                        "name": "Quinn Allen"
+                    },
+                    "environment": {
+                        "id": 3172,
+                        "name": "preview/lambdas/guyllian-gomez-packages-inspector-jira-status-deps",
+                        "slug": "preview-lambdas-g-gsg3cn",
+                        "external_url": null,
+                        "created_at": "2023-06-12T14:51:44.757Z",
+                        "updated_at": "2023-06-13T08:07:44.784Z"
+                    },
+                    "deployable": {
+                        "id": 280072130,
+                        "status": "Success",
+                        "stage": "test",
+                        "name": "preview-lambdas",
+                        "ref": "guyllian.gomez/packages-inspector-jira-status-deps",
+                        "tag": false,
+                        "coverage": null,
+                        "allow_failure": false,
+                        "created_at": "2023-06-12T15:03:43.127Z",
+                        "started_at": "2023-06-12T15:03:49.742Z",
+                        "finished_at": "2023-06-12T15:06:48.502Z",
+                        "erased_at": null,
+                        "duration": 178.760067,
+                        "queued_duration": 0.308666,
+                        "user": {
+                            "name": "Quinn Allen"
+                        },
+                        "commit": {
+                            "id": "e5d7b36816d09a9099972785603a9551f4fd1389",
+                            "short_id": "e5d7b368",
+                            "created_at": "2023-06-12T17:02:58.000+02:00",
+                            "parent_ids": [
+                                "af2b52e22117af66ed8cc033dbf35948f12e5859"
+                            ],
+                            "title": "Clean up table data type",
+                            "message": "Clean up table data type\n",
+                            "author_name": "Guyllian Gomez",
+                            "author_email": "guyllian.gomez@datadoghq.com",
+                            "authored_date": "2023-06-12T17:02:58.000+02:00",
+                            "committer_name": "Guyllian Gomez",
+                            "committer_email": "guyllian.gomez@datadoghq.com",
+                            "committed_date": "2023-06-12T17:02:58.000+02:00",
+                            "trailers": {},
+                            "extended_trailers": {},
+                            "web_url": "https://gitlab.example/Owner/Repo/-/commit/e5d7b36816d09a9099972785603a9551f4fd1389"
+                        },
+                        "pipeline": {
+                            "id": 16708893,
+                            "iid": 804940,
+                            "project_id": 881,
+                            "sha": "e5d7b36816d09a9099972785603a9551f4fd1389",
+                            "ref": "guyllian.gomez/packages-inspector-jira-status-deps",
+                            "status": "Success",
+                            "source": "push",
+                            "created_at": "2023-06-12T15:03:43.108Z",
+                            "updated_at": "2023-06-13T07:17:16.312Z",
+                            "web_url": "https://gitlab.example/Owner/Repo/-/pipelines/16708893"
+                        },
+                        "web_url": "https://gitlab.example/Owner/Repo/-/jobs/280072130",
+                        "project": {
+                            "ci_job_token_scope_enabled": false
+                        },
+                        "artifacts": [
+                            {
+                                "file_type": "trace",
+                                "size": 109438,
+                                "filename": "job.log",
+                                "file_format": null
+                            }
+                        ],
+                        "runner": null,
+                        "artifacts_expire_at": null,
+                        "archived": false,
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
+                    },
+                    "status": "Success"
+                }
+            ]
+        },
+        "pipeline_Id": {},
+        "retryPipeline": {
+            "id": "46",
+            "iid": "11",
+            "project_id": "1",
+            "status": "pending",
+            "ref": "main",
+            "web_url": "https://example.com/foo/bar/pipelines/46"
+        }
+    },
+    "tile_background": "table",
+    "tile_icon_action_fqn": "com.datadoghq.gitlab.getProjectDeployments",
+    "tags": [
+        "software_delivery"
+    ],
+    "embedded_workflow_blueprints": {},
+    "embedded_datastore_blueprints": {}
+}

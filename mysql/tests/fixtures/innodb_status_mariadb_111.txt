@@ -1,0 +1,273 @@
+
+=====================================
+2024-10-23 18:09:19 0x78d939569640 INNODB MONITOR OUTPUT
+=====================================
+Per second averages calculated from the last 10 seconds
+-----------------
+BACKGROUND THREAD
+-----------------
+srv_master_thread loops: 0 srv_active, 974 srv_idle
+srv_master_thread log flush and writes: 974
+----------
+SEMAPHORES
+----------
+------------
+TRANSACTIONS
+------------
+Trx id counter 125588
+Purge done for trx's n:o < 125482 undo n:o < 0 state: running
+History list length 53
+LIST OF TRANSACTIONS FOR EACH SESSION:
+---TRANSACTION (0x78d93821fa80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93821ef80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93821e480), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93821d980), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93821ce80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93821c380), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93821b880), ACTIVE 0 sec fetching rows
+mysql tables in use 5, locked 5
+351 lock struct(s), heap size 41080, 17224 row lock(s)
+MariaDB thread id 418, OS thread handle 132874375390784, query id 19199809 127.0.0.1 shopper_3 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-000000000000000008129e275a612aba-40bafe7325d3d384-00',ddh='127.0.0.1',dddb='dbmorders_1',ddprs='orders-mysql'*/ 
+                        INSERT INTO order_status_change (dbm_order_id, message, price, state) 
+                                VALUES ((SELECT id as dbm_order_id FROM dbm_order WHERE id = 631), 'discount applied', 
+                        (SELECT (t.price * t.quantity * d.discount_percent) 
+                                AS price FROM dbm_order o 
+                                JOIN order_item t ON o.id = t.dbm_order_id 
+                                JOIN discount d ON d.dbm_item_id = t.id
+                                WHERE o.id = 631 LIMIT 1), 'pending') /
+---TRANSACTION (0x78d93821ad80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93821a280), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938219780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938218c80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938218180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938217680), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938216b80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938216080), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938215580), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938214a80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938213f80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938213480), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938212980), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938211e80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938211380), ACTIVE 0 sec starting index read
+mysql tables in use 5, locked 5
+335 lock struct(s), heap size 41080, 15352 row lock(s)
+MariaDB thread id 402, OS thread handle 132873630287424, query id 19199774 127.0.0.1 shopper_1 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-0000000000000000007eb1807abb7bff-3b9247d040ce7644-00',ddh='127.0.0.1',dddb='dbmorders_1',ddprs='orders-mysql'*/ 
+                        INSERT INTO order_status_change (dbm_order_id, message, price, state) 
+                                VALUES ((SELECT id as dbm_order_id FROM dbm_order WHERE id = 792), 'discount applied', 
+                        (SELECT (t.price * t.quantity * d.discount_percent) 
+                                AS price FROM dbm_order o 
+                                JOIN order_item t ON o.id = t.dbm_order_id 
+                                JOIN discount d ON d.dbm_item_id = t.id
+                                WHERE o.id = 792 LIMIT 1), 'started') /
+---TRANSACTION (0x78d938210880), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93820fd80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93820f280), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93820e780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93820dc80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93820d180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93820c680), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93820bb80), ACTIVE 0 sec
+mysql tables in use 1, locked 0
+0 lock struct(s), heap size 1128, 0 row lock(s)
+MariaDB thread id 393, OS thread handle 132873662973504, query id 19200628 127.0.0.1 shopper_2 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-0000000000000000625c18c2c40ae6f0-51a0070adc99c9cc-00',ddh='127.0.0.1',dddb='dbmorders',ddprs='orders-mysql'*/ SELECT * FROM discount where description LIKE 'random%' /* date='12%2F31',num='42' */
+Trx read view will not see trx with id >= 125588, sees < 125588
+---TRANSACTION (0x78d93820b080), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93820a580), ACTIVE 0 sec fetching rows
+mysql tables in use 1, locked 0
+0 lock struct(s), heap size 1128, 0 row lock(s)
+MariaDB thread id 391, OS thread handle 132873662666304, query id 19200553 127.0.0.1 shopper_4 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-000000000000000011796d6a155a41c5-6162c992ba6a1c04-00',ddh='127.0.0.1',dddb='dbmorders',ddprs='orders-mysql'*/ SELECT * FROM dbm_user where username LIKE 'random%' /* num:42,date:12/31,key:val */
+Trx read view will not see trx with id >= 125584, sees < 125584
+---TRANSACTION (0x78d938209a80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938208f80), ACTIVE 0 sec fetching rows
+mysql tables in use 1, locked 0
+0 lock struct(s), heap size 1128, 0 row lock(s)
+MariaDB thread id 389, OS thread handle 132873635096128, query id 19200610 127.0.0.1 shopper_2 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-0000000000000000420cc7c98cedcdbc-43cf3c158f378957-00',ddh='127.0.0.1',dddb='dbmorders_1',ddprs='orders-mysql'*/ SELECT * FROM order_item where sku LIKE 'random%' /* date:12/31,key:val */
+Trx read view will not see trx with id >= 125588, sees < 125588
+---TRANSACTION (0x78d938208480), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938207980), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938206e80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938206380), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938205880), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938204d80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938203780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938202c80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938202180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938201680), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938200b80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938248380), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93823f480), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938247880), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938246d80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938246280), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93823e980), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93823de80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938245780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938244c80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938244180), ACTIVE 0 sec starting index read
+mysql tables in use 5, locked 5
+527 lock struct(s), heap size 73848, 43034 row lock(s)
+MariaDB thread id 360, OS thread handle 132873940973120, query id 19198747 127.0.0.1 shopper_4 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-000000000000000006880af7bc93a50f-5d1c339f140f57e8-00',ddh='127.0.0.1',dddb='dbmorders',ddprs='orders-mysql'*/ 
+                        INSERT INTO order_status_change (dbm_order_id, message, price, state) 
+                                VALUES ((SELECT id as dbm_order_id FROM dbm_order WHERE id = 14), 'discount applied', 
+                        (SELECT (t.price * t.quantity * d.discount_percent) 
+                                AS price FROM dbm_order o 
+                                JOIN order_item t ON o.id = t.dbm_order_id 
+                                JOIN discount d ON d.dbm_item_id = t.id
+                                WHERE o.id = 14 LIMIT 1), 'complete') /* d
+---TRANSACTION (0x78d938243680), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938242b80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93823d380), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938242080), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938241580), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938240a80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93823c880), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93823bd80), ACTIVE 0 sec fetching rows
+mysql tables in use 1, locked 0
+0 lock struct(s), heap size 1128, 0 row lock(s)
+MariaDB thread id 350, OS thread handle 132874344240704, query id 19200054 127.0.0.1 shopper_3 Sending data
+/*dddbs='orders-app',dde='dbm-agent-integration',ddps='orders-app',ddpv='81db4e10',traceparent='00-000000000000000032c28d28fb3d0969-79d63a06fc9d5ce3-00',ddh='127.0.0.1',dddb='dbmorders_1',ddprs='orders-mysql'*/ SELECT * FROM order_item where sku LIKE 'random%' /* key='val' */
+Trx read view will not see trx with id >= 125580, sees < 125580
+---TRANSACTION (0x78d93823ff80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93823b280), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93823a780), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938239c80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938239180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938238680), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938237b80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938237080), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938236580), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938235a80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938234f80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938234480), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938233980), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938232e80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938232380), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938231880), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938230d80), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d93822e180), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+---TRANSACTION (0x78d938204280), not started
+0 lock struct(s), heap size 1128, 0 row lock(s)
+--------
+FILE I/O
+--------
+Pending flushes (fsync): 0
+170 OS file reads, 64812 OS file writes, 62896 OS fsyncs
+0.00 reads/s, 0 avg bytes/read, 63.59 writes/s, 63.59 fsyncs/s
+---
+LOG
+---
+Log sequence number 85062982
+Log flushed up to   85062982
+Pages flushed up to 70787118
+Last checkpoint at  70787118
+----------------------
+BUFFER POOL AND MEMORY
+----------------------
+Total large memory allocated 167772160
+Dictionary memory allocated 886376
+Buffer pool size   8064
+Free buffers       4938
+Database pages     3118
+Old database pages 1130
+Modified db pages  311
+Percent of dirty pages(LRU & free pages): 3.860
+Max dirty pages percent: 90.000
+Pending reads 0
+Pending writes: LRU 0, flush list 0
+Pages made young 249875, not young 0
+635.54 youngs/s, 0.00 non-youngs/s
+Pages read 153, created 3173, written 2955
+0.00 reads/s, 0.00 creates/s, 0.00 writes/s
+Buffer pool hit rate 1000 / 1000, young-making rate 0 / 1000 not 0 / 1000
+Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
+LRU len: 3118, unzip_LRU len: 0
+I/O sum[0]:cur[0], unzip sum[0]:cur[0]
+--------------
+ROW OPERATIONS
+--------------
+4 read views open inside InnoDB
+state: sleeping
+----------------------------
+END OF INNODB MONITOR OUTPUT
+============================

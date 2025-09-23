@@ -1,18 +1,13 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.dev.testing import requires_py3
+from types import MappingProxyType
 
-pytestmark = [requires_py3]
+from datadog_checks.base.utils.models.validation.utils import make_immutable
 
 
-def test_make_immutable_check_config():
-    # TODO: move imports up top when we drop Python 2
-    from immutables import Map
-
-    from datadog_checks.base.utils.models.types import make_immutable_check_config
-
-    obj = make_immutable_check_config(
+def test_make_immutable():
+    obj = make_immutable(
         {
             'string': 'foo',
             'integer': 9000,
@@ -23,7 +18,7 @@ def test_make_immutable_check_config():
         }
     )
 
-    assert isinstance(obj, Map)
+    assert isinstance(obj, MappingProxyType)
     assert len(obj) == 6
     assert isinstance(obj['string'], str)
     assert obj['string'] == 'foo'
@@ -35,10 +30,10 @@ def test_make_immutable_check_config():
     assert obj['boolean'] is True
     assert isinstance(obj['array'], tuple)
     assert len(obj['array']) == 2
-    assert isinstance(obj['array'][0], Map)
+    assert isinstance(obj['array'][0], MappingProxyType)
     assert obj['array'][0]['key'] == 'foo'
-    assert isinstance(obj['array'][1], Map)
+    assert isinstance(obj['array'][1], MappingProxyType)
     assert obj['array'][1]['key'] == 'bar'
-    assert isinstance(obj['mapping'], Map)
+    assert isinstance(obj['mapping'], MappingProxyType)
     assert len(obj['mapping']) == 1
     assert obj['mapping']['foo'] == 'bar'

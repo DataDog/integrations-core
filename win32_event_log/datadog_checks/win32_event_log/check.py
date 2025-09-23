@@ -8,19 +8,15 @@ import win32con
 import win32event
 import win32evtlog
 import win32security
-from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.time import get_timestamp
 
+from .config_models import ConfigMixin
 from .filters import construct_xpath_query
 from .legacy import Win32EventLogWMI
-
-if PY2:
-    ConfigMixin = object
-else:
-    from .config_models import ConfigMixin
 
 
 class Win32EventLogCheck(AgentCheck, ConfigMixin):
@@ -58,6 +54,8 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
         'event_format',
     )
 
+    NEW_PARAMS = ('dd_security_events',)
+
     # https://docs.microsoft.com/en-us/windows/win32/wes/eventmanifestschema-leveltype-complextype#remarks
     #
     # From
@@ -69,10 +67,32 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if PY2 or is_affirmative(instance.get('legacy_mode', True)):
+        init_config_legacy_mode = init_config.get('legacy_mode', None)
+        init_config_legacy_mode_v2 = init_config.get('legacy_mode_v2', None)
+        # If legacy_mode is unset for an instance, default to the init_config option
+        use_legacy_mode = instance.get('legacy_mode', init_config_legacy_mode)
+        use_legacy_mode_v2 = instance.get('legacy_mode_v2', init_config_legacy_mode_v2)
+
+        # If legacy_mode and legacy_mode_v2 are unset, default to legacy mode for configuration backwards compatibility
+        if use_legacy_mode is None and not is_affirmative(use_legacy_mode_v2):
+            use_legacy_mode = True
+
+        use_legacy_mode = is_affirmative(use_legacy_mode)
+        use_legacy_mode_v2 = is_affirmative(use_legacy_mode_v2)
+
+        if use_legacy_mode and use_legacy_mode_v2:
+            raise ConfigurationError(
+                "legacy_mode and legacy_mode_v2 are both true. Each instance must set a single mode to true."
+            )
+
+        if use_legacy_mode:
             return Win32EventLogWMI(name, init_config, instances)
-        else:
+        elif use_legacy_mode_v2:
             return super(Win32EventLogCheck, cls).__new__(cls)
+        else:
+            raise SkipInstanceError(
+                "Set the legacy_mode and legacy_mode_v2 options to configure the implementation to use."
+            )
 
     def __init__(self, name, init_config, instances):
         super(Win32EventLogCheck, self).__init__(name, init_config, instances)
@@ -127,6 +147,10 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
                     "%s config option is ignored unless running legacy mode. Please remove it", legacy_param
                 )
 
+        for new_param in self.NEW_PARAMS:
+            if new_param in self.instance:
+                self.warning("%s config option is ignored when running legacy_mode_v2. Please remove it", new_param)
+
     def check(self, _):
         for event in self.consume_events():
             try:
@@ -139,7 +163,7 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
             event_payload = {
                 'source_type_name': self.SOURCE_TYPE_NAME,
                 'priority': self._event_priority,
-                'tags': list(self.config.tags),
+                'tags': list(self.config.tags) if self.config.tags is not None else [],
             }
 
             # As seen in every collector, before using members of the enum you need to check for existence. See:
@@ -279,7 +303,6 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
 
     def poll_events(self):
         while True:
-
             # IMPORTANT: the subscription starts immediately so you must consume before waiting for the first signal
             while True:
                 # https://docs.microsoft.com/en-us/windows/win32/api/winevt/nf-winevt-evtnext

@@ -1,0 +1,1437 @@
+{
+  "title": "RingCentral Voice Call",
+  "description": "The RingCentral Voice Dashboard offers an extensive view of RingCentral voice call metrics, providing crucial insights into call performance, usage, and associated costs. It serves as a vital tool for analyzing user behavior, detecting call patterns, and enhancing communication efficiency within the organization.",
+  "widgets": [
+      {
+          "id": 8321444127095890,
+          "definition": {
+              "type": "image",
+              "url": "https://www.jenne.com/media/1024/ringcentral.png",
+              "url_dark_theme": "https://www.jenne.com/media/1024/ringcentral.png",
+              "sizing": "fill",
+              "has_background": false,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+          },
+          "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 5,
+              "height": 2
+          }
+      },
+      {
+          "id": 889760886222274,
+          "definition": {
+              "title": "Call Overview",
+              "background_color": "vivid_blue",
+              "show_title": true,
+              "type": "group",
+              "layout_type": "ordered",
+              "widgets": [
+                  {
+                      "id": 1638255374572738,
+                      "definition": {
+                          "title": "Total Calls",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.total_calls{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "black_on_light_yellow",
+                                          "custom_bg_color": "#e1f0fa"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 0
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 7,
+                          "height": 2
+                      }
+                  },
+                  {
+                      "id": 7418162133773108,
+                      "definition": {
+                          "title": "Total Call Minutes",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.total_call_minutes{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "custom_unit_label",
+                                                  "label": "minutes"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "black_on_light_yellow"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 2
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 2,
+                          "width": 3,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 8016995663955472,
+                      "definition": {
+                          "title": "Average Call Duration",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.total_call_minutes{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      },
+                                      {
+                                          "name": "query2",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.total_calls{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit",
+                                                  "unit_name": "minute"
+                                              }
+                                          },
+                                          "formula": "query1 / query2"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "black_on_light_yellow"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 2
+                      },
+                      "layout": {
+                          "x": 3,
+                          "y": 2,
+                          "width": 4,
+                          "height": 3
+                      }
+                  }
+              ]
+          },
+          "layout": {
+              "x": 5,
+              "y": 0,
+              "width": 7,
+              "height": 6
+          }
+      },
+      {
+          "id": 2923359492917778,
+          "definition": {
+              "type": "note",
+              "content": "**Dashboard Overview**\n\nThe RingCentral Voice Dashboard offers an extensive view of RingCentral voice call metrics, providing crucial insights into call performance, usage, and associated costs. It serves as a vital tool for analyzing user behavior, detecting call patterns, and enhancing communication efficiency within the organization.\n\nFor more information, see the [RingCentral Integration Documentation](https://docs.datadoghq.com/integrations/ringcentral).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+          },
+          "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 5,
+              "height": 4
+          }
+      },
+      {
+          "id": 735774317626376,
+          "definition": {
+              "title": "Call Types and Status",
+              "background_color": "vivid_blue",
+              "show_title": true,
+              "type": "group",
+              "layout_type": "ordered",
+              "widgets": [
+                  {
+                      "id": 6190958815110272,
+                      "definition": {
+                          "title": "Completed Calls",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.completed_voice_calls{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "custom_bg",
+                                          "custom_bg_color": "#e1f0fa"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 0,
+                          "timeseries_background": {
+                              "type": "area",
+                              "yaxis": {
+                                  "include_zero": true
+                              }
+                          }
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 4,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 5749468265615256,
+                      "definition": {
+                          "title": "Missed Calls",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.missed_voice_calls{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "custom_bg",
+                                          "custom_bg_color": "#e1f0fa"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 0,
+                          "timeseries_background": {
+                              "type": "area",
+                              "yaxis": {
+                                  "include_zero": true
+                              }
+                          }
+                      },
+                      "layout": {
+                          "x": 4,
+                          "y": 0,
+                          "width": 4,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 1378360882989284,
+                      "definition": {
+                          "title": "Unknown Calls",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.unknown_voice_calls{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "custom_bg",
+                                          "custom_bg_color": "#e1f0fa"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 0,
+                          "timeseries_background": {
+                              "type": "area",
+                              "yaxis": {
+                                  "include_zero": true
+                              }
+                          }
+                      },
+                      "layout": {
+                          "x": 8,
+                          "y": 0,
+                          "width": 4,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 8446987192974732,
+                      "definition": {
+                          "title": "Accepted Calls",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.accepted_voice_calls{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "custom_bg",
+                                          "custom_bg_color": "#e1f0fa"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 0,
+                          "timeseries_background": {
+                              "type": "area",
+                              "yaxis": {
+                                  "include_zero": true
+                              }
+                          }
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 3,
+                          "width": 4,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 2970894397584182,
+                      "definition": {
+                          "title": "Abandoned Calls",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.abandoned_voice_calls{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "custom_bg",
+                                          "custom_bg_color": "#e1f0fa"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 0,
+                          "timeseries_background": {
+                              "type": "area",
+                              "yaxis": {
+                                  "include_zero": true
+                              }
+                          }
+                      },
+                      "layout": {
+                          "x": 4,
+                          "y": 3,
+                          "width": 4,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 1125861725681346,
+                      "definition": {
+                          "title": "Voicemail Calls",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.voicemail_voice_calls{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "custom_bg",
+                                          "custom_bg_color": "#e1f0fa"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 0,
+                          "timeseries_background": {
+                              "type": "area",
+                              "yaxis": {
+                                  "include_zero": true
+                              }
+                          }
+                      },
+                      "layout": {
+                          "x": 8,
+                          "y": 3,
+                          "width": 4,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 7640625940389524,
+                      "definition": {
+                          "title": "Calls by Result",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "logs",
+                                          "name": "query1",
+                                          "indexes": [
+                                              "*"
+                                          ],
+                                          "compute": {
+                                              "aggregation": "count"
+                                          },
+                                          "group_by": [
+                                              {
+                                                  "facet": "@log.result",
+                                                  "limit": 10,
+                                                  "sort": {
+                                                      "order": "desc",
+                                                      "aggregation": "count"
+                                                  }
+                                              }
+                                          ],
+                                          "search": {
+                                              "query": "source:ringcentral service:voice $AccountId $Direction"
+                                          },
+                                          "storage": "hot"
+                                      }
+                                  ],
+                                  "style": {
+                                      "palette": "datadog16"
+                                  },
+                                  "sort": {
+                                      "count": 10,
+                                      "order_by": [
+                                          {
+                                              "type": "formula",
+                                              "index": 0,
+                                              "order": "desc"
+                                          }
+                                      ]
+                                  }
+                              }
+                          ],
+                          "type": "sunburst",
+                          "legend": {
+                              "type": "table"
+                          }
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 6,
+                          "width": 6,
+                          "height": 4
+                      }
+                  },
+                  {
+                      "id": 2899541394888750,
+                      "definition": {
+                          "title": "Calls by Response",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1 + query2 + query3 + query4"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "query": "sum:ringcentral.voice.answered_voice_calls{$AccountId,$Direction} by {response}.as_count()",
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "aggregator": "sum"
+                                      },
+                                      {
+                                          "query": "sum:ringcentral.voice.notanswered_voice_calls{$AccountId,$Direction} by {response}.as_count()",
+                                          "data_source": "metrics",
+                                          "name": "query2",
+                                          "aggregator": "sum"
+                                      },
+                                      {
+                                          "query": "sum:ringcentral.voice.connected_voice_calls{$AccountId,$Direction} by {response}.as_count()",
+                                          "data_source": "metrics",
+                                          "name": "query3",
+                                          "aggregator": "sum"
+                                      },
+                                      {
+                                          "query": "sum:ringcentral.voice.notconnected_voice_calls{$AccountId,$Direction} by {response}.as_count()",
+                                          "data_source": "metrics",
+                                          "name": "query4",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "style": {
+                                      "palette": "datadog16"
+                                  },
+                                  "sort": {
+                                      "order_by": [
+                                          {
+                                              "type": "formula",
+                                              "index": 0,
+                                              "order": "desc"
+                                          }
+                                      ],
+                                      "count": 500
+                                  }
+                              }
+                          ],
+                          "type": "sunburst",
+                          "legend": {
+                              "type": "table"
+                          }
+                      },
+                      "layout": {
+                          "x": 6,
+                          "y": 6,
+                          "width": 6,
+                          "height": 4
+                      }
+                  }
+              ]
+          },
+          "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 11
+          }
+      },
+      {
+          "id": 8747954866743258,
+          "definition": {
+              "title": "Call Duration Breakdown",
+              "background_color": "vivid_blue",
+              "show_title": true,
+              "type": "group",
+              "layout_type": "ordered",
+              "widgets": [
+                  {
+                      "id": 3453842358568210,
+                      "definition": {
+                          "type": "note",
+                          "content": "An *inbound* call is a call received by a company or individual from a customer or client, while an *outbound* call is made by a company or individual to reach out to a customer or client.",
+                          "background_color": "white",
+                          "font_size": "14",
+                          "text_align": "left",
+                          "vertical_align": "center",
+                          "show_tick": true,
+                          "tick_pos": "50%",
+                          "tick_edge": "right",
+                          "has_padding": true
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 2,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 5053173972030748,
+                      "definition": {
+                          "title": "Inbound Call Duration",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.inbound_call_duration{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit",
+                                                  "unit_name": "second"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "black_on_light_yellow"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 1
+                      },
+                      "layout": {
+                          "x": 2,
+                          "y": 0,
+                          "width": 5,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 5218963444986850,
+                      "definition": {
+                          "title": "Outbound Call Duration",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.outbound_call_duration{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit",
+                                                  "unit_name": "second"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "black_on_light_yellow"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 1
+                      },
+                      "layout": {
+                          "x": 7,
+                          "y": 0,
+                          "width": 5,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 7395151899769614,
+                      "definition": {
+                          "type": "note",
+                          "content": "Internal voice calls refer to calls made between users within the same organization, using the RingCentral system. External voice calls are those made to or received from contacts outside the organization, such as customers or clients.",
+                          "background_color": "white",
+                          "font_size": "14",
+                          "text_align": "left",
+                          "vertical_align": "center",
+                          "show_tick": true,
+                          "tick_pos": "50%",
+                          "tick_edge": "right",
+                          "has_padding": true
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 3,
+                          "width": 2,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 8560850209729932,
+                      "definition": {
+                          "title": "Internal Call Duration",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.internal_call_duration{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit",
+                                                  "unit_name": "second"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "black_on_light_yellow"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 1
+                      },
+                      "layout": {
+                          "x": 2,
+                          "y": 3,
+                          "width": 5,
+                          "height": 3
+                      }
+                  },
+                  {
+                      "id": 6344750945994318,
+                      "definition": {
+                          "title": "External Call Duration",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_value",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.external_call_duration{$AccountId,$Direction}.as_count()",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "formulas": [
+                                      {
+                                          "number_format": {
+                                              "unit": {
+                                                  "type": "canonical_unit",
+                                                  "unit_name": "second"
+                                              }
+                                          },
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "conditional_formats": [
+                                      {
+                                          "comparator": ">=",
+                                          "value": 0,
+                                          "palette": "black_on_light_yellow"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "autoscale": true,
+                          "precision": 2
+                      },
+                      "layout": {
+                          "x": 7,
+                          "y": 3,
+                          "width": 5,
+                          "height": 3
+                      }
+                  }
+              ]
+          },
+          "layout": {
+              "x": 0,
+              "y": 17,
+              "width": 12,
+              "height": 7
+          }
+      },
+      {
+          "id": 5765673603022034,
+          "definition": {
+              "title": "Call Trends and Distribution",
+              "background_color": "vivid_blue",
+              "show_title": true,
+              "type": "group",
+              "layout_type": "ordered",
+              "widgets": [
+                  {
+                      "id": 1144839007896174,
+                      "definition": {
+                          "title": "Voice Call Volume over Time",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "show_legend": false,
+                          "legend_layout": "auto",
+                          "legend_columns": [
+                              "avg",
+                              "min",
+                              "max",
+                              "value",
+                              "sum"
+                          ],
+                          "type": "timeseries",
+                          "requests": [
+                              {
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "name": "query1",
+                                          "data_source": "metrics",
+                                          "query": "sum:ringcentral.voice.total_calls{$AccountId,$Direction}.as_count()"
+                                      }
+                                  ],
+                                  "response_format": "timeseries",
+                                  "style": {
+                                      "palette": "dog_classic",
+                                      "order_by": "values",
+                                      "line_type": "solid",
+                                      "line_width": "normal"
+                                  },
+                                  "display_type": "line"
+                              }
+                          ]
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 0,
+                          "width": 12,
+                          "height": 4
+                      }
+                  },
+                  {
+                      "id": 2416177293091466,
+                      "definition": {
+                          "title": "Calls by Company Hours",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1 + query2"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "query": "sum:ringcentral.voice.businesshours_calls{$AccountId,$Direction} by {companyhours}.as_count()",
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "aggregator": "sum"
+                                      },
+                                      {
+                                          "query": "sum:ringcentral.voice.afterhours_calls{$AccountId,$Direction} by {companyhours}.as_count()",
+                                          "data_source": "metrics",
+                                          "name": "query2",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "style": {
+                                      "palette": "datadog16"
+                                  },
+                                  "sort": {
+                                      "count": 500,
+                                      "order_by": [
+                                          {
+                                              "type": "formula",
+                                              "index": 0,
+                                              "order": "desc"
+                                          }
+                                      ]
+                                  }
+                              }
+                          ],
+                          "type": "sunburst",
+                          "legend": {
+                              "type": "table"
+                          }
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 4,
+                          "width": 6,
+                          "height": 5
+                      }
+                  },
+                  {
+                      "id": 3071602528342088,
+                      "definition": {
+                          "title": "Calls by Transport",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "requests": [
+                              {
+                                  "response_format": "scalar",
+                                  "formulas": [
+                                      {
+                                          "formula": "query1"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "data_source": "logs",
+                                          "name": "query1",
+                                          "indexes": [
+                                              "*"
+                                          ],
+                                          "compute": {
+                                              "aggregation": "count"
+                                          },
+                                          "group_by": [
+                                              {
+                                                  "facet": "@log.transport",
+                                                  "limit": 10,
+                                                  "sort": {
+                                                      "order": "desc",
+                                                      "aggregation": "count"
+                                                  }
+                                              }
+                                          ],
+                                          "search": {
+                                              "query": "service:voice source:ringcentral $AccountId $Direction"
+                                          },
+                                          "storage": "hot"
+                                      }
+                                  ],
+                                  "style": {
+                                      "palette": "datadog16"
+                                  },
+                                  "sort": {
+                                      "count": 10,
+                                      "order_by": [
+                                          {
+                                              "type": "formula",
+                                              "index": 0,
+                                              "order": "desc"
+                                          }
+                                      ]
+                                  }
+                              }
+                          ],
+                          "type": "sunburst",
+                          "legend": {
+                              "type": "table"
+                          }
+                      },
+                      "layout": {
+                          "x": 6,
+                          "y": 4,
+                          "width": 6,
+                          "height": 5
+                      }
+                  },
+                  {
+                      "id": 7163848489017058,
+                      "definition": {
+                          "title": "Calls by Origin",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "requests": [
+                              {
+                                  "formulas": [
+                                      {
+                                          "formula": "query1 + query2"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "query": "sum:ringcentral.voice.total_internal_calls{$AccountId,$Direction} by {origin}.as_count()",
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "aggregator": "sum"
+                                      },
+                                      {
+                                          "query": "sum:ringcentral.voice.total_external_calls{$AccountId,$Direction} by {origin}.as_count()",
+                                          "data_source": "metrics",
+                                          "name": "query2",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "response_format": "scalar",
+                                  "style": {
+                                      "palette": "datadog16"
+                                  }
+                              }
+                          ],
+                          "type": "sunburst",
+                          "legend": {
+                              "type": "table"
+                          }
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 9,
+                          "width": 6,
+                          "height": 5
+                      }
+                  },
+                  {
+                      "id": 6510124761908000,
+                      "definition": {
+                          "title": "Calls by Direction",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "requests": [
+                              {
+                                  "formulas": [
+                                      {
+                                          "formula": "query1 + query2"
+                                      }
+                                  ],
+                                  "queries": [
+                                      {
+                                          "query": "sum:ringcentral.voice.total_inbound_calls{$AccountId,$Direction} by {direction}.as_count()",
+                                          "data_source": "metrics",
+                                          "name": "query1",
+                                          "aggregator": "sum"
+                                      },
+                                      {
+                                          "query": "sum:ringcentral.voice.total_outbound_calls{$AccountId,$Direction} by {direction}.as_count()",
+                                          "data_source": "metrics",
+                                          "name": "query2",
+                                          "aggregator": "sum"
+                                      }
+                                  ],
+                                  "response_format": "scalar",
+                                  "style": {
+                                      "palette": "datadog16"
+                                  }
+                              }
+                          ],
+                          "type": "sunburst",
+                          "legend": {
+                              "type": "table"
+                          }
+                      },
+                      "layout": {
+                          "x": 6,
+                          "y": 9,
+                          "width": 6,
+                          "height": 5
+                      }
+                  },
+                  {
+                      "id": 4907079252645858,
+                      "definition": {
+                          "title": "Inbound Calls by Phone Number",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_table",
+                          "requests": [
+                              {
+                                  "queries": [
+                                      {
+                                          "data_source": "logs",
+                                          "name": "query1",
+                                          "indexes": [
+                                              "*"
+                                          ],
+                                          "compute": {
+                                              "aggregation": "count"
+                                          },
+                                          "group_by": [
+                                              {
+                                                  "facet": "@log.from.phoneNumber",
+                                                  "limit": 10,
+                                                  "sort": {
+                                                      "order": "desc",
+                                                      "aggregation": "count"
+                                                  }
+                                              }
+                                          ],
+                                          "search": {
+                                              "query": "source:ringcentral service:voice @log.direction:Inbound $AccountId $Direction"
+                                          },
+                                          "storage": "hot"
+                                      }
+                                  ],
+                                  "response_format": "scalar",
+                                  "sort": {
+                                      "count": 10,
+                                      "order_by": [
+                                          {
+                                              "type": "formula",
+                                              "index": 0,
+                                              "order": "desc"
+                                          }
+                                      ]
+                                  },
+                                  "formulas": [
+                                      {
+                                          "cell_display_mode": "bar",
+                                          "alias": "count",
+                                          "formula": "query1"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "has_search_bar": "auto"
+                      },
+                      "layout": {
+                          "x": 0,
+                          "y": 14,
+                          "width": 6,
+                          "height": 4
+                      }
+                  },
+                  {
+                      "id": 2987926043576390,
+                      "definition": {
+                          "title": "Outbound Calls by Phone Number",
+                          "title_size": "16",
+                          "title_align": "left",
+                          "type": "query_table",
+                          "requests": [
+                              {
+                                  "queries": [
+                                      {
+                                          "data_source": "logs",
+                                          "name": "query1",
+                                          "indexes": [
+                                              "*"
+                                          ],
+                                          "compute": {
+                                              "aggregation": "count"
+                                          },
+                                          "group_by": [
+                                              {
+                                                  "facet": "@log.from.phoneNumber",
+                                                  "limit": 10,
+                                                  "sort": {
+                                                      "order": "desc",
+                                                      "aggregation": "count"
+                                                  }
+                                              },
+                                              {
+                                                  "facet": "@log.from.name",
+                                                  "limit": 10,
+                                                  "sort": {
+                                                      "order": "desc",
+                                                      "aggregation": "count"
+                                                  }
+                                              }
+                                          ],
+                                          "search": {
+                                              "query": "source:ringcentral service:voice @log.direction:Outbound $AccountId $Direction"
+                                          },
+                                          "storage": "hot"
+                                      }
+                                  ],
+                                  "response_format": "scalar",
+                                  "sort": {
+                                      "count": 100,
+                                      "order_by": [
+                                          {
+                                              "type": "formula",
+                                              "index": 0,
+                                              "order": "desc"
+                                          }
+                                      ]
+                                  },
+                                  "formulas": [
+                                      {
+                                          "cell_display_mode": "bar",
+                                          "alias": "count",
+                                          "formula": "query1"
+                                      }
+                                  ]
+                              }
+                          ],
+                          "has_search_bar": "auto"
+                      },
+                      "layout": {
+                          "x": 6,
+                          "y": 14,
+                          "width": 6,
+                          "height": 4
+                      }
+                  }
+              ]
+          },
+          "layout": {
+              "x": 0,
+              "y": 24,
+              "width": 12,
+              "height": 19,
+              "is_column_break": true
+          }
+      },
+      {
+          "id": 4635841880663967,
+          "definition": {
+              "title": "Call Information",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                  {
+                      "response_format": "event_list",
+                      "query": {
+                          "data_source": "logs_stream",
+                          "query_string": "source:ringcentral service:voice $AccountId $Direction ",
+                          "indexes": [],
+                          "storage": "hot",
+                          "sort": {
+                              "order": "desc",
+                              "column": "timestamp"
+                          }
+                      },
+                      "columns": [
+                          {
+                              "field": "status_line",
+                              "width": "auto"
+                          },
+                          {
+                              "field": "@log.from.name",
+                              "width": "auto"
+                          },
+                          {
+                              "field": "@log.direction",
+                              "width": "auto"
+                          },
+                          {
+                              "field": "@log.duration",
+                              "width": "auto"
+                          },
+                          {
+                              "field": "@log.result",
+                              "width": "auto"
+                          },
+                          {
+                              "field": "timestamp",
+                              "width": "auto"
+                          },
+                          {
+                              "field": "content",
+                              "width": "auto"
+                          },
+                          {
+                              "field": "source",
+                              "width": "auto"
+                          },
+                          {
+                              "field": "service",
+                              "width": "auto"
+                          }
+                      ]
+                  }
+              ],
+              "type": "list_stream"
+          },
+          "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 5
+          }
+      }
+  ],
+  "template_variables": [
+      {
+          "name": "AccountId",
+          "prefix": "accountid",
+          "available_values": [],
+          "default": "*"
+      },
+      {
+          "name": "Direction",
+          "prefix": "direction",
+          "available_values": [],
+          "default": "*"
+      }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

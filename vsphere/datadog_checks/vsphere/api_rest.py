@@ -3,16 +3,15 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import json
 from collections import defaultdict
-from typing import Any, Dict, Iterator, List, Set
+from typing import Any, Dict, Iterator, List, Set  # noqa: F401
 
 from pyVmomi import vim
-from six import iteritems
 
-from datadog_checks.base.log import CheckLoggingAdapter
+from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.vsphere.config import VSphereConfig
+from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
-from datadog_checks.vsphere.types import ResourceTags, TagAssociation
+from datadog_checks.vsphere.types import ResourceTags, TagAssociation  # noqa: F401
 
 from .api import APIResponseError, smart_retry
 
@@ -24,7 +23,7 @@ MOR_TYPE_MAPPING_FROM_STRING = {
     'ClusterComputeResource': vim.ClusterComputeResource,
 }
 
-MOR_TYPE_MAPPING_TO_STRING = {v: k for k, v in iteritems(MOR_TYPE_MAPPING_FROM_STRING)}
+MOR_TYPE_MAPPING_TO_STRING = {v: k for k, v in MOR_TYPE_MAPPING_FROM_STRING.items()}
 
 
 class VSphereRestAPI(object):
@@ -81,15 +80,14 @@ class VSphereRestAPI(object):
         self.log.debug("Fetched tag associations: %s", tag_associations)
 
         # Initialise resource_tags
-        resource_tags = {
-            resource_type: defaultdict(list) for resource_type in ALL_RESOURCES_WITH_METRICS
-        }  # type: ResourceTags
+        resource_tags = {resource_type: defaultdict(list) for resource_type in ALL_RESOURCES_WITH_METRICS}  # type: ResourceTags
 
         all_tag_ids = set()
         for tag_asso in tag_associations:
             all_tag_ids.update(tag_asso["tag_ids"])
 
         tags = self._get_tags(all_tag_ids)
+        self.log.debug("Fetched tags: %s", tags)
 
         for tag_asso in tag_associations:
             mor_id = tag_asso["object_id"]["id"]
@@ -121,12 +119,21 @@ class VSphereRestAPI(object):
         tags = {}
         categories = {}
         for tag_id in tag_ids:
-            tag = self._client.tagging_tags_get(tag_id)
-            category_id = tag["category_id"]
-            if category_id not in categories:
-                categories[category_id] = self._client.tagging_category_get(category_id)
-            category_name = categories[category_id]["name"]
-            tags[tag_id] = "{}{}:{}".format(self.config.tags_prefix, category_name, tag['name'])
+            try:
+                tag = self._client.tagging_tags_get(tag_id)
+                self.log.debug("Tag information fetched for tag identifier `%s`: %s", tag_id, tag)
+                category_id = tag["category_id"]
+                if category_id not in categories:
+                    categories[category_id] = self._client.tagging_category_get(category_id)
+                    self.log.debug(
+                        "Category information fetched for category identifier `%s`: %s",
+                        category_id,
+                        categories[category_id],
+                    )
+                category_name = categories[category_id]["name"]
+                tags[tag_id] = "{}{}:{}".format(self.config.tags_prefix, category_name, tag['name'])
+            except Exception as e:
+                self.log.warning("Exception in get_tags for `%s`: %s", tag_id, e)
         return tags
 
 

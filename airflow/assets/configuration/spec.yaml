@@ -13,6 +13,12 @@ files:
       description: The URL used to connect to the Airflow instance (use the Airflow web server REST API endpoint).
       value:
         type: string
+    - name: collect_ongoing_duration
+      required: false
+      description: Collect ongoing duration metric for DAG task instances.
+      value:
+        type: boolean
+        example: true
     - template: instances/http
     - template: instances/default
   - template: logs

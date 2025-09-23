@@ -1257,7 +1257,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "max:mongodb.oplatencies.commands.latencyps{$scope,$replset_name}",
+                      "query": "max:mongodb.oplatencies.commands.latency{$scope,$replset_name}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1305,7 +1305,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "max:mongodb.oplatencies.reads.latencyps{$scope,$replset_name}",
+                      "query": "max:mongodb.oplatencies.reads.latency{$scope,$replset_name}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1353,7 +1353,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "max:mongodb.oplatencies.writes.latencyps{$scope,$replset_name}",
+                      "query": "max:mongodb.oplatencies.writes.latency{$scope,$replset_name}",
                       "data_source": "metrics",
                       "name": "query3"
                     }
@@ -1623,6 +1623,5 @@
   "layout_type": "ordered",
   "is_read_only": false,
   "notify_list": [],
-  "reflow_type": "fixed",
-  "id": "gxg-c59-wyr"
+  "reflow_type": "fixed"
 }

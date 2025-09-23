@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8dfd58fe-b6de-4976-960b-14711d217efe",
   "app_id": "kafka-consumer",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,26 @@
     "title": "Kafka Consumer",
     "media": [],
     "classifier_tags": [
+      "Category::Message Queues",
       "Supported OS::Linux",
-      "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Messaging",
-      "Category::Autodiscovery"
+      "Supported OS::macOS",
+      "Offering::Integration",
+      "Product::Data Streams Monitoring"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collecting-kafka-performance-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-kafka-with-datadog"
+      }
     ]
   },
   "author": {
@@ -26,7 +41,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Kafka Consumer",
@@ -43,7 +57,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10239,
+      "auto_install": true
     }
   }
 }

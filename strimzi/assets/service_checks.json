@@ -1,0 +1,47 @@
+[
+  {
+    "agent_version": "7.47.0",
+    "integration": "Strimzi",
+    "check": "strimzi.cluster_operator.openmetrics.health",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "host",
+      "endpoint"
+    ],
+    "name": "Cluster Operator OpenMetrics endpoint health",
+    "description": "Returns `CRITICAL` if the Agent is unable to connect to the Cluster Operator OpenMetrics endpoint, otherwise returns `OK`."
+  },
+  {
+    "agent_version": "7.47.0",
+    "integration": "Strimzi",
+    "check": "strimzi.topic_operator.openmetrics.health",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "host",
+      "endpoint"
+    ],
+    "name": "Topic Operator OpenMetrics endpoint health",
+    "description": "Returns `CRITICAL` if the Agent is unable to connect to the Topic Operator OpenMetrics endpoint, otherwise returns `OK`."
+  },
+  {
+    "agent_version": "7.47.0",
+    "integration": "Strimzi",
+    "check": "strimzi.user_operator.openmetrics.health",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "host",
+      "endpoint"
+    ],
+    "name": "User Operator OpenMetrics endpoint health",
+    "description": "Returns `CRITICAL` if the Agent is unable to connect to the User Operator OpenMetrics endpoint, otherwise returns `OK`."
+  }
+]

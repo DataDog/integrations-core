@@ -1,30 +1,39 @@
 {
-  "name": "[Tomcat] Anomalous max processing time for host {{host.name}}",
-  "type": "query alert",
-  "query": "avg(last_4h):anomalies(avg:tomcat.max_time{*} by {host}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
-  "message": "There is an anomaly in the Tomcat max processing time on host: {{host.name}} \n\n`tomcat.max_time` indicates the maximum amount of time it takes for the server to process one request: from the time an available thread starts processing the request to the time it returns a response. Its value updates whenever the server detects a longer request processing time than the current `tomcat.max_time`.\n\nA spike in max processing time could indicate that a JSP page isn’t loading or an associated process (such as a database query) is taking too long to complete. ",
-  "tags": ["integration:tomcat"],
-  "options": {
-    "notify_audit": false,
-    "locked": false,
-    "timeout_h": 0,
-    "new_host_delay": 300,
-    "require_full_window": true,
-    "notify_no_data": false,
-    "renotify_interval": 0,
-    "escalation_message": "",
-    "no_data_timeframe": null,
-    "include_tags": true,
-    "thresholds": {
-      "critical": 1,
-      "critical_recovery": 0
+  "version": 2,
+  "created_at": "2021-03-09",
+  "last_updated_at": "2021-03-09",
+  "title": "Processing time has a spike",
+  "tags": [
+    "integration:tomcat"
+  ],
+  "description": "A Tomcat web server can take more or less time to respond to a request. This monitor tracks the average response time on different Tomcat hosts to identify instances that experience unusually long response times.",
+  "definition": {
+    "message": "There is an anomaly in the Tomcat max processing time on host: {{host.name}} \n\n`tomcat.max_time` indicates the maximum amount of time it takes for the server to process one request: from the time an available thread starts processing the request to the time it returns a response. Its value updates whenever the server detects a longer request processing time than the current `tomcat.max_time`.\n\nA spike in max processing time could indicate that a JSP page isn’t loading or an associated process (such as a database query) is taking too long to complete.",
+    "name": "[Tomcat] Anomalous max processing time for host {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": true,
+      "threshold_windows": {
+        "recovery_window": "last_15m",
+        "trigger_window": "last_15m"
+      },
+      "thresholds": {
+        "critical": 1,
+        "critical_recovery": 0
+      },
+      "timeout_h": 0
     },
-    "threshold_windows": {
-      "trigger_window": "last_15m",
-      "recovery_window": "last_15m"
-    }
-  },
-  "recommended_monitor_metadata": {
-    "description": "Notifies when Tomcat experiences an anomalous max processing time for a specific host."
+    "query": "avg(last_4h):anomalies(avg:tomcat.max_time{*} by {host}, 'agile', 2, direction='both', alert_window='last_15m', interval=60, count_default_zero='true', seasonality='daily') >= 1",
+    "tags": [
+      "integration:tomcat"
+    ],
+    "type": "query alert"
   }
 }

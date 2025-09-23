@@ -33,8 +33,8 @@ class NonDatadogPackage(CLIError):
 # Exceptions for the download module.
 
 
-class UpdatedTargetsError(ChecksDownloaderException):
-    """An exception raised when any issue with updated target arises."""
+class TargetNotFoundError(ChecksDownloaderException):
+    """An exception raised when a target is not found."""
 
 
 class IncorrectRootLayoutType(ChecksDownloaderException):

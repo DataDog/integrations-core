@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: F401
 
 import mock
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_i import IbmICheck
 from datadog_checks.ibm_i.check import SystemInfo
@@ -34,9 +34,9 @@ def test_connection_subprocess(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.load_configuration_models()
     with mock.patch('datadog_checks.ibm_i.IbmICheck._create_connection_subprocess') as m:
-        check.connection_subprocess
+        _ = check.connection_subprocess
         check._subprocess = mock.MagicMock()
-        check.connection_subprocess
+        _ = check.connection_subprocess
     m.assert_called_once()
 
 
@@ -99,9 +99,10 @@ def test_fetch_system_info(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
     check.load_configuration_models()
-    with mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[("hostname", "7", "3")]), mock.patch(
-        'datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess'
-    ) as delete_conn:
+    with (
+        mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[("hostname", "7", "3")]),
+        mock.patch('datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess') as delete_conn,
+    ):
         system_info = check.fetch_system_info()
 
     assert system_info == SystemInfo(hostname="hostname", os_version=7, os_release=3)
@@ -113,9 +114,10 @@ def test_fetch_system_info_too_many(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
     check.load_configuration_models()
-    with mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[1, 2]), mock.patch(
-        'datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess'
-    ) as delete_conn:
+    with (
+        mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[1, 2]),
+        mock.patch('datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess') as delete_conn,
+    ):
         system_info = check.fetch_system_info()
 
     assert system_info is None
@@ -127,9 +129,10 @@ def test_fetch_system_info_incorrect_schema(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
     check.load_configuration_models()
-    with mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[[]]), mock.patch(
-        'datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess'
-    ) as delete_conn:
+    with (
+        mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[[]]),
+        mock.patch('datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess') as delete_conn,
+    ):
         system_info = check.fetch_system_info()
 
     assert system_info is None
@@ -141,9 +144,10 @@ def test_fetch_system_info_incorrect_version(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
     check.load_configuration_models()
-    with mock.patch(
-        'datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[["hostname", "invalid", 3]]
-    ), mock.patch('datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess') as delete_conn:
+    with (
+        mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[["hostname", "invalid", 3]]),
+        mock.patch('datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess') as delete_conn,
+    ):
         system_info = check.fetch_system_info()
 
     assert system_info is None
@@ -155,9 +159,10 @@ def test_fetch_system_info_incorrect_release(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
     check.load_configuration_models()
-    with mock.patch(
-        'datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[["hostname", 7, "invalid"]]
-    ), mock.patch('datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess') as delete_conn:
+    with (
+        mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[["hostname", 7, "invalid"]]),
+        mock.patch('datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess') as delete_conn,
+    ):
         system_info = check.fetch_system_info()
 
     assert system_info is None
@@ -169,9 +174,10 @@ def test_failed_fetch_system_info(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.log = mock.MagicMock()
     check.load_configuration_models()
-    with mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[]), mock.patch(
-        'datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess'
-    ) as delete_conn:
+    with (
+        mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', return_value=[]),
+        mock.patch('datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess') as delete_conn,
+    ):
         system_info = check.fetch_system_info()
 
     assert system_info is None
@@ -302,9 +308,10 @@ def test_check_query_error(aggregator, instance):
     check.log = mock.MagicMock()
     check.load_configuration_models()
 
-    with mock.patch(
-        'datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 4)
-    ), mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', side_effect=Exception("boom")):
+    with (
+        mock.patch('datadog_checks.ibm_i.IbmICheck.fetch_system_info', return_value=SystemInfo("host", 7, 4)),
+        mock.patch('datadog_checks.ibm_i.IbmICheck.execute_query', side_effect=Exception("boom")),
+    ):
         assert check._query_manager is None
         check.check(instance)
         assert check._query_manager is not None

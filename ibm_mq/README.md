@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [IBM MQ][1] versions 8 to 9.0.
+This check monitors [IBM MQ][1] versions 9.1 and above.
 
 ## Setup
 
@@ -10,16 +10,15 @@ This check monitors [IBM MQ][1] versions 8 to 9.0.
 
 The IBM MQ check is included in the [Datadog Agent][2] package.
 
-To use the IBM MQ check, you need to make sure the [IBM MQ Client][3] 9.1+ is installed (unless a compatible version of IBM MQ server is installed on the Agent host). Currently, the IBM MQ check does not support connecting to an IBM MQ server on z/OS.
+To use the IBM MQ check, ensure that an [IBM MQ Client][3] version 9.1+ is installed (unless a compatible version of IBM MQ server is already installed on the Agent host). For example the [9.3 Redistributable client][17]. Currently, the IBM MQ check does not support connecting to an IBM MQ server on z/OS.
 
 #### On Linux
 
-Update your `LD_LIBRARY_PATH` and `C_INCLUDE_PATH` to include the location of the libraries. (Create these two environment variables if they don't exist yet.)
-For example, if you installed it in `/opt`:
+Update your `LD_LIBRARY_PATH` to include the location of the libraries. Create this environment variable if it doesn't exist yet.
+For example, if you installed the client under `/opt`:
 
 ```text
 export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
-export C_INCLUDE_PATH=/opt/mqm/inc:$C_INCLUDE_PATH
 ```
 
 **Note**: Agent v6+ uses `upstart`, `systemd` or `launchd` to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of:
@@ -140,6 +139,13 @@ Configure the environment variable `MQ_FILE_PATH`, to point at the data director
 
 There are many ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions and, optionally, `+chg` permissions. `+chg` permissions are required to collect metrics for [reset queue statistics][14] (`MQCMD_RESET_Q_STATS`). If you do not wish to collect these metrics you can disable `collect_reset_queue_metrics` on the configuration. Collecting reset queue statistics performance data will also reset the performance data.
 
+The example below sets the required permissions on the queue manager `QM1` for the `mqclient` group, the group the `datadog` user is using to execute commands. You can use wildcards to grant permissions to many queues at once.
+
+```shell
+setmqaut -m QM1 -n SYSTEM.ADMIN.COMMAND.QUEUE -t queue -g mqclient +dsp +inq +get +put
+setmqaut -m QM1 -n SYSTEM.MQEXPLORER.REPLY.MODEL -t queue -g mqclient +dsp +inq +get +put
+```
+
 **Note**: "Queue Monitoring" must be enabled on the MQ server and set to at least "Medium". This can be done using the MQ UI or with an `mqsc` command in the server's host:
 
 ```text
@@ -178,15 +184,15 @@ To configure this check for an Agent running on a host:
    - `port`: The port that IBM MQ has exposed
    - `convert_endianness`: You need to enable this if your MQ server is running on AIX or IBM i
 
-    If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner (`dd-agent`) is used.
+   If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner (`dd-agent`) is used.
 
-    **Note**: The check only monitors the queues you have set with the `queues` parameter
+   **Note**: The check only monitors the queues you have set with the `queues` parameter
 
-    ```yaml
-    queues:
-      - APP.QUEUE.1
-      - ADMIN.QUEUE.1
-    ```
+   ```yaml
+   queues:
+     - APP.QUEUE.1
+     - ADMIN.QUEUE.1
+   ```
 
 2. [Restart the Agent][6].
 
@@ -265,6 +271,7 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 ## Troubleshooting
 
 ### Reset queue statistics MQRC_NOT_AUTHORIZED permission warning
+
 If you are getting the following warning:
 
 ```
@@ -272,32 +279,34 @@ Warning: Error getting pcf queue reset metrics for SAMPLE.QUEUE.1: MQI Error. Co
 ```
 
 This is due to the `datadog` user not having the `+chg` permission to collect reset queue metrics. To fix this, you can either give `+chg` permissions to the `datadog` user [using `setmqaut`][15] and collect queue reset metrics, or you can disable the `collect_reset_queue_metrics`:
+
 ```yaml
-    collect_reset_queue_metrics: false
+collect_reset_queue_metrics: false
 ```
 
 ### High resource utilization
+
 The IBM MQ check performs queries on the server, sometimes these queries can be expensive and cause a degradation on the check.
 
 If you observe that the check is taking a long time to execute or that is consuming many resources on your host,
 you can potentially reduce the scope of the check by trying the following:
 
-* If you are using `auto_discover_queues`, try using `queue_patterns` or `queue_regex` instead to only discover certain queues. This is particularly relevant if your system creates dynamic queues.
-* If you are autodiscovering queues with `queue_patterns` or `queue_regex`, try tightening the pattern or regex so it matches _less_ queues.
-* Disable `auto_discover_channels` if you have too many channels.
-* Disable `collect_statistics_metrics`.
+- If you are using `auto_discover_queues`, try using `queue_patterns` or `queue_regex` instead to only discover certain queues. This is particularly relevant if your system creates dynamic queues.
+- If you are autodiscovering queues with `queue_patterns` or `queue_regex`, try tightening the pattern or regex so it matches _less_ queues.
+- Disable `auto_discover_channels` if you have too many channels.
+- Disable `collect_statistics_metrics`.
 
 ### Errors in the logs
-* `Unpack for type ((67108864,)) not implemented`: If you're seeing errors like this, and your MQ server is running on a IBM OS, enable `convert_endianness` and restart your Agent.
+
+- `Unpack for type ((67108864,)) not implemented`: If you're seeing errors like this, and your MQ server is running on a IBM OS, enable `convert_endianness` and restart your Agent.
 
 ### Warnings in the logs
-* `Error getting [...]: MQI Error. Comp: 2, Reason 2085: FAILED: MQRC_UNKNOWN_OBJECT_NAME`: If you're seeing messages like this, it is because the integration is trying to collect metrics from a queue that doesn't exist. This can be either due to misconfiguration or, if you're using `auto_discover_queues`,  the integration can discover a [dynamic queue][16] and then, when it tries to gather its metrics, the queue no longer exists. In this case you can mitigate the issue by providing a stricter `queue_patterns` or `queue_regex`, or just ignore the warning.  
 
+- `Error getting [...]: MQI Error. Comp: 2, Reason 2085: FAILED: MQRC_UNKNOWN_OBJECT_NAME`: If you're seeing messages like this, it is because the integration is trying to collect metrics from a queue that doesn't exist. This can be either due to misconfiguration or, if you're using `auto_discover_queues`, the integration can discover a [dynamic queue][16] and then, when it tries to gather its metrics, the queue no longer exists. In this case you can mitigate the issue by providing a stricter `queue_patterns` or `queue_regex`, or just ignore the warning.
 
 ### Other
 
 Need help? Contact [Datadog support][12].
-
 
 ## Further Reading
 
@@ -306,8 +315,8 @@ Additional helpful documentation, links, and articles:
 - [Monitor IBM MQ metrics and logs with Datadog][13]
 
 [1]: https://www.ibm.com/products/mq
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://www.ibm.com/support/pages/mqc9-ibm-mq-9-clients
+[2]: /account/settings/agent/latest
+[3]: https://www.ibm.com/docs/en/ibm-mq/9.3?topic=roadmap-mq-downloads#mq_downloads_admins__familyraclients__title__1
 [4]: https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html#//apple_ref/doc/uid/TP40016462-CH3-SW1
 [5]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/datadog_checks/ibm_mq/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -321,3 +330,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
 [15]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-setmqaut-grant-revoke-authority
 [16]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=queues-dynamic-model
+[17]: https://www.ibm.com/support/fixcentral/swg/selectFixes?parent=ibm~WebSphere&product=ibm/WebSphere/WebSphere+MQ&release=9.3.0.0&platform=All&function=fixid&fixids=*IBM-MQC-Redist-*

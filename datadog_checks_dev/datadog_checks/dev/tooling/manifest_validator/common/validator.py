@@ -5,14 +5,12 @@
 import abc
 import json
 import os
-from typing import Dict
+from typing import Dict  # noqa: F401
 
-import six
-
-from ...datastructures import JSONDict
-from ...git import git_show_file
-from ...utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
-from ..constants import V1, V1_STRING, V2, V2_STRING
+from datadog_checks.dev.tooling.datastructures import JSONDict
+from datadog_checks.dev.tooling.git import git_show_file
+from datadog_checks.dev.tooling.manifest_validator.constants import V1, V1_STRING, V2, V2_STRING
+from datadog_checks.dev.tooling.utils import get_metadata_file, has_logs, is_metric_in_metadata_file, read_metadata_rows
 
 
 class ValidationResult(object):
@@ -29,8 +27,7 @@ class ValidationResult(object):
         return str(self)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class BaseManifestValidator(object):
+class BaseManifestValidator(abc.ABC):
     def __init__(
         self,
         is_extras=False,
@@ -64,6 +61,7 @@ class BaseManifestValidator(object):
             return True
         return False
 
+    @abc.abstractmethod
     def validate(self, check_name, manifest, should_fix):
         # type: (str, Dict, bool) -> None
         """Validates the decoded manifest. Will perform inline changes if fix is true"""
@@ -88,7 +86,6 @@ class BaseManifestValidator(object):
 
 
 class MaintainerValidator(BaseManifestValidator):
-
     MAINTAINER_PATH = {V1: '/maintainer', V2: '/author/support_email'}
 
     def validate(self, check_name, decoded, fix):
@@ -112,7 +109,6 @@ class MaintainerValidator(BaseManifestValidator):
 
 
 class MetricsMetadataValidator(BaseManifestValidator):
-
     METADATA_PATH = {V1: "/assets/metrics_metadata", V2: "/assets/integration/metrics/metadata_path"}
 
     def validate(self, check_name, decoded, fix):
@@ -283,6 +279,7 @@ class LogsCategoryValidator(BaseManifestValidator):
         'altostra',
         'hasura_cloud',
         'sqreen',
+        'openai',  # Logs are submitted to the logs intake API
     }
 
     def validate(self, check_name, decoded, fix):

@@ -5,11 +5,13 @@ import json
 import os
 import platform
 import re
+import sys
 from fnmatch import fnmatch
 
-from ..fs import chdir, file_exists, path_join, read_file_binary, write_file_binary
-from ..structures import EnvVars
-from ..subprocess import run_command
+from datadog_checks.dev.fs import chdir, file_exists, path_join, read_file_binary, write_file_binary
+from datadog_checks.dev.structures import EnvVars
+from datadog_checks.dev.subprocess import run_command
+
 from .commands.console import abort, echo_debug, echo_info, echo_success
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
 from .dependencies import read_check_base_dependencies
@@ -65,8 +67,8 @@ def get_test_envs(
 
     checks_seen = set()
 
-    env_filter = os.environ.get("TOX_SKIP_ENV")
-    env_filter_re = re.compile(env_filter) if env_filter is not None else None
+    env_filter = os.environ.get("SKIP_ENV_NAME")
+    env_filter_re = re.compile(env_filter) if env_filter else None
 
     for check in checks:
         check, _, envs_selected = check.partition(':')
@@ -125,11 +127,11 @@ def get_available_envs(check, sort=False, e2e_only=False, e2e_tests_only=False):
 
 def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=False):
     if e2e_tests_only:
-        tox_command = 'tox --listenvs-all -v'
+        tox_command = f'"{sys.executable}" -m tox --listenvs-all -v'
     elif e2e_only:
-        tox_command = 'tox --listenvs-all'
+        tox_command = f'"{sys.executable}" -m tox --listenvs-all'
     else:
-        tox_command = 'tox --listenvs'
+        tox_command = f'"{sys.executable}" -m tox --listenvs'
 
     with chdir(path_join(get_root(), check)):
         output = run_command(tox_command, capture='out')
@@ -238,7 +240,7 @@ def select_tox_envs(
 
 def get_hatch_env_data(check):
     with chdir(path_join(get_root(), check), env_vars=EnvVars({'NO_COLOR': '1'})):
-        return json.loads(run_command(['hatch', 'env', 'show', '--json'], capture='out').stdout)
+        return json.loads(run_command([sys.executable, '-m', 'hatch', 'env', 'show', '--json'], capture='out').stdout)
 
 
 def get_available_hatch_envs(check, sort=False, e2e_only=False, e2e_tests_only=False):
@@ -267,28 +269,40 @@ def select_hatch_envs(
     latest,
     env_filter_re,
 ):
+    available_envs = get_available_hatch_envs(check, sort, e2e_tests_only=e2e_tests_only)
+
     if style or format_style:
         envs_selected[:] = ['lint']
     elif benchmark:
         envs_selected[:] = [
             env_name
-            for env_name, config in get_available_hatch_envs(check, e2e_tests_only=e2e_tests_only).items()
-            if config.get('benchmark-env', False)
+            for env_name, config in available_envs.items()
+            if env_name == 'bench' or config.get('benchmark-env', False)
         ]
     elif latest:
         envs_selected[:] = [
             env_name
-            for env_name, config in get_available_hatch_envs(check, e2e_tests_only=e2e_tests_only).items()
+            for env_name, config in available_envs.items()
             if env_name == 'latest' or config.get('latest-env', False)
         ]
     elif not envs_selected:
-        envs_selected[:] = [
-            env_name
-            for env_name, config in get_available_hatch_envs(check, e2e_tests_only=e2e_tests_only).items()
-            if config.get('test-env', False)
-        ]
+        envs_selected[:] = [env_name for env_name, config in available_envs.items() if config.get('test-env', False)]
         if not e2e_tests_only:
             envs_selected.append('lint')
+    elif every:
+        envs_selected[:] = available_envs.keys()
+    else:
+        available = set(envs_selected) & available_envs.keys()
+        selected = []
+
+        # Retain order and remove duplicates
+        for env in envs_selected:
+            # TODO: support globs or regex
+            if env in available:
+                selected.append(env)
+                available.remove(env)
+
+        envs_selected[:] = selected
 
     if env_filter_re:
         envs_selected[:] = [e for e in envs_selected if not env_filter_re.match(e)]
@@ -313,7 +327,7 @@ def display_check_envs(checks, changed_only):
     if hatch_checks:
         for check in checks:
             with chdir(path_join(get_root(), check)):
-                run_command(['hatch', 'env', 'show'])
+                run_command([sys.executable, '-m', 'hatch', 'env', 'show'])
 
 
 def prepare_test_commands(
@@ -369,6 +383,8 @@ def prepare_tox_test_commands(
     benchmark,
 ):
     command = [
+        sys.executable,
+        '-m',
         'tox',
         # so users won't get failures for our possibly strict CI requirements
         '--skip-missing-interpreters',
@@ -422,10 +438,12 @@ def prepare_hatch_test_commands(
     commands = []
     if 'lint' in env_names:
         env_names.remove('lint')
-        commands.append(['hatch', 'env', 'run', '--env', 'lint', '--', 'fmt' if format_style else 'all'])
+        commands.append(
+            [sys.executable, '-m', 'hatch', 'env', 'run', '--env', 'lint', '--', 'fmt' if format_style else 'all']
+        )
 
     if env_names:
-        command = ['hatch', '-v', 'env', 'run', '--ignore-compat']
+        command = [sys.executable, '-m', 'hatch', '-v', 'env', 'run', '--ignore-compat']
         for env_name in env_names:
             command.append('--env')
             command.append(env_name)
@@ -454,7 +472,7 @@ def prepare_hatch_test_commands(
         echo_info(f'Skipping forcing base dependency for check {check}')
 
     if force_env_rebuild:
-        commands.insert(0, ['hatch', 'env', 'prune'])
+        commands.insert(0, [sys.executable, '-m', 'hatch', 'env', 'prune'])
 
     if verbose:
         env_vars['HATCH_VERBOSE'] = str(verbose)
@@ -535,9 +553,7 @@ def construct_pytest_options(
             # junit report file must contain the env name to handle multiple envs
             # $HATCH_ENV_ACTIVE is a Hatch injected variable
             # See https://hatch.pypa.io/latest/plugins/environment/reference/#hatch.env.plugin.interface.EnvironmentInterface.get_env_vars  # noqa
-            # $TOX_ENV_NAME is a tox injected variable
-            # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
-            f' --junit-xml=.junit/test-{test_group}-$HATCH_ENV_ACTIVE$TOX_ENV_NAME.xml'
+            f' --junit-xml=junit/test-{test_group}-$HATCH_ENV_ACTIVE.xml'
             # Junit test results class prefix
             f' --junit-prefix={check}'
         )

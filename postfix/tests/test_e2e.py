@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import iteritems
 
 from .common import get_e2e_instance, get_e2e_instance_postqueue, get_queue_counts
 
@@ -11,7 +10,7 @@ from .common import get_e2e_instance, get_e2e_instance_postqueue, get_queue_coun
 def test_check_default(dd_agent_check):
     aggregator = dd_agent_check(get_e2e_instance())
 
-    for queue, count in iteritems(get_queue_counts()):
+    for queue, count in get_queue_counts().items():
         tags = ['instance:postfix_data', 'queue:{}'.format(queue)]
         aggregator.assert_metric('postfix.queue.size', value=count[0], tags=tags)
 

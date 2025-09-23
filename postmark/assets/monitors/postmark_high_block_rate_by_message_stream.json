@@ -1,0 +1,87 @@
+{
+	"version": 2,
+	"created_at": "2024-10-21",
+	"last_updated_at": "2024-10-21",
+	"title": "High block rate by message stream",
+	"description": "This monitor tracks the block rate for emails sent with specific message stream. A high block rate suggests that your emails are being flagged by recipients or email providers, indicating possible issues with deliverability or content relevance that need to be addressed.",
+	"definition": {
+		"id": 156055857,
+		"name": "High block rate by message stream",
+		"type": "log alert",
+		"query": "formula(\"(query1 / query) * 100\").last(\"1d\") > 10",
+		"message": "{{#is_warning}}  \nThe block rate for message stream  '{{log.attributes.MessageStream}}' has exceeded the threshold.  \nCurrent Block Rate: {{value}}%  \nThreshold: {{warn_threshold}}%  \n{{/is_warning}}\n\n{{#is_alert}}  \nThe block rate for message stream  '{{log.attributes.MessageStream}}' has exceeded the threshold.    \nCurrent Block Rate: {{value}}%  \nThreshold: {{threshold}}%  \n{{/is_alert}}",
+		"tags": [
+			"integration:postmark"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10,
+				"warning": 5
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"variables": [
+				{
+					"data_source": "logs",
+					"name": "query1",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "count"
+					},
+					"group_by": [
+						{
+							"facet": "@MessageStream",
+							"limit": 10,
+							"sort": {
+								"order": "desc",
+								"aggregation": "count"
+							}
+						}
+					],
+					"search": {
+						"query": "source:postmark @evt.name:Bounce @Type:Blocked"
+					},
+					"storage": "hot"
+				},
+				{
+					"data_source": "logs",
+					"name": "query",
+					"indexes": [
+						"*"
+					],
+					"compute": {
+						"aggregation": "count"
+					},
+					"group_by": [
+						{
+							"facet": "@MessageStream",
+							"limit": 10,
+							"sort": {
+								"order": "desc",
+								"aggregation": "count"
+							}
+						}
+					],
+					"search": {
+						"query": "source:postmark @evt.name:(Delivery OR Bounce)"
+					},
+					"storage": "hot"
+				}
+			],
+			"new_host_delay": 300,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": 2,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:postmark"
+	]
+}

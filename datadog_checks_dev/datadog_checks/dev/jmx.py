@@ -28,6 +28,7 @@ JVM_E2E_METRICS = [
     'jvm.non_heap_memory_max',
     'jvm.os.open_file_descriptors',
     'jvm.thread_count',
+    'jvm.unloaded_classes',
 ]
 
 JMX_E2E_METRICS = [

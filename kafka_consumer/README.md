@@ -4,11 +4,12 @@
 
 ## Overview
 
-This Agent check only collects metrics for message offsets. If you want to collect JMX metrics from the Kafka brokers or Java-based consumers/producers, see the kafka check.
+This Agent integration collects message offset metrics from your Kafka consumers. This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in Kafka (or Zookeeper for old-style consumers), and then calculates consumer lag (which is the difference between the broker offset and the consumer offset).
 
-This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in Kafka or zookeeper (for old-style consumers), and the calculated consumer lag (which is the difference between the broker offset and the consumer offset).
+**Note:** 
+- This integration ensures that consumer offsets are checked before broker offsets; in the worst case, consumer lag may be a little overstated. Checking these offsets in the reverse order can understate consumer lag to the point of having negative values, which is a dire scenario usually indicating messages are being skipped.
+- If you want to collect JMX metrics from your Kafka brokers or Java-based consumers/producers, see the [Kafka Broker integration][19].
 
-**Note:** This integration ensures that consumer offsets are checked before broker offsets because worst case is that consumer lag is a little overstated. Doing it in reverse can understate consumer lag to the point of having negative values, which is a dire scenario usually indicating messages are being skipped.
 
 ## Setup
 
@@ -19,41 +20,56 @@ The Agent's Kafka consumer check is included in the [Datadog Agent][2] package. 
 ### Configuration
 
 <!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx -->
-
-#### Host
-
-To configure this check for an Agent running on a host:
-
-##### Metric collection
-
-1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample kafka_consumer.d/conf.yaml][4] for all available configuration options.
-
-2. [Restart the Agent][5].
-
-##### Log collection
-
-This check does not collect additional logs. To collect logs from Kafka brokers, see [log collection instructions for Kafka][6].
-
-<!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery with JMX][7] guide.
+Configure this check on a container running the Kafka Consumer.
+See the [Autodiscovery Integration Templates][17] for guidance on applying the parameters below.
+In Kubernetes, if a single consumers is running on many containers, you can setup this check as a [Cluster Check][20] to avoid having multiple checks collecting the same metrics.
+
+| Parameter            | Value                                |
+| -------------------- | ------------------------------------ |
+| `<INTEGRATION_NAME>` | `kafka_consumer`                     |
+| `<INIT_CONFIG>`      | blank or `{}`                        |
+| `<INSTANCE_CONFIG>`  | `{"kafka_connect_str": "<KAFKA_CONNECT_STR>", "consumer_groups": {"<CONSUMER_NAME>": {}}}` <br/>For example, `{"kafka_connect_str": "server:9092", "consumer_groups": {"my_consumer_group": {}}}` |
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Host" xxx -->
+
+Configure this check on a host running the Kafka Consumer.
+Avoid having multiple Agents running with the same check configuration, as this puts additional pressure on your Kafka cluster.
+
+1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample kafka_consumer.d/conf.yaml][4] for all available configuration options. A minimal setup is:
+
+```
+instances:
+  - kafka_connect_str: <KAFKA_CONNECT_STR>
+    consumer_groups:
+      # Monitor all topics for consumer <CONSUMER_NAME>
+      <CONSUMER_NAME>: {}
+```
+
+2. [Restart the Agent][5].
+
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.
+1. [Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.
+2. Ensure the metric `kafka.consumer_lag` is generated for the appropriate `consumer_group`.
 
 ## Data Collected
 
 ### Metrics
 
 See [metadata.csv][9] for a list of metrics provided by this check.
+
+### Kafka messages
+
+This integration is used by [Data Streams Monitoring][18] to [retrieve messages from Kafka on demand][21].
 
 ### Events
 
@@ -115,7 +131,7 @@ sudo service datadog-agent restart
 - [Monitoring Kafka with Datadog][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
+[2]: /account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/datadog_checks/kafka_consumer/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -128,3 +144,8 @@ sudo service datadog-agent restart
 [13]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [14]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
+[17]: https://docs.datadoghq.com/containers/kubernetes/integrations/
+[18]: /data-streams
+[19]: /integrations/kafka?search=kafka
+[20]: /containers/cluster_agent/clusterchecks/
+[21]: /data_streams/messages/

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "92342b09-db9a-4542-b442-76bb9b7f716e",
   "app_id": "marklogic",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,8 +16,9 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "MarkLogic",
@@ -45,21 +46,20 @@
       },
       "process_signatures": [
         "MarkLogic"
-      ]
+      ],
+      "source_type_id": 10124,
+      "auto_install": true
     },
     "dashboards": {
       "MarkLogic - Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Marklogic low cache": "assets/recommended_monitors/marklogic_low_cache.json",
-      "Marklogic high load": "assets/recommended_monitors/marklogic_high_load.json",
-      "Marklogic long requests": "assets/recommended_monitors/marklogic_long_requests.json"
+      "Cache is not large enough": "assets/monitors/marklogic_low_cache.json",
+      "Forest processing load is high": "assets/monitors/marklogic_high_load.json",
+      "Active requests are taking too long": "assets/monitors/marklogic_long_requests.json"
     },
     "saved_views": {
       "marklogic_processes": "assets/saved_views/marklogic_processes.json"
-    },
-    "logs": {
-      "source": "marklogic"
     }
   }
 }

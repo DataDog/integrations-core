@@ -1,4 +1,4 @@
-# CiscoACI Integration
+# Cisco ACI Integration
 
 ## Overview
 
@@ -7,6 +7,7 @@ The Cisco ACI Integration lets you:
 - Track the state and health of your network
 - Track the capacity of your ACI
 - Monitor the switches and controllers themselves
+- The ability to monitor devices via [Network Devices Monitoring][11]
 
 ## Setup
 
@@ -52,6 +53,22 @@ To configure this check for an Agent running on a host:
         # tenant:
         #   - <TENANT_1>
         #   - <TENANT_2>
+
+        ## @param send_ndm_metadata - boolean - optional - default: false
+        ## Set to `true` to enable Network Device Monitoring metadata (for devices, interfaces, topology) to be sent
+        ## and to allow Cisco ACI fault collection to be enabled.
+        #
+        # send_ndm_metadata: false
+
+        ## @param send_faultinst_faults - boolean - optional - default: false
+        ## Set to `true` to enable collection of Cisco ACI faultInst faults as logs.
+        #
+        # send_faultinst_faults: false
+
+        ## @param send_faultdelegate_faults - boolean - optional - default: false
+        ## Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
+        #
+        # send_faultdelegate_faults: false
    ```
    
    *NOTE*: Be sure to specify any tenants for the integration to collect metrics on applications, EPG, etc.
@@ -78,6 +95,10 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 [Run the Agent's `status` subcommand][6] and look for `cisco_aci` under the Checks section.
 
+## Vendor profiles
+
+Specific supported vendor profiles for this integration can be found on the [network vendors][10] page.
+
 ## Data Collected
 
 ### Metrics
@@ -101,10 +122,27 @@ Modify the `apic_url`, `apic_username`, and `apic_password` to your configuratio
 
 Verify that the output you get from cURLing the endpoint matches any of the metrics collected in `datadog_checks/cisco_aci/aci_metrics.py`. If none of the statistics match, this means that the endpoint is not emitting any statistics that the integration can collect.
 
+### Long execution times
+
+Because this check queries all the tenants, apps, and endpoints listed before returning metrics, there may be high execution times coming from this integration.
+
+  ```yaml
+    cisco_aci (2.2.0)
+  -----------------
+    Instance ID: cisco_aci:d3a2958f66f46212 [OK]
+    Configuration Source: file:/etc/datadog-agent/conf.d/cisco_aci.d/conf.yaml
+    Total Runs: 1
+    Metric Samples: Last Run: 678, Total: 678
+    Events: Last Run: 0, Total: 0
+    Service Checks: Last Run: 1, Total: 1
+    Average Execution Time : 28m20.95s
+    Last Execution Date : 2023-01-04 15:58:04 CST / 2023-01-04 21:58:04 UTC (1672869484000)
+    Last Successful Execution Date : 2023-01-04 15:58:04 CST / 2023-01-04 21:58:04 UTC (1672869484000)
+  ```
 
 Need help? Contact [Datadog support][9].
 
-[1]: https://app.datadoghq.com/account/settings#agent
+[1]: /account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/datadog_checks/cisco_aci/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -113,3 +151,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
+[11]: https://www.datadoghq.com/product/network-monitoring/network-device-monitoring/

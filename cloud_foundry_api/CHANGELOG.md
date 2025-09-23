@@ -1,64 +1,186 @@
 # CHANGELOG - Cloud Foundry API
 
-## 2.2.1 / 2022-10-28
+<!-- towncrier release notes start -->
 
-* [Fixed] Fix deprecation warnings with `semver`. See [#12967](https://github.com/DataDog/integrations-core/pull/12967).
+## 5.2.0 / 2025-02-20 / Agent 7.64.0
 
-## 2.2.0 / 2022-09-16
+***Added***:
 
-* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+* Update dependencies ([#19576](https://github.com/DataDog/integrations-core/pull/19576))
+
+## 5.1.0 / 2025-01-16 / Agent 7.63.0
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 5.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 4.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+
+## 3.3.1 / 2024-05-31 / Agent 7.55.0
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 3.3.0 / 2024-02-16 / Agent 7.52.0
+
+***Added***:
+
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 3.2.0 / 2024-01-05 / Agent 7.51.0
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
+## 3.1.0 / 2023-11-10 / Agent 7.50.0
+
+***Added***:
+
+* Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
+
+## 3.0.0 / 2023-08-10 / Agent 7.48.0
+
+***Changed***:
+
+* Bump the minimum base check version ([#15427](https://github.com/DataDog/integrations-core/pull/15427))
+
+***Added***:
+
+* Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
+
+***Fixed***:
+
+* Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
+
+## 2.3.0 / 2023-07-10 / Agent 7.47.0
+
+***Added***:
+
+* Bump dependencies for Agent 7.47 ([#15145](https://github.com/DataDog/integrations-core/pull/15145))
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9 ([#14701](https://github.com/DataDog/integrations-core/pull/14701))
+
+## 2.2.1 / 2022-10-28 / Agent 7.41.0
+
+***Fixed***:
+
+* Fix deprecation warnings with `semver` ([#12967](https://github.com/DataDog/integrations-core/pull/12967))
+
+## 2.2.0 / 2022-09-16 / Agent 7.40.0
+
+***Added***:
+
+* Update HTTP config spec templates ([#12890](https://github.com/DataDog/integrations-core/pull/12890))
 
 ## 2.1.1 / 2022-05-15 / Agent 7.37.0
 
-* [Fixed] Fix enumerated integer validation. See [#11964](https://github.com/DataDog/integrations-core/pull/11964).
+***Fixed***:
+
+* Fix enumerated integer validation ([#11964](https://github.com/DataDog/integrations-core/pull/11964))
 
 ## 2.1.0 / 2022-04-05 / Agent 7.36.0
 
-* [Added] Upgrade dependencies. See [#11726](https://github.com/DataDog/integrations-core/pull/11726).
-* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
-* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+***Added***:
+
+* Upgrade dependencies ([#11726](https://github.com/DataDog/integrations-core/pull/11726))
+* Add metric_patterns options to filter all metric submission by a list of regexes ([#11695](https://github.com/DataDog/integrations-core/pull/11695))
+
+***Fixed***:
+
+* Remove outdated warning in the description for the `tls_ignore_warning` option ([#11591](https://github.com/DataDog/integrations-core/pull/11591))
 
 ## 2.0.0 / 2022-02-19 / Agent 7.35.0
 
-* [Added] Add `pyproject.toml` file. See [#11328](https://github.com/DataDog/integrations-core/pull/11328).
-* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
-* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+***Changed***:
+
+* Add tls_protocols_allowed option documentation ([#11251](https://github.com/DataDog/integrations-core/pull/11251))
+
+***Added***:
+
+* Add `pyproject.toml` file ([#11328](https://github.com/DataDog/integrations-core/pull/11328))
+
+***Fixed***:
+
+* Fix namespace packaging on Python 2 ([#11532](https://github.com/DataDog/integrations-core/pull/11532))
 
 ## 1.3.1 / 2022-01-08 / Agent 7.34.0
 
-* [Fixed] Add comment to autogenerated model files. See [#10945](https://github.com/DataDog/integrations-core/pull/10945).
+***Fixed***:
+
+* Add comment to autogenerated model files ([#10945](https://github.com/DataDog/integrations-core/pull/10945))
 
 ## 1.3.0 / 2021-11-13 / Agent 7.33.0
 
-* [Added] Add runtime configuration validation. See [#8896](https://github.com/DataDog/integrations-core/pull/8896).
+***Added***:
+
+* Add runtime configuration validation ([#8896](https://github.com/DataDog/integrations-core/pull/8896))
 
 ## 1.2.0 / 2021-10-04 / Agent 7.32.0
 
-* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
-* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
-* [Added] Echo warning for unnecessary params used. See [#10053](https://github.com/DataDog/integrations-core/pull/10053).
-* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+***Added***:
+
+* Add HTTP option to control the size of streaming responses ([#10183](https://github.com/DataDog/integrations-core/pull/10183))
+* Add allow_redirect option ([#10160](https://github.com/DataDog/integrations-core/pull/10160))
+* Echo warning for unnecessary params used ([#10053](https://github.com/DataDog/integrations-core/pull/10053))
+
+***Fixed***:
+
+* Fix the description of the `allow_redirects` HTTP option ([#10195](https://github.com/DataDog/integrations-core/pull/10195))
 
 ## 1.1.1 / 2021-03-07 / Agent 7.27.0
 
-* [Fixed] Rename config spec example consumer option `default` to `display_default`. See [#8593](https://github.com/DataDog/integrations-core/pull/8593).
-* [Fixed] Bump minimum base package version. See [#8443](https://github.com/DataDog/integrations-core/pull/8443).
+***Fixed***:
+
+* Rename config spec example consumer option `default` to `display_default` ([#8593](https://github.com/DataDog/integrations-core/pull/8593))
+* Bump minimum base package version ([#8443](https://github.com/DataDog/integrations-core/pull/8443))
 
 ## 1.1.0 / 2020-10-31 / Agent 7.24.0
 
-* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
+***Added***:
+
+* Add ability to dynamically get authentication information ([#7660](https://github.com/DataDog/integrations-core/pull/7660))
 
 ## 1.0.0 / 2020-09-21 / Agent 7.23.0
 
-* [Added] Add integration for Cloud Foundry API. See [#6832](https://github.com/DataDog/integrations-core/pull/6832).
+***Added***:
+
+* Add integration for Cloud Foundry API ([#6832](https://github.com/DataDog/integrations-core/pull/6832))
 
 ## 0.2.0 / 2020-08-10 / Agent 7.22.0
 
-* [Added] Add space and org names as tags to events. See [#7297](https://github.com/DataDog/integrations-core/pull/7297).
-* [Fixed] Stop sending events multiple times. See [#7293](https://github.com/DataDog/integrations-core/pull/7293).
-* [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
+***Added***:
+
+* Add space and org names as tags to events ([#7297](https://github.com/DataDog/integrations-core/pull/7297))
+
+***Fixed***:
+
+* Stop sending events multiple times ([#7293](https://github.com/DataDog/integrations-core/pull/7293))
+* DOCS-838 Template wording ([#7038](https://github.com/DataDog/integrations-core/pull/7038))
 
 ## 0.1.0 / 2020-06-29 / Agent 7.21.0
 
-* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+***Added***:
 
+* Add note about warning concurrency ([#6967](https://github.com/DataDog/integrations-core/pull/6967))

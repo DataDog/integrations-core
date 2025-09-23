@@ -6,7 +6,7 @@ from requests import HTTPError
 from datadog_checks.base import AgentCheck
 
 from .api import HarborAPI
-from .common import HEALTHY, VERSION_1_5, VERSION_1_8
+from .common import HEALTHY
 
 CAN_CONNECT = 'harbor.can_connect'
 REGISTRY_STATUS = 'harbor.registry.status'
@@ -16,33 +16,11 @@ STATUS = 'harbor.status'
 class HarborCheck(AgentCheck):
     def _check_health(self, api, base_tags):
         """Submits service checks for Harbor individual components."""
-        if api.harbor_version >= VERSION_1_8:
-            health = api.health()
-            for el in health['components']:
-                component_status = AgentCheck.OK if el['status'] == HEALTHY else AgentCheck.CRITICAL
-                tags = base_tags + ['component:{}'.format(el['name'])]
-                self.service_check(STATUS, component_status, tags=tags)
-        elif api.harbor_version >= VERSION_1_5:
-            ping = api.ping()
-            overall_status = AgentCheck.OK if ping == 'Pong' else AgentCheck.CRITICAL
-            self.service_check(STATUS, overall_status, tags=base_tags)
-            if api.with_chartrepo:
-                try:
-                    chartrepo_health = api.chartrepo_health()[HEALTHY]
-                except HTTPError as e:
-                    if e.response.status_code in (401, 403):
-                        self.log.info(
-                            "Provided user in harbor integration config is not an admin user. Ignoring chartrepo health"
-                        )
-                        self.log.debug(e, exc_info=True)
-                        return
-                    raise e
-                chartrepo_status = AgentCheck.OK if chartrepo_health else AgentCheck.CRITICAL
-                tags = base_tags + ['component:chartmuseum']
-                self.service_check(STATUS, chartrepo_status, tags=tags)
-        else:
-            # Before version 1.5, there is no support for a health check.
-            self.service_check(STATUS, AgentCheck.UNKNOWN, tags=base_tags)
+        health = api.health()
+        for el in health['components']:
+            component_status = AgentCheck.OK if el['status'] == HEALTHY else AgentCheck.CRITICAL
+            tags = base_tags + ['component:{}'.format(el['name'])]
+            self.service_check(STATUS, component_status, tags=tags)
 
     def _check_registries_health(self, api, base_tags):
         """A registry here is an external docker registry (DockerHub, ECR, another Harbor...) that this current
@@ -121,7 +99,7 @@ class HarborCheck(AgentCheck):
             self._submit_read_only_status(api, tags)
         except Exception:
             self.log.exception("An error occurred when collecting Harbor metrics")
-            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)
+            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL, tags)
             raise
         else:
-            self.service_check(CAN_CONNECT, AgentCheck.OK)
+            self.service_check(CAN_CONNECT, AgentCheck.OK, tags)

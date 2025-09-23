@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: F401
+from urllib.parse import urljoin
 
 from dateutil import parser, tz
-from six.moves.urllib_parse import urljoin
 
 
 def get_next_url(payload, version):

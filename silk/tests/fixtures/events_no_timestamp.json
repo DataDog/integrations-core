@@ -1,1 +1,11 @@
-[{"event_id": 11, "id": 2, "labels": "EVENT, ACTION", "level": "INFO", "message": "test_event1", "name": "EVENT_LOGGING_STARTED", "user": "Internal"}]
+[
+    {
+        "event_id": 11,
+        "id": 2,
+        "labels": "EVENT, ACTION",
+        "level": "INFO",
+        "message": "test_event1",
+        "name": "EVENT_LOGGING_STARTED",
+        "user": "Internal"
+    }
+]

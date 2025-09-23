@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2020-12-07",
+  "last_updated_at": "2021-02-03",
+  "title": "Sonarqube has vulnerabilities",
+  "tags": [
+    "integration:sonarqube"
+  ],
+  "description": "SonarQube identifies code \"vulnerabilities\" indicating potential security and quality issues. The goal is to address these issues promptly to improve software quality and security. The monitor tracks the presence of security vulnerabilities.",
+  "definition": {
+    "message": "At least one vulnerability has been detected.",
+    "name": "[SonarQube] Vulnerabilities",
+    "options": {
+      "escalation_message": "Resolve potential vulnerabilities.",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": true,
+      "notify_no_data": false,
+      "renotify_interval": 360,
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 0
+      },
+      "timeout_h": 0
+    },
+    "priority": 2,
+    "query": "max(last_5m):avg:sonarqube.security.vulnerabilities{*} > 0",
+    "tags": [
+      "integration:sonarqube"
+    ],
+    "type": "query alert"
+  }
+}

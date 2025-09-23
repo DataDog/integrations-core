@@ -9,9 +9,10 @@
         "check": "solr.can_connect",
         "statuses": [
             "ok",
-            "critical"
+            "critical",
+            "warning"
         ],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SolR instance. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SolR instance, `WARNING` if no metrics are collected, and `OK` otherwise."
     }
 ]

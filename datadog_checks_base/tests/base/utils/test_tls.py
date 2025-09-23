@@ -6,9 +6,10 @@ import ssl
 from ssl import SSLContext
 
 import pytest
-from mock import MagicMock, patch
+from mock import MagicMock, patch  # noqa: F401
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http import get_tls_config_from_options
 from datadog_checks.base.utils.tls import TlsContextWrapper
 from datadog_checks.dev import TempDir
 
@@ -298,6 +299,107 @@ class TestTLSContext:
         with patch('ssl.SSLContext'), patch('os.path.expanduser') as mock_expand:
             check.get_tls_context()
             mock_expand.assert_called_with('~/foo')
+
+    @pytest.mark.parametrize(
+        'instance,expected_ciphers',
+        [
+            pytest.param(
+                {'tls_verify': False},
+                'ALL',
+                id="Construct ciphers with no config",
+            ),
+            pytest.param(
+                {'tls_ciphers': ['TLS_RSA_WITH_SEED_CBC_SHA', 'TLS_SM4_GCM_SM3']},
+                'TLS_RSA_WITH_SEED_CBC_SHA:TLS_SM4_GCM_SM3',
+                id='Construct ciphers with specific ciphers',
+            ),
+            pytest.param(
+                {'tls_ciphers': ['ALL']},
+                'ALL',
+                id="Construct Ciphers with 'ALL' ciphers",
+            ),
+        ],
+    )
+    def test_cipher_construction(self, instance, expected_ciphers):
+        with patch.object(ssl.SSLContext, 'set_ciphers') as mock_set_ciphers:
+            check = AgentCheck('test', {}, [instance])
+            check.get_tls_context()
+            mock_set_ciphers.assert_called_once_with(expected_ciphers)
+
+    @pytest.mark.parametrize(
+        'instance,expected_ciphers',
+        [
+            pytest.param(
+                {'tls_verify': False},
+                'ALL',
+                id="No Ciphers, default to 'ALL'",
+            ),
+            pytest.param(
+                {'tls_ciphers': ['PSK-CAMELLIA128-SHA256', 'DHE-PSK-CAMELLIA128-SHA256']},
+                'PSK-CAMELLIA128-SHA256:DHE-PSK-CAMELLIA128-SHA256',
+                id='Add specific ciphers only',
+            ),
+            pytest.param(
+                {'tls_ciphers': ['ALL']},
+                'ALL',
+                id="'ALL' manually",
+            ),
+        ],
+    )
+    def test_ciphers(self, instance, expected_ciphers):
+        check = AgentCheck('test', {}, [instance])
+        context = check.get_tls_context()
+
+        expected_context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
+        expected_context.set_ciphers(expected_ciphers)
+
+        actual_ciphers = sorted(cipher['name'] for cipher in context.get_ciphers())
+        expected_ciphers_list = sorted(cipher['name'] for cipher in expected_context.get_ciphers())
+
+        assert actual_ciphers == expected_ciphers_list
+
+    @pytest.mark.parametrize(
+        'options, expected_config',
+        [
+            pytest.param(
+                {'verify': False, 'cert': 'foo'},
+                {'tls_verify': False, 'tls_cert': 'foo'},
+                id='verify false and cert',
+            ),
+            pytest.param(
+                {'verify': True, 'cert': 'foo'},
+                {'tls_verify': True, 'tls_cert': 'foo'},
+                id='verify true and cert',
+            ),
+            pytest.param(
+                {'verify': 'bar', 'cert': 'foo'},
+                {'tls_verify': True, 'tls_cert': 'foo', 'tls_ca_cert': 'bar'},
+                id='verify string and cert',
+            ),
+            pytest.param(
+                {'verify': 'bar', 'cert': ('foo', 'key')},
+                {'tls_verify': True, 'tls_cert': 'foo', 'tls_ca_cert': 'bar', 'tls_private_key': 'key'},
+                id='verify string and cert with key',
+            ),
+            pytest.param(
+                {'cert': 'foo'},
+                {'tls_cert': 'foo'},
+                id='only cert',
+            ),
+            pytest.param(
+                {'verify': 'foo'},
+                {'tls_verify': True, 'tls_ca_cert': 'foo'},
+                id='only verify',
+            ),
+            pytest.param(
+                {},
+                {},
+                id='empty',
+            ),
+        ],
+    )
+    def test_tls_config_from_options(self, options, expected_config):
+        assert get_tls_config_from_options(options) == expected_config
 
 
 class TestTLSContextOverrides:

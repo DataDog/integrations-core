@@ -104,16 +104,16 @@ def test_get_hosts(init_config, instance):
     assert hosts[1]['metrics'] is not None
 
 
-def test_get_host_metrics(instance, aggregator):
+def test_get_host_metrics(instance, aggregator, datadog_agent):
     ambari = AmbariCheck('Ambari', {}, [instance])
     ambari._get_hosts_info = MagicMock(return_value=responses.HOSTS_INFO)
-    ambari.set_external_tags = MagicMock()
     cluster_tag = ['ambari_cluster:cluster1']
 
     ambari.get_host_metrics(['cluster1'])
-    ambari.set_external_tags.assert_called_with(
-        [('my_host_1', {'ambari': cluster_tag}), ('my_host_2', {'ambari': cluster_tag})]
-    )
+
+    datadog_agent.assert_external_tags("my_host_1", {'ambari': cluster_tag})
+    datadog_agent.assert_external_tags("my_host_2", {'ambari': cluster_tag})
+    datadog_agent.assert_external_tags_count(2)
 
     metrics = [
         ('boottime', 1555934503.0),

@@ -62,8 +62,9 @@ files:
       - name: collection_type
         description: |
           Should be either 'realtime' or 'historical'
-          Use 'realtime' to collect metrics about Hosts and VMs.
-          Use 'historical' to collect metrics about Datastores, Datacenters and Clusters.
+          Use 'realtime' to collect metrics that are about the past hour. Realtime metrics are about Hosts and VMs.
+          Use 'historical' to collect metrics that are about longer time frames such as a day, week, or month.
+          Historical metrics are about VMs, Datastores, Datacenters and Clusters.
           If you want both, we suggest creating an additional instance connecting to the same vCenter
           in this configuration file, but you can also set this field to 'both'. This is not recommended
           as the collection of historical metrics will negatively impact the collection of your realtime metrics.
@@ -100,6 +101,12 @@ files:
         value:
           type: boolean
           example: true
+      - name: ssl_cafile
+        description: |
+          Set to the absolute file path of CA certificates in PEM format
+        value:
+          type: string
+          example: "<FILE_PATH>"
       - name: ssl_capath
         description: |
           Set to the absolute file path of a directory containing CA certificates
@@ -139,8 +146,9 @@ files:
                if VMware tools are installed)
           Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
                   resources do not have realtime metrics
-          Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do not have
+          Note2: 'host' filters are ignored when collecting historical metrics as this resource does not have
                   historical metrics
+          Note3: If no filters are set for a resource type, all resources of that resource type are collected.
 
         value:
           example:
@@ -194,12 +202,12 @@ files:
           for the list of collected metrics (do not prefix them with `vsphere`)
           Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
                   resources do not have realtime metrics. They will work only with "collection_type: historical".
-          Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no
+          Note2: 'host' filters are ignored when collecting historical metrics as this resource does not
                   have historical metrics. They will work only with "collection_type: realtime".
         value:
           example:
             vm:
-              - <VM_REGEX>                 # Only possible with "collection_type: realtime"
+              - <VM_REGEX>
             host:
               - <HOST_REGEX>               # Only possible with "collection_type: realtime"
             datastore:
@@ -238,12 +246,12 @@ files:
           See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
           for the list of collected metrics (do not prefix them with `vsphere`)
           Note1: 'datastore' and 'cluster' are possible only with "collection_type: historical"
-          Note2: 'vm' and 'host' are possible only with "collection_type: realtime"
+          Note2: 'host' are possible only with "collection_type: realtime"
           /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
         value:
           example:
             vm:
-              - <VM_REGEX>                 # Only possible with "collection_type: realtime"
+              - <VM_REGEX>
             host:
               - <HOST_REGEX>               # Only possible with "collection_type: realtime"
             datastore:
@@ -268,6 +276,65 @@ files:
               type: array
               items:
                 type: string
+      - name: event_resource_filters
+        description: |
+          For events that can be filtered by resources, specify which resources to collect these events for.
+
+          The events that can be filtered by resource are as follows: AlarmAcknowledgedEvent,
+          AlarmActionTriggeredEvent, AlarmClearedEvent, AlarmCreatedEvent, AlarmEmailCompletedEvent,
+          AlarmEmailFailedEvent, AlarmReconfiguredEvent, AlarmRemovedEvent, AlarmScriptCompleteEvent,
+          AlarmScriptFailedEvent, AlarmSnmpCompletedEvent, AlarmSnmpFailedEvent, AlarmStatusChangedEvent,
+          CustomFieldValueChangedEvent, GeneralUserEvent, PermissionEvent, ScheduledTaskEvent
+
+          Available resource types are vm, host, datastore, datacenter, and cluster.
+
+          By default, the integration will only collect these events for VMs and Hosts.
+        value:
+          example:
+            - 'vm'
+            - 'host'
+            - 'datastore'
+            - 'datacenter'
+            - 'cluster'
+            - 'storage_pod'
+            - 'vstorage_object_manager'
+          type: array
+          display_default: ['vm', 'host']
+          items:
+            type: string
+      - name: include_events
+        description: |
+          The events that should be collected by the vSphere integration.
+
+          The "event" specifies the event type you want to include, and optionally, the "excluded_messages" is
+          a list of messages of that event type you do not want to collect. For example, if the key
+          is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
+          then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
+          and 'Green to Gray' will be included.
+          
+          Events can only be collected if their event type ID is in the 'vim.event' class:
+          https://vdc-repo.vmware.com/vmwb-repository/dcr-public/d1902b0e-d479-46bf-8ac9-cee0e31e8ec0/
+          07ce8dbd-db48-4261-9b8f-c6d3ad8ba472/vim.event.Event.html
+
+          The default events reported are listed here:
+          https://github.com/DataDog/integrations-core/tree/master/vsphere#events
+
+        value:
+          example:
+            - event: <EVENT_NAME_TO_INCLUDE>
+              excluded_messages:
+                - <EVENT_MESSAGE_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_1>
+                - <EVENT_MESSAGE_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_2>
+          type: array
+          items:
+            type: object
+            properties:
+              - name: event
+                type: string
+                name: excluded_messages
+                type: array
+                items:
+                  type: string
       - name: collect_tags
         description: |
           If true, the vSphere Tags will be collected.
@@ -310,6 +377,27 @@ files:
         value:
           type: boolean
           example: false
+      - name: collect_property_metrics
+        description: |
+          If true, the vSphere integration will collect additional metrics about the resource types
+          you have configured to monitor. These are configuration properties such as disk information
+          in a VM and DRS config status in clusters.
+
+          Note: These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
+          Warning: Depending on the size of the vSphere environment, property metric collection can be slow,
+          very CPU intensive and put pressure on the vCenter Server.
+        value:
+          type: boolean
+          example: false
+      - name: collect_vsan_data
+        description: |
+          If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
+          Ensure that you have the vSAN Performance Service enabled:
+          https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vsan-monitoring.doc/
+          GUID-02F67DC3-3D5A-48A4-A445-D2BD6AF2862C.html
+        value:
+          type: boolean
+          example: false
       - name: attributes_prefix
         description: |
           Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
@@ -338,6 +426,15 @@ files:
         value:
           type: boolean
           example: false
+      - name: vm_hostname_suffix_tag
+        description: |
+          If specified, the integration will submit hostnames as <VM_NAME-SUFFIX> where suffix is the
+          value of the given tag key
+
+          If a VM does not have a matching tag with the key, the integration will leave out the suffix
+        value:
+          type: string
+          example: <TAG_KEY>
       - name: threads_count
         description: |
           This integration is using threads internally when making queries against the vCenter API.
@@ -423,6 +520,16 @@ files:
         value:
           type: boolean
           example: true
+      - name: hostname_transform
+        description: |
+          Should be either 'upper' or 'lower' or 'default'
+          If 'upper', the check will convert the vSphere hostname to uppercase.
+          If 'lower', the check will convert the vSphere hostname to lowercase.
+          If 'default', the check will not transform the vSphere hostname (the default option).
+          Use this if you install the agent in VMs so that the hosts are not duplicated in the web application UI.
+        value:
+          type: string
+          example: default
       - name: rest_api_options
         description: |
           REST API options

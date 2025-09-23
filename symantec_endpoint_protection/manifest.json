@@ -1,0 +1,94 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "e334ac09-0038-408b-8666-cba88c3217e6",
+  "app_id": "symantec-endpoint-protection",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Symantec Endpoint Protection Logs.",
+    "title": "Symantec Endpoint Protection",
+    "media": [
+      {
+        "caption": "Symantec Endpoint Protection - Overview",
+        "image_url": "images/symantec_endpoint_protection_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Symantec Endpoint Protection - Scan",
+        "image_url": "images/symantec_endpoint_protection_scan.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Symantec Endpoint Protection - Risk",
+        "image_url": "images/symantec_endpoint_protection_risk.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Symantec Endpoint Protection - Application Control",
+        "image_url": "images/symantec_endpoint_protection_application_control.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Symantec Endpoint Protection - Security",
+        "image_url": "images/symantec_endpoint_protection_security.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Symantec Endpoint Protection - System",
+        "image_url": "images/symantec_endpoint_protection_system.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Symantec Endpoint Protection - Traffic",
+        "image_url": "images/symantec_endpoint_protection_traffic.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 26728495,
+      "source_type_name": "Symantec Endpoint Protection",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Symantec Endpoint Protection - Overview": "assets/dashboards/symantec_endpoint_protection_overview.json",
+      "Symantec Endpoint Protection - Scan": "assets/dashboards/symantec_endpoint_protection_scan.json",
+      "Symantec Endpoint Protection - Risk": "assets/dashboards/symantec_endpoint_protection_risk.json",
+      "Symantec Endpoint Protection - Application Control": "assets/dashboards/symantec_endpoint_protection_application_control.json",
+      "Symantec Endpoint Protection - Security": "assets/dashboards/symantec_endpoint_protection_security.json",
+      "Symantec Endpoint Protection - System": "assets/dashboards/symantec_endpoint_protection_system.json",
+      "Symantec Endpoint Protection - Traffic": "assets/dashboards/symantec_endpoint_protection_traffic.json"
+    },
+    "logs":{
+      "source": "symantec-endpoint-protection"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

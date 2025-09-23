@@ -1,91 +1,234 @@
 # CHANGELOG - Scylla
 
-## 2.3.0 / 2022-09-16
+<!-- towncrier release notes start -->
 
-* [Added] Update HTTP config spec templates. See [#12890](https://github.com/DataDog/integrations-core/pull/12890).
+## 5.0.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 5.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
+## 4.1.0 / 2025-01-16 / Agent 7.63.0
+
+***Added***:
+
+* Add `tls_ciphers` param to integration ([#19334](https://github.com/DataDog/integrations-core/pull/19334))
+
+## 4.0.0 / 2024-10-04 / Agent 7.59.0
+
+***Removed***:
+
+* Remove support for Python 2. ([#18580](https://github.com/DataDog/integrations-core/pull/18580))
+
+***Fixed***:
+
+* Bump the version of datadog-checks-base to 37.0.0 ([#18617](https://github.com/DataDog/integrations-core/pull/18617))
+
+## 3.0.0 / 2024-10-01 / Agent 7.58.0
+
+***Changed***:
+
+* Bump minimum version of base check ([#18733](https://github.com/DataDog/integrations-core/pull/18733))
+
+***Added***:
+
+* Bump the python version from 3.11 to 3.12 ([#18212](https://github.com/DataDog/integrations-core/pull/18212))
+
+## 2.7.2 / 2024-07-05 / Agent 7.55.0
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+## 2.7.1 / 2024-05-31
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 2.7.0 / 2024-02-16 / Agent 7.52.0
+
+***Added***:
+
+* Add OMv2 support to Scylla integration ([#16497](https://github.com/DataDog/integrations-core/pull/16497))
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 2.6.0 / 2024-01-05 / Agent 7.51.0
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
+## 2.5.0 / 2023-08-18 / Agent 7.48.0
+
+***Added***:
+
+* Add new ScyllaDB metrics ([#15592](https://github.com/DataDog/integrations-core/pull/15592))
+
+***Fixed***:
+
+* Update datadog-checks-base dependency version to 32.6.0 ([#15604](https://github.com/DataDog/integrations-core/pull/15604))
+* Add config for new metrics groups ([#15614](https://github.com/DataDog/integrations-core/pull/15614))
+
+## 2.4.0 / 2023-08-10
+
+***Added***:
+
+* Update generated config models ([#15212](https://github.com/DataDog/integrations-core/pull/15212))
+
+***Fixed***:
+
+* Fix types for generated config models ([#15334](https://github.com/DataDog/integrations-core/pull/15334))
+
+## 2.3.1 / 2023-07-10 / Agent 7.47.0
+
+***Fixed***:
+
+* Bump Python version from py3.8 to py3.9 ([#14701](https://github.com/DataDog/integrations-core/pull/14701))
+
+## 2.3.0 / 2022-09-16 / Agent 7.40.0
+
+***Added***:
+
+* Update HTTP config spec templates ([#12890](https://github.com/DataDog/integrations-core/pull/12890))
 
 ## 2.2.0 / 2022-05-15 / Agent 7.37.0
 
-* [Added] Support dynamic bearer tokens (Bound Service Account Token Volume). See [#11915](https://github.com/DataDog/integrations-core/pull/11915).
+***Added***:
+
+* Support dynamic bearer tokens (Bound Service Account Token Volume) ([#11915](https://github.com/DataDog/integrations-core/pull/11915))
 
 ## 2.1.0 / 2022-04-05 / Agent 7.36.0
 
-* [Added] Add metric_patterns options to filter all metric submission by a list of regexes. See [#11695](https://github.com/DataDog/integrations-core/pull/11695).
-* [Fixed] Remove outdated warning in the description for the `tls_ignore_warning` option. See [#11591](https://github.com/DataDog/integrations-core/pull/11591).
+***Added***:
+
+* Add metric_patterns options to filter all metric submission by a list of regexes ([#11695](https://github.com/DataDog/integrations-core/pull/11695))
+
+***Fixed***:
+
+* Remove outdated warning in the description for the `tls_ignore_warning` option ([#11591](https://github.com/DataDog/integrations-core/pull/11591))
 
 ## 2.0.0 / 2022-02-19 / Agent 7.35.0
 
-* [Added] Add `pyproject.toml` file. See [#11429](https://github.com/DataDog/integrations-core/pull/11429).
-* [Fixed] Fix namespace packaging on Python 2. See [#11532](https://github.com/DataDog/integrations-core/pull/11532).
-* [Changed] Add tls_protocols_allowed option documentation. See [#11251](https://github.com/DataDog/integrations-core/pull/11251).
+***Changed***:
+
+* Add tls_protocols_allowed option documentation ([#11251](https://github.com/DataDog/integrations-core/pull/11251))
+
+***Added***:
+
+* Add `pyproject.toml` file ([#11429](https://github.com/DataDog/integrations-core/pull/11429))
+
+***Fixed***:
+
+* Fix namespace packaging on Python 2 ([#11532](https://github.com/DataDog/integrations-core/pull/11532))
 
 ## 1.6.3 / 2022-01-21 / Agent 7.34.0
 
-* [Fixed] Fix license header dates in autogenerated files. See [#11187](https://github.com/DataDog/integrations-core/pull/11187).
+***Fixed***:
+
+* Fix license header dates in autogenerated files ([#11187](https://github.com/DataDog/integrations-core/pull/11187))
 
 ## 1.6.2 / 2022-01-18
 
-* [Fixed] Fix the type of `bearer_token_auth`. See [#11144](https://github.com/DataDog/integrations-core/pull/11144).
+***Fixed***:
+
+* Fix the type of `bearer_token_auth` ([#11144](https://github.com/DataDog/integrations-core/pull/11144))
 
 ## 1.6.1 / 2022-01-08
 
-* [Fixed] Add comment to autogenerated model files. See [#10945](https://github.com/DataDog/integrations-core/pull/10945).
+***Fixed***:
+
+* Add comment to autogenerated model files ([#10945](https://github.com/DataDog/integrations-core/pull/10945))
 
 ## 1.6.0 / 2021-11-13 / Agent 7.33.0
 
-* [Added] Document new include_labels option. See [#10617](https://github.com/DataDog/integrations-core/pull/10617).
-* [Added] Document new use_process_start_time option. See [#10601](https://github.com/DataDog/integrations-core/pull/10601).
+***Added***:
+
+* Document new include_labels option ([#10617](https://github.com/DataDog/integrations-core/pull/10617))
+* Document new use_process_start_time option ([#10601](https://github.com/DataDog/integrations-core/pull/10601))
 
 ## 1.5.0 / 2021-10-04 / Agent 7.32.0
 
-* [Added] Add HTTP option to control the size of streaming responses. See [#10183](https://github.com/DataDog/integrations-core/pull/10183).
-* [Added] Add runtime configuration validation. See [#8982](https://github.com/DataDog/integrations-core/pull/8982).
-* [Added] Add allow_redirect option. See [#10160](https://github.com/DataDog/integrations-core/pull/10160).
-* [Fixed] Fix the description of the `allow_redirects` HTTP option. See [#10195](https://github.com/DataDog/integrations-core/pull/10195).
+***Added***:
+
+* Add HTTP option to control the size of streaming responses ([#10183](https://github.com/DataDog/integrations-core/pull/10183))
+* Add runtime configuration validation ([#8982](https://github.com/DataDog/integrations-core/pull/8982))
+* Add allow_redirect option ([#10160](https://github.com/DataDog/integrations-core/pull/10160))
+
+***Fixed***:
+
+* Fix the description of the `allow_redirects` HTTP option ([#10195](https://github.com/DataDog/integrations-core/pull/10195))
 
 ## 1.4.0 / 2021-05-28 / Agent 7.29.0
 
-* [Added] Support "ignore_tags" configuration. See [#9392](https://github.com/DataDog/integrations-core/pull/9392).
+***Added***:
+
+* Support "ignore_tags" configuration ([#9392](https://github.com/DataDog/integrations-core/pull/9392))
 
 ## 1.3.2 / 2021-03-07 / Agent 7.27.0
 
-* [Fixed] Fix logs section placement in example config. See [#8605](https://github.com/DataDog/integrations-core/pull/8605).
+***Fixed***:
+
+* Fix logs section placement in example config ([#8605](https://github.com/DataDog/integrations-core/pull/8605))
 
 ## 1.3.1 / 2021-01-25 / Agent 7.26.0
 
-* [Fixed] Update prometheus_metrics_prefix documentation. See [#8236](https://github.com/DataDog/integrations-core/pull/8236).
+***Fixed***:
+
+* Update prometheus_metrics_prefix documentation ([#8236](https://github.com/DataDog/integrations-core/pull/8236))
 
 ## 1.3.0 / 2020-10-31 / Agent 7.24.0
 
-* [Added] Sync openmetrics config specs with new option ignore_metrics_by_labels. See [#7823](https://github.com/DataDog/integrations-core/pull/7823).
-* [Added] Add ability to dynamically get authentication information. See [#7660](https://github.com/DataDog/integrations-core/pull/7660).
-* [Added] Add config spec. See [#7735](https://github.com/DataDog/integrations-core/pull/7735).
+***Added***:
+
+* Sync openmetrics config specs with new option ignore_metrics_by_labels ([#7823](https://github.com/DataDog/integrations-core/pull/7823))
+* Add ability to dynamically get authentication information ([#7660](https://github.com/DataDog/integrations-core/pull/7660))
+* Add config spec ([#7735](https://github.com/DataDog/integrations-core/pull/7735))
 
 ## 1.2.1 / 2020-09-21 / Agent 7.23.0
 
-* [Fixed] Fix style for the latest release of Black. See [#7438](https://github.com/DataDog/integrations-core/pull/7438).
+***Fixed***:
+
+* Fix style for the latest release of Black ([#7438](https://github.com/DataDog/integrations-core/pull/7438))
 
 ## 1.2.0 / 2020-06-29 / Agent 7.21.0
 
-* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+***Added***:
+
+* Add note about warning concurrency ([#6967](https://github.com/DataDog/integrations-core/pull/6967))
 
 ## 1.1.0 / 2020-05-17 / Agent 7.20.0
 
-* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+***Added***:
+
+* Allow optional dependency installation for all checks ([#6589](https://github.com/DataDog/integrations-core/pull/6589))
 
 ## 1.0.3 / 2020-04-04 / Agent 7.19.0
 
-* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+***Fixed***:
+
+* Remove logs sourcecategory ([#6121](https://github.com/DataDog/integrations-core/pull/6121))
 
 ## 1.0.2 / 2020-02-26 / Agent 7.18.0
 
-* [Fixed] Fix discrepancies in `batchlog_manager`, `execution_stages`, `io_queue` and `query_processor` metric group names. See [#5885](https://github.com/DataDog/integrations-core/pull/5885).
+***Fixed***:
+
+* Fix discrepancies in `batchlog_manager`, `execution_stages`, `io_queue` and `query_processor` metric group names ([#5885](https://github.com/DataDog/integrations-core/pull/5885))
 
 ## 1.0.1 / 2020-02-25
 
-* [Fixed] Fix typo in explicit send_histograms_buckets option. See [#5867](https://github.com/DataDog/integrations-core/pull/5867).
+***Fixed***:
+
+* Fix typo in explicit send_histograms_buckets option ([#5867](https://github.com/DataDog/integrations-core/pull/5867))
 
 ## 1.0.0 / 2020-02-21
 
-* [Added] Scylla new integration. See [#5440](https://github.com/DataDog/integrations-core/pull/5440).
+***Added***:
 
+* Scylla new integration ([#5440](https://github.com/DataDog/integrations-core/pull/5440))

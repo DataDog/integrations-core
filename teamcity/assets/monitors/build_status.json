@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "created_at": "2022-12-01",
+  "last_updated_at": "2022-12-01",
+  "title": "Builds are failing",
+  "tags": [
+    "integration:teamcity"
+  ],
+  "description": "Each finished build returns a code indicating the status of the build. This monitor tracks builds that are emitting error codes and are ultimately failing.",
+  "definition": {
+    "message": "{{#is_alert}}\nBuild configuration {{build_config.name}} experienced a critical build status. \n{{/is_alert}}",
+    "name": "TeamCity Build Status",
+    "options": {
+      "avalanche_window": 10,
+      "escalation_message": "",
+      "include_tags": true,
+      "new_group_delay": 60,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "silenced": {
+        "*": null
+      },
+      "thresholds": {
+        "critical": 1,
+        "ok": 2,
+        "warning": 1
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "\"teamcity.build.status\".over(\"*\").by(\"build_config\").last(3).count_by_status()",
+    "restricted_roles": null,
+    "tags": [
+      "integration:teamcity"
+    ],
+    "type": "service check"
+  }
+}

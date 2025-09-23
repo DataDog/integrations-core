@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a18dccd2-35c0-40e2-9c0a-7a01a5daf5f3",
   "app_id": "systemd",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -13,7 +14,8 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Category::OS & System"
+      "Category::OS & System",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -22,7 +24,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Systemd",
@@ -37,7 +38,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10066,
+      "auto_install": true
     },
     "dashboards": {
       "Systemd Overview": "assets/dashboards/overview.json"

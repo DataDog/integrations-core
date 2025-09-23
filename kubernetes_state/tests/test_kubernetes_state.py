@@ -112,8 +112,7 @@ METRICS = [
 ]
 
 TAGS = {
-    NAMESPACE
-    + '.node.count': [
+    NAMESPACE + '.node.count': [
         'container_runtime_version:docker://1.12.6',
         'kernel_version:4.9.13',
         'kubelet_version:v1.8.0',
@@ -122,8 +121,7 @@ TAGS = {
     ],
     NAMESPACE + '.pod.ready': ['node:minikube'],
     NAMESPACE + '.pod.scheduled': ['node:minikube'],
-    NAMESPACE
-    + '.nodes.by_condition': [
+    NAMESPACE + '.nodes.by_condition': [
         'condition:memorypressure',
         'condition:diskpressure',
         'condition:outofdisk',
@@ -132,8 +130,7 @@ TAGS = {
         'status:false',
         'status:unknown',
     ],
-    NAMESPACE
-    + '.node.by_condition': [
+    NAMESPACE + '.node.by_condition': [
         'condition:memorypressure',
         'condition:diskpressure',
         'condition:outofdisk',
@@ -141,8 +138,7 @@ TAGS = {
         'status:true',
         'status:false',
     ],
-    NAMESPACE
-    + '.pod.status_phase': [
+    NAMESPACE + '.pod.status_phase': [
         'phase:pending',
         'phase:running',
         'phase:failed',
@@ -152,8 +148,7 @@ TAGS = {
         'namespace:kube-system',
     ],
     NAMESPACE + '.pod.count': ['uid:b6fb4273-2dd6-4edb-9a23-7642bb121806', 'created_by_kind:daemonset'],
-    NAMESPACE
-    + '.container.status_report.count.waiting': [
+    NAMESPACE + '.container.status_report.count.waiting': [
         'reason:containercreating',
         'reason:crashloopbackoff',  # Lowercase "off"
         'reason:crashloopbackoff',  # Uppercase "Off"
@@ -161,6 +156,7 @@ TAGS = {
         'reason:imagepullbackoff',
         'reason:createcontainererror',
         'reason:invalidimagename',
+        'reason:createcontainerconfigerror',
         'pod:kube-dns-1326421443-hj4hx',
         'pod:hello-1509998340-k4f8q',
     ],
@@ -173,22 +169,28 @@ TAGS = {
 
 JOINED_METRICS = {
     NAMESPACE + '.deployment.replicas': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
-    NAMESPACE
-    + '.deployment.replicas_available': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
-    NAMESPACE
-    + '.deployment.replicas_unavailable': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
-    NAMESPACE
-    + '.deployment.replicas_updated': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
-    NAMESPACE
-    + '.deployment.replicas_desired': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
-    NAMESPACE + '.deployment.paused': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
-    NAMESPACE
-    + '.deployment.rollingupdate.max_unavailable': [
+    NAMESPACE + '.deployment.replicas_available': [
         'label_addonmanager_kubernetes_io_mode:reconcile',
         'deployment:kube-dns',
     ],
-    NAMESPACE
-    + '.container.status_report.count.waiting': [
+    NAMESPACE + '.deployment.replicas_unavailable': [
+        'label_addonmanager_kubernetes_io_mode:reconcile',
+        'deployment:kube-dns',
+    ],
+    NAMESPACE + '.deployment.replicas_updated': [
+        'label_addonmanager_kubernetes_io_mode:reconcile',
+        'deployment:kube-dns',
+    ],
+    NAMESPACE + '.deployment.replicas_desired': [
+        'label_addonmanager_kubernetes_io_mode:reconcile',
+        'deployment:kube-dns',
+    ],
+    NAMESPACE + '.deployment.paused': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
+    NAMESPACE + '.deployment.rollingupdate.max_unavailable': [
+        'label_addonmanager_kubernetes_io_mode:reconcile',
+        'deployment:kube-dns',
+    ],
+    NAMESPACE + '.container.status_report.count.waiting': [
         'label_addonmanager_kubernetes_io_mode:reconcile',
         'pod:registry-creds-hq249',
     ],
@@ -965,15 +967,15 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=99255.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1068.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1400.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=101457.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=1096.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1428.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=332.0)
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',
         tags=['resource_name:pod', 'resource_namespace:default', 'optional:tag1'],
-        value=638.0,
+        value=666.0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',

@@ -3,8 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
 
-from six import iteritems, text_type
-
 log = logging.getLogger(__name__)
 
 
@@ -12,7 +10,7 @@ def collect_all_scalars(key, dictionary):
     if key not in dictionary or dictionary[key] is None:
         yield None, None
     elif isinstance(dictionary[key], dict):
-        for tag, _ in iteritems(dictionary[key]):
+        for tag, _ in dictionary[key].items():
             yield tag, collect_type(tag, dictionary[key], float)
     else:
         yield None, collect_type(key, dictionary, float)
@@ -23,7 +21,7 @@ def collect_scalar(key, mapping):
 
 
 def collect_string(key, mapping):
-    return collect_type(key, mapping, text_type)
+    return collect_type(key, mapping, str)
 
 
 def collect_type(key, mapping, the_type):

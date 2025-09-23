@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2024-12-05",
+	"last_updated_at": "2024-12-05",
+	"title": "High number of suspicious fraud transactions detected",
+	"description": "The advanced fraud detection suite (AFDS) in Authorize.Net uses filters like transaction thresholds, payment velocity, and country restrictions to block fraud. This monitor tracks potential fraud issues to ensure timely action, safeguarding revenue and maintaining customer trust.",
+	"definition": {
+		"id": 156179619,
+		"name": "High number of suspicious fraud transactions detected",
+		"type": "log alert",
+		"query": "logs(\"source:authorize-net service:transaction @log.transactionStatus:(FDSPendingReview OR FDSAuthorizedPendingReview)\").index(\"*\").rollup(\"cardinality\", \"@log.transId\").last(\"1d\") > 10",
+		"message": "{{#is_alert}}\nAuthorize.Net includes a built-in fraud tool, the advanced fraud detection suite, with configurable filters for transaction thresholds, payment velocity, country restrictions, and more to prevent fraudulent transactions.\n\nA high number of suspicious fraud transactions has been detected. This issue requires immediate attention to ensure proper resolution and avoid customer dissatisfaction.\n{{/is_alert}}",
+		"tags": [
+			"integration:authorize-net"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:authorize-net"
+	]
+}

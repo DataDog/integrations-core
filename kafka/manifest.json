@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "39640d5e-54be-48ff-abf1-8871499e2fd3",
   "app_id": "kafka",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -9,16 +10,36 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect metrics for producers and consumers, replication, max lag, and more.",
-    "title": "Kafka",
+    "title": "Kafka Broker",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Processing",
-      "Category::Messaging",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Category::Message Queues",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration",
+      "Product::Data Streams Monitoring"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collecting-kafka-performance-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-kafka-with-datadog"
+      },
+      {
+        "resource_type": "other",
+        "url": "https://www.datadoghq.com/knowledge-center/apache-kafka/"
+      }
     ]
   },
   "author": {
@@ -27,7 +48,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Kafka",
@@ -39,7 +59,10 @@
       },
       "metrics": {
         "prefix": "kafka.",
-        "check": "kafka.net.bytes_out.rate",
+        "check": [
+          "kafka.net.bytes_out",
+          "kafka.net.bytes_out.rate"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -47,24 +70,23 @@
       },
       "process_signatures": [
         "java kafka.kafka"
-      ]
+      ],
+      "source_type_id": 64,
+      "auto_install": true
     },
     "dashboards": {
       "kafka": "assets/dashboards/kafka_dashboard.json"
     },
     "monitors": {
-      "[Kafka] High produce latency on broker": "assets/monitors/broker_produce_latency.json",
-      "[Kafka] High producer request rate": "assets/recommended_monitors/kafka_high_producer_request_rate.json",
-      "[Kafka] Offline partition": "assets/recommended_monitors/kafka_offline_partition.json"
+      "Produce latency is high": "assets/monitors/broker_produce_latency.json",
+      "Produce request rate is high": "assets/monitors/kafka_high_producer_request_rate.json",
+      "Partition is offline": "assets/monitors/kafka_offline_partition.json"
     },
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",
       "kafka_patterns": "assets/saved_views/kafka_patterns.json",
       "logger_overview": "assets/saved_views/logger_overview.json",
       "kafka_processes": "assets/saved_views/kafka_processes.json"
-    },
-    "logs": {
-      "source": "kafka"
     }
   }
 }

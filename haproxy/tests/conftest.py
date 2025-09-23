@@ -102,6 +102,9 @@ def prometheus_metrics():
                 metrics.pop(metric)
     if HAPROXY_VERSION < version.parse('2.4.9'):
         metrics.pop('haproxy_backend_agg_server_check_status')
+    if HAPROXY_VERSION < version.parse('2.4.21'):
+        metrics.pop('haproxy_backend_agg_check_status')
+        metrics.pop('haproxy_backend_agg_server_status')
 
     metrics = list(metrics.values())
     return metrics
@@ -150,7 +153,6 @@ def legacy_environment():
             service_name="haproxy-open",
             conditions=[WaitFor(wait_for_haproxy_open)],
         ):
-
             if platform_supports_sockets:
                 with docker_run(
                     compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
@@ -207,7 +209,7 @@ def haproxy_mock():
     filepath = os.path.join(HERE, 'fixtures', 'mock_data')
     with open(filepath, 'rb') as f:
         data = f.read()
-    p = mock.patch('requests.get', return_value=mock.Mock(content=data))
+    p = mock.patch('requests.Session.get', return_value=mock.Mock(content=data))
     yield p.start()
     p.stop()
 
@@ -225,7 +227,7 @@ def haproxy_mock_evil():
     filepath = os.path.join(HERE, 'fixtures', 'mock_data_evil')
     with open(filepath, 'rb') as f:
         data = f.read()
-    p = mock.patch('requests.get', return_value=mock.Mock(content=data))
+    p = mock.patch('requests.Session.get', return_value=mock.Mock(content=data))
     yield p.start()
     p.stop()
 
@@ -235,7 +237,7 @@ def haproxy_mock_enterprise_version_info():
     filepath = os.path.join(HERE, 'fixtures', 'enterprise_version_info.html')
     with open(filepath, 'rb') as f:
         data = f.read()
-    with mock.patch('requests.get', return_value=mock.Mock(content=data)) as p:
+    with mock.patch('requests.Session.get', return_value=mock.Mock(content=data)) as p:
         yield p
 
 

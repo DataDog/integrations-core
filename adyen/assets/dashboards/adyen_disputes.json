@@ -1,0 +1,1112 @@
+{
+    "title": "Adyen Disputes",
+    "description": "This dashboard provides a comprehensive overview of key logs related to dispute events. The dashboard visualizes chargeback overview, fraud, and dispute analytics. Additionally, it provide insights related to chargebacks by merchant account.",
+    "widgets": [
+        {
+            "id": 7687241876619038,
+            "definition": {
+                "type": "image",
+                "url": "https://cdn-assets-eu.frontify.com/s3/frontify-enterprise-files-eu/eyJwYXRoIjoiYWR5ZW5cL2ZpbGVcL1ZBanFlS3N5Ulc2ckZhVms5NTI1LnN2ZyJ9:adyen:r06pNrzaXXGyE0fhpig2QP-tBs3hC99-cwKlx-PdS68",
+                "url_dark_theme": "https://cdn-assets-eu.frontify.com/s3/frontify-enterprise-files-eu/eyJwYXRoIjoiYWR5ZW5cL2ZpbGVcL1BrU051WngzanVnamZZZ0FZR0JrLnN2ZyJ9:adyen:qWZTSS0KDkayjczU8jwAJNPlbHzmxs1Wq_hYu7QR-Q4",
+                "sizing": "cover",
+                "has_background": false,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 2
+            }
+        },
+        {
+            "id": 186195290867710,
+            "definition": {
+                "title": "Monitors Summary",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4935332869161822,
+                        "definition": {
+                            "title": "Monitors Summary",
+                            "type": "manage_status",
+                            "display_format": "countsAndList",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:(source:adyen AND service:dispute)",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 5
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 6
+            }
+        },
+        {
+            "id": 8664679548486656,
+            "definition": {
+                "type": "note",
+                "content": "**Overview**\n\nThis dashboard provides a comprehensive overview of key logs related to dispute events. The dashboard visualizes chargeback overviews, fraud, and dispute analytics, along with insights on chargebacks by merchant account.\n\nFor more information, see the [Adyen Integration Documentation](https://docs.datadoghq.com/integrations/adyen/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 8846779929019656,
+            "definition": {
+                "title": "Chargeback Overview",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4437822100258310,
+                        "definition": {
+                            "type": "note",
+                            "content": "To learn more about the dispute flow and process, see the [Adyen Dispute Documentation](https://docs.adyen.com/risk-management/understanding-disputes/dispute-process-and-flow/)",
+                            "background_color": "yellow",
+                            "font_size": "16",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8952129363890986,
+                        "definition": {
+                            "title": "Chargeback Notifications",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_CHARGEBACK $MerchantAccount $PaymentMethod"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow",
+                                            "custom_bg_color": "#d6c7ff"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1442350089093946,
+                        "definition": {
+                            "title": "Total Chargebacks ",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:CHARGEBACK $MerchantAccount $PaymentMethod"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "custom_bg",
+                                            "custom_bg_color": "#d6c7ff"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7809641657550002,
+                        "definition": {
+                            "title": "Total Second Chargebacks ",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:SECOND_CHARGEBACK $MerchantAccount $PaymentMethod"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red",
+                                            "custom_bg_color": "#d6c7ff"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 935243487362654,
+                        "definition": {
+                            "title": "Top Reasons for NoC",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_CHARGEBACK $MerchantAccount $PaymentMethod -@notificationItems.NotificationRequestItem.reason:\"\""
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1842471959234388,
+                        "definition": {
+                            "title": "Lost Pre-arbitration Cases",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:PREARBITRATION_LOST $MerchantAccount $PaymentMethod"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red",
+                                            "custom_bg_color": "#d6c7ff"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2925453883001420,
+                        "definition": {
+                            "title": "Won Pre-arbitration Cases",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:PREARBITRATION_WON $MerchantAccount $PaymentMethod"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green",
+                                            "custom_bg_color": "#d6c7ff"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 3,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4197302775386064,
+                        "definition": {
+                            "title": "Total Request for Information (RFI)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:REQUEST_FOR_INFORMATION $MerchantAccount $PaymentMethod"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow",
+                                            "custom_bg_color": "#d6c7ff"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6221171436580578,
+                        "definition": {
+                            "title": "Reversed Chargebacks",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:CHARGEBACK_REVERSED $MerchantAccount $PaymentMethod"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green",
+                                            "custom_bg_color": "#d6c7ff"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 5,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 2637130255059616,
+                        "definition": {
+                            "title": "Top Reasons for Second Chargeback",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:SECOND_CHARGEBACK $MerchantAccount $PaymentMethod -@notificationItems.NotificationRequestItem.reason:\"\""
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4434774958434120,
+                        "definition": {
+                            "title": "NoCs by Merchant Account",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.merchantAccountCode",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_CHARGEBACK $MerchantAccount $PaymentMethod"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 12
+            }
+        },
+        {
+            "id": 4628493529131032,
+            "definition": {
+                "title": "Fraud and Dispute Analytics",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5090269811400060,
+                        "definition": {
+                            "title": "Fraud Notifications",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_FRAUD $MerchantAccount $PaymentMethod"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red",
+                                            "custom_bg_color": "#d6c7ff"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8664545062940364,
+                        "definition": {
+                            "title": "NoFs by Merchant Account",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.merchantAccountCode",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_FRAUD $MerchantAccount $PaymentMethod"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4850596776264180,
+                        "definition": {
+                            "title": "Top Reasons for NoF",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@pspReference"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@notificationItems.NotificationRequestItem.reason",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@pspReference"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:adyen service:dispute @evt.name:NOTIFICATION_OF_FRAUD $MerchantAccount $PaymentMethod -@notificationItems.NotificationRequestItem.reason:\"\""
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "white_on_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 18,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 1765265865571710,
+            "definition": {
+                "title": "Dispute Logs over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@evt.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:adyen service:dispute $PaymentMethod $MerchantAccount"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 2986745038735583,
+            "definition": {
+                "title": "Dispute Logs",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:adyen service:dispute $PaymentMethod $MerchantAccount",
+                            "indexes": [],
+                            "storage": "hot",
+                            "sort": {
+                                "order": "desc",
+                                "column": "timestamp"
+                            }
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "content",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "MerchantAccount",
+            "prefix": "@notificationItems.NotificationRequestItem.merchantAccountCode",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "PaymentMethod",
+            "prefix": "@notificationItems.NotificationRequestItem.paymentMethod",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

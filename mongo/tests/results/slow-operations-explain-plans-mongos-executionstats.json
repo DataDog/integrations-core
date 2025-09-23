@@ -1,0 +1,2896 @@
+[
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
+        "cloud_metadata": {},
+        "timestamp": 32479987545338.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:58133"
+            }
+        },
+        "db": {
+            "instance": "test",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "mongosPlannerVersion": 1,
+                        "winningPlan": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "connectionString": "shard01/shard01a:27018,shard01b:27019,shard01d:27021,shard01e:27022",
+                                    "serverInfo": {
+                                        "host": "401f5a12b0de",
+                                        "port": 27018,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "connectionString": "shard02/shard02a:27019,shard02b:27019",
+                                    "serverInfo": {
+                                        "host": "dd70a84f2f81",
+                                        "port": 27019,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "connectionString": "shard03/shard03a:27020,shard03b:27020",
+                                    "serverInfo": {
+                                        "host": "d00d23922aa3",
+                                        "port": 27020,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "connectionString": "shard04/shard04:27021",
+                                    "serverInfo": {
+                                        "host": "2b5ae3681d72",
+                                        "port": 27021,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                }
+                            ]
+                        }
+                    },
+                    "executionStats": {
+                        "nReturned": 51,
+                        "executionTimeMillis": 3,
+                        "totalKeysExamined": 51,
+                        "totalDocsExamined": 51,
+                        "executionStages": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "nReturned": 51,
+                            "executionTimeMillis": 3,
+                            "totalKeysExamined": 51,
+                            "totalDocsExamined": 51,
+                            "totalChildMillis": 0,
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "executionSuccess": true,
+                                    "nReturned": 16,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 16,
+                                    "totalDocsExamined": 16,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 16,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 17,
+                                        "advanced": 16,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 16,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 17,
+                                            "advanced": 16,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 16,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 17,
+                                                "advanced": 16,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 16,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 16,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 17,
+                                                    "advanced": 16,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 16,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 17,
+                                                        "advanced": 16,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 16,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "executionSuccess": true,
+                                    "nReturned": 12,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 12,
+                                    "totalDocsExamined": 12,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 12,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 13,
+                                        "advanced": 12,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 12,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 13,
+                                            "advanced": 12,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 12,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 13,
+                                                "advanced": 12,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 12,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 12,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 13,
+                                                    "advanced": 12,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 12,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 13,
+                                                        "advanced": 12,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 12,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "executionSuccess": true,
+                                    "nReturned": 9,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 9,
+                                    "totalDocsExamined": 9,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 9,
+                                        "executionTimeMillisEstimate": 1,
+                                        "works": 10,
+                                        "advanced": 9,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 9,
+                                            "executionTimeMillisEstimate": 1,
+                                            "works": 10,
+                                            "advanced": 9,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 9,
+                                                "executionTimeMillisEstimate": 1,
+                                                "works": 10,
+                                                "advanced": 9,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 9,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 9,
+                                                    "executionTimeMillisEstimate": 1,
+                                                    "works": 10,
+                                                    "advanced": 9,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 9,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 10,
+                                                        "advanced": 9,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 9,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "executionSuccess": true,
+                                    "nReturned": 14,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 14,
+                                    "totalDocsExamined": 14,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 14,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 15,
+                                        "advanced": 14,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 14,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 15,
+                                            "advanced": 14,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 14,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 15,
+                                                "advanced": 14,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 14,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 14,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 15,
+                                                    "advanced": 14,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 14,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 15,
+                                                        "advanced": 14,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 14,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                }
+                            ]
+                        },
+                        "allPlansExecution": [
+                            {
+                                "shardName": "shard01",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard02",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard03",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard04",
+                                "allPlans": []
+                            }
+                        ]
+                    }
+                },
+                "signature": "9f964b7dcbe792eb"
+            },
+            "query_signature": "2e0dfc1416f51975",
+            "application": null,
+            "user": null,
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"limit\": 151, \"$db\": \"test\"}",
+            "operation_metadata": {
+                "op": "command",
+                "ns": "test.customers",
+                "collection": "customers",
+                "comment": "query customers by subscription status"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "command",
+            "ns": "test.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 12000,
+            "num_yields": 0,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            },
+            "cursor": {
+                "cursor_id": 5170666760900931828,
+                "originating_command": null,
+                "comment": null
+            }
+        }
+    },
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
+        "cloud_metadata": {},
+        "timestamp": 32479987545521.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:58133"
+            }
+        },
+        "db": {
+            "instance": "test",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "mongosPlannerVersion": 1,
+                        "winningPlan": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "connectionString": "shard01/shard01a:27018,shard01b:27019,shard01d:27021,shard01e:27022",
+                                    "serverInfo": {
+                                        "host": "401f5a12b0de",
+                                        "port": 27018,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "connectionString": "shard02/shard02a:27019,shard02b:27019",
+                                    "serverInfo": {
+                                        "host": "dd70a84f2f81",
+                                        "port": 27019,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "connectionString": "shard03/shard03a:27020,shard03b:27020",
+                                    "serverInfo": {
+                                        "host": "d00d23922aa3",
+                                        "port": 27020,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "connectionString": "shard04/shard04:27021",
+                                    "serverInfo": {
+                                        "host": "2b5ae3681d72",
+                                        "port": 27021,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                }
+                            ]
+                        }
+                    },
+                    "executionStats": {
+                        "nReturned": 51,
+                        "executionTimeMillis": 3,
+                        "totalKeysExamined": 51,
+                        "totalDocsExamined": 51,
+                        "executionStages": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "nReturned": 51,
+                            "executionTimeMillis": 3,
+                            "totalKeysExamined": 51,
+                            "totalDocsExamined": 51,
+                            "totalChildMillis": 0,
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "executionSuccess": true,
+                                    "nReturned": 16,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 16,
+                                    "totalDocsExamined": 16,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 16,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 17,
+                                        "advanced": 16,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 16,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 17,
+                                            "advanced": 16,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 16,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 17,
+                                                "advanced": 16,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 16,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 16,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 17,
+                                                    "advanced": 16,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 16,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 17,
+                                                        "advanced": 16,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 16,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "executionSuccess": true,
+                                    "nReturned": 12,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 12,
+                                    "totalDocsExamined": 12,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 12,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 13,
+                                        "advanced": 12,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 12,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 13,
+                                            "advanced": 12,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 12,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 13,
+                                                "advanced": 12,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 12,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 12,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 13,
+                                                    "advanced": 12,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 12,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 13,
+                                                        "advanced": 12,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 12,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "executionSuccess": true,
+                                    "nReturned": 9,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 9,
+                                    "totalDocsExamined": 9,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 9,
+                                        "executionTimeMillisEstimate": 1,
+                                        "works": 10,
+                                        "advanced": 9,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 9,
+                                            "executionTimeMillisEstimate": 1,
+                                            "works": 10,
+                                            "advanced": 9,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 9,
+                                                "executionTimeMillisEstimate": 1,
+                                                "works": 10,
+                                                "advanced": 9,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 9,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 9,
+                                                    "executionTimeMillisEstimate": 1,
+                                                    "works": 10,
+                                                    "advanced": 9,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 9,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 10,
+                                                        "advanced": 9,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 9,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "executionSuccess": true,
+                                    "nReturned": 14,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 14,
+                                    "totalDocsExamined": 14,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 14,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 15,
+                                        "advanced": 14,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 14,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 15,
+                                            "advanced": 14,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 14,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 15,
+                                                "advanced": 14,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 14,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 14,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 15,
+                                                    "advanced": 14,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 14,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 15,
+                                                        "advanced": 14,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 14,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                }
+                            ]
+                        },
+                        "allPlansExecution": [
+                            {
+                                "shardName": "shard01",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard02",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard03",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard04",
+                                "allPlans": []
+                            }
+                        ]
+                    }
+                },
+                "signature": "9f964b7dcbe792eb"
+            },
+            "query_signature": "6f544fbdad56d0dc",
+            "application": null,
+            "user": null,
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"limit\": 183, \"$db\": \"test\"}",
+            "operation_metadata": {
+                "op": "command",
+                "ns": "test.customers",
+                "collection": "customers",
+                "comment": "query customers by subscription status"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "command",
+            "ns": "test.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 14000,
+            "num_yields": 0,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            }
+        }
+    },
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
+        "cloud_metadata": {},
+        "timestamp": 32479987545338.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:58133"
+            }
+        },
+        "db": {
+            "instance": "integration",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "mongosPlannerVersion": 1,
+                        "winningPlan": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "connectionString": "shard01/shard01a:27018,shard01b:27019,shard01d:27021,shard01e:27022",
+                                    "serverInfo": {
+                                        "host": "401f5a12b0de",
+                                        "port": 27018,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "connectionString": "shard02/shard02a:27019,shard02b:27019",
+                                    "serverInfo": {
+                                        "host": "dd70a84f2f81",
+                                        "port": 27019,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "connectionString": "shard03/shard03a:27020,shard03b:27020",
+                                    "serverInfo": {
+                                        "host": "d00d23922aa3",
+                                        "port": 27020,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "connectionString": "shard04/shard04:27021",
+                                    "serverInfo": {
+                                        "host": "2b5ae3681d72",
+                                        "port": 27021,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                }
+                            ]
+                        }
+                    },
+                    "executionStats": {
+                        "nReturned": 51,
+                        "executionTimeMillis": 3,
+                        "totalKeysExamined": 51,
+                        "totalDocsExamined": 51,
+                        "executionStages": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "nReturned": 51,
+                            "executionTimeMillis": 3,
+                            "totalKeysExamined": 51,
+                            "totalDocsExamined": 51,
+                            "totalChildMillis": 0,
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "executionSuccess": true,
+                                    "nReturned": 16,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 16,
+                                    "totalDocsExamined": 16,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 16,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 17,
+                                        "advanced": 16,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 16,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 17,
+                                            "advanced": 16,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 16,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 17,
+                                                "advanced": 16,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 16,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 16,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 17,
+                                                    "advanced": 16,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 16,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 17,
+                                                        "advanced": 16,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 16,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "executionSuccess": true,
+                                    "nReturned": 12,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 12,
+                                    "totalDocsExamined": 12,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 12,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 13,
+                                        "advanced": 12,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 12,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 13,
+                                            "advanced": 12,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 12,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 13,
+                                                "advanced": 12,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 12,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 12,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 13,
+                                                    "advanced": 12,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 12,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 13,
+                                                        "advanced": 12,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 12,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "executionSuccess": true,
+                                    "nReturned": 9,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 9,
+                                    "totalDocsExamined": 9,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 9,
+                                        "executionTimeMillisEstimate": 1,
+                                        "works": 10,
+                                        "advanced": 9,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 9,
+                                            "executionTimeMillisEstimate": 1,
+                                            "works": 10,
+                                            "advanced": 9,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 9,
+                                                "executionTimeMillisEstimate": 1,
+                                                "works": 10,
+                                                "advanced": 9,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 9,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 9,
+                                                    "executionTimeMillisEstimate": 1,
+                                                    "works": 10,
+                                                    "advanced": 9,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 9,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 10,
+                                                        "advanced": 9,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 9,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "executionSuccess": true,
+                                    "nReturned": 14,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 14,
+                                    "totalDocsExamined": 14,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 14,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 15,
+                                        "advanced": 14,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 14,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 15,
+                                            "advanced": 14,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 14,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 15,
+                                                "advanced": 14,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 14,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 14,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 15,
+                                                    "advanced": 14,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 14,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 15,
+                                                        "advanced": 14,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 14,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                }
+                            ]
+                        },
+                        "allPlansExecution": [
+                            {
+                                "shardName": "shard01",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard02",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard03",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard04",
+                                "allPlans": []
+                            }
+                        ]
+                    }
+                },
+                "signature": "9f964b7dcbe792eb"
+            },
+            "query_signature": "cde36dfcce436712",
+            "application": null,
+            "user": null,
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"limit\": 151, \"$db\": \"integration\"}",
+            "operation_metadata": {
+                "op": "command",
+                "ns": "integration.customers",
+                "collection": "customers",
+                "comment": "query customers by subscription status"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "command",
+            "ns": "integration.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 12000,
+            "num_yields": 0,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            },
+            "cursor": {
+                "cursor_id": 5170666760900931828,
+                "originating_command": null,
+                "comment": null
+            }
+        }
+    },
+    {
+        "host": "mongohost",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongo",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster,hosting_type:self-hosted,sharding_cluster_role:mongos",
+        "cloud_metadata": {},
+        "timestamp": 32479987545521.0,
+        "service": "my_service",
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:58133"
+            }
+        },
+        "db": {
+            "instance": "integration",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "mongosPlannerVersion": 1,
+                        "winningPlan": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "connectionString": "shard01/shard01a:27018,shard01b:27019,shard01d:27021,shard01e:27022",
+                                    "serverInfo": {
+                                        "host": "401f5a12b0de",
+                                        "port": 27018,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "connectionString": "shard02/shard02a:27019,shard02b:27019",
+                                    "serverInfo": {
+                                        "host": "dd70a84f2f81",
+                                        "port": 27019,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "connectionString": "shard03/shard03a:27020,shard03b:27020",
+                                    "serverInfo": {
+                                        "host": "d00d23922aa3",
+                                        "port": 27020,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "connectionString": "shard04/shard04:27021",
+                                    "serverInfo": {
+                                        "host": "2b5ae3681d72",
+                                        "port": 27021,
+                                        "version": "6.0.15",
+                                        "gitVersion": "***********************************e860e"
+                                    },
+                                    "namespace": "integration.users",
+                                    "indexFilterSet": false,
+                                    "parsedQuery": {},
+                                    "queryHash": "6FF88FAE",
+                                    "planCacheKey": "6FF88FAE",
+                                    "maxIndexedOrSolutionsReached": false,
+                                    "maxIndexedAndSolutionsReached": false,
+                                    "maxScansToExplodeReached": false,
+                                    "winningPlan": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "rejectedPlans": []
+                                }
+                            ]
+                        }
+                    },
+                    "executionStats": {
+                        "nReturned": 51,
+                        "executionTimeMillis": 3,
+                        "totalKeysExamined": 51,
+                        "totalDocsExamined": 51,
+                        "executionStages": {
+                            "stage": "SHARD_MERGE_SORT",
+                            "nReturned": 51,
+                            "executionTimeMillis": 3,
+                            "totalKeysExamined": 51,
+                            "totalDocsExamined": 51,
+                            "totalChildMillis": 0,
+                            "shards": [
+                                {
+                                    "shardName": "shard01",
+                                    "executionSuccess": true,
+                                    "nReturned": 16,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 16,
+                                    "totalDocsExamined": 16,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 16,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 17,
+                                        "advanced": 16,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 16,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 17,
+                                            "advanced": 16,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 16,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 17,
+                                                "advanced": 16,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 16,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 16,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 17,
+                                                    "advanced": 16,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 16,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 17,
+                                                        "advanced": 16,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 16,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard02",
+                                    "executionSuccess": true,
+                                    "nReturned": 12,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 12,
+                                    "totalDocsExamined": 12,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 12,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 13,
+                                        "advanced": 12,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 12,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 13,
+                                            "advanced": 12,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 12,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 13,
+                                                "advanced": 12,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 12,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 12,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 13,
+                                                    "advanced": 12,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 12,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 13,
+                                                        "advanced": 12,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 12,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard03",
+                                    "executionSuccess": true,
+                                    "nReturned": 9,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 9,
+                                    "totalDocsExamined": 9,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 9,
+                                        "executionTimeMillisEstimate": 1,
+                                        "works": 10,
+                                        "advanced": 9,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 9,
+                                            "executionTimeMillisEstimate": 1,
+                                            "works": 10,
+                                            "advanced": 9,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 9,
+                                                "executionTimeMillisEstimate": 1,
+                                                "works": 10,
+                                                "advanced": 9,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 9,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 9,
+                                                    "executionTimeMillisEstimate": 1,
+                                                    "works": 10,
+                                                    "advanced": 9,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 9,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 10,
+                                                        "advanced": 9,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 9,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                },
+                                {
+                                    "shardName": "shard04",
+                                    "executionSuccess": true,
+                                    "nReturned": 14,
+                                    "executionTimeMillis": 0,
+                                    "totalKeysExamined": 14,
+                                    "totalDocsExamined": 14,
+                                    "executionStages": {
+                                        "stage": "PROJECTION_DEFAULT",
+                                        "nReturned": 14,
+                                        "executionTimeMillisEstimate": 0,
+                                        "works": 15,
+                                        "advanced": 14,
+                                        "needTime": 0,
+                                        "needYield": 0,
+                                        "saveState": 0,
+                                        "restoreState": 0,
+                                        "isEOF": 1,
+                                        "transformBy": {
+                                            "$sortKey": {
+                                                "$meta": "sortKey"
+                                            }
+                                        },
+                                        "inputStage": {
+                                            "stage": "SORT_KEY_GENERATOR",
+                                            "nReturned": 14,
+                                            "executionTimeMillisEstimate": 0,
+                                            "works": 15,
+                                            "advanced": 14,
+                                            "needTime": 0,
+                                            "needYield": 0,
+                                            "saveState": 0,
+                                            "restoreState": 0,
+                                            "isEOF": 1,
+                                            "inputStage": {
+                                                "stage": "FETCH",
+                                                "nReturned": 14,
+                                                "executionTimeMillisEstimate": 0,
+                                                "works": 15,
+                                                "advanced": 14,
+                                                "needTime": 0,
+                                                "needYield": 0,
+                                                "saveState": 0,
+                                                "restoreState": 0,
+                                                "isEOF": 1,
+                                                "docsExamined": 14,
+                                                "alreadyHasObj": 0,
+                                                "inputStage": {
+                                                    "stage": "SHARDING_FILTER",
+                                                    "nReturned": 14,
+                                                    "executionTimeMillisEstimate": 0,
+                                                    "works": 15,
+                                                    "advanced": 14,
+                                                    "needTime": 0,
+                                                    "needYield": 0,
+                                                    "saveState": 0,
+                                                    "restoreState": 0,
+                                                    "isEOF": 1,
+                                                    "chunkSkips": 0,
+                                                    "inputStage": {
+                                                        "stage": "IXSCAN",
+                                                        "nReturned": 14,
+                                                        "executionTimeMillisEstimate": 0,
+                                                        "works": 15,
+                                                        "advanced": 14,
+                                                        "needTime": 0,
+                                                        "needYield": 0,
+                                                        "saveState": 0,
+                                                        "restoreState": 0,
+                                                        "isEOF": 1,
+                                                        "keyPattern": {
+                                                            "user_id": 1
+                                                        },
+                                                        "indexName": "user_id_1",
+                                                        "isMultiKey": false,
+                                                        "multiKeyPaths": {
+                                                            "user_id": []
+                                                        },
+                                                        "isUnique": false,
+                                                        "isSparse": false,
+                                                        "isPartial": false,
+                                                        "indexVersion": 2,
+                                                        "direction": "forward",
+                                                        "indexBounds": {
+                                                            "user_id": [
+                                                                "?"
+                                                            ]
+                                                        },
+                                                        "keysExamined": 14,
+                                                        "seeks": 1,
+                                                        "dupsTested": 0,
+                                                        "dupsDropped": 0
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "allPlansExecution": []
+                                }
+                            ]
+                        },
+                        "allPlansExecution": [
+                            {
+                                "shardName": "shard01",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard02",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard03",
+                                "allPlans": []
+                            },
+                            {
+                                "shardName": "shard04",
+                                "allPlans": []
+                            }
+                        ]
+                    }
+                },
+                "signature": "9f964b7dcbe792eb"
+            },
+            "query_signature": "d6bf9ce5ca12a12c",
+            "application": null,
+            "user": null,
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"limit\": 183, \"$db\": \"integration\"}",
+            "operation_metadata": {
+                "op": "command",
+                "ns": "integration.customers",
+                "collection": "customers",
+                "comment": "query customers by subscription status"
+            },
+            "truncated": "not_truncated",
+            "source": "slow_query"
+        },
+        "mongodb": {
+            "op": "command",
+            "ns": "integration.customers",
+            "plan_summary": "IXSCAN { name: 1 }",
+            "microsecs_running": 14000,
+            "num_yields": 0,
+            "lock_stats": {
+                "feature_compatibility_version": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                },
+                "global": {
+                    "acquire_count": {
+                        "r": 1
+                    }
+                }
+            }
+        }
+    }
+]

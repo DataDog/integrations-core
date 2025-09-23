@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing, contextmanager
-from typing import Any, AnyStr, Dict, Iterable, Iterator, List, Sequence, cast
+from typing import Any, AnyStr, Dict, Iterable, Iterator, List, Sequence, cast  # noqa: F401
 
 import pymysql
 
@@ -26,7 +26,6 @@ ADDITIONAL_SYSTEM_QUERIES = [SYSINFO_CPU, SYSINFO_DISK, SYSINFO_MEM, SYSINFO_NET
 
 
 class SinglestoreCheck(AgentCheck):
-
     SERVICE_CHECK_NAME = "can_connect"
     __NAMESPACE__ = "singlestore"
 

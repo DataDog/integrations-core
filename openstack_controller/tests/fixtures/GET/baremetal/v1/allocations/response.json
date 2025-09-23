@@ -1,0 +1,52 @@
+{
+  "allocations": [
+    {
+      "candidate_nodes": [],
+      "created_at": "2019-02-20T09:43:58+00:00",
+      "extra": {},
+      "last_error": null,
+      "links": [
+        {
+          "href": "http://127.0.0.1:6385/v1/allocations/5344a3e2-978a-444e-990a-cbf47c62ef88",
+          "rel": "self"
+        },
+        {
+          "href": "http://127.0.0.1:6385/allocations/5344a3e2-978a-444e-990a-cbf47c62ef88",
+          "rel": "bookmark"
+        }
+      ],
+      "name": "allocation-1",
+      "node_uuid": "6d85703a-565d-469a-96ce-30b6de53079d",
+      "owner": null,
+      "resource_class": "bm-large",
+      "state": "active",
+      "traits": [],
+      "updated_at": "2019-02-20T09:43:58+00:00",
+      "uuid": "5344a3e2-978a-444e-990a-cbf47c62ef88"
+    },
+    {
+      "uuid": "2c9eb88e-cb83-4125-9e82-6fc0312818a7",
+      "created_at": "2024-05-09T19:30:11+00:00",
+      "updated_at": "2024-05-09T19:30:11+00:00",
+      "candidate_nodes": [],
+      "extra": {},
+      "last_error": "Failed to process allocation 2c9eb88e-cb83-4125-9e82-6fc0312818a7: no available nodes match the resource class bm-large.",
+      "name": "allocation-2",
+      "owner": null,
+      "resource_class": "bm-large",
+      "state": "error",
+      "traits": [],
+      "links": [
+        {
+          "href": "http://127.0.0.1/baremetal/v1/allocations/2c9eb88e-cb83-4125-9e82-6fc0312818a7",
+          "rel": "self"
+        },
+        {
+          "href": "http://127.0.0.1/baremetal/allocations/2c9eb88e-cb83-4125-9e82-6fc0312818a7",
+          "rel": "bookmark"
+        }
+      ],
+      "node_uuid": "5344a3e2-978a-444e-990a-cbf47c62ef88"
+    }
+  ]
+}

@@ -37,7 +37,7 @@ def mock_metrics():
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
             status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
         ),
@@ -85,6 +85,7 @@ def generic_check_metrics(aggregator, check_deprecated):
     assert_metric('.max_fds')
 
     assert_metric('.nodes.evictions', metric_type=aggregator.MONOTONIC_COUNT, value=1, tags=["zone:test"])
+    assert_metric('.nodes.evictions', metric_type=aggregator.MONOTONIC_COUNT, value=3, tags=["zone:test-total"])
     assert_metric('.nodes.count', value=5, tags=["zone:test"])
     assert_metric('.nodes.unhealthy', value=1, tags=["zone:test"])
 
@@ -118,6 +119,10 @@ def generic_check_metrics(aggregator, check_deprecated):
     assert_metric('.queue.queue_duration.count', value=99.0, tags=["queue:daemonset", "upper_bound:none"])
     assert_metric('.queue.queue_duration.sum', value=0.3633380879999999, tags=["queue:daemonset"])
 
+    # Metrics from 1.26
+    assert_metric('.job_controller.terminated_pods_tracking_finalizer', value=6, tags=["event:add"])
+    assert_metric('.job_controller.terminated_pods_tracking_finalizer', value=6, tags=["event:delete"])
+
     # Leader election mixin
     expected_le_tags = ["record_kind:endpoints", "record_name:kube-controller-manager", "record_namespace:kube-system"]
     assert_metric('.leader_election.transitions', value=3, tags=expected_le_tags)
@@ -141,13 +146,13 @@ def test_service_check_ok(monkeypatch):
     ]
 
     # successful health check
-    with mock.patch("requests.get", return_value=mock.MagicMock(status_code=200)):
+    with mock.patch('requests.Session.get', return_value=mock.MagicMock(status_code=200)):
         check._perform_service_check(instance)
 
     # failed health check
     raise_error = mock.Mock()
     raise_error.side_effect = requests.HTTPError('health check failed')
-    with mock.patch("requests.get", return_value=mock.MagicMock(raise_for_status=raise_error)):
+    with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=raise_error)):
         check._perform_service_check(instance)
 
     check.service_check.assert_has_calls(calls)

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7d801e88-1fad-433e-81d9-07449fd45e13",
   "app_id": "aspdotnet",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,10 +13,11 @@
     "title": "ASP.NET",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Windows",
-      "Category::Web",
       "Category::Languages",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Windows",
+      "Supported OS::Windows",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -24,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "ASP.NET",
@@ -41,7 +42,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10039,
+      "auto_install": true
     },
     "dashboards": {
       "ASP.NET - Overview": "assets/dashboards/overview.json"

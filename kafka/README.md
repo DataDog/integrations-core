@@ -1,26 +1,29 @@
-# Agent Check: Kafka
+# Agent Check: Kafka Broker
 
 ![Kafka Dashboard][1]
 
 ## Overview
 
-Connect Kafka to Datadog to:
+View Kafka broker metrics and logs for a 360-view of the health and performance of your Kafka clusters in real time.
 
-- Visualize the performance of your cluster in real time.
-- Correlate the performance of Kafka with the rest of your applications.
+Add [Data Streams Monitoring][24] to your producers and consumers to visualize the application topology, root cause issues across services, and measure end to end latency, throughput and lag.
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated on the info page. Specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect see the [JMX Checks documentation][2] for more detailed instructions.
+**Note**:
+
+- This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the Agent status output. Specify the metrics you are interested in by editing the configuration below. For more detailed instructions on customizing the metrics to collect, see the
+  [JMX Checks documentation][2].
+- This integration attached sample configuration works only for Kafka >= 0.8.2.
+  If you are running a version older than that, see the [Agent v5.2.x released sample files][22].
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
-
-**Note**: This integration attached sample configuration works only for Kafka >= 0.8.2.
-If you are running a version older than that, see the [Agent v5.2.x released sample files][22].
 
 ## Setup
 
 ### Installation
 
-The Agent's Kafka check is included in the [Datadog Agent][4] package, so you don't need to install anything else on your Kafka nodes.
+The Agent's Kafka check is included in the [Datadog Agent][4] package, no additional installation is needed on your Kafka nodes.
+
+Add [Data Streams Monitoring][24] to your producers and consumers to visualize the application topology, root cause issues across services, and measure end to end latency, throughput and lag.
 
 The check collects metrics from JMX with [JMXFetch][5]. A JVM is needed on each kafka node so the Agent can run JMXFetch. The same JVM that Kafka uses can be used for this.
 
@@ -64,7 +67,7 @@ _Available for Agent versions >6.0_
      [%d] %p %m (%c)%n
    ```
 
-    Clone and edit the [integration pipeline][10] if you have a different format.
+   Clone and edit the [integration pipeline][10] if you have a different format.
 
 3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -153,11 +156,12 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 - [Monitoring Kafka performance metrics][19]
 - [Collecting Kafka performance metrics][20]
 - [Monitoring Kafka with Datadog][21]
+- [Kafka Overview on the Knowledge Center][23]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/java/
 [3]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
-[4]: https://app.datadoghq.com/account/settings#agent
+[4]: /account/settings/agent/latest
 [5]: https://github.com/DataDog/jmxfetch
 [6]: https://docs.datadoghq.com/integrations/amazon_msk/#pagetitle
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -175,3 +179,6 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [20]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [21]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [22]: https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
+[23]: https://www.datadoghq.com/knowledge-center/apache-kafka/
+[24]: https://docs.datadoghq.com/data_streams/
+[25]: /data-streams

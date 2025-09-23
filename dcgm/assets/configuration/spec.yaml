@@ -1,0 +1,14 @@
+name: dcgm
+files:
+- name: dcgm.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://localhost:9400/metrics
+        openmetrics_endpoint.description: |
+          Set this to the port of the dcgm-exporter exposing the metrics in the OpenMetrics format.

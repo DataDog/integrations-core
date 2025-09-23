@@ -5,18 +5,13 @@ import json
 import re
 import xml.parsers.expat  # python 2.4 compatible
 from collections import defaultdict
-from distutils.version import LooseVersion
 from os import geteuid
 
-from six import PY3, iteritems
-from six.moves import filter
+from packaging.version import Version
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
-
-if PY3:
-    long = int
 
 
 class BackendStatus(object):
@@ -76,7 +71,7 @@ class Varnish(AgentCheck):
 
         self.name = self.instance.get('name')
         self.metrics_filter = self.instance.get("metrics_filter", [])
-        self.tags = self.custom_tags + [u'varnish_name:%s' % (self.name if self.name is not None else 'default')]
+        self.tags = self.custom_tags + ['varnish_name:%s' % (self.name if self.name is not None else 'default')]
         self.check_initializations.append(self.validate_config)
 
     def validate_config(self):
@@ -100,11 +95,11 @@ class Varnish(AgentCheck):
         if name == "stat":
             m_name = self.normalize(self._current_metric)
             if self._current_type in ("a", "c"):
-                self.rate(m_name, long(self._current_value), tags=self.tags)
+                self.rate(m_name, int(self._current_value), tags=self.tags)
             elif self._current_type in ("i", "g"):
-                self.gauge(m_name, long(self._current_value), tags=self.tags)
+                self.gauge(m_name, int(self._current_value), tags=self.tags)
                 if 'n_purges' in m_name:
-                    self.rate('varnish.n_purgesps', long(self._current_value), tags=self.tags)
+                    self.rate('varnish.n_purgesps', int(self._current_value), tags=self.tags)
             else:
                 # Unsupported data type, ignore
                 self._reset()
@@ -120,7 +115,7 @@ class Varnish(AgentCheck):
         data = data.strip()
         if len(data) > 0 and self._current_element != "":
             if self._current_element == "value":
-                self._current_value = long(data)
+                self._current_value = int(data)
             elif self._current_element == "flag":
                 self._current_type = data
             else:
@@ -156,7 +151,7 @@ class Varnish(AgentCheck):
         if geteuid() != 0:
             cmd.append('sudo')
 
-        if version < LooseVersion('4.1.0'):
+        if version < Version('4.1.0'):
             cmd.extend(self.varnishadm_path + ['-S', self.secretfile_path, 'debug.health'])
         else:
             cmd.extend(
@@ -210,12 +205,12 @@ class Varnish(AgentCheck):
         if raw_version is None:
             raw_version = '3.0.0'
 
-        version = LooseVersion(raw_version)
+        version = Version(raw_version)
 
         # Location of varnishstat
-        if version < LooseVersion('3.0.0'):
+        if version < Version('3.0.0'):
             varnishstat_format = "text"
-        elif version < LooseVersion('5.0.0'):  # we default to json starting version 5.0.0
+        elif version < Version('5.0.0'):  # we default to json starting version 5.0.0
             varnishstat_format = "xml"
 
         return version, varnishstat_format
@@ -243,7 +238,7 @@ class Varnish(AgentCheck):
             json_output = json.loads(output)
             if "counters" in json_output:
                 json_output = json_output["counters"]
-            for name, metric in iteritems(json_output):
+            for name, metric in json_output.items():
                 if not isinstance(metric, dict):  # skip 'timestamp' field
                     continue
 
@@ -254,11 +249,11 @@ class Varnish(AgentCheck):
                 value = metric.get("value", 0)
 
                 if metric.get("flag") in ("a", "c"):
-                    self.rate(metric_name, long(value), tags=self.tags)
+                    self.rate(metric_name, int(value), tags=self.tags)
                 elif metric.get("flag") in ("g", "i"):
-                    self.gauge(metric_name, long(value), tags=self.tags)
+                    self.gauge(metric_name, int(value), tags=self.tags)
                     if 'n_purges' in self.normalize(name, prefix="varnish"):
-                        self.rate('varnish.n_purgesps', long(value), tags=self.tags)
+                        self.rate('varnish.n_purgesps', int(value), tags=self.tags)
                 elif 'flag' not in metric:
                     self.log.warning("Could not determine the type of metric %s, skipping submission", metric_name)
                     self.log.debug("Raw metric %s is missing the `flag` field", str(metric))
@@ -317,6 +312,12 @@ class Varnish(AgentCheck):
               --------------------------------------------------------------RR Good Recv
               ------------------------------------------------------------HHHH Happy
 
+        Example output (v6):
+
+            Backend name   Admin      Probe    Health     Last change
+            boot.default   healthy    0/0      healthy    Mon, 16 Jan 2023 09:13:41 GMT
+            boot.image     healthy    0/0      healthy    Mon, 16 Jan 2023 09:13:41 GMT
+
         """
         # Process status by backend.
         backends_by_status = defaultdict(list)
@@ -324,9 +325,9 @@ class Varnish(AgentCheck):
             backend, status, message = None, None, None
             # split string and remove all empty fields
             tokens = filter(None, line.strip().split(' '))
-            tokens = [t for t in tokens]
+            tokens = list(tokens)
             if len(tokens):
-                if tokens == ['Backend', 'name', 'Admin', 'Probe']:
+                if all(t in tokens for t in ['Backend', 'name', 'Admin', 'Probe']):
                     # skip the column headers that exist in new output format
                     continue
                 # parse new output format
@@ -361,7 +362,7 @@ class Varnish(AgentCheck):
         if backends_by_status is None:
             return
 
-        for status, backends in iteritems(backends_by_status):
+        for status, backends in backends_by_status.items():
             check_status = BackendStatus.to_check_status(status)
             for backend, message in backends:
                 service_checks_tags = ['backend:%s' % backend] + self.custom_tags

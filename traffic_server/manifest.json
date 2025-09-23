@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "aaf78f60-10de-453c-b2d8-dc44818720c9",
   "app_id": "traffic-server",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,12 +13,12 @@
     "title": "Traffic Server",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Web",
       "Category::Caching",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Traffic Server",
@@ -49,22 +49,21 @@
         "traffic_manager",
         "traffic_server",
         "trafficserver start"
-      ]
+      ],
+      "source_type_id": 10259,
+      "auto_install": true
     },
     "dashboards": {
       "Traffic Server - Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "[Traffic Server] 4xx Errors higher than usual": "assets/monitors/4xx.json",
-      "[Traffic Server] 5xx Errors higher than usual": "assets/monitors/5xx.json"
+      "4xx errors number is high": "assets/monitors/4xx.json",
+      "5xx errors number is high": "assets/monitors/5xx.json"
     },
     "saved_views": {
       "traffic_server_error_logs": "assets/saved_views/traffic_server_error_logs.json",
       "traffic_server_overview": "assets/saved_views/traffic_server_overview.json",
       "traffic_server_patterns": "assets/saved_views/traffic_server_error_patterns.json"
-    },
-    "logs": {
-      "source": "traffic_server"
     }
   }
 }

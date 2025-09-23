@@ -11,8 +11,6 @@ import struct
 from collections import defaultdict
 
 import psutil
-from six import iteritems
-from six.moves import range
 
 from datadog_checks.base import AgentCheck
 
@@ -111,7 +109,6 @@ class BTRFS(AgentCheck):
         results = []
 
         with FileDescriptor(mountpoint) as fd:
-
             # Get the struct size needed
             # https://github.com/spotify/linux/blob/master/fs/btrfs/ioctl.h#L46-L50
             ret = sized_array(TWO_LONGS_STRUCT.size)
@@ -137,7 +134,6 @@ class BTRFS(AgentCheck):
         unallocated_bytes = 0
 
         with FileDescriptor(mountpoint) as fd:
-
             # Retrieve the fs info to get the number of devices and max device id
             fs_info = sized_array(BTRFS_FS_INFO_STRUCT.size)
             fcntl.ioctl(fd, BTRFS_IOC_FS_INFO, fs_info)
@@ -175,7 +171,7 @@ class BTRFS(AgentCheck):
         if len(btrfs_devices) == 0:
             raise Exception("No btrfs device found")
 
-        for device, mountpoint in iteritems(btrfs_devices):
+        for device, mountpoint in btrfs_devices.items():
             for flags, total_bytes, used_bytes in self.get_usage(mountpoint):
                 replication_type, usage_type = FLAGS_MAPPER[flags]
                 tags = [

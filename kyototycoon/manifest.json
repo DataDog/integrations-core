@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5cc7578e-8f8e-43c3-890a-4360581634e7",
   "app_id": "kyoto-tycoon",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -15,8 +16,9 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Store",
-      "Category::Log Collection"
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -25,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Kyoto Tycoon",
@@ -45,16 +46,15 @@
       },
       "process_signatures": [
         "ktserver"
-      ]
+      ],
+      "source_type_id": 62,
+      "auto_install": true
     },
     "dashboards": {
       "kyototycoon": "assets/dashboards/kyototycoon_dashboard.json"
     },
     "saved_views": {
       "kyoto-tycoon_processes": "assets/saved_views/kyoto-tycoon_processes.json"
-    },
-    "logs": {
-      "source": "kyototycoon"
     }
   }
 }

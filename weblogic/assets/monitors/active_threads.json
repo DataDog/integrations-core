@@ -1,29 +1,36 @@
 {
-	"name": "[WebLogic] % of Active Execute Threads is high on host {{host.name}} for server runtime {{serverruntime.name}}",
-	"type": "query alert",
-	"query": "avg(last_5m):((avg:weblogic.threadpool_runtime.execute_threads_total{*} by {host,serverruntime} - avg:weblogic.threadpool_runtime.threads_standby{*} by {host,serverruntime}) / avg:weblogic.threadpool_runtime.execute_threads_total{*} by {host,serverruntime}) * 100 > 70",
-	"message": "{{#is_alert}}\\n\\nALERT: The current number of active threads represents {{value}} % of  the current number of threads managed by the thread pool for host: {{host.name}}, server runtime {{serverruntime.name}}\\n\\n{{/is_alert}} \\n\\n{{#is_warning}}\\n\\nWARNING: The current number of active threads represents {{value}} % of  the current number of threads managed by the thread pool for host: {{host.name}}, server runtime {{serverruntime.name}}\\n\\n{{/is_warning}}",
-	"tags": [
-		"integration:weblogic"
-	],
-	"options": {
-		"thresholds": {
-			"critical": 70,
-			"warning": 50
-		},
-		"notify_audit": false,
-		"require_full_window": false,
-		"notify_no_data": false,
-		"no_data_timeframe": 10,
-		"renotify_interval": 0,
-		"locked": false,
-		"silenced": {},
-		"include_tags": true,
-		"escalation_message": "",
-		"new_group_delay": 60
-	},
-	"priority": null,
-	"recommended_monitor_metadata": {
-		"description": "Get notified when the percent of Active Execute Threads is high."
-	}
+  "version": 2,
+  "created_at": "2022-03-01",
+  "last_updated_at": "2022-03-01",
+  "title": "Number of active thread is high",
+  "tags": [
+    "integration:weblogic"
+  ],
+  "description": "Threads are a crucial mechanism to ensure that the server can efficiently manage a wide range of tasks without becoming overwhelmed. This monitor tracks the utilization of WebLogic Server's thread pool to avoid potential performance concern.",
+  "definition": {
+    "message": "{{#is_alert}}\\n\\nALERT: The current number of active threads represents {{value}} % of  the current number of threads managed by the thread pool for host: {{host.name}}, server runtime {{serverruntime.name}}\\n\\n{{/is_alert}} \\n\\n{{#is_warning}}\\n\\nWARNING: The current number of active threads represents {{value}} % of  the current number of threads managed by the thread pool for host: {{host.name}}, server runtime {{serverruntime.name}}\\n\\n{{/is_warning}}",
+    "name": "[WebLogic] % of Active Execute Threads is high on host {{host.name}} for server runtime {{serverruntime.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_group_delay": 60,
+      "no_data_timeframe": 10,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "silenced": {},
+      "thresholds": {
+        "critical": 70,
+        "warning": 50
+      }
+    },
+    "priority": null,
+    "query": "avg(last_5m):((avg:weblogic.threadpool_runtime.execute_threads_total{*} by {host,serverruntime} - avg:weblogic.threadpool_runtime.threads_standby{*} by {host,serverruntime}) / avg:weblogic.threadpool_runtime.execute_threads_total{*} by {host,serverruntime}) * 100 > 70",
+    "tags": [
+      "integration:weblogic"
+    ],
+    "type": "query alert"
+  }
 }

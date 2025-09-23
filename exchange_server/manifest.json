@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e334d30a-a7df-4c06-9d1f-d8b6663df38a",
   "app_id": "exchange-server",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,9 +13,10 @@
     "title": "Microsoft Exchange Server",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Windows",
       "Supported OS::Windows",
-      "Category::OS & System",
-      "Category::Log Collection"
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -23,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Exchange Server",
@@ -40,13 +41,12 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10023,
+      "auto_install": true
     },
     "dashboards": {
       "Exchange Server Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "exchange_server"
     }
   }
 }

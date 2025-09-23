@@ -1,0 +1,13 @@
+{
+	"paging": {
+		"pageIndex": 1,
+		"pageSize": 1,
+		"total": 2
+	},
+	"components": [{
+		"key": "tmp_project",
+		"name": "Example of temporal project",
+		"qualifier": "TRK",
+		"project": "tmp_project"
+	}]
+}

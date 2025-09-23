@@ -1,0 +1,47 @@
+<events>
+  <event name="sql_batch_completed" timestamp="2023-01-01T12:00:00.123Z">
+    <data name="duration">
+      <value>10000</value>
+    </data>
+    <data name="session_id">
+      <value>123</value>
+    </data>
+    <data name="request_id">
+      <value>456</value>
+    </data>
+    <data name="database_name">
+      <value>TestDB</value>
+    </data>
+    <data name="batch_text">
+      <value>SELECT * FROM Customers WHERE CustomerId = 123</value>
+    </data>
+  </event>
+  <event name="rpc_completed" timestamp="2023-01-01T12:01:00.456Z">
+    <data name="duration">
+      <value>5000</value>
+    </data>
+    <data name="session_id">
+      <value>124</value>
+    </data>
+    <data name="database_name">
+      <value>TestDB</value>
+    </data>
+    <data name="statement">
+      <value>EXEC sp_GetCustomerDetails @CustomerId = 123</value>
+    </data>
+  </event>
+  <event name="error_reported" timestamp="2023-01-01T12:02:00.789Z">
+    <data name="error_number">
+      <value>8134</value>
+    </data>
+    <data name="session_id">
+      <value>125</value>
+    </data>
+    <data name="message">
+      <value>Divide by zero error encountered.</value>
+    </data>
+    <data name="statement">
+      <value>SELECT 1/0</value>
+    </data>
+  </event>
+</events> 

@@ -10,7 +10,7 @@
 # Author: monica.riccelli@oracle.com
 # ==============================================
 # jython for WLST (WebLogic Scripting Tool)
-# flake8: noqa
+# ruff: noqa
 
 import os
 
@@ -124,7 +124,6 @@ cd('/')
 cl = create(cluster_name, 'Cluster')
 
 if cluster_type == "CONFIGURED":
-
     # Create managed servers
     for index in range(0, number_of_ms):
         cd('/')

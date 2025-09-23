@@ -5,10 +5,19 @@ on:
   pull_request_target:
     branches:
       - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - review_requested
 
 jobs:
   labeler:
     if: ${{ github.event.pull_request.head.repo.full_name != github.repository }} # only PRs from other repos
+    permissions:
+      pull-requests: write # Needed for labeler-reusable.yml
+      contents: read # Needed for labeler-reusable.yml
     uses: ./.github/workflows/labeler-reusable.yml
     secrets:
-      repo-token: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"
+      app-id: "${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}"
+      private-key: "${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}"

@@ -1,0 +1,29 @@
+{
+  "name": "Unready nodes by cluster",
+  "query": "Filter by: node_status:notready",
+  "page": "container_orchestration_nodes",
+  "type": "container",
+  "options": {
+    "palette": "hostmap_blues",
+    "tab": "overview",
+    "metric": "node.uptime",
+    "showNogroupObjects": false,
+    "groups": [
+      {
+        "kind": "tag",
+        "value": "kube_cluster_name"
+      }
+    ],
+    "query": "tag#node_status:notready",
+    "view": "node",
+    "columns": [
+      "name",
+      "status",
+      "node_schedulability",
+      "node_role",
+      "kubelet_version",
+      "age"
+  ],
+    "paletteFlip": false
+  }
+}

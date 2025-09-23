@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "fe9a038e-3948-4646-9a1c-ea1f1cc59977",
   "app_id": "marathon",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -17,7 +18,7 @@
       "Category::Configuration & Deployment",
       "Category::Containers",
       "Category::Log Collection",
-      "Category::Autodiscovery"
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -26,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Marathon",
@@ -46,16 +46,15 @@
       },
       "process_signatures": [
         "start --master mesos marathon"
-      ]
+      ],
+      "source_type_id": 82,
+      "auto_install": true
     },
     "dashboards": {
       "marathon-overview": "assets/dashboards/marathon-overview_dashboard.json"
     },
     "saved_views": {
       "marathon_processes": "assets/saved_views/marathon_processes.json"
-    },
-    "logs": {
-      "source": "marathon"
     }
   }
 }

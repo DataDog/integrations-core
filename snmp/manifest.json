@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4fc8e176-17ce-4346-9544-bec30ac47a00",
   "app_id": "snmp",
+  "owner": "network-device-monitoring-core",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -12,14 +13,23 @@
     "title": "SNMP",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
-      "Category::Monitoring",
-      "Category::Notification",
       "Category::Network",
-      "Category::Autodiscovery",
-      "Category::SNMP"
+      "Category::Notifications",
+      "Category::SNMP",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-snmp-with-datadog/"
+      },
+      {
+        "resource_type": "guide",
+        "url": "https://datadoghq.dev/integrations-core/tutorials/snmp/introduction/"
+      }
     ]
   },
   "author": {
@@ -28,7 +38,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "SNMP",
@@ -45,14 +54,27 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 78,
+      "auto_install": true
     },
     "dashboards": {
       "Interface Performance": "assets/dashboards/interface_performance.json",
-      "Datacenter Overview": "assets/dashboards/datacenter_overview.json"
+      "Datacenter Overview": "assets/dashboards/datacenter_overview.json",
+      "Netflow Monitoring": "assets/dashboards/netflow_monitoring.json",
+      "Datadog NDM Environment": "assets/dashboards/ndm_troubleshooting.json",
+      "BGP & OSPF Overview": "assets/dashboards/bgp_ospf_overview.json"
     },
     "monitors": {
-      "[SNMP] Device Down Alert": "assets/monitors/device_down.json"
+      "Device is down": "assets/monitors/device_down.json",
+      "SNMP Device is unreachable": "assets/monitors/device_unreachable.json",
+      "Interface is down on SNMP device": "assets/monitors/interface_down.json",
+      "LinkDown Trap Interface is down on SNMP device": "assets/monitors/traps_linkDown.json",
+      "SNMP device CPU usage is high": "assets/monitors/high_cpu.json",
+      "SNMP device memory usage is high": "assets/monitors/high_memory.json",
+      "Interface bandwidth usage for incoming traffic is high": "assets/monitors/high_interface_bandwidth_usage_in.json",
+      "Interface bandwidth usage for outgoing traffic is high": "assets/monitors/high_interface_bandwidth_usage_out.json",
+      "BGP peer state is stuck in an unestablished state": "assets/monitors/bgp_peer_state_stuck.json"
     }
   }
 }

@@ -121,6 +121,20 @@ files:
           type: boolean
           display_default: false
           example: true
+      - name: disable_spark_job_stage_tags
+        description: |
+          Enable to stop submitting the tag `stage_id` for Spark jobs.
+        value:
+          type: boolean
+          display_default: false
+          example: true
+      - name: disable_spark_stage_metrics
+        description: |
+          Enable to stop collecting Spark stage metrics.
+        value:
+          type: boolean
+          display_default: false
+          example: true
       - template: instances/http
         overrides:
           auth_token.description: |

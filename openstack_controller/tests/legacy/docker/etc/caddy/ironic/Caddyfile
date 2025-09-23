@@ -1,0 +1,26 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @get_v1_conductors {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /v1/conductors
+    }
+    route @get_v1_conductors {
+        rewrite /v1/conductors /v1/conductors/get.json
+        file_server
+    }
+    @get_v1_nodes {
+        method GET
+        header X-Auth-Token "demo_test"
+        path /v1/nodes
+    }
+    route @get_v1_nodes {
+        rewrite /v1/nodes /v1/nodes/get.json
+        file_server
+    }
+    file_server browse
+}

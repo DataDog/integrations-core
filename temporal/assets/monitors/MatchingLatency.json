@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "created_at": "2023-04-13",
+  "last_updated_at": "2023-04-13",
+  "title": "Matching Service latency is elevated",
+  "tags": [
+    "integration:temporal"
+  ],
+  "description": "The Matching Service is responsible for matching Workers to Tasks and routing new Tasks to the appropriate queue. This monitor tracks the latency of the Matching Service to avoid performance issues.",
+  "definition": {
+    "message": "The latency for the Temporal matching service is elevated ({{ value }}).",
+    "name": "Temporal matching service latency is elevated",
+    "options": {
+      "avalanche_window": 10,
+      "include_tags": false,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "silenced": {},
+      "thresholds": {
+        "critical": 1000,
+        "warning": 500
+      }
+    },
+    "priority": null,
+    "query": "avg(last_5m):sum:temporal.server.service.latency.sum{service_name:matching}.as_rate() / sum:temporal.server.service.latency.count{service_name:matching}.as_rate() > 1000",
+    "restricted_roles": null,
+    "tags": [
+      "integration:temporal",
+      "service_name:matching"
+    ],
+    "type": "query alert"
+  }
+}

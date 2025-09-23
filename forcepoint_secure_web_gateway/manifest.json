@@ -1,0 +1,65 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "183f1ae8-8bc0-4135-8b17-e6ff2b449f9c",
+  "app_id": "forcepoint-secure-web-gateway",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Forcepoint Secure Web Gateway logs",
+    "title": "Forcepoint Secure Web Gateway",
+    "media": [
+      {
+        "caption": "Forcepoint Secure Web Gateway - Overview",
+        "image_url": "images/forcepoint_secure_web_gateway_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forcepoint Secure Web Gateway - Web DLP Logs",
+        "image_url": "images/forcepoint_secure_web_gateway_web_dlp_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forcepoint Secure Web Gateway - Web Logs",
+        "image_url": "images/forcepoint_secure_web_gateway_web_logs.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 36227438,
+      "source_type_name": "Forcepoint Secure Web Gateway",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Forcepoint Secure Web Gateway - Overview": "assets/dashboards/forcepoint_secure_web_gateway_overview.json",
+      "Forcepoint Secure Web Gateway - Web Logs": "assets/dashboards/forcepoint_secure_web_gateway_web_logs.json",
+      "Forcepoint Secure Web Gateway - Web DLP Logs": "assets/dashboards/forcepoint_secure_web_gateway_web_dlp_logs.json"
+    },
+    "logs": {
+      "source": "forcepoint-secure-web-gateway"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

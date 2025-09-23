@@ -1,0 +1,11 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.12"]
+version = ["1.17"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+    { key = "FLUENTD_VERSION", value = "1.17.1", if = ["1.17"] },
+    { key = "FLUENTD_IMAGE_TAG", value = "v1.17.1-1.0", if = ["1.17"] },
+]

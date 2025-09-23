@@ -1,5 +1,0 @@
-# This file is here, so that we can add this initially empty directory as part
-# of the Python package data:
-# https://steindom.com/articles/add-empty-directory-git-repository
-*
-!.gitignore

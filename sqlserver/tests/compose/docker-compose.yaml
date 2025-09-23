@@ -1,18 +1,17 @@
-version: '3'
-
 services:
   sqlserver:
     # https://hub.docker.com/_/microsoft-mssql-server
     # https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-linux-2017
-    #image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
     build:
       context: .
       dockerfile: Dockerfile
       args:
         - SQLSERVER_IMAGE_TAG=${SQLSERVER_IMAGE_TAG}
+    platform: linux/amd64
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Password123
+      - TZ=${TZ}
     ports:
       - "1433:1433"
     volumes:

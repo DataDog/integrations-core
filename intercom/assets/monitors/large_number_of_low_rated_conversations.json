@@ -1,0 +1,36 @@
+{
+	"version": 2,
+	"created_at": "2024-09-18",
+	"last_updated_at": "2024-09-18",
+	"title": "Large Number of Low Rated Conversations",
+	"description": "This monitor tracks and alerts when a large number of conversations receive low ratings.",
+	"definition": {
+		"id": 153714191,
+		"name": "Large Number of Low Rated Conversations",
+		"type": "log alert",
+		"query": "logs(\"source:intercom service:conversation @data.item.conversation_rating.rating:1\").index(\"*\").rollup(\"cardinality\", \"@data.item.source.id\").last(\"1d\") >= 5",
+		"message": "{{#is_alert}}\nA significant number of Intercom conversations have received low ratings. The total number of conversations given a one-star rating is {{value}}.\nPlease take the necessary steps to manage your Intercom account accordingly.\n{{/is_alert}}",
+		"tags": [
+			"source:intercom",
+			"service:conversation"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 5
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"groupby_simple_monitor": false,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:intercom"
+	]
+}

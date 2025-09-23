@@ -2,13 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.utils.time import get_timestamp
-from datadog_checks.dev.testing import requires_py3
 
 from ..utils import get_check
-
-pytestmark = [
-    requires_py3,
-]
 
 
 def test(aggregator, dd_run_check, mock_http_response):
@@ -17,9 +12,7 @@ def test(aggregator, dd_run_check, mock_http_response):
         # HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
         # TYPE go_memstats_last_gc_time_seconds gauge
         go_memstats_last_gc_time_seconds{{foo="bar"}} {}
-        """.format(
-            get_timestamp() - 1.2
-        )
+        """.format(get_timestamp() - 1.2)
     )
     check = get_check({'metrics': [{'go_memstats_last_gc_time_seconds': {'type': 'time_elapsed'}}]})
     dd_run_check(check)

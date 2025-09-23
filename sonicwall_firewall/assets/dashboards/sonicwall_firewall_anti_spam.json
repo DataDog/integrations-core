@@ -1,0 +1,638 @@
+{
+  "title": "SonicWall Firewall - Anti-Spam",
+  "description": "This dashboard provides information about the Firewall Anti-Spam logs generated in SonicWall Firewall.",
+  "widgets": [
+    {
+      "id": 580203364676372,
+      "definition": {
+        "type": "image",
+        "url": "https://securityaffairs.com/wp-content/uploads/2020/10/SonicWall.png",
+        "url_dark_theme": "https://securityaffairs.com/wp-content/uploads/2020/10/SonicWall.png",
+        "sizing": "contain",
+        "margin": "md",
+        "has_background": false,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 3
+      }
+    },
+    {
+      "id": 25814084312524,
+      "definition": {
+        "type": "note",
+        "content": "## Overview\n- This dashboard provides insights on Anti-Spam logs.\n- SonicWall's logs for Anti-Spam categories include information on emails flagged as spam, actions taken (such as blocking or quarantining), source and destination IPs, email addresses, and the categories of spam identified.\n",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 4,
+        "height": 3
+      }
+    },
+    {
+      "id": 6404712839745130,
+      "definition": {
+        "title": "Total Anti-Spam Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall @gcat:14 $Priority"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 3
+      }
+    },
+    {
+      "id": 8315856489152810,
+      "definition": {
+        "title": "Total Events by Priority Over Time",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [
+                  {
+                    "facet": "@priority",
+                    "limit": 10,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:sonicwall-firewall @gcat:14 $Priority"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "order_by": "values",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 3,
+        "width": 8,
+        "height": 4
+      }
+    },
+    {
+      "id": 7192538660853662,
+      "definition": {
+        "title": "Total Disabled Anti-Spam Services",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall @gcat:14 @message_id:1085 $Priority"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#9e9a9a"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 8,
+        "y": 3,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 8979897882829710,
+      "definition": {
+        "title": "Total Enabled Anti-Spam Services",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall @gcat:14 @message_id:1084 $Priority"
+                },
+                "storage": "hot"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "custom_bg",
+                "custom_bg_color": "#cfefaf"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 8,
+        "y": 5,
+        "width": 4,
+        "height": 2
+      }
+    },
+    {
+      "id": 8503888150541206,
+      "definition": {
+        "title": "Top Client IP for SHLO Replay Attack",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [
+                  {
+                    "facet": "@message_value",
+                    "limit": 10,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:sonicwall-firewall @gcat:14 @message_id:1378 $Priority"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 4,
+        "height": 5
+      }
+    },
+    {
+      "id": 2593064471869400,
+      "definition": {
+        "title": "Dropped Inbound vs Outbound Server Connections Over Time",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "alias": "Dropped Outbound Connections",
+                "style": {
+                  "palette": "dd20",
+                  "palette_index": 4
+                },
+                "formula": "query1"
+              },
+              {
+                "alias": "Dropped Inbound Connections",
+                "style": {
+                  "palette": "dd20",
+                  "palette_index": 0
+                },
+                "formula": "query2"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall @gcat:14 @message_id:1091 $Priority"
+                },
+                "storage": "hot"
+              },
+              {
+                "data_source": "logs",
+                "name": "query2",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [],
+                "search": {
+                  "query": "source:sonicwall-firewall @gcat:14 @message_id:1092 $Priority"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "order_by": "values",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      },
+      "layout": {
+        "x": 4,
+        "y": 7,
+        "width": 8,
+        "height": 5
+      }
+    },
+    {
+      "id": 502696036174550,
+      "definition": {
+        "title": "Most Frequent Anti-Spam Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [
+                  {
+                    "facet": "message",
+                    "limit": 10,
+                    "sort": {
+                      "order": "desc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:sonicwall-firewall @gcat:14 $Priority"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 1685160324932570,
+      "definition": {
+        "title": "Least Frequent Anti-Spam Events",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "compute": {
+                  "aggregation": "count"
+                },
+                "group_by": [
+                  {
+                    "facet": "message",
+                    "limit": 10,
+                    "sort": {
+                      "order": "asc",
+                      "aggregation": "count"
+                    }
+                  }
+                ],
+                "search": {
+                  "query": "source:sonicwall-firewall @gcat:14 $Priority"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 10,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "asc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {
+          "display": {
+            "type": "stacked",
+            "legend": "automatic"
+          }
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 12,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 5727857748797350,
+      "definition": {
+        "title": "Anti-Spam Details",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "requests": [
+          {
+            "response_format": "event_list",
+            "query": {
+              "data_source": "logs_stream",
+              "query_string": "source:sonicwall-firewall @gcat:14 $Priority",
+              "indexes": [],
+              "storage": "hot",
+              "sort": {
+                "column": "host",
+                "order": "asc"
+              }
+            },
+            "columns": [
+              {
+                "field": "status_line",
+                "width": "auto"
+              },
+              {
+                "field": "timestamp",
+                "width": "auto"
+              },
+              {
+                "field": "host",
+                "width": "auto"
+              },
+              {
+                "field": "@message_id",
+                "width": "auto"
+              },
+              {
+                "field": "@priority",
+                "width": "auto"
+              },
+              {
+                "field": "@network.client.ip",
+                "width": "auto"
+              },
+              {
+                "field": "@network.destination.ip",
+                "width": "auto"
+              },
+              {
+                "field": "message",
+                "width": "auto"
+              }
+            ]
+          }
+        ],
+        "type": "list_stream"
+      },
+      "layout": {
+        "x": 0,
+        "y": 18,
+        "width": 12,
+        "height": 5
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "Priority",
+      "prefix": "@priority",
+      "available_values": [
+        "Alert",
+        "Info",
+        "Notice",
+        "normal"
+      ],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

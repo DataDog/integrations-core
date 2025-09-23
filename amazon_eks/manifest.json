@@ -9,16 +9,34 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Amazon EKS is a managed service that makes it easy to run Kubernetes on AWS",
-    "title": "Amazon-EKS",
+    "title": "Amazon EKS",
     "media": [],
     "classifier_tags": [
-      "Supported OS::Linux",
-      "Supported OS::macOS",
-      "Supported OS::Windows",
       "Category::AWS",
+      "Category::Cloud",
+      "Category::Configuration & Deployment",
       "Category::Containers",
+      "Category::Kubernetes",
+      "Category::Log Collection",
       "Category::Orchestration",
-      "Category::Log Collection"
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/announcing-eks"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/eks-cluster-metrics"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/eks_fargate/"
+      }
     ]
   },
   "author": {
@@ -27,7 +45,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Amazon EKS",
@@ -37,7 +54,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10018,
+      "auto_install": true
     }
   }
 }

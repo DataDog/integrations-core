@@ -7,7 +7,6 @@ import os
 import psutil
 import pytest
 from mock import patch
-from six import iteritems
 
 from datadog_checks.process import ProcessCheck
 
@@ -24,7 +23,7 @@ except Exception:
 _PSUTIL_MEM_SHARED = True
 try:
     p = psutil.Process(os.getpid())
-    p.memory_info().shared
+    _ = p.memory_info().shared
 except Exception:
     _PSUTIL_MEM_SHARED = False
 
@@ -44,6 +43,17 @@ class MockProcess(object):
 
     def children(self, recursive=False):
         return []
+
+    # https://stackoverflow.com/questions/5093382/object-becomes-none-when-using-a-context-manager
+    def oneshot(self):
+        class MockOneShot(object):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, type, value, traceback):
+                pass
+
+        return MockOneShot()
 
 
 class NamedMockProcess(object):
@@ -98,7 +108,7 @@ def test_psutil_wrapper_accessors_fail(aggregator):
 
 
 @patch('psutil.process_iter', side_effect=[[NamedMockProcess("Process 1")], [NamedMockProcess("Process 2")]])
-def test_process_list_cache(aggregator, dd_run_check):
+def test_process_list_cache(aggregator, dd_run_check, caplog):
     config = {
         'instances': [{'name': 'python', 'search_string': ['python']}, {'name': 'python', 'search_string': ['python']}]
     }
@@ -106,8 +116,11 @@ def test_process_list_cache(aggregator, dd_run_check):
     process2 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][1]])
 
     with patch('datadog_checks.process.cache.ProcessListCache.reset'):
-        dd_run_check(process1)
-        dd_run_check(process2)
+        caplog.set_level(logging.DEBUG)
+        for process in (process1, process2):
+            dd_run_check(process)
+            assert "No matching process 'python' was found" in caplog.text
+            caplog.clear()
 
     # Should always succeed
     assert process1.process_list_cache.elements[0].name() == "Process 1"
@@ -155,7 +168,7 @@ def mock_psutil_wrapper(method, accessors):
     if accessors is None:
         result = 0
     else:
-        result = dict([(accessor, 0) for accessor in accessors])
+        result = dict.fromkeys(accessors, 0)
     return result
 
 
@@ -224,7 +237,8 @@ def test_check_missing_process(aggregator, dd_run_check, caplog):
     assert "Unable to find process named ['fooprocess', '/usr/bin/foo'] among processes" in caplog.text
 
 
-def test_check_real_process(aggregator, dd_run_check):
+@pytest.mark.parametrize("oneshot", [True, False])
+def test_check_real_process(aggregator, dd_run_check, oneshot):
     "Check that we detect python running (at least this process)"
     from datadog_checks.base.utils.platform import Platform
 
@@ -234,6 +248,7 @@ def test_check_real_process(aggregator, dd_run_check):
         'exact_match': False,
         'ignored_denied_access': True,
         'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
+        'use_oneshot': oneshot,
     }
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     expected_tags = generate_expected_tags(instance)
@@ -313,7 +328,7 @@ def test_relocated_procfs(aggregator, dd_run_check):
     my_procfs = tempfile.mkdtemp()
 
     def _fake_procfs(arg, root=my_procfs):
-        for key, val in iteritems(arg):
+        for key, val in arg.items():
             path = os.path.join(root, key)
             if isinstance(val, dict):
                 os.mkdir(path)
@@ -340,7 +355,7 @@ def test_relocated_procfs(aggregator, dd_run_check):
                     'cancelled_write_bytes: 0\n'
                 ),
             },
-            'stat': ("cpu  13034 0 18596 380856797 2013 2 2962 0 0 0\n" "btime 1448632481\n"),
+            'stat': ("cpu  13034 0 18596 380856797 2013 2 2962 0 0 0\nbtime 1448632481\n"),
         }
     )
 
@@ -359,9 +374,12 @@ def test_relocated_procfs(aggregator, dd_run_check):
     process = ProcessCheck(common.CHECK_NAME, config['init_config'], config['instances'])
 
     try:
-        with patch('socket.AF_PACKET', create=True), patch('sys.platform', 'linux'), patch(
-            'psutil._psutil_linux', create=True
-        ), patch('psutil._psutil_posix', create=True):
+        with (
+            patch('socket.AF_PACKET', create=True),
+            patch('sys.platform', 'linux'),
+            patch('psutil._psutil_linux', create=True),
+            patch('psutil._psutil_posix', create=True),
+        ):
             dd_run_check(process)
     finally:
         shutil.rmtree(my_procfs)
@@ -384,3 +402,23 @@ def test_process_service_check(aggregator):
     aggregator.assert_service_check('process.up', count=1, tags=['process:warning'], status=process.WARNING)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_ok'], status=process.OK)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_critical'], status=process.CRITICAL)
+
+
+def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):
+    """Test that reset() is called/not called based on reset_cache_on_process_changes config."""
+    # Config=True (default)
+    init_config = {'reset_cache_on_process_changes': True}
+    instance = {'name': 'nonexistent_process_12345', 'search_string': ['nonexistent_process_12345']}
+    process = ProcessCheck(common.CHECK_NAME, init_config, [instance])
+    with patch.object(process.process_list_cache, 'reset') as mock_reset:
+        dd_run_check(process)
+        # Should call reset since the config is true
+        mock_reset.assert_called()
+    # Config=False
+    init_config = {'reset_cache_on_process_changes': False}
+    instance = {'name': 'nonexistent_process_12345', 'search_string': ['nonexistent_process_12345']}
+    process = ProcessCheck(common.CHECK_NAME, init_config, [instance])
+    with patch.object(process.process_list_cache, 'reset') as mock_reset:
+        dd_run_check(process)
+        # Should NOT call reset since the config is false
+        mock_reset.assert_not_called()

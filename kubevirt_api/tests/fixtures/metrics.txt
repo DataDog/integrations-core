@@ -1,0 +1,442 @@
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 5.9416e-05
+go_gc_duration_seconds{quantile="0.25"} 0.000366
+go_gc_duration_seconds{quantile="0.5"} 0.000785625
+go_gc_duration_seconds{quantile="0.75"} 0.00111325
+go_gc_duration_seconds{quantile="1"} 0.004126875
+go_gc_duration_seconds_sum 0.109885085
+go_gc_duration_seconds_count 126
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 77
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.21.8 X:nocoverageredesign"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 6.846924e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 2.25478264e+09
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 2.08853e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 1.6223202e+07
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 6.793464e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 6.846924e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 2.99008e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 8.9014272e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 447234
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 1.609728e+07
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 1.18915072e+08
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.7216000898338568e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 1.6670436e+07
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 12000
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 15600
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 1.765176e+06
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 1.890336e+06
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.3438044e+08
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 1.885374e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 2.719744e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 2.719744e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 1.3430812e+08
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 16
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 22.75
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 13
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 1.7424384e+08
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.72159010925e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 2.445406208e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 1
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0
+# HELP rest_client_rate_limiter_duration_seconds Client side rate limiter latency in seconds. Broken down by verb and URL.
+# TYPE rest_client_rate_limiter_duration_seconds histogram
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET"} 3.042e-06
+rest_client_rate_limiter_duration_seconds_count{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 2
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1.6669999999999999e-06
+rest_client_rate_limiter_duration_seconds_count{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 2
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 9.17e-07
+rest_client_rate_limiter_duration_seconds_count{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 6.67e-07
+rest_client_rate_limiter_duration_seconds_count{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 9.58e-07
+rest_client_rate_limiter_duration_seconds_count{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 2.25e-06
+rest_client_rate_limiter_duration_seconds_count{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1e-06
+rest_client_rate_limiter_duration_seconds_count{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.001"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.002"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.004"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.008"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.016"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.032"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.064"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.128"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.256"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.512"} 1
+rest_client_rate_limiter_duration_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="+Inf"} 1
+rest_client_rate_limiter_duration_seconds_sum{url="https://10.96.0.1:443/version",verb="GET"} 3.208e-06
+rest_client_rate_limiter_duration_seconds_count{url="https://10.96.0.1:443/version",verb="GET"} 1
+# HELP rest_client_request_latency_seconds Request latency in seconds. Broken down by verb and URL.
+# TYPE rest_client_request_latency_seconds histogram
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.005"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.025"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.05"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET"} 0.003591625
+rest_client_request_latency_seconds_count{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps/%7Bname%7D",verb="GET"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.005"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.025"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.05"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.1"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.2"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.4"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.6"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.8"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.25"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.5"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="2"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="3"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="4"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="5"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="6"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="8"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="10"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="15"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="20"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="30"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="45"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="60"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 2
+rest_client_request_latency_seconds_sum{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.0015655830000000002
+rest_client_request_latency_seconds_count{url="https://10.96.0.1:443/api/v1/namespaces/%7Bnamespace%7D/configmaps?fieldSelector=%7Bvalue%7D&limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 2
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.005"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.025"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.05"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.000969291
+rest_client_request_latency_seconds_count{url="https://10.96.0.1:443/api/v1/namespaces?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.005"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.025"} 0
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.05"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.025628292
+rest_client_request_latency_seconds_count{url="https://10.96.0.1:443/apis/apiextensions.k8s.io/v1/customresourcedefinitions?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.005"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.025"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.05"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.001959292
+rest_client_request_latency_seconds_count{url="https://10.96.0.1:443/apis/kubevirt.io/v1/kubevirts?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.005"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.025"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.05"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.000972167
+rest_client_request_latency_seconds_count{url="https://10.96.0.1:443/apis/kubevirt.io/v1/virtualmachineinstancepresets?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.005"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.025"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.05"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 0.000539667
+rest_client_request_latency_seconds_count{url="https://10.96.0.1:443/apis/snapshot.kubevirt.io/v1alpha1/virtualmachinerestores?limit=%7Bvalue%7D&resourceVersion=%7Bvalue%7D",verb="GET"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.005"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.025"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.05"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="0.8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="1"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="1.25"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="1.5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="2"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="3"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="4"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="5"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="6"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="8"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="10"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="15"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="20"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="30"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="45"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="60"} 1
+rest_client_request_latency_seconds_bucket{url="https://10.96.0.1:443/version",verb="GET",le="+Inf"} 1
+rest_client_request_latency_seconds_sum{url="https://10.96.0.1:443/version",verb="GET"} 0.002227375
+rest_client_request_latency_seconds_count{url="https://10.96.0.1:443/version",verb="GET"} 1
+# HELP rest_client_requests_total Number of HTTP requests, partitioned by status code, method, and host.
+# TYPE rest_client_requests_total counter
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET",resource="configmaps",verb="GET"} 1
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET",resource="configmaps",verb="LIST"} 47
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET",resource="customresourcedefinitions",verb="LIST"} 25
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET",resource="kubevirts",verb="LIST"} 23
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET",resource="namespaces",verb="LIST"} 23
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET",resource="none",verb="none"} 1
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET",resource="virtualmachineinstancepresets",verb="LIST"} 22
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET",resource="virtualmachinerestores",verb="LIST"} 25
