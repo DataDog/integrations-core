@@ -47,6 +47,8 @@ jobs:
     - name: Configure ddev
       run: |
             ddev config override
+            ddev config set orgs.default.site datadoghq.com
+            ddev config set orgs.default.api_key ${{ secrets.DD_API_KEY }}
 
     - name: Measure disk usage
       env:
@@ -54,7 +56,8 @@ jobs:
       run: |
         cmd="ddev size status \
         --commit ${{github.event.pull_request.head.sha }} \
-        --format json " # TODO: change to ${{ github.event.workflow_run.head_sha }}
+        --format json 
+        --to-dd-org default" # TODO: change to ${{ github.event.workflow_run.head_sha }}
         # Send metrics to Datadog only on push to master
 
         # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
@@ -104,6 +107,9 @@ jobs:
     - name: Configure ddev
       run: |
             ddev config override
+            ddev config set orgs.default.site datadoghq.com
+            ddev config set orgs.default.api_key ${{ secrets.DD_API_KEY }}
+
     - name: Calculate diff
       run: |
         ddev size diff ${{github.event.pull_request.head.sha }} --format json --use-artifacts --quality-gate-threshold ${{ env.SIZE_THRESHOLD }} # TODO: change to ${{ github.event.workflow_run.head_sha }}
