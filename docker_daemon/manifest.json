@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ca1a7870-7d95-40c7-9790-ef6c1e928967",
   "app_id": "docker",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -76,6 +77,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "docker": "assets/dashboards/docker_dashboard.json"
     }
   }
 }

@@ -8,7 +8,7 @@
 		"id": 157631120,
 		"name": "High Number of Abandoned Outbound Voice Conversations Detected",
 		"type": "query alert",
-		"query": "sum(last_1d):sum:genesys.voice.abandoned_outbound_conversations_count{*}.as_count() > 100",
+		"query": "sum(last_1d):sum:genesys_cloud.voice.abandoned_outbound_conversations_count{*}.as_count() > 100",
 		"message": "{{#is_alert}}\nThe abandoned outbound conversations refer to the number of outbound dialer calls that were abandoned.\n\nA high number of abandoned outbound conversations has been detected. Please review and take necessary action.\n{{/is_alert}}",
 		"tags": [
 			"source:genesys"

@@ -13,7 +13,8 @@ SHELL ["cmd", "/S", "/C"]
 
 # https://learn.microsoft.com/en-us/visualstudio/install/build-tools-container#create-and-build-the-dockerfile
 # https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools
-RUN curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe `
+# Bootstrapper version pinned to 17.12.36227.10 (taken from learn.microsoft.com/en-us/visualstudio/releases/2022/release-history#fixed-version-bootstrappers)
+RUN curl -SL --output vs_buildtools.exe https://download.visualstudio.microsoft.com/download/pr/87b94407-0aa3-45fc-b53f-d224027a42b3/00e8cad9ef34839c57f9be8bc4f93c517804777bdef770e8dbdc8ba0e06bc348/vs_BuildTools.exe `
  && (start /w vs_buildtools.exe --quiet --wait --norestart --nocache `
      --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools" `
      --add Microsoft.VisualStudio.Component.VC.140 `
@@ -82,11 +83,11 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.12.9"
+ENV PYTHON_VERSION="3.12.10"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash '2a52993092a19cfdffe126e2eeac46a4265e25705614546604ad44988e040c0f'; `
+      -Hash '67b5635e80ea51072b87941312d00ec8927c4db9ba18938f7ad2d27b328b95fb'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
@@ -114,9 +115,9 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\perl\perl\bin" && `
     Remove-Item "strawberry-perl-$Env:PERL_VERSION-64bit.zip"
 
-ENV OPENSSL_VERSION="3.4.1"
+ENV OPENSSL_VERSION="3.5.2"
 
-ENV CURL_VERSION="8.12.1"
+ENV CURL_VERSION="8.16.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt

@@ -4,7 +4,8 @@
 import re
 from copy import deepcopy
 
-from ....config import is_affirmative
+from datadog_checks.base.config import is_affirmative
+
 from . import transformers
 
 DEFAULT_METRIC_TYPE = 'native'

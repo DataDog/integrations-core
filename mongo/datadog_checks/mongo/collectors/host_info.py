@@ -17,5 +17,5 @@ class HostInfoCollector(MongoCollector):
         return True
 
     def collect(self, api):
-        host_info = api['admin'].command('hostInfo')
+        host_info = api['admin'].command('hostInfo', maxTimeMS=api._timeout)
         return self._submit_payload({'system': host_info.get('system', {})})

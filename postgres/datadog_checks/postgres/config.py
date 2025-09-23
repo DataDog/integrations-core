@@ -91,6 +91,13 @@ class PostgresConfig:
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_wal_metrics = self._should_collect_wal_metrics(instance.get('collect_wal_metrics'))
         self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
+        # Locks idle in transaction metrics config
+        locks_idle_cfg = instance.get('locks_idle_in_transaction', {}) or {}
+        self.locks_idle_in_transaction = {
+            'enabled': is_affirmative(locks_idle_cfg.get('enabled', True)),
+            'collection_interval': int(locks_idle_cfg.get('collection_interval', 300)),
+            'max_rows': int(locks_idle_cfg.get('max_rows', 100)),
+        }
         self.data_directory = instance.get('data_directory', None)
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
         if is_affirmative(instance.get('collect_default_database', True)):
@@ -116,6 +123,7 @@ class PostgresConfig:
         self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
+        self.query_encodings = instance.get('query_encodings')
         self.managed_identity = instance.get('managed_identity', {})
         self.cloud_metadata = {}
         aws = instance.get('aws', {})
@@ -244,8 +252,9 @@ class PostgresConfig:
                     cap_mtype = mtype.upper()
                     if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
                         raise ConfigurationError(
-                            'Collector method {} is not known. '
-                            'Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
+                            'Collector method {} is not known. Known methods are RATE, GAUGE, MONOTONIC'.format(
+                                cap_mtype
+                            )
                         )
 
                     m['metrics'][ref][1] = getattr(PostgresConfig, cap_mtype)

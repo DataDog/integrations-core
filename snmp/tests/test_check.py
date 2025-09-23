@@ -865,7 +865,7 @@ def test_profile_sys_object_unknown(aggregator, caplog):
     # Via network discovery...
 
     host = socket.gethostbyname(common.HOST)
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    network = ipaddress.ip_network('{}/29'.format(host), strict=False).with_prefixlen
     instance = {
         'name': 'snmp_conf',
         'network_address': network,
@@ -898,7 +898,7 @@ def test_profile_sys_object_no_metrics():
 
 def test_discovery(aggregator):
     host = socket.gethostbyname(common.HOST)
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    network = ipaddress.ip_network('{}/29'.format(host), strict=False).with_prefixlen
     check_tags = [
         'snmp_device:{}'.format(host),
         'snmp_profile:profile1',
@@ -949,7 +949,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
     read_mock.return_value = '["192.168.0.1","192.168.0.2"]'
 
     host = socket.gethostbyname(common.HOST)
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    network = ipaddress.ip_network('{}/29'.format(host), strict=False).with_prefixlen
     check_tags = [
         'autodiscovery_subnet:{}'.format(to_native_string(network)),
     ]

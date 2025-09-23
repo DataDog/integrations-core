@@ -2,13 +2,111 @@
 
 <!-- towncrier release notes start -->
 
+## 37.20.0 / 2025-09-17
+
+***Added***:
+
+* Add support for customizable cache keys to be used by the agent persistent cache. This allows integrations developers to define when the cache will be invalidated for each integration. ([#21316](https://github.com/DataDog/integrations-core/pull/21316))
+* Upgrade ddtrace to 3.12.5 ([#21360](https://github.com/DataDog/integrations-core/pull/21360))
+
+## 37.19.0 / 2025-09-05
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 37.18.1 / 2025-09-03 / Agent 7.70.1
+
+***Fixed***:
+
+* Regularly check for cancel event between DBMAsyncJob check intervals ([#21150](https://github.com/DataDog/integrations-core/pull/21150))
+
+*Note: This release is bundled with Agent version `7.70.1` and does not include changes from the `37.18.0` release.*
+
+## 37.18.0 / 2025-08-29
+
+***Added***:
+
+* Add database Health class for sending DBM health events ([#20739](https://github.com/DataDog/integrations-core/pull/20739))
+
+## 37.17.1 / 2025-08-26
+
+***Fixed***:
+
+* Regularly check for cancel event between DBMAsyncJob check intervals ([#21150](https://github.com/DataDog/integrations-core/pull/21150))
+
+## 37.17.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Update orjson to 3.11.1 ([#20958](https://github.com/DataDog/integrations-core/pull/20958))
+
+***Fixed***:
+
+* Fixes deprecation warnings on isSet() usage in DBMAsyncJob ([#20947](https://github.com/DataDog/integrations-core/pull/20947))
+
+## 37.16.0 / 2025-07-10 / Agent 7.69.0
+
+***Added***:
+
+* Add OpenMetrics decorator to add code_class to metrics that have an HTTP status code tag ([#20528](https://github.com/DataDog/integrations-core/pull/20528))
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+* Add flag to allow symmetric inclusion validation on assert_metrics_using_metadata in AggregatorStub ([#20563](https://github.com/DataDog/integrations-core/pull/20563))
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+* Add support for ingesting target_info when using the WithHttpCodeClass decorator ([#20555](https://github.com/DataDog/integrations-core/pull/20555))
+* Fix WithHttpCodeClass decorator not keeping track of internal state of the scraper ([#20640](https://github.com/DataDog/integrations-core/pull/20640))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+* Replace patch_all with modern config ddtrace.auto ([#20651](https://github.com/DataDog/integrations-core/pull/20651))
+
+## 37.15.0 / 2025-06-13 / Agent 7.68.0
+
+***Security***:
+
+* Updates `requests` to 2.32.4 ([#20494](https://github.com/DataDog/integrations-core/pull/20494))
+
+## 37.14.0 / 2025-06-12
+
+***Added***:
+
+* Update dependencies ([#20470](https://github.com/DataDog/integrations-core/pull/20470))
+
+***Fixed***:
+
+* Fix handling of special float values like inf in configs. ([#20406](https://github.com/DataDog/integrations-core/pull/20406))
+
+## 37.13.0 / 2025-05-29
+
+***Added***:
+
+* Add TagManager class to dbm base utils ([#20397](https://github.com/DataDog/integrations-core/pull/20397))
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
+## 37.12.0 / 2025-05-28
+
+***Added***:
+
+* Bump ddtrace to 3.7.2 ([#20358](https://github.com/DataDog/integrations-core/pull/20358))
+
+***Fixed***:
+
+* Fix tracemalloc usage error ([#20355](https://github.com/DataDog/integrations-core/pull/20355))
+
+## 37.11.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
 ## 37.10.1 / 2025-04-30
 
 ***Fixed***:
 
 * Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)` respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
 
-## 37.10.0 / 2025-04-17
+## 37.10.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:
 

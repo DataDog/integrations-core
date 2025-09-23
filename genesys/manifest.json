@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a0f0e600-1f10-4505-8fc3-64442e78b1a3",
   "app_id": "genesys",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -65,8 +66,8 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "genesys.",
-        "check": ["genesys.voice.total_conversations", "genesys.callback.wait_time_avg"],
+        "prefix": "genesys_cloud.",
+        "check": ["genesys_cloud.callback.connected_conversations_count", "genesys_cloud.chat.connected_conversations_count", "genesys_cloud.email.connected_conversations_count", "genesys_cloud.message.connected_conversations_count", "genesys_cloud.voice.connected_conversations_count", "genesys_cloud.callback.total_conversations"],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

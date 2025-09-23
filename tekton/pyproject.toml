@@ -29,7 +29,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=37.4.0",
+    "datadog-checks-base>=37.16.0",
 ]
 dynamic = [
     "version",
@@ -58,3 +58,6 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.ruff]
+extend = "../pyproject.toml"

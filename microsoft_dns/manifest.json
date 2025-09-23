@@ -1,0 +1,79 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "88d1372f-1732-4d6d-b3b3-f2f4ccd08209",
+  "app_id": "microsoft-dns",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Microsoft DNS Server audit events.",
+    "title": "Microsoft DNS",
+    "media": [
+      {
+        "caption": "Microsoft DNS - Overview 1",
+        "image_url": "images/microsoft_dns_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft DNS - Overview 2",
+        "image_url": "images/microsoft_dns_overview_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft DNS - Overview 3",
+        "image_url": "images/microsoft_dns_overview_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft DNS - Overview 4",
+        "image_url": "images/microsoft_dns_overview_4.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft DNS - Overview 5",
+        "image_url": "images/microsoft_dns_overview_5.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft DNS - Overview 6",
+        "image_url": "images/microsoft_dns_overview_6.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 42775829,
+      "source_type_name": "Microsoft DNS",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Microsoft DNS - Overview": "assets/dashboards/microsoft_dns_overview.json"
+    },
+    "logs": {
+      "source": "microsoft-dns"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

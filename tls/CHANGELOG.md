@@ -2,7 +2,43 @@
 
 <!-- towncrier release notes start -->
 
-## 4.4.0 / 2025-04-17
+## 5.1.0 / 2025-09-05
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 5.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
+***Added***:
+
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+
+***Fixed***:
+
+* Allow HTTPS requests to use `tls_ciphers` parameter ([#20179](https://github.com/DataDog/integrations-core/pull/20179))
+
+## 4.6.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
+## 4.5.0 / 2025-05-15 / Agent 7.67.0
+
+***Added***:
+
+* Update dependencies ([#20215](https://github.com/DataDog/integrations-core/pull/20215))
+
+***Fixed***:
+
+* Replace deprecated `cert.not_valid_after` and `datetime.utcnow()` with `cert.not_valid_after_utc` and `datetime.now(timezone.utc)` respectively. ([#20100](https://github.com/DataDog/integrations-core/pull/20100))
+
+## 4.4.0 / 2025-04-17 / Agent 7.66.0
 
 ***Added***:
 

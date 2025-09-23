@@ -1,0 +1,26 @@
+snapshot_time             1749630724.585904599 secs.nsecs
+start_time                1748858812.971617845 secs.nsecs
+elapsed_time              771911.614286754 secs.nsecs
+read_bytes                3 samples [bytes] 28 40 96 3168
+write_bytes               45 samples [bytes] 27 8192 176653 915510425
+read                      3 samples [usecs] 31 2104 4188 8642586
+write                     45 samples [usecs] 9 1370 10405 10725723
+ioctl                     273 samples [reqs]
+open                      45 samples [usecs] 3 3964 18140 38165090
+close                     45 samples [usecs] 2 2188 55704 77600542
+seek                      30 samples [usecs] 0 3 46 86
+fsync                     12 samples [usecs] 5701 11981 108250 1013412540
+readdir                   28 samples [usecs] 0 2719 5480 14731926
+setattr                   19 samples [usecs] 3722 9751 89449 458377985
+truncate                  9 samples [usecs] 4910 6735 49177 271351551
+getattr                   215 samples [usecs] 1 5960 119527 417009569
+unlink                    32 samples [usecs] 1267 1560 43056 58039616
+mkdir                     5 samples [usecs] 1475 4598 13328 44701478
+rmdir                     2 samples [usecs] 1341 1429 2770 3840322
+mknod                     35 samples [usecs] 1323 4120 57732 106778058
+rename                    8 samples [usecs] 1322 2741 15970 34660908
+setxattr                  7 samples [usecs] 2420 2720 18169 47209371
+getxattr                  9 samples [usecs] 1232 1499 12041 16165675
+inode_permission          620 samples [usecs] 0 1871 103761 136321927
+opencount                 62 samples [reqs] 1 3 70 90
+openclosetime             9 samples [usecs] 1310 72792200544 87801149569 5538044318550188265

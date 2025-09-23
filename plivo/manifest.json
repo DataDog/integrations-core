@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b6d1ad60-e67f-4612-92fd-4fe4b4182b22",
   "app_id": "plivo",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -13,22 +14,22 @@
     "media": [
       {
         "caption": "Plivo Messages",
-        "image_url": "images/plivo_messages_1.png",
+        "image_url": "images/plivo_messages_1_light.png",
         "media_type": "image"
       },
       {
         "caption": "Plivo Messages",
-        "image_url": "images/plivo_messages_2.png",
+        "image_url": "images/plivo_messages_2_light.png",
         "media_type": "image"
       },
       {
         "caption": "Plivo Voice Calls",
-        "image_url": "images/plivo_voice_calls_1.png",
+        "image_url": "images/plivo_voice_calls_1_light.png",
         "media_type": "image"
       },
       {
         "caption": "Plivo Voice Calls",
-        "image_url": "images/plivo_voice_calls_2.png",
+        "image_url": "images/plivo_voice_calls_2_light.png",
         "media_type": "image"
       }
     ],

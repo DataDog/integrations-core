@@ -1,0 +1,110 @@
+<event name="module_end" package="sqlserver" timestamp="2025-04-24T20:56:25.313Z">
+	<data name="source_database_id">
+		<type name="uint32" package="package0" />
+		<value>
+			9
+		</value>
+	</data>
+	<data name="object_id">
+		<type name="int32" package="package0" />
+		<value>
+			2002300576
+		</value>
+	</data>
+	<data name="duration">
+		<type name="uint64" package="package0" />
+		<value>
+			1239182
+		</value>
+	</data>
+	<data name="row_count">
+		<type name="uint64" package="package0" />
+		<value>
+			2
+		</value>
+	</data>
+	<data name="line_number">
+		<type name="int32" package="package0" />
+		<value>
+			1
+		</value>
+	</data>
+	<data name="offset">
+		<type name="int32" package="package0" />
+		<value>
+			314
+		</value>
+	</data>
+	<data name="offset_end">
+		<type name="int32" package="package0" />
+		<value>
+			372
+		</value>
+	</data>
+	<data name="object_type">
+		<type name="ansi_string" package="package0" />
+		<value>
+			P
+		</value>
+	</data>
+	<data name="object_name">
+		<type name="unicode_string" package="package0" />
+		<value>
+			SelectAndProcessOrderItem
+		</value>
+	</data>
+	<data name="statement">
+		<type name="unicode_string" package="package0" />
+		<value>
+			EXEC SelectAndProcessOrderItem
+		</value>
+	</data>
+	<action name="request_id" package="sqlserver">
+		<type name="uint32" package="package0" />
+		<value>
+			0
+		</value>
+	</action>
+	<action name="session_id" package="sqlserver">
+		<type name="uint16" package="package0" />
+		<value>
+			115
+		</value>
+	</action>
+	<action name="client_hostname" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			a05c90468fb8
+		</value>
+	</action>
+	<action name="client_app_name" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			go-mssqldb
+		</value>
+	</action>
+	<action name="username" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			shopper_4
+		</value>
+	</action>
+	<action name="database_name" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			dbmorders
+		</value>
+	</action>
+	<action name="sql_text" package="sqlserver">
+		<type name="unicode_string" package="package0" />
+		<value>
+			/*dddbs='orders-app',ddps='orders-app',ddh='awbergs-sqlserver2019-test.c7ug0vvtkhqv.us-east-1.rds.amazonaws.com',dddb='dbmorders',ddprs='orders-sqlserver'*/ EXEC SelectAndProcessOrderItem
+		</value>
+	</action>
+	<action name="attach_activity_id" package="package0">
+		<type name="activity_id" package="package0" />
+		<value>
+			3C7BB946-DFAE-4953-B678-D440F97A3495-8
+		</value>
+	</action>
+</event>

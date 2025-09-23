@@ -15,12 +15,17 @@ from typing import Dict, List  # noqa: F401
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 from .metrics import BRICK_STATS, CLUSTER_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
 
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
 
-GSTATUS_PATH = '/opt/datadog-agent/embedded/sbin/gstatus'
+GSTATUS_PATH_SUFFIX = '/embedded/sbin/gstatus'
 
 
 class GlusterfsCheck(AgentCheck):
@@ -39,8 +44,12 @@ class GlusterfsCheck(AgentCheck):
         if init_config.get('gstatus_path'):
             self.gstatus_cmd = init_config.get('gstatus_path')
         else:
-            if os.path.exists(GSTATUS_PATH):
-                self.gstatus_cmd = GSTATUS_PATH
+            path = datadog_agent.get_config('run_path')
+            if path.endswith('/run'):
+                path = path[:-4]
+            path = path + GSTATUS_PATH_SUFFIX
+            if os.path.exists(path):
+                self.gstatus_cmd = path
             else:
                 raise ConfigurationError(
                     'Glusterfs check requires `gstatus` to be installed or set the path to the installed version.'
@@ -49,7 +58,6 @@ class GlusterfsCheck(AgentCheck):
         self.use_sudo = is_affirmative(self.instance.get('use_sudo', True))
 
     def get_gstatus_output(self, cmd):
-
         res = subprocess.run(cmd.split(), capture_output=True, text=True)
         return res.stdout, res.stderr, res.returncode
 

@@ -237,7 +237,7 @@ def generate_container_profile_config(community_string, profile=None):
 
 def generate_container_profile_config_with_ad(profile):
     host = socket.gethostbyname(get_container_ip(SNMP_CONTAINER_NAME))
-    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    network = ipaddress.ip_network('{}/29'.format(host), strict=False).with_prefixlen
     conf = {
         # Make sure the check handles bytes
         'network_address': to_native_string(network),
@@ -301,6 +301,11 @@ def assert_common_check_run_metrics(aggregator, tags=None, is_e2e=False, loader=
     aggregator.assert_metric('datadog.snmp.check_duration', metric_type=aggregator.GAUGE, tags=tags)
     aggregator.assert_metric('datadog.snmp.check_interval', metric_type=monotonic_type, tags=tags)
     aggregator.assert_metric('datadog.snmp.submitted_metrics', metric_type=aggregator.GAUGE, tags=tags)
+    if loader == 'core':
+        # request_type tag can be get, getbulk, or getnext
+        aggregator.assert_metric_has_tag_prefix('datadog.snmp.requests', tag_prefix='request_type:get')
+        for tag in tags:
+            aggregator.assert_metric_has_tag('datadog.snmp.requests', tag)
 
 
 def assert_common_device_metrics(
@@ -345,3 +350,7 @@ def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
 
     aggregator._metrics = new_agg_metrics
     return aggregator
+
+
+def get_agent_hostname():
+    return socket.gethostname().lower()

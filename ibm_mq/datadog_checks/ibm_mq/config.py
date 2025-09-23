@@ -81,10 +81,9 @@ class IBMMQConfig:
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))  # type: bool
 
-        self.collect_statistics_metrics = is_affirmative(
-            instance.get('collect_statistics_metrics', False)
-        )  # type: bool
+        self.collect_statistics_metrics = is_affirmative(instance.get('collect_statistics_metrics', False))  # type: bool
         self.collect_reset_queue_metrics = is_affirmative(instance.get('collect_reset_queue_metrics', True))
+        self.collect_connection_metrics = is_affirmative(instance.get('collect_connection_metrics', True))
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
             self.log.warning(
                 "Configurations auto_discover_queues, queue_patterns and queue_regex are not intended to be used "
@@ -93,14 +92,13 @@ class IBMMQConfig:
 
         self.channels = instance.get('channels', [])  # type: List[str]
 
-        self.channel_status_mapping = self.get_channel_status_mapping(
-            instance.get('channel_status_mapping')
-        )  # type: Dict[str, str]
+        self.channel_status_mapping = self.get_channel_status_mapping(instance.get('channel_status_mapping'))  # type: Dict[str, str]
 
         self.convert_endianness = instance.get('convert_endianness', False)  # type: bool
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str
         self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
         self.use_qm_tz_for_metrics = is_affirmative(instance.get('use_qm_tz_for_metrics', False))  # type: bool
+        self.auto_discover_queues_via_names = is_affirmative(instance.get('auto_discover_queues_via_names', False))  # type: bool
 
         # Initialize timezone handling
         # First validate the timezone if it's not UTC

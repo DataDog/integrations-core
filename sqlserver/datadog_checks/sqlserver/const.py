@@ -24,6 +24,7 @@ ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
 # Keys of the static info cache, used to cache server info which does not change
 STATIC_INFO_SERVERNAME = 'servername'
 STATIC_INFO_INSTANCENAME = 'instancename'
+STATIC_INFO_FULL_SERVERNAME = 'full_servername'
 STATIC_INFO_VERSION = 'version'
 STATIC_INFO_MAJOR_VERSION = 'major_version'
 STATIC_INFO_ENGINE_EDITION = 'engine_edition'
@@ -38,6 +39,8 @@ AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES = {
     "managed_instance": "azure_sql_server_managed_instance",
     "virtual_machine": "azure_virtual_machine_instance",
 }
+AZURE_SERVER_SUFFIX = ".database.windows.net"
+
 
 # Metric discovery queries
 COUNTER_TYPE_QUERY = """select distinct cntr_type
@@ -248,6 +251,13 @@ DATABASE_FRAGMENTATION_METRICS = [
 DATABASE_MASTER_FILES = [
     ('sqlserver.database.master_files.size', 'sys.master_files', 'size'),
     ('sqlserver.database.master_files.state', 'sys.master_files', 'state'),
+]
+
+TABLE_SIZE_METRICS = [
+    ('sqlserver.table.row_count', 'sys.dm_db_partition_stats', 'row_count'),
+    ('sqlserver.table.total_size', 'sys.dm_db_partition_stats', 'total_size'),
+    ('sqlserver.table.used_size', 'sys.dm_db_partition_stats', 'used_size'),
+    ('sqlserver.table.data_size', 'sys.dm_db_partition_stats', 'data_size'),
 ]
 
 TEMPDB_FILE_SPACE_USAGE_METRICS = [

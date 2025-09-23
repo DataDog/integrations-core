@@ -1,0 +1,2 @@
+test-queue*|N/A|c[1-2]|up|1|972|allocated|10|gpu:tesla:4|gpu:tesla:3(IDX:0,2-3)
+foo|N/A|c[3-4]|down|1|2000|idle*|11|(null)|(null)

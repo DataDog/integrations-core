@@ -4,7 +4,8 @@ from copy import deepcopy
 
 from packaging.requirements import InvalidRequirement, Requirement
 
-from ..fs import stream_file_lines, write_file_lines
+from datadog_checks.dev.fs import stream_file_lines, write_file_lines
+
 from .constants import NOT_CHECKS, get_agent_requirements, get_root
 from .utils import (
     get_normalized_dependency,

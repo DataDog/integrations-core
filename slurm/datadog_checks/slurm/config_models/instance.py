@@ -38,6 +38,7 @@ class InstanceConfig(BaseModel):
     collect_sacct_stats: Optional[bool] = None
     collect_scontrol_stats: Optional[bool] = None
     collect_sdiag_stats: Optional[bool] = None
+    collect_seff_stats: Optional[bool] = None
     collect_sinfo_stats: Optional[bool] = None
     collect_squeue_stats: Optional[bool] = None
     collect_sshare_stats: Optional[bool] = None

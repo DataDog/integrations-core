@@ -8,7 +8,7 @@
 		"id": 157630365,
 		"name": "High Number of over SLA Conversations Detected",
 		"type": "query alert",
-		"query": "sum(last_1d):sum:genesys.callback.over_sla_count{*}.as_count() + sum:genesys.chat.over_sla_count{*}.as_count() + sum:genesys.email.over_sla_count{*}.as_count() + sum:genesys.message.over_sla_count{*}.as_count() + sum:genesys.voice.over_sla_count{*}.as_count() > 100",
+		"query": "sum(last_1d):sum:genesys_cloud.callback.over_sla_count{*}.as_count() + sum:genesys_cloud.chat.over_sla_count{*}.as_count() + sum:genesys_cloud.email.over_sla_count{*}.as_count() + sum:genesys_cloud.message.over_sla_count{*}.as_count() + sum:genesys_cloud.voice.over_sla_count{*}.as_count() > 100",
 		"message": "{{#is_alert}}\nThe over SLA conversations refer to the number of answered interactions that were over the SLA threshold.\n\nHigh number of over SLA conversations has been detected. Please review and take necessary action.\n{{/is_alert}}",
 		"tags": [
 			"source:genesys"

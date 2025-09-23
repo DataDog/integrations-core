@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.1 / 2025-08-07 / Agent 7.70.0
+
+***Fixed***:
+
+* Lift `pyodbc` dependency exclusion for macOS on AArch64/ARM64 ([#20812](https://github.com/DataDog/integrations-core/pull/20812))
+
 ## 4.1.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:

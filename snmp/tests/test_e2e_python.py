@@ -15,6 +15,7 @@ pytestmark = pytest.mark.e2e
 def test_e2e_python(dd_agent_check):
     metrics = common.SUPPORTED_METRIC_TYPES
     config = common.generate_container_instance_config(metrics)
+    config['init_config']['loader'] = 'python'
     instance = config['instances'][0]
     aggregator = dd_agent_check(config, rate=True)
     tags = ['snmp_device:{}'.format(instance['ip_address'])]

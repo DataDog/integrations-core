@@ -63,6 +63,7 @@ nav:
     - Test framework: ddev/test.md
     - Plugins: ddev/plugins.md
     - Configuration: ddev/configuration.md
+    - Multi-repo/Worktrees: ddev/multirepo.md
     - CLI: ddev/cli.md
   - Guidelines:
     - Pull requests: guidelines/pr.md

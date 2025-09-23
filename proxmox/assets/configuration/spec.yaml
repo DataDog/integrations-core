@@ -1,0 +1,124 @@
+name: Proxmox
+files:
+- name: proxmox.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+    - template: init_config/http
+  - template: instances
+    options:
+    - name: proxmox_server
+      display_priority: 5
+      description: |
+        Proxmox API endpoint.
+      value:
+        example: http://localhost:8006/api2/json
+        type: string
+      required: true
+    - name: collect_tasks
+      display_priority: 5
+      description: |
+        Whether or not to collect Proxmox tasks as events.
+      value:
+        type: boolean
+        example: true
+        display_default: false
+      required: false
+    - name: collected_task_types
+      display_priority: 5
+      description: |
+        Which Proxmox task types to collect. When `collect_tasks` is enabled, the integration will collect
+        the following task types by default:
+          - qmstart
+          - qhstop
+          - qmshutdown
+          - qmreboot
+          - qmigrate
+          - qmsuspend
+          - vzstart
+          - vzshutdown
+          - vzsuspend
+          - startall
+          - stopall
+          - suspendall
+          - aptupdate
+      value:
+        type: array
+        items:
+          type: string
+        default: ['qmstart', 'qmstop', 'qmshutdown', 'qmreboot', 'qmigrate', 'qmsuspend', 'vzstart', 'vzshutdown', 'vzsuspend', 'startall', 'stopall', 'suspendall', 'aptupdate']
+      required: false
+    - name: resource_filters
+      description: |
+          Each filter in the list is composed of three parameters.
+          'resource' is one of vm/node/container/storage/pool/sdn on which to apply the filter
+          'patterns' is a list of matching regex, if any of those matches, the resource is monitored.
+          'type' is either the include list (default) or exclude list. If a resource is both included and excluded, it is
+                 considered excluded.
+          'property' is the kind of property on which to apply the filter and must be one of these values:
+             - resource_name (default) to filter on the resource name (defined by Proxmox)
+             - hostname (available only for VMs and nodes) to filter on the hostname
+      value:
+          example:
+            - resource: vm
+              property: hostname
+              patterns:
+                - .*
+            - resource: node
+              type: exclude
+              patterns:
+                - .+
+            - resource: container
+              type: include
+              patterns:
+                - thiscontainer
+          type: array
+          items:
+            type: object
+            properties:
+              - name: resource
+                type: string
+              - name: patterns
+                type: array
+                items:
+                  type: string
+              - name: type
+                type: string
+              - name: property
+                type: string
+    - template: instances/default
+      overrides:
+        empty_default_hostname.display_priority: 1
+        empty_default_hostname.default: true
+        empty_default_hostname.value.example: true
+        empty_default_hostname.description: |
+          The Proxmox integration is a check where metrics are usually unrelated to the host on which the Agent
+          runs. Setting this parameter to "true" prevents the Agent from attaching the hostname (and the host
+          tags) to the metrics. It is especially important to leave this parameter set to "true" when you are running the
+          Agent inside a Proxmox VM or Node, because in this scenario the host tags are unrelated to other metrics.
+    - template: instances/http
+      overrides:
+        headers.display_priority: 4
+        headers.enabled: true
+        headers.description: |
+          Headers to use for every request. An Authorization header including the Proxmox API token is required
+          for authentication for the REST API.
+          You can alternatively use the `auth_token` option.
+
+        headers.value.example:
+          Authorization: "PVEAPIToken=<USER>@<REALM>!<TOKEN_ID>=<YOUR_TOKEN>"
+        auth_token.display_priority: 3
+  - template: logs
+    example:
+    - type: journald
+      source: proxmox
+      include_units:
+        - pveproxy.service
+        - pvedaemon.service
+        - pve-firewall.service
+        - pve-ha-crm.service
+        - pve-ha-lrm.service
+        - pvescheduler.service
+        - pvestatd.service
+        - qmeventd.service

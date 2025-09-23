@@ -10,3 +10,5 @@ Command: show queues
 * $TMP$.tibemsd.1669EC51B3.1        ---------    5      1        0     0.0 Kb        0     0.0 Kb
   queue.sample                      -------+-    5*     0        0     0.0 Kb        0     0.0 Kb
   sample                            -------+-    5*     0        0     0.0 Kb        0     0.0 Kb
+  none.prefetch.sample              --------- none     16      214   214.1 Kb      214   214.1 Kb
+

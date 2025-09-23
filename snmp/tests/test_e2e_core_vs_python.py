@@ -26,6 +26,7 @@ ASSERT_VALUE_METRICS = [
 # Profiles may contain symbols declared twice with different names and the same OID
 # Python check does handle one single metric name per OID symbol
 SKIPPED_CORE_ONLY_METRICS = [
+    'datadog.snmp.requests',
     'snmp.memory.total',
     'snmp.memory.used',
     'snmp.memory.free',
@@ -72,7 +73,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.dell.memoryDevice',  # Dell constant metric
 ]
 
-DEFAULT_TAGS_TO_SKIP = ['loader', 'device_id', 'device_ip']
+DEFAULT_TAGS_TO_SKIP = ['loader', 'device_id', 'device_ip', 'agent_host']
 
 CORE_ONLY_TAGS = ['device_namespace:default']
 

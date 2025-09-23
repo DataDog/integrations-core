@@ -39,8 +39,8 @@
                             "margin": "md",
                             "sizing": "cover",
                             "type": "image",
-                            "url": "/static/images/logos/Infiniband_large.svg",
-                            "url_dark_theme": "/static/images/logos/Infiniband_reversed_large.svg",
+                            "url": "/static/images/logos/infiniband_large.svg",
+                            "url_dark_theme": "/static/images/logos/infiniband_reversed_large.svg",
                             "vertical_align": "center"
                         },
                         "id": 6676885668580031,

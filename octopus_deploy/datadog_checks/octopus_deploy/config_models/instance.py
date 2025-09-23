@@ -37,7 +37,7 @@ class Environments(BaseModel):
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[Union[str, MappingProxyType[str, Any]], ...]] = None
     interval: Optional[int] = None
-    limit: Optional[int] = Field(None, description='Maximum number of environments to be processed.\n')
+    limit: Optional[int] = Field(None, description='Maximum number of environments processed.\n')
 
 
 class MetricPatterns(BaseModel):
@@ -57,7 +57,7 @@ class ProjectGroups(BaseModel):
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[Union[str, MappingProxyType[str, Any]], ...]] = None
     interval: Optional[int] = None
-    limit: Optional[int] = Field(None, description='Maximum number of project groups to be processed.\n')
+    limit: Optional[int] = Field(None, description='Maximum number of project groups processed.\n')
 
 
 class Projects(BaseModel):
@@ -68,7 +68,7 @@ class Projects(BaseModel):
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[Union[str, MappingProxyType[str, Any]], ...]] = None
     interval: Optional[int] = None
-    limit: Optional[int] = Field(None, description='Maximum number of projects to be processed.\n')
+    limit: Optional[int] = Field(None, description='Maximum number of projects processed.\n')
 
 
 class Proxy(BaseModel):

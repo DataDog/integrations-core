@@ -6,7 +6,6 @@ import re
 from semver import VersionInfo
 
 from datadog_checks.base.log import get_check_logger
-from datadog_checks.postgres.cursor import CommenterCursor
 
 V8_3 = VersionInfo.parse("8.3.0")
 V9 = VersionInfo.parse("9.0.0")
@@ -27,32 +26,40 @@ V17 = VersionInfo.parse("17.0.0")
 class VersionUtils(object):
     def __init__(self):
         self.log = get_check_logger()
-        self._seen_aurora_exception = False
+        self._is_aurora = None
 
     @staticmethod
     def get_raw_version(db):
         with db as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+            with conn.cursor() as cursor:
                 cursor.execute('SHOW SERVER_VERSION;')
                 raw_version = cursor.fetchone()[0]
                 return raw_version
 
     def is_aurora(self, db):
-        if self._seen_aurora_exception:
-            return False
+        if self._is_aurora is not None:
+            return self._is_aurora
         with db as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
-                # This query will pollute PG logs in non aurora versions,
-                # but is the only reliable way to detect aurora
-                try:
-                    cursor.execute('select AURORA_VERSION();')
-                    return True
-                except Exception as e:
-                    self.log.debug(
-                        "Captured exception %s while determining if the DB is aurora. Assuming is not", str(e)
-                    )
-                    self._seen_aurora_exception = True
-                    return False
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT 1 FROM pg_available_extension_versions "
+                    "WHERE name ILIKE '%aurora%' OR comment ILIKE '%aurora%' "
+                    "LIMIT 1;"
+                )
+                if cursor.fetchone():
+                    # This query will pollute PG logs in non aurora versions,
+                    # but is the only reliable way to detect aurora.
+                    # Since we found aurora extensions, this should exist.
+                    try:
+                        cursor.execute('select AURORA_VERSION();')
+                        self._is_aurora = True
+                        return self._is_aurora
+                    except Exception as e:
+                        self.log.debug(
+                            "Captured exception %s while determining if the DB is aurora. Assuming is not", str(e)
+                        )
+                self._is_aurora = False
+                return self._is_aurora
 
     @staticmethod
     def parse_version(raw_version):

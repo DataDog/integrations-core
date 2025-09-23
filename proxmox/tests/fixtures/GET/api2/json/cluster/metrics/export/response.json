@@ -1,0 +1,356 @@
+{
+    "data": {
+        "data": [
+            {
+                "type": "gauge",
+                "timestamp": 1749063075,
+                "value": 2664,
+                "id": "node/ip-122-82-3-112",
+                "metric": "uptime"
+            },
+            {
+                "value": 10054993,
+                "metric": "net_in",
+                "id": "node/ip-122-82-3-112",
+                "type": "derive",
+                "timestamp": 1749063075
+            },
+            {
+                "type": "derive",
+                "timestamp": 1749063075,
+                "value": 15401885,
+                "id": "node/ip-122-82-3-112",
+                "metric": "net_out"
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "gauge",
+                "metric": "cpu_avg1",
+                "id": "node/ip-122-82-3-112",
+                "value": 0.48
+            },
+            {
+                "id": "node/ip-122-82-3-112",
+                "metric": "cpu_avg5",
+                "value": 0.12,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "metric": "cpu_avg15",
+                "id": "node/ip-122-82-3-112",
+                "value": 0.04,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "metric": "cpu_max",
+                "id": "node/ip-122-82-3-112",
+                "value": 72,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "type": "gauge",
+                "timestamp": 1749063075,
+                "value": 0.00451518824996925,
+                "id": "node/ip-122-82-3-112",
+                "metric": "cpu_current"
+            },
+            {
+                "id": "node/ip-122-82-3-112",
+                "metric": "cpu_iowait",
+                "value": 0.00166201092780969,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "type": "gauge",
+                "timestamp": 1749063075,
+                "value": 540883783680,
+                "id": "node/ip-122-82-3-112",
+                "metric": "mem_total"
+            },
+            {
+                "type": "gauge",
+                "timestamp": 1749063075,
+                "value": 7128940544,
+                "metric": "mem_used",
+                "id": "node/ip-122-82-3-112"
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "gauge",
+                "metric": "swap_total",
+                "id": "node/ip-122-82-3-112",
+                "value": 0
+            },
+            {
+                "metric": "swap_used",
+                "id": "node/ip-122-82-3-112",
+                "value": 0,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "metric": "disk_total",
+                "id": "node/ip-122-82-3-112",
+                "value": 5284205195264,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "value": 14254239744,
+                "id": "node/ip-122-82-3-112",
+                "metric": "disk_used",
+                "type": "gauge",
+                "timestamp": 1749063075
+            },
+            {
+                "value": 0.0990053865436579,
+                "id": "qemu/100",
+                "metric": "cpu_current",
+                "type": "gauge",
+                "timestamp": 1749063075
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "gauge",
+                "id": "qemu/100",
+                "metric": "mem_used",
+                "value": 442114048
+            },
+            {
+                "metric": "disk_read",
+                "id": "qemu/100",
+                "value": 341741134,
+                "timestamp": 1749063075,
+                "type": "derive"
+            },
+            {
+                "type": "derive",
+                "timestamp": 1749063075,
+                "value": 7226368,
+                "metric": "disk_write",
+                "id": "qemu/100"
+            },
+            {
+                "type": "derive",
+                "timestamp": 1749063075,
+                "value": 146847,
+                "id": "qemu/100",
+                "metric": "net_in"
+            },
+            {
+                "id": "qemu/100",
+                "metric": "net_out",
+                "value": 34617,
+                "timestamp": 1749063075,
+                "type": "derive"
+            },
+            {
+                "type": "gauge",
+                "timestamp": 1749063075,
+                "value": 52,
+                "id": "qemu/100",
+                "metric": "uptime"
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "gauge",
+                "metric": "cpu_max",
+                "id": "qemu/100",
+                "value": 2
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "gauge",
+                "id": "qemu/100",
+                "metric": "mem_total",
+                "value": 2147483648
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "gauge",
+                "id": "qemu/100",
+                "metric": "disk_total",
+                "value": 34359738368
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "gauge",
+                "metric": "cpu_current",
+                "id": "lxc/111",
+                "value": 0
+            },
+            {
+                "metric": "mem_used",
+                "id": "lxc/111",
+                "value": 47296512,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "derive",
+                "metric": "disk_read",
+                "id": "lxc/111",
+                "value": 182546432
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "derive",
+                "metric": "disk_write",
+                "id": "lxc/111",
+                "value": 385024
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "derive",
+                "metric": "net_in",
+                "id": "lxc/111",
+                "value": 0
+            },
+            {
+                "value": 0,
+                "metric": "net_out",
+                "id": "lxc/111",
+                "type": "derive",
+                "timestamp": 1749063075
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "gauge",
+                "metric": "disk_used",
+                "id": "lxc/111",
+                "value": 1478844416
+            },
+            {
+                "type": "gauge",
+                "timestamp": 1749063075,
+                "value": 5,
+                "id": "lxc/111",
+                "metric": "uptime"
+            },
+            {
+                "id": "lxc/111",
+                "metric": "cpu_max",
+                "value": 72,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "gauge",
+                "id": "lxc/111",
+                "metric": "mem_total",
+                "value": 536870912
+            },
+            {
+                "metric": "disk_total",
+                "id": "lxc/111",
+                "value": 4143677440,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "type": "gauge",
+                "timestamp": 1749063075,
+                "value": 0.0592336339050551,
+                "metric": "cpu_current",
+                "id": "lxc/101"
+            },
+            {
+                "value": 1957888,
+                "id": "lxc/101",
+                "metric": "mem_used",
+                "type": "gauge",
+                "timestamp": 1749063075
+            },
+            {
+                "metric": "disk_read",
+                "id": "lxc/101",
+                "value": 14360576,
+                "timestamp": 1749063075,
+                "type": "derive"
+            },
+            {
+                "metric": "disk_write",
+                "id": "lxc/101",
+                "value": 0,
+                "timestamp": 1749063075,
+                "type": "derive"
+            },
+            {
+                "type": "derive",
+                "timestamp": 1749063075,
+                "value": 0,
+                "metric": "net_in",
+                "id": "lxc/101"
+            },
+            {
+                "timestamp": 1749063075,
+                "type": "derive",
+                "metric": "net_out",
+                "id": "lxc/101",
+                "value": 0
+            },
+            {
+                "value": 1500459008,
+                "metric": "disk_used",
+                "id": "lxc/101",
+                "type": "gauge",
+                "timestamp": 1749063075
+            },
+            {
+                "type": "gauge",
+                "timestamp": 1749063075,
+                "value": 1,
+                "id": "lxc/101",
+                "metric": "uptime"
+            },
+            {
+                "metric": "disk_used",
+                "id": "storage/ip-122-82-3-112",
+                "value": 14254243840,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "value": 1,
+                "id": "lxc/101",
+                "metric": "cpu_max",
+                "type": "gauge",
+                "timestamp": 1749063075
+            },
+            {
+                "value": 536870912,
+                "metric": "mem_total",
+                "id": "lxc/101",
+                "type": "gauge",
+                "timestamp": 1749063075
+            },
+            {
+                "id": "lxc/101",
+                "metric": "disk_total",
+                "value": 8350298112,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "metric": "disk_total",
+                "id": "storage/ip-122-82-3-112/local",
+                "value": 5284205195264,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            },
+            {
+                "metric": "disk_used",
+                "id": "storage/ip-122-82-3-112/local",
+                "value": 14254243840,
+                "timestamp": 1749063075,
+                "type": "gauge"
+            }
+        ]
+    }
+}

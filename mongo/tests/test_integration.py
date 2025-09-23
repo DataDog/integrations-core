@@ -42,7 +42,7 @@ def _assert_mongodb_instance_event(
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['dbms'] == "mongo"
-    assert mongodb_instance_event['tags'].sort() == expected_tags.sort()
+    assert sorted(mongodb_instance_event['tags']) == sorted(expected_tags)
 
     expected_instance_metadata = {
         "replset_name": replset_name,
@@ -107,12 +107,18 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
             'dd.mongo.operation.time',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
-    expected_tags = ['server:mongodb://localhost:27017/', 'sharding_cluster_role:mongos', 'hosting_type:self-hosted']
+    expected_tags = [
+        'server:mongodb://testUser2:*****@localhost:27017/test',
+        'sharding_cluster_role:mongos',
+        'hosting_type:self-hosted',
+        'clustername:my_cluster',
+    ]
     _assert_mongodb_instance_event(
         aggregator,
         mongos_check,
@@ -195,6 +201,7 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -294,6 +301,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -350,6 +358,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -414,6 +423,7 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -511,6 +521,7 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -578,6 +589,7 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -683,6 +695,7 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -777,6 +790,7 @@ def test_integration_replicaset_secondary(
         'dbstats-local',
         'fsynclock',
         'hostinfo',
+        'indexes-stats',
     ]
     if collect_custom_queries:
         metrics_categories.append('custom-queries')
@@ -791,6 +805,7 @@ def test_integration_replicaset_secondary(
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -846,6 +861,7 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -902,12 +918,13 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
-    expected_tags = [f'server:{mongo_check._config.clean_server_name}']
+    expected_tags = [f'server:{mongo_check._config.clean_server_name}', 'hosting_type:self-hosted']
     _assert_mongodb_instance_event(
         aggregator,
         mongo_check,
@@ -968,6 +985,7 @@ def test_db_names_with_nonexistent_database(check, instance_integration, aggrega
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -1003,6 +1021,7 @@ def test_db_names_missing_existent_database(check, instance_integration, aggrega
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.async_job.cancel',
         ],
         check_submission_type=True,
     )
@@ -1092,7 +1111,11 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
         'hosting_type:self-hosted',
     ]
 
-    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    expected_tags = replica_tags + [
+        f'server:{mongo_check._config.clean_server_name}',
+        'clustername:my_cluster',
+        'replset_me:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+    ]
     _assert_mongodb_instance_event(
         aggregator,
         mongo_check,
