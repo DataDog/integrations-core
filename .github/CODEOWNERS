@@ -635,6 +635,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /beyondtrust_password_safe/manifest.json                             @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
 /beyondtrust_password_safe/assets/logs/                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/crowdstrike_fdr/                                                    @DataDog/saas-integrations
+/crowdstrike_fdr/*.md                                                @DataDog/saas-integrations @DataDog/documentation
+/crowdstrike_fdr/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
+/crowdstrike_fdr/assets/logs/                                        @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /trend_micro_cloud_one/                                              @DataDog/saas-integrations
 /trend_micro_cloud_one/*.md                                          @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_cloud_one/manifest.json                                 @DataDog/saas-integrations @DataDog/documentation
