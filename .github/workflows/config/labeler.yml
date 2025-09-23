@@ -285,6 +285,8 @@ integration/haproxy:
 - haproxy/**/*
 integration/harbor:
 - harbor/**/*
+integration/have_i_been_pwned:
+- have_i_been_pwned/**/*
 integration/hazelcast:
 - hazelcast/**/*
 integration/hdfs_datanode:
