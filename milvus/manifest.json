@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "38ddb395-6770-4b81-9730-e43cf4b4b2a0",
   "app_id": "milvus",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
