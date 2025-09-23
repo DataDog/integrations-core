@@ -81,6 +81,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://datadoghq.dev/integrations-core/base/persistent-cache/</loc>
+         <lastmod>2020-02-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://datadoghq.dev/integrations-core/base/tls/</loc>
          <lastmod>2020-02-02</lastmod>
          <changefreq>daily</changefreq>
