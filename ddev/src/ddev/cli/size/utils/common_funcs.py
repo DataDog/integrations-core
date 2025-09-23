@@ -963,7 +963,7 @@ def get_last_commit_data() -> tuple[str, list[str], list[str]]:
 def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: str) -> Path | None:
     dep_sizes_json = get_dep_sizes_json(commit, platform)
     if not dep_sizes_json:
-        previous_sizes = get_previous_dep_sizes_json(app.repo.git.merge_base(commit, "master"))
+        previous_sizes = get_previous_dep_sizes_json(app.repo.git.merge_base(commit, "origin/master"))
         if previous_sizes:
             compressed_json, uncompressed_json = previous_sizes["compressed"], previous_sizes["uncompressed"]
             sizes = parse_sizes_json(compressed_json, uncompressed_json, platform)
