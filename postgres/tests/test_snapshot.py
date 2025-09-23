@@ -3,10 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import contextlib
-import decimal
-import os
-from enum import Enum
-from ipaddress import IPv4Address
 
 import orjson
 import psycopg
@@ -14,10 +10,10 @@ import pytest
 from psycopg import Connection, Cursor
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.base.stubs.common import MetricStub
 from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager
 
 from .conftest import SnapshotMode
+from .snapshots import SnapshotFileType, read_file, serialize_aggregator, snapshot_file_path, write_file
 
 
 class Observer:
@@ -30,7 +26,7 @@ class Observer:
 
 
 class PoolObserver(Observer):
-    mode = "record"
+    mode = SnapshotMode.RECORD
 
     def __init__(self, pool_manager: LRUConnectionPoolManager, *args, **kwargs):
         self.snapshot = []
@@ -51,9 +47,9 @@ class ConnectionObserver(Observer):
     @contextlib.contextmanager
     def cursor(self, *args, **kwargs):
         # print(f"Getting cursor")
-        if self.mode == "record":
+        if self.mode == SnapshotMode.RECORD:
             yield CursorObserver(self.target.cursor(*args, **kwargs), self.snapshot, self.mode)
-        if self.mode == "replay":
+        if self.mode == SnapshotMode.REPLAY:
             yield CursorObserver(None, self.snapshot, self.mode)
         # raise ValueError(f"Mode {self.mode} is not supported")
 
@@ -65,7 +61,7 @@ class ConnectionObserver(Observer):
         # Replay connection is always OK
         class Info:
             status = psycopg.pq.ConnStatus.OK
-            dbname = "replay"
+            dbname = ""
 
         return Info()
 
@@ -137,9 +133,8 @@ def test_snapshot(aggregator: AggregatorStub, integration_check, pg_instance, sn
     observer.snapshot = []
 
     if snapshot_mode == SnapshotMode.REPLAY:
-        with open(file_path(SnapshotFileType.REQUESTS), "r") as f:
-            observer.snapshot = orjson.loads(f.read())
-            assert observer.snapshot != []
+        observer.snapshot = read_file(snapshot_file_path(SnapshotFileType.REQUESTS))
+        assert observer.snapshot != []
 
     def generate_new_connection(new_connection):
         def observed_new_connection(dbname):
@@ -163,60 +158,10 @@ def test_snapshot(aggregator: AggregatorStub, integration_check, pg_instance, sn
     output = serialize_aggregator(aggregator)
 
     if observer.mode == SnapshotMode.RECORD:
-        with open(file_path(SnapshotFileType.REQUESTS), "w") as f:
-            f.write(orjson.dumps(observer.snapshot, default=default, option=orjson.OPT_INDENT_2).decode("utf-8"))
-        with open(file_path(SnapshotFileType.EXPECTED), "w") as f:
-            f.write(orjson.dumps(output, default=default, option=orjson.OPT_INDENT_2).decode("utf-8"))
+        write_file(observer.snapshot, snapshot_file_path(SnapshotFileType.REQUESTS))
+        write_file(output, snapshot_file_path(SnapshotFileType.EXPECTED))
     elif observer.mode == SnapshotMode.REPLAY:
-        with open(file_path(SnapshotFileType.EXPECTED), "r") as f:
+        with open(snapshot_file_path(SnapshotFileType.EXPECTED), "r") as f:
             expected = orjson.loads(f.read())
-        with open(file_path(SnapshotFileType.OUTPUT), "w") as f:
-            f.write(orjson.dumps(output, default=default, option=orjson.OPT_INDENT_2).decode("utf-8"))
+        write_file(output, snapshot_file_path(SnapshotFileType.OUTPUT))
         assert output == expected
-
-
-# def AggregatorOutput(TypedDict):
-#     metrics: dict[str, list[dict]]
-#     events: list[dict]
-
-
-class SnapshotFileType(Enum):
-    REQUESTS = "requests"
-    EXPECTED = "expected"
-    OUTPUT = "output"
-
-
-def file_path(file_type: SnapshotFileType):
-    snapshots_dir = os.path.join(os.path.dirname(__file__), "snapshots")
-
-    test_env = os.environ.get("HATCH_ENV_ACTIVE")
-    active_test = os.environ.get("PYTEST_CURRENT_TEST").replace("tests/", "").replace(":", "_").replace(".", "_")
-    file_prefix = f"{test_env}.{active_test}"
-
-    return os.path.join(snapshots_dir, f"{file_prefix}.{file_type.value}.json")
-
-
-def serialize_aggregator(aggregator: AggregatorStub):
-    return {
-        "metrics": {name: [default(m) for m in list(aggregator.metrics(name))] for name in aggregator.metric_names},
-        "events": aggregator.events,
-    }
-
-
-def default(obj):
-    if isinstance(obj, decimal.Decimal):
-        return str(obj)
-    if isinstance(obj, IPv4Address):
-        return str(obj)
-    if isinstance(obj, MetricStub):
-        return {
-            "name": obj.name,
-            "type": obj.type,
-            # The operation time is wall time of the running integration so will vary each time
-            "value": obj.value if obj.name != "dd.postgres.operation.time" else 1,
-            "tags": sorted(obj.tags),
-            "hostname": obj.hostname,
-            "device": obj.device,
-            "flush_first_value": obj.flush_first_value,
-        }
-    raise TypeError
