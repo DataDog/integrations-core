@@ -84,12 +84,26 @@ jobs:
     needs:
       - set-platforms
       - measure-disk-usage
-    strategy:
-      matrix:
-        platform: ${{ fromJSON(needs.set-platforms.outputs.platforms) }}
     outputs:
       passed: ${{ steps.check_diff.outputs.passed }}
     steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install ddev
+      run: |
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
+
+    - name: Configure ddev
+      run: |
+            ddev config override
     - name: Calculate diff
       run: |
         ddev size diff ${{github.event.pull_request.head.sha }} --format json --use-artifacts --quality-gate-threshold ${{ env.SIZE_THRESHOLD }} # TODO: change to ${{ github.event.workflow_run.head_sha }}
