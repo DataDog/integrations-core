@@ -28,6 +28,9 @@ class MyCheck(AgentCheck):
 
 ## Cache Invalidation
 
+!!! info
+    Customizable cache invalidation was added in `datadog-checks-base 37.20.0`
+
 By default, every key stored in the persistent cache is associated with an ID that makes the key unique among all checks running in the Agent. This ID, also known as `check_id`, includes a digest of the entire instance configuration. Consequently, the cache is automatically invalidated whenever there is any change to the check's configuration.
 
 While this default behavior is safe and prevents state from leaking between different check configurations, it can be problematic for integrations that need to maintain a stable state even when unrelated configuration options change. For example, if a user modifies a timeout setting, it would invalidate the cache and could cause a log-collecting integration to re-send old logs or miss new ones.
