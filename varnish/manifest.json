@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e342e5eb-71ce-4c5b-a9c9-2c33691e858f",
   "app_id": "varnish",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

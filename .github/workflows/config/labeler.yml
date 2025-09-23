@@ -285,6 +285,8 @@ integration/haproxy:
 - haproxy/**/*
 integration/harbor:
 - harbor/**/*
+integration/have_i_been_pwned:
+- have_i_been_pwned/**/*
 integration/hazelcast:
 - hazelcast/**/*
 integration/hdfs_datanode:
@@ -443,6 +445,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_copilot:
+- microsoft_copilot/**/*
 integration/microsoft_dns:
 - microsoft_dns/**/*
 integration/microsoft_sysmon:
