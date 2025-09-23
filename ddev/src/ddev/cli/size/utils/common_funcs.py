@@ -1197,7 +1197,6 @@ def get_sizes_json_from_artifacts(
     extension: str | None = "json",
 ) -> dict[str, Path | None]:
     print(f"Getting dependency sizes json for {commit=}, {platform=}")
-    print(f"Directory: {dir}")
     compression = "compressed" if compressed else "uncompressed"
     artifact_name = f'status_{compression}.{extension}' if extension == "json" else f'{compression}_status.{extension}'
     print(f"Artifact name: {artifact_name}")
@@ -1210,7 +1209,7 @@ def get_sizes_json_from_artifacts(
     uncompressed_json = None
     if run_id and (compressed is None or compressed):
         compressed_json = get_artifact(run_id, artifact_name, dir)
-    if run_id and not compressed and extension == "json":
+    if run_id and not compressed:
         uncompressed_json = get_artifact(run_id, artifact_name, dir)
     return {"compressed": compressed_json, "uncompressed": uncompressed_json}
 

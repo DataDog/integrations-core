@@ -327,8 +327,8 @@ def calculate_diff(
         b = old_commit.get((name, _type, platform, py_version))
         a = new_commit.get((name, _type, platform, py_version))
 
-        size_b = b["Size_Bytes"] if b else 0
-        size_a = a["Size_Bytes"] if a else 0
+        size_b = int(b["Size_Bytes"]) if b else 0
+        size_a = int(a["Size_Bytes"]) if a else 0
         delta = size_a - size_b
 
         if delta == 0:
