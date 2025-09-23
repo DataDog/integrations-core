@@ -63,17 +63,6 @@ The Netlogon and Security metrics help address several monitoring scenarios:
 - **Monitor authentication protocol usage**: Track the ratio of NTLM vs Kerberos authentications to ensure proper protocol usage
 - **Detect authentication timeouts and failures**: Rising `semaphore_timeouts` indicate authentication infrastructure issues
 
-#### Service-Aware Metric Collection
-
-The integration automatically detects which Windows services are running and only collects metrics for available services. This prevents errors when optional roles like DHCP Server or DFS Replication are not installed.
-
-#### Additional Metrics
-
-- **LDAP Write Operations**: `ldap.writes_persec` tracks directory modifications
-- **LDAP Active Threads**: `ldap.active_threads` monitors LDAP subsystem load
-- **Client Binds**: `ds.client_binds_persec` includes all bind attempts (successful and failed)
-- **Last Authentication Time**: `netlogon.last_authentication_time` shows time since last auth
-
 ### Events
 
 The Active Directory check does not include any events.
