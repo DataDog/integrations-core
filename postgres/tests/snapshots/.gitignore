@@ -1,0 +1,2 @@
+# The output is only used for debugging failed tests and should not be committed
+*.output.json

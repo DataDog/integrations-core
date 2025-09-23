@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
+from enum import Enum
 
 import psycopg
 import pytest
@@ -134,20 +135,29 @@ def e2e_instance():
     return instance
 
 
+class SnapshotMode(Enum):
+    RECORD = "record"
+    REPLAY = "replay"
+
+
 def pytest_addoption(parser: pytest.Parser):
     parser.addoption(
-        "--snapshot-mode", action="store", default="replay", help="set snapshot mode", choices=("record", "replay")
+        "--snapshot-mode",
+        action="store",
+        default="replay",
+        help="set snapshot mode",
+        choices=(SnapshotMode.RECORD.value, SnapshotMode.REPLAY.value),
     )
 
 
 @pytest.fixture
 def snapshot_mode(request):
-    return request.config.getoption("--snapshot-mode")
+    return SnapshotMode(request.config.getoption("--snapshot-mode"))
 
 
 def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]):
     for item in items:
         # We only want to load the dd_environment fixture for snapshot tests if we are recording
         # If we are replaying we don't need the database and we can run much faster without it
-        if "snapshot" in item.keywords and config.getoption("--snapshot-mode") == "record":
+        if "snapshot" in item.keywords and config.getoption("--snapshot-mode") == SnapshotMode.RECORD.value:
             item.fixturenames.append('dd_environment')

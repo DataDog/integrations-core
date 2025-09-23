@@ -5,6 +5,7 @@
 import contextlib
 import decimal
 import os
+from enum import Enum
 from ipaddress import IPv4Address
 
 import orjson
@@ -15,6 +16,8 @@ from psycopg import Connection, Cursor
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.common import MetricStub
 from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager
+
+from .conftest import SnapshotMode
 
 
 class Observer:
@@ -82,10 +85,10 @@ class CursorObserver(Observer):
     def execute(self, query, *args, **kwargs):
         global replay_offset
         # print("executing query", query, self.mode)
-        if self.mode == "record":
+        if self.mode == SnapshotMode.RECORD:
             self.snapshot.append(query)
             return self.target.execute(query, *args, **kwargs)
-        if self.mode == "replay":
+        if self.mode == SnapshotMode.REPLAY:
             # Check that the top of the snapshot is the same as the query
             if self.snapshot[replay_offset] != query:
                 print("Query does not match snapshot", query, self.snapshot[replay_offset])
@@ -97,20 +100,20 @@ class CursorObserver(Observer):
         raise ValueError(f"Mode {self.mode} is not supported")
 
     def fetchone(self):
-        if self.mode == "record":
+        if self.mode == SnapshotMode.RECORD:
             result = self.target.fetchone()
             self.snapshot.append(result)
             return result
-        if self.mode == "replay":
+        if self.mode == SnapshotMode.REPLAY:
             return self.replay()
         raise ValueError(f"Mode {self.mode} is not supported")
 
     def fetchall(self):
-        if self.mode == "record":
+        if self.mode == SnapshotMode.RECORD:
             result = self.target.fetchall()
             self.snapshot.append(result)
             return result
-        if self.mode == "replay":
+        if self.mode == SnapshotMode.REPLAY:
             return self.replay()
         raise ValueError(f"Mode {self.mode} is not supported")
 
@@ -125,26 +128,23 @@ class CursorObserver(Observer):
         return value
 
 
-snapshots_dir = os.path.join(os.path.dirname(__file__), "snapshots")
-
-
 @pytest.mark.snapshot
-def test_snapshot(aggregator: AggregatorStub, integration_check, pg_instance, snapshot_mode):
+def test_snapshot(aggregator: AggregatorStub, integration_check, pg_instance, snapshot_mode: SnapshotMode):
     check = integration_check(pg_instance)
-
 
     observer = PoolObserver(check.db_pool)
     observer.mode = snapshot_mode
     observer.snapshot = []
 
-    if snapshot_mode == "replay":
-        with open(os.path.join(snapshots_dir, "1.requests.json"), "r") as f:
+    if snapshot_mode == SnapshotMode.REPLAY:
+        with open(file_path(SnapshotFileType.REQUESTS), "r") as f:
             observer.snapshot = orjson.loads(f.read())
+            assert observer.snapshot != []
 
     def generate_new_connection(new_connection):
         def observed_new_connection(dbname):
             try:
-                if observer.mode == "replay":
+                if observer.mode == SnapshotMode.REPLAY:
                     return ConnectionObserver(None, observer.snapshot, observer.mode)
                 conn = new_connection(dbname)
             except Exception as e:
@@ -162,15 +162,15 @@ def test_snapshot(aggregator: AggregatorStub, integration_check, pg_instance, sn
 
     output = serialize_aggregator(aggregator)
 
-    if observer.mode == "record":
-        with open(os.path.join(snapshots_dir, "1.requests.json"), "w") as f:
+    if observer.mode == SnapshotMode.RECORD:
+        with open(file_path(SnapshotFileType.REQUESTS), "w") as f:
             f.write(orjson.dumps(observer.snapshot, default=default, option=orjson.OPT_INDENT_2).decode("utf-8"))
-        with open(os.path.join(snapshots_dir, "1.expected.json"), "w") as f:
+        with open(file_path(SnapshotFileType.EXPECTED), "w") as f:
             f.write(orjson.dumps(output, default=default, option=orjson.OPT_INDENT_2).decode("utf-8"))
-    elif observer.mode == "replay":
-        with open(os.path.join(snapshots_dir, "1.expected.json"), "r") as f:
+    elif observer.mode == SnapshotMode.REPLAY:
+        with open(file_path(SnapshotFileType.EXPECTED), "r") as f:
             expected = orjson.loads(f.read())
-        with open(os.path.join(snapshots_dir, "1.output.json"), "w") as f:
+        with open(file_path(SnapshotFileType.OUTPUT), "w") as f:
             f.write(orjson.dumps(output, default=default, option=orjson.OPT_INDENT_2).decode("utf-8"))
         assert output == expected
 
@@ -178,6 +178,22 @@ def test_snapshot(aggregator: AggregatorStub, integration_check, pg_instance, sn
 # def AggregatorOutput(TypedDict):
 #     metrics: dict[str, list[dict]]
 #     events: list[dict]
+
+
+class SnapshotFileType(Enum):
+    REQUESTS = "requests"
+    EXPECTED = "expected"
+    OUTPUT = "output"
+
+
+def file_path(file_type: SnapshotFileType):
+    snapshots_dir = os.path.join(os.path.dirname(__file__), "snapshots")
+
+    test_env = os.environ.get("HATCH_ENV_ACTIVE")
+    active_test = os.environ.get("PYTEST_CURRENT_TEST").replace("tests/", "").replace(":", "_").replace(".", "_")
+    file_prefix = f"{test_env}.{active_test}"
+
+    return os.path.join(snapshots_dir, f"{file_prefix}.{file_type.value}.json")
 
 
 def serialize_aggregator(aggregator: AggregatorStub):
