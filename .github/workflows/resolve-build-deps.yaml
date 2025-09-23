@@ -292,7 +292,7 @@ jobs:
       contents: read
       actions: read
     needs:
-      - build
+      # - build
       - build-macos
     uses: ./.github/workflows/measure-disk-usage.yml
 

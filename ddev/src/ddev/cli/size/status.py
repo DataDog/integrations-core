@@ -16,7 +16,7 @@ from ddev.utils.fs import Path
 if TYPE_CHECKING:
     from ddev.cli.size.utils.common_funcs import (
         CLIParameters,
-        FileDataEntryPlatformVersion,
+        FileDataEntry,
     )
 
 
@@ -69,7 +69,7 @@ def status(
             app,
         )
 
-        modules_plat_ver: list[FileDataEntryPlatformVersion] = []
+        modules_plat_ver: list[FileDataEntry] = []
         platforms = valid_platforms if platform is None else [platform]
         versions = valid_versions if version is None else [version]
         combinations = [(p, v) for p in platforms for v in versions]
@@ -147,9 +147,8 @@ def status_mode(
     repo_path: Path,
     params: CLIParameters,
     dependency_sizes: Path | None,
-) -> list[FileDataEntryPlatformVersion]:
+) -> list[FileDataEntry]:
     from ddev.cli.size.utils.common_funcs import (
-        format_modules,
         get_dependencies,
         get_files,
         print_table,
@@ -159,20 +158,21 @@ def status_mode(
         if dependency_sizes:
             from ddev.cli.size.utils.common_funcs import get_dependencies_from_json
 
-            modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies_from_json(
+            modules = get_files(
+                repo_path, params["compressed"], params["version"], params["platform"]
+            ) + get_dependencies_from_json(
                 dependency_sizes, params["platform"], params["version"], params["compressed"]
             )
 
         else:
-            modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies(
-                repo_path, params["platform"], params["version"], params["compressed"]
-            )
+            modules = get_files(
+                repo_path, params["compressed"], params["version"], params["platform"]
+            ) + get_dependencies(repo_path, params["platform"], params["version"], params["compressed"])
 
-    formatted_modules = format_modules(modules, params["platform"], params["version"])
-    formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
+    modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
 
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
-        print_table(params["app"], "Status", formatted_modules)
+        print_table(params["app"], "Status", modules)
 
     treemap_path = None
     if params["format"] and "png" in params["format"]:
@@ -185,11 +185,11 @@ def status_mode(
 
         plot_treemap(
             params["app"],
-            formatted_modules,
+            modules,
             f"Disk Usage Status for {params['platform']} and Python version {params['version']}",
             params["show_gui"],
             "status",
             treemap_path,
         )
 
-    return formatted_modules
+    return modules
