@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ee31aff6-4821-4dbf-af9c-bd09e59a4e80",
   "app_id": "gitlab-runner",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

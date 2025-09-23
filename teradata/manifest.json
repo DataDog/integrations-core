@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8cac0599-64ca-4a46-8c68-1c5db6cc65ca",
   "app_id": "teradata",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

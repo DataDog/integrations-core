@@ -226,6 +226,10 @@ instances:
     #
     # collect_count_metrics: true
 
+    ## Configure collection of idle in transaction lock age metrics
+    #
+    # locks_idle_in_transaction:
+
     ## @param collect_checksum_metrics - boolean - optional - default: false
     ## Collect counts of database failed checksums. Only supported on versions >= 12.
     #
