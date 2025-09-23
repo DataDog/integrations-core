@@ -54,8 +54,7 @@ jobs:
       run: |
         cmd="ddev size status \
         --commit ${{github.event.pull_request.head.sha }} \
-        --format json \
-        --platform macos-x86_64 " # TODO: change to ${{ github.event.workflow_run.head_sha }}
+        --format json " # TODO: change to ${{ github.event.workflow_run.head_sha }}
         # Send metrics to Datadog only on push to master
 
         # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
@@ -93,7 +92,7 @@ jobs:
     steps:
     - name: Calculate diff
       run: |
-        ddev size diff ${{github.event.pull_request.head.sha }} --format json --use-artifacts --quality-gate-threshold ${{ env.SIZE_THRESHOLD }} --platform macos-x86_64 # TODO: change to ${{ github.event.workflow_run.head_sha }}
+        ddev size diff ${{github.event.pull_request.head.sha }} --format json --use-artifacts --quality-gate-threshold ${{ env.SIZE_THRESHOLD }} # TODO: change to ${{ github.event.workflow_run.head_sha }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SIZE_THRESHOLD: 1000000000000
