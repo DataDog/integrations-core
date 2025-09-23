@@ -97,10 +97,15 @@ class PoolObserver(Observer):
         self.snapshot = []
         self.target = pool_manager
 
-    @contextlib.contextmanager
+    # @contextlib.contextmanager
     def get_connection(self, dbname: str, persistent: bool = False):
-        with self.target.get_connection(dbname, persistent) as conn:
-            yield ConnectionObserver(conn, self.snapshot, self.mode)
+        if self.mode == SnapshotMode.RECORD:
+            with self.target.get_connection(dbname, persistent) as conn:
+                return ConnectionObserver(conn, self.snapshot, self.mode)
+        if self.mode == SnapshotMode.REPLAY:
+            return ConnectionObserver(None, self.snapshot, self.mode)
+        # raise ValueError(f"Mode {self.mode} is not supported")
+
 
 
 class ConnectionObserver(Observer):
@@ -109,6 +114,21 @@ class ConnectionObserver(Observer):
         self.snapshot = snapshot
         self.target = conn
         self.mode = mode
+
+    def __enter__(self):
+        if self.target:
+            self.target = self.target.__enter__()
+        return self
+
+    def __exit__(
+        self,
+        exc_type,
+        exc_val,
+        exc_tb,
+    ):
+        if self.target:
+            return self.target.__exit__(exc_type, exc_val, exc_tb)
+        return None
 
     @contextlib.contextmanager
     def cursor(self, *args, **kwargs):
