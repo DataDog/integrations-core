@@ -77,7 +77,7 @@ def diff(
         combinations = [(p, v) for p in platforms for v in versions]
 
         if not old_commit:
-            old_commit = app.repo.git.merge_base(new_commit, "master")
+            old_commit = app.repo.git.merge_base(new_commit, "origin/master")
         if use_artifacts:
             for plat, ver in combinations:
                 parameters_artifacts: CLIParameters = {
