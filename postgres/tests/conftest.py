@@ -69,6 +69,7 @@ def dd_environment(e2e_instance):
         os.path.join(HERE, 'compose', compose_file),
         conditions=[WaitFor(connect_to_pg)],
         env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE, "POSTGRES_LOCALE": POSTGRES_LOCALE},
+        capture=True,
     ):
         yield e2e_instance, E2E_METADATA
 
@@ -132,3 +133,22 @@ def e2e_instance():
     instance = copy.deepcopy(INSTANCE)
     instance['dbm'] = True
     return instance
+
+
+def pytest_addoption(parser: pytest.Parser):
+    parser.addoption(
+        "--snapshot-mode", action="store", default="replay", help="set snapshot mode", choices=("record", "replay")
+    )
+
+
+@pytest.fixture
+def snapshot_mode(request):
+    return request.config.getoption("--snapshot-mode")
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]):
+    for item in items:
+        # We only want to load the dd_environment fixture for snapshot tests if we are recording
+        # If we are replaying we don't need the database and we can run much faster without it
+        if "snapshot" in item.keywords and config.getoption("--snapshot-mode") == "record":
+            item.fixturenames.append('dd_environment')

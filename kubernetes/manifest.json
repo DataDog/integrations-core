@@ -71,6 +71,7 @@
       "Nodes are unavailable": "assets/monitors/monitor_node_unavailable.json",
       "Pod is in a CrashloopBackOff state": "assets/monitors/monitor_pod_crashloopbackoff.json",
       "Pod is in an ImagePullBackOff state": "assets/monitors/monitor_pod_imagepullbackoff.json",
+      "Pod is in an OOMKilled state": "assets/monitors/monitor_pod_oomkilled.json",
       "Pods are failing": "assets/monitors/monitor_pods_failed_state.json",
       "Pods are restarting": "assets/monitors/monitor_pods_restarting.json",
       "Kubernetes Statefulset Replicas are failing": "assets/monitors/monitor_statefulset_replicas.json"
