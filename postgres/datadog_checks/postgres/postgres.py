@@ -259,9 +259,17 @@ class PostgreSql(AgentCheck):
             self._db = self._new_connection(self._config.dbname)
             # once the connection is reinitialized, we need to reload the pg_settings
             self._load_pg_settings(self._db)
-        if self._db.info.status != psycopg.pq.ConnStatus.OK:
-            self._db.rollback()
+            print('loaded pg_settings')
         try:
+            status = self._db.info.status
+        except Exception as e:
+            print("error getting status", e)
+            status = None
+        if status != psycopg.pq.ConnStatus.OK:
+            print("rolling back db")
+            self._db.rollback() 
+        try:
+            print("yielding db")
             yield self._db
         except (psycopg.InterfaceError, InterruptedError):
             # if we get an interface error or an interrupted error,
@@ -284,9 +292,12 @@ class PostgreSql(AgentCheck):
         try:
             # run a simple query to check if the connection is healthy
             # health check should run after a connection is established
+            print("about to execute health check")
             with conn.cursor() as cursor:
+                print("executing health check")
                 cursor.execute("SELECT 1")
                 cursor.fetchall()
+                print("done executing health check")
                 self.log.debug("Connection health check passed for database %s", conn.info.dbname)
         except psycopg.Error as e:
             err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
@@ -956,10 +967,13 @@ class PostgreSql(AgentCheck):
                     ("pg_stat_statements.max", "track_activity_query_size", "track_io_timing"),
                 )
                 rows = cursor.fetchall()
+                print("got rows", rows)
                 self.pg_settings.clear()
                 for setting in rows:
                     name, val = setting
+                    print("set setting", name, val)
                     self.pg_settings[name] = val
+                print("done itearing")
         except psycopg.Error as err:
             self.log.warning("Failed to query for pg_settings: %s", repr(err))
             self.count(
@@ -969,6 +983,7 @@ class PostgreSql(AgentCheck):
                 hostname=self.reported_hostname,
                 raw=True,
             )
+        print("dont loading")
 
     def _get_main_db(self):
         """
