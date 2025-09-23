@@ -39,14 +39,23 @@ The cloudgen_firewall check is included in the [Datadog Agent][2] package.
 ### Validation
 
 1. Confirm the Datadog Agent is listening on the correct port (`514` in the following examples):
+
     `sudo netstat -tunlp | grep 514`
+
     If using TCP and UDP listeners, use the following command:
+
     `sudo lsof -i :514`
+
 2. Confirm logs are reaching the Agent from the correct log source:
+
     `tail -f /var/log/datadog/syslog.log`
+
     **Note**: If the file doesn't exist, verify that syslog logs are being written by your configuration.
+
 3. Use the tcpdump command to confirm network traffic on the Datadog Agent host:
+
     `sudo tcpdump -i any port 514`
+    
 After running this command, you should see traffic from the CloudGen Firewall IP address. If you don't see any such traffic, check the firewall rules between CloudGen and the Datadog Agent. Confirm the correct protocol (UDP or TCP) is being used on both sides.
 4. Check the Datadog [Live Tail][7] for logs from the source and service you defined in the `conf.yaml` file.
 5. After following these steps, you can create a test log on the firewall by triggering an event.
