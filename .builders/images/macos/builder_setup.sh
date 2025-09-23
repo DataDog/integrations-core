@@ -94,6 +94,15 @@ RELATIVE_PATH="curl-{{version}}" \
 # Remove the binary installed so that we consistenly use the same original `curl` binary
 rm "${DD_PREFIX_PATH}/bin/curl"
 
+# libpq and pg_config as needed by psycopg
+DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
+VERSION="16.9" \
+SHA256="07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005" \
+RELATIVE_PATH="postgresql-{{version}}" \
+  install-from-source --without-readline --with-openssl --without-icu
+# Add paths to pg_config and to the library
+echo PATH="${DD_PREFIX_PATH}/bin:${PATH:-}" >> "$DD_ENV_FILE"
+
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \
 VERSION="0.9.29" \
