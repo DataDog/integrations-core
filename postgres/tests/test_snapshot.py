@@ -15,7 +15,19 @@ from .snapshots import (
 
 
 @pytest.mark.snapshot
-def test_snapshot(aggregator: AggregatorStub, integration_check, pg_instance, snapshot_mode: SnapshotMode):
+def test_snapshot_dbm_false(aggregator: AggregatorStub, integration_check, pg_instance, snapshot_mode: SnapshotMode):
+    check = integration_check(pg_instance)
+    inject_snapshot_observer(check, snapshot_mode)
+    check.run()
+
+    # Sanity check that the check ran
+    aggregator.assert_metric("postgresql.running", count=1)
+
+    validate_snapshot(aggregator, check)
+
+@pytest.mark.snapshot
+def test_snapshot_dbm_true(aggregator: AggregatorStub, integration_check, pg_instance, snapshot_mode: SnapshotMode):
+    pg_instance['dbm'] = True
     check = integration_check(pg_instance)
     inject_snapshot_observer(check, snapshot_mode)
     check.run()

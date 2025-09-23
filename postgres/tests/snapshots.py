@@ -102,6 +102,7 @@ class PoolObserver(Observer):
         return ConnectionObserver(conn, self.snapshot, self.mode)
 
 
+@contextlib.contextmanager
 class ConnectionObserver(Observer):
     def __init__(self, conn: Connection, snapshot: list, mode: str):
         # print(f"Initializing connection observer")
