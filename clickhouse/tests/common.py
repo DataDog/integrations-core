@@ -16,7 +16,6 @@ COMPOSE_LOGS_FILE = os.path.join(HERE, 'docker', 'compose-logs.yaml')
 
 CLICKHOUSE_NODE_NUM = 2
 HTTP_START_PORT = 8123
-TCP_START_PORT = 9000
 
 CONFIG = {
     'server': HOST,

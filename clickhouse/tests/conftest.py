@@ -26,12 +26,15 @@ def dd_environment():
             )
         )
         conditions.append(
-            CheckEndpoints(endpoints=['http://{}:{}'.format(common.HOST, common.HTTP_START_PORT + i)], wait=5),
+            CheckEndpoints(endpoints=['http://{}:{}'.format(config['server'], common.HTTP_START_PORT + i)], wait=5),
         )
         conditions.append(
             WaitFor(
-                func=ping_clickhouse(common.HOST, common.TCP_START_PORT + i, config['username'], config['password']),
+                func=ping_clickhouse(
+                    config['server'], common.HTTP_START_PORT + i, config['username'], config['password']
+                ),
                 wait=5,
+
             )
         )
 
@@ -45,9 +48,19 @@ def instance():
     return get_instance_config()
 
 
+@pytest.fixture
+def clickhouse_client(instance):
+    return get_clickhouse_client(
+        host=instance['server'],
+        port=instance['port'],
+        username=instance['username'],
+        password=instance['password'],
+    )
+
+
 def ping_clickhouse(host, port, username, password):
     def _ping_clickhouse():
-        client = clickhouse_connect.get_client(
+        client = get_clickhouse_client(
             host=host,
             port=port,
             username=username,
@@ -58,15 +71,14 @@ def ping_clickhouse(host, port, username, password):
     return _ping_clickhouse
 
 
+def get_clickhouse_client(host, port, username, password):
+    return clickhouse_connect.get_client(
+        host=host,
+        port=port,
+        username=username,
+        password=password,
+    )
+
+
 def get_instance_config() -> dict:
     return deepcopy(common.CONFIG)
-
-
-@pytest.fixture
-def clickhouse_client(instance):
-    return clickhouse_driver.Client(
-        host=instance['server'],
-        port=instance['port'],
-        user=instance['username'],
-        password=instance['password'],
-    )
