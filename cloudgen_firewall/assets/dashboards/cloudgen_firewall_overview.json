@@ -3166,7 +3166,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:(auditop OR audit OR IPSDownload OR Activity OR threat)"
+                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3239,7 +3239,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:(auditop OR audit OR IPSDownload OR Activity OR threat)"
+                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3288,7 +3288,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:(auditop OR audit OR IPSDownload OR Activity OR threat) message:*block*"
+                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:* message:*block*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3369,7 +3369,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:(auditop OR audit OR IPSDownload OR Activity OR threat)"
+                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3412,7 +3412,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:(auditop OR audit OR IPSDownload OR Activity OR threat)"
+                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3481,7 +3481,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:(auditop OR audit OR IPSDownload OR Activity OR threat)"
+                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:*"
                                             },
                                             "indexes": [
                                                 "*"

@@ -455,3 +455,53 @@ pipeline:
       enabled: true
       sources:
         - timestamp
+    - type: attribute-remapper
+      name: Map `component` to `cloudgen_firewall.component`
+      enabled: true
+      sources:
+        - component
+      sourceType: attribute
+      target: cloudgen_firewall.component
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `ip` to `cloudgen_firewall.ip`
+      enabled: true
+      sources:
+        - ip
+      sourceType: attribute
+      target: cloudgen_firewall.ip
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `process` to `cloudgen_firewall.process`
+      enabled: true
+      sources:
+        - process
+      sourceType: attribute
+      target: cloudgen_firewall.process
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `pid` to `cloudgen_firewall.pid`
+      enabled: true
+      sources:
+        - pid
+      sourceType: attribute
+      target: cloudgen_firewall.pid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `session_status` to `cloudgen_firewall.session_status`
+      enabled: true
+      sources:
+        - session_status
+      sourceType: attribute
+      target: cloudgen_firewall.session_status
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
