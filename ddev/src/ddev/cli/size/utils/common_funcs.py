@@ -952,8 +952,8 @@ def send_metrics_to_dd(
 
     config_file_info = app.config.orgs.get(org, {})
 
-    if not commits and not is_everything_committed():
-        raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
+    # if not commits and not is_everything_committed():
+    #     raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
     if "api_key" not in config_file_info:
         raise RuntimeError("No API key found in config file")
     if "site" not in config_file_info:

@@ -102,7 +102,9 @@ def status(
             from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
 
             mode: Literal["status"] = "status"
-            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, compressed, mode)
+            commits = [dependency_commit] if dependency_commit else None
+            print(f"Sending metrics to Datadog for commits: {commits}")
+            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, compressed, mode, commits)
     except Exception as e:
         app.abort(str(e))
 
