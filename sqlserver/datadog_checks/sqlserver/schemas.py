@@ -50,6 +50,7 @@ class SubmitData:
         self._total_columns_sent = 0
         self.db_to_schemas = {}  # dbname : { id : schema }
         self.db_info = {}  # name to info
+        self.payloads_count = 0
 
     def set_base_event_data(self, hostname, database_instance, tags, cloud_metadata, dbms_version):
         self._base_event["host"] = hostname
@@ -57,6 +58,7 @@ class SubmitData:
         self._base_event["tags"] = tags
         self._base_event["cloud_metadata"] = cloud_metadata
         self._base_event["dbms_version"] = dbms_version
+        self._base_event["collection_started_at"] = time.time()
 
     def reset(self):
         self._total_columns_sent = 0
@@ -120,12 +122,15 @@ class SubmitData:
         self._log.debug("Reporting truncation of schema collection: {}".format(self.truncate(json_event)))
         self._submit_to_agent_queue(json_event)
 
-    def submit(self):
+    def submit(self, complete=False):
         if not self.db_to_schemas:
             return
         self._total_columns_sent += self._columns_count
+        self.payloads_count += 1
         self._columns_count = 0
         event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
+        if complete:
+            event["collection_payloads_count"] = self.payloads_count
         for db, schemas_by_id in self.db_to_schemas.items():
             db_info = {}
             db_info = self.db_info[db]
@@ -298,7 +303,7 @@ class Schemas(DBMAsyncJob):
         db_infos = self._query_db_information(databases)
         self._data_submitter.store_db_infos(db_infos, databases)
         self._fetch_for_databases()
-        self._data_submitter.submit()
+        self._data_submitter.submit(complete=True)
         self._log.debug("Finished collect_schemas_data")
 
     def _query_db_information(self, db_names):

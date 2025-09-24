@@ -40,7 +40,8 @@ class SubmitData:
         self._total_columns_sent = 0
         self.db_to_tables = {}  # dbname : {"tables" : []}
         self.db_info = {}  # name to info
-        self.any_tables_found = False  # Flag to track for permission issues
+        self.any_tables_found = False
+        self.payloads_count = 0  # Flag to track for permission issues
 
     def set_base_event_data(self, hostname, database_instance, tags, cloud_metadata, dbms_version, flavor):
         self._base_event["host"] = hostname
@@ -49,6 +50,7 @@ class SubmitData:
         self._base_event["cloud_metadata"] = cloud_metadata
         self._base_event["dbms_version"] = dbms_version
         self._base_event["flavor"] = flavor
+        self._base_event["collection_started_at"] = time.time()
 
     def reset(self):
         self._total_columns_sent = 0
@@ -56,6 +58,7 @@ class SubmitData:
         self.db_info.clear()
         self.db_to_tables.clear()
         self.any_tables_found = False
+        self.payloads_count = 0
 
     def store_db_infos(self, db_infos):
         for db_info in db_infos:
@@ -96,12 +99,15 @@ class SubmitData:
         self._log.debug("Reporting truncation of schema collection: {}".format(self.truncate(json_event)))
         self._submit_to_agent_queue(json_event)
 
-    def submit(self):
+    def submit(self, complete=False):
         if not self.db_to_tables:
             return
         self._total_columns_sent += self._columns_count
+        self.payloads_count += 1
         self._columns_count = 0
         event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
+        if complete:
+            event["collection_payloads_count"] = self.payloads_count
         for db, tables in self.db_to_tables.items():
             db_info = self.db_info[db]
             event["metadata"] = event["metadata"] + [{**(db_info), "tables": tables}]
@@ -263,7 +269,7 @@ class DatabasesData:
                 db_infos = self._query_db_information(cursor)
                 self._data_submitter.store_db_infos(db_infos)
                 self._fetch_for_databases(db_infos, cursor)
-                self._data_submitter.submit()
+                self._data_submitter.submit(complete=True)
         finally:
             self._data_submitter.reset()  # Ensure we reset in case of errors
         self._log.debug("Finished collect_databases_data")

@@ -383,10 +383,14 @@ class PostgresMetadata(DBMAsyncJob):
                 "dbms_version": self._payload_pg_version(),
                 "tags": self._tags_no_db,
                 "cloud_metadata": self._check.cloud_metadata,
+                # We don't rely on this time being strictly monotonic, it's just a unique identifier
+                # but having it be the time is helpful for debugging
+                "collection_started_at": time.time(),
             }
 
             # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
             chunk_size = 50
+            payloads_count = 1
 
             for database in schema_metadata:
                 dbname = database["name"]
@@ -420,13 +424,19 @@ class PostgresMetadata(DBMAsyncJob):
                                     buffer_column_count += len(t.get("columns", []))
 
                                 if buffer_column_count >= 100_000:
+                                    payloads_count += 1
                                     self._flush_schema(base_event, database, schema, tables_buffer)
                                     total_tables += len(tables_buffer)
                                     tables_buffer = []
                                     buffer_column_count = 0
 
                             if len(tables_buffer) > 0:
-                                self._flush_schema(base_event, database, schema, tables_buffer)
+                                self._flush_schema(
+                                    {**base_event, "collection_payloads_count": payloads_count},
+                                    database,
+                                    schema,
+                                    tables_buffer,
+                                )
                                 total_tables += len(tables_buffer)
         except Exception as e:
             self._log.error("Error collecting schema metadata: %s", e)
