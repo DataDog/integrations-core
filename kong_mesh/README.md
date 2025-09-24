@@ -10,13 +10,13 @@ With the Datadog Kong Mesh integration, you can:
 - Collect logs from both the control plane and the data plane proxies.
 - Gain detailed insights into the internal traffic flows within your service mesh which helps monitor performance and ensure reliability.
 
+## Setup
+
 For monitoring Kong Mesh (control plane and Envoy data planes):
 - Use the [Kuma integration][3] to collect both metrics and logs. Follow the [Configuration instructions][5] in the Kuma documentation.
 - This integration provides prebuilt dashboards and monitors for convenience. Kong Mesh can be fully monitored using only the Kuma integration, which also includes dashboards and monitors.
 
 **Note:** You can also use the [Kuma integration][3] to monitor your Kong Mesh deployment.
-
-## Setup
 
 The `Kuma` Agent check required by the Kong Mesh integration is included in the [Datadog Agent][4] package. No additional installation is needed on your server.
 
