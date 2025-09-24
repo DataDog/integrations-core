@@ -125,12 +125,19 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
 
     schemas_got = set()
 
-    for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+    collection_started_at = None
+    schema_events = [e for e in dbm_metadata if e['kind'] == 'pg_databases']
+    for schema_event in schema_events:
         assert schema_event.get("timestamp") is not None
+        if collection_started_at is None:
+            collection_started_at = schema_event["collection_started_at"]
+        assert schema_event["collection_started_at"] == collection_started_at
+
         # there should only be one database, datadog_test
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
         assert 'datadog_test' == database_metadata[0]['name']
+
 
         # there should only two schemas, 'public' and 'datadog'. datadog is empty
         schema = database_metadata[0]['schemas'][0]
