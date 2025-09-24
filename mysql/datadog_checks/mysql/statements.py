@@ -255,7 +255,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
         if collect_prepared_statements:
             prepared_sql_statement_summary = """\
-                SELECT  NULL AS `schema_name`,
+                SELECT  `owner_object_schema` AS `schema_name`,
                         NULL AS `digest`,
                         `sql_text` AS `digest_text`,
                         `count_execute` AS `count_star`,
