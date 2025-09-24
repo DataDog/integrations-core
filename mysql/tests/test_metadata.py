@@ -673,8 +673,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             expected_tags += ('cluster_uuid:{}'.format(mysql_check.cluster_uuid), 'replication_role:primary')
 
     collection_started_at = None
-    schema_events = [e for e in dbm_metadata if e['kind'] == 'mysql_databases']
-    for i, schema_event in enumerate(schema_events):
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
         assert schema_event.get("timestamp") is not None
         assert schema_event["host"] == "stubbed.hostname"
         assert schema_event["agent_version"] == "0.0.0"
