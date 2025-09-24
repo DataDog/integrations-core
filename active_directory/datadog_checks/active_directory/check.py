@@ -25,16 +25,17 @@ def _service_exists(service_name):
     return True
 
 
+def _get_existing_services():
+    return {service for service in SERVICE_METRIC_MAP.keys() if _service_exists(service)}
+
+
 class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
     __NAMESPACE__ = 'active_directory'
-
-    def _get_existing_services(self):
-        return {service for service in SERVICE_METRIC_MAP.keys() if _service_exists(service)}
 
     def get_default_config(self):
         """Build metrics configuration based on service availability."""
         filtered_metrics_config = {}
-        existing_services = self._get_existing_services()
+        existing_services = _get_existing_services()
 
         for service in existing_services:
             for metric in SERVICE_METRIC_MAP[service]:

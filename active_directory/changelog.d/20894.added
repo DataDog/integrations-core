@@ -1,13 +1,1 @@
-Active Directory Performance Metrics
-
-Added metrics for critical Active Directory components:
-
-Netlogon: Monitors for authentication bottlenecks with metrics like semaphore_waiters and semaphore_holders.
-
-Security: Tracks the rate of ntlm_authentications and kerberos_authentications.
-
-DHCP Failover: Monitors the health of DHCP failover relationships.
-
-DFS Replication: Provides visibility into SYSVOL health with metrics for staging_folder_size and conflict_files_size.
-
-Core NTDS: Expanded to include ldap.writes_persec and ldap.active_threads.
+Add Netlogon, Security, DHCP Server, DFSR metrics and expand NTDS metrics.
