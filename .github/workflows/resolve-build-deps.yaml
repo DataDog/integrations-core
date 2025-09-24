@@ -61,16 +61,15 @@ jobs:
           jq -r '.files | map(.filename) | join(" ")')
 
           echo "files_changed=$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "files_changed=$CHANGED_FILES"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      
       - name: Check for dependency changes
         id: dependency-check
         run: |
           FILES_CHANGED="${{ steps.changed-files.outputs.files_changed }}"
-          echo "files_changed=$FILES_CHANGED"
-          DEPENDENCY_CHANGED=$(echo "$FILES_CHANGED" | grep -qE "(agent_requirements\.in)" && echo "true" || echo "false") #"(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)"
+          DEPENDENCY_CHANGED=$(echo "$FILES_CHANGED" | grep -qE "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)" && echo "true" || echo "false") 
           BUILDER_CHANGED=$(echo "$FILES_CHANGED" | grep -qE "^\.builders/" && echo "true" || echo "false")
 
           echo "dependency_changed=$DEPENDENCY_CHANGED" >> $GITHUB_OUTPUT
@@ -130,48 +129,7 @@ jobs:
       DOCKER: docker
 
     steps:
-    # - name: Checkout code
-    #   if: github.event_name != 'pull_request'
-    #   uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-    #   with:
-    #     fetch-depth: 2
-
-    # On pull requests, ensure that changed files are determined before checking out the code so
-    # that we use the GitHub API, otherwise we would have to fetch the entire history (depth: 0)
-    # - name: Check for builder changes (pull request)
-    #   id: changed-files-pr
-    #   if: github.event_name == 'pull_request'
-    #   env:
-    #     GH_TOKEN: "${{ github.token }}"
-    #   run: |
-    #     PR_NUMBER="${{ github.event.pull_request.number }}"
-    #     REPO="${{ github.repository }}"
-
-    #     BUILDERS_CHANGED=$(gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/files" | \
-    #       jq -r 'map(.filename) | map(select(startswith(".builders/"))) | length > 0')
-
-    #     echo "builders_any_changed=$BUILDERS_CHANGED" >> $GITHUB_OUTPUT
-
-    # For push events, we still need to check changes but will rely on minimal checkout
-    # - name: Check for builder changes (push)
-    #   id: changed-files-push
-    #   if: github.event_name != 'pull_request'
-    #   run: |
-    #     CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-    #     echo "builders_any_changed=$(echo "$CHANGED_FILES" | grep -q "^\.builders/" && echo "true" || echo "false")" >> $GITHUB_OUTPUT
-
-    # Combine outputs for subsequent steps
-    # - name: Combine changed files outputs
-    #   id: changed-files
-    #   run: |
-    #     if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-    #       echo "builders_any_changed=${{ steps.changed-files-pr.outputs.builders_any_changed }}" >> $GITHUB_OUTPUT
-    #     else
-    #       echo "builders_any_changed=${{ steps.changed-files-push.outputs.builders_any_changed }}" >> $GITHUB_OUTPUT
-    #     fi
-
     - name: Checkout code
-      # if: github.event_name == 'pull_request'
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
