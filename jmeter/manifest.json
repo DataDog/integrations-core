@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "be62a333-998e-4fea-b0e4-dd4a45b859b4",
   "app_id": "jmeter",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

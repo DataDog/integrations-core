@@ -1,0 +1,61 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "e6ea092c-302f-4810-9c0d-0da969c4774e",
+  "app_id": "litellm",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "This integration allows for real-time collection of LiteLLM metrics for enhanced observability and monitoring.",
+    "title": "LiteLLM",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 48026888,
+      "source_type_name": "LiteLLM",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "litellm.",
+        "check": "litellm.process.uptime.seconds",
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "litellm"
+      ],
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "LiteLLM Overview": "assets/dashboards/litellm_overview.json"
+    },
+    "monitors": {
+      "High LLM API Failure Rate Detected": "assets/monitors/high_failure_response.json",
+      "High Fallback Failure Rate Detected": "assets/monitors/high_fallback_failures.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

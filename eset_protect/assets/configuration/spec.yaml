@@ -1,0 +1,9 @@
+name: ESET Protect
+files:
+- name: eset_protect.yaml
+  options:
+  - template: logs
+    example:
+    - type: tcp/udp
+      port: <PORT>
+      source: eset-protect

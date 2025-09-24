@@ -13,7 +13,6 @@ class RabbitMQ(AgentCheck):
         instance = instances[0]
 
         if 'prometheus_plugin' in instance:
-
             return RabbitMQOpenMetrics(name, init_config, instances)
         else:
             from .rabbitmq import RabbitMQManagement

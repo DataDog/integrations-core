@@ -24,8 +24,12 @@ class FoundationdbCheck(AgentCheck):
             return self._db
 
         # TLS options. Each option has a different function name, so we cannot be smart with it without ugly code
+        if 'tls_ca_file' in self.instance:
+            fdb.options.set_tls_ca_path(self.instance.get('tls_ca_file'))
         if 'tls_certificate_file' in self.instance:
             fdb.options.set_tls_cert_path(self.instance.get('tls_certificate_file'))
+        if 'tls_password' in self.instance:
+            fdb.options.set_tls_password(self.instance.get('tls_password'))
         if 'tls_key_file' in self.instance:
             fdb.options.set_tls_key_path(self.instance.get('tls_key_file'))
         if 'tls_verify_peers' in self.instance:
@@ -38,7 +42,7 @@ class FoundationdbCheck(AgentCheck):
 
     def fdb_status_data(self):
         self.construct_database()
-        return self._db[u'\xff\xff/status/json'.encode(u'latin-1')]
+        return self._db['\xff\xff/status/json'.encode('latin-1')]
 
     def check(self, _):
         status_data = self.fdb_status_data()

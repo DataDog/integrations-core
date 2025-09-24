@@ -45,6 +45,7 @@ class InstanceConfig(BaseModel):
     filetagname: Optional[str] = None
     follow_symlinks: Optional[bool] = None
     ignore_missing: Optional[bool] = None
+    max_filegauge_count: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     name: Optional[str] = None

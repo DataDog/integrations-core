@@ -74,11 +74,14 @@ tests:
       }
     }
   service: "threat-response-alerts"
+  tags:
+   - "api_host:example.com"
   result:
     custom:
       Endpoint:
         id: 2
       ackedAt: "2024-12-26T06:26:52.692Z"
+      alert_link: "https://example.com/ui/threatresponse/alerts?guid=00000000-0000-0000-0000-000000000001"
       alertedAt: "2024-12-26T06:15:52.000Z"
       computerName: "AssetTag-EID"
       createdAt: "2024-12-26T06:20:09.636Z"
@@ -88,6 +91,9 @@ tests:
       firstEIDResolutionAttempt: "2024-12-26T06:20:17.210Z"
       groupingId: 2
       guid: "00000000-0000-0000-0000-000000000001"
+      http:
+        url_details:
+          host: "example.com"
       id: 2
       intelDoc:
         allowAutoDisable: true

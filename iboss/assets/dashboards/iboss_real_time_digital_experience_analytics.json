@@ -1,0 +1,2215 @@
+{
+    "title": "iboss - Real-Time Digital Experience Log Analytics",
+    "description": "This dashboard provides insights into end-user digital experiences by analyzing latency and response times across users, resources, countries, and assets using logs.",
+    "widgets": [
+        {
+            "id": 4051130684011850,
+            "definition": {
+                "type": "image",
+                "url": "https://www.iboss.com/storage/2022/09/500x144-logo-black@2x.png",
+                "url_dark_theme": "https://www.iboss.com/core/assets/iboss/img/2022_iboss-wordmark-primary-white.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 7698910360951864,
+            "definition": {
+                "type": "note",
+                "content": "This dashboard provides insights into end-user digital experiences by analyzing latency and response times across users, resources, countries, and assets using logs.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "green",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 5218912866242654,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using iboss logs forwarded via a [Datadog Agent](https://docs.datadoghq.com/agent).\n- Please follow the **Installation** and **Configuration** steps [here](/integrations/iboss) to enable log collection.\n\n",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
+            "id": 7161133483529427,
+            "definition": {
+                "title": "Average Application Peer Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.serverPeerTime"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "bars",
+                    "yaxis": {}
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 1252700507115629,
+            "definition": {
+                "title": "Average Application Peer Connection Time Trend",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "alias": "Average Time",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.serverPeerTime"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 5,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 1453325418198765,
+            "definition": {
+                "title": "Average Client Peer Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.clientPeerTime"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "yaxis": {},
+                    "type": "bars"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 2301051375697580,
+            "definition": {
+                "title": "Average Client Peer Connection Time Trend",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "alias": "Average Time",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.clientPeerTime"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 8,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 3422784510323458,
+            "definition": {
+                "title": "Average DNS Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.proxyDnsLookupTime"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "bars",
+                    "yaxis": {}
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 11,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 2016006172779590,
+            "definition": {
+                "title": "Average DNS Connection Time Trend",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "alias": "Average Time",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.proxyDnsLookupTime"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 4,
+                "y": 11,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 3137392013403437,
+            "definition": {
+                "title": "User: Average Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "events_query_1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.serverPeerTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            },
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.clientPeerTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.proxyDnsLookupTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "alias": "Application",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "black_on_light_yellow"
+                                    }
+                                ],
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "formula": "events_query_1"
+                            },
+                            {
+                                "alias": "Client",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "black_on_light_green"
+                                    }
+                                ],
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "formula": "query1"
+                            },
+                            {
+                                "alias": "DNS ",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "green_on_white"
+                                    }
+                                ],
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "formula": "query2"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 7720273502431188,
+            "definition": {
+                "title": "Users by Average Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.serverPeerTime"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.clientPeerTime"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query3",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.proxyDnsLookupTime"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "alias": "Application",
+                                "formula": "query1"
+                            },
+                            {
+                                "alias": "Client",
+                                "formula": "query2"
+                            },
+                            {
+                                "alias": "DNS",
+                                "formula": "query3"
+                            }
+                        ]
+                    }
+                ],
+                "specification": {
+                    "type": "vega-lite",
+                    "contents": {
+                        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                        "description": "Bar chart with labels inside the top of each bar.",
+                        "data": {
+                            "name": "table1"
+                        },
+                        "transform": [
+                            {
+                                "fold": [
+                                    "Application",
+                                    "Client",
+                                    "DNS"
+                                ],
+                                "as": [
+                                    "query",
+                                    "time_ms"
+                                ]
+                            },
+                            {
+                                "calculate": "datum.time_ms <= 5 ? '0-5' : datum.time_ms <= 15 ? '5-15' : datum.time_ms <= 150 ? '15-150' : datum.time_ms <= 1000 ? '150-1000' : '1000+'",
+                                "as": "range"
+                            }
+                        ],
+                        "layer": [
+                            {
+                                "data": {
+                                    "values": [
+                                        {
+                                            "range": "0-5"
+                                        },
+                                        {
+                                            "range": "5-15"
+                                        },
+                                        {
+                                            "range": "15-150"
+                                        },
+                                        {
+                                            "range": "150-1000"
+                                        },
+                                        {
+                                            "range": "1000+"
+                                        }
+                                    ]
+                                },
+                                "mark": "bar",
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ]
+                                    },
+                                    "y": {
+                                        "value": 0
+                                    },
+                                    "opacity": {
+                                        "value": 0.2
+                                    },
+                                    "color": {
+                                        "value": "#ccc"
+                                    }
+                                }
+                            },
+                            {
+                                "mark": "bar",
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ],
+                                        "title": "Average Time (In milliseconds)"
+                                    },
+                                    "xOffset": {
+                                        "field": "query",
+                                        "type": "nominal"
+                                    },
+                                    "y": {
+                                        "aggregate": "count",
+                                        "type": "quantitative",
+                                        "title": "Users"
+                                    },
+                                    "color": {
+                                        "field": "query",
+                                        "type": "nominal",
+                                        "title": "",
+                                        "scale": {
+                                            "domain": [
+                                                "Application",
+                                                "Client",
+                                                "DNS"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "mark": {
+                                    "type": "text",
+                                    "dy": -5,
+                                    "align": "center",
+                                    "color": "#1f5495",
+                                    "fontWeight": "bold"
+                                },
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ]
+                                    },
+                                    "xOffset": {
+                                        "field": "query",
+                                        "type": "nominal"
+                                    },
+                                    "y": {
+                                        "aggregate": "count",
+                                        "type": "quantitative"
+                                    },
+                                    "text": {
+                                        "aggregate": "count",
+                                        "type": "quantitative"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "type": "wildcard"
+            },
+            "layout": {
+                "x": 6,
+                "y": 14,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6126725322873387,
+            "definition": {
+                "title": "Resource: Average Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "events_query_1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@resourceName",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.serverPeerTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            },
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@resourceName",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.clientPeerTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@resourceName",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.proxyDnsLookupTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "alias": "Application",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "black_on_light_yellow"
+                                    }
+                                ],
+                                "formula": "events_query_1"
+                            },
+                            {
+                                "alias": "Client",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "black_on_light_green"
+                                    }
+                                ],
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "formula": "query1"
+                            },
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "alias": "DNS",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "green_on_white"
+                                    }
+                                ],
+                                "formula": "query2"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 18,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 42215952136779,
+            "definition": {
+                "title": "Resources by Average Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@resourceName",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.serverPeerTime"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@resourceName",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.clientPeerTime"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query3",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss -@resourceName:\"-\" $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@resourceName",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.proxyDnsLookupTime"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "alias": "Application",
+                                "formula": "query1"
+                            },
+                            {
+                                "alias": "Client",
+                                "formula": "query2"
+                            },
+                            {
+                                "alias": "DNS",
+                                "formula": "query3"
+                            }
+                        ]
+                    }
+                ],
+                "specification": {
+                    "type": "vega-lite",
+                    "contents": {
+                        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                        "description": "Bar chart with labels inside the top of each bar.",
+                        "data": {
+                            "name": "table1"
+                        },
+                        "transform": [
+                            {
+                                "fold": [
+                                    "Application",
+                                    "Client",
+                                    "DNS"
+                                ],
+                                "as": [
+                                    "query",
+                                    "time_ms"
+                                ]
+                            },
+                            {
+                                "calculate": "datum.time_ms <= 5 ? '0-5' : datum.time_ms <= 15 ? '5-15' : datum.time_ms <= 150 ? '15-150' : datum.time_ms <= 1000 ? '150-1000' : '1000+'",
+                                "as": "range"
+                            }
+                        ],
+                        "layer": [
+                            {
+                                "data": {
+                                    "values": [
+                                        {
+                                            "range": "0-5"
+                                        },
+                                        {
+                                            "range": "5-15"
+                                        },
+                                        {
+                                            "range": "15-150"
+                                        },
+                                        {
+                                            "range": "150-1000"
+                                        },
+                                        {
+                                            "range": "1000+"
+                                        }
+                                    ]
+                                },
+                                "mark": "bar",
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ]
+                                    },
+                                    "y": {
+                                        "value": 0
+                                    },
+                                    "opacity": {
+                                        "value": 0.2
+                                    },
+                                    "color": {
+                                        "value": "#ccc"
+                                    }
+                                }
+                            },
+                            {
+                                "mark": "bar",
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ],
+                                        "title": "Average Time (In milliseconds)"
+                                    },
+                                    "xOffset": {
+                                        "field": "query",
+                                        "type": "nominal"
+                                    },
+                                    "y": {
+                                        "aggregate": "count",
+                                        "type": "quantitative",
+                                        "title": "Resources"
+                                    },
+                                    "color": {
+                                        "field": "query",
+                                        "type": "nominal",
+                                        "title": "",
+                                        "scale": {
+                                            "domain": [
+                                                "Application",
+                                                "Client",
+                                                "DNS"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "mark": {
+                                    "type": "text",
+                                    "dy": -5,
+                                    "align": "center",
+                                    "color": "#1f5495",
+                                    "fontWeight": "bold"
+                                },
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ]
+                                    },
+                                    "xOffset": {
+                                        "field": "query",
+                                        "type": "nominal"
+                                    },
+                                    "y": {
+                                        "aggregate": "count",
+                                        "type": "quantitative"
+                                    },
+                                    "text": {
+                                        "aggregate": "count",
+                                        "type": "quantitative"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "type": "wildcard"
+            },
+            "layout": {
+                "x": 6,
+                "y": 18,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 8796805646093887,
+            "definition": {
+                "title": "Asset: Average Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "events_query_1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@assetId",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@computerName",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.serverPeerTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            },
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@assetId",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@computerName",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.clientPeerTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@assetId",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    },
+                                    {
+                                        "facet": "@computerName",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.proxyDnsLookupTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "alias": "Application",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "black_on_light_yellow"
+                                    }
+                                ],
+                                "formula": "events_query_1"
+                            },
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "alias": "Client",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "black_on_light_green"
+                                    }
+                                ],
+                                "formula": "query1"
+                            },
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "alias": "DNS",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "green_on_white"
+                                    }
+                                ],
+                                "formula": "query2"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6202294240359145,
+            "definition": {
+                "title": "Assets by Average Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@assetId",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.serverPeerTime"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@assetId",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.clientPeerTime"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query3",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@assetId",
+                                        "limit": 10,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.proxyDnsLookupTime"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "alias": "Application",
+                                "formula": "query1"
+                            },
+                            {
+                                "alias": "Client",
+                                "formula": "query2"
+                            },
+                            {
+                                "alias": "DNS",
+                                "formula": "query3"
+                            }
+                        ]
+                    }
+                ],
+                "specification": {
+                    "type": "vega-lite",
+                    "contents": {
+                        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                        "description": "Bar chart with labels inside the top of each bar.",
+                        "data": {
+                            "name": "table1"
+                        },
+                        "transform": [
+                            {
+                                "fold": [
+                                    "Application",
+                                    "Client",
+                                    "DNS"
+                                ],
+                                "as": [
+                                    "query",
+                                    "time_ms"
+                                ]
+                            },
+                            {
+                                "calculate": "datum.time_ms <= 5 ? '0-5' : datum.time_ms <= 15 ? '5-15' : datum.time_ms <= 150 ? '15-150' : datum.time_ms <= 1000 ? '150-1000' : '1000+'",
+                                "as": "range"
+                            }
+                        ],
+                        "layer": [
+                            {
+                                "data": {
+                                    "values": [
+                                        {
+                                            "range": "0-5"
+                                        },
+                                        {
+                                            "range": "5-15"
+                                        },
+                                        {
+                                            "range": "15-150"
+                                        },
+                                        {
+                                            "range": "150-1000"
+                                        },
+                                        {
+                                            "range": "1000+"
+                                        }
+                                    ]
+                                },
+                                "mark": "bar",
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ]
+                                    },
+                                    "y": {
+                                        "value": 0
+                                    },
+                                    "opacity": {
+                                        "value": 0.2
+                                    },
+                                    "color": {
+                                        "value": "#ccc"
+                                    }
+                                }
+                            },
+                            {
+                                "mark": "bar",
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ],
+                                        "title": "Average Time (In milliseconds)"
+                                    },
+                                    "xOffset": {
+                                        "field": "query",
+                                        "type": "nominal"
+                                    },
+                                    "y": {
+                                        "aggregate": "count",
+                                        "type": "quantitative",
+                                        "title": "Assets"
+                                    },
+                                    "color": {
+                                        "field": "query",
+                                        "type": "nominal",
+                                        "title": "",
+                                        "scale": {
+                                            "domain": [
+                                                "Application",
+                                                "Client",
+                                                "DNS"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "mark": {
+                                    "type": "text",
+                                    "dy": -5,
+                                    "align": "center",
+                                    "color": "#1f5495",
+                                    "fontWeight": "bold"
+                                },
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ]
+                                    },
+                                    "xOffset": {
+                                        "field": "query",
+                                        "type": "nominal"
+                                    },
+                                    "y": {
+                                        "aggregate": "count",
+                                        "type": "quantitative"
+                                    },
+                                    "text": {
+                                        "aggregate": "count",
+                                        "type": "quantitative"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "type": "wildcard"
+            },
+            "layout": {
+                "x": 6,
+                "y": 22,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 228587065622629,
+            "definition": {
+                "title": "Country: Average Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "events_query_1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.serverPeerTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            },
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.clientPeerTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.proxyDnsLookupTime"
+                                },
+                                "storage": "hot",
+                                "calculated_fields": []
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "black_on_light_yellow"
+                                    }
+                                ],
+                                "alias": "Application",
+                                "formula": "events_query_1"
+                            },
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "black_on_light_green"
+                                    }
+                                ],
+                                "alias": "Client",
+                                "formula": "query1"
+                            },
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "millisecond"
+                                    }
+                                },
+                                "alias": "DNS",
+                                "conditional_formats": [
+                                    {
+                                        "comparator": ">=",
+                                        "value": 0,
+                                        "palette": "green_on_white"
+                                    }
+                                ],
+                                "cell_display_mode": "number",
+                                "formula": "query2"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 26,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 279713663840578,
+            "definition": {
+                "title": "Countries by Average Connection Time",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.serverPeerTime"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.clientPeerTime"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query3",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss $country $computer_name $resource_name $user $asset_id $location $host"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.name",
+                                        "limit": 1000,
+                                        "sort": {
+                                            "aggregation": "avg",
+                                            "order": "desc",
+                                            "metric": "@iboss.serverPeerTime"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@iboss.proxyDnsLookupTime"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "alias": "Application",
+                                "formula": "query1"
+                            },
+                            {
+                                "alias": "Client",
+                                "formula": "query2"
+                            },
+                            {
+                                "alias": "DNS",
+                                "formula": "query3"
+                            }
+                        ]
+                    }
+                ],
+                "specification": {
+                    "type": "vega-lite",
+                    "contents": {
+                        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                        "description": "Bar chart with labels inside the top of each bar.",
+                        "data": {
+                            "name": "table1"
+                        },
+                        "transform": [
+                            {
+                                "fold": [
+                                    "Application",
+                                    "Client",
+                                    "DNS"
+                                ],
+                                "as": [
+                                    "query",
+                                    "time_ms"
+                                ]
+                            },
+                            {
+                                "calculate": "datum.time_ms <= 5 ? '0-5' : datum.time_ms <= 15 ? '5-15' : datum.time_ms <= 150 ? '15-150' : datum.time_ms <= 1000 ? '150-1000' : '1000+'",
+                                "as": "range"
+                            }
+                        ],
+                        "layer": [
+                            {
+                                "data": {
+                                    "values": [
+                                        {
+                                            "range": "0-5"
+                                        },
+                                        {
+                                            "range": "5-15"
+                                        },
+                                        {
+                                            "range": "15-150"
+                                        },
+                                        {
+                                            "range": "150-1000"
+                                        },
+                                        {
+                                            "range": "1000+"
+                                        }
+                                    ]
+                                },
+                                "mark": "bar",
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ]
+                                    },
+                                    "y": {
+                                        "value": 0
+                                    },
+                                    "opacity": {
+                                        "value": 0.2
+                                    },
+                                    "color": {
+                                        "value": "#ccc"
+                                    }
+                                }
+                            },
+                            {
+                                "mark": "bar",
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ],
+                                        "title": "Average Time (In milliseconds)"
+                                    },
+                                    "xOffset": {
+                                        "field": "query",
+                                        "type": "nominal"
+                                    },
+                                    "y": {
+                                        "aggregate": "count",
+                                        "type": "quantitative",
+                                        "title": "Countries"
+                                    },
+                                    "color": {
+                                        "field": "query",
+                                        "type": "nominal",
+                                        "title": "",
+                                        "scale": {
+                                            "domain": [
+                                                "Application",
+                                                "Client",
+                                                "DNS"
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "mark": {
+                                    "type": "text",
+                                    "dy": -5,
+                                    "align": "center",
+                                    "color": "#1f5495",
+                                    "fontWeight": "bold"
+                                },
+                                "encoding": {
+                                    "x": {
+                                        "field": "range",
+                                        "type": "ordinal",
+                                        "sort": [
+                                            "0-5",
+                                            "5-15",
+                                            "15-150",
+                                            "150-1000",
+                                            "1000+"
+                                        ]
+                                    },
+                                    "xOffset": {
+                                        "field": "query",
+                                        "type": "nominal"
+                                    },
+                                    "y": {
+                                        "aggregate": "count",
+                                        "type": "quantitative"
+                                    },
+                                    "text": {
+                                        "aggregate": "count",
+                                        "type": "quantitative"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "type": "wildcard"
+            },
+            "layout": {
+                "x": 6,
+                "y": 26,
+                "width": 6,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "host",
+            "prefix": "@hostname",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "user",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "resource_name",
+            "prefix": "@resourceName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "asset_id",
+            "prefix": "@assetId",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "computer_name",
+            "prefix": "@computerName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "location",
+            "prefix": "@location",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "country",
+            "prefix": "@network.client.geoip.country.name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

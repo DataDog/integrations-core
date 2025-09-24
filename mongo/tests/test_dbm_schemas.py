@@ -120,3 +120,17 @@ def test_mongo_schemas_standalone_atlas(
         assert len(mongodb_databases) == len(expected_mongodb_databases)
         for i, db in enumerate(mongodb_databases):
             assert db == expected_mongodb_databases[i]
+
+
+@pytest.mark.unit
+def test_mongo_schemas_config_deprecations(instance_integration_cluster_autodiscovery, check):
+    instance_integration_cluster_autodiscovery['dbm'] = True
+
+    instance_integration_cluster_autodiscovery['schemas'] = {'enabled': True}
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    assert mongo_check._config.schemas['enabled'] is True
+
+    instance_integration_cluster_autodiscovery.pop('schemas')
+    instance_integration_cluster_autodiscovery['collect_schemas'] = {'enabled': True}
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    assert mongo_check._config.schemas['enabled'] is True

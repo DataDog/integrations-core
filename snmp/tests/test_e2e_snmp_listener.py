@@ -61,6 +61,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         'tag1:val1',
         'tag2:val2',
         'device_namespace:default',
+        'agent_host:' + common.get_agent_hostname(),
     ]
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
@@ -139,6 +140,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
             'device_hostname:41ba948911b9',
             'snmp_profile:generic-device',
             'device_namespace:test-auth-proto-{}'.format(auth_proto),
+            'agent_host:' + common.get_agent_hostname(),
         ]
 
         common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
@@ -153,6 +155,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         'snmp_host:41ba948911b9',
         'device_hostname:41ba948911b9',
         'snmp_profile:generic-device',
+        'agent_host:' + common.get_agent_hostname(),
     ]
     aggregator.assert_metric('snmp.devices_monitored', count=0, tags=tags)
 

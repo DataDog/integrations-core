@@ -4,6 +4,12 @@
     "widgets": [
         {
             "id": 15,
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 119,
+                "height": 5
+            },
             "definition": {
                 "type": "note",
                 "content": "Overview",
@@ -13,52 +19,59 @@
                 "show_tick": false,
                 "tick_pos": "50%",
                 "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 119,
-                "height": 5
             }
         },
         {
             "id": 16,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name} by {type}",
-                        "display_type": "area",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        },
-                        "on_right_yaxis": false
-                    }
-                ],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Service types per cluster",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
             "layout": {
                 "x": 28,
                 "y": 6,
                 "width": 31,
                 "height": 16
+            },
+            "definition": {
+                "title": "Service types per cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "on_right_yaxis": false,
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name} by {type}"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "area"
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                }
             }
         },
         {
             "id": 21,
+            "layout": {
+                "x": 0,
+                "y": 23,
+                "width": 119,
+                "height": 5
+            },
             "definition": {
                 "type": "note",
                 "content": "Resources",
@@ -68,132 +81,202 @@
                 "show_tick": false,
                 "tick_pos": "50%",
                 "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": -2,
-                "y": 23,
-                "width": 119,
-                "height": 5
             }
         },
         {
             "id": 22,
+            "layout": {
+                "x": 0,
+                "y": 35,
+                "width": 59,
+                "height": 24
+            },
             "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "exclude_null(sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
                 "title": "CPU Usage by Service",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": -2,
-                "y": 35,
-                "width": 59,
-                "height": 24
-            }
-        },
-        {
-            "id": 23,
-            "definition": {
+                "legend_size": "0",
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "exclude_null(sum:kubernetes.memory.usage{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})",
-                        "display_type": "line",
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.cpu.usage.total{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
                             "line_width": "normal"
-                        }
+                        },
+                        "display_type": "line"
                     }
                 ],
                 "yaxis": {
                     "label": "",
                     "scale": "linear",
+                    "include_zero": true,
                     "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "Memory Usage by Service",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
-            },
+                    "max": "auto"
+                }
+            }
+        },
+        {
+            "id": 23,
             "layout": {
                 "x": 60,
                 "y": 35,
                 "width": 59,
                 "height": 24
+            },
+            "definition": {
+                "title": "Memory Usage by Service",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.memory.usage{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                }
             }
         },
         {
             "id": 24,
+            "layout": {
+                "x": 60,
+                "y": 60,
+                "width": 59,
+                "height": 24
+            },
             "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(exclude_null(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')"
-                    }
-                ],
                 "title": "Most memory-intensive Services",
                 "title_size": "16",
                 "title_align": "left",
                 "time": {
                     "live_span": "4h"
-                }
-            },
-            "layout": {
-                "x": 60,
-                "y": 60,
-                "width": 59,
-                "height": 24
+                },
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ]
             }
         },
         {
             "id": 25,
-            "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')"
-                    }
-                ],
-                "title": "Most CPU-intensive Services",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
-            },
             "layout": {
                 "x": 0,
                 "y": 60,
                 "width": 59,
                 "height": 24
+            },
+            "definition": {
+                "title": "Most CPU-intensive Services",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ]
             }
         },
         {
             "id": 28,
+            "layout": {
+                "x": 0,
+                "y": 29,
+                "width": 59,
+                "height": 5
+            },
             "definition": {
                 "type": "note",
                 "content": "CPU",
@@ -203,16 +286,16 @@
                 "show_tick": false,
                 "tick_pos": "50%",
                 "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": -2,
-                "y": 29,
-                "width": 59,
-                "height": 5
             }
         },
         {
             "id": 29,
+            "layout": {
+                "x": 60,
+                "y": 29,
+                "width": 59,
+                "height": 5
+            },
             "definition": {
                 "type": "note",
                 "content": "Memory",
@@ -222,16 +305,16 @@
                 "show_tick": false,
                 "tick_pos": "50%",
                 "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 60,
-                "y": 29,
-                "width": 59,
-                "height": 5
             }
         },
         {
             "id": 30,
+            "layout": {
+                "x": 0,
+                "y": 85,
+                "width": 59,
+                "height": 5
+            },
             "definition": {
                 "type": "note",
                 "content": "Disk",
@@ -241,16 +324,16 @@
                 "show_tick": false,
                 "tick_pos": "50%",
                 "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": -2,
-                "y": 85,
-                "width": 59,
-                "height": 5
             }
         },
         {
             "id": 31,
+            "layout": {
+                "x": 60,
+                "y": 85,
+                "width": 59,
+                "height": 5
+            },
             "definition": {
                 "type": "note",
                 "content": "Network",
@@ -260,327 +343,472 @@
                 "show_tick": false,
                 "tick_pos": "50%",
                 "tick_edge": "bottom"
-            },
-            "layout": {
-                "x": 60,
-                "y": 85,
-                "width": 59,
-                "height": 5
             }
         },
         {
             "id": 32,
+            "layout": {
+                "x": 60,
+                "y": 91,
+                "width": 59,
+                "height": 24
+            },
             "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "exclude_null(sum:kubernetes.network.rx_bytes{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}), exclude_null(sum:kubernetes.network.tx_bytes{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
                 "title": "Network Usage (Rx / Tx rate)",
                 "title_size": "16",
                 "title_align": "left",
                 "show_legend": true,
-                "legend_size": "0"
-            },
-            "layout": {
-                "x": 60,
-                "y": 91,
-                "width": 59,
-                "height": 24
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.network.rx_bytes{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:kubernetes.network.tx_bytes{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            },
+                            {
+                                "formula": "exclude_null(query2)"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                }
             }
         },
         {
             "id": 33,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "exclude_null(sum:kubernetes.network.rx_errors{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}), exclude_null(sum:kubernetes.network.tx_errors{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})",
-                        "display_type": "line",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        }
-                    }
-                ],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "markers": [
-                    {
-                        "value": "y = 0",
-                        "display_type": "ok dashed",
-                        "label": "y = 0"
-                    }
-                ],
-                "title": "Network Errors",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
-            },
             "layout": {
                 "x": 60,
                 "y": 116,
                 "width": 59,
                 "height": 24
-            }
-        },
-        {
-            "id": 34,
+            },
             "definition": {
+                "title": "Network Errors",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "exclude_null(sum:kubernetes.filesystem.usage{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})",
-                        "display_type": "line",
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.network.rx_errors{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:kubernetes.network.tx_errors{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            },
+                            {
+                                "formula": "exclude_null(query2)"
+                            }
+                        ],
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
                             "line_width": "normal"
-                        }
+                        },
+                        "display_type": "line"
                     }
                 ],
                 "yaxis": {
                     "label": "",
                     "scale": "linear",
+                    "include_zero": true,
                     "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
+                    "max": "auto"
                 },
-                "title": "Disk Usage",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
-            },
+                "markers": [
+                    {
+                        "label": "y = 0",
+                        "value": "y = 0",
+                        "display_type": "ok dashed"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 34,
             "layout": {
                 "x": 0,
                 "y": 91,
                 "width": 59,
                 "height": 24
-            }
-        },
-        {
-            "id": 35,
+            },
             "definition": {
+                "title": "Disk Usage",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
                 "type": "timeseries",
                 "requests": [
                     {
-                        "q": "exclude_null(sum:kubernetes.filesystem.usage_pct{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name})*100",
-                        "display_type": "line",
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.filesystem.usage{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
                         "style": {
                             "palette": "dog_classic",
                             "line_type": "solid",
                             "line_width": "normal"
-                        }
+                        },
+                        "display_type": "line"
                     }
                 ],
                 "yaxis": {
                     "label": "",
                     "scale": "linear",
+                    "include_zero": true,
                     "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "markers": [
-                    {
-                        "value": "y = 100",
-                        "display_type": "error dashed",
-                        "label": " 100% "
-                    }
-                ],
-                "title": "Disk Usage %",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": true,
-                "legend_size": "0"
-            },
+                    "max": "auto"
+                }
+            }
+        },
+        {
+            "id": 35,
             "layout": {
                 "x": 0,
                 "y": 116,
                 "width": 59,
                 "height": 24
+            },
+            "definition": {
+                "title": "Disk Usage %",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.filesystem.usage_pct{$kube_namespace,$kube_service,$scope,$kube_cluster_name} by {kube_service,kube_namespace,kube_cluster_name}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1) * 100"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": [
+                    {
+                        "label": " 100% ",
+                        "value": "y = 100",
+                        "display_type": "error dashed"
+                    }
+                ]
             }
         },
         {
             "id": 36,
+            "layout": {
+                "x": 0,
+                "y": 141,
+                "width": 59,
+                "height": 24
+            },
             "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')"
-                    }
-                ],
                 "title": "Most Disk-intensive Services",
                 "title_size": "16",
                 "title_align": "left",
                 "time": {
                     "live_span": "4h"
-                }
-            },
-            "layout": {
-                "x": -2,
-                "y": 141,
-                "width": 59,
-                "height": 24
+                },
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ]
             }
         },
         {
             "id": 37,
-            "definition": {
-                "type": "toplist",
-                "requests": [
-                    {
-                        "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}), 10, 'mean', 'desc')"
-                    }
-                ],
-                "title": "Most Network-intensive Services",
-                "title_size": "16",
-                "title_align": "left",
-                "time": {
-                    "live_span": "4h"
-                }
-            },
             "layout": {
                 "x": 60,
                 "y": 141,
                 "width": 59,
                 "height": 24
+            },
+            "definition": {
+                "title": "Most Network-intensive Services",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_service,$kube_cluster_name,!pod_name:no_pod} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ]
             }
         },
         {
             "id": 38,
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 27,
+                "height": 16
+            },
             "definition": {
+                "title": "Services per cluster",
+                "title_size": "16",
+                "title_align": "left",
                 "type": "query_value",
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name}",
-                        "aggregator": "last",
                         "conditional_formats": [
                             {
                                 "comparator": ">",
                                 "value": 0,
                                 "palette": "white_on_green"
                             }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.service.count{$scope,$kube_cluster_name}",
+                                "aggregator": "last"
+                            }
                         ]
                     }
                 ],
-                "title": "Services per cluster",
-                "title_size": "16",
-                "title_align": "left",
                 "precision": 0
-            },
-            "layout": {
-                "x": 0,
-                "y": 6,
-                "width": 27,
-                "height": 16
             }
         },
         {
             "id": 7462426759445848,
-            "definition": {
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "q": "exclude_null(sum:kubernetes.pods.running{$kube_service,$kube_namespace,$kube_cluster_name,$scope} by {kube_service})",
-                        "display_type": "bars",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        },
-                        "on_right_yaxis": false
-                    }
-                ],
-                "yaxis": {
-                    "label": "",
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto",
-                    "include_zero": true
-                },
-                "title": "# Pods running by Service",
-                "title_size": "16",
-                "title_align": "left",
-                "show_legend": false,
-                "legend_size": "0"
-            },
             "layout": {
                 "x": 60,
                 "y": 6,
                 "width": 28,
                 "height": 16
+            },
+            "definition": {
+                "title": "# Pods running by Service",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "on_right_yaxis": false,
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.pods.running{$kube_service,$kube_namespace,$kube_cluster_name,$scope} by {kube_service}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "bars"
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                }
             }
         },
         {
             "id": 6742716780081854,
-            "definition": {
-                "type": "query_table",
-                "requests": [
-                    {
-                        "q": "exclude_null(sum:kubernetes.pods.running{$kube_service,$kube_namespace,$kube_cluster_name,$scope} by {kube_service,kube_namespace,kube_cluster_name})",
-                        "aggregator": "max",
-                        "limit": 10,
-                        "order": "desc",
-                        "alias": "Pods"
-                    }
-                ],
-                "title": "Top Services by # Pods running",
-                "title_size": "16",
-                "title_align": "left"
-            },
             "layout": {
                 "x": 89,
                 "y": 6,
                 "width": 30,
                 "height": 16
+            },
+            "definition": {
+                "title": "Top Services by # Pods running",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.pods.running{$kube_service,$kube_namespace,$kube_cluster_name,$scope} by {kube_service,kube_namespace,kube_cluster_name}",
+                                "aggregator": "max"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)",
+                                "alias": "Pods"
+                            }
+                        ]
+                    }
+                ]
             }
         }
     ],
     "template_variables": [
         {
             "name": "scope",
-            "default": "*",
-            "prefix": null
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "kube_cluster_name",
-            "default": "*",
-            "prefix": "kube_cluster_name"
+            "prefix": "kube_cluster_name",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "kube_namespace",
-            "default": "*",
-            "prefix": "kube_namespace"
+            "prefix": "kube_namespace",
+            "available_values": [],
+            "default": "*"
         },
         {
             "name": "kube_service",
-            "default": "*",
-            "prefix": "kube_service"
+            "prefix": "kube_service",
+            "available_values": [],
+            "default": "*"
         }
     ],
     "layout_type": "free",
-    "is_read_only": false,
     "notify_list": []
 }

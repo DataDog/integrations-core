@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "88d1372f-1732-4d6d-b3b3-f2f4ccd08209",
   "app_id": "microsoft-dns",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -29,6 +30,16 @@
       {
         "caption": "Microsoft DNS - Overview 4",
         "image_url": "images/microsoft_dns_overview_4.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft DNS - Overview 5",
+        "image_url": "images/microsoft_dns_overview_5.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Microsoft DNS - Overview 6",
+        "image_url": "images/microsoft_dns_overview_6.png",
         "media_type": "image"
       }
     ],
