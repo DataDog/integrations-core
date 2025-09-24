@@ -775,6 +775,8 @@ integration/zerofox_cloud_platform:
 - zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
+integration/cp_harmony_ec:
+- cp_harmony_ec/**/*
 qa/skip-qa:
 - '**/__about__.py'
 - requirements-agent-release.txt

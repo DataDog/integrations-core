@@ -1,0 +1,80 @@
+id: cp-harmony-ec
+metric_id: cp-harmony-ec
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - description: ""
+    facetType: list
+    groups:
+      - Checkpoint Harmony Email and Collaboration
+    name: Entity Sub Type
+    path: event.security_event.entity_info.entity_sub_type
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: Checkpoint Harmony Email and Collaboration
+  enabled: true
+  filter:
+    query: source:cp-harmony-ec
+  processors:
+    - type: attribute-remapper
+      name: "Remapper : Map `event.security_event.entity_info.entity_sub_type` to
+        `evt.name`"
+      enabled: true
+      sources:
+        - event.security_event.entity_info.entity_sub_type
+      sourceType: attribute
+      target: evt.name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: " Remapper : Map `saas_actor_id` to `usr.email`"
+      enabled: true
+      sources:
+        - event.entity.saas_info.saas_actor_id
+      sourceType: attribute
+      target: usr.email
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: " Remapper : Map `sender_server_ip` to `network.client.ip`"
+      enabled: true
+      sources:
+        - event.entity.entity_payload.sender_server_ip
+      sourceType: attribute
+      target: network.client.ip
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: "Remapper : Map `event.entity.time` to `timestamp`"
+      enabled: true
+      sources:
+        - event.entity.time
+      sourceType: attribute
+      target: timestamp
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp

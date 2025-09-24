@@ -1,0 +1,774 @@
+id: "cp-harmony-ec"
+tests:
+ -
+  sample: |-
+    {
+      "service" : "s3",
+      "aws" : {
+        "s3" : {
+          "bucket" : "harmonyemailnew",
+          "key" : "logs/av_events_sacumendivisionofclariontechinc_1750158654.556238.json"
+        },
+        "invoked_function_arn" : "arn:aws:lambda:us-east-1:102716399460:function:datadog-forwarder-Forwarder-SUZWpKQP5sCM"
+      },
+      "event" : {
+        "security_event" : {
+          "entity_payload" : {
+            "severity" : 4,
+            "policy_rule_id" : 17471211147401976,
+            "confidence_level" : 5,
+            "current_state" : "new",
+            "description" : "#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"avanan_ap_scan\", \"label\": \"Spam\"} attempt detected in an email from #{\"entity_id\": null, \"entity_type\": \"google_user\", \"disable_link\": true, \"label\": \"jackson.dehaven@sophos.com\"} - '#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"google_mail_email\", \"label\": \"Re: Quick chat? A Yeti Water Bottle as a Thank You\"}' (#{\"entity_id\": \"101256934200235566666\", \"entity_type\": \"google_user\", \"label\": \"nitesh@sacumentech.com\"}'s mailbox)",
+            "description_text" : "Spam attempt detected in an email from jackson.dehaven@sophos.com - 'Re: Quick chat? A Yeti Water Bottle as a Thank You' (nitesh@sacumentech.com's mailbox)",
+            "aggregation_id" : "267ceac171deb46baa48d479025248d3",
+            "event_metadata" : {
+              "sender_address" : "jackson.dehaven@sophos.com",
+              "ap_detection_reasons" : [ "Email is marked as spam by Google", "Your users didn't communicate with the sender", "Insignificant historical reputation with sender", "Suspicious-looking email text", "Email content is encoded" ]
+            },
+            "multi" : false,
+            "event_trigger" : {
+              "id" : 17471211147401976,
+              "type" : "Policy"
+            },
+            "description_short" : "#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"avanan_ap_scan\", \"label\": \"Spam\"} detected in '#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"google_mail_email\", \"label\": \"Re: Quick chat? A Yeti Water Bottle as a Thank You\"}' (#{\"entity_id\": \"101256934200235566666\", \"entity_type\": \"google_user\", \"label\": \"nitesh@sacumentech.com\"})",
+            "confidence_indicator" : "malicious",
+            "saas" : "google_mail",
+            "matched_security_tool" : "avanan_ap_scan",
+            "category" : "spam",
+            "description_tooltips" : [ "jackson.dehaven@sophos.com", "Re: Quick chat? A Yeti Water Bottle as a Thank You", "Jackson DeHaven", "pass", "Nitesh Sinha", "2025-06-13T13:36:57", "nitesh@sacumentech.com" ],
+            "metadata_json" : {
+              "impersonate_nickname_new" : false,
+              "impersonation_description" : "Other"
+            }
+          },
+          "saas_info" : {
+            "entity_type" : "google_mail_email",
+            "account_id" : [ "101256934200235566666" ],
+            "saas_spam_verdict" : "1",
+            "saas_actor_payload" : {
+              "is_deleted" : false,
+              "full_name" : "Nitesh Sinha",
+              "entity_type" : "google_user",
+              "entity_id" : "101256934200235566666",
+              "key" : "nitesh@sacumentech.com",
+              "email" : "nitesh@sacumentech.com"
+            },
+            "entity_id" : "182dd585c830a9abf4e81f31b528125b"
+          },
+          "entity_info" : {
+            "entity_type" : "security_event",
+            "customer_farm" : "mt-prod-cp-us-2",
+            "entity_expiration" : 1766573766,
+            "entity_sub_type" : "phishing",
+            "customer_oem" : "checkpoint",
+            "customer_region" : "us-east-1",
+            "entity_created" : "2025-06-17T10:56:06.292296+00:00",
+            "customer_cluster" : [ "25" ],
+            "locale" : "en-us",
+            "entity_reporter" : "emails-7112134-25",
+            "entity_id" : "e79e28671f034339b64537a4062e6a6c",
+            "customer_domain" : "sacumendivisionofclariontechinc"
+          },
+          "time" : "2025-06-17T10:56:06.289340",
+          "_id" : "49663617026887827507000878347116320790923307881068494898.49"
+        },
+        "entity" : {
+          "entity_payload" : {
+            "is_internal" : false,
+            "is_body_changed" : false,
+            "from_email" : "jackson.dehaven@sophos.com",
+            "subject" : "Re: Quick chat? A Yeti Water Bottle as a Thank You",
+            "saas_spam_verdict" : "1",
+            "source" : "mta",
+            "is_signed" : false,
+            "mode" : "monitor",
+            "email_links_domains" : [ "hello.sophos.com" ],
+            "is_restored" : false,
+            "is_quarantine_user_notification" : false,
+            "dmarc_result" : "pass",
+            "spf_result" : "pass",
+            "is_group_user" : false,
+            "is_quarantined" : false,
+            "orig_recipient" : "nitesh@sacumentech.com",
+            "is_restore_declined" : false,
+            "has_encrypted_attachments" : false,
+            "is_incoming" : true,
+            "is_subject_changed" : false,
+            "orig_message_id" : "645da2cda8854e7482b339ba7bf7457c",
+            "is_attachment_restored" : false,
+            "is_quarantine_notification" : false,
+            "aggregation_id" : "f248d5f196b5832034ea02925562856d",
+            "recipients" : [ "nitesh@sacumentech.com" ],
+            "email_split" : "original",
+            "is_restore_requested" : false,
+            "from_domain" : "sophos.com",
+            "is_outgoing" : false,
+            "is_links_replaced" : false,
+            "is_sent_from_internal" : false,
+            "attachments" : [ {
+              "entity_type" : "google_mail_attachment",
+              "size" : 20804,
+              "name" : "kjoWjQeAz1Xyv5lK7-RQL3D5JCWWZcgLXh58Y9L_4VE",
+              "mimetype" : "image/png",
+              "entity_id" : "fd2bc7387f843929e2ab33db5d3d1785",
+              "MD5" : "ee097c24dcc8f4187689d04b7db6aae4"
+            } ],
+            "dkim_result" : "pass",
+            "is_inline_handled" : false,
+            "from_name" : "Jackson DeHaven",
+            "is_wd_rescan" : false,
+            "is_deleted" : false,
+            "is_in_s3_quarantine" : false,
+            "insert_time_sqs" : "2025-06-17T10:55:59.673000Z",
+            "recipients_user" : [ {
+              "is_deleted" : false,
+              "full_name" : "Nitesh Sinha",
+              "entity_type" : "google_user",
+              "entity_id" : "101256934200235566666",
+              "key" : "nitesh@sacumentech.com",
+              "email" : "nitesh@sacumentech.com"
+            } ],
+            "is_attachment_changed" : false,
+            "sender_server_ip" : "198.154.180.93",
+            "saas_phishing_verdict" : "0",
+            "has_internal_recipient" : false,
+            "internet_message_id" : "<685149b5a3092_177c90_3910_31@worker-mail-5dbffb6448-lnd6c.mail>",
+            "to" : [ "nitesh@sacumentech.com" ],
+            "is_spam_header_added" : false,
+            "attachment_count" : 1,
+            "email_links" : [ "https://hello.sophos.com/api/mailings/click/PMRGSZBCHI2TMMJVGY4DELBCOVZGYIR2EJWWC2LMORXTU2TBMNVXG33OFZSGK2DBOZSW4QDTN5YGQ33TFZRW63JCFQRG64THEI5CEZTFGUYTQYZVGYWTIZBSHAWTIOLDGEWWEY3CGQWWGYJTGEZWGMJSHA4WGNBCFQRHMZLSONUW63RCHIRDIIRMEJZWSZZCHIRG63TEI5VFK4TQKNRXKOLQJ5VUU4SPNZRHERTHOFXUUTRQN4ZEC6KBIYZV6U2WKJUUISLLHURH2===", "https://hello.sophos.com/api/mailings/click/PMRGSZBCHI2TMNZWGI3DCLBCOVZGYIR2EJWWC2LMORXTU2TBMNVXG33OFZSGK2DBOZSW4QDTN5YGQ33TFZRW63JCFQRG64THEI5CEZTFGUYTQYZVGYWTIZBSHAWTIOLDGEWWEY3CGQWWGYJTGEZWGMJSHA4WGNBCFQRHMZLSONUW63RCHIRDIIRMEJZWSZZCHIRG62JUIJBGW6CCKA4VEV2SGB4HOZ3RON4DKOKTJZ2EMULGOJAVKWLOI5TWOSJXJB3WSYTLHURH2===", "https://hello.sophos.com/api/mailings/unsubscribe/PMRGSZBCHI2TMMJVGY4DELBCN5ZGOIR2EJTGKNJRHBRTKNRNGRSDEOBNGQ4WGMJNMJRWENBNMNQTGMJTMMYTEOBZMM2CELBCOZSXE43JN5XCEORCGQRCYITTNFTSEORCIV3UW2CKGNDF6RDUOFVW2OLENVTGQY3QIJSEKQRZPBXUYSLHJRSFIRJXOFWWY3CQG5DTIPJCPU======", "https://hello.sophos.com/api/mailings/unsubscribe/PMRGSZBCHI2TMNZWGI3DCLBCN5ZGOIR2EJTGKNJRHBRTKNRNGRSDEOBNGQ4WGMJNMJRWENBNMNQTGMJTMMYTEOBZMM2CELBCOZSXE43JN5XCEORCGQRCYITTNFTSEORCN5DDSMSWIFJUOQLDFUYVUMLOJBFTK5TXINBU4ZS7MRBTOSTKPJVHASTKJFWXSR3PFVYESPJCPU======" ]
+          },
+          "saas_info" : {
+            "saas_actor_id" : "nitesh@sacumentech.com",
+            "saas_entity_created" : "2025-06-17T10:56:00.283085Z",
+            "saas_id" : "google_mail",
+            "saas_entity_type" : "email",
+            "saas_actor_type" : "google_user",
+            "saas_actor_payload" : {
+              "is_deleted" : false,
+              "full_name" : "Nitesh Sinha",
+              "entity_type" : "google_user",
+              "entity_id" : "101256934200235566666",
+              "key" : "nitesh@sacumentech.com",
+              "email" : "nitesh@sacumentech.com"
+            }
+          },
+          "entity_info" : {
+            "entity_updated" : "2025-06-17T10:56:00.467963Z",
+            "entity_type" : "google_mail_email",
+            "customer_farm" : "mt-prod-cp-us-2",
+            "entity_expiration" : 1765796160,
+            "customer_oem" : "Check Point",
+            "customer_region" : "us-east-1",
+            "entity_created" : "2025-06-17T10:56:00.508124Z",
+            "customer_cluster" : "25",
+            "locale" : "en-us",
+            "entity_reporter" : "emails-7112134-25",
+            "entity_id" : "182dd585c830a9abf4e81f31b528125b",
+            "customer_domain" : "sacumendivisionofclariontechinc"
+          },
+          "entity_security_result" : {
+            "av" : [ {
+              "security_result_entity_id" : "fd2bc7387f843929e2ab33db5d3d1785",
+              "score" : 0,
+              "status_description" : "The request has been fully answered",
+              "entity_type" : "google_mail_attachment",
+              "status_code" : "1001",
+              "sec_type" : "av",
+              "verdict" : "clean",
+              "security_result_entity_type" : "checkpoint2",
+              "entity_id" : "fd2bc7387f843929e2ab33db5d3d1785"
+            } ],
+            "shadow_it" : [ {
+              "security_result_entity_id" : "182dd585c830a9abf4e81f31b528125b",
+              "score" : 0,
+              "status_description" : "Clean",
+              "entity_type" : "google_mail_email",
+              "status_code" : "clean",
+              "sec_type" : "shadow_it",
+              "payload" : {
+                "subject" : "Re: Quick chat? A Yeti Water Bottle as a Thank You",
+                "domain" : "",
+                "from" : "jackson.dehaven@sophos.com",
+                "to" : "nitesh@sacumentech.com"
+              },
+              "verdict" : "clean",
+              "security_result_entity_type" : "shadow_it_emails_scan",
+              "entity_id" : "182dd585c830a9abf4e81f31b528125b"
+            } ],
+            "combined_verdict" : {
+              "av" : "clean",
+              "shadow_it" : "clean",
+              "ap" : "spam"
+            },
+            "findings_summary" : [ {
+              "sectool_name" : "avanan_ap_scan",
+              "sectool_type" : "ap",
+              "verdict" : "spam"
+            } ],
+            "is_clean" : false,
+            "ap" : [ {
+              "security_result_entity_id" : "182dd585c830a9abf4e81f31b528125b",
+              "score" : 26.365586,
+              "entity_type" : "google_mail_email",
+              "status_code" : "0",
+              "sec_type" : "ap",
+              "payload" : {
+                "reasons_by_category" : {
+                  "Email Text" : [ {
+                    "short_text" : "Suspicious-looking email text",
+                    "full_text" : "NLP analysis of the email text indicates a suspicious-looking email content"
+                  }, {
+                    "short_text" : "Email content is encoded",
+                    "full_text" : "Email content is encoded - a known email obfuscation technique often associated with phishing attacks"
+                  } ],
+                  "Sender Reputation" : [ {
+                    "short_text" : "Your users didn't communicate with the sender",
+                    "full_text" : "The people in your org didn't communicate with the sender"
+                  }, {
+                    "short_text" : "Insignificant historical reputation with sender",
+                    "full_text" : "The sending email address hasn't established significant historical reputation with your domain"
+                  } ],
+                  "Email Headers" : [ {
+                    "short_text" : "Email is marked as spam by Google",
+                    "full_text" : "Email is marked as spam by Google with X-Gm-Spam=1 header"
+                  } ]
+                },
+                "reasons_by_category_list" : [ "Email Headers", "Sender Reputation", "Email Text" ]
+              },
+              "verdict" : "spam",
+              "security_result_entity_type" : "avanan_ap_scan",
+              "entity_id" : "182dd585c830a9abf4e81f31b528125b"
+            } ]
+          },
+          "time" : "2025-06-17T10:56:17.630279Z"
+        }
+      },
+      "network" : {
+        "ip" : {
+          "attributes" : [ {
+            "ip" : "198.154.180.93",
+            "source" : [ "@event.entity.entity_payload.sender_server_ip" ]
+          } ],
+          "list" : [ "198.154.180.93" ]
+        }
+      }
+    }
+  result:
+    custom:
+      aws:
+        invoked_function_arn: "arn:aws:lambda:us-east-1:102716399460:function:datadog-forwarder-Forwarder-SUZWpKQP5sCM"
+        s3:
+          bucket: "harmonyemailnew"
+          key: "logs/av_events_sacumendivisionofclariontechinc_1750158654.556238.json"
+      event:
+        entity:
+          entity_info:
+            customer_cluster: "25"
+            customer_domain: "sacumendivisionofclariontechinc"
+            customer_farm: "mt-prod-cp-us-2"
+            customer_oem: "Check Point"
+            customer_region: "us-east-1"
+            entity_created: "2025-06-17T10:56:00.508124Z"
+            entity_expiration: 1765796160
+            entity_id: "182dd585c830a9abf4e81f31b528125b"
+            entity_reporter: "emails-7112134-25"
+            entity_type: "google_mail_email"
+            entity_updated: "2025-06-17T10:56:00.467963Z"
+            locale: "en-us"
+          entity_payload:
+            aggregation_id: "f248d5f196b5832034ea02925562856d"
+            attachment_count: 1
+            attachments:
+             -
+              entity_type: "google_mail_attachment"
+              size: 20804
+              name: "kjoWjQeAz1Xyv5lK7-RQL3D5JCWWZcgLXh58Y9L_4VE"
+              mimetype: "image/png"
+              entity_id: "fd2bc7387f843929e2ab33db5d3d1785"
+              MD5: "ee097c24dcc8f4187689d04b7db6aae4"
+            dkim_result: "pass"
+            dmarc_result: "pass"
+            email_links:
+             - "https://hello.sophos.com/api/mailings/click/PMRGSZBCHI2TMMJVGY4DELBCOVZGYIR2EJWWC2LMORXTU2TBMNVXG33OFZSGK2DBOZSW4QDTN5YGQ33TFZRW63JCFQRG64THEI5CEZTFGUYTQYZVGYWTIZBSHAWTIOLDGEWWEY3CGQWWGYJTGEZWGMJSHA4WGNBCFQRHMZLSONUW63RCHIRDIIRMEJZWSZZCHIRG63TEI5VFK4TQKNRXKOLQJ5VUU4SPNZRHERTHOFXUUTRQN4ZEC6KBIYZV6U2WKJUUISLLHURH2==="
+             - "https://hello.sophos.com/api/mailings/click/PMRGSZBCHI2TMNZWGI3DCLBCOVZGYIR2EJWWC2LMORXTU2TBMNVXG33OFZSGK2DBOZSW4QDTN5YGQ33TFZRW63JCFQRG64THEI5CEZTFGUYTQYZVGYWTIZBSHAWTIOLDGEWWEY3CGQWWGYJTGEZWGMJSHA4WGNBCFQRHMZLSONUW63RCHIRDIIRMEJZWSZZCHIRG62JUIJBGW6CCKA4VEV2SGB4HOZ3RON4DKOKTJZ2EMULGOJAVKWLOI5TWOSJXJB3WSYTLHURH2==="
+             - "https://hello.sophos.com/api/mailings/unsubscribe/PMRGSZBCHI2TMMJVGY4DELBCN5ZGOIR2EJTGKNJRHBRTKNRNGRSDEOBNGQ4WGMJNMJRWENBNMNQTGMJTMMYTEOBZMM2CELBCOZSXE43JN5XCEORCGQRCYITTNFTSEORCIV3UW2CKGNDF6RDUOFVW2OLENVTGQY3QIJSEKQRZPBXUYSLHJRSFIRJXOFWWY3CQG5DTIPJCPU======"
+             - "https://hello.sophos.com/api/mailings/unsubscribe/PMRGSZBCHI2TMNZWGI3DCLBCN5ZGOIR2EJTGKNJRHBRTKNRNGRSDEOBNGQ4WGMJNMJRWENBNMNQTGMJTMMYTEOBZMM2CELBCOZSXE43JN5XCEORCGQRCYITTNFTSEORCN5DDSMSWIFJUOQLDFUYVUMLOJBFTK5TXINBU4ZS7MRBTOSTKPJVHASTKJFWXSR3PFVYESPJCPU======"
+            email_links_domains:
+             - "hello.sophos.com"
+            email_split: "original"
+            from_domain: "sophos.com"
+            from_email: "jackson.dehaven@sophos.com"
+            from_name: "Jackson DeHaven"
+            has_encrypted_attachments: false
+            has_internal_recipient: false
+            insert_time_sqs: "2025-06-17T10:55:59.673000Z"
+            internet_message_id: "<685149b5a3092_177c90_3910_31@worker-mail-5dbffb6448-lnd6c.mail>"
+            is_attachment_changed: false
+            is_attachment_restored: false
+            is_body_changed: false
+            is_deleted: false
+            is_group_user: false
+            is_in_s3_quarantine: false
+            is_incoming: true
+            is_inline_handled: false
+            is_internal: false
+            is_links_replaced: false
+            is_outgoing: false
+            is_quarantine_notification: false
+            is_quarantine_user_notification: false
+            is_quarantined: false
+            is_restore_declined: false
+            is_restore_requested: false
+            is_restored: false
+            is_sent_from_internal: false
+            is_signed: false
+            is_spam_header_added: false
+            is_subject_changed: false
+            is_wd_rescan: false
+            mode: "monitor"
+            orig_message_id: "645da2cda8854e7482b339ba7bf7457c"
+            orig_recipient: "nitesh@sacumentech.com"
+            recipients:
+             - "nitesh@sacumentech.com"
+            recipients_user:
+             -
+              is_deleted: false
+              full_name: "Nitesh Sinha"
+              entity_type: "google_user"
+              entity_id: "101256934200235566666"
+              key: "nitesh@sacumentech.com"
+              email: "nitesh@sacumentech.com"
+            saas_phishing_verdict: "0"
+            saas_spam_verdict: "1"
+            sender_server_ip: "198.154.180.93"
+            source: "mta"
+            spf_result: "pass"
+            subject: "Re: Quick chat? A Yeti Water Bottle as a Thank You"
+            to:
+             - "nitesh@sacumentech.com"
+          entity_security_result:
+            ap:
+             -
+              security_result_entity_id: "182dd585c830a9abf4e81f31b528125b"
+              score: 26.365586
+              entity_type: "google_mail_email"
+              status_code: "0"
+              sec_type: "ap"
+              payload:
+                reasons_by_category:
+                  Email Text:
+                   -
+                    short_text: "Suspicious-looking email text"
+                    full_text: "NLP analysis of the email text indicates a suspicious-looking email content"
+                   -
+                    short_text: "Email content is encoded"
+                    full_text: "Email content is encoded - a known email obfuscation technique often associated with phishing attacks"
+                  Sender Reputation:
+                   -
+                    short_text: "Your users didn't communicate with the sender"
+                    full_text: "The people in your org didn't communicate with the sender"
+                   -
+                    short_text: "Insignificant historical reputation with sender"
+                    full_text: "The sending email address hasn't established significant historical reputation with your domain"
+                  Email Headers:
+                   -
+                    short_text: "Email is marked as spam by Google"
+                    full_text: "Email is marked as spam by Google with X-Gm-Spam=1 header"
+                reasons_by_category_list:
+                 - "Email Headers"
+                 - "Sender Reputation"
+                 - "Email Text"
+              verdict: "spam"
+              security_result_entity_type: "avanan_ap_scan"
+              entity_id: "182dd585c830a9abf4e81f31b528125b"
+            av:
+             -
+              security_result_entity_id: "fd2bc7387f843929e2ab33db5d3d1785"
+              score: 0
+              status_description: "The request has been fully answered"
+              entity_type: "google_mail_attachment"
+              status_code: "1001"
+              sec_type: "av"
+              verdict: "clean"
+              security_result_entity_type: "checkpoint2"
+              entity_id: "fd2bc7387f843929e2ab33db5d3d1785"
+            combined_verdict:
+              ap: "spam"
+              av: "clean"
+              shadow_it: "clean"
+            findings_summary:
+             -
+              sectool_name: "avanan_ap_scan"
+              sectool_type: "ap"
+              verdict: "spam"
+            is_clean: false
+            shadow_it:
+             -
+              security_result_entity_id: "182dd585c830a9abf4e81f31b528125b"
+              score: 0
+              status_description: "Clean"
+              entity_type: "google_mail_email"
+              status_code: "clean"
+              sec_type: "shadow_it"
+              payload:
+                subject: "Re: Quick chat? A Yeti Water Bottle as a Thank You"
+                domain: ""
+                from: "jackson.dehaven@sophos.com"
+                to: "nitesh@sacumentech.com"
+              verdict: "clean"
+              security_result_entity_type: "shadow_it_emails_scan"
+              entity_id: "182dd585c830a9abf4e81f31b528125b"
+          saas_info:
+            saas_actor_id: "nitesh@sacumentech.com"
+            saas_actor_payload:
+              email: "nitesh@sacumentech.com"
+              entity_id: "101256934200235566666"
+              entity_type: "google_user"
+              full_name: "Nitesh Sinha"
+              is_deleted: false
+              key: "nitesh@sacumentech.com"
+            saas_actor_type: "google_user"
+            saas_entity_created: "2025-06-17T10:56:00.283085Z"
+            saas_entity_type: "email"
+            saas_id: "google_mail"
+          time: "2025-06-17T10:56:17.630279Z"
+        security_event:
+          _id: "49663617026887827507000878347116320790923307881068494898.49"
+          entity_info:
+            customer_cluster:
+             - "25"
+            customer_domain: "sacumendivisionofclariontechinc"
+            customer_farm: "mt-prod-cp-us-2"
+            customer_oem: "checkpoint"
+            customer_region: "us-east-1"
+            entity_created: "2025-06-17T10:56:06.292296+00:00"
+            entity_expiration: 1766573766
+            entity_id: "e79e28671f034339b64537a4062e6a6c"
+            entity_reporter: "emails-7112134-25"
+            entity_sub_type: "phishing"
+            entity_type: "security_event"
+            locale: "en-us"
+          entity_payload:
+            aggregation_id: "267ceac171deb46baa48d479025248d3"
+            category: "spam"
+            confidence_indicator: "malicious"
+            confidence_level: 5
+            current_state: "new"
+            description: "#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"avanan_ap_scan\", \"label\": \"Spam\"} attempt detected in an email from #{\"entity_id\": null, \"entity_type\": \"google_user\", \"disable_link\": true, \"label\": \"jackson.dehaven@sophos.com\"} - '#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"google_mail_email\", \"label\": \"Re: Quick chat? A Yeti Water Bottle as a Thank You\"}' (#{\"entity_id\": \"101256934200235566666\", \"entity_type\": \"google_user\", \"label\": \"nitesh@sacumentech.com\"}'s mailbox)"
+            description_short: "#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"avanan_ap_scan\", \"label\": \"Spam\"} detected in '#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"google_mail_email\", \"label\": \"Re: Quick chat? A Yeti Water Bottle as a Thank You\"}' (#{\"entity_id\": \"101256934200235566666\", \"entity_type\": \"google_user\", \"label\": \"nitesh@sacumentech.com\"})"
+            description_text: "Spam attempt detected in an email from jackson.dehaven@sophos.com - 'Re: Quick chat? A Yeti Water Bottle as a Thank You' (nitesh@sacumentech.com's mailbox)"
+            description_tooltips:
+             - "jackson.dehaven@sophos.com"
+             - "Re: Quick chat? A Yeti Water Bottle as a Thank You"
+             - "Jackson DeHaven"
+             - "pass"
+             - "Nitesh Sinha"
+             - "2025-06-13T13:36:57"
+             - "nitesh@sacumentech.com"
+            event_metadata:
+              ap_detection_reasons:
+               - "Email is marked as spam by Google"
+               - "Your users didn't communicate with the sender"
+               - "Insignificant historical reputation with sender"
+               - "Suspicious-looking email text"
+               - "Email content is encoded"
+              sender_address: "jackson.dehaven@sophos.com"
+            event_trigger:
+              id: 17471211147401976
+              type: "Policy"
+            matched_security_tool: "avanan_ap_scan"
+            metadata_json:
+              impersonate_nickname_new: false
+              impersonation_description: "Other"
+            multi: false
+            policy_rule_id: 17471211147401976
+            saas: "google_mail"
+            severity: 4
+          saas_info:
+            account_id:
+             - "101256934200235566666"
+            entity_id: "182dd585c830a9abf4e81f31b528125b"
+            entity_type: "google_mail_email"
+            saas_actor_payload:
+              email: "nitesh@sacumentech.com"
+              entity_id: "101256934200235566666"
+              entity_type: "google_user"
+              full_name: "Nitesh Sinha"
+              is_deleted: false
+              key: "nitesh@sacumentech.com"
+            saas_spam_verdict: "1"
+          time: "2025-06-17T10:56:06.289340"
+      evt:
+        name: "phishing"
+      network:
+        client:
+          ip: "198.154.180.93"
+        ip:
+          attributes:
+           -
+            ip: "198.154.180.93"
+            source:
+             - "@event.entity.entity_payload.sender_server_ip"
+          list:
+           - "198.154.180.93"
+      service: "s3"
+      timestamp: "2025-06-17T10:56:17.630279Z"
+      usr:
+        email: "nitesh@sacumentech.com"
+    message: |-
+      {
+        "service" : "s3",
+        "aws" : {
+          "s3" : {
+            "bucket" : "harmonyemailnew",
+            "key" : "logs/av_events_sacumendivisionofclariontechinc_1750158654.556238.json"
+          },
+          "invoked_function_arn" : "arn:aws:lambda:us-east-1:102716399460:function:datadog-forwarder-Forwarder-SUZWpKQP5sCM"
+        },
+        "event" : {
+          "security_event" : {
+            "entity_payload" : {
+              "severity" : 4,
+              "policy_rule_id" : 17471211147401976,
+              "confidence_level" : 5,
+              "current_state" : "new",
+              "description" : "#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"avanan_ap_scan\", \"label\": \"Spam\"} attempt detected in an email from #{\"entity_id\": null, \"entity_type\": \"google_user\", \"disable_link\": true, \"label\": \"jackson.dehaven@sophos.com\"} - '#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"google_mail_email\", \"label\": \"Re: Quick chat? A Yeti Water Bottle as a Thank You\"}' (#{\"entity_id\": \"101256934200235566666\", \"entity_type\": \"google_user\", \"label\": \"nitesh@sacumentech.com\"}'s mailbox)",
+              "description_text" : "Spam attempt detected in an email from jackson.dehaven@sophos.com - 'Re: Quick chat? A Yeti Water Bottle as a Thank You' (nitesh@sacumentech.com's mailbox)",
+              "aggregation_id" : "267ceac171deb46baa48d479025248d3",
+              "event_metadata" : {
+                "sender_address" : "jackson.dehaven@sophos.com",
+                "ap_detection_reasons" : [ "Email is marked as spam by Google", "Your users didn't communicate with the sender", "Insignificant historical reputation with sender", "Suspicious-looking email text", "Email content is encoded" ]
+              },
+              "multi" : false,
+              "event_trigger" : {
+                "id" : 17471211147401976,
+                "type" : "Policy"
+              },
+              "description_short" : "#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"avanan_ap_scan\", \"label\": \"Spam\"} detected in '#{\"entity_id\": \"182dd585c830a9abf4e81f31b528125b\", \"entity_type\": \"google_mail_email\", \"label\": \"Re: Quick chat? A Yeti Water Bottle as a Thank You\"}' (#{\"entity_id\": \"101256934200235566666\", \"entity_type\": \"google_user\", \"label\": \"nitesh@sacumentech.com\"})",
+              "confidence_indicator" : "malicious",
+              "saas" : "google_mail",
+              "matched_security_tool" : "avanan_ap_scan",
+              "category" : "spam",
+              "description_tooltips" : [ "jackson.dehaven@sophos.com", "Re: Quick chat? A Yeti Water Bottle as a Thank You", "Jackson DeHaven", "pass", "Nitesh Sinha", "2025-06-13T13:36:57", "nitesh@sacumentech.com" ],
+              "metadata_json" : {
+                "impersonate_nickname_new" : false,
+                "impersonation_description" : "Other"
+              }
+            },
+            "saas_info" : {
+              "entity_type" : "google_mail_email",
+              "account_id" : [ "101256934200235566666" ],
+              "saas_spam_verdict" : "1",
+              "saas_actor_payload" : {
+                "is_deleted" : false,
+                "full_name" : "Nitesh Sinha",
+                "entity_type" : "google_user",
+                "entity_id" : "101256934200235566666",
+                "key" : "nitesh@sacumentech.com",
+                "email" : "nitesh@sacumentech.com"
+              },
+              "entity_id" : "182dd585c830a9abf4e81f31b528125b"
+            },
+            "entity_info" : {
+              "entity_type" : "security_event",
+              "customer_farm" : "mt-prod-cp-us-2",
+              "entity_expiration" : 1766573766,
+              "entity_sub_type" : "phishing",
+              "customer_oem" : "checkpoint",
+              "customer_region" : "us-east-1",
+              "entity_created" : "2025-06-17T10:56:06.292296+00:00",
+              "customer_cluster" : [ "25" ],
+              "locale" : "en-us",
+              "entity_reporter" : "emails-7112134-25",
+              "entity_id" : "e79e28671f034339b64537a4062e6a6c",
+              "customer_domain" : "sacumendivisionofclariontechinc"
+            },
+            "time" : "2025-06-17T10:56:06.289340",
+            "_id" : "49663617026887827507000878347116320790923307881068494898.49"
+          },
+          "entity" : {
+            "entity_payload" : {
+              "is_internal" : false,
+              "is_body_changed" : false,
+              "from_email" : "jackson.dehaven@sophos.com",
+              "subject" : "Re: Quick chat? A Yeti Water Bottle as a Thank You",
+              "saas_spam_verdict" : "1",
+              "source" : "mta",
+              "is_signed" : false,
+              "mode" : "monitor",
+              "email_links_domains" : [ "hello.sophos.com" ],
+              "is_restored" : false,
+              "is_quarantine_user_notification" : false,
+              "dmarc_result" : "pass",
+              "spf_result" : "pass",
+              "is_group_user" : false,
+              "is_quarantined" : false,
+              "orig_recipient" : "nitesh@sacumentech.com",
+              "is_restore_declined" : false,
+              "has_encrypted_attachments" : false,
+              "is_incoming" : true,
+              "is_subject_changed" : false,
+              "orig_message_id" : "645da2cda8854e7482b339ba7bf7457c",
+              "is_attachment_restored" : false,
+              "is_quarantine_notification" : false,
+              "aggregation_id" : "f248d5f196b5832034ea02925562856d",
+              "recipients" : [ "nitesh@sacumentech.com" ],
+              "email_split" : "original",
+              "is_restore_requested" : false,
+              "from_domain" : "sophos.com",
+              "is_outgoing" : false,
+              "is_links_replaced" : false,
+              "is_sent_from_internal" : false,
+              "attachments" : [ {
+                "entity_type" : "google_mail_attachment",
+                "size" : 20804,
+                "name" : "kjoWjQeAz1Xyv5lK7-RQL3D5JCWWZcgLXh58Y9L_4VE",
+                "mimetype" : "image/png",
+                "entity_id" : "fd2bc7387f843929e2ab33db5d3d1785",
+                "MD5" : "ee097c24dcc8f4187689d04b7db6aae4"
+              } ],
+              "dkim_result" : "pass",
+              "is_inline_handled" : false,
+              "from_name" : "Jackson DeHaven",
+              "is_wd_rescan" : false,
+              "is_deleted" : false,
+              "is_in_s3_quarantine" : false,
+              "insert_time_sqs" : "2025-06-17T10:55:59.673000Z",
+              "recipients_user" : [ {
+                "is_deleted" : false,
+                "full_name" : "Nitesh Sinha",
+                "entity_type" : "google_user",
+                "entity_id" : "101256934200235566666",
+                "key" : "nitesh@sacumentech.com",
+                "email" : "nitesh@sacumentech.com"
+              } ],
+              "is_attachment_changed" : false,
+              "sender_server_ip" : "198.154.180.93",
+              "saas_phishing_verdict" : "0",
+              "has_internal_recipient" : false,
+              "internet_message_id" : "<685149b5a3092_177c90_3910_31@worker-mail-5dbffb6448-lnd6c.mail>",
+              "to" : [ "nitesh@sacumentech.com" ],
+              "is_spam_header_added" : false,
+              "attachment_count" : 1,
+              "email_links" : [ "https://hello.sophos.com/api/mailings/click/PMRGSZBCHI2TMMJVGY4DELBCOVZGYIR2EJWWC2LMORXTU2TBMNVXG33OFZSGK2DBOZSW4QDTN5YGQ33TFZRW63JCFQRG64THEI5CEZTFGUYTQYZVGYWTIZBSHAWTIOLDGEWWEY3CGQWWGYJTGEZWGMJSHA4WGNBCFQRHMZLSONUW63RCHIRDIIRMEJZWSZZCHIRG63TEI5VFK4TQKNRXKOLQJ5VUU4SPNZRHERTHOFXUUTRQN4ZEC6KBIYZV6U2WKJUUISLLHURH2===", "https://hello.sophos.com/api/mailings/click/PMRGSZBCHI2TMNZWGI3DCLBCOVZGYIR2EJWWC2LMORXTU2TBMNVXG33OFZSGK2DBOZSW4QDTN5YGQ33TFZRW63JCFQRG64THEI5CEZTFGUYTQYZVGYWTIZBSHAWTIOLDGEWWEY3CGQWWGYJTGEZWGMJSHA4WGNBCFQRHMZLSONUW63RCHIRDIIRMEJZWSZZCHIRG62JUIJBGW6CCKA4VEV2SGB4HOZ3RON4DKOKTJZ2EMULGOJAVKWLOI5TWOSJXJB3WSYTLHURH2===", "https://hello.sophos.com/api/mailings/unsubscribe/PMRGSZBCHI2TMMJVGY4DELBCN5ZGOIR2EJTGKNJRHBRTKNRNGRSDEOBNGQ4WGMJNMJRWENBNMNQTGMJTMMYTEOBZMM2CELBCOZSXE43JN5XCEORCGQRCYITTNFTSEORCIV3UW2CKGNDF6RDUOFVW2OLENVTGQY3QIJSEKQRZPBXUYSLHJRSFIRJXOFWWY3CQG5DTIPJCPU======", "https://hello.sophos.com/api/mailings/unsubscribe/PMRGSZBCHI2TMNZWGI3DCLBCN5ZGOIR2EJTGKNJRHBRTKNRNGRSDEOBNGQ4WGMJNMJRWENBNMNQTGMJTMMYTEOBZMM2CELBCOZSXE43JN5XCEORCGQRCYITTNFTSEORCN5DDSMSWIFJUOQLDFUYVUMLOJBFTK5TXINBU4ZS7MRBTOSTKPJVHASTKJFWXSR3PFVYESPJCPU======" ]
+            },
+            "saas_info" : {
+              "saas_actor_id" : "nitesh@sacumentech.com",
+              "saas_entity_created" : "2025-06-17T10:56:00.283085Z",
+              "saas_id" : "google_mail",
+              "saas_entity_type" : "email",
+              "saas_actor_type" : "google_user",
+              "saas_actor_payload" : {
+                "is_deleted" : false,
+                "full_name" : "Nitesh Sinha",
+                "entity_type" : "google_user",
+                "entity_id" : "101256934200235566666",
+                "key" : "nitesh@sacumentech.com",
+                "email" : "nitesh@sacumentech.com"
+              }
+            },
+            "entity_info" : {
+              "entity_updated" : "2025-06-17T10:56:00.467963Z",
+              "entity_type" : "google_mail_email",
+              "customer_farm" : "mt-prod-cp-us-2",
+              "entity_expiration" : 1765796160,
+              "customer_oem" : "Check Point",
+              "customer_region" : "us-east-1",
+              "entity_created" : "2025-06-17T10:56:00.508124Z",
+              "customer_cluster" : "25",
+              "locale" : "en-us",
+              "entity_reporter" : "emails-7112134-25",
+              "entity_id" : "182dd585c830a9abf4e81f31b528125b",
+              "customer_domain" : "sacumendivisionofclariontechinc"
+            },
+            "entity_security_result" : {
+              "av" : [ {
+                "security_result_entity_id" : "fd2bc7387f843929e2ab33db5d3d1785",
+                "score" : 0,
+                "status_description" : "The request has been fully answered",
+                "entity_type" : "google_mail_attachment",
+                "status_code" : "1001",
+                "sec_type" : "av",
+                "verdict" : "clean",
+                "security_result_entity_type" : "checkpoint2",
+                "entity_id" : "fd2bc7387f843929e2ab33db5d3d1785"
+              } ],
+              "shadow_it" : [ {
+                "security_result_entity_id" : "182dd585c830a9abf4e81f31b528125b",
+                "score" : 0,
+                "status_description" : "Clean",
+                "entity_type" : "google_mail_email",
+                "status_code" : "clean",
+                "sec_type" : "shadow_it",
+                "payload" : {
+                  "subject" : "Re: Quick chat? A Yeti Water Bottle as a Thank You",
+                  "domain" : "",
+                  "from" : "jackson.dehaven@sophos.com",
+                  "to" : "nitesh@sacumentech.com"
+                },
+                "verdict" : "clean",
+                "security_result_entity_type" : "shadow_it_emails_scan",
+                "entity_id" : "182dd585c830a9abf4e81f31b528125b"
+              } ],
+              "combined_verdict" : {
+                "av" : "clean",
+                "shadow_it" : "clean",
+                "ap" : "spam"
+              },
+              "findings_summary" : [ {
+                "sectool_name" : "avanan_ap_scan",
+                "sectool_type" : "ap",
+                "verdict" : "spam"
+              } ],
+              "is_clean" : false,
+              "ap" : [ {
+                "security_result_entity_id" : "182dd585c830a9abf4e81f31b528125b",
+                "score" : 26.365586,
+                "entity_type" : "google_mail_email",
+                "status_code" : "0",
+                "sec_type" : "ap",
+                "payload" : {
+                  "reasons_by_category" : {
+                    "Email Text" : [ {
+                      "short_text" : "Suspicious-looking email text",
+                      "full_text" : "NLP analysis of the email text indicates a suspicious-looking email content"
+                    }, {
+                      "short_text" : "Email content is encoded",
+                      "full_text" : "Email content is encoded - a known email obfuscation technique often associated with phishing attacks"
+                    } ],
+                    "Sender Reputation" : [ {
+                      "short_text" : "Your users didn't communicate with the sender",
+                      "full_text" : "The people in your org didn't communicate with the sender"
+                    }, {
+                      "short_text" : "Insignificant historical reputation with sender",
+                      "full_text" : "The sending email address hasn't established significant historical reputation with your domain"
+                    } ],
+                    "Email Headers" : [ {
+                      "short_text" : "Email is marked as spam by Google",
+                      "full_text" : "Email is marked as spam by Google with X-Gm-Spam=1 header"
+                    } ]
+                  },
+                  "reasons_by_category_list" : [ "Email Headers", "Sender Reputation", "Email Text" ]
+                },
+                "verdict" : "spam",
+                "security_result_entity_type" : "avanan_ap_scan",
+                "entity_id" : "182dd585c830a9abf4e81f31b528125b"
+              } ]
+            },
+            "time" : "2025-06-17T10:56:17.630279Z"
+          }
+        },
+        "network" : {
+          "ip" : {
+            "attributes" : [ {
+              "ip" : "198.154.180.93",
+              "source" : [ "@event.entity.entity_payload.sender_server_ip" ]
+            } ],
+            "list" : [ "198.154.180.93" ]
+          }
+        }
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1750157777630
