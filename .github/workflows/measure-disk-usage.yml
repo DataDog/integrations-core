@@ -55,7 +55,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         cmd="ddev size status \
-        --commit ${{github.event.pull_request.head.sha }} \
+        --dependency-commit ${{github.event.pull_request.head.sha }} \
         --format json 
         --to-dd-org default" # TODO: change to ${{ github.event.workflow_run.head_sha }}
         # Send metrics to Datadog only on push to master
