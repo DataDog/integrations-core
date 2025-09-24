@@ -690,7 +690,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         if i == len(schema_events) - 1:
             assert schema_event["collection_payloads_count"] == len(schema_events)
         else:
-            assert "collection_payloads_count" not in schema_event, f"collection_payloads_count should not be present for event {i} with {len(schema_events)} events"
+            assert "collection_payloads_count" not in schema_event, (
+                f"collection_payloads_count should not be present for event {i} with {len(schema_events)} events"
+            )
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']

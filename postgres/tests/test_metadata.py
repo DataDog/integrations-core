@@ -475,6 +475,7 @@ def test_collect_schemas_interrupted(integration_check, dbm_instance, aggregator
         database_metadata = schema_event['metadata']
         assert len(database_metadata[0]['schemas'][0]['tables']) <= 1
 
+
 def test_collect_schemas_multiple_payloads(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
     dbm_instance['relations'] = []
@@ -492,11 +493,13 @@ def test_collect_schemas_multiple_payloads(integration_check, dbm_instance, aggr
     collection_started_at = schema_events[0]['collection_started_at']
     for schema_event in schema_events:
         assert schema_event['collection_started_at'] == collection_started_at
-    # Check that only the last payload has the collection_payloads_count and that the count matches the number of payloads
+    # Check that only the last payload has the collection_payloads_count
+    # and that the count matches the number of payloads
     collection_payloads_count = schema_events[-1]['collection_payloads_count']
     assert collection_payloads_count == len(schema_events)
     for schema_event in schema_events[:-1]:
         assert 'collection_payloads_count' not in schema_event
+
 
 def assert_fields(keys: List[str], fields: List[str]):
     for field in fields:
