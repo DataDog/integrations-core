@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.0.2 / 2025-09-17
+
+***Fixed***:
+
+* Remove usage of bitnami images for testing and add ruff rules from parent directory ([#21274](https://github.com/DataDog/integrations-core/pull/21274))
+
 ## 3.0.1 / 2025-08-07 / Agent 7.70.0
 
 ***Fixed***:
