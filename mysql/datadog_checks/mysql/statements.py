@@ -221,7 +221,11 @@ class MySQLStatementMetrics(DBMAsyncJob):
         several fields must be further processed from the delta values.
         """
         only_query_recent_statements = self._config.statement_metrics_config.get('only_query_recent_statements', False)
-        collect_prepared_statements = self._config.statement_metrics_config.get('collect_prepared_statements', True)
+        # Since `performance_schema.prepared_statements_instances` doesn't have a last_seen column,
+        # we only collect prepared statements if we're not querying recent statements
+        collect_prepared_statements = not only_query_recent_statements and self._config.statement_metrics_config.get(
+            'collect_prepared_statements', True
+        )
 
         condition = (
             "WHERE `last_seen` >= %s"
@@ -250,12 +254,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
             """.format(condition)
 
         if collect_prepared_statements:
-            prepared_condition = (
-                "WHERE `last_seen` >= %s"
-                if only_query_recent_statements
-                else "WHERE `sql_text` NOT LIKE 'EXPLAIN %' OR `sql_text` IS NULL"
-            )
-
             prepared_sql_statement_summary = """\
                 SELECT  NULL AS `schema_name`,
                         NULL AS `digest`,
@@ -273,8 +271,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
                         `sum_no_good_index_used`,
                         NOW() AS `last_seen`
                 FROM performance_schema.prepared_statements_instances
-                {}
-                """.format(prepared_condition)
+                WHERE `sql_text` NOT LIKE 'EXPLAIN %' OR `sql_text` IS NULL
+                """
 
             sql_statement_summary = f"""\
                 {sql_statement_summary}
