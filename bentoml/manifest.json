@@ -37,7 +37,7 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "bentoml",
+        "bentoml"
       ]
     },
     "dashboards": {
