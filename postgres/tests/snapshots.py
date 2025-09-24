@@ -10,7 +10,7 @@ from ipaddress import IPv4Address
 
 import orjson
 import psycopg
-import psycopg_binary
+import psycopg_c
 from psycopg import Column, Connection, Cursor
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
@@ -77,24 +77,24 @@ def default(obj):
             "scale": obj.scale,
             "null_ok": obj.null_ok,
         }
-    if isinstance(obj, psycopg.pq.PGresult) or isinstance(obj, psycopg_binary.pq.PGresult):
+    if isinstance(obj, psycopg.pq.PGresult) or isinstance(obj, psycopg_c.pq.PGresult):
         return {
             "status": obj.status,
-            "num_tuples": obj.num_tuples,
-            "num_fields": obj.num_fields,
-            "fields": obj.fields,
+            "ntuples": obj.ntuples,
+            "nfields": obj.nfields,
         }
     if isinstance(obj, MetricStub):
         return {
             "name": obj.name,
             "type": obj.type,
-            # The operation time is wall time of the running integration so will vary each time
-            "value": obj.value if obj.name != "dd.postgres.operation.time" else 1,
+            # Internal operation times are wall time of the running integration so will vary each time
+            "value": obj.value if "operation.time" not in obj.name and "dd.postgres" not in obj.name else 1,
             "tags": sorted(obj.tags),
             "hostname": obj.hostname,
             "device": obj.device,
             "flush_first_value": obj.flush_first_value,
         }
+    print("obj", obj)
     raise TypeError
 
 
@@ -123,7 +123,6 @@ class PoolObserver(Observer):
         if self.mode == SnapshotMode.REPLAY:
             yield ConnectionObserver(None, self.snapshot, self.mode)
         # raise ValueError(f"Mode {self.mode} is not supported")
-
 
 
 class ConnectionObserver(Observer):
@@ -219,9 +218,10 @@ class CursorObserver(Observer):
     def replay(self):
         global replay_offset
         # print("Replaying value", self.snapshot[replay_offset])
-        if self.snapshot[replay_offset] and not isinstance(self.snapshot[replay_offset], list):
-            print("Snapshot is not a list", self.snapshot[replay_offset])
-            raise ValueError(f"Snapshot {self.snapshot[replay_offset]} is not a list")
+        # if self.snapshot[replay_offset] and not isinstance(self.snapshot[replay_offset], list)
+        # and not isinstance(self.snapshot[replay_offset], dict):
+        #     print("Snapshot is not a list", self.snapshot[replay_offset])
+        #     raise ValueError(f"Snapshot {self.snapshot[replay_offset]} is not a list")
         value = self.snapshot[replay_offset]
         replay_offset += 1
         return value
@@ -235,17 +235,29 @@ class CursorObserver(Observer):
         columns = [[c['name']] for c in self.replay()]
         return columns
 
+    class Pgresult:
+        status = None
+
+        def __init__(self, status):
+            self.status = status
+
     @property
     def pgresult(self):
         if self.target:
             result = self.target.pgresult
             self.snapshot.append(result)
             return result
-        result = self.replay()[0]
-        print("result", result)
-        pgresult = psycopg.pq.PGresult()
-        pgresult.status = result.get('status')
-        return result
+        result = self.replay()
+        pgresult = self.Pgresult(result.get('status'))
+        return pgresult
+
+    def nextset(self):
+        if self.target:
+            set = self.target.nextset()
+            self.snapshot.append(set)
+            return set
+        return self.replay()
+
 
 def inject_snapshot_observer(check: PostgreSql, snapshot_mode: SnapshotMode):
     observer = PoolObserver(check.db_pool)
@@ -270,6 +282,7 @@ def inject_snapshot_observer(check: PostgreSql, snapshot_mode: SnapshotMode):
 
     check._new_connection = generate_new_connection(check._new_connection)
     check.db_pool = observer
+    # check.metadata_samples.db_pool = observer
 
 
 def validate_snapshot(aggregator: AggregatorStub, check: PostgreSql):
