@@ -189,7 +189,7 @@ datadog-sap-hana==5.1.1
 datadog-scylla==5.0.1
 datadog-sidekiq==3.0.0
 datadog-silk==4.1.1
-datadog-silverstripe-cms==1.4.0
+datadog-silverstripe-cms==1.4.1
 datadog-singlestore==4.2.0
 datadog-slurm==2.0.2; sys_platform == 'linux2'
 datadog-snmp==11.0.0
