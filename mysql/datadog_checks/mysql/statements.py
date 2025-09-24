@@ -221,12 +221,12 @@ class MySQLStatementMetrics(DBMAsyncJob):
         several fields must be further processed from the delta values.
         """
         only_query_recent_statements = self._config.statement_metrics_config.get('only_query_recent_statements', False)
+        collect_prepared_statements = self._config.statement_metrics_config.get('collect_prepared_statements', True)
+
         condition = (
             "WHERE `last_seen` >= %s"
             if only_query_recent_statements
-            else """WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
-            ORDER BY `count_star` DESC
-            LIMIT 10000"""
+            else "WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL"
         )
 
         sql_statement_summary = """\
@@ -249,8 +249,51 @@ class MySQLStatementMetrics(DBMAsyncJob):
             {}
             """.format(condition)
 
+        if collect_prepared_statements:
+            prepared_condition = (
+                "WHERE `last_seen` >= %s"
+                if only_query_recent_statements
+                else "WHERE `sql_text` NOT LIKE 'EXPLAIN %' OR `sql_text` IS NULL"
+            )
+
+            prepared_sql_statement_summary = """\
+                SELECT  NULL AS `schema_name`,
+                        NULL AS `digest`,
+                        `sql_text` AS `digest_text`,
+                        `count_execute` AS `count_star`,
+                        `sum_timer_execute` AS `sum_timer_wait`,
+                        `sum_lock_time`,
+                        `sum_errors`,
+                        `sum_rows_affected`,
+                        `sum_rows_sent`,
+                        `sum_rows_examined`,
+                        `sum_select_scan`,
+                        `sum_select_full_join`,
+                        `sum_no_index_used`,
+                        `sum_no_good_index_used`,
+                        NOW() AS `last_seen`
+                FROM performance_schema.prepared_statements_instances 
+                {}
+                """.format(prepared_condition)
+
+            sql_statement_summary = f"""\
+                {sql_statement_summary}
+                UNION ALL
+                {prepared_sql_statement_summary}
+                """
+
+        sql_statement_summary = f"""\
+            {sql_statement_summary}
+            ORDER BY `count_star` DESC
+            LIMIT 10000
+            """
+        
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            args = [self._last_seen] if only_query_recent_statements else None
+            if only_query_recent_statements:
+                arg_count = 1 + (1 if collect_prepared_statements else 0)
+                args = [self._last_seen] * arg_count
+            else:
+                args = None
             cursor.execute(sql_statement_summary, args)
 
             rows = cursor.fetchall() or []  # type: ignore
