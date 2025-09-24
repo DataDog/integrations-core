@@ -34,7 +34,6 @@ def dd_environment():
                     config['server'], common.HTTP_START_PORT + i, config['username'], config['password']
                 ),
                 wait=5,
-
             )
         )
 
