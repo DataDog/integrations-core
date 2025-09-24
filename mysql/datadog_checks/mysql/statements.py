@@ -281,12 +281,12 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 UNION ALL
                 {prepared_sql_statement_summary}
                 """
-
-        sql_statement_summary = f"""\
-            {sql_statement_summary}
-            ORDER BY `count_star` DESC
-            LIMIT 10000
-            """
+        if not only_query_recent_statements:
+            sql_statement_summary = f"""\
+                {sql_statement_summary}
+                ORDER BY `count_star` DESC
+                LIMIT 10000
+                """
         
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             if only_query_recent_statements:
