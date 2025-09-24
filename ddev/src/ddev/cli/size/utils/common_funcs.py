@@ -1048,15 +1048,12 @@ def is_everything_committed() -> bool:
     return result.stdout.strip() == ""
 
 
-def get_commit_data(commit: str | None) -> tuple[int, str, list[str], list[str]]:
+def get_commit_data(commit: str | None = "") -> tuple[int, str, list[str], list[str]]:
     '''
     Get the commit data for a given commit. If no commit is provided, get the last commit data.
     '''
-    if commit:
-        print(f"Getting commit data for commit: {commit}")
-        # result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
-    else:
-        result = subprocess.run(["git", "log", "-1", "--format=%s%n%ct"], capture_output=True, text=True, check=True)
+
+    result = subprocess.run(["git", "log", "-1", "--format=%s%n%ct", commit], capture_output=True, text=True, check=True)
 
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
