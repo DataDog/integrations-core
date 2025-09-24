@@ -433,7 +433,7 @@ pipeline:
       sourceType: attribute
       target: syslog.timestamp
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map hostname to syslog.hostname
@@ -443,7 +443,7 @@ pipeline:
       sourceType: attribute
       target: syslog.hostname
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: status-remapper
       name: Remapper level to status
@@ -463,7 +463,7 @@ pipeline:
       sourceType: attribute
       target: cloudgen_firewall.component
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `ip` to `cloudgen_firewall.ip`
@@ -473,7 +473,7 @@ pipeline:
       sourceType: attribute
       target: cloudgen_firewall.ip
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `process` to `cloudgen_firewall.process`
@@ -483,7 +483,7 @@ pipeline:
       sourceType: attribute
       target: cloudgen_firewall.process
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `pid` to `cloudgen_firewall.pid`
@@ -493,7 +493,7 @@ pipeline:
       sourceType: attribute
       target: cloudgen_firewall.pid
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `session_status` to `cloudgen_firewall.session_status`
@@ -503,5 +503,5 @@ pipeline:
       sourceType: attribute
       target: cloudgen_firewall.session_status
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
