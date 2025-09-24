@@ -4,6 +4,8 @@
 
 The CockroachDB check monitors the overall health and performance of a [CockroachDB][1] cluster.
 
+**Minimum Agent version:** 6.6.0
+
 ## Setup
 
 ### Installation

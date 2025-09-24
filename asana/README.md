@@ -10,6 +10,8 @@ This integration gathers audit logs and forwards them to Datadog for seamless an
 
 **Disclaimer**: By enabling this integration, you consent to the integration accessing your content and data from Asana. Asana is not responsible for the privacy, security, or integrity of any of your data outside the Asana services.
 
+**Minimum Agent version:** 7.59.0
+
 ## Setup
 
 ### Generate API Credentials in Asana

@@ -7,6 +7,8 @@ Get metrics from the .NET CLR service in real time to:
 - Visualize and monitor .NET CLR states.
 - Be notified about .NET CLR failovers and events.
 
+**Minimum Agent version:** 6.2.0
+
 ## Setup
 
 ### Installation

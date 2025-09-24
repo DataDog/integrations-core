@@ -4,6 +4,8 @@
 
 This check monitors [Velero][1] through the Datadog Agent. It collects data about Velero's backup, restore and snapshot operations. This allows users to gain insight into the health, performance and reliability of their disaster recovery processes.
 
+**Minimum Agent version:** 7.64.0
+
 ## Setup
 
 ### Installation

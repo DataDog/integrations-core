@@ -6,6 +6,8 @@
 
 Integrate Trend Micro Cloud One with Datadog to gain insights into endpoint and workload security, file storage security, and network security events using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
+**Minimum Agent version:** 7.69.2
+
 ## Setup
 
 ### Log Collection Overview

@@ -18,6 +18,8 @@ Metrics are collected through the [Airflow StatsD][1] plugin and sent to Datadog
 
 In addition to metrics, the Datadog Agent also sends service checks related to Airflow's health.
 
+**Minimum Agent version:** 7.17.0
+
 ## Setup
 
 ### Installation

@@ -5,6 +5,8 @@
 This check monitors [Flink][1]. Datadog collects Flink metrics through Flink's
 [Datadog HTTP Reporter][2], which uses [Datadog's HTTP API][3].
 
+**Minimum Agent version:** 7.17.2
+
 ## Setup
 
 ### Installation

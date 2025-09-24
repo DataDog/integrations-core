@@ -14,6 +14,8 @@ Firewall traffic logs can be used to measure the traffic and sessions passing th
 #### Monitor authentication anomalies
 Firewall authentication logs provide detailed information on users as they authenticate with Palo Alto Networks firewall. These logs can be used to monitor anomalous spikes in authentication traffic from specific protocols, users, locations, and more.
 
+**Minimum Agent version:** 7.31.1
+
 ## Setup
 
 ### Log collection

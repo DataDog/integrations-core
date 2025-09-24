@@ -8,6 +8,8 @@ This check monitors [Appgate SDP][1] through the Datadog Agent.
 - Provides visibility into resource utilization, active connections, session counts, and license usage to help ensure secure and efficient access management.
 - Enables proactive alerting and troubleshooting by tracking critical indicators such as CPU, memory, disk usage, and system events across distributed environments.
 
+**Minimum Agent version:** 7.59.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

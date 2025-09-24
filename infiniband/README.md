@@ -10,6 +10,8 @@ Get visibility into your high-performance networking infrastructure to help iden
 
 Key metrics collected include port counters like bytes/packets transmitted and received, error counts, and RDMA hardware-specific metrics - giving operators the data needed to ensure optimal performance of their high-speed networking infrastructure.
 
+**Minimum Agent version:** 7.65.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. The check collects metrics by reading and submitting counters by default from [`/sys/class/infiniband/<device>/ports/*/counters/` and `/sys/class/infiniband/<device>/ports/*/hw_counters/`][3] directories. To ensure that this integration works, ensure that the Agent has the appropriate permissions to access and read the counters from these directories.

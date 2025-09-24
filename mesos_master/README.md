@@ -15,6 +15,8 @@ This check collects metrics from Mesos masters for:
 
 And many more.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

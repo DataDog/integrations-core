@@ -9,6 +9,8 @@ The Cisco ACI Integration lets you:
 - Monitor the switches and controllers themselves
 - The ability to monitor devices via [Network Devices Monitoring][11]
 
+**Minimum Agent version:** 6.3.2
+
 ## Setup
 
 ### Installation

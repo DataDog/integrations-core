@@ -8,6 +8,8 @@ Collect Gearman metrics to:
 - Know how many tasks are queued or running.
 - Correlate Gearman performance with the rest of your applications.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

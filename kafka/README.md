@@ -17,6 +17,8 @@ Add [Data Streams Monitoring][24] to your producers and consumers to visualize t
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

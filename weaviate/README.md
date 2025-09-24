@@ -13,6 +13,8 @@ Weaviate is an open source, AI-native vector database that helps create AI-power
 
 This check monitors [Weaviate][1] through the Datadog Agent. For more information, see [Weaviate monitoring][2]. To learn more about Datadog's suite of AI integrations, see this [blog][15].
 
+**Minimum Agent version:** 7.47.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

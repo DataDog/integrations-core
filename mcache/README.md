@@ -4,6 +4,8 @@
 
 The Agent's Memcache check lets you track Memcache's memory use, hits, misses, evictions, fill percent, and much more.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

@@ -21,6 +21,8 @@ And many more.
 
 Finally, in addition to metrics, the Datadog Agent also sends a service check for each of Consul's health checks, and an event after each new leader election.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

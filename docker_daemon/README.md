@@ -15,6 +15,8 @@ Configure this Agent check to get metrics from the Docker_daemon service in real
 * Visualize and monitor Docker_daemon states.
 * Be notified about Docker_daemon failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 ### Installation
 

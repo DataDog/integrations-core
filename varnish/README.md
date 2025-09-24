@@ -13,6 +13,8 @@ This check collects Varnish metrics regarding:
 
 It also submits service checks for the health of each backend.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

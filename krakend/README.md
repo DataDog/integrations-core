@@ -9,6 +9,8 @@ Include a high level overview of what this integration does:
 - What value will customers get from this integration, and why is it valuable to them?
 - What specific data will your integration monitor, and what's the value of that data?
 
+**Minimum Agent version:** 7.69.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

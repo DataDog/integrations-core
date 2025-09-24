@@ -5,6 +5,8 @@
 This check monitors [Hudi][1].
 It is compatible with Hudi [versions][2] `0.10.0` and above.
 
+**Minimum Agent version:** 7.32.0
+
 ## Setup
 
 ### Installation
