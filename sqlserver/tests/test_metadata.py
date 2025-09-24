@@ -377,6 +377,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             assert "collection_payloads_count" not in schema_event
 
         database_metadata = schema_event['metadata']
+        if len(database_metadata) == 0:
+            # Empty final event for sending payloads count
+            continue
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']
 

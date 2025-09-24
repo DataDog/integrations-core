@@ -100,8 +100,6 @@ class SubmitData:
         self._submit_to_agent_queue(json_event)
 
     def submit(self, complete=False):
-        if not self.db_to_tables:
-            return
         self._total_columns_sent += self._columns_count
         self.payloads_count += 1
         self._columns_count = 0
@@ -111,6 +109,7 @@ class SubmitData:
         for db, tables in self.db_to_tables.items():
             db_info = self.db_info[db]
             event["metadata"] = event["metadata"] + [{**(db_info), "tables": tables}]
+        print("event", event)
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
         self._submit_to_agent_queue(json_event)
