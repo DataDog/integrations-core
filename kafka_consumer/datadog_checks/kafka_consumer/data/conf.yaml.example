@@ -305,6 +305,6 @@ instances:
     #   - <EXCLUDE_REGEX>
 
     ## @param data_streams_enabled - boolean - optional - default: false
-    ## Collects consumer lag metric in seconds. It may result in additional billing charges.
+    ## Collects consumer lag metric in seconds.
     #
     # data_streams_enabled: false
