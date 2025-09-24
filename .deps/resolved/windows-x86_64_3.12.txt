@@ -17,7 +17,7 @@ charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-n
 clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhouse-cityhash/clickhouse_cityhash-1.0.2.4-cp312-cp312-win_amd64.whl#sha256=0409917be29f5ad80a6772712fce954b5e81450555636e8523290ee9740a2dbb
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.9-cp312-cp312-win_amd64.whl#sha256=de6624e28eeffd01668803d28ae89e3d4e359b1bff8b60e4933e1cb3c6f86f18
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20250218143924-py3-none-win_amd64.whl#sha256=02165c52665dfa139b6606bd802b996c51bcbc8c89f3c79801833d53e838d735
-confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250917201039-cp312-cp312-win_amd64.whl#sha256=b35204e6ef0362d96dd42d81690c040ef55546537cbcf2a87677d8f5b23aab53
+confluent-kafka @ https://agent-int-packages.datadoghq.com/built/confluent-kafka/confluent_kafka-2.8.0-20250924041048-cp312-cp312-win_amd64.whl#sha256=e2af043dc01ccf3072257f9f90867d5ab575ad5009dc32c80063b1782f73c5dd
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-45.0.6-cp311-abi3-win_amd64.whl#sha256=833dc32dfc1e39b7376a87b9a6a4288a10aae234631268486558920029b086ec
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-3.12.5-cp312-cp312-win_amd64.whl#sha256=e9ab796491ef6bb3048b55b9e8a26ffbd1d6abb94be7dd8656ff2804b160fa3b
 decorator @ https://agent-int-packages.datadoghq.com/external/decorator/decorator-5.2.1-py3-none-any.whl#sha256=d316bb415a2d9e2d2b3abcc4084c6502fc09240e292cd76a76afc106a1c8e04a
@@ -46,7 +46,7 @@ looseversion @ https://agent-int-packages.datadoghq.com/external/looseversion/lo
 lxml @ https://agent-int-packages.datadoghq.com/external/lxml/lxml-5.1.1-cp312-cp312-win_amd64.whl#sha256=0e46181d15fae102c53621bed9356b7a599a1e837b978c934a350dd00842b1d9
 lz4 @ https://agent-int-packages.datadoghq.com/external/lz4/lz4-4.4.4-cp312-cp312-win_amd64.whl#sha256=d21d1a2892a2dcc193163dd13eaadabb2c1b803807a5117d8f8588b22eaf9f12
 mmh3 @ https://agent-int-packages.datadoghq.com/external/mmh3/mmh3-5.2.0-cp312-cp312-win_amd64.whl#sha256=72d80005b7634a3a2220f81fbeb94775ebd12794623bb2e1451701ea732b4aa3
-msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.33.0-py3-none-any.whl#sha256=c0cd41cecf8eaed733ee7e3be9e040291eba53b0f262d3ae9c58f38b04244273
+msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.34.0-py3-none-any.whl#sha256=f669b1644e4950115da7a176441b0e13ec2975c29528d8b9e81316023676d6e1
 msal-extensions @ https://agent-int-packages.datadoghq.com/external/msal-extensions/msal_extensions-1.3.1-py3-none-any.whl#sha256=96d3de4d034504e969ac5e85bae8106c8373b5c6568e4c8fa7af2eca9dbe6bca
 oauthlib @ https://agent-int-packages.datadoghq.com/external/oauthlib/oauthlib-3.3.1-py3-none-any.whl#sha256=88119c938d2b8fb88561af5f6ee0eec8cc8d552b7bb1f712743136eb7523b7a1
 openstacksdk @ https://agent-int-packages.datadoghq.com/external/openstacksdk/openstacksdk-4.7.0-py3-none-any.whl#sha256=35b5df0f16b126b23a420cefa771b5066ac87351f9c8ee1e44677f9e4bf88f48
@@ -62,8 +62,8 @@ ply @ https://agent-int-packages.datadoghq.com/external/ply/ply-3.11-py2.py3-non
 prometheus-client @ https://agent-int-packages.datadoghq.com/external/prometheus-client/prometheus_client-0.22.1-py3-none-any.whl#sha256=cca895342e308174341b2cbf99a56bef291fbc0ef7b9e5412a0f26d653ba7094
 protobuf @ https://agent-int-packages.datadoghq.com/external/protobuf/protobuf-6.32.0-cp310-abi3-win_amd64.whl#sha256=a8bdbb2f009cfc22a36d031f22a625a38b615b5e19e558a7b756b3279723e68e
 psutil @ https://agent-int-packages.datadoghq.com/external/psutil/psutil-6.0.0-cp37-abi3-win_amd64.whl#sha256=33ea5e1c975250a720b3a6609c490db40dae5d83a4eb315170c4fe0d8b1f34b3
-psycopg @ https://agent-int-packages.datadoghq.com/external/psycopg/psycopg-3.2.7-py3-none-any.whl#sha256=d39747d2d5b9658b69fa462ad21d31f1ba4a5722ad1d0cb952552bc0b4125451
-psycopg-binary @ https://agent-int-packages.datadoghq.com/external/psycopg-binary/psycopg_binary-3.2.7-cp312-cp312-win_amd64.whl#sha256=47e9d09b4f898eaf46cd2b7433f9e6faa935246a9d8983b4f88f0a46809abbd2
+psycopg @ https://agent-int-packages.datadoghq.com/external/psycopg/psycopg-3.2.10-py3-none-any.whl#sha256=ab5caf09a9ec42e314a21f5216dbcceac528e0e05142e42eea83a3b28b320ac3
+psycopg-c @ https://agent-int-packages.datadoghq.com/built/psycopg-c/psycopg_c-3.2.10-20250924041049-cp312-cp312-win_amd64.whl#sha256=76d61b19a98fd80dbad9a1b8ee27f73c4ea6c2bcc05ed429ece3f16b0205f2db
 psycopg-pool @ https://agent-int-packages.datadoghq.com/external/psycopg-pool/psycopg_pool-3.2.6-py3-none-any.whl#sha256=5887318a9f6af906d041a0b1dc1c60f8f0dda8340c2572b74e10907b51ed5da7
 pyasn1 @ https://agent-int-packages.datadoghq.com/external/pyasn1/pyasn1-0.4.8-py2.py3-none-any.whl#sha256=39c7e2ec30515947ff4e87fb6f456dfc6e84857d34be479c9d4a4ba4bf46aa5d
 pyasn1-modules @ https://agent-int-packages.datadoghq.com/external/pyasn1-modules/pyasn1_modules-0.4.1-py3-none-any.whl#sha256=49bfa96b45a292b711e986f222502c1c9a5e1f4e568fc30e2574a6c7d07838fd
@@ -74,7 +74,7 @@ pydantic @ https://agent-int-packages.datadoghq.com/external/pydantic/pydantic-2
 pydantic-core @ https://agent-int-packages.datadoghq.com/external/pydantic-core/pydantic_core-2.33.2-cp312-cp312-win_amd64.whl#sha256=f941635f2a3d96b2973e867144fde513665c87f13fe0e193c158ac51bfaaa7b2
 pyjwt @ https://agent-int-packages.datadoghq.com/external/pyjwt/PyJWT-2.10.1-py3-none-any.whl#sha256=dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb
 pymongo @ https://agent-int-packages.datadoghq.com/external/pymongo/pymongo-4.8.0-cp312-cp312-win_amd64.whl#sha256=e84bc7707492f06fbc37a9f215374d2977d21b72e10a67f1b31893ec5a140ad8
-pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.11-20250917201039-cp312-cp312-win_amd64.whl#sha256=5556672b6346eb76e1e53b3410fd680b7b2cf513bb0d3400a99fa29fab881dca
+pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.11-20250924041049-cp312-cp312-win_amd64.whl#sha256=94513643fa8b1b10f689ac7c7b45a4065c2cb28d72da77abb9409f6844f32894
 pymysql @ https://agent-int-packages.datadoghq.com/external/pymysql/pymysql-1.1.2-py3-none-any.whl#sha256=e6b1d89711dd51f8f74b1631fe08f039e7d76cf67a42a323d3178f0f25762ed9
 pynacl @ https://agent-int-packages.datadoghq.com/external/pynacl/pynacl-1.6.0-cp38-abi3-win_amd64.whl#sha256=cf831615cc16ba324240de79d925eacae8265b7691412ac6b24221db157f6bd1
 pyodbc @ https://agent-int-packages.datadoghq.com/external/pyodbc/pyodbc-5.2.0-cp312-cp312-win_amd64.whl#sha256=b1f5686b142759c5b2bdbeaa0692622c2ebb1f10780eb3c174b85f5607fbcf55
