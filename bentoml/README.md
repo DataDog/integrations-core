@@ -2,12 +2,11 @@
 
 ## Overview
 
-This check monitors [BentoML][1] through the Datadog Agent. 
+This check monitors [BentoML][1] through the Datadog Agent.
 
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
+BentoML is an open-source platform for building, shipping, and running machine learning models in production. This integration enables you to track the health and performance of your BentoML model serving infrastructure directly from Datadog.
+
+By using this integration, you gain visibility into key BentoML metrics such as request throughput, response latency, error rates, and resource utilization. Monitoring these metrics helps you ensure reliable model deployments, quickly detect issues, and optimize the performance of your ML services in production environments.
 
 ## Setup
 
@@ -15,14 +14,31 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The BentoML check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+Starting from agent 7.71.0,the BentoML check is included in the [Datadog Agent][2] package. No additional installation is needed on your environment. 
+
+This check uses OpenMetrics to collect metrics from the OpenMetrics endpoint that BentoML exposes, which requires Python 3.
 
 ### Configuration
 
-1. Edit the `bentoml.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your bentoml performance data. See the [sample bentoml.d/conf.yaml][4] for all available configuration options.
+#### Metrics
+
+The BentoML integration collects data from both the [health API endpoints][11] and the [Prometheus metrics endpoint][10]. By default, BentoML exposes these endpoints, so in most cases, no additional configuration is required on the BentoML side. For more information about these endpoints and how to enable or secure them, refer to the [BentoML observability documentation][11].
+
+To configure the Datadog Agent to collect BentoML metrics:
+
+1. Edit the `bentoml.d/conf.yaml` file, located in the `conf.d/` directory at the root of your Agent's configuration folder. This file controls how the Agent collects metrics from your BentoML deployment. For a full list of configuration options, see the [sample bentoml.d/conf.yaml][4]. Below is a minimal example configuration:
+
+```yaml
+init_config:
+instances:
+  - openmetrics_endpoint: http://localhost:3000/metrics
+```
 
 2. [Restart the Agent][5].
+
+#### Logs
+
+Logs can be collected through various ways. The easiest way is to have the agent tail the 
 
 ### Validation
 
@@ -40,8 +56,6 @@ The BentoML integration does not include any events.
 
 ### Service Checks
 
-The BentoML integration does not include any service checks.
-
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
@@ -49,7 +63,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://docs.bentoml.com/en/latest/index.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/bentoml/datadog_checks/bentoml/data/conf.yaml.example
@@ -58,3 +72,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/bentoml/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/bentoml/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.bentoml.com/en/latest/build-with-bentoml/observability/metrics.html
+[11]: https://docs.bentoml.com/en/latest/build-with-bentoml/observability/monitoring-and-data-collection.html#monitoring
