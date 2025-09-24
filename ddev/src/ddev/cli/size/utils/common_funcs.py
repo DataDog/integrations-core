@@ -1042,7 +1042,7 @@ def send_metrics_to_dd(
     if mode == "status":
         api.Metric.send(metrics=n_integrations_metrics)
         api.Metric.send(metrics=n_dependencies_metrics)
-
+    print("Metrics sent to Datadog")
 
 def is_everything_committed() -> bool:
     result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
