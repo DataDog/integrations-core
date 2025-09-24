@@ -56,8 +56,8 @@ jobs:
       run: |
         cmd="ddev size status \
         --dependency-commit ${{github.event.pull_request.head.sha }} \
-        --format json"
-        # --to-dd-org default" # TODO: change to ${{ github.event.workflow_run.head_sha }}
+        --format json
+        --to-dd-org default" # TODO: change to ${{ github.event.workflow_run.head_sha }}
         # Send metrics to Datadog only on push to master
 
         # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
