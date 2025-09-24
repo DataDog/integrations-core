@@ -954,9 +954,9 @@ def send_metrics_to_dd(
     print("Config file info: ", config_file_info["site"])
     # if not commits and not is_everything_committed():
     #     raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
-    if "api_key" not in config_file_info:
+    if "api_key" not in config_file_info or config_file_info["api_key"] is None:
         raise RuntimeError("No API key found in config file")
-    if "site" not in config_file_info:
+    if "site" not in config_file_info or config_file_info["site"] is None:
         raise RuntimeError("No site found in config file")
 
     timestamp, message, tickets, prs = get_commit_data(commits[-1] if commits else get_commit_data())
