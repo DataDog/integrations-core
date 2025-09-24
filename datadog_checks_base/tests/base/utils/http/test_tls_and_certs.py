@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import ssl
+import os
 
 import mock
 import pytest
@@ -66,6 +67,17 @@ class TestCert:
 
             mock_load_cert_chain.assert_called_once()
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
+
+    def test_bad_default_verify_paths(self, monkeypatch):
+        '''The SSL default verify paths can be set incorrectly.'''
+        monkeypatch.setenv("SSL_CERT_FILE", "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/cert.pem")
+        monkeypatch.setenv("SSL_CERT_DIR", "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/certs")
+        bad_ssl_paths = ssl.DefaultVerifyPaths(cafile="None", capath="None", openssl_cafile_env="SSL_CERT_FILE", openssl_capath_env="SSL_CERT_DIR", openssl_cafile="/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/cert.pem", openssl_capath="/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/certs")
+        with mock.patch("ssl.get_default_verify_paths", return_value=bad_ssl_paths):
+            http = RequestsWrapper({"tls_verify":True}, {})
+            assert ssl.get_default_verify_paths() == bad_ssl_paths
+            assert http.session.adapters["https://"].ssl_context.get_ca_certs() == []
+            http.get("https://google.com")
 
 
 class TestIgnoreTLSWarning:
