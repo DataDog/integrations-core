@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import click
 
@@ -22,10 +22,9 @@ if TYPE_CHECKING:
 
 @click.command()
 @click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
-@click.option("--to-dd-key", type=str, help="Send metrics to datadoghq.com using the specified API key.")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
-@click.option("--dependency-sizes", type=click.Path(exists=True), help="Path to the dependency sizes file. If no")
-@click.option("--commit", help="Commit hash to check the status of. It takes the commit's dependency sizes file.")
+@click.option("--dependency-sizes", type=click.Path(exists=True), help="Path to the dependency sizes json file.")
+@click.option("--dependency-commit", help="Commit hash to check the dependency status of. It takes the commit's dependency sizes file.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def status(
@@ -36,9 +35,8 @@ def status(
     format: list[str],
     show_gui: bool,
     to_dd_org: str | None,
-    to_dd_key: str | None,
     dependency_sizes: Path | None,
-    commit: str | None,
+    dependency_commit: str | None,
 ) -> None:
     """
     Show the current size of all integrations and dependencies in your local repo.
@@ -63,9 +61,8 @@ def status(
             version,
             format,
             to_dd_org,
-            commit,
+            dependency_commit,
             dependency_sizes,
-            to_dd_key,
             app,
         )
 
@@ -75,10 +72,10 @@ def status(
         combinations = [(p, v) for p in platforms for v in versions]
 
         for plat, ver in combinations:
-            if commit:
+            if dependency_commit:
                 from ddev.cli.size.utils.common_funcs import get_last_dependency_sizes_artifact
 
-                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat)
+                dependency_sizes = get_last_dependency_sizes_artifact(app, dependency_commit, plat)
             parameters: CLIParameters = {
                 "app": app,
                 "platform": plat,
@@ -98,10 +95,10 @@ def status(
             from ddev.cli.size.utils.common_funcs import export_format
 
             export_format(app, format, modules_plat_ver, "status", platform, version, compressed)
-        if to_dd_org or to_dd_key:
+        if to_dd_org:
             from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
-
-            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, to_dd_key, compressed)
+            mode: Literal["status"] = "status"
+            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, compressed, mode)
     except Exception as e:
         app.abort(str(e))
 
@@ -113,9 +110,8 @@ def validate_parameters(
     version: str | None,
     format: list[str],
     to_dd_org: str | None,
-    commit: str | None,
+    dependency_commit: str | None,
     dependency_sizes: Path | None,
-    to_dd_key: str | None,
     app: Application,
 ) -> None:
     errors = []
@@ -125,8 +121,8 @@ def validate_parameters(
     if version and version not in valid_versions:
         errors.append(f"Invalid version: {version!r}")
 
-    if commit and dependency_sizes:
-        errors.append("Pass either 'commit' or 'dependency-sizes'. Both options cannot be supplied.")
+    if dependency_commit and dependency_sizes:
+        errors.append("Pass either 'dependency-commit' or 'dependency-sizes'. Both options cannot be supplied.")
 
     if format:
         for fmt in format:
@@ -135,9 +131,6 @@ def validate_parameters(
 
     if dependency_sizes and not dependency_sizes.is_file():
         errors.append(f"Dependency sizes file does not exist: {dependency_sizes!r}")
-
-    if to_dd_org and to_dd_key:
-        errors.append("Specify either --to-dd-org or --to-dd-key, not both")
 
     if errors:
         app.abort("\n".join(errors))

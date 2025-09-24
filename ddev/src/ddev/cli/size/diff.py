@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import os
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import click
 
@@ -36,6 +36,7 @@ MINIMUM_LENGTH_COMMIT = 7
     help="Threshold for the size difference. Outputs the html only if the size"
     " difference is greater than the quality gate threshold",
 )
+@click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def diff(
@@ -49,6 +50,7 @@ def diff(
     show_gui: bool,
     use_artifacts: bool,
     quality_gate_threshold: int | None,
+    to_dd_org: str | None,
 ) -> None:
     """
     Compares the size of integrations and dependencies between two commits.
@@ -132,14 +134,22 @@ def diff(
                             passes_quality_gate = False
                 except Exception as e:
                     app.abort(str(e))
-        if format:
-            from .utils.common_funcs import export_format
 
-            export_format(app, format, modules, "diff", platform, version, compressed)
-        if not passes_quality_gate:
-            from .utils.common_funcs import save_html
+        if to_dd_org:
+            from .utils.common_funcs import send_metrics_to_dd
+            mode: Literal["diff"] = "diff"
+            send_metrics_to_dd(app, modules, to_dd_org, compressed, mode)
 
-            save_html(app, "Diff", modules, "diff.html")
+        if format or not passes_quality_gate:
+            modules = [module for module in modules if module["Size_Bytes"] != 0]
+            if format:
+                from .utils.common_funcs import export_format
+
+                export_format(app, format, modules, "diff", platform, version, compressed)
+            if not passes_quality_gate:
+                from .utils.common_funcs import save_html
+
+                save_html(app, "Diff", modules, "diff.html")
         return None
 
 
@@ -330,9 +340,6 @@ def calculate_diff(
         size_b = int(b["Size_Bytes"]) if b else 0
         size_a = int(a["Size_Bytes"]) if a else 0
         delta = size_a - size_b
-
-        if delta == 0:
-            continue
 
         ver_b = b["Version"] if b else ""
         ver_a = a["Version"] if a else ""
