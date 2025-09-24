@@ -109,7 +109,6 @@ class SubmitData:
         for db, tables in self.db_to_tables.items():
             db_info = self.db_info[db]
             event["metadata"] = event["metadata"] + [{**(db_info), "tables": tables}]
-        print("event", event)
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
         self._submit_to_agent_queue(json_event)

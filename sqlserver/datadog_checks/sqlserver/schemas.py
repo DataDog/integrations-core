@@ -123,8 +123,6 @@ class SubmitData:
         self._submit_to_agent_queue(json_event)
 
     def submit(self, complete=False):
-        if not self.db_to_schemas:
-            return
         self._total_columns_sent += self._columns_count
         self.payloads_count += 1
         self._columns_count = 0
