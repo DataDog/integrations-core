@@ -25,8 +25,8 @@ class ManagedAuthentication(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    enabled: Optional[bool] = Field(None, example=False)
-    role_arn: Optional[str] = Field(None, example='arn:aws:iam::123456789012:role/MyRole')
+    enabled: Optional[bool] = Field(None, examples=[False])
+    role_arn: Optional[str] = Field(None, examples=['arn:aws:iam::123456789012:role/MyRole'])
 
 
 class Aws(BaseModel):
@@ -72,7 +72,9 @@ class CustomQuery(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collection_interval: Optional[int] = None
     columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
 
