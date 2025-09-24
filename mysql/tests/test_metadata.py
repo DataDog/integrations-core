@@ -673,7 +673,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             expected_tags += ('cluster_uuid:{}'.format(mysql_check.cluster_uuid), 'replication_role:primary')
 
     collection_started_at = None
-    for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
+    schema_events = [e for e in dbm_metadata if e['kind'] == 'mysql_databases']
+    for i, schema_event in enumerate(schema_events):
         assert schema_event.get("timestamp") is not None
         assert schema_event["host"] == "stubbed.hostname"
         assert schema_event["agent_version"] == "0.0.0"
@@ -686,6 +687,10 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         if collection_started_at is None:
             collection_started_at = schema_event["collection_started_at"]
         assert schema_event["collection_started_at"] == collection_started_at
+        if i == len(schema_events) - 1:
+            assert schema_event["collection_payloads_count"] == len(schema_events)
+        else:
+            assert "collection_payloads_count" not in schema_event, f"collection_payloads_count should not be present for event {i} with {len(schema_events)} events"
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']

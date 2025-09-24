@@ -271,6 +271,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._time_since_last_extension_query = 0
         self._time_since_last_settings_query = 0
         self._last_schemas_query_time = 0
+        self.column_buffer_size = 100_000
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
@@ -390,16 +391,16 @@ class PostgresMetadata(DBMAsyncJob):
 
             # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
             chunk_size = 50
-            payloads_count = 1
+            payloads_count = 0
 
-            for database, di in enumerate(schema_metadata):
+            for di, database in enumerate(schema_metadata):
                 dbname = database["name"]
                 if not self._should_collect_metadata(dbname, "database"):
                     continue
 
                 with self.db_pool.get_connection(dbname) as conn:
                     with conn.cursor(row_factory=dict_row) as cursor:
-                        for schema, si in enumerate(database["schemas"]):
+                        for si, schema in enumerate(database["schemas"]):
                             if not self._should_collect_metadata(schema["name"], "schema"):
                                 continue
 
@@ -423,7 +424,7 @@ class PostgresMetadata(DBMAsyncJob):
                                 for t in table_info:
                                     buffer_column_count += len(t.get("columns", []))
 
-                                if buffer_column_count >= 100_000:
+                                if buffer_column_count >= self.column_buffer_size:
                                     payloads_count += 1
                                     self._flush_schema(base_event, database, schema, tables_buffer)
                                     total_tables += len(tables_buffer)
@@ -432,6 +433,7 @@ class PostgresMetadata(DBMAsyncJob):
 
                             # Send the payload even if the table buffer was perfectly emptied by the last flust
                             # to make sure we don't miss the completion event
+                            payloads_count += 1
                             self._flush_schema(
                                 # For very last payload send the payloads count to mark the collection as complete
                                 {**base_event, "collection_payloads_count": payloads_count}
