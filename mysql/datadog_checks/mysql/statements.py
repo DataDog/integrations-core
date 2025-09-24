@@ -272,7 +272,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                         `sum_no_index_used`,
                         `sum_no_good_index_used`,
                         NOW() AS `last_seen`
-                FROM performance_schema.prepared_statements_instances 
+                FROM performance_schema.prepared_statements_instances
                 {}
                 """.format(prepared_condition)
 
@@ -287,7 +287,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 ORDER BY `count_star` DESC
                 LIMIT 10000
                 """
-        
+
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             if only_query_recent_statements:
                 arg_count = 1 + (1 if collect_prepared_statements else 0)
