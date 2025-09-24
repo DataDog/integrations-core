@@ -6,6 +6,6 @@ import pytest
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    # This is a required fixture for e2e tests, but good practice to have.
-    # For unit tests, it doesn't do anything.
+    # Required for e2e tests to set up test environments.
+    # Optional for unit tests but good practice for consistency.
     yield
