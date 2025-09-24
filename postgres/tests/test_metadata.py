@@ -138,7 +138,6 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
         assert len(database_metadata) == 1
         assert 'datadog_test' == database_metadata[0]['name']
 
-
         # there should only two schemas, 'public' and 'datadog'. datadog is empty
         schema = database_metadata[0]['schemas'][0]
         schema_name = schema['name']

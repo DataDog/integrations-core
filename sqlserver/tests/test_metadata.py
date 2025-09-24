@@ -370,7 +370,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         if collection_started_at is None:
             collection_started_at = schema_event["collection_started_at"]
         assert schema_event["collection_started_at"] == collection_started_at
-        
+
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']
