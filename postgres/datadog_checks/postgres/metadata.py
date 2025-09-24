@@ -392,14 +392,14 @@ class PostgresMetadata(DBMAsyncJob):
             chunk_size = 50
             payloads_count = 1
 
-            for database in schema_metadata:
+            for database, di in enumerate(schema_metadata):
                 dbname = database["name"]
                 if not self._should_collect_metadata(dbname, "database"):
                     continue
 
                 with self.db_pool.get_connection(dbname) as conn:
                     with conn.cursor(row_factory=dict_row) as cursor:
-                        for schema in database["schemas"]:
+                        for schema, si in enumerate(database["schemas"]):
                             if not self._should_collect_metadata(schema["name"], "schema"):
                                 continue
 
@@ -430,14 +430,18 @@ class PostgresMetadata(DBMAsyncJob):
                                     tables_buffer = []
                                     buffer_column_count = 0
 
-                            if len(tables_buffer) > 0:
-                                self._flush_schema(
-                                    {**base_event, "collection_payloads_count": payloads_count},
-                                    database,
-                                    schema,
-                                    tables_buffer,
-                                )
-                                total_tables += len(tables_buffer)
+                            # Send the payload even if the table buffer was perfectly emptied by the last flust
+                            # to make sure we don't miss the completion event
+                            self._flush_schema(
+                                # For very last payload send the payloads count to mark the collection as complete
+                                {**base_event, "collection_payloads_count": payloads_count}
+                                if di == len(schema_metadata) - 1 and si == len(database["schemas"]) - 1
+                                else base_event,
+                                database,
+                                schema,
+                                tables_buffer,
+                            )
+                            total_tables += len(tables_buffer)
         except Exception as e:
             self._log.error("Error collecting schema metadata: %s", e)
             status = "error"
