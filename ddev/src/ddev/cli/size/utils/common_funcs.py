@@ -945,7 +945,7 @@ def send_metrics_to_dd(
     org: str,
     compressed: bool,
     mode: Literal["status", "diff"],
-    commits: list[str] | None,
+    commits: list[str] | None = None,
 ) -> None:
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
@@ -1055,12 +1055,12 @@ def get_commit_data(commit: str | None) -> tuple[int, str, list[str], list[str]]
     if commit:
         print(f"Getting commit data for commit: {commit}")
         # result = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, check=True)
-    else: 
+    else:
         result = subprocess.run(["git", "log", "-1", "--format=%s%n%ct"], capture_output=True, text=True, check=True)
-    
+
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
-    
+
     message, timestamp = result.stdout.strip().split('\n')
 
     tickets = re.findall(ticket_pattern, message)
@@ -1070,6 +1070,7 @@ def get_commit_data(commit: str | None) -> tuple[int, str, list[str], list[str]]
     if not prs:
         prs = [""]
     return int(timestamp), message, tickets, prs
+
 
 def check_commits(commits: list[str]) -> bool:
     # Check if commits are from master branch
@@ -1091,6 +1092,7 @@ def check_commits(commits: list[str]) -> bool:
         raise ValueError("Second commit must be the direct parent of first commit. Metrics cannot be uploaded.")
 
     return True
+
 
 @cache
 def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: str) -> Path | None:

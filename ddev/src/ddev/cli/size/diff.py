@@ -137,6 +137,7 @@ def diff(
 
         if to_dd_org:
             from .utils.common_funcs import send_metrics_to_dd
+
             mode: Literal["diff"] = "diff"
             send_metrics_to_dd(app, modules, to_dd_org, compressed, mode)
 

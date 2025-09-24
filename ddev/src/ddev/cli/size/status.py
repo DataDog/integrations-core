@@ -24,7 +24,10 @@ if TYPE_CHECKING:
 @click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
 @click.option("--dependency-sizes", type=click.Path(exists=True), help="Path to the dependency sizes json file.")
-@click.option("--dependency-commit", help="Commit hash to check the dependency status of. It takes the commit's dependency sizes file.")
+@click.option(
+    "--dependency-commit",
+    help="Commit hash to check the dependency status of. It takes the commit's dependency sizes file.",
+)
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def status(
@@ -97,6 +100,7 @@ def status(
             export_format(app, format, modules_plat_ver, "status", platform, version, compressed)
         if to_dd_org:
             from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
+
             mode: Literal["status"] = "status"
             send_metrics_to_dd(app, modules_plat_ver, to_dd_org, compressed, mode)
     except Exception as e:
