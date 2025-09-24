@@ -183,6 +183,8 @@ integration/cri:
 - cri/**/*
 integration/crio:
 - crio/**/*
+integration/crowdstrike_fdr:
+- crowdstrike_fdr/**/*
 integration/databricks:
 - databricks/**/*
 integration/datadog_checks_tests_helper:
@@ -285,6 +287,8 @@ integration/haproxy:
 - haproxy/**/*
 integration/harbor:
 - harbor/**/*
+integration/have_i_been_pwned:
+- have_i_been_pwned/**/*
 integration/hazelcast:
 - hazelcast/**/*
 integration/hdfs_datanode:
