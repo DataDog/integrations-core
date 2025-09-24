@@ -431,7 +431,7 @@ class PostgresMetadata(DBMAsyncJob):
                                     tables_buffer = []
                                     buffer_column_count = 0
 
-                            # Send the payload even if the table buffer was perfectly emptied by the last flust
+                            # Send the payload even if the table buffer was perfectly emptied by the last flush
                             # to make sure we don't miss the completion event
                             payloads_count += 1
                             self._flush_schema(

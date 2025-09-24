@@ -40,8 +40,8 @@ class SubmitData:
         self._total_columns_sent = 0
         self.db_to_tables = {}  # dbname : {"tables" : []}
         self.db_info = {}  # name to info
-        self.any_tables_found = False
-        self.payloads_count = 0  # Flag to track for permission issues
+        self.any_tables_found = False  # Flag to track for permission issues
+        self.payloads_count = 0
 
     def set_base_event_data(self, hostname, database_instance, tags, cloud_metadata, dbms_version, flavor):
         self._base_event["host"] = hostname
