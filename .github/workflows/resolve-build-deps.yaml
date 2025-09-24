@@ -70,7 +70,7 @@ jobs:
         run: |
           FILES_CHANGED="${{ steps.changed-files.outputs.files_changed }}"
           echo "files_changed=$FILES_CHANGED"
-          DEPENDENCY_CHANGED=$(echo "$FILES_CHANGED" | grep -qE "(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)" && echo "true" || echo "false")
+          DEPENDENCY_CHANGED=$(echo "$FILES_CHANGED" | grep -qE "(agent_requirements\.in)" && echo "true" || echo "false") #"(\.github/workflows/resolve-build-deps\.yml|\.builders/|agent_requirements\.in)"
           BUILDER_CHANGED=$(echo "$FILES_CHANGED" | grep -qE "^\.builders/" && echo "true" || echo "false")
 
           echo "dependency_changed=$DEPENDENCY_CHANGED" >> $GITHUB_OUTPUT
