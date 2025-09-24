@@ -951,7 +951,7 @@ def send_metrics_to_dd(
     size_type = "compressed" if compressed else "uncompressed"
     print("Getting config file info for org: ", org)
     config_file_info = app.config.orgs.get(org, {})
-    print("Config file info: ", config_file_info)
+    print("Config file info: ", config_file_info["site"])
     # if not commits and not is_everything_committed():
     #     raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
     if "api_key" not in config_file_info:
