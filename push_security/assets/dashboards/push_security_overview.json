@@ -1,6 +1,6 @@
 {
     "title": "Push Security - Overview",
-    "description": "This dashboard offers a comprehensive summary of push security events.",
+    "description": "This dashboard offers a comprehensive summary of Push Security events.",
     "widgets": [
         {
             "id": 8508816171812108,
@@ -26,7 +26,7 @@
             "id": 10546878817969,
             "definition": {
                 "type": "note",
-                "content": "[Push Security](https://pushsecurity.com/) is an identity security platform that focuses on securing workforce identities through browser-level monitoring. It uses a browser extension to provide real-time visibility into user activity, enabling the detection and response to threats such as phishing, session hijacking, and credential misuse.\n\nThis dashboard offers a comprehensive summary of push security events.\n\nFor more information, see the [Push Security Documentation](https://docs.datadoghq.com/integrations/push_security/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
+                "content": "[Push Security](https://pushsecurity.com/) is an identity security platform that focuses on securing workforce identities through browser-level monitoring. It uses a browser extension to provide real-time visibility into user activity, enabling the detection and response to threats such as phishing, session hijacking, and credential misuse.\n\nThis dashboard offers a comprehensive summary of Push Security events.\n\nFor more information, see the [Push Security Documentation](https://docs.datadoghq.com/integrations/push_security/).\n\n**Tips**:\n - Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n - Clone this dashboard to rearrange, modify, and add widgets and visualizations.\n\n",
                 "background_color": "orange",
                 "font_size": "14",
                 "text_align": "left",
