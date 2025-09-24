@@ -174,7 +174,7 @@ The DCGM exporter can quickly be installed in a Kubernetes environment using the
    helm install dcgm-datadog gpu-helm-charts/dcgm-exporter -n default -f dcgm-values.yaml
    ```
 
-**Note**: You can modify the release name `dcgm-datadog` as well as the namespace, but you must modify accordingly the manifest from step 1.
+**Note**: You can modify the release name `dcgm-datadog` as well as the namespace, but you must modify accordingly the manifest from step 2.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Operator" xxx -->

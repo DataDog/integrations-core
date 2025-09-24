@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "6aa84f17-78d1-4707-adcd-784f43cfa895",
   "app_id": "kuma",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

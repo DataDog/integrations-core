@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e588293a-833f-4888-a7b4-2208e087059a",
   "app_id": "ibm-db2",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

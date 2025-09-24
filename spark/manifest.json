@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5cb22455-9ae2-44ee-ae05-ec21c27b3292",
   "app_id": "spark",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
