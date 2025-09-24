@@ -10,7 +10,8 @@ from ipaddress import IPv4Address
 
 import orjson
 import psycopg
-from psycopg import Connection, Cursor
+import psycopg_binary
+from psycopg import Column, Connection, Cursor
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.common import MetricStub
@@ -66,6 +67,23 @@ def default(obj):
         return str(obj)
     if isinstance(obj, IPv4Address):
         return str(obj)
+    if isinstance(obj, Column):
+        return {
+            "name": obj.name,
+            "type_code": obj.type_code,
+            "display_size": obj.display_size,
+            "internal_size": obj.internal_size,
+            "precision": obj.precision,
+            "scale": obj.scale,
+            "null_ok": obj.null_ok,
+        }
+    if isinstance(obj, psycopg.pq.PGresult) or isinstance(obj, psycopg_binary.pq.PGresult):
+        return {
+            "status": obj.status,
+            "num_tuples": obj.num_tuples,
+            "num_fields": obj.num_fields,
+            "fields": obj.fields,
+        }
     if isinstance(obj, MetricStub):
         return {
             "name": obj.name,
@@ -97,13 +115,13 @@ class PoolObserver(Observer):
         self.snapshot = []
         self.target = pool_manager
 
-    # @contextlib.contextmanager
+    @contextlib.contextmanager
     def get_connection(self, dbname: str, persistent: bool = False):
         if self.mode == SnapshotMode.RECORD:
             with self.target.get_connection(dbname, persistent) as conn:
-                return ConnectionObserver(conn, self.snapshot, self.mode)
+                yield ConnectionObserver(conn, self.snapshot, self.mode)
         if self.mode == SnapshotMode.REPLAY:
-            return ConnectionObserver(None, self.snapshot, self.mode)
+            yield ConnectionObserver(None, self.snapshot, self.mode)
         # raise ValueError(f"Mode {self.mode} is not supported")
 
 
@@ -134,7 +152,8 @@ class ConnectionObserver(Observer):
     def cursor(self, *args, **kwargs):
         # print(f"Getting cursor")
         if self.mode == SnapshotMode.RECORD:
-            yield CursorObserver(self.target.cursor(*args, **kwargs), self.snapshot, self.mode)
+            with self.target.cursor(*args, **kwargs) as cursor:
+                yield CursorObserver(cursor, self.snapshot, self.mode)
         if self.mode == SnapshotMode.REPLAY:
             yield CursorObserver(None, self.snapshot, self.mode)
         # raise ValueError(f"Mode {self.mode} is not supported")
@@ -207,6 +226,26 @@ class CursorObserver(Observer):
         replay_offset += 1
         return value
 
+    @property
+    def description(self):
+        if self.target:
+            description = self.target.description
+            self.snapshot.append(description)
+            return description
+        columns = [[c['name']] for c in self.replay()]
+        return columns
+
+    @property
+    def pgresult(self):
+        if self.target:
+            result = self.target.pgresult
+            self.snapshot.append(result)
+            return result
+        result = self.replay()[0]
+        print("result", result)
+        pgresult = psycopg.pq.PGresult()
+        pgresult.status = result.get('status')
+        return result
 
 def inject_snapshot_observer(check: PostgreSql, snapshot_mode: SnapshotMode):
     observer = PoolObserver(check.db_pool)

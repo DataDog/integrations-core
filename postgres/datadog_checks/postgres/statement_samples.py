@@ -309,13 +309,14 @@ class PostgresStatementSamples(DBMAsyncJob):
                         )
                     )
                     all_columns = {i[0] for i in cursor.description}
+                    print("all_columns", all_columns)
                     available_columns = [c for c in all_expected_columns if c in all_columns]
                     missing_columns = set(all_expected_columns) - set(available_columns)
                     if missing_columns:
-                        self._log.debug(
+                        print(
                             "missing the following expected columns from pg_stat_activity: %s", missing_columns
                         )
-                    self._log.debug("found available pg_stat_activity columns: %s", available_columns)
+                    print("found available pg_stat_activity columns: %s", available_columns)
                 except psycopg.errors.InvalidSchemaName as e:
                     self._log.warning(
                         "cannot collect activity due to invalid schema in dbname=%s: %s", self._config.dbname, repr(e)

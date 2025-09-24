@@ -41,3 +41,5 @@ def test_snapshot_dbm_true(aggregator: AggregatorStub, integration_check, pg_ins
     aggregator.assert_metric("postgresql.running", count=1)
 
     validate_snapshot(aggregator, check)
+
+    

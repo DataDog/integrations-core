@@ -234,10 +234,15 @@ class PostgresStatementMetrics(DBMAsyncJob):
             extra_clauses="LIMIT 0",
         )
 
-        _, description = self._execute_query(query)
-        col_names = [desc[0] for desc in description] if description else []
-        self._stat_column_cache = col_names
-        self._log.debug("Fetched columns %s", col_names)
+        try:
+            _, description = self._execute_query(query)
+            print("description", description)
+            col_names = [desc[0] for desc in description] if description else []
+            self._stat_column_cache = col_names
+        except Exception as e:
+            print("Error fetching columns", e)
+            raise e
+        print("Fetched columns %s", col_names)
         return col_names
 
     def _check_called_queries(self):
