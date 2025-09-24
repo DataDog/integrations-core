@@ -47,16 +47,6 @@ def instance():
     return get_instance_config()
 
 
-@pytest.fixture
-def clickhouse_client(instance):
-    return get_clickhouse_client(
-        host=instance['server'],
-        port=instance['port'],
-        username=instance['username'],
-        password=instance['password'],
-    )
-
-
 def ping_clickhouse(host, port, username, password):
     def _ping_clickhouse():
         client = get_clickhouse_client(
