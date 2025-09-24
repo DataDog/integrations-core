@@ -952,14 +952,15 @@ def send_metrics_to_dd(
     print("Getting config file info for org: ", org)
     config_file_info = app.config.orgs.get(org, {})
     print("Config file info: ", config_file_info["site"])
+
     # if not commits and not is_everything_committed():
     #     raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
-    if "api_key" not in config_file_info or config_file_info["api_key"] is None:
+    if "api_key" not in config_file_info or config_file_info["api_key"] is None or config_file_info["api_key"] == "":
         raise RuntimeError("No API key found in config file")
-    if "site" not in config_file_info or config_file_info["site"] is None:
+    if "site" not in config_file_info or config_file_info["site"] is None or config_file_info["site"] == "":
         raise RuntimeError("No site found in config file")
 
-    timestamp, message, tickets, prs = get_commit_data(commits[-1] if commits else get_commit_data())
+    timestamp, message, tickets, prs = get_commit_data(commits[-1]) if commits else get_commit_data()
 
     metrics = []
     n_integrations_metrics = []
@@ -1052,8 +1053,9 @@ def get_commit_data(commit: str | None = "") -> tuple[int, str, list[str], list[
     '''
     Get the commit data for a given commit. If no commit is provided, get the last commit data.
     '''
-
-    result = subprocess.run(["git", "log", "-1", "--format=%s%n%ct", commit], capture_output=True, text=True, check=True)
+    cmd = ["git", "log", "-1", "--format=%s%n%ct"]
+    cmd.append(commit) if commit else None
+    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
