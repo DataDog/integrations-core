@@ -969,7 +969,7 @@ def send_metrics_to_dd(
     n_dependencies: dict[tuple[str, str], int] = {}
 
     for item in modules:
-        change_type = item['Change_Type'] if item['Change_Type'] else ''
+        change_type = item.get('Change_Type', '')
         metrics.append(
             {
                 "metric": f"{metric_name}.size_{mode}",
