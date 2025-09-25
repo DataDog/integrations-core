@@ -288,10 +288,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 """
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            if only_query_recent_statements:
-                args = [self._last_seen]
-            else:
-                args = None
+            args = [self._last_seen] if only_query_recent_statements else None
             cursor.execute(sql_statement_summary, args)
 
             rows = cursor.fetchall() or []  # type: ignore
