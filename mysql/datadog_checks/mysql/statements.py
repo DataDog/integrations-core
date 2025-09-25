@@ -258,20 +258,21 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 SELECT  `owner_object_schema` AS `schema_name`,
                         NULL AS `digest`,
                         `sql_text` AS `digest_text`,
-                        `count_execute` AS `count_star`,
-                        `sum_timer_execute` AS `sum_timer_wait`,
-                        `sum_lock_time`,
-                        `sum_errors`,
-                        `sum_rows_affected`,
-                        `sum_rows_sent`,
-                        `sum_rows_examined`,
-                        `sum_select_scan`,
-                        `sum_select_full_join`,
-                        `sum_no_index_used`,
-                        `sum_no_good_index_used`,
+                        sum(`count_execute`) AS `count_star`,
+                        sum(`sum_timer_execute`) AS `sum_timer_wait`,
+                        sum(`sum_lock_time`) AS `sum_lock_time`,
+                        sum(`sum_errors`) AS `sum_errors`,
+                        sum(`sum_rows_affected`) AS `sum_rows_affected`,
+                        sum(`sum_rows_sent`) AS `sum_rows_sent`,
+                        sum(`sum_rows_examined`) AS `sum_rows_examined`,
+                        sum(`sum_select_scan`) AS `sum_select_scan`,
+                        sum(`sum_select_full_join`) AS `sum_select_full_join`,
+                        sum(`sum_no_index_used`) AS `sum_no_index_used`,
+                        sum(`sum_no_good_index_used`) AS `sum_no_good_index_used`,
                         NOW() AS `last_seen`
                 FROM performance_schema.prepared_statements_instances
                 WHERE `sql_text` NOT LIKE 'EXPLAIN %' OR `sql_text` IS NULL
+                GROUP BY `owner_object_schema`, `sql_text`
                 """
 
             sql_statement_summary = f"""\
@@ -288,8 +289,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             if only_query_recent_statements:
-                arg_count = 1 + (1 if collect_prepared_statements else 0)
-                args = [self._last_seen] * arg_count
+                args = [self._last_seen]
             else:
                 args = None
             cursor.execute(sql_statement_summary, args)
