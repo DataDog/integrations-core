@@ -378,10 +378,12 @@ def calculate_diff(
     for name, _type, platform, py_version in all_names:
         b = old_commit.get((name, _type, platform, py_version))
         a = new_commit.get((name, _type, platform, py_version))
-
         size_b = int(b["Size_Bytes"]) if b else 0
         size_a = int(a["Size_Bytes"]) if a else 0
         delta = size_a - size_b
+
+        print("Name: ", name, "Type: ", _type, "Platform: ", platform, "Before: ", size_b, "After: ", size_a)
+
 
         ver_b = b["Version"] if b else ""
         ver_a = a["Version"] if a else ""
