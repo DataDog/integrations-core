@@ -254,6 +254,8 @@ class MySQLStatementMetrics(DBMAsyncJob):
             """.format(condition)
 
         if collect_prepared_statements:
+            # Every prepared statement object has a row in `performance_schema.prepared_statements_instances`.
+            # Group by `schema_name` and `digest_text` to get the totals for each statement.
             prepared_sql_statement_summary = """\
                 SELECT  `owner_object_schema` AS `schema_name`,
                         NULL AS `digest`,
