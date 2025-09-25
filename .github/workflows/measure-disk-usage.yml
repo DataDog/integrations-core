@@ -51,6 +51,7 @@ jobs:
     - name: Measure disk usage
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DD_API_KEY: ${{ secrets.DD_API_KEY}}
       run: |
         cmd="ddev size status \
         --dependency-commit ${{github.event.pull_request.head.sha }} \
@@ -60,12 +61,10 @@ jobs:
         # Send metrics to Datadog only on push to master
 
         # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
-        #   cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
+        #   cmd="$cmd --to-dd-key $DD_API_KEY"
         # fi
         
-        # $cmd --to-dd-key ${{ secrets.DD_API_KEY }}
-        $cmd
-
+        $cmd --to-dd-key $DD_API_KEY
         $cmd --compressed
 
     - name: Upload JSON uncompressed sizes artifact
