@@ -941,7 +941,9 @@ def draw_treemap_rects_with_labels(
 def send_metrics_to_dd(
     app: Application,
     modules: list[FileDataEntry],
-    org: str,
+    org: str | None,
+    key: str | None,
+    site: str | None,
     compressed: bool,
     mode: Literal["status", "diff"],
     commits: list[str] | None = None,
@@ -955,8 +957,8 @@ def send_metrics_to_dd(
 
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
-    print("Getting config file info for org: ", org)
-    config_file_info = app.config.orgs.get(org, {})
+    dd_site = site if site else "datadoghq.com"
+    config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': key, 'site': dd_site}
     print("Config file info: ", config_file_info["site"])
     print("Config file info: ", config_file_info["api_key"][0])
 
@@ -980,7 +982,8 @@ def send_metrics_to_dd(
 
     for item in modules:
         change_type = item.get('Change_Type', '')
-        metrics.append(MetricSeries(
+        metrics.append(
+            MetricSeries(
                 metric=f"{metric_name}.size_{mode}",
                 type=gauge_type,
                 points=[MetricPoint(timestamp=timestamp, value=item["Size_Bytes"])],
@@ -1056,6 +1059,7 @@ def send_metrics_to_dd(
             api_instance.submit_metrics(body=MetricPayload(series=n_integrations_metrics))
             api_instance.submit_metrics(body=MetricPayload(series=n_dependencies_metrics))
     print("Metrics sent to Datadog")
+
 
 def is_everything_committed() -> bool:
     result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)

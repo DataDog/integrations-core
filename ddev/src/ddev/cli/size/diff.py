@@ -37,6 +37,12 @@ MINIMUM_LENGTH_COMMIT = 7
     " difference is greater than the quality gate threshold",
 )
 @click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
+@click.option("--to-dd-key", type=str, help="Send metrics to Datadog using the specified API key.")
+@click.option(
+    "--to-dd-site",
+    type=str,
+    help="Send metrics to Datadog using the specified site. If not provided datadoghq.com will be used.",
+)
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def diff(
@@ -51,6 +57,8 @@ def diff(
     use_artifacts: bool,
     quality_gate_threshold: int | None,
     to_dd_org: str | None,
+    to_dd_key: str | None,
+    to_dd_site: str | None,
 ) -> None:
     """
     Compares the size of integrations and dependencies between two commits.
@@ -72,7 +80,19 @@ def diff(
 
         valid_versions = get_valid_versions(app.repo.path)
         valid_platforms = get_valid_platforms(app.repo.path, valid_versions)
-        validate_parameters(app, old_commit, new_commit, format, valid_platforms, valid_versions, platform, version)
+        validate_parameters(
+            app,
+            old_commit,
+            new_commit,
+            format,
+            valid_platforms,
+            valid_versions,
+            platform,
+            version,
+            to_dd_org,
+            to_dd_key,
+            to_dd_site,
+        )
 
         platforms = valid_platforms if platform is None else [platform]
         versions = valid_versions if version is None else [version]
@@ -135,11 +155,11 @@ def diff(
                 except Exception as e:
                     app.abort(str(e))
 
-        if to_dd_org:
+        if to_dd_org or to_dd_key:
             from .utils.common_funcs import send_metrics_to_dd
 
             mode: Literal["diff"] = "diff"
-            send_metrics_to_dd(app, modules, to_dd_org, compressed, mode)
+            send_metrics_to_dd(app, modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
 
         if format or not passes_quality_gate:
             modules = [module for module in modules if module["Size_Bytes"] != 0]
@@ -163,28 +183,47 @@ def validate_parameters(
     valid_versions: set[str],
     platform: str | None,
     version: str | None,
+    to_dd_org: str | None,
+    to_dd_key: str | None,
+    to_dd_site: str | None,
 ):
     errors = []
     if platform and platform not in valid_platforms:
         errors.append(f"Invalid platform: {platform}")
+
     elif version and version not in valid_versions:
         errors.append(f"Invalid version: {version}")
+
     if len(new_commit) < MINIMUM_LENGTH_COMMIT and old_commit and len(old_commit) < MINIMUM_LENGTH_COMMIT:
         errors.append(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
+
     elif len(new_commit) < MINIMUM_LENGTH_COMMIT:
         errors.append(
             f"First commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
         )
+
     elif new_commit and len(new_commit) < MINIMUM_LENGTH_COMMIT:
         errors.append(
             f"Second commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
         )
+
     if new_commit and old_commit == new_commit:
         errors.append("Commit hashes must be different")
+
     if format:
         for fmt in format:
             if fmt not in ["png", "csv", "markdown", "json"]:
                 errors.append(f"Invalid format: {fmt}. Only png, csv, markdown, json, and html are supported.")
+
+    if to_dd_site and not to_dd_key:
+        errors.append("If --to-dd-site is provided, --to-dd-key must also be provided.")
+
+    if to_dd_site and to_dd_org:
+        errors.append("If --to-dd-org is provided, --to-dd-site must not be provided.")
+
+    if to_dd_key and to_dd_org:
+        errors.append("If --to-dd-org is provided, --to-dd-key must not be provided.")
+
     if errors:
         app.abort("\n".join(errors))
 
