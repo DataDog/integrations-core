@@ -8,14 +8,17 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres.config import (
     FeatureKey,
     ValidationResult,
     build_config,
+    deprecation_warning,
     sanitize,
 )
 from datadog_checks.postgres.config_models import dict_defaults
 from datadog_checks.postgres.config_models.instance import Relations
+from datadog_checks.postgres.relationsmanager import RelationsManager
 
 
 @pytest.fixture
@@ -274,3 +277,64 @@ def test_relations_validation(mock_check, minimal_instance):
         # Empty schemas means all schemas, even though the first relation matches first.
         Relations(relation_regex=r"[pP]ersons[-_]?(dup\d)?"),
     )
+
+@pytest.mark.parametrize('section, section_config, expected_collection_interval', [
+    ("query_metrics", {"collection_interval": "not_a_number"}, dict_defaults.instance_query_metrics().collection_interval),
+    ("query_metrics", {"collection_interval": "0"}, dict_defaults.instance_query_metrics().collection_interval),
+    ("query_metrics", {"collection_interval": "1"}, 1),
+    ("query_samples", {"collection_interval": "not_a_number"}, dict_defaults.instance_query_samples().collection_interval),
+    ("query_samples", {"collection_interval": "0"}, dict_defaults.instance_query_samples().collection_interval),
+    ("query_samples", {"collection_interval": "1"}, 1),
+    ("query_activity", {"collection_interval": "not_a_number"}, dict_defaults.instance_query_activity().collection_interval),
+    ("query_activity", {"collection_interval": "0"}, dict_defaults.instance_query_activity().collection_interval),
+    ("query_activity", {"collection_interval": "1"}, 1),
+])
+def test_apply_validated_defaults(mock_check, minimal_instance, section, section_config, expected_collection_interval):
+    instance = minimal_instance.copy()
+    instance[section] = {**instance.get(section, {}), **section_config}
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert getattr(config, section).collection_interval == expected_collection_interval
+
+def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
+    instance = minimal_instance.copy()
+    instance['ssl'] = 'invalid_ssl'
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.ssl == "allow"
+    assert any("Invalid ssl option" in w for w in result.warnings)
+
+@pytest.mark.parametrize('option, replacement, value', [
+    ('custom_metrics', 'custom_queries', []),
+    ('deep_database_monitoring', 'dbm', True),
+    ('managed_authentication', 'azure.managed_authentication', True),
+    ('statement_samples', 'query_samples', {}),
+    ('collect_default_database', 'postgres', True),
+])
+def test_apply_deprecation_warnings(mock_check, minimal_instance, option, replacement, value):
+    instance = minimal_instance.copy()
+    instance[option] = value
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    _, result = build_config(check=mock_check)
+    assert result.valid
+    assert any(deprecation_warning(option, replacement) in w for w in result.warnings)
+
+
+def test_relations_validation_fails_if_no_relname_or_regex():
+    with pytest.raises(ConfigurationError):
+        RelationsManager.validate_relations_config([{"relkind": ["i"]}])
+
+
+def test_relations_validation_fails_if_schemas_is_wrong_type():
+    with pytest.raises(ConfigurationError):
+        RelationsManager.validate_relations_config([{"relation_name": "person", "schemas": "foo"}])
+
+
+def test_relations_validation_fails_if_relkind_is_wrong_type():
+    with pytest.raises(ConfigurationError):
+        RelationsManager.validate_relations_config([{"relation_name": "person", "relkind": "foo"}])

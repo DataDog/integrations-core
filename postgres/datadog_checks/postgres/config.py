@@ -299,6 +299,9 @@ def apply_validated_defaults(args: dict, validation_result: ValidationResult):
             f"query_activity.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
+def deprecation_warning(option: str, replacement: str):
+    return        f'The `{option}` option is deprecated. Use `{replacement}` instead.'
+    
 
 def apply_deprecation_warnings(instance: dict, validation_result: ValidationResult):
     # Simple deprecated options
@@ -309,12 +312,10 @@ def apply_deprecation_warnings(instance: dict, validation_result: ValidationResu
         ['statement_samples', 'query_samples'],
         ['collect_default_database', 'postgres'],
     ]
-
+    
     for deprecation in deprecations:
-        if instance.get(deprecation[0]):
-            validation_result.add_warning(
-                f'The `{deprecation[0]}` option is deprecated. Use `{deprecation[1]}` instead.'
-            )
+        if deprecation[0] in instance:
+            validation_result.add_warning(deprecation_warning(deprecation[0], deprecation[1]))
 
 
 def apply_cloud_validations(args: dict, instance: dict, validation_result: ValidationResult):
