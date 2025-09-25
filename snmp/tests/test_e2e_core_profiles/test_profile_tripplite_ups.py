@@ -33,6 +33,7 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'tl_ups_ident_id:2',
         'tl_ups_ident_serial_num:zombies acted',

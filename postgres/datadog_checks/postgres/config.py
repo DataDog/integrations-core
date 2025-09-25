@@ -91,6 +91,13 @@ class PostgresConfig:
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_wal_metrics = self._should_collect_wal_metrics(instance.get('collect_wal_metrics'))
         self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
+        # Locks idle in transaction metrics config
+        locks_idle_cfg = instance.get('locks_idle_in_transaction', {}) or {}
+        self.locks_idle_in_transaction = {
+            'enabled': is_affirmative(locks_idle_cfg.get('enabled', True)),
+            'collection_interval': int(locks_idle_cfg.get('collection_interval', 300)),
+            'max_rows': int(locks_idle_cfg.get('max_rows', 100)),
+        }
         self.data_directory = instance.get('data_directory', None)
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
         if is_affirmative(instance.get('collect_default_database', True)):
