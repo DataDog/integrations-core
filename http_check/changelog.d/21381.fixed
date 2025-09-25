@@ -1,0 +1,1 @@
+Fix instance tag normalization to preserve minuses (-) in tag values according to Datadog tag rules
