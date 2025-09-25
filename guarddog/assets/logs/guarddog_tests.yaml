@@ -1,0 +1,24 @@
+id: guarddog
+tests:
+  - sample: '{"enrichment_details":{"package_ecosystem":"npm","rules_triggered":["shady-links"]},"log":{"dependency":"event-stream","version":"4.0.1","result":{"issues":2,"errors":{},"results":{"release_zero":null,"deceptive_author":null,"direct_url_dependency":null,"npm_metadata_mismatch":null,"potentially_compromised_email_domain":null,"empty_information":"This
+      package has an empty description on
+      npm","unclaimed_maintainer_email_domain":null,"typosquatting":null,"bundled_binary":null,"npm-exec-base64":{},"npm-install-script":{},"npm-obfuscation":{},"npm-silent-process-execution":{},"shady-links":[{"location":"package/package.json:35","code":"  \"author\":
+      \"Dominic Tarr <dominic.tarr@gmail.com>
+      (http://bit.ly/dominictarr)\"\n","message":"This package contains an URL
+      to a domain with a suspicious
+      extension"}],"npm-steganography":{},"npm-exfiltrate-sensitive-data":{},"npm-dll-hijacking":{},"npm-serialize-environment":{}}},"path":"/tmp/tmpmm2wc69i/event-stream"},"timestamp":1758799611}'
+    result: null
+  - sample: "{\"enrichment_details\":{\"package_ecosystem\":\"pypi\",\"rules_trigge\
+      red\":[]},\"log\":{\"dependency\":\"urllib3\",\"version\":\"1.24.1\",\"re\
+      sult\":{\"issues\":0,\"errors\":{\"repository_integrity_mismatch\":\"fail\
+      ed to run rule repository_integrity_mismatch: [Errno 20] Not a directory:
+      '/tmp/tmpo8dtzk8y/sources/urllib3/LICENSE.txt'\"},\"results\":{\"deceptiv\
+      e_author\":null,\"typosquatting\":null,\"unclaimed_maintainer_email_domain\
+      \":null,\"empty_information\":null,\"release_zero\":null,\"potentially_co\
+      mpromised_email_domain\":null,\"single_python_file\":null,\"bundled_binary\
+      \":null,\"dll-hijacking\":{},\"shady-links\":{},\"download-executable\":{\
+      },\"obfuscation\":{},\"clipboard-access\":{},\"silent-process-execution\"\
+      :{},\"cmd-overwrite\":{},\"steganography\":{},\"code-execution\":{},\"exe\
+      c-base64\":{},\"exfiltrate-sensitive-data\":{}},\"path\":\"/tmp/tmpo8dtzk\
+      8y/urllib3\"}},\"timestamp\":1758799611}"
+    result: null
