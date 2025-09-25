@@ -27,13 +27,6 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.postgres.features import Feature, FeatureKey, FeatureNames
-from datadog_checks.postgres.statement_samples import (
-    DEFAULT_ACTIVITY_COLLECTION_INTERVAL as DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL,
-)
-from datadog_checks.postgres.statement_samples import (
-    DEFAULT_COLLECTION_INTERVAL as DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL,
-)
-from datadog_checks.postgres.statements import DEFAULT_COLLECTION_INTERVAL as DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -126,32 +119,32 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             "custom_queries": instance.get('custom_queries', []),
             "database_identifier": instance.get('database_identifier', {"template": "$resolved_hostname"}),
             "database_autodiscovery": {
-                **dict_defaults.instance_database_autodiscovery(),
+                **dict_defaults.instance_database_autodiscovery().model_dump(),
                 **(instance.get('database_autodiscovery', {})),
             },
             "query_metrics": {
-                **dict_defaults.instance_query_metrics(),
+                **dict_defaults.instance_query_metrics().model_dump(),
                 **{
                     "batch_max_content_size": init_config.get('metrics', {}).get('batch_max_content_size', 20_000_000),
                 },
                 **(instance.get('query_metrics', {})),
             },
             "query_samples": {
-                **dict_defaults.instance_query_samples(),
+                **dict_defaults.instance_query_samples().model_dump(),
                 **(instance.get('statement_samples', {})),  # Deprecated, use `query_samples` instead
                 **(instance.get('query_samples', {})),
             },
             "query_activity": {
-                **dict_defaults.instance_query_activity(),
+                **dict_defaults.instance_query_activity().model_dump(),
                 **(instance.get('query_activity', {})),
             },
             # Metadata collection
             "collect_settings": {
-                **dict_defaults.instance_collect_settings(),
+                **dict_defaults.instance_collect_settings().model_dump(),
                 **(instance.get('collect_settings') or {}),
             },
             "collect_schemas": {
-                **dict_defaults.instance_collect_schemas(),
+                **dict_defaults.instance_collect_schemas().model_dump(),
                 **(instance.get('collect_schemas', {})),
             },
             # Cloud
@@ -169,15 +162,15 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             },
             # Obfuscation and query logging
             "obfuscator_options": {
-                **dict_defaults.instance_obfuscator_options(),
+                **dict_defaults.instance_obfuscator_options().model_dump(),
                 **(instance.get('obfuscator_options', {})),
             },
             "collect_raw_query_statement": {
-                **dict_defaults.instance_collect_raw_query_statement(),
+                **dict_defaults.instance_collect_raw_query_statement().model_dump(),
                 **(instance.get('collect_raw_query_statement', {})),
             },
             "locks_idle_in_transaction": {
-                **dict_defaults.instance_locks_idle_in_transaction(),
+                **dict_defaults.instance_locks_idle_in_transaction().model_dump(),
                 **(instance.get('locks_idle_in_transaction', {})),
             },
             "propagate_agent_tags": should_propagate_agent_tags(instance=instance, init_config=init_config),
@@ -189,28 +182,6 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
 
     validation_result = ValidationResult()
 
-    # Check provided values and revert to defaults if they are invalid
-    if safefloat(args['query_metrics']['collection_interval']) <= 0:
-        args['query_metrics']['collection_interval'] = DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
-        validation_result.add_warning(
-            "query_metrics.collection_interval must be greater than 0, defaulting to "
-            f"{DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL} seconds."
-        )
-
-    if safefloat(args['query_samples']['collection_interval']) <= 0:
-        args['query_samples']['collection_interval'] = DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL
-        validation_result.add_warning(
-            "query_samples.collection_interval must be greater than 0, defaulting to "
-            f"{DEFAULT_QUERY_SAMPLES_COLLECTION_INTERVAL} seconds."
-        )
-
-    if safefloat(args['query_activity']['collection_interval']) <= 0:
-        args['query_activity']['collection_interval'] = DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL
-        validation_result.add_warning(
-            "query_activity.collection_interval must be greater than 0, defaulting to "
-            f"{DEFAULT_QUERY_ACTIVITY_COLLECTION_INTERVAL} seconds."
-        )
-
     # Generate and validate tags
     tags, tag_errors = build_tags(instance=instance, init_config=init_config, config=args)
     args['tags'] = tags
@@ -219,62 +190,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
         # but we don't raise an exception here, as we want to validate the rest of the configuration
         validation_result.add_error(error)
 
-    # AWS backfill and validation
-    if (
-        not instance.get("aws", {}).get("managed_authentication", None)
-        and args['aws'].get('region')
-        and not args['password']
-    ):
-        # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
-        args['aws']['managed_authentication']['enabled'] = True
-
-    if args['aws']['managed_authentication']['enabled'] and not args['aws']['region']:
-        validation_result.add_error('AWS region must be set when using AWS managed authentication')
-
-    # Azure backfill and validation
-    if not instance.get("azure", {}).get("managed_authentication", None) and (
-        args['azure'].get('managed_authentication', {}).get('client_id')
-        or instance.get('managed_identity', {}).get('client_id')
-    ):
-        # if managed_authentication is not set, we assume it is enabled if client_id is set
-        args['azure']['managed_authentication']['enabled'] = True
-
-    if instance.get("managed_identity"):
-        validation_result.add_warning(
-            'The `managed_identity` option is deprecated. Use `azure.managed_authentication` instead.'
-        )
-        args['azure']['managed_authentication'] = {
-            **args['azure']['managed_authentication'],
-            **instance.get('managed_identity', {}),
-        }
-
-    if args['azure'].get('managed_authentication', {}).get('enabled') and not args['azure'].get(
-        'managed_authentication', {}
-    ).get('client_id'):
-        validation_result.add_error('Azure client_id must be set when using Azure managed authentication')
-
-    if args.get('collect_default_database'):
-        args['ignore_databases'] = [d for d in args['ignore_databases'] if d != 'postgres']
-
-    # Validate config arguments for invalid or deprecated options
-    if args['ssl'] not in SSL_MODES:
-        warning = f"Invalid ssl option '{args['ssl']}', should be one of {SSL_MODES}. Defaulting to 'allow'."
-        validation_result.add_warning(warning)
-        args['ssl'] = "allow"
-
-    # Deprecated options
-    if instance.get('custom_metrics'):
-        validation_result.add_warning('The `custom_metrics` option is deprecated. Use `custom_queries` instead.')
-
-    if instance.get('deep_database_monitoring'):
-        validation_result.add_warning('The `deep_database_monitoring` option is deprecated. Use `dbm` instead.')
-
-    if instance.get('managed_authentication'):
-        validation_result.add_warning(
-            'The `managed_authentication` option is deprecated. Use `azure.managed_authentication` instead.'
-        )
-    if instance.get('statement_samples'):
-        validation_result.add_warning('The `statement_samples` option is deprecated. Use `query_samples` instead.')
+    # Apply various validations and fallbacks
+    apply_validated_defaults(args, validation_result)
+    apply_cloud_validations(args, instance, validation_result)
+    apply_deprecation_warnings(instance, validation_result)
 
     # Check user provided value because the default configuration would trigger this warning
     if instance.get('collect_default_database', False) and 'postgres' in instance.get('ignore_databases', []):
@@ -298,49 +217,14 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     # Instead we copy the behavior of the base check and instantiate this way
     config = InstanceConfig.model_validate(args, context={"configured_fields": instance_config_fields})
 
-    # Validate config after defaults have been applied
-    if not config.application_name.isascii():
-        validation_result.add_error(f"Application name can include only ASCII characters: {config.application_name}")
-
-    if config.relations and not (config.dbname or config.database_autodiscovery.enabled):
-        validation_result.add_error(
-            '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
-        )
-
-    if config.empty_default_hostname:
-        validation_result.add_warning(
-            'The `empty_default_hostname` option has no effect in the Postgres check. '
-            'Use the `exclude_hostname` option instead.'
-        )
+    validate_config(config, instance, validation_result)
 
     try:
         RelationsManager.validate_relations_config(list(config.relations))
     except ConfigurationError as e:
         validation_result.add_error(e)
 
-    # Features
-    validation_result.add_feature(
-        FeatureKey.RELATION_METRICS,
-        bool(config.relations),
-        "Relation metrics requires a value for `relations` in the configuration." if not config.relations else None,
-    )
-    validation_result.add_feature(FeatureKey.QUERY_ACTIVITY, config.query_activity.enabled and config.dbm)
-    validation_result.add_feature(FeatureKey.QUERY_SAMPLES, config.query_samples.enabled and config.dbm)
-    validation_result.add_feature(FeatureKey.QUERY_METRICS, config.query_metrics.enabled and config.dbm)
-    validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and config.dbm)
-    validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
-
-    # If instance config explicitly enables these features, we add a warning if dbm is not enabled
-    if instance.get('query_activity', {}).get('enabled') and not config.dbm:
-        validation_result.add_warning('The `query_activity` feature requires the `dbm` option to be enabled.')
-    if instance.get('query_samples', {}).get('enabled') and not config.dbm:
-        validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')
-    if instance.get('query_metrics', {}).get('enabled') and not config.dbm:
-        validation_result.add_warning('The `query_metrics` feature requires the `dbm` option to be enabled.')
-    if instance.get('collect_settings', {}).get('enabled') and not config.dbm:
-        validation_result.add_warning('The `collect_settings` feature requires the `dbm` option to be enabled.')
-    if instance.get('collect_schemas', {}).get('enabled') and not config.dbm:
-        validation_result.add_warning('The `collect_schemas` feature requires the `dbm` option to be enabled.')
+    apply_features(config, validation_result)
 
     return config, validation_result
 
@@ -383,6 +267,136 @@ def build_tags(instance: dict, init_config: dict, config: dict) -> Tuple[list[st
     tags.extend(["raw_query_statement:enabled"] if config.get('collect_raw_query_statement', {}).get("enabled") else [])
 
     return tags, errors
+
+
+def apply_validated_defaults(args: dict, validation_result: ValidationResult):
+    # Check provided values and revert to defaults if they are invalid
+
+    # Validate config arguments for invalid or deprecated options
+    if args['ssl'] not in SSL_MODES:
+        warning = f"Invalid ssl option '{args['ssl']}', should be one of {SSL_MODES}. Defaulting to 'allow'."
+        validation_result.add_warning(warning)
+        args['ssl'] = "allow"
+
+    if safefloat(args['query_metrics']['collection_interval']) <= 0:
+        default_value = dict_defaults.instance_query_metrics().collection_interval
+        args['query_metrics']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"query_metrics.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    if safefloat(args['query_samples']['collection_interval']) <= 0:
+        default_value = dict_defaults.instance_query_samples().collection_interval
+        args['query_samples']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"query_samples.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    if safefloat(args['query_activity']['collection_interval']) <= 0:
+        default_value = dict_defaults.instance_query_activity().collection_interval
+        args['query_activity']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"query_activity.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+
+def apply_deprecation_warnings(instance: dict, validation_result: ValidationResult):
+    # Simple deprecated options
+    deprecations = [
+        ['custom_metrics', 'custom_queries'],
+        ['deep_database_monitoring', 'dbm'],
+        ['managed_authentication', 'azure.managed_authentication'],
+        ['statement_samples', 'query_samples'],
+        ['collect_default_database', 'postgres'],
+    ]
+
+    for deprecation in deprecations:
+        if instance.get(deprecation[0]):
+            validation_result.add_warning(
+                f'The `{deprecation[0]}` option is deprecated. Use `{deprecation[1]}` instead.'
+            )
+
+
+def apply_cloud_validations(args: dict, instance: dict, validation_result: ValidationResult):
+    # AWS backfill and validation
+    if (
+        not instance.get("aws", {}).get("managed_authentication", None)
+        and args['aws'].get('region')
+        and not args['password']
+    ):
+        # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
+        args['aws']['managed_authentication']['enabled'] = True
+
+    if args['aws']['managed_authentication']['enabled'] and not args['aws']['region']:
+        validation_result.add_error('AWS region must be set when using AWS managed authentication')
+
+    # Azure backfill and validation
+    if not instance.get("azure", {}).get("managed_authentication", None) and (
+        args['azure'].get('managed_authentication', {}).get('client_id')
+        or instance.get('managed_identity', {}).get('client_id')
+    ):
+        # if managed_authentication is not set, we assume it is enabled if client_id is set
+        args['azure']['managed_authentication']['enabled'] = True
+
+    if instance.get("managed_identity"):
+        validation_result.add_warning(
+            'The `managed_identity` option is deprecated. Use `azure.managed_authentication` instead.'
+        )
+        args['azure']['managed_authentication'] = {
+            **args['azure']['managed_authentication'],
+            **instance.get('managed_identity', {}),
+        }
+
+    if args['azure'].get('managed_authentication', {}).get('enabled') and not args['azure'].get(
+        'managed_authentication', {}
+    ).get('client_id'):
+        validation_result.add_error('Azure client_id must be set when using Azure managed authentication')
+
+    if args.get('collect_default_database'):
+        args['ignore_databases'] = [d for d in args['ignore_databases'] if d != 'postgres']
+
+
+def validate_config(config: InstanceConfig, instance: dict, validation_result: ValidationResult):
+    # Validate config after defaults and other validations have been applied
+    if not config.application_name.isascii():
+        validation_result.add_error(f"Application name can include only ASCII characters: {config.application_name}")
+
+    if config.relations and not (config.dbname or config.database_autodiscovery.enabled):
+        validation_result.add_error(
+            '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
+        )
+
+    if config.empty_default_hostname:
+        validation_result.add_warning(
+            'The `empty_default_hostname` option has no effect in the Postgres check. '
+            'Use the `exclude_hostname` option instead.'
+        )
+
+    # If instance config explicitly enables these features, we add a warning if dbm is not enabled
+    if instance.get('query_activity', {}).get('enabled') and not config.dbm:
+        validation_result.add_warning('The `query_activity` feature requires the `dbm` option to be enabled.')
+    if instance.get('query_samples', {}).get('enabled') and not config.dbm:
+        validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')
+    if instance.get('query_metrics', {}).get('enabled') and not config.dbm:
+        validation_result.add_warning('The `query_metrics` feature requires the `dbm` option to be enabled.')
+    if instance.get('collect_settings', {}).get('enabled') and not config.dbm:
+        validation_result.add_warning('The `collect_settings` feature requires the `dbm` option to be enabled.')
+    if instance.get('collect_schemas', {}).get('enabled') and not config.dbm:
+        validation_result.add_warning('The `collect_schemas` feature requires the `dbm` option to be enabled.')
+
+
+def apply_features(config: InstanceConfig, validation_result: ValidationResult):
+    # Features
+    validation_result.add_feature(
+        FeatureKey.RELATION_METRICS,
+        bool(config.relations),
+        "Relation metrics requires a value for `relations` in the configuration." if not config.relations else None,
+    )
+    validation_result.add_feature(FeatureKey.QUERY_ACTIVITY, config.query_activity.enabled and config.dbm)
+    validation_result.add_feature(FeatureKey.QUERY_SAMPLES, config.query_samples.enabled and config.dbm)
+    validation_result.add_feature(FeatureKey.QUERY_METRICS, config.query_metrics.enabled and config.dbm)
+    validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and config.dbm)
+    validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
 
 
 METRIC_TYPES = {

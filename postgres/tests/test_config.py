@@ -9,12 +9,12 @@ from unittest.mock import MagicMock
 import pytest
 
 from datadog_checks.postgres.config import (
-    DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL,
     FeatureKey,
     ValidationResult,
     build_config,
     sanitize,
 )
+from datadog_checks.postgres.config_models import dict_defaults
 from datadog_checks.postgres.config_models.instance import Relations
 
 
@@ -254,7 +254,7 @@ def test_invalid_numbers(mock_check, minimal_instance):
     mock_check.init_config = {}
     config, result = build_config(check=mock_check)
     assert any("query_metrics.collection_interval must be greater than 0" in w for w in result.warnings)
-    assert config.query_metrics.collection_interval == DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
+    assert config.query_metrics.collection_interval == dict_defaults.instance_query_metrics().collection_interval
 
 
 def test_relations_validation(mock_check, minimal_instance):
