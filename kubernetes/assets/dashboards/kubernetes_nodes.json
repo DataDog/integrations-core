@@ -372,13 +372,19 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 10,
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
                                                 "order": "desc"
                                             }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 }
                             ],
                             "custom_links": []
@@ -1318,13 +1324,19 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 10,
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
                                                 "order": "desc"
                                             }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 }
                             ],
                             "custom_links": []
@@ -1390,7 +1402,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 0,
+                "y": 25,
                 "width": 12,
                 "height": 5,
                 "is_column_break": true
@@ -1411,8 +1423,42 @@
                             "title": "Events per node",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "event_timeline",
-                            "query": "source:kubernetes $host $cluster"
+                            "show_legend": false,
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "events",
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:kubernetes $host $cluster"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 25,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "semantic"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
                         },
                         "layout": {
                             "x": 0,
@@ -1484,13 +1530,19 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 25,
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
                                                 "order": "asc"
                                             }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 }
                             ],
                             "custom_links": []
@@ -1526,7 +1578,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 5,
+                "y": 30,
                 "width": 12,
                 "height": 6
             }
@@ -1650,14 +1702,20 @@
                                             "aggregator": "avg"
                                         }
                                     ],
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "asc"
+                                            }
+                                        ]
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1",
-                                            "alias": "CPU Available",
-                                            "limit": {
-                                                "count": 25,
-                                                "order": "asc"
-                                            }
+                                            "alias": "CPU Available"
                                         }
                                     ]
                                 }
@@ -1689,14 +1747,20 @@
                                             "aggregator": "avg"
                                         }
                                     ],
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "asc"
+                                            }
+                                        ]
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1",
-                                            "alias": "Pods Available",
-                                            "limit": {
-                                                "count": 25,
-                                                "order": "asc"
-                                            }
+                                            "alias": "Pods Available"
                                         }
                                     ]
                                 }
@@ -1728,14 +1792,20 @@
                                             "aggregator": "avg"
                                         }
                                     ],
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "asc"
+                                            }
+                                        ]
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1",
-                                            "alias": "Memory Available",
-                                            "limit": {
-                                                "count": 25,
-                                                "order": "asc"
-                                            }
+                                            "alias": "Memory Available"
                                         }
                                     ]
                                 }
@@ -1753,7 +1823,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 11,
+                "y": 36,
                 "width": 12,
                 "height": 7
             }
@@ -1943,7 +2013,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 18,
+                "y": 43,
                 "width": 12,
                 "height": 5
             }

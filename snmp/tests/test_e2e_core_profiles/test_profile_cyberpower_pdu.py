@@ -32,6 +32,7 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'e_pdu_ident_model_number:their oxen forward kept driving',
         'e_pdu_ident_name:zombies oxen their oxen Jaded driving driving kept acted',

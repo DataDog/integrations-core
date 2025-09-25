@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 35.2.0 / 2025-08-20
+
+***Added***:
+
+* Add option to specify container to check logs from and to wait for health when running docker compose up ([#21104](https://github.com/DataDog/integrations-core/pull/21104))
+
+***Fixed***:
+
+* Updating check_only to not have support_type = 'partner' ([#21109](https://github.com/DataDog/integrations-core/pull/21109))
+
+## 35.1.4 / 2025-08-07
+
+***Fixed***:
+
+* Improve descriptions and examples in configuration templates ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Fix codeowners validation to use proper team ([#20974](https://github.com/DataDog/integrations-core/pull/20974))
+
 ## 35.1.3 / 2025-07-30
 
 ***Fixed***:

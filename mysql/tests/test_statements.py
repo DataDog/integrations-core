@@ -127,16 +127,18 @@ def test_statement_metrics(
 
     with (
         mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as m_obfuscate_sql,
-        mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora,
         mock.patch.object(
             mysql_check, '_get_aurora_replication_role', passthrough=True
         ) as m_get_aurora_replication_role,
+        mock.patch(
+            'datadog_checks.mysql.global_variables.GlobalVariables.is_aurora', new_callable=mock.PropertyMock
+        ) as m_is_aurora,
     ):
         m_obfuscate_sql.side_effect = _obfuscate_sql
-        m_get_is_aurora.return_value = False
         m_get_aurora_replication_role.return_value = None
+        m_is_aurora.return_value = False
         if aurora_replication_role:
-            m_get_is_aurora.return_value = True
+            m_is_aurora.return_value = True
             m_get_aurora_replication_role.return_value = aurora_replication_role
 
         # Run a query
@@ -433,15 +435,12 @@ def test_statement_samples_collect(
         expected_tags.add("replication_role:" + aurora_replication_role)
 
     with (
-        mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora,
         mock.patch.object(
             mysql_check, '_get_aurora_replication_role', passthrough=True
         ) as m_get_aurora_replication_role,
     ):
-        m_get_is_aurora.return_value = False
         m_get_aurora_replication_role.return_value = None
         if aurora_replication_role:
-            m_get_is_aurora.return_value = True
             m_get_aurora_replication_role.return_value = aurora_replication_role
 
         logger.debug("running first check")
@@ -581,7 +580,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     # Fake the performance schema being disabled to validate the reporting of a warning when this condition occurs
-    mysql_check._performance_schema_enabled = False
+    mysql_check.global_variables._variables = {'performance_schema': 'OFF'}
 
     # Run this twice to confirm that duplicate warnings aren't added more than once
     mysql_check._statement_metrics.collect_per_statement_metrics()
@@ -600,7 +599,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     # as we faked the performance schema being disabled, running the check should restore the flag to True
     # this is to "simulate" enabling performance schema without restarting the agent
     # as the next check run will update the flag
-    assert mysql_check.performance_schema_enabled is True
+    assert mysql_check.global_variables.performance_schema_enabled is True
 
     # clear the warnings and rerun collect_per_statement_metrics
     mysql_check.warnings.clear()
@@ -879,6 +878,7 @@ def _expected_dbm_instance_tags(dbm_instance, check):
     _tags = dbm_instance.get('tags', ()) + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
@@ -896,6 +896,7 @@ def _expected_dbm_job_err_tags(dbm_instance, check):
     _tags = dbm_instance['tags'] + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',

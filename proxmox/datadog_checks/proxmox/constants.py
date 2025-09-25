@@ -63,3 +63,7 @@ EVENT_TYPE_TO_TITLE = {
     'aptupdate': 'Update package database',
     'vncproxy': 'Console started',
 }
+
+ALLOWED_FILTER_PROPERTIES = ['resource_name']
+ADDITIONAL_FILTER_PROPERTIES = ['hostname']
+ALLOWED_FILTER_TYPES = ['include', 'exclude']

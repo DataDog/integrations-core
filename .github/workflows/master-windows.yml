@@ -1,0 +1,106 @@
+name: Master Windows
+# This is a temporary fix to avoid hitting the max 256 jobs per workflow limit
+# We will remove this once we have a better solution
+
+on:
+  push:
+    branches:
+    - master
+    paths:
+      # List of files/paths that should trigger the run. The intention is to avoid running all tests if the commit only includes changes on assets or README
+    - '*/datadog_checks/**'
+    - '*/tests/**'
+    - 'ddev'
+    - 'datadog_check_base'
+    - 'datadog_checks_dev'
+    # Contains overrides for testing
+    - '.ddev'
+    # Want to ensure any change in workflows is validated
+    - '.github/workflows/**'
+    # Test matrices and dependencies
+    - '*/hatch.toml'
+    - '*/pyproject.toml'
+    # Some integrations might use this file to validate metrics emission
+    - '*/metadata.csv'
+    # In case some linting formatting config has changed
+    - 'pyproject.toml'
+
+jobs:
+  cache:
+    uses: ./.github/workflows/cache-shared-deps.yml
+
+  test:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-all-windows.yml
+    with:
+      repo: core
+
+      # Options
+      # Because -m starts with a dash,
+      # click (the library used to build the CLI) will
+      # interpret it as an option, not as an argument.
+      # To avoid this, using -- syntax,
+      # which tells the command that everything following it
+      # should be treated as positional arguments, not options
+      pytest-args: '-m "not flaky"'
+    secrets: inherit
+
+    permissions:
+       # needed for compute-matrix in test-target.yml
+       contents: read
+
+  publish-test-results:
+
+    needs:
+    - test
+
+    if: success() || failure()
+    concurrency:
+      group: test-results
+
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: write
+
+    uses: ./.github/workflows/test-results-master.yml
+    secrets: inherit
+
+  upload-coverage:
+    needs:
+    - test
+    if: >
+      !github.event.repository.private &&
+      (success() || failure())
+    runs-on: ubuntu-latest
+    permissions:
+      # needed for codecov, allows the action to get a JWT signed by Github
+      id-token: write
+      contents: read
+
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+    - name: Download all coverage artifacts
+      uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      with:
+        pattern: coverage-*
+        path: coverage-reports
+        merge-multiple: false
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@15559ed290fa727036809b67ab0f646ffa6c5158
+      with:
+        use_oidc: true
+        directory: coverage-reports
+        fail_ci_if_error: false
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

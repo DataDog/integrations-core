@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "73f0a2e1-f02d-4ad5-8591-9554197a8a6d",
   "app_id": "workato",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -54,9 +55,11 @@
     },
     "monitors": {
       "Critical recipe is offline" : "assets/monitors/critical_recipe_offline.json",
+      "Critical recipe is offline with cause unknown" : "assets/monitors/critical_recipe_offline_cause_unknown.json",
       "Connection with active recipes is down" : "assets/monitors/connection_with_active_recipes.json",
       "Connection is lost" : "assets/monitors/connection_lost.json",
       "Connection auth failure" : "assets/monitors/connection_auth_failure.json",
+      "High percentage of recipe job failures" : "assets/monitors/high_percentage_of_recipe_job_failures.json",
       "Recipe exceeds quota" : "assets/monitors/recipe_exceeds_quota.json"
     }
   },

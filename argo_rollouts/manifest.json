@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "28d531ac-954c-4c5a-8769-589589f793e0",
   "app_id": "argo-rollouts",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
