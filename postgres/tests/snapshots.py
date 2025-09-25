@@ -232,7 +232,7 @@ class CursorObserver(Observer):
             description = self.target.description
             self.snapshot.append(description)
             return description
-        columns = [[c['name']] for c in self.replay()]
+        columns = [[c['name'] if isinstance(c, dict) else c] for c in self.replay()]
         return columns
 
     class Pgresult:
