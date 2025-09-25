@@ -38,7 +38,7 @@ def test_validate_configurations_with_empty_dependency_file_path(instance):
     empty_path = ""
     package_ecosystem = "pypi"
     err_message = (
-        "Dependency File Path is required for package ecosystem: " f"{package_ecosystem} to run the guarddog scan"
+        f"Dependency File Path is required for package ecosystem: {package_ecosystem} to run the guarddog scan"
     )
     with pytest.raises(ConfigurationError, match=err_message):
         check.package_ecosystem = package_ecosystem
