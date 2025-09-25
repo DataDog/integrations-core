@@ -1,1 +1,65 @@
-[]
+[
+    {
+        "agent_version": "7.60.0",
+        "integration": "active_directory",
+        "check": "active_directory.service.ntds",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["host"],
+        "name": "NT Directory Services Status",
+        "description": "Returns `OK` if NTDS service is running, `CRITICAL` if stopped, `UNKNOWN` if status cannot be determined."
+    },
+    {
+        "agent_version": "7.60.0",
+        "integration": "active_directory",
+        "check": "active_directory.service.dns",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["host"],
+        "name": "DNS Server Status",
+        "description": "Returns `OK` if DNS service is running, `CRITICAL` if stopped, `UNKNOWN` if status cannot be determined."
+    },
+    {
+        "agent_version": "7.60.0",
+        "integration": "active_directory",
+        "check": "active_directory.service.kdc",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["host"],
+        "name": "Key Distribution Center Status",
+        "description": "Returns `OK` if KDC service is running, `CRITICAL` if stopped, `UNKNOWN` if status cannot be determined."
+    },
+    {
+        "agent_version": "7.60.0",
+        "integration": "active_directory",
+        "check": "active_directory.service.netlogon",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["host"],
+        "name": "Net Logon Service Status",
+        "description": "Returns `OK` if Netlogon service is running, `CRITICAL` if stopped, `UNKNOWN` if status cannot be determined."
+    },
+    {
+        "agent_version": "7.60.0",
+        "integration": "active_directory",
+        "check": "active_directory.service.w32time",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["host"],
+        "name": "Windows Time Service Status",
+        "description": "Returns `OK` if W32Time service is running, `CRITICAL` if stopped, `UNKNOWN` if status cannot be determined."
+    },
+    {
+        "agent_version": "7.60.0",
+        "integration": "active_directory",
+        "check": "active_directory.service.dfsr",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["host"],
+        "name": "DFS Replication Service Status",
+        "description": "Returns `OK` if DFSR service is running, `CRITICAL` if stopped, `UNKNOWN` if status cannot be determined."
+    },
+    {
+        "agent_version": "7.60.0",
+        "integration": "active_directory",
+        "check": "active_directory.service.adws",
+        "statuses": ["ok", "critical", "unknown"],
+        "groups": ["host"],
+        "name": "AD Web Services Status",
+        "description": "Returns `OK` if ADWS service is running, `CRITICAL` if stopped, `UNKNOWN` if status cannot be determined."
+    }
+]
