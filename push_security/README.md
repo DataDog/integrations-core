@@ -30,7 +30,8 @@ Configure the Datadog endpoint to forward Push Security events as logs to Datado
 ## Data Collected
 
 ### Logs
-The Push Security integration collects Activity, Audit, Controls, Detections and Entities Events.
+
+The Push Security integration collects activity, audit, control, detection and entity events.
 
 ### Metrics
 
