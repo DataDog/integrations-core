@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict
 
 import requests
 import squarify
-from datadog import api, initialize
 from typing_extensions import NotRequired
 
 from ddev.cli.application import Application
@@ -947,6 +946,13 @@ def send_metrics_to_dd(
     mode: Literal["status", "diff"],
     commits: list[str] | None = None,
 ) -> None:
+    from datadog_api_client import ApiClient, Configuration
+    from datadog_api_client.v2.api.metrics_api import MetricsApi
+    from datadog_api_client.v2.model.metric_intake_type import MetricIntakeType
+    from datadog_api_client.v2.model.metric_payload import MetricPayload
+    from datadog_api_client.v2.model.metric_point import MetricPoint
+    from datadog_api_client.v2.model.metric_series import MetricSeries
+
     metric_name = "datadog.agent_integrations"
     size_type = "compressed" if compressed else "uncompressed"
     print("Getting config file info for org: ", org)
@@ -970,14 +976,15 @@ def send_metrics_to_dd(
     n_integrations: dict[tuple[str, str], int] = {}
     n_dependencies: dict[tuple[str, str], int] = {}
 
+    gauge_type = MetricIntakeType.GAUGE
+
     for item in modules:
         change_type = item.get('Change_Type', '')
-        metrics.append(
-            {
-                "metric": f"{metric_name}.size_{mode}",
-                "type": "gauge",
-                "points": [(timestamp, item["Size_Bytes"])],
-                "tags": [
+        metrics.append(MetricSeries(
+                metric=f"{metric_name}.size_{mode}",
+                type=gauge_type,
+                points=[MetricPoint(timestamp=timestamp, value=item["Size_Bytes"])],
+                tags=[
                     f"module_name:{item['Name']}",
                     f"module_type:{item['Type']}",
                     f"name_type:{item['Type']}({item['Name']})",
@@ -992,7 +999,7 @@ def send_metrics_to_dd(
                     f"commit_message:{message}",
                     f"change_type:{change_type}",
                 ],
-            }
+            )
         )
         key_count = (item['Platform'], item['Python_Version'])
         if key_count not in n_integrations:
@@ -1007,42 +1014,47 @@ def send_metrics_to_dd(
     if mode == "status":
         for (platform, py_version), count in n_integrations.items():
             n_integrations_metrics.append(
-                {
-                    "metric": f"{metric_name}.integration_count",
-                    "type": "gauge",
-                    "points": [(timestamp, count)],
-                    "tags": [
+                MetricSeries(
+                    metric=f"{metric_name}.integration_count",
+                    type=gauge_type,
+                    points=[MetricPoint(timestamp=timestamp, value=count)],
+                    tags=[
                         f"platform:{platform}",
                         f"python_version:{py_version}",
                         "team:agent-integrations",
                         f"metrics_version:{METRIC_VERSION}",
                     ],
-                }
+                )
             )
         for (platform, py_version), count in n_dependencies.items():
             n_dependencies_metrics.append(
-                {
-                    "metric": f"{metric_name}.dependency_count",
-                    "type": "gauge",
-                    "points": [(timestamp, count)],
-                    "tags": [
+                MetricSeries(
+                    metric=f"{metric_name}.dependency_count",
+                    type=gauge_type,
+                    points=[MetricPoint(timestamp=timestamp, value=count)],
+                    tags=[
                         f"platform:{platform}",
                         f"python_version:{py_version}",
                         "team:agent-integrations",
                         f"metrics_version:{METRIC_VERSION}",
                     ],
-                }
+                )
             )
 
-    initialize(
-        api_key=config_file_info["api_key"],
-        api_host=f"https://api.{config_file_info['site']}",
-    )
+    configuration = Configuration()
+    configuration.request_timeout = (5, 5)
 
-    api.Metric.send(metrics=metrics)
-    if mode == "status":
-        api.Metric.send(metrics=n_integrations_metrics)
-        api.Metric.send(metrics=n_dependencies_metrics)
+    configuration.api_key = {
+        "apiKeyAuth": config_file_info["api_key"],
+    }
+    configuration.server_variables["site"] = config_file_info["site"]
+
+    with ApiClient(configuration) as api_client:
+        api_instance = MetricsApi(api_client)
+        api_instance.submit_metrics(body=MetricPayload(series=metrics))
+        if mode == "status":
+            api_instance.submit_metrics(body=MetricPayload(series=n_integrations_metrics))
+            api_instance.submit_metrics(body=MetricPayload(series=n_dependencies_metrics))
     print("Metrics sent to Datadog")
 
 def is_everything_committed() -> bool:
