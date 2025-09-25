@@ -431,20 +431,19 @@ class PostgresMetadata(DBMAsyncJob):
                                     tables_buffer = []
                                     buffer_column_count = 0
 
-                            # Send the payload if there are any remaining tables or if it is the very last iteration
-                            # to make sure we don't miss the completion event
+                            # Send the payload in the last iteration to 1) capture empty schemas and 2) ensure we get
+                            # a final payload for tombstoning
                             is_final_payload = di == len(schema_metadata) - 1 and si == len(database["schemas"]) - 1
-                            if len(tables_buffer) > 0 or is_final_payload:
-                                payloads_count += 1
-                                self._flush_schema(
-                                    # For very last payload send the payloads count to mark the collection as complete
-                                    {**base_event, "collection_payloads_count": payloads_count}
-                                    if is_final_payload
-                                    else base_event,
-                                    database,
-                                    schema,
-                                    tables_buffer,
-                                )
+                            payloads_count += 1
+                            self._flush_schema(
+                                # For very last payload send the payloads count to mark the collection as complete
+                                {**base_event, "collection_payloads_count": payloads_count}
+                                if is_final_payload
+                                else base_event,
+                                database,
+                                schema,
+                                tables_buffer,
+                            )
                             total_tables += len(tables_buffer)
         except Exception as e:
             self._log.error("Error collecting schema metadata: %s", e)
