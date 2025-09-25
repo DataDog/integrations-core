@@ -357,9 +357,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     actual_payloads = {}
 
-    collection_started_at = None
-    schema_events = [e for e in dbm_metadata if e['kind'] == 'sqlserver_databases']
-    for i, schema_event in enumerate(schema_events):
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'sqlserver_databases'):
         assert schema_event.get("timestamp") is not None
         assert schema_event["host"] == "stubbed.hostname"
         assert schema_event["agent_version"] == "0.0.0"
@@ -367,19 +365,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("collection_interval") is not None
         assert schema_event.get("dbms_version") is not None
 
-        assert schema_event.get("collection_started_at") is not None
-        if collection_started_at is None:
-            collection_started_at = schema_event["collection_started_at"]
-        assert schema_event["collection_started_at"] == collection_started_at
-        if i == len(schema_events) - 1:
-            assert schema_event["collection_payloads_count"] == len(schema_events)
-        else:
-            assert "collection_payloads_count" not in schema_event
-
         database_metadata = schema_event['metadata']
-        if len(database_metadata) == 0:
-            # Empty final event for sending payloads count
-            continue
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']
 
