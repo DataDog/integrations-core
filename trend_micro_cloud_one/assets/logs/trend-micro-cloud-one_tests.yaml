@@ -1,0 +1,565 @@
+id: trend-micro-cloud-one
+tests:
+  -
+    sample: "<134>2025-08-14T07:11:22Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|20|cat=Firewall name=New Firewall Rule_3_CDS desc=New Firewall Rule_3_CDS sev=1 cn1=331 cn1Label=Host ID dvchost=win-edr.edr.local TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 act=Log dstMAC=A8:46:9D:23:D2:7A srcMAC=00:50:56:81:C2:07 TrendMicroDsFrameType=IP src=10.0.0.0 dst=10.0.0.1 out=244 proto=ICMP srcPort=0 dstPort=0 cs4=3 3 cs4Label=ICMP cnt=1"
+    result:
+      custom:
+        TrendMicroDsFrameType: "IP"
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        action: "Log"
+        category: "Firewall"
+        cn1Label: "Host ID"
+        cnt: 1
+        cs4Label: "ICMP"
+        desc: "New Firewall Rule_3_CDS"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3982"
+        dstMAC: "A8:46:9D:23:D2:7A"
+        dvchost: "win-edr.edr.local"
+        evt:
+          name: "New Firewall Rule_3_CDS"
+        host_id: 331
+        icmp_type_code: "3 3"
+        network:
+          bytes_written: 244
+          client:
+            geoip: {}
+            ip: "10.0.0.0"
+            port: 0
+          destination:
+            geoip: {}
+            ip: "10.0.0.1"
+            port: 0
+        proto: "ICMP"
+        severity: 1
+        signature_id: "20"
+        srcMAC: "00:50:56:81:C2:07"
+        status: "info"
+        time: 1755155482000
+      message: "<134>2025-08-14T07:11:22Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|20|cat=Firewall name=New Firewall Rule_3_CDS desc=New Firewall Rule_3_CDS sev=1 cn1=331 cn1Label=Host ID dvchost=win-edr.edr.local TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 act=Log dstMAC=A8:46:9D:23:D2:7A srcMAC=00:50:56:81:C2:07 TrendMicroDsFrameType=IP src=10.0.0.0 dst=10.0.0.1 out=244 proto=ICMP srcPort=0 dstPort=0 cs4=3 3 cs4Label=ICMP cnt=1"
+      status: "info"
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1755155482000
+  -
+    sample: "<134>2025-08-14T07:26:45Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|20|cat=Firewall  name=New Firewall Rule_3_CDS  desc=New Firewall Rule_3_CDS  sev=1  cn1=331  cn1Label=Host ID  dvchost=win-edr.edr.local  TrendMicroDsTenant=279555847073  TrendMicroDsTenantId=146271  act=Log  dstMAC=A8:46:9D:23:D2:7A  srcMAC=00:50:56:81:C2:07  TrendMicroDsFrameType=IP  src=10.0.0.0  dst=10.0.0.1  out=66  cs3=DF 0  cs3Label=Fragmentation Bits  proto=TCP  srcPort=50119  dstPort=443  cs2=CWR ECE SYN  cs2Label=TCP Flags  cnt=1"
+    result:
+      custom:
+        TrendMicroDsFrameType: "IP"
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        action: "Log"
+        category: "Firewall"
+        cn1Label: "Host ID"
+        cnt: 1
+        cs2Label: "TCP Flags"
+        cs3Label: "Fragmentation Bits"
+        desc: "New Firewall Rule_3_CDS"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3982"
+        dstMAC: "A8:46:9D:23:D2:7A"
+        dvchost: "win-edr.edr.local"
+        evt:
+          name: "New Firewall Rule_3_CDS"
+        fragmentation_bits: "DF 0"
+        host_id: 331
+        network:
+          bytes_written: 66
+          client:
+            geoip: {}
+            ip: "10.0.0.0"
+            port: 50119
+          destination:
+            geoip: {}
+            ip: "10.0.0.1"
+            port: 443
+        proto: "TCP"
+        severity: 1
+        signature_id: "20"
+        srcMAC: "00:50:56:81:C2:07"
+        status: "info"
+        tcp_flags: "CWR ECE SYN"
+        time: 1755156405000
+      message: "<134>2025-08-14T07:26:45Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|20|cat=Firewall  name=New Firewall Rule_3_CDS  desc=New Firewall Rule_3_CDS  sev=1  cn1=331  cn1Label=Host ID  dvchost=win-edr.edr.local  TrendMicroDsTenant=279555847073  TrendMicroDsTenantId=146271  act=Log  dstMAC=A8:46:9D:23:D2:7A  srcMAC=00:50:56:81:C2:07  TrendMicroDsFrameType=IP  src=10.0.0.0  dst=10.0.0.1  out=66  cs3=DF 0  cs3Label=Fragmentation Bits  proto=TCP  srcPort=50119  dstPort=443  cs2=CWR ECE SYN  cs2Label=TCP Flags  cnt=1"
+      status: "info"
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1755156405000
+  -
+    sample: "<134>2025-08-14T07:26:45Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|20|cat=Firewall  name=New Firewall Rule_3_CDS  desc=New Firewall Rule_3_CDS  sev=1  cn1=331  cn1Label=Host ID  dvchost=win-edr.edr.local  TrendMicroDsTenant=279555847073  TrendMicroDsTenantId=146271  act=Log  dstMAC=A8:46:9D:23:D2:7A  srcMAC=00:50:56:81:C2:07  TrendMicroDsFrameType=IP  src=10.0.0.0  dst=10.0.0.1  out=66  cs3=DF 0  cs3Label=Fragmentation Bits  proto=TCP  srcPort=50119  dstPort=443  cs2=CWR ECE SYN  cs2Label=TCP Flags  cnt=1  TrendMicroDsUserName=test"
+    result:
+      custom:
+        TrendMicroDsFrameType: "IP"
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        action: "Log"
+        category: "Firewall"
+        cn1Label: "Host ID"
+        cnt: 1
+        cs2Label: "TCP Flags"
+        cs3Label: "Fragmentation Bits"
+        desc: "New Firewall Rule_3_CDS"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3982"
+        dstMAC: "A8:46:9D:23:D2:7A"
+        dvchost: "win-edr.edr.local"
+        evt:
+          name: "New Firewall Rule_3_CDS"
+        fragmentation_bits: "DF 0"
+        host_id: 331
+        network:
+          bytes_written: 66
+          client:
+            geoip: {}
+            ip: "10.0.0.0"
+            port: 50119
+          destination:
+            geoip: {}
+            ip: "10.0.0.1"
+            port: 443
+        proto: "TCP"
+        severity: 1
+        signature_id: "20"
+        srcMAC: "00:50:56:81:C2:07"
+        status: "info"
+        tcp_flags: "CWR ECE SYN"
+        time: 1755156405000
+        usr:
+          name: "test"
+      message: "<134>2025-08-14T07:26:45Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|20|cat=Firewall  name=New Firewall Rule_3_CDS  desc=New Firewall Rule_3_CDS  sev=1  cn1=331  cn1Label=Host ID  dvchost=win-edr.edr.local  TrendMicroDsTenant=279555847073  TrendMicroDsTenantId=146271  act=Log  dstMAC=A8:46:9D:23:D2:7A  srcMAC=00:50:56:81:C2:07  TrendMicroDsFrameType=IP  src=10.0.0.0  dst=10.0.0.1  out=66  cs3=DF 0  cs3Label=Fragmentation Bits  proto=TCP  srcPort=50119  dstPort=443  cs2=CWR ECE SYN  cs2Label=TCP Flags  cnt=1  TrendMicroDsUserName=test"
+      status: "info"
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1755156405000
+  -
+    sample: "<134>2025-08-14T07:34:48Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Manager|50.0.3982|1909|cat=System name=AWS Account Synchronization Finished desc=Description Omitted sev=3 src=10.0.0.0 usrName=System target=125832268643 - 125832268643 msg=Description Omitted TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271"
+    result:
+      custom:
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        category: "System"
+        desc: "Description Omitted"
+        device_product: "Deep Security Manager"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3982"
+        evt:
+          name: "AWS Account Synchronization Finished"
+        msg: "Description Omitted"
+        network:
+          client:
+            geoip: {}
+            ip: "10.0.0.0"
+        severity: 3
+        signature_id: "1909"
+        status: "warning"
+        target: "125832268643 - 125832268643"
+        time: 1755156888000
+        usr:
+          name: "System"
+      message: "<134>2025-08-14T07:34:48Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Manager|50.0.3982|1909|cat=System name=AWS Account Synchronization Finished desc=Description Omitted sev=3 src=10.0.0.0 usrName=System target=125832268643 - 125832268643 msg=Description Omitted TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271"
+      status: "warn"
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1755156888000
+  -
+    sample: "<134>2025-08-12T12:35:06Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3970|4000010|cat=Anti-Malware name=Joke.Win32.LauncherRepeat.A desc=Joke.Win32.LauncherRepeat.A sev=6 cn1=102 cn1Label=Host ID dvchost=admin TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 cs3=C:\\\\Users\\\\crest\\\\Downloads\\\\The-MALWARE-Repo-master_2\\\\The-MALWARE-Repo-master\\\\The-MALWARE-Repo-master\\\\Joke\\\\Launcher.exe cs3Label=Infected Resource cs4=10 cs4Label=Resource Type cs5=0 cs5Label=Risk Level act=Quarantine result=Quarantined msg=Realtime"
+    result:
+      custom:
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        action: "Quarantine"
+        category: "Anti-Malware"
+        cn1Label: "Host ID"
+        cs3Label: "Infected Resource"
+        cs4Label: "Resource Type"
+        cs5Label: "Risk Level"
+        desc: "Joke.Win32.LauncherRepeat.A"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3970"
+        dvchost: "admin"
+        evt:
+          name: "Joke.Win32.LauncherRepeat.A"
+        host_id: 102
+        infected_resource: "C:\\\\Users\\\\crest\\\\Downloads\\\\The-MALWARE-Repo-master_2\\\\The-MALWARE-Repo-master\\\\The-MALWARE-Repo-master\\\\Joke\\\\Launcher.exe"
+        msg: "Realtime"
+        resource_type: 10
+        resource_type_value: "Files and Directories"
+        result: "Quarantined"
+        risk_level: 0
+        risk_level_severity: "Very Low"
+        severity: 6
+        signature_id: "4000010"
+        status: "error"
+        time: 1755002106000
+      message: "<134>2025-08-12T12:35:06Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3970|4000010|cat=Anti-Malware name=Joke.Win32.LauncherRepeat.A desc=Joke.Win32.LauncherRepeat.A sev=6 cn1=102 cn1Label=Host ID dvchost=admin TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 cs3=C:\\\\Users\\\\crest\\\\Downloads\\\\The-MALWARE-Repo-master_2\\\\The-MALWARE-Repo-master\\\\The-MALWARE-Repo-master\\\\Joke\\\\Launcher.exe cs3Label=Infected Resource cs4=10 cs4Label=Resource Type cs5=0 cs5Label=Risk Level act=Quarantine result=Quarantined msg=Realtime"
+      status: "error"
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1755002106000
+  -
+    sample: "<134>2025-08-13T06:20:41Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3970|4000000|cat=Anti-Malware name=TROJ_RANSOM_BL13015C.TOMC desc=TROJ_RANSOM_BL13015C.TOMC sev=6 cn1=102 cn1Label=Host ID dvchost=admin TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 cn2=139585 cn2Label=Quarantine File Size filePath=C:\\\\Users\\\\crest\\\\Downloads\\\\The-MALWARE-Repo-master_2\\\\The-MALWARE-Repo-master\\\\The-MALWARE-Repo-master\\\\Ransomware\\\\PowerPoint.exe fileInCompressedFile= act=Delete result=Deleted msg=Realtime TrendMicroDsFileSHA1=C71799A6A6D09EE758B04CDF90A4AB76FBD2A7E3 TrendMicroDsProcessPid=0  cs6=ContainerImageName | ContainerName | ContainerID  suser=test"
+    result:
+      custom:
+        TrendMicroDsFileSHA1: "C71799A6A6D09EE758B04CDF90A4AB76FBD2A7E3"
+        TrendMicroDsProcessPid: 0
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        action: "Delete"
+        category: "Anti-Malware"
+        cn1Label: "Host ID"
+        cn2Label: "Quarantine File Size"
+        container: "ContainerImageName"
+        desc: "TROJ_RANSOM_BL13015C.TOMC"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3970"
+        dvchost: "admin"
+        evt:
+          name: "TROJ_RANSOM_BL13015C.TOMC"
+        filePath: "C:\\\\Users\\\\crest\\\\Downloads\\\\The-MALWARE-Repo-master_2\\\\The-MALWARE-Repo-master\\\\The-MALWARE-Repo-master\\\\Ransomware\\\\PowerPoint.exe"
+        host_id: 102
+        msg: "Realtime"
+        quarantine_file_size: 139585
+        result: "Deleted"
+        severity: 6
+        signature_id: "4000000"
+        status: "error"
+        time: 1755066041000
+      message: "<134>2025-08-13T06:20:41Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3970|4000000|cat=Anti-Malware name=TROJ_RANSOM_BL13015C.TOMC desc=TROJ_RANSOM_BL13015C.TOMC sev=6 cn1=102 cn1Label=Host ID dvchost=admin TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 cn2=139585 cn2Label=Quarantine File Size filePath=C:\\\\Users\\\\crest\\\\Downloads\\\\The-MALWARE-Repo-master_2\\\\The-MALWARE-Repo-master\\\\The-MALWARE-Repo-master\\\\Ransomware\\\\PowerPoint.exe fileInCompressedFile= act=Delete result=Deleted msg=Realtime TrendMicroDsFileSHA1=C71799A6A6D09EE758B04CDF90A4AB76FBD2A7E3 TrendMicroDsProcessPid=0  cs6=ContainerImageName | ContainerName | ContainerID  suser=test"
+      status: "error"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1755066041000
+  -
+    sample: "<134>2025-08-14T08:20:22Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|6001200|cat=AppControl name=detectOnly desc=detectOnly sev=6 cn1=102 cn1Label=Host ID dvchost=admin TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 fileHash=37BB66FAE59084AF5AD0DD5CBBB572ACAB4B174525BEA348397A92D1E04CE522 suser=admin\\\\test suid=S-1-5-21-2195366824-2826071503-3266291696-1001 act=detectOnly filePath=C:\\\\Windows\\\\System32\\\\\\\\schannel.dll fsize=671744 aggregationType=0 repeatCount=1 cs1=notWhitelisted cs1Label=actionReason cs2=427E12D08F38ADDD4544398266DE884783AA0F50 cs2Label=sha1 cs3=467ED538239D726F7F564085AD624DD0 cs3Label=md5"
+    result:
+      custom:
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        action: "detectOnly"
+        actionReason: "notWhitelisted"
+        aggregationReason: "The event is not aggregated."
+        aggregationType: 0
+        category: "AppControl"
+        cn1Label: "Host ID"
+        cs1Label: "actionReason"
+        cs2Label: "sha1"
+        cs3Label: "md5"
+        desc: "detectOnly"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3982"
+        dvchost: "admin"
+        evt:
+          name: "detectOnly"
+        fileHash: "37BB66FAE59084AF5AD0DD5CBBB572ACAB4B174525BEA348397A92D1E04CE522"
+        filePath: "C:\\\\Windows\\\\System32\\\\\\\\schannel.dll"
+        fsize: 671744
+        host_id: 102
+        md5: "467ED538239D726F7F564085AD624DD0"
+        repeatCount: 1
+        severity: 6
+        sha1: "427E12D08F38ADDD4544398266DE884783AA0F50"
+        signature_id: "6001200"
+        status: "error"
+        time: 1755159622000
+        usr:
+          id: "S-1-5-21-2195366824-2826071503-3266291696-1001"
+          name: "admin\\\\test"
+      message: "<134>2025-08-14T08:20:22Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|6001200|cat=AppControl name=detectOnly desc=detectOnly sev=6 cn1=102 cn1Label=Host ID dvchost=admin TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 fileHash=37BB66FAE59084AF5AD0DD5CBBB572ACAB4B174525BEA348397A92D1E04CE522 suser=admin\\\\test suid=S-1-5-21-2195366824-2826071503-3266291696-1001 act=detectOnly filePath=C:\\\\Windows\\\\System32\\\\\\\\schannel.dll fsize=671744 aggregationType=0 repeatCount=1 cs1=notWhitelisted cs1Label=actionReason cs2=427E12D08F38ADDD4544398266DE884783AA0F50 cs2Label=sha1 cs3=467ED538239D726F7F564085AD624DD0 cs3Label=md5"
+      status: "error"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1755159622000
+  -
+    sample: "<134>2025-08-12T19:05:03Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3970|1005293|cat=Intrusion Prevention name=Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002) desc=Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002) sev=8 cn1=331 cn1Label=Host ID dvchost=win-edr.edr.local TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 dstMAC=00:50:56:81:C2:07 srcMAC=00:50:56:81:97:C5 TrendMicroDsFrameType=IP src=10.0.0.0 dst=10.0.0.1 in=649 cs3=DF 0 cs3Label=Fragmentation Bits proto=TCP srcPort=49999 dstPort=445 cs2=ACK PSH cs2Label=TCP Flags cnt=1 act=IDS:Reset cn3=226 cn3Label=DPI Packet Position cs5=745 cs5Label=DPI Stream Position  cs1=adminlogin2 cs1Label=DPI Note cs6=8 cs6Label=DPI Flags cs7=FWD cs7Label=Flow"
+    result:
+      custom:
+        TrendMicroDsFrameType: "IP"
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        action: "IDS:Reset"
+        category: "Intrusion Prevention"
+        cn1Label: "Host ID"
+        cn3Label: "DPI Packet Position"
+        cnt: 1
+        cs1Label: "DPI Note"
+        cs2Label: "TCP Flags"
+        cs3Label: "Fragmentation Bits"
+        cs5Label: "DPI Stream Position"
+        cs6Label: "DPI Flags"
+        cs7Label: "Flow"
+        desc: "Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002)"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3970"
+        dstMAC: "00:50:56:81:C2:07"
+        dvchost: "win-edr.edr.local"
+        event_flow: "Connection Flow"
+        evt:
+          name: "Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002)"
+        flags: 8
+        flow: "FWD"
+        fragmentation_bits: "DF 0"
+        host_id: 331
+        intrusion_prevention_flag: "Have Data - Contains packet data."
+        network:
+          bytes_read: 649
+          client:
+            geoip: {}
+            ip: "10.0.0.0"
+            port: 49999
+          destination:
+            geoip: {}
+            ip: "10.0.0.1"
+            port: 445
+        note: "adminlogin2"
+        packet_position: 226
+        proto: "TCP"
+        severity: 8
+        signature_id: "1005293"
+        srcMAC: "00:50:56:81:97:C5"
+        status: "critical"
+        stream_position: 745
+        tcp_flags: "ACK PSH"
+        time: 1755025503000
+      message: "<134>2025-08-12T19:05:03Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3970|1005293|cat=Intrusion Prevention name=Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002) desc=Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002) sev=8 cn1=331 cn1Label=Host ID dvchost=win-edr.edr.local TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 dstMAC=00:50:56:81:C2:07 srcMAC=00:50:56:81:97:C5 TrendMicroDsFrameType=IP src=10.0.0.0 dst=10.0.0.1 in=649 cs3=DF 0 cs3Label=Fragmentation Bits proto=TCP srcPort=49999 dstPort=445 cs2=ACK PSH cs2Label=TCP Flags cnt=1 act=IDS:Reset cn3=226 cn3Label=DPI Packet Position cs5=745 cs5Label=DPI Stream Position  cs1=adminlogin2 cs1Label=DPI Note cs6=8 cs6Label=DPI Flags cs7=FWD cs7Label=Flow"
+      status: "critical"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1755025503000
+  -
+    sample: "<134>2025-08-12T19:05:03Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3970|1005293|cat=Intrusion Prevention name=Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002) desc=Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002) sev=8 cn1=331 cn1Label=Host ID dvchost=win-edr.edr.local TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 dstMAC=00:50:56:81:C2:07 srcMAC=00:50:56:81:97:C5 TrendMicroDsFrameType=IP src=10.0.0.0 dst=10.0.0.1 out=649 cs3=DF 0 cs3Label=Fragmentation Bits proto=TCP srcPort=49999 dstPort=445 cs2=ACK PSH cs2Label=TCP Flags cnt=1 act=IDS:Reset cn3=226 cn3Label=DPI Packet Position cs5=745 cs5Label=DPI Stream Position  cs1=adminlogin2 cs1Label=DPI Note cs6=8 cs6Label=DPI Flags cs7=FWD cs7Label=Flow"
+    result:
+      custom:
+        TrendMicroDsFrameType: "IP"
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        action: "IDS:Reset"
+        category: "Intrusion Prevention"
+        cn1Label: "Host ID"
+        cn3Label: "DPI Packet Position"
+        cnt: 1
+        cs1Label: "DPI Note"
+        cs2Label: "TCP Flags"
+        cs3Label: "Fragmentation Bits"
+        cs5Label: "DPI Stream Position"
+        cs6Label: "DPI Flags"
+        cs7Label: "Flow"
+        desc: "Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002)"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3970"
+        dstMAC: "00:50:56:81:C2:07"
+        dvchost: "win-edr.edr.local"
+        event_flow: "Connection Flow"
+        evt:
+          name: "Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002)"
+        flags: 8
+        flow: "FWD"
+        fragmentation_bits: "DF 0"
+        host_id: 331
+        intrusion_prevention_flag: "Have Data - Contains packet data."
+        network:
+          bytes_written: 649
+          client:
+            geoip: {}
+            ip: "10.0.0.0"
+            port: 49999
+          destination:
+            geoip: {}
+            ip: "10.0.0.1"
+            port: 445
+        note: "adminlogin2"
+        packet_position: 226
+        proto: "TCP"
+        severity: 8
+        signature_id: "1005293"
+        srcMAC: "00:50:56:81:97:C5"
+        status: "critical"
+        stream_position: 745
+        tcp_flags: "ACK PSH"
+        time: 1755025503000
+      message: "<134>2025-08-12T19:05:03Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3970|1005293|cat=Intrusion Prevention name=Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002) desc=Prevent Windows Administrator User Login Over SMB (ATT&CK T1078.002,T1078.001,T1021.002) sev=8 cn1=331 cn1Label=Host ID dvchost=win-edr.edr.local TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 dstMAC=00:50:56:81:C2:07 srcMAC=00:50:56:81:97:C5 TrendMicroDsFrameType=IP src=10.0.0.0 dst=10.0.0.1 out=649 cs3=DF 0 cs3Label=Fragmentation Bits proto=TCP srcPort=49999 dstPort=445 cs2=ACK PSH cs2Label=TCP Flags cnt=1 act=IDS:Reset cn3=226 cn3Label=DPI Packet Position cs5=745 cs5Label=DPI Stream Position  cs1=adminlogin2 cs1Label=DPI Note cs6=8 cs6Label=DPI Flags cs7=FWD cs7Label=Flow"
+      status: "critical"
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1755025503000
+  -
+    sample: "<134>2025-08-14T05:11:26Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|2007210|cat=Integrity Monitor name=TMTR-0018: Suspicious Files Detected In User Profile Directory (ATT&CK T1560.001) desc=TMTR-0018: Suspicious Files Detected In User Profile Directory (ATT&CK T1560.001) sev=6 cn1=102 cn1Label=Host ID dvchost=admin TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 act=deleted filePath=c:\\\\users\\\\test\\\\appdata\\\\local\\\\google\\\\chrome\\\\user data\\\\default\\\\indexeddb\\\\https_www.thesun.co.uk_0.indexeddb.blob\\\\2\\\\00\\\\3 suser=admin\\\\test sproc=C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe entityType=File msg=No description is available."
+    result:
+      custom:
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        action: "deleted"
+        category: "Integrity Monitor"
+        cn1Label: "Host ID"
+        desc: "TMTR-0018: Suspicious Files Detected In User Profile Directory (ATT&CK T1560.001)"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3982"
+        dvchost: "admin"
+        entityType: "File"
+        evt:
+          name: "TMTR-0018: Suspicious Files Detected In User Profile Directory (ATT&CK T1560.001)"
+        filePath: "c:\\\\users\\\\test\\\\appdata\\\\local\\\\google\\\\chrome\\\\user data\\\\default\\\\indexeddb\\\\https_www.thesun.co.uk_0.indexeddb.blob\\\\2\\\\00\\\\3"
+        host_id: 102
+        msg: "No description is available."
+        severity: 6
+        signature_id: "2007210"
+        sproc: "C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe"
+        status: "error"
+        time: 1755148286000
+        usr:
+          name: "admin\\\\test"
+      message: "<134>2025-08-14T05:11:26Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|2007210|cat=Integrity Monitor name=TMTR-0018: Suspicious Files Detected In User Profile Directory (ATT&CK T1560.001) desc=TMTR-0018: Suspicious Files Detected In User Profile Directory (ATT&CK T1560.001) sev=6 cn1=102 cn1Label=Host ID dvchost=admin TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 act=deleted filePath=c:\\\\users\\\\test\\\\appdata\\\\local\\\\google\\\\chrome\\\\user data\\\\default\\\\indexeddb\\\\https_www.thesun.co.uk_0.indexeddb.blob\\\\2\\\\00\\\\3 suser=admin\\\\test sproc=C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe entityType=File msg=No description is available."
+      status: "error"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1755148286000
+  -
+    sample: "<134>2025-08-14T07:43:58Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|3002828|cat=Log Inspection name=Application - Secure Shell Daemon (SSHD) desc=SSHD brute force trying to get access to the system (ATTACK T1110) sev=10 cn1=67 cn1Label=Host ID dvchost=rhel7-50-0-0 TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 cs1=SSHD brute force trying to get access to the system (ATTACK T1110) cs1Label=LI Description fname=/var/log/secure src=10.0.0.0 duser=zyfwp shost=rhel7-50-0-0 msg=Aug 14 13:13:56 rhel7-50-0-0 sshd[10767]: Invalid user zyfwp from 10.0.0.0 port 12036"
+    result:
+      custom:
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        category: "Log Inspection"
+        cn1Label: "Host ID"
+        cs1Label: "LI Description"
+        desc: "SSHD brute force trying to get access to the system (ATTACK T1110)"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3982"
+        dvchost: "rhel7-50-0-0"
+        evt:
+          name: "Application - Secure Shell Daemon (SSHD)"
+        fname: "/var/log/secure"
+        host_id: 67
+        li_desc: "SSHD brute force trying to get access to the system (ATTACK T1110)"
+        msg: "Aug 14 13:13:56 rhel7-50-0-0 sshd[10767]: Invalid user zyfwp from 10.0.0.0 port 12036"
+        network:
+          client:
+            geoip: {}
+            ip: "10.0.0.0"
+        severity: 10
+        shost: "rhel7-50-0-0"
+        signature_id: "3002828"
+        status: "critical"
+        time: 1755157438000
+        usr:
+          name: "zyfwp"
+      message: "<134>2025-08-14T07:43:58Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|3002828|cat=Log Inspection name=Application - Secure Shell Daemon (SSHD) desc=SSHD brute force trying to get access to the system (ATTACK T1110) sev=10 cn1=67 cn1Label=Host ID dvchost=rhel7-50-0-0 TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 cs1=SSHD brute force trying to get access to the system (ATTACK T1110) cs1Label=LI Description fname=/var/log/secure src=10.0.0.0 duser=zyfwp shost=rhel7-50-0-0 msg=Aug 14 13:13:56 rhel7-50-0-0 sshd[10767]: Invalid user zyfwp from 10.0.0.0 port 12036"
+      status: "critical"
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1755157438000
+  -
+    sample: "<134>2025-08-14T05:23:45Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|5000000|cat=Web Reputation name=WebReputation desc=WebReputation sev=5 cn1=102 cn1Label=Host ID dvchost=admin TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 request=https://1.envato.market/c/1295728/298927/4662?u\\=https%3A%2F%2F1.envato.market%2FrQn5&svlink\\=4291&level\\=1&brwsr\\=d8f0ef3e-78ce-11f0-b1b1-5f2e6327fcf4&brwsrsig\\=1uAw0axGsUALRpr3O12NNSt40AR2Za msg=Untested"
+    result:
+      custom:
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        category: "Web Reputation"
+        cn1Label: "Host ID"
+        desc: "WebReputation"
+        device_product: "Deep Security Agent"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3982"
+        dvchost: "admin"
+        evt:
+          name: "WebReputation"
+        host_id: 102
+        msg: "Untested"
+        severity: 5
+        signature_id: "5000000"
+        status: "error"
+        time: 1755149025000
+      message: "<134>2025-08-14T05:23:45Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3982|5000000|cat=Web Reputation name=WebReputation desc=WebReputation sev=5 cn1=102 cn1Label=Host ID dvchost=admin TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 request=https://1.envato.market/c/1295728/298927/4662?u\\=https%3A%2F%2F1.envato.market%2FrQn5&svlink\\=4291&level\\=1&brwsr\\=d8f0ef3e-78ce-11f0-b1b1-5f2e6327fcf4&brwsrsig\\=1uAw0axGsUALRpr3O12NNSt40AR2Za msg=Untested"
+      status: "error"
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1755149025000
+  -
+    sample: "<134>2025-08-13T06:15:39Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3970|7001000|cat=Device Control name=DeviceControl desc=DeviceControl sev=6 cn1=364 cn1Label=Host ID dvchost=DVC_HOST TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 device=USB Flash DISK USB Device vendor=USB serial=1408033910001641 model=1000 computerName=COMPUTER_NAME domainName=WORKGROUP deviceType=1 permission=0"
+    result:
+      custom:
+        TrendMicroDsTenant: 279555847073
+        TrendMicroDsTenantId: 146271
+        category: "Device Control"
+        cn1: 364
+        cn1Label: "Host ID"
+        computerName: "COMPUTER_NAME"
+        desc: "DeviceControl"
+        device: "USB Flash DISK USB Device"
+        deviceType: 1
+        device_permission: "BLOCK"
+        device_product: "Deep Security Agent"
+        device_type: "USB_STORAGE_DEVICE"
+        device_vendor: "Trend Micro"
+        device_version: "50.0.3970"
+        dns:
+          question:
+            name: "WORKGROUP"
+        dvchost: "DVC_HOST"
+        evt:
+          name: "DeviceControl"
+        model: 1000
+        permission: 0
+        serial: 1408033910001641
+        severity: 6
+        signature_id: "7001000"
+        status: "error"
+        time: 1755065739000
+        vendor: "USB"
+      message: "<134>2025-08-13T06:15:39Z deepsecurity LEEF:2.0|Trend Micro|Deep Security Agent|50.0.3970|7001000|cat=Device Control name=DeviceControl desc=DeviceControl sev=6 cn1=364 cn1Label=Host ID dvchost=DVC_HOST TrendMicroDsTenant=279555847073 TrendMicroDsTenantId=146271 device=USB Flash DISK USB Device vendor=USB serial=1408033910001641 model=1000 computerName=COMPUTER_NAME domainName=WORKGROUP deviceType=1 permission=0"
+      status: "error"
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1755065739000
+  -
+    sample: "772 <37>1 2025-08-12T06:37:36.027+00:00 NetworkSecurityPoC LOGID_10-REP_BLOCK-NOTICE - - [meta sequenceId=\\\"1391\\\"] <37>2025-08-12T06:37:36.027+00:00 NetworkSecurityPoC IPS: CEF:0|TippingPoint|vTPS Cloud|2024.9.0.13694|7610|IP Reputation|1|dvchost=NetworkSecurityPoC dvc=10.0.0.0 cat=ReputationBlock deviceFacility=Reputation act=Block cs2=e19397df-f749-4cdb-a2fa-6aa71f1326ed cs2Label=Policy UUID cs3=00000001-0001-0001-0001-000000007610 cs3Label=Signature UUID src=10.0.0.1 spt=48518 dst=10.0.0.2 dpt=4786 start=Jul 31 2025 22:31:28+0000 cnt=1 deviceInboundInterface=1B deviceOutboundInterface=1A cs1=cloud formation cs1Label=Virtual Segment cn2=0 cn2Label=SSL Flag c6a1=10.0.0.1 c6a1Label=Client IPv4 cs6=10.0.0.1 Geolocation Filtering cs6Label=Parameters"
+    result:
+      custom:
+        action: "Block"
+        c6a1Label: "Client IPv4"
+        category: "ReputationBlock"
+        client_ipv4: "10.0.0.1"
+        cn2Label: "SSL Flag"
+        cnt: 1
+        cs1Label: "Virtual Segment"
+        cs2Label: "Policy UUID"
+        cs3Label: "Signature UUID"
+        cs6: "10.0.0.1 Geolocation Filtering"
+        cs6Label: "Parameters"
+        deviceFacility: "Reputation"
+        deviceInboundInterface: "1B"
+        deviceOutboundInterface: "1A"
+        dvc: "10.0.0.0"
+        dvchost: "NetworkSecurityPoC"
+        network:
+          client:
+            geoip: {}
+            ip: "10.0.0.1"
+            port: 48518
+          destination:
+            geoip: {}
+            ip: "10.0.0.2"
+            port: 4786
+        policy_uuid: "e19397df-f749-4cdb-a2fa-6aa71f1326ed"
+        severity: "LOGID_10-REP_BLOCK-NOTICE"
+        signature_uuid: "00000001-0001-0001-0001-000000007610"
+        ssl_flag: 0
+        start: "Jul 31 2025 22:31:28+0000"
+        status: "notice"
+        time: 1754980656027
+        virtual_segment: "cloud formation"
+      message: "772 <37>1 2025-08-12T06:37:36.027+00:00 NetworkSecurityPoC LOGID_10-REP_BLOCK-NOTICE - - [meta sequenceId=\\\"1391\\\"] <37>2025-08-12T06:37:36.027+00:00 NetworkSecurityPoC IPS: CEF:0|TippingPoint|vTPS Cloud|2024.9.0.13694|7610|IP Reputation|1|dvchost=NetworkSecurityPoC dvc=10.0.0.0 cat=ReputationBlock deviceFacility=Reputation act=Block cs2=e19397df-f749-4cdb-a2fa-6aa71f1326ed cs2Label=Policy UUID cs3=00000001-0001-0001-0001-000000007610 cs3Label=Signature UUID src=10.0.0.1 spt=48518 dst=10.0.0.2 dpt=4786 start=Jul 31 2025 22:31:28+0000 cnt=1 deviceInboundInterface=1B deviceOutboundInterface=1A cs1=cloud formation cs1Label=Virtual Segment cn2=0 cn2Label=SSL Flag c6a1=10.0.0.1 c6a1Label=Client IPv4 cs6=10.0.0.1 Geolocation Filtering cs6Label=Parameters"
+      status: "notice"
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1754980656027

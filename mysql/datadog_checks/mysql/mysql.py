@@ -542,9 +542,7 @@ class MySql(AgentCheck):
             # Use cached global variables instead of making a separate query
             results.update(self.global_variables.all_variables)
 
-        if not is_affirmative(
-            self._config.options.get('disable_innodb_metrics', False)
-        ) and self._check_innodb_engine_enabled(db):
+        if self._check_innodb_engine_enabled(db):
             # Innodb metrics are not available for Aurora reader instances
             if self.global_variables.is_aurora and self._replication_role == "reader":
                 self.log.debug("Skipping innodb metrics collection for reader instance")
@@ -1083,6 +1081,12 @@ class MySql(AgentCheck):
         # table. Later is chosen because that involves no string parsing.
         if self._is_innodb_engine_enabled_cached is not None:
             return self._is_innodb_engine_enabled_cached
+
+        if self._config.disable_innodb_metrics:
+            self.log.debug("disable_innodb_metrics config is set, disabling innodb metric collection")
+            self._is_innodb_engine_enabled_cached = False
+            return self._is_innodb_engine_enabled_cached
+
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_INNODB_ENGINES)

@@ -86,6 +86,12 @@ on:
         required: false
         type: string
         default: ""
+      context:
+        description: "Context where the test is run"
+        required: false
+        default: "standard"
+        type: string
+
 defaults:
   run:
     shell: bash
@@ -107,7 +113,6 @@ jobs:
       # Tracing to monitor our test suite
       DD_ENV: "ci"
       DD_SERVICE: "${{ inputs.target }}-integrations-${{ inputs.repo }}"
-      DD_TAGS: "team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }}"
       DD_TRACE_ANALYTICS_ENABLED: "true"
       # Capture traces for a separate job to do the submission
       TRACE_CAPTURE_BASE_DIR: "trace-captures"
@@ -120,13 +125,14 @@ jobs:
        contents: read
     steps:
 
-    - name: Set environment variables with sanitized paths
+    - name: Set environment variables
       run: |
         # We want to replace leading dots as they will make directories hidden, which will cause them to be ignored by upload-artifact and EnricoMi/publish-unit-test-result-action
         JOB_NAME=$(echo "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}" | sed 's/^\./Dot/')
 
         echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
         echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
+        echo "DD_TAGS=team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }},agent_image:$DDEV_E2E_AGENT,context:${{ inputs.context }}" >> $GITHUB_ENV
 
     - name: Set up Windows
       if: runner.os == 'Windows'

@@ -1,0 +1,37 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "9afc329a-e4bc-44c0-97a6-ccd7151feca2",
+  "app_id": "have-i-been-pwned",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "<FILL IN - A brief description of what this offering provides>",
+    "title": "Have I Been Pwned",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 54391682,
+      "source_type_name": "Have I Been Pwned",
+      "events": {
+        "creates_events": false
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
