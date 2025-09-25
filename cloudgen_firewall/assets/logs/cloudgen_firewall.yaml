@@ -143,10 +143,10 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{word:source}\s+%{word:status}:
-              (%{data::csv("traffic,protocol,srcIf,source_ip,source_port,source_mac,dest_ip,dest_port,dest_service,destIf,rule,info,src_nat,dest_nat,duration,count,received_bytes,sent_bytes,received_packets,sent_packets,user,session_protocol,application,target,content,urlcat","|")})?\]?
+              (%{data::csv("traffic,protocol,source_if,source_ip,source_port,source_mac,dest_ip,dest_port,dest_service,dest_if,rule,info,src_nat,dest_nat,duration,count,received_bytes,sent_bytes,received_packets,sent_packets,user,session_protocol,application,target,content,urlcat","|")})?\]?
 
 
-              autoFilledRule2 %{word:source} %{word:status}: %{greedyData:message.details}
+              autoFilledRule2 %{word:source} %{word:status}: %{greedyData:message_details}
         - type: grok-parser
           name: Box Firewall IPSDownload
           enabled: true
@@ -159,7 +159,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1
-              %{word:source}\s+%{word:process}:\s+\[%{number:process_id}\]\s+%{word:action}:\s+(%{data::csv("traffic,protocol,sourceIf,source_ip,source_port,source_mac,destip","|")})
+              %{word:source}\s+%{word:process}:\s+\[%{number:process_id}\]\s+%{word:action}:\s+(%{data::csv("traffic,protocol,source_if,source_ip,source_port,source_mac,dest_ip","|")})
 
 
               autoFilledRule2 %{word:source}\s+%{greedyData:message}
@@ -212,7 +212,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: autoFilledRule1
-              %{word:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+AdminAction:\s+%{greedyData:Action}
+              %{word:source}\s+%{word:status}:\s+\[%{data:session}@%{ip:ip}\]\s+AdminAction:\s+%{greedyData:action}
         - type: grok-parser
           name: Box Firewall Threat
           enabled: true
@@ -253,7 +253,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1
-              %{word:source}\s+%{word:log_type}:\s+\[%{number:event_id}\]\s+%{data:event}\s+from\s+%{ip:source_ip}:%{port:source_port}\s+-\s+\((%{data::csv("event_type,severity,category,subcategory,action,user_id,username,source_host,session_id,description","|")}\))
+              %{word:source}\s+%{word:log_type}:\s+\[%{number:event_id}\]\s+%{data:event}\s+from\s+%{ip:source_ip}:%{port:source_port}\s+-\s+\((%{data::csv("event_type,severity,category,subcategory,action,user_id,user_name,source_host,session_id,description","|")}\))
 
 
               autoFilledRule2 %{word:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
@@ -277,7 +277,7 @@ pipeline:
               %{word:source}\s+%{word:process}:\s+\[%{number:process_id}\]%{greedyData:message}
 
 
-              autoFilledRule2 %{word:source} %{word:process_host} %{word:process} %{integer:pid} %{greedyData:message}
+              autoFilledRule2 %{word:source} %{word:process_host} %{word:process} %{integer:process_id} %{greedyData:message}
     - type: pipeline
       name: Box SSH
       enabled: true
@@ -426,7 +426,7 @@ pipeline:
             supportRules: ""
             matchRules: autoFilledRule1 %{word:source}\s+%{greedyData:message}
     - type: attribute-remapper
-      name: " Map `timestamp` to `syslog.timestamp`"
+      name: Map `timestamp` to `syslog.timestamp`
       enabled: true
       sources:
         - timestamp
@@ -436,7 +436,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map hostname to syslog.hostname
+      name: Map `hostname` to `syslog.hostname`
       enabled: true
       sources:
         - hostname

@@ -479,7 +479,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Auth @sub_component:access"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Auth @sub_component:access"
                                             },
                                             "indexes": [
                                                 "*"
@@ -541,14 +541,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Auth @sub_component:access"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Auth @sub_component:access"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@hostname",
+                                                    "facet": "@syslog.hostname",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -624,7 +624,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Auth @sub_component:access"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Auth @sub_component:access"
                                             },
                                             "indexes": [
                                                 "*"
@@ -666,7 +666,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Auth @sub_component:access"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Auth @sub_component:access"
                                             },
                                             "indexes": [
                                                 "*"
@@ -737,14 +737,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Auth @sub_component:access @session_status:Closed"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Auth @sub_component:access @cloudgen_firewall.session_status:Closed"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@hostname",
+                                                    "facet": "@syslog.hostname",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -866,23 +866,12 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:operative"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:operative"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "service",
-                                                    "limit": 50,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -919,14 +908,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:operative"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:operative"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@hostname",
+                                                    "facet": "@syslog.hostname",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -985,7 +974,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:operative"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:operative"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1058,7 +1047,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:operative"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:operative"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1066,7 +1055,7 @@
                                             "group_by": [],
                                             "compute": {
                                                 "aggregation": "cardinality",
-                                                "metric": "@hostname"
+                                                "metric": "@syslog.hostname"
                                             },
                                             "storage": "hot"
                                         }
@@ -1111,7 +1100,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:operative"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:operative"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1163,7 +1152,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:operative @level:Error"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:operative @level:Error"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1264,23 +1253,12 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:eventS"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:eventS"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "service",
-                                                    "limit": 50,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
+                                            "group_by": [],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -1322,7 +1300,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:eventS"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:eventS"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1374,7 +1352,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:eventS"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:eventS"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1382,7 +1360,7 @@
                                             "group_by": [],
                                             "compute": {
                                                 "aggregation": "cardinality",
-                                                "metric": "@hostname"
+                                                "metric": "@syslog.hostname"
                                             },
                                             "storage": "hot"
                                         }
@@ -1428,7 +1406,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:eventS @level:Error"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:eventS @level:Error"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1480,7 +1458,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:eventS @event:\"Insert Event\""
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:eventS @event:\"Insert Event\""
                                             },
                                             "indexes": [
                                                 "*"
@@ -1526,7 +1504,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Event @sub_component:eventS"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:eventS"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1633,7 +1611,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:admin"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:admin"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1703,7 +1681,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:admin"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:admin"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1784,7 +1762,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:admin"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:admin"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1825,14 +1803,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:admin"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:admin"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@hostname",
+                                                    "facet": "@syslog.hostname",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1931,7 +1909,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:changes"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:changes"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1999,14 +1977,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:changes"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:changes"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@hostname",
+                                                    "facet": "@syslog.hostname",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2080,7 +2058,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:changes"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:changes"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2123,7 +2101,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:changes"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:changes"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2229,7 +2207,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:daemon_download"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:daemon_download"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2297,14 +2275,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:daemon_download"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:daemon_download"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@hostname",
+                                                    "facet": "@syslog.hostname",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2378,7 +2356,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:daemon_download"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:daemon_download"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2421,7 +2399,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:daemon_download"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:daemon_download"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2523,7 +2501,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:sync"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:sync"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2591,14 +2569,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:sync"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:sync"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@hostname",
+                                                    "facet": "@syslog.hostname",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2672,7 +2650,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:sync"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:sync"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2715,7 +2693,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Config @sub_component:sync"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Config @sub_component:sync"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2817,7 +2795,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Control @sub_component:AuthService"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Control @sub_component:AuthService"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2887,7 +2865,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Control @sub_component:AuthService"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Control @sub_component:AuthService"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2964,7 +2942,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Control @sub_component:AuthService"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Control @sub_component:AuthService"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3007,14 +2985,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Control @sub_component:AuthService"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Control @sub_component:AuthService"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@hostname",
+                                                    "facet": "@syslog.hostname",
                                                     "limit": 500,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3087,7 +3065,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Control @sub_component:AuthService"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Control @sub_component:AuthService"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3166,7 +3144,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:*"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall -@sub_component:*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3239,7 +3217,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:*"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall -@sub_component:*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3288,7 +3266,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:* message:*block*"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall -@sub_component:* message:*block*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3369,7 +3347,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:*"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall -@sub_component:*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3412,7 +3390,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:*"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @cloudgen_firewall.process:AdminAction"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3481,14 +3459,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall -@sub_component:*"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall -@sub_component:*"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@process",
+                                                    "facet": "@cloudgen_firewall.process",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3584,7 +3562,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:Activity"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3652,7 +3630,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:Activity @status:Allow"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity @status:Allow"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3721,7 +3699,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:Activity @status:Block"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity @status:Block"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3802,7 +3780,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:Activity"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3845,14 +3823,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:Activity"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "message",
+                                                    "facet": "@message",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3947,7 +3925,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:IPSDownload"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4020,7 +3998,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:IPSDownload"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4069,7 +4047,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:IPSDownload message:*block*"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity message:*block*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4150,7 +4128,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:IPSDownload"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4193,7 +4171,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:IPSDownload -message:(*block* OR *allowed*)"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity -message:(*block* OR *allowed*)"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4262,7 +4240,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:IPSDownload"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4368,7 +4346,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:audit"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:audit"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4441,7 +4419,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:audit"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:audit"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4490,14 +4468,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:audit message:*terminated*"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:audit message:*terminated*"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@ip",
+                                                    "facet": "@cloudgen_firewall.ip",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -4578,7 +4556,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:audit"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:audit"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4621,7 +4599,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:audit"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:audit"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4727,7 +4705,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:auditop"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:auditop"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4800,7 +4778,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:auditop"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:auditop"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4849,14 +4827,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:auditop"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:auditop"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@Action",
+                                                    "facet": "@action",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -4930,7 +4908,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:auditop"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:auditop"
                                             },
                                             "indexes": [
                                                 "*"
@@ -4973,7 +4951,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:auditop"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:auditop"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5079,7 +5057,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:threat"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:threat"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5152,7 +5130,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:threat"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:threat"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5201,7 +5179,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:threat"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:threat"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5270,14 +5248,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:threat"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:threat"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@process",
+                                                    "facet": "@cloudgen_firewall.process",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -5351,7 +5329,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:Firewall @sub_component:threat"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:threat"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5431,7 +5409,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:System @sub_component:mgmaccess"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:System @sub_component:mgmaccess"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5501,7 +5479,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:System @sub_component:mgmaccess"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:System @sub_component:mgmaccess"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5582,7 +5560,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:System @sub_component:mgmaccess"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:System @sub_component:mgmaccess"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5625,14 +5603,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:System @sub_component:mgmaccess"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:System @sub_component:mgmaccess"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@hostname",
+                                                    "facet": "@syslog.hostname",
                                                     "limit": 500,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -5705,7 +5683,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:System @sub_component:mgmaccess"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:System @sub_component:mgmaccess"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5784,7 +5762,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:SSH @sub_component:sshd"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:SSH @sub_component:sshd"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5868,7 +5846,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:SSH @sub_component:sshd"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:SSH @sub_component:sshd"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5924,7 +5902,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:SSH @sub_component:sshd"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:SSH @sub_component:sshd"
                                             },
                                             "indexes": [
                                                 "*"
@@ -5963,7 +5941,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:SSH @sub_component:sshd"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:SSH @sub_component:sshd"
                                             },
                                             "indexes": [
                                                 "*"
@@ -6065,7 +6043,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:SSH @sub_component:config"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:SSH @sub_component:config"
                                             },
                                             "indexes": [
                                                 "*"
@@ -6149,7 +6127,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:SSH @sub_component:config"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:SSH @sub_component:config"
                                             },
                                             "indexes": [
                                                 "*"
@@ -6200,7 +6178,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:SSH @sub_component:config"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:SSH @sub_component:config"
                                             },
                                             "indexes": [
                                                 "*"
@@ -6274,7 +6252,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:SSH @sub_component:config"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:SSH @sub_component:config"
                                             },
                                             "indexes": [
                                                 "*"
@@ -6313,14 +6291,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @component:SSH @sub_component:config"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:SSH @sub_component:config"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@hostname",
+                                                    "facet": "@syslog.hostname",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
