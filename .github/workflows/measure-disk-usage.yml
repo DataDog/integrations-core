@@ -63,7 +63,7 @@ jobs:
         #   cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         # fi
         
-        $cmd --to-dd-key ${{ secrets.DD_API_KEY }}
+        $cmd --to-dd-key "${{ secrets.DD_API_KEY }}"
 
         $cmd --compressed
 
