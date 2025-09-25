@@ -137,6 +137,16 @@ class Gcp(BaseModel):
     project_id: Optional[str] = None
 
 
+class LocksIdleInTransaction(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_rows: Optional[int] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -261,6 +271,7 @@ class InstanceConfig(BaseModel):
     idle_connection_timeout: Optional[int] = None
     ignore_databases: Optional[tuple[str, ...]] = None
     ignore_schemas_owned_by: Optional[tuple[str, ...]] = None
+    locks_idle_in_transaction: Optional[LocksIdleInTransaction] = None
     log_unobfuscated_plans: Optional[bool] = None
     log_unobfuscated_queries: Optional[bool] = None
     max_connections: Optional[int] = None

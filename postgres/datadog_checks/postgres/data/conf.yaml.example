@@ -36,17 +36,17 @@ instances:
     ## The hostname to connect to. To connect to a Unix socket, specify the full path to the socket file,
     ## e.g. `/var/run/postgresql/.s.PGSQL.5432`.
     #
-    # host: localhost
+    # host: <HOST>
 
     ## @param port - integer - optional - default: 5432
     ## The port to use when connecting to PostgreSQL.
     #
-    # port: 5432
+    # port: <PORT>
 
     ## @param username - string - optional - default: datadog
     ## The Datadog username created to connect to PostgreSQL.
     #
-    # username: datadog
+    # username: <USERNAME>
 
     ## @param password - string - optional
     ## The password associated with the Datadog user.
@@ -286,7 +286,7 @@ instances:
     ## @param table_count_limit - integer - optional - default: 200
     ## The maximum number of tables to collect metrics from.
     #
-    # table_count_limit: 200
+    # table_count_limit: <TABLE_COUNT_LIMIT>
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
@@ -362,11 +362,6 @@ instances:
     #     tags:
     #     - test:postgresql
     #     metric_prefix: postgresql
-
-    ## @param custom_metrics - list of mappings - optional
-    ## This option is deprecated. Use `custom_queries` instead.
-    #
-    # custom_metrics: []
 
     ## Define the configuration for database autodiscovery.
     ## Complete this section if you want to auto-discover databases on this host

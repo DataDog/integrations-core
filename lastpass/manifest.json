@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "74cf38da-74b5-487f-9b9b-0d01776d1fea",
   "app_id": "lastpass",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

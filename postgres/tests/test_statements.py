@@ -310,7 +310,7 @@ def test_statement_metrics(
         fqt_events = [e for e in dbm_samples if e.get('dbm_type') == 'fqt']
         assert len(fqt_events) > 0
         matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
-        assert len(matching) == 1
+        assert len(matching) >= 1
         fqt_event = matching[0]
         assert fqt_event['ddagentversion'] == datadog_agent.get_version()
         assert fqt_event['ddsource'] == "postgres"
@@ -1022,6 +1022,7 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_samples']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
 

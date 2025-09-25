@@ -45,7 +45,9 @@
         "prefix": "anthropic.",
         "check": [
           "anthropic.input_tokens",
-          "anthropic.output_tokens"
+          "anthropic.output_tokens",
+          "anthropic.messages.input_tokens",
+          "anthropic.messages.output_tokens"
         ],
         "metadata_path": "metadata.csv"
       },

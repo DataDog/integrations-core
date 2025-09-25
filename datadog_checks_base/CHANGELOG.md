@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 37.20.0 / 2025-09-17
+
+***Added***:
+
+* Add support for customizable cache keys to be used by the agent persistent cache. This allows integrations developers to define when the cache will be invalidated for each integration. ([#21316](https://github.com/DataDog/integrations-core/pull/21316))
+* Upgrade ddtrace to 3.12.5 ([#21360](https://github.com/DataDog/integrations-core/pull/21360))
+
+## 37.19.0 / 2025-09-05
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 37.18.1 / 2025-09-03 / Agent 7.70.1
+
+***Fixed***:
+
+* Regularly check for cancel event between DBMAsyncJob check intervals ([#21150](https://github.com/DataDog/integrations-core/pull/21150))
+
+*Note: This release is bundled with Agent version `7.70.1` and does not include changes from the `37.18.0` release.*
+
 ## 37.18.0 / 2025-08-29
 
 ***Added***:
@@ -14,7 +35,7 @@
 
 * Regularly check for cancel event between DBMAsyncJob check intervals ([#21150](https://github.com/DataDog/integrations-core/pull/21150))
 
-## 37.17.0 / 2025-08-07
+## 37.17.0 / 2025-08-07 / Agent 7.70.0
 
 ***Added***:
 

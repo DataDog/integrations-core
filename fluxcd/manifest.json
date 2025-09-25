@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "11cc5047-83aa-44df-b7ca-9c6e1c32b723",
   "app_id": "fluxcd",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

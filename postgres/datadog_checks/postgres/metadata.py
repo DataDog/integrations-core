@@ -29,12 +29,6 @@ from datadog_checks.postgres.util import get_list_chunks
 from .util import payload_pg_version
 from .version_utils import VersionUtils
 
-# default collection intervals in seconds
-DEFAULT_EXTENSIONS_COLLECTION_INTERVAL = 600
-DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
-DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
-DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
-
 # PG_EXTENSION_INFO_QUERY is used to collect extension names and versions from
 # the pg_extension table. Schema names and roles are retrieved from their re-
 # spective catalog tables.

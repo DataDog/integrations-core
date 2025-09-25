@@ -8,14 +8,17 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres.config import (
-    DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL,
     FeatureKey,
     ValidationResult,
     build_config,
+    deprecation_warning,
     sanitize,
 )
+from datadog_checks.postgres.config_models import dict_defaults
 from datadog_checks.postgres.config_models.instance import Relations
+from datadog_checks.postgres.relationsmanager import RelationsManager
 
 
 @pytest.fixture
@@ -35,32 +38,20 @@ pytestmark = pytest.mark.unit
 
 
 def test_initialize_valid_config(mock_check, minimal_instance):
-    config, result = build_config(check=mock_check, init_config={}, instance=minimal_instance)
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     assert isinstance(result, ValidationResult)
     assert result.valid
     assert not result.errors
 
 
-def test_initialize_missing_host(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
-    instance.pop('host')
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
-    assert not result.valid
-    assert any("Please specify a valid host" in str(e) for e in result.errors)
-
-
-def test_initialize_missing_username(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
-    instance.pop('username')
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
-    assert not result.valid
-    assert any("specify a user" in str(e).lower() for e in result.errors)
-
-
 def test_initialize_invalid_ssl_mode(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['ssl'] = 'invalid_ssl'
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     assert result.valid  # Should still be valid, but with a warning
     assert any("Invalid ssl option" in w for w in result.warnings)
 
@@ -69,7 +60,9 @@ def test_initialize_conflicting_collect_default_database_and_ignore_databases(mo
     instance = minimal_instance.copy()
     instance['collect_default_database'] = True
     instance['ignore_databases'] = ['postgres']
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     assert result.valid
     assert any("cannot be ignored" in w for w in result.warnings)
 
@@ -77,7 +70,9 @@ def test_initialize_conflicting_collect_default_database_and_ignore_databases(mo
 def test_initialize_non_ascii_application_name(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['application_name'] = 'datadog-агент'
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     assert not result.valid
     assert any("ASCII characters" in str(e) for e in result.errors)
 
@@ -96,7 +91,9 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
             'query_metrics': {'enabled': True},
         }
     )
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     feature_keys = {f['key'] for f in result.features}
     assert set(feature_keys) == {
         FeatureKey.RELATION_METRICS,
@@ -111,7 +108,9 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
 
 
 def test_initialize_features_disabled_by_default(mock_check, minimal_instance):
-    config, result = build_config(check=mock_check, init_config={}, instance=minimal_instance)
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     features = {f['key']: f for f in result.features}
     assert features[FeatureKey.RELATION_METRICS]['enabled'] is False
     assert features[FeatureKey.QUERY_SAMPLES]['enabled'] is False
@@ -129,7 +128,9 @@ def test_initialize_features_warn_if_dbm_missing_for_dbm_features(mock_check, mi
     instance['collect_schemas'] = {'enabled': True}
     instance['query_activity'] = {'enabled': True}
     instance['query_metrics'] = {'enabled': True}
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     # Should warn for each feature that requires dbm
     assert any("requires the `dbm` option to be enabled" in w for w in result.warnings)
     # Should have all features in the features list
@@ -145,7 +146,9 @@ def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['deep_database_monitoring'] = True
     instance['statement_samples'] = {'enabled': True}
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     assert config.dbm is True
     assert any("deprecated" in w for w in result.warnings)
 
@@ -153,7 +156,9 @@ def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
 def test_initialize_empty_default_hostname_warns(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['empty_default_hostname'] = True
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     assert any("empty_default_hostname" in w for w in result.warnings)
 
 
@@ -173,7 +178,9 @@ def test_initialize_empty_default_hostname_warns(mock_check, minimal_instance):
 def test_propagate_agent_tags(instance, init_config, should_propagate, mock_check, minimal_instance):
     minimal_instance['propagate_agent_tags'] = instance
     init_config = {'propagate_agent_tags': init_config}
-    config, _ = build_config(instance=minimal_instance, init_config=init_config, check=mock_check)
+    mock_check.instance = minimal_instance
+    mock_check.init_config = init_config
+    config, _ = build_config(check=mock_check)
     assert config.propagate_agent_tags == should_propagate
 
 
@@ -189,7 +196,9 @@ def test_sanitize_config(mock_check, minimal_instance):
             "relation": False,
         }
     ]
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     sanitized = sanitize(config)
     assert sanitized['password'] == '***'
     assert sanitized['ssl_password'] == '***'
@@ -222,7 +231,9 @@ def test_serialize_config(mock_check, minimal_instance):
             'tags': ['query:another_custom_one'],
         },
     ]
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     serialized = json.dumps(sanitize(config))
     assert isinstance(serialized, str)
     assert '"password": "***"' in serialized
@@ -232,7 +243,9 @@ def test_serialize_config(mock_check, minimal_instance):
 def test_valid_string_numbers(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['query_metrics'] = {'collection_interval': '30'}
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     assert result.valid
     assert config.query_metrics.collection_interval == 30
 
@@ -240,9 +253,11 @@ def test_valid_string_numbers(mock_check, minimal_instance):
 def test_invalid_numbers(mock_check, minimal_instance):
     instance = minimal_instance.copy()
     instance['query_metrics'] = {'collection_interval': 'not_a_number'}
-    config, result = build_config(check=mock_check, init_config={}, instance=instance)
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     assert any("query_metrics.collection_interval must be greater than 0" in w for w in result.warnings)
-    assert config.query_metrics.collection_interval == DEFAULT_QUERY_METRICS_COLLECTION_INTERVAL
+    assert config.query_metrics.collection_interval == dict_defaults.instance_query_metrics().collection_interval
 
 
 def test_relations_validation(mock_check, minimal_instance):
@@ -252,7 +267,9 @@ def test_relations_validation(mock_check, minimal_instance):
         {"relation_regex": r"[pP]ersons[-_]?(dup\d)?"},
     ]
 
-    config, result = build_config(check=mock_check, init_config={}, instance=minimal_instance)
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
     assert result.errors == []
     assert result.valid
     assert config.relations == (
@@ -260,3 +277,107 @@ def test_relations_validation(mock_check, minimal_instance):
         # Empty schemas means all schemas, even though the first relation matches first.
         Relations(relation_regex=r"[pP]ersons[-_]?(dup\d)?"),
     )
+
+
+@pytest.mark.parametrize(
+    'section, section_config, expected_collection_interval',
+    [
+        (
+            "query_metrics",
+            {"collection_interval": "not_a_number"},
+            dict_defaults.instance_query_metrics().collection_interval,
+        ),
+        ("query_metrics", {"collection_interval": "0"}, dict_defaults.instance_query_metrics().collection_interval),
+        ("query_metrics", {"collection_interval": "1"}, 1),
+        (
+            "query_samples",
+            {"collection_interval": "not_a_number"},
+            dict_defaults.instance_query_samples().collection_interval,
+        ),
+        ("query_samples", {"collection_interval": "0"}, dict_defaults.instance_query_samples().collection_interval),
+        ("query_samples", {"collection_interval": "1"}, 1),
+        (
+            "query_activity",
+            {"collection_interval": "not_a_number"},
+            dict_defaults.instance_query_activity().collection_interval,
+        ),
+        ("query_activity", {"collection_interval": "0"}, dict_defaults.instance_query_activity().collection_interval),
+        ("query_activity", {"collection_interval": "1"}, 1),
+    ],
+)
+def test_apply_validated_defaults(mock_check, minimal_instance, section, section_config, expected_collection_interval):
+    instance = minimal_instance.copy()
+    instance[section] = {**instance.get(section, {}), **section_config}
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert getattr(config, section).collection_interval == expected_collection_interval
+
+
+def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
+    instance = minimal_instance.copy()
+    instance['ssl'] = 'invalid_ssl'
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.ssl == "allow"
+    assert any("Invalid ssl option" in w for w in result.warnings)
+
+
+@pytest.mark.parametrize(
+    'option, replacement, value',
+    [
+        ('custom_metrics', 'custom_queries', []),
+        ('deep_database_monitoring', 'dbm', True),
+        ('managed_identity', 'azure.managed_authentication', {}),
+        ('statement_samples', 'query_samples', {}),
+        ('collect_default_database', 'postgres', True),
+    ],
+)
+def test_apply_deprecation_warnings(mock_check, minimal_instance, option, replacement, value):
+    instance = minimal_instance.copy()
+    instance[option] = value
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    _, result = build_config(check=mock_check)
+    assert result.valid
+    assert any(deprecation_warning(option, replacement) in w for w in result.warnings)
+
+
+def test_cloud_validations(mock_check, minimal_instance):
+    # AWS
+    instance = minimal_instance.copy()
+    instance['aws'] = {'region': 'us-east-1'}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.aws.managed_authentication.enabled
+
+    # Azure
+    instance = minimal_instance.copy()
+    instance['managed_identity'] = {'client_id': '123'}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.azure.managed_authentication.enabled
+
+
+def test_relations_validation_fails_if_no_relname_or_regex():
+    with pytest.raises(ConfigurationError):
+        RelationsManager.validate_relations_config([{"relkind": ["i"]}])
+
+
+def test_relations_validation_fails_if_schemas_is_wrong_type():
+    with pytest.raises(ConfigurationError):
+        RelationsManager.validate_relations_config([{"relation_name": "person", "schemas": "foo"}])
+
+
+def test_relations_validation_fails_if_relkind_is_wrong_type():
+    with pytest.raises(ConfigurationError):
+        RelationsManager.validate_relations_config([{"relation_name": "person", "relkind": "foo"}])

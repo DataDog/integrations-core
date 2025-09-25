@@ -15,8 +15,6 @@ from datadog_checks.postgres.util import DatabaseConfigurationError, warning_wit
 
 AUTODISCOVERY_QUERY: str = """select datname from pg_catalog.pg_database where datistemplate = false;"""
 DEFAULT_EXCLUDES = ["cloudsqladmin", "rdsadmin", "alloydbadmin", "alloydbmetadata"]
-DEFAULT_MAX_DATABASES = 100
-DEFAULT_REFRESH = 600
 
 
 class PostgresAutodiscovery(Discovery):

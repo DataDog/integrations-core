@@ -89,7 +89,7 @@ def instance_exclude_hostname():
 
 
 def instance_host():
-    return ''
+    return 'localhost'
 
 
 def instance_idle_connection_timeout():
@@ -201,4 +201,4 @@ def instance_use_global_custom_queries():
 
 
 def instance_username():
-    return ''
+    return 'datadog'

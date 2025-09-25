@@ -37,9 +37,9 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "azure-identity==1.23.0",
-    "boto3==1.38.41",
-    "cachetools==6.1.0",
+    "azure-identity==1.24.0",
+    "boto3==1.40.21",
+    "cachetools==6.2.0",
     "psycopg[binary,pool]==3.2.7",
     "semver==3.0.4",
 ]
@@ -63,4 +63,9 @@ include = [
 ]
 dev-mode-dirs = [
     ".",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "snapshot: marks tests as snapshot tests",
 ]

@@ -136,10 +136,6 @@ class StatementTruncationState(Enum):
     unknown = 'unknown'
 
 
-DEFAULT_COLLECTION_INTERVAL = 1
-DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
-
-
 def agent_check_getter(self):
     return self._check
 

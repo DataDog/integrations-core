@@ -150,9 +150,6 @@ def _row_key(row):
     return row['query_signature'], row['datname'], row['rolname']
 
 
-DEFAULT_COLLECTION_INTERVAL = 10
-
-
 class PostgresStatementMetrics(DBMAsyncJob):
     """Collects telemetry for SQL statements"""
 
