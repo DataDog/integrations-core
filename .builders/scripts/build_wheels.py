@@ -168,8 +168,7 @@ def main():
             dependencies[project_name] = project_version
 
 
-            project_sizes = calculate_wheel_sizes(wheel)
-            sizes[project_name] = {'version': project_version, **project_sizes}
+            sizes[project_name] = {'version': project_version, **calculate_wheel_sizes(wheel)}
 
     output_path = MOUNT_DIR / 'sizes.json'
     with output_path.open('w', encoding='utf-8') as fp:
