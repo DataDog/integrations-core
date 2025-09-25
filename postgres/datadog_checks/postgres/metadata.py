@@ -377,8 +377,6 @@ class PostgresMetadata(DBMAsyncJob):
             # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
             chunk_size = 50
 
-            print("Collecting schema metadata for {} databases".format(len(schema_metadata)))
-
             for database in schema_metadata:
                 dbname = database["name"]
                 if not self._should_collect_metadata(dbname, "database"):
@@ -469,11 +467,6 @@ class PostgresMetadata(DBMAsyncJob):
                     )
                 )
                 return True
-            self._log.warning(
-                "Excluding {metadata_type} {name} from metadata collection because of {re_str}".format(
-                    metadata_type=metadata_type, name=name, re_str=re_str
-                )
-            )
         return False
 
     def _flush_schema(self, base_event, database, schema, tables):
