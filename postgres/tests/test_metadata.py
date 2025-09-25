@@ -487,7 +487,6 @@ def test_collect_schemas_multiple_payloads(integration_check, dbm_instance, aggr
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     schema_events = [e for e in dbm_metadata if e['kind'] == 'pg_databases']
-    print("found {} schema events".format(len(schema_events)))
     assert len(schema_events) > 1
     # Check that all the payloads have the same collection_started_at
     collection_started_at = schema_events[0]['collection_started_at']
