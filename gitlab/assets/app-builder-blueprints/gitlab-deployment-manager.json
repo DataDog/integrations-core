@@ -178,36 +178,6 @@
                         },
                         {
                             "events": [],
-                            "name": "gridCell8",
-                            "properties": {
-                                "children": [
-                                    {
-                                        "events": [],
-                                        "name": "text1",
-                                        "properties": {
-                                            "content": "![](https://app-builder-demo.s3.amazonaws.com/gitlab.png)",
-                                            "contentType": "markdown",
-                                            "isVisible": true,
-                                            "textAlign": "left",
-                                            "verticalAlign": "top"
-                                        },
-                                        "type": "text"
-                                    }
-                                ],
-                                "isVisible": "true",
-                                "layout": {
-                                    "default": {
-                                        "height": 15,
-                                        "width": 1,
-                                        "x": 0,
-                                        "y": 0
-                                    }
-                                }
-                            },
-                            "type": "gridCell"
-                        },
-                        {
-                            "events": [],
                             "name": "gridCell4_copy",
                             "properties": {
                                 "children": [
@@ -584,6 +554,36 @@
                                 }
                             },
                             "type": "gridCell"
+                        },
+                        {
+                            "events": [],
+                            "name": "gridCell3",
+                            "properties": {
+                                "children": [
+                                    {
+                                        "events": [],
+                                        "name": "integrationLogo0",
+                                        "properties": {
+                                            "horizontalAlign": "center",
+                                            "integrationId": "gitlab",
+                                            "isLoading": false,
+                                            "isVisible": true,
+                                            "verticalAlign": "center"
+                                        },
+                                        "type": "integrationLogo"
+                                    }
+                                ],
+                                "isVisible": "true",
+                                "layout": {
+                                    "default": {
+                                        "height": 11,
+                                        "width": 1,
+                                        "x": 0,
+                                        "y": 0
+                                    }
+                                }
+                            },
+                            "type": "gridCell"
                         }
                     ]
                 },
@@ -769,7 +769,10 @@
                         "runner": null,
                         "artifacts_expire_at": null,
                         "archived": false,
-                        "tag_list": ["arch:amd64", "specific:true"]
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
                     },
                     "status": "Success"
                 },
@@ -855,7 +858,10 @@
                         "runner": null,
                         "artifacts_expire_at": null,
                         "archived": false,
-                        "tag_list": ["arch:amd64", "specific:true"]
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
                     },
                     "status": "Success"
                 },
@@ -941,7 +947,10 @@
                         "runner": null,
                         "artifacts_expire_at": null,
                         "archived": false,
-                        "tag_list": ["arch:amd64", "specific:true"]
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
                     },
                     "status": "Success"
                 },
@@ -1027,7 +1036,10 @@
                         "runner": null,
                         "artifacts_expire_at": null,
                         "archived": false,
-                        "tag_list": ["arch:amd64", "specific:true"]
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
                     },
                     "status": "Success"
                 },
@@ -1114,7 +1126,10 @@
                         "runner": null,
                         "artifacts_expire_at": null,
                         "archived": false,
-                        "tag_list": ["arch:amd64", "specific:true"]
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
                     },
                     "status": "Success"
                 },
@@ -1198,7 +1213,10 @@
                         "runner": null,
                         "artifacts_expire_at": null,
                         "archived": false,
-                        "tag_list": ["arch:amd64", "specific:true"]
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
                     },
                     "status": "Success"
                 },
@@ -1283,7 +1301,10 @@
                         "runner": null,
                         "artifacts_expire_at": null,
                         "archived": false,
-                        "tag_list": ["arch:amd64", "specific:true"]
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
                     },
                     "status": "Success"
                 },
@@ -1367,7 +1388,10 @@
                         "runner": null,
                         "artifacts_expire_at": null,
                         "archived": false,
-                        "tag_list": ["arch:amd64", "specific:true"]
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
                     },
                     "status": "Success"
                 },
@@ -1451,7 +1475,10 @@
                         "runner": null,
                         "artifacts_expire_at": null,
                         "archived": false,
-                        "tag_list": ["arch:amd64", "specific:true"]
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
                     },
                     "status": "Success"
                 },
@@ -1537,7 +1564,10 @@
                         "runner": null,
                         "artifacts_expire_at": null,
                         "archived": false,
-                        "tag_list": ["arch:amd64", "specific:true"]
+                        "tag_list": [
+                            "arch:amd64",
+                            "specific:true"
+                        ]
                     },
                     "status": "Success"
                 }
@@ -1555,7 +1585,9 @@
     },
     "tile_background": "table",
     "tile_icon_action_fqn": "com.datadoghq.gitlab.getProjectDeployments",
-    "tags": ["software_delivery"],
+    "tags": [
+        "software_delivery"
+    ],
     "embedded_workflow_blueprints": {},
     "embedded_datastore_blueprints": {}
 }

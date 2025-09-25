@@ -226,6 +226,10 @@ instances:
     #
     # collect_count_metrics: true
 
+    ## Configure collection of idle in transaction lock age metrics
+    #
+    # locks_idle_in_transaction:
+
     ## @param collect_checksum_metrics - boolean - optional - default: false
     ## Collect counts of database failed checksums. Only supported on versions >= 12.
     #
@@ -530,10 +534,10 @@ instances:
     #
     # collect_settings:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of pg_settings. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collection_interval - number - optional - default: 600
         ## Set the database settings collection interval (in seconds). Each collection involves a single query to

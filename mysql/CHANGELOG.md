@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 15.8.0 / 2025-09-05
+
+***Added***:
+
+* Update core tags with agent host name for DB integrations(postgres, mysql, sqlserver) ([#20991](https://github.com/DataDog/integrations-core/pull/20991))
+* Enable collect_settings by default for DBM enabled integrations ([#21172](https://github.com/DataDog/integrations-core/pull/21172))
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+***Fixed***:
+
+* Fix innodb buffer pool utilization metrics collection for Aurora MySQL reader instances by ensuring `process_innodb_stats` runs even when `SHOW ENGINE INNODB STATUS` is skipped ([#21190](https://github.com/DataDog/integrations-core/pull/21190))
+* Properly cleanup schema metadata memory references after all collection cycles ([#21198](https://github.com/DataDog/integrations-core/pull/21198))
+
+## 15.7.3 / 2025-08-25 / Agent 7.70.0
+
+***Fixed***:
+
+* Change statement_rows to TTL cache to fix mysql memory leaks ([#21097](https://github.com/DataDog/integrations-core/pull/21097))
+
 ## 15.7.2 / 2025-08-07
 
 ***Fixed***:
