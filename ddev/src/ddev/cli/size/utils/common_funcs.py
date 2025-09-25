@@ -574,8 +574,10 @@ def save_html(
     """
     if modules == []:
         return
+
     MAX_HTML_SIZE = 65536  # PR comment size max
     html = str()
+
     groups = group_modules(modules)
 
     html_headers = "<h3>Size Changes</h3>"
@@ -669,6 +671,8 @@ def print_table(
     columns = [col for col in modules[0].keys() if "Bytes" not in col]
     modules_table: dict[str, dict[int, str]] = {col: {} for col in columns}
     for i, row in enumerate(modules):
+        if row.get("Size_Bytes") == 0:
+            continue
         for key in columns:
             modules_table[key][i] = str(row.get(key, ""))
 
@@ -1236,12 +1240,10 @@ def get_artifact(
 @cache
 def get_sizes_json_from_artifacts(
     commit: str,
-    platform: str,
     dir: str | None = None,
     compressed: bool | None = None,
     extension: str | None = "json",
 ) -> dict[str, Path | None]:
-    print(f"Getting dependency sizes json for {commit=}, {platform=}")
     compression = "compressed" if compressed else "uncompressed"
     artifact_name = f'status_{compression}.{extension}' if extension == "json" else f'{compression}_status.{extension}'
     print(f"Artifact name: {artifact_name}")
@@ -1261,10 +1263,10 @@ def get_sizes_json_from_artifacts(
 
 @cache
 def get_previous_dep_sizes_json(commit: str, platform: str, compressed: bool | None = None) -> Path | None:
-    sizes_json = get_sizes_json_from_artifacts(commit, platform, compressed)
+    sizes_json = get_sizes_json_from_artifacts(commit, compressed)
     if not sizes_json["compressed"] or not sizes_json["uncompressed"]:
         return None
-    sizes = parse_dep_sizes_json(sizes_json["compressed"], sizes_json["uncompressed"])
+    sizes = parse_dep_sizes_json(sizes_json["compressed"], sizes_json["uncompressed"], platform)
     output_path = Path(f'{platform}.json')
     output_path.write_text(json.dumps(sizes, indent=2))
     print(f"Wrote merged sizes json to {output_path}")
@@ -1272,7 +1274,7 @@ def get_previous_dep_sizes_json(commit: str, platform: str, compressed: bool | N
 
 
 @cache
-def parse_dep_sizes_json(compressed_json_path: Path, uncompressed_json_path: Path) -> dict[str, dict[str, int]]:
+def parse_dep_sizes_json(compressed_json_path: Path, uncompressed_json_path: Path, platform: str) -> dict[str, dict[str, int]]:
     compressed_list = list(json.loads(compressed_json_path.read_text()))
     uncompressed_list = list(json.loads(uncompressed_json_path.read_text()))
 
@@ -1282,11 +1284,11 @@ def parse_dep_sizes_json(compressed_json_path: Path, uncompressed_json_path: Pat
             "version": dep.get("Version"),
         }
         for dep in compressed_list
-        if dep.get("Type") == "Dependency"
+        if dep.get("Type") == "Dependency" and dep.get("Platform") == platform
     }
 
     for dep in uncompressed_list:
-        if dep.get("Type") == "Dependency":
+        if dep.get("Type") == "Dependency" and dep.get("Platform") == platform:
             name = dep["Name"]
             entry = sizes_json.setdefault(name, {"version": dep.get("Version")})
             entry["uncompressed"] = int(dep["Size_Bytes"])

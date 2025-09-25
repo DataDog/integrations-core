@@ -100,6 +100,7 @@ def diff(
 
         if not old_commit:
             old_commit = app.repo.git.merge_base(new_commit, "origin/master")
+            print("Comparing to commit: ", old_commit)
         if use_artifacts:
             for plat, ver in combinations:
                 parameters_artifacts: CLIParameters = {
@@ -237,14 +238,15 @@ def get_sizes_from_artifacts(
 
     with tempfile.TemporaryDirectory() as temp_dir:
         print(f"Temporary directory: {temp_dir}")
-        sizes_json = get_sizes_json_from_artifacts(commit, platform, temp_dir, compressed, extension)
+        sizes_json = get_sizes_json_from_artifacts(commit, temp_dir, compressed, extension)
         compression = "compressed" if compressed else "uncompressed"
         if not sizes_json[compression]:
             app.abort(f"Sizes not found for {commit=}, {platform=}, {compressed=}")
             return []
         if extension == "json" and sizes_json[compression]:
             modules_json: list[FileDataEntry] = list(json.loads(sizes_json[compression].read_text()))
-            return modules_json
+            filtered_modules_json = [module for module in modules_json if module.get("Platform") == platform]
+            return filtered_modules_json
         elif extension == "csv" and sizes_json[compression]:
             # Assume CSV
             import csv
@@ -252,8 +254,8 @@ def get_sizes_from_artifacts(
             modules_csv: list[FileDataEntry] = []
             with open(sizes_json[compression], newline="", encoding="utf-8") as csvfile:
                 modules_csv = list(csv.DictReader(csvfile))
-
-            return modules_csv
+            filtered_modules_csv = [module for module in modules_csv if module.get("Platform") == platform]
+            return filtered_modules_csv
         return []
 
 
