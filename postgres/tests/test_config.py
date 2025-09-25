@@ -278,17 +278,33 @@ def test_relations_validation(mock_check, minimal_instance):
         Relations(relation_regex=r"[pP]ersons[-_]?(dup\d)?"),
     )
 
-@pytest.mark.parametrize('section, section_config, expected_collection_interval', [
-    ("query_metrics", {"collection_interval": "not_a_number"}, dict_defaults.instance_query_metrics().collection_interval),
-    ("query_metrics", {"collection_interval": "0"}, dict_defaults.instance_query_metrics().collection_interval),
-    ("query_metrics", {"collection_interval": "1"}, 1),
-    ("query_samples", {"collection_interval": "not_a_number"}, dict_defaults.instance_query_samples().collection_interval),
-    ("query_samples", {"collection_interval": "0"}, dict_defaults.instance_query_samples().collection_interval),
-    ("query_samples", {"collection_interval": "1"}, 1),
-    ("query_activity", {"collection_interval": "not_a_number"}, dict_defaults.instance_query_activity().collection_interval),
-    ("query_activity", {"collection_interval": "0"}, dict_defaults.instance_query_activity().collection_interval),
-    ("query_activity", {"collection_interval": "1"}, 1),
-])
+
+@pytest.mark.parametrize(
+    'section, section_config, expected_collection_interval',
+    [
+        (
+            "query_metrics",
+            {"collection_interval": "not_a_number"},
+            dict_defaults.instance_query_metrics().collection_interval,
+        ),
+        ("query_metrics", {"collection_interval": "0"}, dict_defaults.instance_query_metrics().collection_interval),
+        ("query_metrics", {"collection_interval": "1"}, 1),
+        (
+            "query_samples",
+            {"collection_interval": "not_a_number"},
+            dict_defaults.instance_query_samples().collection_interval,
+        ),
+        ("query_samples", {"collection_interval": "0"}, dict_defaults.instance_query_samples().collection_interval),
+        ("query_samples", {"collection_interval": "1"}, 1),
+        (
+            "query_activity",
+            {"collection_interval": "not_a_number"},
+            dict_defaults.instance_query_activity().collection_interval,
+        ),
+        ("query_activity", {"collection_interval": "0"}, dict_defaults.instance_query_activity().collection_interval),
+        ("query_activity", {"collection_interval": "1"}, 1),
+    ],
+)
 def test_apply_validated_defaults(mock_check, minimal_instance, section, section_config, expected_collection_interval):
     instance = minimal_instance.copy()
     instance[section] = {**instance.get(section, {}), **section_config}
@@ -297,6 +313,7 @@ def test_apply_validated_defaults(mock_check, minimal_instance, section, section
     config, result = build_config(check=mock_check)
     assert result.valid
     assert getattr(config, section).collection_interval == expected_collection_interval
+
 
 def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
     instance = minimal_instance.copy()
@@ -308,13 +325,17 @@ def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
     assert config.ssl == "allow"
     assert any("Invalid ssl option" in w for w in result.warnings)
 
-@pytest.mark.parametrize('option, replacement, value', [
-    ('custom_metrics', 'custom_queries', []),
-    ('deep_database_monitoring', 'dbm', True),
-    ('managed_authentication', 'azure.managed_authentication', True),
-    ('statement_samples', 'query_samples', {}),
-    ('collect_default_database', 'postgres', True),
-])
+
+@pytest.mark.parametrize(
+    'option, replacement, value',
+    [
+        ('custom_metrics', 'custom_queries', []),
+        ('deep_database_monitoring', 'dbm', True),
+        ('managed_identity', 'azure.managed_authentication', {}),
+        ('statement_samples', 'query_samples', {}),
+        ('collect_default_database', 'postgres', True),
+    ],
+)
 def test_apply_deprecation_warnings(mock_check, minimal_instance, option, replacement, value):
     instance = minimal_instance.copy()
     instance[option] = value
@@ -323,6 +344,28 @@ def test_apply_deprecation_warnings(mock_check, minimal_instance, option, replac
     _, result = build_config(check=mock_check)
     assert result.valid
     assert any(deprecation_warning(option, replacement) in w for w in result.warnings)
+
+
+def test_cloud_validations(mock_check, minimal_instance):
+    # AWS
+    instance = minimal_instance.copy()
+    instance['aws'] = {'region': 'us-east-1'}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.aws.managed_authentication.enabled
+
+    # Azure
+    instance = minimal_instance.copy()
+    instance['managed_identity'] = {'client_id': '123'}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.azure.managed_authentication.enabled
 
 
 def test_relations_validation_fails_if_no_relname_or_regex():

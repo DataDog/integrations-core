@@ -191,8 +191,7 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
         validation_result.add_error(error)
 
     # Apply various validations and fallbacks
-    apply_validated_defaults(args, validation_result)
-    apply_cloud_validations(args, instance, validation_result)
+    apply_validated_defaults(args, instance, validation_result)
     apply_deprecation_warnings(instance, validation_result)
 
     # Check user provided value because the default configuration would trigger this warning
@@ -215,6 +214,7 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     # The current InstanceConfig cannot be instantiated directly and integrations team is reluctant to fix it
     # in case existing integrations use the faulty behavior.
     # Instead we copy the behavior of the base check and instantiate this way
+    print("Creating config with args", args)
     config = InstanceConfig.model_validate(args, context={"configured_fields": instance_config_fields})
 
     validate_config(config, instance, validation_result)
@@ -269,7 +269,7 @@ def build_tags(instance: dict, init_config: dict, config: dict) -> Tuple[list[st
     return tags, errors
 
 
-def apply_validated_defaults(args: dict, validation_result: ValidationResult):
+def apply_validated_defaults(args: dict, instance: dict, validation_result: ValidationResult):
     # Check provided values and revert to defaults if they are invalid
 
     # Validate config arguments for invalid or deprecated options
@@ -299,62 +299,71 @@ def apply_validated_defaults(args: dict, validation_result: ValidationResult):
             f"query_activity.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
+    if args.get('collect_default_database'):
+        args['ignore_databases'] = [d for d in args['ignore_databases'] if d != 'postgres']
+
+    apply_cloud_defaults(args, instance, validation_result)
+
+
+def apply_cloud_defaults(args: dict, instance: dict, validation_result: ValidationResult):
+    # AWS backfill and validation
+    if (
+        not instance.get("aws", {}).get("managed_authentication", None)
+        and args.get('aws', {}).get('region')
+        and not args.get('password')
+    ):
+        # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
+        args['aws'] = {
+            **args['aws'],
+            'managed_authentication': {**args['aws'].get('managed_authentication', {}), 'enabled': True},
+        }
+
+    if args.get('aws', {}).get('managed_authentication', {}).get('enabled') and not args.get('aws', {}).get('region'):
+        validation_result.add_error('AWS region must be set when using AWS managed authentication')
+
+    # Azure backfill and validation
+    if instance.get("managed_identity"):
+        args['azure'] = {
+            **args.get('azure', {}),
+            'managed_authentication': {
+                **args.get('azure', {}).get('managed_authentication', {}),
+                **instance.get('managed_identity', {}),
+            },
+        }
+
+    if not instance.get("azure", {}).get("managed_authentication", None) and (
+        args.get('azure', {}).get('managed_authentication', {}).get('client_id')
+        or instance.get('managed_identity', {}).get('client_id')
+    ):
+        # if managed_authentication is not set, we assume it is enabled if client_id is set
+        args['azure'] = {
+            **args.get('azure', {}),
+            'managed_authentication': {**args.get('azure', {}).get('managed_authentication', {}), 'enabled': True},
+        }
+
+    if args.get('azure', {}).get('managed_authentication', {}).get('enabled') and not args.get('azure', {}).get(
+        'managed_authentication', {}
+    ).get('client_id'):
+        validation_result.add_error('Azure client_id must be set when using Azure managed authentication')
+
+
 def deprecation_warning(option: str, replacement: str):
-    return        f'The `{option}` option is deprecated. Use `{replacement}` instead.'
-    
+    return f'The `{option}` option is deprecated. Use `{replacement}` instead.'
+
 
 def apply_deprecation_warnings(instance: dict, validation_result: ValidationResult):
     # Simple deprecated options
     deprecations = [
         ['custom_metrics', 'custom_queries'],
         ['deep_database_monitoring', 'dbm'],
-        ['managed_authentication', 'azure.managed_authentication'],
+        ['managed_identity', 'azure.managed_authentication'],
         ['statement_samples', 'query_samples'],
         ['collect_default_database', 'postgres'],
     ]
-    
+
     for deprecation in deprecations:
         if deprecation[0] in instance:
             validation_result.add_warning(deprecation_warning(deprecation[0], deprecation[1]))
-
-
-def apply_cloud_validations(args: dict, instance: dict, validation_result: ValidationResult):
-    # AWS backfill and validation
-    if (
-        not instance.get("aws", {}).get("managed_authentication", None)
-        and args['aws'].get('region')
-        and not args['password']
-    ):
-        # if managed_authentication is not set, we assume it is enabled if region is set and password is not set
-        args['aws']['managed_authentication']['enabled'] = True
-
-    if args['aws']['managed_authentication']['enabled'] and not args['aws']['region']:
-        validation_result.add_error('AWS region must be set when using AWS managed authentication')
-
-    # Azure backfill and validation
-    if not instance.get("azure", {}).get("managed_authentication", None) and (
-        args['azure'].get('managed_authentication', {}).get('client_id')
-        or instance.get('managed_identity', {}).get('client_id')
-    ):
-        # if managed_authentication is not set, we assume it is enabled if client_id is set
-        args['azure']['managed_authentication']['enabled'] = True
-
-    if instance.get("managed_identity"):
-        validation_result.add_warning(
-            'The `managed_identity` option is deprecated. Use `azure.managed_authentication` instead.'
-        )
-        args['azure']['managed_authentication'] = {
-            **args['azure']['managed_authentication'],
-            **instance.get('managed_identity', {}),
-        }
-
-    if args['azure'].get('managed_authentication', {}).get('enabled') and not args['azure'].get(
-        'managed_authentication', {}
-    ).get('client_id'):
-        validation_result.add_error('Azure client_id must be set when using Azure managed authentication')
-
-    if args.get('collect_default_database'):
-        args['ignore_databases'] = [d for d in args['ignore_databases'] if d != 'postgres']
 
 
 def validate_config(config: InstanceConfig, instance: dict, validation_result: ValidationResult):
