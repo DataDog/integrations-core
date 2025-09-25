@@ -36,3 +36,12 @@ def write_result_file(mocker):
         return _write
 
     return _write_result_file
+
+
+@pytest.fixture(autouse=True)
+def mock_repo_worktrees(mocker):
+    from ddev.utils.git import GitRepository
+
+    # Patch 'worktrees' on the Repository class
+    # For all instances, it will now return an empty list, bypassing the git call.
+    mocker.patch.object(GitRepository, "worktrees", return_value=[])
