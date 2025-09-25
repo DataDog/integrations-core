@@ -158,11 +158,10 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `email`, `actor.details.email` to `usr.email`
+          name: Map `email` to `usr.email`
           enabled: true
           sources:
             - email
-            - actor.details.email
           sourceType: attribute
           target: usr.email
           targetType: attribute
