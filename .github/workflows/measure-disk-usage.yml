@@ -17,7 +17,7 @@ jobs:
       platforms: ${{ steps.set.outputs.platforms }}
     steps:
       - id: set
-        run: echo 'platforms=["macos-x86_64","macos-aarch64","linux-aarch64","linux-x86_64","windows-x86_64"]' >> "$GITHUB_OUTPUT" 
+        run: echo 'platforms=["macos-x86_64","macos-aarch64","linux-aarch64","linux-x86_64","windows-x86_64"]' >> "$GITHUB_OUTPUT"
 
   measure-disk-usage:
     runs-on: ubuntu-22.04
@@ -51,20 +51,19 @@ jobs:
     - name: Measure disk usage
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        DD_API_KEY: ${{ secrets.DD_API_KEY}}
       run: |
         cmd="ddev size status \
         --dependency-commit ${{github.event.pull_request.head.sha }} \
         --format json"
-        
+
         # TODO: change to ${{ github.event.workflow_run.head_sha }}
         # Send metrics to Datadog only on push to master
 
-        # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
+        # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then
         #   cmd="$cmd --to-dd-key $DD_API_KEY"
         # fi
-        
-        $cmd --to-dd-key $DD_API_KEY
+
+        $cmd --to-dd-key ${{ secrets.DD_API_KEY}}
         $cmd --compressed
 
     - name: Upload JSON uncompressed sizes artifact
@@ -73,13 +72,13 @@ jobs:
         name: status_uncompressed.json
         path: status_uncompressed.json
         if-no-files-found: error
-  
+
     - name: Upload JSON compressed sizes artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: status_compressed.json
         path: status_compressed.json
-        if-no-files-found: error        
+        if-no-files-found: error
 
   calculate-diff:
     runs-on: ubuntu-22.04
@@ -136,17 +135,17 @@ jobs:
         direction: last
 
     - name: Delete last comment
-      if: github.event_name == 'pull_request' && steps.check_diff.outputs.passed == 'false' && steps.find_comment.outputs.comment-id != '' 
+      if: github.event_name == 'pull_request' && steps.check_diff.outputs.passed == 'false' && steps.find_comment.outputs.comment-id != ''
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
       with:
           script: |
-            const commentId = ${{ steps.find_comment.outputs.comment-id }};            
+            const commentId = ${{ steps.find_comment.outputs.comment-id }};
             await github.rest.issues.deleteComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: commentId,
               });
-    
+
     - name: Create comment
       if: github.event_name == 'pull_request' && steps.check_diff.outputs.passed == 'false'
       run: |
