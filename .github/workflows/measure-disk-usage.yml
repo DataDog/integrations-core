@@ -108,8 +108,8 @@ jobs:
     - name: Configure ddev
       run: |
             ddev config override
-            # ddev config set orgs.default.site datadoghq.com --overrides
-            # ddev config set orgs.default.api_key "${{ secrets.DD_API_KEY }}" --overrides
+            ddev config set orgs.default.site datadoghq.com --overrides
+            ddev config set orgs.default.api_key "${{ secrets.DD_API_KEY }}" --overrides
             ddev config show
 
     - name: Calculate diff
