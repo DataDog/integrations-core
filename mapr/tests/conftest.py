@@ -28,8 +28,8 @@ E2E_METADATA = {
         "https://packages.confluent.io/clients/deb $(lsb_release -cs) main\" "
         "> /etc/apt/sources.list.d/confluent.list'",
         # Configure apt to ignore certificate verification issues for this repository
-        'sh -c "echo \'Acquire::https::packages.confluent.io::Verify-Peer "false";\' > /etc/apt/apt.conf.d/99confluent-verify-peer"',
-        'sh -c "echo \'Acquire::https::packages.confluent.io::Verify-Host "false";\' >> /etc/apt/apt.conf.d/99confluent-verify-peer"',
+        'sh -c "echo \'Acquire::https::packages.confluent.io::Verify-Peer "false";\' > /etc/apt/apt.conf.d/99confluent-verify-peer"',  # noqa: E501
+        'sh -c "echo \'Acquire::https::packages.confluent.io::Verify-Host "false";\' >> /etc/apt/apt.conf.d/99confluent-verify-peer"',  # noqa: E501
         'apt-get update',
         # Install librdkafka-dev (latest available version)
         'apt-get install -y librdkafka-dev',
