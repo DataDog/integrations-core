@@ -108,9 +108,10 @@ def status(
             from ddev.cli.size.utils.common_funcs import export_format
 
             export_format(app, format, modules_plat_ver, "status", platform, version, compressed)
+
         if to_dd_org or to_dd_key:
             from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
-
+            print("Sending metrics to Datadog ")
             mode: Literal["status"] = "status"
             commits = [dependency_commit] if dependency_commit else None
             print(f"Sending metrics to Datadog for commits: {commits}")

@@ -131,6 +131,8 @@ jobs:
     if: github.event_name == 'pull_request' && needs.calculate-diff.outputs.passed == 'false'
     needs:
       - calculate-diff
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - name: Find last comment
       uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
