@@ -2,14 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-MOCK_INSTANCES = {
-    "NTDS": ["NTDS"],
-    "Netlogon": ["_Total"],
-    "Security System-Wide Statistics": ["_Total"],
-    "DHCP Server": ["_Total"],
-    "DFS Replicated Folders": ["InstanceOne", "InstanceTwo"],
-}
-
 # This is a complete mock database of all counters the check knows about.
 # This prevents the "None of the specified counters are installed" error.
 PERFORMANCE_OBJECTS = {

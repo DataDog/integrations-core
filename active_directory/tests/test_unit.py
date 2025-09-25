@@ -9,20 +9,9 @@ from datadog_checks.dev.testing import requires_windows
 from datadog_checks.dev.utils import get_metadata_metrics
 
 # Import the mock data we will use for our tests
-from .common import MOCK_INSTANCES, PERFORMANCE_OBJECTS
+from .common import PERFORMANCE_OBJECTS
 
 pytestmark = [requires_windows]
-
-
-def mock_expand_counter_path(wildcard_path):
-    """
-    This helper replaces the problematic `ExpandCounterPath`.
-    It satisfies the base check's instance discovery mechanism.
-    """
-    object_name = wildcard_path.strip("\\").split("(")[0]
-    if object_name in MOCK_INSTANCES:
-        return [f"\\{object_name}({instance})\\" for instance in MOCK_INSTANCES[object_name]]
-    return []
 
 
 @pytest.fixture
@@ -131,7 +120,7 @@ def test_no_existing_services(
 def test_metadata_metrics(aggregator, dd_run_check, mock_performance_objects, mock_service_states, dd_default_hostname):
     """Test that check respects metadata definitions."""
     mock_performance_objects(PERFORMANCE_OBJECTS)
-    mock_service_states(dict.fromkeys(MOCK_INSTANCES, True))
+    mock_service_states({'NTDS': True, 'Netlogon': True, 'DHCPServer': True, 'DFSR': True})
 
     check = ActiveDirectoryCheckV2("active_directory", {}, [{"host": dd_default_hostname}])
     dd_run_check(check)
