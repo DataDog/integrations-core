@@ -33,6 +33,7 @@ def test_e2e_profile_fortinet(dd_agent_check):
         "snmp_device:" + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ]
 
     # --- TEST METRICS ---
@@ -50,6 +51,7 @@ def test_e2e_profile_fortinet(dd_agent_check):
         "status": 1,
         "sys_object_id": "1.3.6.1.4.1.12356.103.1",
         "tags": [
+            'agent_host:' + common.get_agent_hostname(),
             "device_ip:" + ip_address,
             "device_id:default:" + ip_address,
             "device_namespace:default",

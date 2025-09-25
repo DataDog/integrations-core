@@ -32,6 +32,7 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
         'device_vendor:chatsworth',
     ] + [
         'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',

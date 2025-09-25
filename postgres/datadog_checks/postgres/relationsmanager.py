@@ -30,16 +30,7 @@ RELKIND = 'relkind'
 
 # The view pg_locks provides access to information about the locks held by active processes within the database server.
 LOCK_METRICS = {
-    'descriptors': [
-        ('mode', 'lock_mode'),
-        ('locktype', 'lock_type'),
-        ('nspname', 'schema'),
-        ('datname', 'db'),
-        ('relname', 'table'),
-        ('granted', 'granted'),
-        ('fastpath', 'fastpath'),
-    ],
-    'metrics': {'lock_count': ('locks', AgentCheck.gauge)},
+    'name': 'pg_locks',
     'query': """
 SELECT mode,
        locktype,
@@ -48,17 +39,25 @@ SELECT mode,
        pc.relname,
        granted,
        fastpath,
-       count(*) AS {metrics_columns}
+       count(*)
   FROM pg_locks l
-  JOIN pg_database pd ON (l.database = pd.oid)
-  JOIN pg_class pc ON (l.relation = pc.oid)
+  LEFT JOIN pg_database pd ON (l.database = pd.oid)
+  LEFT JOIN pg_class pc ON (l.relation = pc.oid)
   LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
- WHERE {relations}
+ WHERE (pc IS NULL OR ({relations} AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'))
    AND l.mode IS NOT NULL
-   AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
- GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted, fastpath""",
-    'relation': True,
-    'name': 'lock_metrics',
+ GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted, fastpath
+""",
+    'columns': [
+        {'name': 'lock_mode', 'type': 'tag'},
+        {'name': 'lock_type', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag_not_null'},
+        {'name': 'db', 'type': 'tag_not_null'},
+        {'name': 'table', 'type': 'tag_not_null'},
+        {'name': 'granted', 'type': 'tag'},
+        {'name': 'fastpath', 'type': 'tag'},
+        {'name': 'locks', 'type': 'gauge'},
+    ],
 }
 
 
@@ -415,8 +414,8 @@ INDEX_BLOAT = {
     'name': 'index_bloat_metrics',
 }
 
-RELATION_METRICS = [LOCK_METRICS, STATIO_METRICS]
-DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS]
+RELATION_METRICS = [STATIO_METRICS]
+DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS, LOCK_METRICS]
 
 
 class RelationsManager(object):

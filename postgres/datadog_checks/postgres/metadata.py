@@ -250,7 +250,7 @@ class PostgresMetadata(DBMAsyncJob):
         )
         self._check = check
         self._config = config
-        self.db_pool = self._check.db_pool
+        # self.db_pool = self._check.db_pool
         self._collect_pg_settings_enabled = config.collect_settings.enabled
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
@@ -263,6 +263,10 @@ class PostgresMetadata(DBMAsyncJob):
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
+
+    @property
+    def db_pool(self):
+        return self._check.db_pool
 
     def _dbtags(self, db, *extra_tags):
         """

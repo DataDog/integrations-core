@@ -48,10 +48,13 @@ pipeline:
         - '2017-11-07 17:37:22 UTC FATAL:  role "myrole" does not exist'
         - '2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;'
         - '2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter'
+        - '2025-09-15 19:05:58.892 UTC:10.0.216.218(36378):shopper_1@dbmorders_1:[20337]:395:00000:2025-09-15 19:02:57 UTC:384/39221:0:68c862e1.4f71:[unknown]:LOCATION:  exec_simple_query, postgres.c:1075'
+        - '2025-09-16 18:26:45.429 UTC:192.168.65.1(31674):postgres@postgres:[87]:34853:00000:2025-09-16 18:25:58 UTC:5/2050:2823:68c9abb6.57:pgbench:LOG:  duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);'
       grok:
         supportRules: |
           _timestamp %{date("yyyy-MM-dd HH:mm:ss z"):db.date}
           _timestamp_ms %{date("yyyy-MM-dd HH:mm:ss.SSS z"):db.date}
+          _betimestamp %{date("yyyy-MM-dd HH:mm:ss z"):db.backend_start}
           _database %{notSpace:db.instance}
           _raw_query %{data:db.statement}
           _duration %{numberExt:duration}
@@ -67,6 +70,11 @@ pipeline:
           suggested_format_with_duration %{_prefix} %{_severity}:\s+duration:\s+%{_duration}\s+ms\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
 
           suggested_format %{_prefix} %{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+
+          #See RDS documentation for more data-rich format
+          enhanced_rds_with_duration %{_timestamp_ms}:%{_client_ip}\(%{port:network.client.port:integer}\):%{_user}@%{_database}:\[%{_proc_id}\]:%{integer:session_lineno}:%{notSpace:sql_state}:%{_betimestamp}:%{regex("[^:]+"):postgres.vxid}:%{regex("[^:]+"):postgres.xid}:%{regex("[^:]+"):postgres.session_id}:(%{regex("[^:]+"):postgres.appname})?:%{_severity}:\s+duration:\s+%{_duration}\s+ms\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
+
+          enhanced_rds %{_timestamp_ms}:%{_client_ip}\(%{port:network.client.port:integer}\):%{_user}@%{_database}:\[%{_proc_id}\]:%{integer:session_lineno}:%{notSpace:sql_state}:%{_betimestamp}:%{regex("[^:]+"):postgres.vxid}:%{regex("[^:]+"):postgres.xid}:%{regex("[^:]+"):postgres.session_id}:(%{regex("[^:]+"):postgres.appname})?:%{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
 
           default_format (%{_timestamp}|%{_timestamp_ms} \[%{_proc_id}])\s+%{_severity}:\s+(%{regex("statement:")}\s+%{_raw_query}|%{data:msg})
 
