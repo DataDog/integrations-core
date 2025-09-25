@@ -81,10 +81,10 @@ METRICS_CONFIG = {
         'name': 'dhcp',
         'counters': [
             {
-                'Failover: BndUpd Dropped': {'name': 'failover.binding_updates_dropped', 'type': 'count'},
-                'Failover: BndUpd pending in outbound queue': 'failover.binding_updates_pending',
-                'Failover: BndUpd received/sec': {'name': 'failover.binding_updates_received', 'type': 'rate'},
-                'Failover: BndUpd sent/sec': {'name': 'failover.binding_updates_sent', 'type': 'rate'},
+                'Failover: BndUpd Dropped.': {'name': 'failover.binding_updates_dropped', 'type': 'count'},
+                'Failover: BndUpd pending in outbound queue.': 'failover.binding_updates_pending',
+                'Failover: BndUpd received/sec.': {'name': 'failover.binding_updates_received', 'type': 'rate'},
+                'Failover: BndUpd sent/sec.': {'name': 'failover.binding_updates_sent', 'type': 'rate'},
             }
         ],
     },
