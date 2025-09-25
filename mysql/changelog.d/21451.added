@@ -1,0 +1,1 @@
+Adds a new metric `mysql.performance.errors_raised` which reports back a monotonic count of errors from `performance_schema.events_errors_summary_global_by_error` table where available

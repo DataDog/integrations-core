@@ -156,6 +156,7 @@ mysql.performance.created_tmp_disk_tables,gauge,,table,second,The rate of intern
 mysql.performance.created_tmp_files,gauge,,file,second,The rate of temporary files created by second.,-1,mysql,tmp files created,
 mysql.performance.created_tmp_tables,gauge,,table,second,The rate of internal temporary tables created by second by the server while executing statements.,0,mysql,tmp tables created,
 mysql.performance.digest_95th_percentile.avg_us,gauge,,microsecond,,Query response time 95th percentile per schema.,0,mysql,mysql response time 95th,
+mysql.performance.errors_raised,count,,error,,"The number of errors raised per error code and name. Tags: `error_number`, `error_name`",0,mysql,errors raised,
 mysql.performance.handler_commit,gauge,,operation,second,The number of internal COMMIT statements.,0,mysql,mysql performance handler_commit,
 mysql.performance.handler_delete,gauge,,operation,second,The number of internal DELETE statements.,0,mysql,mysql performance handler_delete,
 mysql.performance.handler_prepare,gauge,,operation,second,The number of internal PREPARE statements.,0,mysql,mysql performance handler_prepare,
