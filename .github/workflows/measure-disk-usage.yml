@@ -64,7 +64,7 @@ jobs:
         # fi
         
         # $cmd --to-dd-key ${{ secrets.DD_API_KEY }}
-
+        $cmd
         $cmd --compressed
 
     - name: Upload JSON uncompressed sizes artifact
