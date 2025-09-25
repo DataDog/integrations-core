@@ -981,7 +981,7 @@ def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: 
 @cache
 def get_dep_sizes_json(current_commit: str, platform: str) -> Path | None:
     '''
-    Get the dependency sizes json for a given commit and platform when dependencies were resolved.
+    Gets the dependency sizes json for a given commit and platform when dependencies were resolved.
     '''
     print(f"Getting dependency sizes json for commit: {current_commit}, platform: {platform}")
     run_id = get_run_id(current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
@@ -1027,7 +1027,7 @@ def get_run_id(commit: str, workflow: str) -> str | None:
 @cache
 def get_current_sizes_json(run_id: str, platform: str) -> Path | None:
     '''
-    Downloads the dependency sizes json for a given run id and platform when dependencies were built.
+    Downloads the dependency sizes json for a given run id and platform when dependencies were resolved.
     '''
     print(f"Getting current sizes json for run_id={run_id}, platform={platform}")
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -1096,7 +1096,7 @@ def get_artifact(run_id: str, artifact_name: str) -> Path | None:
 @cache
 def get_previous_dep_sizes_json(base_commit: str) -> dict[str, Path] | None:
     '''
-    Gets the previous dependency sizes json for a given commit when dependencies were not built.
+    Gets the dependency sizes for a given commit when dependencies were not resolved.
     '''
     print(f"Getting previous dependency sizes json for {base_commit=}")
     run_id = get_run_id(base_commit, MEASURE_DISK_USAGE_WORKFLOW)
