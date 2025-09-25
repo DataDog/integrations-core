@@ -230,6 +230,7 @@ def test_statement_metrics_prepared_statements(
     else:
         assert len(matching_rows) == 0, "no rows for prepared statement"
 
+
 def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instance, datadog_agent):
     query_one = 'select * from information_schema.processlist where state in (\'starting\')'
     query_two = 'select * from information_schema.processlist where state in (\'starting\', \'Waiting on empty queue\')'
