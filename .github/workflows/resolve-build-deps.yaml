@@ -291,6 +291,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      pull-requests: write
     needs:
       # - build
       - build-macos

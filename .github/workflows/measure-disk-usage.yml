@@ -85,6 +85,8 @@ jobs:
     needs:
       - set-platforms
       - measure-disk-usage
+    permissions:
+      pull-requests: write
     outputs:
       passed: ${{ steps.check_diff.outputs.passed }}
     steps:

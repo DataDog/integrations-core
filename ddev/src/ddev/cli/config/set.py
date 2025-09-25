@@ -55,9 +55,8 @@ def validate_final_config(app: Application, overrides: bool, config: dict[str, A
 @click.argument('key')
 @click.argument('value', required=False)
 @click.option('--overrides', is_flag=True, help='Set the value in the local config file (.ddev.toml)')
-@click.option('--quiet', is_flag=True, help='Do not display the new setting')
 @click.pass_obj
-def set_value(app: Application, key: str, value: str | None, overrides: bool, quiet: bool):
+def set_value(app: Application, key: str, value: str | None, overrides: bool):
     """
     Assign values to config file entries. If the value is omitted,
     you will be prompted, with the input hidden if it is sensitive.
@@ -134,6 +133,5 @@ def set_value(app: Application, key: str, value: str | None, overrides: bool, qu
 
     from rich.syntax import Syntax
 
-    if not quiet:
-        app.display_success('New setting:')
-        app.output(Syntax(rendered_changed, 'toml', background_color='default'))
+    app.display_success('New setting:')
+    app.output(Syntax(rendered_changed, 'toml', background_color='default'))
