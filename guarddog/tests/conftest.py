@@ -5,7 +5,6 @@ from copy import deepcopy
 
 import pytest
 
-
 INSTANCE = {
     "min_collection_interval": 15,
     "package_ecosystem": "pypi",
