@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import datetime
 import re
 import time
 from enum import Enum
@@ -939,20 +940,19 @@ class PostgresStatementSamples(DBMAsyncJob):
             }
             if row['state'] in {'idle', 'idle in transaction'}:
                 if row['state_change'] and row['query_start']:
-                    obfuscated_plan_event['duration'] = (
-                        parser.isoparse(row['state_change']).timestamp()
-                        if isinstance(row['state_change'], str)
-                        else row['state_change'] - parser.isoparse(row['query_start']).timestamp()
-                        if isinstance(row['query_start'], str)
-                        else row['query_start']
-                    ).total_seconds() * 1e9
+                    if isinstance(row['state_change'], str):
+                        obfuscated_plan_event['duration'] = parser.isoparse(row['state_change']).timestamp() - parser.isoparse(row['query_start']).timestamp()
+                    elif isinstance(row['state_change'], datetime.datetime):
+                        obfuscated_plan_event['duration'] = (row['state_change'] - row['query_start']).total_seconds() * 1e9
+                    else:
+                        raise ValueError(f"Invalid state_change: {row['state_change']}")
                     # If the transaction is idle then we have a more specific "end time" than the current time at
                     # which we're collecting this event. According to the postgres docs, all of the timestamps in
                     # pg_stat_activity are `timestamp with time zone` so the timezone should always be present. However,
                     # if there is something wrong and it's missing then we can't use `state_change` for the timestamp
                     # of the event else we risk the timestamp being significantly off and the event getting dropped
                     # during ingestion.
-                    if "tzinfo" in row['state_change']:
+                    if hasattr(row['state_change'], "tzinfo"):
                         obfuscated_plan_event['timestamp'] = get_timestamp(row['state_change']) * 1000
 
             if self._collect_raw_query_statement and plan_signature:

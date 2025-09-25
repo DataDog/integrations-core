@@ -62,3 +62,5 @@ def test_snapshot_dbm_true_autodiscovery(aggregator: AggregatorStub, integration
     aggregator.assert_metric("postgresql.running", count=1)
 
     validate_snapshot(aggregator, check)
+
+    assert False
