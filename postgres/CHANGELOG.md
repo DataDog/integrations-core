@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 23.0.1 / 2025-09-24
+
+***Fixed***:
+
+* Updated to build psycopg from source to fix a problem with FIPS compatibility ([#21074](https://github.com/DataDog/integrations-core/pull/21074))
+
 ## 23.0.0 / 2025-09-05
 
 ***Changed***:
@@ -15,7 +21,7 @@
 * Add Postgres Health class for submitting Postgres health events ([#21193](https://github.com/DataDog/integrations-core/pull/21193))
 * Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
 
-## 22.18.0 / 2025-09-04
+## 22.18.0 / 2025-09-04 / Agent 7.70.1
 
 ***Added***:
 

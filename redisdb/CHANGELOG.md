@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.1 / 2025-09-17
+
+***Fixed***:
+
+* Downgrade redis module ([#21366](https://github.com/DataDog/integrations-core/pull/21366))
+
 ## 8.1.0 / 2025-09-05
 
 ***Added***:

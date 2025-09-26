@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "5e035b0b-faa2-4465-baab-6565046f6c1c",
   "app_id": "watchguard-firebox",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
