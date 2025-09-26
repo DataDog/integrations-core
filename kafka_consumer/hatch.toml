@@ -7,18 +7,10 @@ post-install-commands = [
   "python -m pip install --no-binary confluent-kafka confluent-kafka==2.8.0",
 ]
 
-[envs.default.env-vars]
-ZK_VERSION = "3.6.4"
-AUTHENTICATION = "noauth"
-
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["2.6", "3.3"]
-
-[[envs.default.matrix]]
-python = ["3.13"]
-version = ["3.3"]
-auth = ["ssl", "kerberos"]
+kafka_version = ["3.3"]
+auth = ["ssl", "kerberos", "noauth"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
@@ -28,5 +20,4 @@ matrix.version.env-vars = [
 matrix.auth.env-vars = "AUTHENTICATION"
 
 [envs.latest.env-vars]
-KAFKA_VERSION = "latest"
-ZK_VERSION = "3.6.4"
+CONFLUENT_VERSION = "latest"
