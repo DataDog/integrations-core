@@ -161,10 +161,8 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
         assert matching_rows[0]['calls'] == 1
 
-
     for conn in connections.values():
         conn.close()
-    
 
 
 statement_samples_keys = ["query_samples", "statement_samples"]
