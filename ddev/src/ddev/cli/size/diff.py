@@ -171,7 +171,7 @@ def diff(
             if not passes_quality_gate:
                 from .utils.common_funcs import save_html
 
-                save_html(app, "Diff", modules, "diff.html")
+                save_html(app, "Diff", modules, "diff.html", old_commit)
         return None
 
 

@@ -567,6 +567,7 @@ def save_html(
     title: str,
     modules: list[FileDataEntry],
     file_path: str,
+    old_commit: str,
 ) -> None:
     """
     Saves the modules list to HTML format, if the ouput is larger than the PR comment size max,
@@ -581,6 +582,7 @@ def save_html(
     groups = group_modules(modules)
 
     html_headers = "<h3>Size Changes</h3>"
+    html_headers += f'<h4>Comparing to commit: <a href="https://github.com/DataDog/integrations-core/commit/{old_commit}">{old_commit}</a></h4>'
     for (platform, py_version), group in groups.items():
         html_subheaders = str()
         total_diff_bytes = sum(int(item.get("Size_Bytes", 0)) for item in group)
