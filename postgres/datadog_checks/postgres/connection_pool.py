@@ -6,7 +6,7 @@ import threading
 import time
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union, Callable
 
 from psycopg import Connection
 from psycopg_pool import ConnectionPool
@@ -82,7 +82,9 @@ class LRUConnectionPoolManager:
     def __init__(
         self,
         max_db: int,
-        base_conn_args: PostgresConnectionArgs,
+        base_conn_args: Optional[PostgresConnectionArgs] = None,
+        conn_args_provider: Optional[Callable[[], PostgresConnectionArgs]] = None,
+        token_refresh_ttl_s: int = 600,
         pool_config: Optional[Dict[str, Any]] = None,
         statement_timeout: Optional[int] = None,  # milliseconds
         sqlascii_encodings: Optional[list[str]] = None,
@@ -98,7 +100,10 @@ class LRUConnectionPoolManager:
             sqlascii_encodings (list[str], optional): List of encodings to handle for SQLASCII text.
         """
         self.max_db = max_db
+        # Exactly one of base_conn_args or conn_args_provider should be set.
         self.base_conn_args = base_conn_args
+        self.conn_args_provider = conn_args_provider
+        self.token_refresh_ttl_s = token_refresh_ttl_s
         self.statement_timeout = statement_timeout
         self.sqlascii_encodings = sqlascii_encodings
 
@@ -109,7 +114,8 @@ class LRUConnectionPoolManager:
             "open": True,
         }
         self.lock = threading.Lock()
-        self.pools: OrderedDict[str, Tuple[ConnectionPool, float, bool]] = OrderedDict()
+        # Map dbname -> (pool, last_used, persistent, last_refreshed)
+        self.pools: OrderedDict[str, Tuple[ConnectionPool, float, bool, float]] = OrderedDict()
         self._closed = False
 
     def _configure_connection(self, conn: Connection) -> None:
@@ -137,8 +143,12 @@ class LRUConnectionPoolManager:
         Returns:
             ConnectionPool: A new pool instance configured for the dbname.
         """
-        kwargs = self.base_conn_args.as_kwargs(dbname=dbname)
-
+        # Create a regular psycopg_pool with args from either provider or static base
+        if self.conn_args_provider is not None:
+            args = self.conn_args_provider()
+            kwargs = args.as_kwargs(dbname=dbname)
+        else:
+            kwargs = self.base_conn_args.as_kwargs(dbname=dbname)
         return ConnectionPool(kwargs=kwargs, configure=self._configure_connection, **self.pool_config)
 
     def get_connection(self, dbname: str, persistent: bool = False):
@@ -171,25 +181,33 @@ class LRUConnectionPoolManager:
 
             # Get or create pool
             if dbname in self.pools:
-                pool, _, was_persistent = self.pools.pop(dbname)
-                self.pools[dbname] = (pool, now, was_persistent or persistent)
+                pool, _, was_persistent, last_refreshed = self.pools.pop(dbname)
+                # If using token provider, refresh the pool on TTL expiry
+                if self.conn_args_provider is not None and (now - last_refreshed) >= self.token_refresh_ttl_s:
+                    try:
+                        pool.close()
+                    except Exception:
+                        pass
+                    pool = self._create_pool(dbname)
+                    last_refreshed = now
+                self.pools[dbname] = (pool, now, was_persistent or persistent, last_refreshed)
             else:
                 # Create new pool, potentially evicting old ones
                 if len(self.pools) >= self.max_db:
                     # Try to evict a non-persistent pool first
                     for evict_dbname in list(self.pools.keys()):
-                        _, _, is_persistent = self.pools[evict_dbname]
+                        _, _, is_persistent, _ = self.pools[evict_dbname]
                         if not is_persistent:
-                            old_pool, _, _ = self.pools.pop(evict_dbname)
+                            old_pool, _, _, _ = self.pools.pop(evict_dbname)
                             old_pool.close()
                             break
                     else:
                         # All remaining are persistent, evict true LRU
-                        evict_dbname, (old_pool, _, _) = self.pools.popitem(last=False)
+                        evict_dbname, (old_pool, _, _, _) = self.pools.popitem(last=False)
                         old_pool.close()
 
                 pool = self._create_pool(dbname)
-                self.pools[dbname] = (pool, now, persistent)
+                self.pools[dbname] = (pool, now, persistent, now)
 
             # Return the pool's context manager directly
             return pool.connection()
@@ -216,12 +234,13 @@ class LRUConnectionPoolManager:
             entry = self.pools.get(dbname)
             if not entry:
                 return None
-            pool, last_used, persistent = entry
+            pool, last_used, persistent, last_refreshed = entry
             stats = pool.get_stats()
             return {
                 **stats,
                 "last_used": last_used,
                 "persistent": persistent,
+                "last_refreshed": last_refreshed,
             }
 
     def close_all(self) -> None:
