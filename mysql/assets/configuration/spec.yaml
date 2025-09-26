@@ -481,6 +481,15 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+              - name: collect_prepared_statements
+                hidden: true
+                description: |
+                  Enable collection of prepared statements metrics. Prerequisites: `only_query_recent_statements: false`.
+                  Defaults to true.
+                value:
+                  type: boolean
+                  example: true
+                  display_default: true
 
           - name: query_samples
             description: Configure collection of query samples
