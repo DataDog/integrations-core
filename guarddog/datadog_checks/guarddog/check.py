@@ -21,13 +21,19 @@ class GuarddogCheck(AgentCheck):
             self.instance.get("package_ecosystem").strip().lower() if self.instance.get("package_ecosystem") else None
         )
         self.path = (
-            self.instance.get("dependency_file_path").strip() if self.instance.get("dependency_file_path") else None
+            str(self.instance.get("dependency_file_path")).strip()
+            if self.instance.get("dependency_file_path")
+            else None
         )
 
-    def get_guarddog_output(self, cmd) -> (str, str, int):
-        self.log.debug(cmd)
-        res = subprocess.run(cmd.split(), capture_output=True, text=True)
-        return res.stdout, res.stderr, res.returncode
+    def get_guarddog_output(self, cmd) -> str:
+        self.log.debug(constants.LOG_TEMPLATE.format(message=cmd))
+        cmd_output = subprocess.run(cmd.split(), capture_output=True, text=True)
+        if cmd_output.returncode != 0:
+            err_message = f"Guarddog command failed: {cmd_output.stderr}"
+            self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
+            raise RuntimeError(err_message)
+        return cmd_output.stdout
 
     def get_enriched_event(self, enrichment_details, result) -> dict:
         return {
@@ -67,14 +73,9 @@ class GuarddogCheck(AgentCheck):
             guarddog_command = constants.GUARDDOG_COMMAND.format(
                 package_ecosystem=self.package_ecosystem, path=self.path
             )
-            stdout, stderr, returncode = self.get_guarddog_output(guarddog_command)
-            if returncode != 0:
-                err_message = f"Guarddog command failed: {stderr}"
-                self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
-                raise RuntimeError(err_message)
-
+            output = self.get_guarddog_output(guarddog_command)
             try:
-                results = json.loads(stdout)
+                results = json.loads(output)
                 for result in results:
                     triggered_rules = [
                         key for key, value in result.get("result", {}).get("results", {}).items() if value

@@ -88,11 +88,9 @@ def test_get_guarddog_output(instance, mocker):
 
     mocker.patch("subprocess.run", return_value=mock_completed_process)
 
-    stdout, stderr, returncode = check.get_guarddog_output(cmd)
+    stdout = check.get_guarddog_output(cmd)
 
     assert stdout == expected_stdout
-    assert stderr == expected_stderr
-    assert returncode == expected_returncode
 
 
 @pytest.mark.unit
