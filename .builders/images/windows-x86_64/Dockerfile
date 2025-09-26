@@ -92,10 +92,10 @@ RUN Get-RemoteFile `
       -Hash 'b12e2e82461ac8e51fc43289050bc8eb937a32d84ce4d242e2c88258c37cf2bb'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
-    & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
-    & 'C:\Program Files\Python312\python.exe' -m pip install --no-warn-script-location virtualenv; `
-    & 'C:\Program Files\Python312\python.exe' -m virtualenv 'C:\py3'; `
-    Add-ToPath -Append 'C:\Program Files\Python312'
+    & 'C:\Program Files\Python313\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
+    & 'C:\Program Files\Python313\python.exe' -m pip install --no-warn-script-location virtualenv; `
+    & 'C:\Program Files\Python313\python.exe' -m virtualenv 'C:\py3'; `
+    Add-ToPath -Append 'C:\Program Files\Python313'
 
 # Install IBM MQ
 ENV IBM_MQ_VERSION="9.2.4.0"
