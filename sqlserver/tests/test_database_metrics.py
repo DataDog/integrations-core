@@ -1514,7 +1514,6 @@ def test_sqlserver_database_stats_metrics(
             (
                 db,
                 database,
-                database_user_access_desc,
                 database_state_desc,
                 database_recovery_model_desc,
                 *metric_values,
@@ -1523,7 +1522,6 @@ def test_sqlserver_database_stats_metrics(
             expected_tags = [
                 f'db:{db}',
                 f'database:{database}',
-                f'database_user_access_desc:{database_user_access_desc}',
                 f'database_state_desc:{database_state_desc}',
                 f'database_recovery_model_desc:{database_recovery_model_desc}',
             ] + tags
