@@ -254,7 +254,7 @@ OPTIONAL_INNODB_VARS = [
 
 PERFORMANCE_VARS = ['mysql.performance.query_run_time.avg', 'mysql.performance.digest_95th_percentile.avg_us']
 
-COMMON_PERFORMANCE_VARS = ['mysql.performance.user_connections']
+COMMON_PERFORMANCE_VARS = ['mysql.performance.user_connections', 'mysql.performance.errors_raised']
 
 # This exists to comply with some of the testing patterns with the old API.
 QUERY_EXECUTOR_METRIC_SETS = {
