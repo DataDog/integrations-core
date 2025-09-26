@@ -87,10 +87,6 @@ def test_autodiscovery_simple(integration_check, pg_instance):
     Test simple autodiscovery.
     """
     pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
-    pg_instance['collect_settings'] = {'enabled': False}
-    pg_instance['query_metrics'] = {'enabled': False}
-    pg_instance['query_samples'] = {'enabled': False}
-    pg_instance['query_activity'] = {'enabled': False}
     del pg_instance['dbname']
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
