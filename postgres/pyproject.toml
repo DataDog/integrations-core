@@ -64,3 +64,8 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.pytest.ini_options]
+markers = [
+    "snapshot: marks tests as snapshot tests",
+]

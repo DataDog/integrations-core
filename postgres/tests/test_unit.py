@@ -74,6 +74,8 @@ def test_get_instance_with_default(pg_instance, collect_default_database):
     Test the contents of the query string with different `collect_default_database` values
     """
     pg_instance['collect_default_database'] = collect_default_database
+    if not collect_default_database:
+        pg_instance['ignore_databases'] = ['postgres']
     check = PostgreSql('postgres', {}, [pg_instance])
     check.version = VersionInfo(9, 2, 0)
     res = check.metrics_cache.get_instance_metrics(check.version)
