@@ -10,7 +10,23 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Guarddog logs.",
     "title": "Guarddog",
-    "media": [],
+    "media": [
+      {
+        "caption": "Guarddog Rules Overview",
+        "image_url": "images/guarddog_rules_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Guarddog Scan & Ecosystem Overview - 1",
+        "image_url": "images/guarddog_scan_ecosystem_overview_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Guarddog Scan & Ecosystem Overview - 2",
+        "image_url": "images/guarddog_scan_ecosystem_overview_2.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
@@ -33,7 +49,7 @@
       }
     },
     "dashboards": {
-      "Guarddog Scan and Ecosystem Overview": "assets/dashboards/guarddog_scan_and_ecosystem_overview.json",
+      "Guarddog Scan & Ecosystem Overview": "assets/dashboards/guarddog_scan_and_ecosystem_overview.json",
       "Guarddog Rules Overview": "assets/dashboards/guarddog_rules_overview.json"
     },
     "logs": {
