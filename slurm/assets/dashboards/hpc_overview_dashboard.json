@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "[[suggested_dashboards]] (cloned)",
+    "description": "HPC Overview Dashboard",
     "layout_type": "ordered",
     "template_variables": [
         {
