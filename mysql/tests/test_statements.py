@@ -199,7 +199,6 @@ def _obfuscate_sql(query, options=None):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 @pytest.mark.parametrize("collect_prepared_statements", [True, False])
 def test_statement_metrics_prepared_statements(
     aggregator, dd_run_check, dbm_instance, bob_conn, collect_prepared_statements
@@ -231,6 +230,9 @@ def test_statement_metrics_prepared_statements(
         assert len(matching_rows) == 0, "no rows for prepared statement"
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instance, datadog_agent):
     query_one = 'select * from information_schema.processlist where state in (\'starting\')'
     query_two = 'select * from information_schema.processlist where state in (\'starting\', \'Waiting on empty queue\')'
