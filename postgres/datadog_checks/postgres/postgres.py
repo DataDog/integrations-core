@@ -175,9 +175,6 @@ class PostgreSql(AgentCheck):
         self._last_validation_timestamp = 0
         self._validation_interval = 60 * 5
         self.validator = PostgresValidator(self)
-        # Send metadata before validating connection to even if connection fails
-        # the UI can display the broken instance for debugging
-        self.check_initializations.append(self._send_database_instance_metadata)
         # Validation needs to run first because other initialization will crash
         # if the connection is not valid
         self.check_initializations.append(self._validate_connection)
@@ -185,6 +182,7 @@ class PostgreSql(AgentCheck):
             lambda: RelationsManager.validate_relations_config(list(self._config.relations))
         )
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self._send_database_instance_metadata)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_cluster_name)
         self.check_initializations.append(self.load_version)
