@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 37.20.0 / 2025-09-17
+
+***Added***:
+
+* Add support for customizable cache keys to be used by the agent persistent cache. This allows integrations developers to define when the cache will be invalidated for each integration. ([#21316](https://github.com/DataDog/integrations-core/pull/21316))
+* Upgrade ddtrace to 3.12.5 ([#21360](https://github.com/DataDog/integrations-core/pull/21360))
+
 ## 37.19.0 / 2025-09-05
 
 ***Added***:

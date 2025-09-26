@@ -221,12 +221,16 @@ class MySQLStatementMetrics(DBMAsyncJob):
         several fields must be further processed from the delta values.
         """
         only_query_recent_statements = self._config.statement_metrics_config.get('only_query_recent_statements', False)
+        # Since `performance_schema.prepared_statements_instances` doesn't have a last_seen column,
+        # we only collect prepared statements if we're not querying recent statements
+        collect_prepared_statements = not only_query_recent_statements and self._config.statement_metrics_config.get(
+            'collect_prepared_statements', True
+        )
+
         condition = (
             "WHERE `last_seen` >= %s"
             if only_query_recent_statements
-            else """WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL
-            ORDER BY `count_star` DESC
-            LIMIT 10000"""
+            else "WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL"
         )
 
         sql_statement_summary = """\
@@ -248,6 +252,42 @@ class MySQLStatementMetrics(DBMAsyncJob):
             FROM performance_schema.events_statements_summary_by_digest
             {}
             """.format(condition)
+
+        if collect_prepared_statements:
+            # Every prepared statement object has a row in `performance_schema.prepared_statements_instances`.
+            # Group by `schema_name` and `digest_text` to get the totals for each statement.
+            prepared_sql_statement_summary = """\
+                SELECT  `owner_object_schema` AS `schema_name`,
+                        NULL AS `digest`,
+                        `sql_text` AS `digest_text`,
+                        sum(`count_execute`) AS `count_star`,
+                        sum(`sum_timer_execute`) AS `sum_timer_wait`,
+                        sum(`sum_lock_time`) AS `sum_lock_time`,
+                        sum(`sum_errors`) AS `sum_errors`,
+                        sum(`sum_rows_affected`) AS `sum_rows_affected`,
+                        sum(`sum_rows_sent`) AS `sum_rows_sent`,
+                        sum(`sum_rows_examined`) AS `sum_rows_examined`,
+                        sum(`sum_select_scan`) AS `sum_select_scan`,
+                        sum(`sum_select_full_join`) AS `sum_select_full_join`,
+                        sum(`sum_no_index_used`) AS `sum_no_index_used`,
+                        sum(`sum_no_good_index_used`) AS `sum_no_good_index_used`,
+                        NOW() AS `last_seen`
+                FROM performance_schema.prepared_statements_instances
+                WHERE `sql_text` NOT LIKE 'EXPLAIN %' OR `sql_text` IS NULL
+                GROUP BY `owner_object_schema`, `sql_text`
+                """
+
+            sql_statement_summary = f"""\
+                {sql_statement_summary}
+                UNION ALL
+                {prepared_sql_statement_summary}
+                """
+        if not only_query_recent_statements:
+            sql_statement_summary = f"""\
+                {sql_statement_summary}
+                ORDER BY `count_star` DESC
+                LIMIT 10000
+                """
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             args = [self._last_seen] if only_query_recent_statements else None

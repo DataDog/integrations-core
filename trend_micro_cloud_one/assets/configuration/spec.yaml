@@ -1,0 +1,14 @@
+name: Trend Micro Cloud One
+files:
+- name: trend_micro_cloud_one.yaml
+  options:
+  - template: logs
+    example:
+    - type: udp
+      port: <UDP-PORT>
+      source: trend-micro-cloud-one
+      service: workload-security
+    - type: tcp
+      port: <TCP-PORT>
+      source: trend-micro-cloud-one
+      service: network-security
