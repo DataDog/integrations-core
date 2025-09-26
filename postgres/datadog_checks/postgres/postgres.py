@@ -120,7 +120,7 @@ class PostgreSql(AgentCheck):
         self.wal_level = None
         self._version_utils = VersionUtils()
 
-        config, validation_result = build_config(check=self)
+        config, validation_result = build_config(self)
         self.validation_result = validation_result
         self._config = config
         # Log validation errors and warnings
