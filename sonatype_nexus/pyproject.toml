@@ -9,7 +9,7 @@ name = "datadog-sonatype-nexus"
 description = "The sonatype_nexus check"
 readme = "README.md"
 license = "BSD-3-Clause"
-requires-python = ">="
+requires-python = ">=3.12"
 keywords = [
     "datadog",
     "datadog agent",
