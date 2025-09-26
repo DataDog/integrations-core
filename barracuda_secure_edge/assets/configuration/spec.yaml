@@ -1,0 +1,9 @@
+name: barracuda_secure_edge
+files:
+- name: barracuda_secure_edge.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/barracuda_secure_edge.log
+      source: barracuda_secure_edge

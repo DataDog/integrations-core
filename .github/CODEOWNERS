@@ -620,6 +620,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /beyondtrust_identity_security_insights/manifest.json                @DataDog/saas-integrations @DataDog/documentation
 /beyondtrust_identity_security_insights/assets/logs/                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/barracuda_secure_edge/                                               @DataDog/agent-integrations
+/barracuda_secure_edge/*.md                                           @DataDog/agent-integrations @DataDog/documentation
+/barracuda_secure_edge/manifest.json                                  @DataDog/agent-integrations @DataDog/documentation
+/barracuda_secure_edge/assets/logs/                                   @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
 /klaviyo/                                                            @DataDog/saas-integrations
 /klaviyo/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /klaviyo/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
