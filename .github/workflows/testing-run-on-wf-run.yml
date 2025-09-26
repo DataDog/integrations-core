@@ -26,7 +26,7 @@ jobs:
           echo "event=${{ github.event.workflow_run.event }}" >> $GITHUB_OUTPUT
           echo "ref_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
-          echo "default_branch=${{ github.event.workflow_run.repository.default_branch }}" >> $GITHUB_OUTPUT
+          echo "pr_number=${{ github.event.workflow_run.pull_requests.number }}" >> $GITHUB_OUTPUT
 
       - name: Get run ID
         run: |
@@ -35,3 +35,4 @@ jobs:
           echo "run_id_list=$run_id" 
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
