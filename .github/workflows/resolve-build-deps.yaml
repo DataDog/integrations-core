@@ -41,23 +41,29 @@ jobs:
       dependency_changed: ${{ steps.dependency-check.outputs.dependency_changed }}
       builder_changed: ${{ steps.dependency-check.outputs.builder_changed }}
     steps:
-      - name: Set Base SHA Output
+      - name: Define diff commits
         id: set_sha
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            echo "prev_sha=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
-            echo "curr_sha=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+            PREV_SHA=${{ github.event.pull_request.base.sha }}
+            CURR_SHA=${{ github.event.pull_request.head.sha }}
           else
-            echo "prev_sha=${{ github.event.before }}" >> $GITHUB_OUTPUT
-            echo "curr_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+            PREV_SHA=${{ github.event.before }}
+            CURR_SHA=${{ github.sha }}
           fi
+
+          echo "prev_sha=$PREV_SHA" >> $GITHUB_OUTPUT
+          echo "curr_sha=$CURR_SHA" >> $GITHUB_OUTPUT
+
+          echo "Current SHA: $CURR_SHA"
+          echo "Previous SHA: $PREV_SHA"
 
       - name: Get changed files
         id: changed-files
         run: |
           REPO="${{ github.repository }}"
 
-          CHANGED_FILES=$(gh api "repos/$REPO/compare/${{ steps.set_sha.outputs.prev_sha }}...${{ steps.set_sha.outputs.curr_sha }}" | \
+          CHANGED_FILES=$(gh api "repos/$REPO/compare/${{ steps.set_sha.outputs.prev_sha }}...${{ steps.set_sha.outputs.curr_sha }}" --paginate| \
           jq -r '.files | map(.filename) | join(" ")')
 
           echo "files_changed=$CHANGED_FILES" >> $GITHUB_OUTPUT
