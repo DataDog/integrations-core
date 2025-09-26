@@ -1477,11 +1477,11 @@ def test_sqlserver_database_stats_metrics(
     }
 
     mocked_results = [
-        ('master', 'master', 'MULTI_USER', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
-        ('tempdb', 'tempdb', 'MULTI_USER', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
-        ('model', 'model', 'MULTI_USER', 'ONLINE', 'FULL', 0, 0, False, False, False),
-        ('msdb', 'msdb', 'MULTI_USER', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
-        ('datadog_test', 'datadog_test', 'MULTI_USER', 'ONLINE', 'FULL', 0, 0, False, False, False),
+        ('master', 'master', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
+        ('tempdb', 'tempdb', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
+        ('model', 'model', 'ONLINE', 'FULL', 0, 0, False, False, False),
+        ('msdb', 'msdb', 'ONLINE', 'SIMPLE', 0, 0, False, False, False),
+        ('datadog_test', 'datadog_test', 'ONLINE', 'FULL', 0, 0, False, False, False),
     ]
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
