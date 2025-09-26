@@ -9,7 +9,7 @@ on:
         type: string
       environment:
         required: false
-        description: Environment to test, e.g. "py3.12". By default runs all
+        description: Environment to test, e.g. "py3.13". By default runs all
         default: ""
         type: string
       test-py3:
