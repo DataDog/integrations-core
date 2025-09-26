@@ -33,7 +33,7 @@ jobs:
           echo "run_id_variable=${{ github.event.workflow_run.id }}"         
           run_id=$(gh run list --workflow ".github/workflows/resolve-build-deps.yaml" -c ${{ steps.define_sha.outputs.sha }} --json databaseId --jq '.[-1].databaseId')
           echo "run_id_list=$run_id" 
-          if [ ${#VAR_VALUE} -gt 2 ]; then echo "accessible!"; else echo "not accessible"; fi
+          if [ ${#DD_API_KEY} -gt 2 ]; then echo "accessible!"; else echo "not accessible"; fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
