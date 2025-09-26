@@ -376,30 +376,29 @@ def calculate_diff(
     diffs: list[FileDataEntry] = []
 
     for name, _type, platform, py_version in all_names:
-        b = old_commit.get((name, _type, platform, py_version))
-        a = new_commit.get((name, _type, platform, py_version))
-        size_b = int(b["Size_Bytes"]) if b else 0
-        size_a = int(a["Size_Bytes"]) if a else 0
-        delta = size_a - size_b
+        old = old_commit.get((name, _type, platform, py_version))
+        new = new_commit.get((name, _type, platform, py_version))
+        size_old = int(old["Size_Bytes"]) if old else 0
+        size_new = int(new["Size_Bytes"]) if new else 0
+        delta = size_new - size_old
 
-        print("Name: ", name, "Type: ", _type, "Platform: ", platform, "Before: ", size_b, "After: ", size_a)
+        print("Name: ", name, "Type: ", _type, "Platform: ", platform, "Before: ", size_old, "After: ", size_new)
 
+        ver_old = old["Version"] if old else ""
+        ver_new = new["Version"] if new else ""
 
-        ver_b = b["Version"] if b else ""
-        ver_a = a["Version"] if a else ""
-
-        if size_b == 0:
+        if size_old == 0:
             change_type = "New"
             name_str = f"{name}"
-            version_str = ver_a
-        elif size_a == 0:
+            version_str = ver_new
+        elif size_new == 0:
             change_type = "Removed"
             name_str = f"{name}"
-            version_str = ver_b
+            version_str = ver_old
         else:
             change_type = "Modified"
             name_str = name
-            version_str = f"{ver_b} -> {ver_a}" if ver_a != ver_b else ver_a
+            version_str = f"{ver_old} -> {ver_new}" if ver_new != ver_old else ver_new
 
         diffs.append(
             {
@@ -410,7 +409,8 @@ def calculate_diff(
                 "Python_Version": py_version,
                 "Size_Bytes": delta,
                 "Size": convert_to_human_readable_size(delta),
-                "Change_Type": change_type,
+                "Percentage": (delta / size_old) * 100 if size_old != 0 else 0,
+                "Delta_Type": change_type,
             }
         )
 

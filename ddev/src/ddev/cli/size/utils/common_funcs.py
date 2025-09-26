@@ -42,7 +42,8 @@ class FileDataEntry(TypedDict):
     Type: str  # Integration/Dependency
     Platform: str  # Target platform (e.g. linux-aarch64)
     Python_Version: str  # Target Python version (e.g. 3.12)
-    Change_Type: NotRequired[str]  # Change type (New, Removed, Modified)
+    Delta_Type: NotRequired[str]  # Change type (New, Removed, Modified)
+    Percentage: NotRequired[float]  # Percentage of the size change
 
 
 # class FileDataEntry(FileDataEntry):
@@ -581,17 +582,17 @@ def save_html(
 
     groups = group_modules(modules)
 
-    html_headers = "<h3>Size Changes</h3>"
-    html_headers += f'<h4>Comparing to commit: <a href="https://github.com/DataDog/integrations-core/commit/{old_commit}">{old_commit}</a></h4>'
+    html_headers = "<h3>Compresssed Size Changes</h3>"
+    html_headers += f'<h4>Comparing to commit: <a href="https://github.com/DataDog/integrations-core/commit/{old_commit}">{old_commit[:7]}</a></h4>'
     for (platform, py_version), group in groups.items():
         html_subheaders = str()
         total_diff_bytes = sum(int(item.get("Size_Bytes", 0)) for item in group)
         sign_total = "+" if total_diff_bytes > 0 else ""
         total_diff = convert_to_human_readable_size(total_diff_bytes)
 
-        added = [g for g in group if g.get("Change_Type") == "New"]
-        removed = [g for g in group if g.get("Change_Type") == "Removed"]
-        modified = [g for g in group if g.get("Change_Type") == "Modified"]
+        added = [g for g in group if g.get("Delta_Type") == "New"]
+        removed = [g for g in group if g.get("Delta_Type") == "Removed"]
+        modified = [g for g in group if g.get("Delta_Type") == "Modified"]
 
         total_added = sum(int(x.get("Size_Bytes", 0)) for x in added)
         total_removed = sum(int(x.get("Size_Bytes", 0)) for x in removed)
@@ -640,10 +641,10 @@ def append_html_entry(total: int, type: str, entries: list[FileDataEntry]) -> st
     if total != 0:
         sign = "+" if total > 0 else ""
         html += f"<b>{type}:</b> {len(entries)} item(s), {sign}{convert_to_human_readable_size(total)}\n"
-        html += "<table><tr><th>Type</th><th>Name</th><th>Version</th><th>Size Delta</th></tr>\n"
+        html += "<table><tr><th>Type</th><th>Name</th><th>Version</th><th>Size Delta</th><th>Percentage</th></tr>\n"
         for e in entries:
             html += f"<tr><td>{e.get('Type', '')}</td><td>{e.get('Name', '')}</td><td>{e.get('Version', '')}</td>"
-            html += f"<td>{e.get('Size', '')}</td></tr>\n"
+            html += f"<td>{e.get('Size', '')}</td><td>{e.get('Percentage', '')}%</td></tr>\n"
         html += "</table>\n"
     else:
         html += f"No {type.lower()} dependencies/integrations\n"
@@ -985,7 +986,7 @@ def send_metrics_to_dd(
     gauge_type = MetricIntakeType.GAUGE
 
     for item in modules:
-        change_type = item.get('Change_Type', '')
+        delta_type = item.get('Delta_Type', '')
         metrics.append(
             MetricSeries(
                 metric=f"{metric_name}.size_{mode}",
@@ -1004,7 +1005,7 @@ def send_metrics_to_dd(
                     f"jira_ticket:{tickets[0]}",
                     f"pr_number:{prs[-1]}",
                     f"commit_message:{message}",
-                    f"change_type:{change_type}",
+                    f"delta_Type:{delta_type}",
                 ],
             )
         )
@@ -1265,10 +1266,12 @@ def get_sizes_json_from_artifacts(
 
 @cache
 def get_previous_dep_sizes_json(commit: str, platform: str, compressed: bool | None = None) -> Path | None:
-    sizes_json = get_sizes_json_from_artifacts(commit, compressed)
-    if not sizes_json["compressed"] or not sizes_json["uncompressed"]:
-        return None
-    sizes = parse_dep_sizes_json(sizes_json["compressed"], sizes_json["uncompressed"], platform)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        sizes_json = get_sizes_json_from_artifacts(commit, dir=tmpdir, compressed=compressed)
+        if not sizes_json["compressed"] or not sizes_json["uncompressed"]:
+            return None
+        sizes = parse_dep_sizes_json(sizes_json["compressed"], sizes_json["uncompressed"], platform)
+
     output_path = Path(f'{platform}.json')
     output_path.write_text(json.dumps(sizes, indent=2))
     print(f"Wrote merged sizes json to {output_path}")

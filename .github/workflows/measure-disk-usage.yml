@@ -86,6 +86,7 @@ jobs:
       - set-platforms
       - measure-disk-usage
     permissions:
+      contents: read
       pull-requests: write
     outputs:
       passed: ${{ steps.check_diff.outputs.passed }}
@@ -110,10 +111,25 @@ jobs:
 
     - name: Calculate diff
       run: |
-        ddev size diff ${{github.event.pull_request.head.sha }} --format json --use-artifacts --quality-gate-threshold ${{ env.SIZE_THRESHOLD }} # TODO: change to ${{ github.event.workflow_run.head_sha }}
+        cmd="ddev size diff ${{github.event.pull_request.head.sha }} --format json --use-artifacts" # TODO: change to ${{ github.event.workflow_run.head_sha }}
+        $cmd --compressed  --quality-gate-threshold ${{ env.SIZE_THRESHOLD }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SIZE_THRESHOLD: -1000000000000
+
+    - name: Upload JSON compressed diff sizes artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: diff_compressed.json
+        path: diff_compressed.json
+        if-no-files-found: error
+
+    - name: Upload JSON uncompressed diff sizes artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: diff_uncompressed.json
+        path: diff_uncompressed.json
+        if-no-files-found: error
 
     - name: Check diff
       id: check_diff
@@ -151,6 +167,19 @@ jobs:
     - name: Create comment
       if: github.event_name == 'pull_request' && steps.check_diff.outputs.passed == 'false'
       run: |
+        GITHUB_RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> diff.html
         gh pr comment ${{ github.event.pull_request.number }} --body-file diff.html
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Check for new dependencies
+      id: check_new_deps
+      run: |
+        if jq -e '.[] | select(.Type == "Dependency" and .Change_Type == "New")' diff_compressed.json > /dev/null; then
+          echo "New dependencies were added."
+          echo "has_new_dependencies=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "No new dependencies were added."
+          echo "has_new_dependencies=false" >> "$GITHUB_OUTPUT"
+        fi
