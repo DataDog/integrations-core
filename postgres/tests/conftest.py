@@ -38,6 +38,7 @@ INSTANCE = {
     'dbname': DB_NAME,
     'tags': ['foo:bar'],
     'disable_generic_tags': True,
+    'collect_settings': {'enabled': True, 'run_sync': True},
 }
 
 
