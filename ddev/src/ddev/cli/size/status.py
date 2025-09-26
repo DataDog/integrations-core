@@ -178,8 +178,9 @@ def status_mode(
 
     with params["app"].status("Calculating sizes..."):
         if dependency_sizes:
-            from ddev.cli.size.utils.common_funcs import get_dependencies_from_json
-
+            from ddev.cli.size.utils.common_funcs import get_commit_data, get_dependencies_from_json
+            last_commit_timestamp, last_commit_message, last_commit_tickets, last_commit_prs = get_commit_data()
+            print(f"Last commit: {last_commit_message} {last_commit_timestamp} {last_commit_tickets} {last_commit_prs}")
             modules = get_files(
                 repo_path, params["compressed"], params["version"], params["platform"]
             ) + get_dependencies_from_json(

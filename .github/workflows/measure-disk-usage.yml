@@ -63,7 +63,7 @@ jobs:
         #   cmd="$cmd --to-dd-key $DD_API_KEY"
         # fi
 
-        $cmd --to-dd-key ${{ secrets.DD_API_KEY}}
+        # $cmd --to-dd-key ${{ secrets.DD_API_KEY}}
         $cmd --compressed
 
     - name: Upload JSON uncompressed sizes artifact
@@ -113,6 +113,7 @@ jobs:
       run: |
         cmd="ddev size diff ${{github.event.pull_request.head.sha }} --format json --use-artifacts" # TODO: change to ${{ github.event.workflow_run.head_sha }}
         $cmd --compressed  --quality-gate-threshold ${{ env.SIZE_THRESHOLD }}
+        $cmd
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SIZE_THRESHOLD: -1000000000000
