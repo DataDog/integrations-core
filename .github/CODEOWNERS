@@ -304,6 +304,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /iboss/manifest.json                                                 @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
 /iboss/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/have_i_been_pwned/                                                  @DataDog/saas-integrations
+/have_i_been_pwned/*.md                                              @DataDog/saas-integrations @DataDog/documentation
+/have_i_been_pwned/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
+/have_i_been_pwned/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /incident_io/                                                        @DataDog/saas-integrations
 /incident_io/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
 /incident_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
@@ -600,6 +605,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /dnsfilter/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /dnsfilter/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/cloudgen_firewall/                                                 @DataDog/agent-integrations
+/cloudgen_firewall/*.md                                                  @DataDog/agent-integrations @DataDog/documentation
+/cloudgen_firewall/manifest.json                                         @DataDog/agent-integrations @DataDog/documentation
+/cloudgen_firewall/assets/logs/                                          @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
 /workato/                                                            @DataDog/saas-integrations
 /workato/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /workato/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
@@ -629,6 +639,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /beyondtrust_password_safe/*.md                                      @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
 /beyondtrust_password_safe/manifest.json                             @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
 /beyondtrust_password_safe/assets/logs/                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/crowdstrike_fdr/                                                    @DataDog/saas-integrations
+/crowdstrike_fdr/*.md                                                @DataDog/saas-integrations @DataDog/documentation
+/crowdstrike_fdr/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
+/crowdstrike_fdr/assets/logs/                                        @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /trend_micro_cloud_one/                                              @DataDog/saas-integrations
 /trend_micro_cloud_one/*.md                                          @DataDog/saas-integrations @DataDog/documentation
