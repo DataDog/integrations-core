@@ -8,8 +8,8 @@ from ddev.utils.git import GitRepository
 
 # Whenenever we bump python version, we also need to bump the python
 # version in the conftest.py.
-OLD_PYTHON_VERSION = "3.12"
-NEW_PYTHON_VERSION = "3.13"
+OLD_PYTHON_VERSION = "3.13"
+NEW_PYTHON_VERSION = "3.14"
 
 
 @pytest.fixture
