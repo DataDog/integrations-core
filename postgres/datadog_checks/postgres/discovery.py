@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import List
+from typing import Dict, List
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.discovery import Discovery
@@ -19,7 +19,7 @@ class PostgresAutodiscovery(Discovery):
         self,
         check: AgentCheck,
         global_view_db: str,
-        autodiscovery_config: dict,
+        autodiscovery_config: Dict,
         default_ttl: int,
     ) -> None:
         super(PostgresAutodiscovery, self).__init__(
