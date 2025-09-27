@@ -36,6 +36,7 @@ from datadog_checks.postgres.relationsmanager import (
 )
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
+from datadog_checks.postgres.validate import PostgresValidator
 
 from .__about__ import __version__
 from .config import build_config, sanitize
@@ -171,10 +172,17 @@ class PostgreSql(AgentCheck):
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
+        self._last_validation_timestamp = 0
+        self._validation_interval = 60 * 5
+        self.validator = PostgresValidator(self)
+        # Validation needs to run first because other initialization will crash
+        # if the connection is not valid
+        self.check_initializations.append(self._validate_connection)
         self.check_initializations.append(
             lambda: RelationsManager.validate_relations_config(list(self._config.relations))
         )
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self._send_database_instance_metadata)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_cluster_name)
         self.check_initializations.append(self.load_version)
@@ -310,6 +318,12 @@ class PostgreSql(AgentCheck):
             err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
             self.log.error(err_msg)
             raise DatabaseHealthCheckError(err_msg)
+
+    def _validate_connection(self):
+        """
+        Validate the connection to the database and the support for all enabled features.
+        """
+        self.validator.validate_connection()
 
     @property
     def dynamic_queries(self):
@@ -1056,8 +1070,9 @@ class PostgreSql(AgentCheck):
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         tags_to_add = []
         try:
-            # Check version
-            self._connect()
+            # Health check
+            self._validate_connection()
+
             # We don't want to cache versions between runs to capture minor updates for metadata
             self.load_version()
 
@@ -1101,9 +1116,7 @@ class PostgreSql(AgentCheck):
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
-            message = 'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
-                self._config.host, self._config.port, self._config.dbname, str(e)
-            )
+            message = str(e)
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -1112,6 +1125,14 @@ class PostgreSql(AgentCheck):
                 hostname=self.reported_hostname,
                 raw=True,
             )
+            if not isinstance(e, DatabaseHealthCheckError):
+                # Submit a health event for unknown errors
+                # We don't send the error because it may contain sensitive information
+                self.health.submit_health_event(
+                    name=HealthEvent.UNKNOWN_ERROR,
+                    status=HealthStatus.ERROR,
+                    description="Unknown error, please check the agent logs for more details.",
+                )
             raise e
         else:
             self.service_check(
