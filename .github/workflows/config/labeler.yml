@@ -159,6 +159,8 @@ integration/cloudera:
 - cloudera/**/*
 integration/cockroachdb:
 - cockroachdb/**/*
+integration/cofense_triage:
+- cofense_triage/**/*
 integration/confluent_platform:
 - confluent_platform/**/*
 integration/consul:
