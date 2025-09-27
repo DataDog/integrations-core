@@ -136,11 +136,13 @@ tests:
         Host: "127.0.0.1:8088"
       ClientAddr: "180.150.154.44:5051"
       ClientUsername: "-"
+      DownstreamStatus: 404
       DownstreamStatusLine: "404 page not found"
       FrontendName: "this-is-my-frontend-name"
       GzipRatio: 5
       OriginContentSize: 257
       OriginDuration: 1345642
+      OriginStatus: 404
       OriginStatusLine: "404 page not found"
       Overhead: 100
       RequestAddr: "127.150.32.44:10514"
