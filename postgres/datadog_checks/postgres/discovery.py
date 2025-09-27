@@ -33,9 +33,14 @@ class PostgresAutodiscovery(Discovery):
         self._db = global_view_db
         self._check = check
         self._log = self._check.log
-        self.db_pool = self._check.db_pool
+        # self.db_pool = self._check.db_pool
         self._max_databases = autodiscovery_config.get("max_databases", DEFAULT_MAX_DATABASES)
         self._cache_filtered = []
+
+    @property
+    def db_pool(self):
+        return self._check.db_pool
+
 
     def get_items(self) -> List[str]:
         """
@@ -65,7 +70,7 @@ class PostgresAutodiscovery(Discovery):
                 ),
             )
 
-        items_parsed = [item[1] for item in items][: self._max_databases]
+        items_parsed = [item[1] for item in sorted(items)][: self._max_databases]
         self._cache_filtered = items_parsed
         return items_parsed
 
