@@ -35,7 +35,10 @@
         "prefix": "bentoml.",
         "check": "bentoml.service.request.count",
         "metadata_path": "metadata.csv"
-      }
+      },
+      "process_signatures": [
+        "bentoml"
+      ]
     },
     "dashboards": {
       "BentoML Placeholder": "assets/dashboards/placeholder.json"
