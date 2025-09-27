@@ -95,6 +95,30 @@ pipeline:
         query: "@syslog.process_name:openvpnas"
       processors:
         - type: grok-parser
+          name: Parsing Authentication Failed Logs
+          enabled: true
+          source: syslog_message
+          samples:
+            - "[-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:1010 SENT
+              CONTROL [openvpn]: 'AUTH_FAILED' (status=1)\""
+            - "[-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:1011 SENT
+              CONTROL [test-user]: 'AUTH_FAILED' (status=1)\""
+            - "[-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:1010 SENT
+              CONTROL [admin]: 'AUTH_FAILED' (status=1)\""
+            - "[-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:1022 SENT
+              CONTROL [devuser]: 'AUTH_FAILED' (status=1)\""
+            - "[-] [OVPN 2] OUT: \"2025-06-12 04:21:09 10.10.10.10:8080 SENT
+              CONTROL [openvpn-user]: 'AUTH_FAILED,TOTP two-factor
+              authentication code is incorrect' (status=1)\""
+          grok:
+            supportRules: ""
+            matchRules: "rule \\[\\-\\] \\[%{regex(\"[^]]+\")}\\] OUT: \"%{notSpace}
+              %{notSpace}
+              %{ip:network.client.ip}:%{notSpace:network.client.port} SENT
+              CONTROL \\[%{regex(\"[^]]+\"):usr.name}\\]:
+              \\'%{regex(\"AUTH_FAILED\"):log_type}(,%{regex(\"[^']+\"):reason}\
+              )?\\'%{data}"
+        - type: grok-parser
           name: Parsing Authentication Success Logs
           enabled: true
           source: syslog_message
@@ -129,16 +153,18 @@ pipeline:
               'common_name': 'openvpn', 'serial': '5735787958742102047',
               'serial_list': []} cli='win'/'3.8connect1'/'OCWindows_3.4.0-3121'"
           grok:
-            supportRules: ""
+            supportRules: |
+              PARSE_TILL_BACKSLASH %{regex("(.*?)(?=\\')")}
+
+              KEYVALUE_PARSE %{data::keyvalue(": ",", ")}
             matchRules: >-
               rule1 (\[\-\])(\s+)?%{regex("AUTH
-              SUCCESS"):log_type}\s+\{%{data::keyvalue(": ",", ")}, 'auth
-              method': '%{regex("(.*?)(?=\\')"):auth_method}',
-              %{data::keyvalue(": ",", ")}
-              cli='%{word:os}'/'%{regex("(.*?)(?=\\')")}'/'%{regex("(.*?)(?=_)")}_%{notSpace:client_connect_version}'
+              SUCCESS"):log_type}\s+\{%{KEYVALUE_PARSE}, 'auth method':
+              '%{PARSE_TILL_BACKSLASH:auth_method}', %{KEYVALUE_PARSE}
+              cli='%{word:os}'/'%{PARSE_TILL_BACKSLASH}'/'%{regex("(.*?)(?=_)")}_%{notSpace:client_connect_version}'
 
 
-              rule2 (\[\-\])(\s+)?%{regex("AUTH SUCCESS"):log_type}\s+\{%{data::keyvalue(": ",", ")} cli='%{word:os}'/'%{regex("(.*?)(?=\\')"):data}'/'%{regex("(.*?)(?=_)")}_%{notSpace:client_connect_version}'
+              rule2 (\[\-\])(\s+)?%{regex("AUTH SUCCESS"):log_type}\s+\{%{KEYVALUE_PARSE} cli='%{word:os}'/'%{PARSE_TILL_BACKSLASH:data}'/'%{regex("(.*?)(?=_)")}_%{notSpace:client_connect_version}'
         - type: grok-parser
           name: Parsing VPN Logs
           enabled: true
@@ -205,16 +231,17 @@ pipeline:
             - "{'status': 1, 'user': 'openvpn', 'reason': 'local auth failed:
               password verification failed'}"
           grok:
-            supportRules: ""
+            supportRules: |
+              KEYVALUE_PARSE %{data::keyvalue(": ",", ")}
             matchRules: >-
-              rule_1 \{%{data::keyvalue(": ",", ")}, 'auth method':
-              '%{regex("(.*?)(?=\\')"):auth_method}'%{data::keyvalue(": ",", ")}
+              rule_1 \{%{KEYVALUE_PARSE}, 'auth method':
+              '%{regex("(.*?)(?=\\')"):auth_method}'%{KEYVALUE_PARSE}
 
 
               rule_2 \{\\'status\\': %{integer:status}, \\'user\\': \\'%{regex("(.*)(?=\\\\')"):user}\\', \\'reason\\': "%{regex("(.*)(?=\")"):reason}"(, \\'auth method\\': \\'%{regex("(.*?)(?=\\\\')"):auth_method}\\')?}
 
 
-              rule_3 \{%{data::keyvalue(": ",", ")}
+              rule_3 \{%{KEYVALUE_PARSE}
         - type: grok-parser
           name: Parsing Peer Connection Logs
           enabled: true
@@ -231,7 +258,8 @@ pipeline:
             matchRules: rule %{regex("(.*?)(?=:)")}:(\s+)?\'%{date("yyyy-M-d H:m:s"):date}
               %{ip:network.client.ip}:%{port:network.client.port}
               \[%{notSpace:user}\] %{regex("Peer Connection
-              Initiated"):log_type}\s+with%{regex("(.*?)(?=\\()")}\(%{regex("(.*?)(?=])")}\]%{ip:server_ip}[%]%{data}
+              Initiated"):log_type}\s+with%{regex("([^()]*)
+              (?=\\()")}\(%{regex("([^]]*)(?=])")}\]%{ip:server_ip}[%]%{data}
         - type: grok-parser
           name: Parsing Virtual IP Logs
           enabled: true
