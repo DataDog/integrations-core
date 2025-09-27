@@ -7,10 +7,21 @@ services:
     container_name: ${CB_CONTAINER_NAME}
   couchbase-sync-gateway:
     container_name: couchbase-sync-gateway
-    image: couchbase/sync-gateway:2.8.3-enterprise
+    image: couchbase/sync-gateway:${COUCHBASE_SYNCGW_VERSION}-enterprise
     command:
-      - "-adminInterface"
+      - "-bootstrap.server"
+      - "couchbase://${CB_CONTAINER_NAME}"
+      - "-bootstrap.use_tls_server=false"
+      - "-bootstrap.username"
+      - "${CB_USERNAME}"
+      - "-bootstrap.password"
+      - "${CB_PASSWORD}"
+      - "-api.admin_interface"
       - ":4985"
+      - "-api.metrics_interface"
+      - ":4986"
+      - "-api.metrics_interface_authentication=false"
     ports:
       - "4984:4984"
       - "4985:4985"
+      - "4986:4986"
