@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import importlib.util
+
 import click
 from datadog_checks.dev.tooling.commands.meta.catalog import catalog
 from datadog_checks.dev.tooling.commands.meta.changes import changes
@@ -22,6 +24,12 @@ def meta():
     This `meta` namespace can be used for an arbitrary number of
     niche or beta features without bloating the root namespace.
     """
+
+
+if importlib.util.find_spec('datadog_checks.base'):
+    from ddev.cli.meta.prometheus import dump
+
+    prom.add_command(dump)
 
 
 meta.add_command(catalog)
