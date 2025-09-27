@@ -561,6 +561,8 @@ integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
 - pulsar/**/*
+integration/push_security:
+- push_security/**/*
 integration/quarkus:
 - quarkus/**/*
 integration/rabbitmq:
