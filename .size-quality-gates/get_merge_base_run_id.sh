@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -e
+
+WORKFLOW_NAME=$1
+
+
+echo "Finding workflow run at merge-base SHA..."
+if [ -z "$DEFAULT_BRANCH" ]; then
+    echo "Error: DEFAULT_BRANCH environment variable is required"
+    exit 1
+fi
+if [ -z "$GH_TOKEN" ]; then
+    echo "Error: GH_TOKEN environment variable is required"
+    exit 1
+fi
+
+if [ -z "$BASE_SHA" ]; then
+    echo "Error: BASE_SHA environment variable is required"
+    exit 1
+fi
+
+
+git fetch origin $DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH
+count=$(git rev-list --count $BASE_SHA..origin/$DEFAULT_BRANCH)
+count_plus_one=$((count + 1))
+
+echo "Searching through $count_plus_one workflow runs..."
+
+RUN_ID=$(
+    (
+        gh run list --workflow "$WORKFLOW_NAME" --limit "$count_plus_one" --branch "master" --json databaseId,headSha,event
+    ) | jq -s '[.[][]] | .[] | select(.headSha == "'"$BASE_SHA"'") | .databaseId' | head -n 1
+) # jq flattens the nested array of objects into a single array
+
+if [ -z "$RUN_ID" ]; then
+    echo "No workflow run found for SHA: $BASE_SHA"
+    exit 1
+fi
+
+echo "Found workflow run ID: $RUN_ID"
+echo "Found workflow run SHA: $BASE_SHA"
+# Output results for GitHub Actions
+if [ -n "$GITHUB_OUTPUT" ]; then
+    echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+else
+    echo "run_id=$RUN_ID"
+fi
