@@ -6,7 +6,7 @@
             "id": 8481596997566296,
             "definition": {
                 "title": "Checkpoint Harmony Endpoint",
-                "banner_img": "/api/v2/images/da49a191-39b7-49ec-a0bd-b0c83661f82d",
+                "banner_img": "/static/images/integration_dashboard/checkpoint-harmony-endpoint_hero_1.png",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -35,43 +35,71 @@
                     {
                         "id": 930849220402476,
                         "definition": {
-                            "title": "All Checkpoint Endpoint Logs",
+                            "title": "Events Based On Hostnames",
                             "title_size": "16",
                             "title_align": "left",
+                            "type": "toplist",
                             "requests": [
                                 {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:checkpoint_harmony_endpoint service:harmony_endpoint",
-                                        "indexes": [],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
+                                    "queries": [
                                         {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "service",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "content",
-                                            "width": "full"
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint_harmony_endpoint service:harmony_endpoint"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@syslog.hostname",
+                                                    "limit": 250,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
                                         }
-                                    ]
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 1,
+                                            "palette": "white_on_yellow"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 250,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
-                            "type": "list_stream"
+                            "style": {
+                                "display": {
+                                    "type": "stacked"
+                                },
+                                "scaling": "relative"
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -161,42 +189,60 @@
                             "title": "Most Frequent Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "type": "toplist",
                             "requests": [
                                 {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:checkpoint_harmony_endpoint service:harmony_endpoint",
-                                        "indexes": [
-                                            "*"
-                                        ],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
+                                    "queries": [
                                         {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "service",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "content",
-                                            "width": "compact"
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:checkpoint_harmony_endpoint service:harmony_endpoint"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "service",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "storage": "hot"
                                         }
-                                    ]
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
-                            "type": "list_stream"
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -493,38 +539,47 @@
                     {
                         "id": 6013485437842605,
                         "definition": {
-                            "title": "All Logged In Events",
+                            "title": "All Logged In IPs",
                             "requests": [
                                 {
                                     "response_format": "event_list",
                                     "query": {
-                                        "data_source": "logs_stream",
+                                        "data_source": "logs_transaction_stream",
                                         "query_string": "source:checkpoint_harmony_endpoint service:harmony_endpoint @operation:\"Log In\"",
-                                        "indexes": [
-                                            "*"
+                                        "indexes": [],
+                                        "group_by": [
+                                            {
+                                                "facet": "@client_ip"
+                                            }
+                                        ],
+                                        "compute": [
+                                            {
+                                                "facet": "count",
+                                                "aggregation": "count"
+                                            }
                                         ],
                                         "storage": "hot"
                                     },
                                     "columns": [
                                         {
-                                            "field": "status_line",
+                                            "field": "group_by",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "timestamp",
+                                            "field": "timeline",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "host",
+                                            "field": "duration",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "service",
+                                            "field": "max_severity",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "content",
-                                            "width": "compact"
+                                            "field": "count:count",
+                                            "width": "auto"
                                         }
                                     ]
                                 }
@@ -541,41 +596,62 @@
                     {
                         "id": 4937472336594071,
                         "definition": {
-                            "title": "All Logged Out Events",
+                            "title": "All Logged Hostnames",
+                            "type": "toplist",
                             "requests": [
                                 {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:checkpoint_harmony_endpoint service:harmony_endpoint @operation:\"Log Out\"",
-                                        "indexes": [],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
+                                    "queries": [
                                         {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "service",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "content",
-                                            "width": "compact"
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:checkpoint_harmony_endpoint service:harmony_endpoint @operation:\"Log In\""
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@syslog.hostname",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
                                         }
-                                    ]
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
-                            "type": "list_stream"
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
                         },
                         "layout": {
                             "x": 8,
