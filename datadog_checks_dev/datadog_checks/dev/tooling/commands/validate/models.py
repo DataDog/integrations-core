@@ -96,7 +96,6 @@ def models(ctx, check, sync, verbose):
     documentation_header_lines = get_config_models_documentation().splitlines(True) + ['\n']
 
     code_formatter = ModelConsumer.create_code_formatter()
-
     if is_core_check:
         checks = checks.difference(INTEGRATIONS_WITHOUT_MODELS)
 
