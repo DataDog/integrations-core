@@ -63,7 +63,7 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
 
 
 def calculate_wheel_sizes(wheel_path: Path) -> WheelSizes:
-    compressed_size = wheel_path.stat(follow_symlinks=True).st_size
+    compressed_size = wheel_path.stat().st_size
     with ZipFile(wheel_path) as zf:
         uncompressed_size = sum(zinfo.file_size for zinfo in zf.infolist())
     return {'compressed': compressed_size, 'uncompressed': uncompressed_size}

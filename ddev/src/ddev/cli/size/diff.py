@@ -381,6 +381,7 @@ def calculate_diff(
         size_old = int(old["Size_Bytes"]) if old else 0
         size_new = int(new["Size_Bytes"]) if new else 0
         delta = size_new - size_old
+        percentage = (delta / size_old) * 100 if size_old != 0 else 0
 
         print("Name: ", name, "Type: ", _type, "Platform: ", platform, "Before: ", size_old, "After: ", size_new)
 
@@ -409,7 +410,7 @@ def calculate_diff(
                 "Python_Version": py_version,
                 "Size_Bytes": delta,
                 "Size": convert_to_human_readable_size(delta),
-                "Percentage": (delta / size_old) * 100 if size_old != 0 else 0,
+                "Percentage": round(percentage, 2),
                 "Delta_Type": change_type,
             }
         )
