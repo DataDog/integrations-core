@@ -413,7 +413,25 @@ INDEX_BLOAT = {
     'name': 'index_bloat_metrics',
 }
 
-RELATION_METRICS = [STATIO_METRICS]
+# Logically grouping with other relation metrics (like index and table bloat) that
+# require the same SELECT permissions for pg_stats
+COLUMN_METRICS = {
+    'descriptors': [('schemaname', 'schema'), ('tablename', 'table'), ('attname', 'column')],
+    'metrics': {
+        'avg_width': ('column.avg_width', AgentCheck.gauge),
+        'n_distinct': ('column.n_distinct', AgentCheck.gauge),
+    },
+    'query': """
+SELECT schemaname, tablename, attname, {metrics_columns}
+FROM pg_stats
+WHERE schemaname NOT IN ('pg_catalog', 'information_schema') AND {relations}
+""",
+    'relation': True,
+    'use_global_db_tag': True,
+    'name': 'column_metrics',
+}
+
+RELATION_METRICS = [STATIO_METRICS, COLUMN_METRICS]
 DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS, LOCK_METRICS]
 
 
