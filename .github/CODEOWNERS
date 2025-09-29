@@ -605,6 +605,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /dnsfilter/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /dnsfilter/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/cloudgen_firewall/                                                 @DataDog/agent-integrations
+/cloudgen_firewall/*.md                                                  @DataDog/agent-integrations @DataDog/documentation
+/cloudgen_firewall/manifest.json                                         @DataDog/agent-integrations @DataDog/documentation
+/cloudgen_firewall/assets/logs/                                          @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
+
 /workato/                                                            @DataDog/saas-integrations
 /workato/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /workato/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
