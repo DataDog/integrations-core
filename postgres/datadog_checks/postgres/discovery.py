@@ -40,6 +40,10 @@ class PostgresAutodiscovery(Discovery):
         self._max_databases = autodiscovery_config.max_databases
         self._cache_filtered = []
 
+    @property
+    def db_pool(self):
+        return self._check.db_pool
+
     def get_items(self) -> List[str]:
         """
         Get_items() from parent class returns a generator with four objects:
@@ -68,7 +72,7 @@ class PostgresAutodiscovery(Discovery):
                 ),
             )
 
-        items_parsed = [item[1] for item in items][: self._max_databases]
+        items_parsed = [item[1] for item in sorted(items)][: self._max_databases]
         self._cache_filtered = items_parsed
         return items_parsed
 
