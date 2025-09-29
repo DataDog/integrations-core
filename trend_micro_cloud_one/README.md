@@ -113,7 +113,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
    - **\<port>**: Same `TCP-PORT` configured in [Log Collection][10].
 
    ```bash
-   curl -X POST -k "https://network.<region>.cloudone.trendmicro.com/api/appliances/<appliances-id>/remotesyslogs" --header "api-version: v1" --header "Content-Type: application/json" --header "Authorization: ApiKey <api-key>" --header --data "{\"host\": \"<ip-address>\", \"port\": <port>, \"enabled\": true}"
+   curl -X POST -k "https://network.<region>.cloudone.trendmicro.com/api/appliances/<appliances-id>/remotesyslogs" --header "api-version: v1" --header "Content-Type: application/json" --header "Authorization: ApiKey <api-key>" --data "{\"host\": \"<ip-address>\", \"port\": <port>, \"enabled\": true}"
    ```
 
 9. Repeat the above step for each appliance you want to push to Datadog.
