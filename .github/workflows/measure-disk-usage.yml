@@ -156,7 +156,7 @@ jobs:
       id: find_comment
       with:
         issue-number: ${{ github.event.pull_request.number }}
-        body-includes: "<h3>Size Changes</h3>"
+        body-includes: "<h3>Compressed Size Changes</h3>"
         direction: last
 
     - name: Delete last comment
@@ -174,9 +174,14 @@ jobs:
     - name: Create comment
       if: github.event_name == 'pull_request' && steps.check_diff.outputs.passed == 'false'
       run: |
+        PR_NUMBER=$(gh pr list \
+            --search ${{ needs.define-current-commit.outputs.commit }} \
+            --state open \
+            --json number \
+            --jq '.[0].number')
         GITHUB_RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> diff.html
-        gh pr comment ${{ github.event.pull_request.number }} --body-file diff.html
+        gh pr comment $PR_NUMBER --body-file diff.html
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
