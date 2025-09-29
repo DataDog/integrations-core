@@ -465,10 +465,15 @@ def should_propagate_agent_tags(instance, init_config) -> bool:
 def sanitize(config: Union[InstanceConfig, dict]) -> dict:
     if isinstance(config, InstanceConfig):
         # If config is an InstanceConfig object, convert it to a dict
-        config = config.model_dump(exclude=['custom_metrics', 'custom_queries'])
+        config = config.model_dump(exclude={'custom_metrics', 'custom_queries'})
     sanitized = copy.deepcopy(config)
     sanitized['password'] = '***' if sanitized.get('password') else None
     sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
+    # For the deprecated custom_metrics we inject a function into the instance
+    # The function isn't serializable so we have to strip it
+    for custom_metric in sanitized.get('custom_metrics', []):
+        for key in custom_metric.get('metrics', {}):
+            custom_metric.get('metrics')[key][1] = ''
 
     return sanitized
 
