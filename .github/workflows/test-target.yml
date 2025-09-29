@@ -55,7 +55,7 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: "datadog/agent-dev:master"
+        default: "datadog/agent-dev:master-py3"
         type: string
       agent-image-py2:
         required: false
