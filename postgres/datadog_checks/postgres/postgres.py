@@ -44,6 +44,7 @@ from .util import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
     BUFFERCACHE_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,
+    COLUMN_METRICS,
     CONNECTION_METRICS,
     COUNT_METRICS,
     FUNCTION_METRICS,
@@ -798,7 +799,7 @@ class PostgreSql(AgentCheck):
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
-        per_database_metric_scope = []
+        per_database_metric_scope = [COLUMN_METRICS]
 
         if self._config.collect_function_metrics:
             # Function metrics are collected from all databases discovered

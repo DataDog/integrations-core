@@ -1127,3 +1127,18 @@ LIMIT {max_rows} ;        """
         {'name': 'locks.idle_in_transaction_age', 'type': 'gauge'},
     ],
 }
+
+COLUMN_METRICS = {
+    'descriptors': [('schemaname', 'schema'), ('tablename', 'table'), ('attname', 'column')],
+    'metrics': {
+        'avg_width': ('column.avg_width', AgentCheck.gauge),
+        'n_distinct': ('column.n_distinct', AgentCheck.gauge),
+    },
+    'query': """
+SELECT schemaname, tablename, attname, {metrics_columns}
+FROM pg_stats
+""",
+    'relation': False,
+    'use_global_db_tag': True,
+    'name': 'column_metrics',
+}
