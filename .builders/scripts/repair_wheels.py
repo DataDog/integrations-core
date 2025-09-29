@@ -12,9 +12,6 @@ from zipfile import ZipFile
 
 from utils import iter_wheels
 
-# Packages for which we're skipping the openssl-3 build check
-OPENSSL_PACKAGE_BYPASS = ["psycopg"]
-
 
 def find_patterns_in_wheel(wheel: Path, patterns: list[str]) -> list[str]:
     """Returns all found files inside `wheel` that match the given glob-style pattern"""
@@ -49,16 +46,9 @@ class WheelName(NamedTuple):
 
 def check_unacceptable_files(
     wheel: Path,
-    bypass_prefixes: list[str],
     invalid_file_patterns: list[str],
 ):
     """Check if a wheel contains any unacceptable files and exit if found."""
-    if any(wheel.name.startswith(pkg_prefix) for pkg_prefix in bypass_prefixes):
-        print(
-            f'Warning: Bypassing unacceptable file check for {wheel.name}'
-        )
-        return
-
     unacceptable_files = find_patterns_in_wheel(wheel, invalid_file_patterns)
     if unacceptable_files:
         print(
@@ -101,11 +91,11 @@ def repair_linux(source_built_dir: str, source_external_dir: str, built_dir: str
 
         check_unacceptable_files(
             wheel,
-            bypass_prefixes=OPENSSL_PACKAGE_BYPASS,
             invalid_file_patterns=external_invalid_file_patterns,
         )
         shutil.move(wheel, external_dir)
         continue
+
 
     for wheel in iter_wheels(source_built_dir):
         print(f'--> {wheel.name}')
@@ -147,11 +137,11 @@ def repair_windows(source_built_dir: str, source_external_dir: str, built_dir: s
 
         check_unacceptable_files(
             wheel,
-            bypass_prefixes=OPENSSL_PACKAGE_BYPASS,
             invalid_file_patterns=external_invalid_file_patterns,
         )
         shutil.move(wheel, external_dir)
         continue
+
 
     for wheel in iter_wheels(source_built_dir):
         print(f'--> {wheel.name}')

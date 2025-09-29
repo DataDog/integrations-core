@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e7fac1cd-65ba-4a58-af73-ee5f160cc6f9",
   "app_id": "couchbase",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -3,10 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ddev.utils.fs import Path
+from ddev.utils.fs import Path
 
 
 class GitCommit:
@@ -32,6 +29,37 @@ class GitRepository:
     @property
     def repo_root(self) -> Path:
         return self.__repo_root
+
+    def worktrees(self, include_root=False, only_subpaths=True) -> list[Path]:
+        """Returns a list of paths to the worktrees in the repo.
+
+        If `include_root` is True, the worktree representing the root of the repo is included.
+        If `only_subpaths` is True, worktrees outside of the repo root are not included.
+        """
+        worktree_output = self.capture('worktree', 'list', '--porcelain')
+
+        worktree_paths = [Path(line.split()[1]) for line in worktree_output.splitlines() if line.startswith('worktree')]
+
+        # Use the resolved repo path because git will show the resolved path of the worktrees
+        # in the porcelain output
+        repo_root = self.repo_root.resolve()
+
+        if only_subpaths:
+            worktree_paths = [
+                worktree_path for worktree_path in worktree_paths if worktree_path.is_relative_to(repo_root)
+            ]
+
+        result = [worktree_path for worktree_path in worktree_paths if include_root or worktree_path != repo_root]
+        return result
+
+    def is_worktree(self, path: Path, include_root=False, only_subpaths=True) -> bool:
+        """
+        Check if a path is a worktree.
+
+        If `include_root` is True, the root of the repo is considered a worktree.
+        If `only_subpaths` is True, worktrees outside of the repo root are not considered.
+        """
+        return path.resolve() in self.worktrees(include_root=include_root, only_subpaths=only_subpaths)
 
     def current_branch(self) -> str:
         return self.capture('rev-parse', '--abbrev-ref', 'HEAD').strip()
@@ -87,7 +115,12 @@ class GitRepository:
                 changed_files.add(line)
 
         # Untracked
-        changed_files.update(self.capture('ls-files', '--others', '--exclude-standard').splitlines())
+        # Remove worktrees within the repo root as they can be untracked and should not be taken into account
+        changed_files.update(
+            untracked_file
+            for untracked_file in self.capture('ls-files', '--others', '--exclude-standard').splitlines()
+            if not self.is_worktree(self.repo_root / untracked_file)
+        )
 
         return sorted(changed_files, key=lambda relative_path: (-relative_path.count('/'), relative_path))
 
@@ -124,6 +157,9 @@ class GitRepository:
                 raise OSError(f'{str(e)[:-1]}:\n{e.output}') from None
 
         return process.stdout
+
+    def merge_base(self, ref_a: str, ref_b: str | None = "HEAD") -> str:
+        return self.capture('merge-base', ref_a, ref_b).splitlines()[0]
 
     @staticmethod
     def __is_warning_line(line):

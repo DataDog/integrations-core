@@ -183,6 +183,8 @@ integration/cri:
 - cri/**/*
 integration/crio:
 - crio/**/*
+integration/crowdstrike_fdr:
+- crowdstrike_fdr/**/*
 integration/databricks:
 - databricks/**/*
 integration/datadog_checks_tests_helper:
@@ -285,6 +287,8 @@ integration/haproxy:
 - haproxy/**/*
 integration/harbor:
 - harbor/**/*
+integration/have_i_been_pwned:
+- have_i_been_pwned/**/*
 integration/hazelcast:
 - hazelcast/**/*
 integration/hdfs_datanode:
@@ -443,6 +447,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_copilot:
+- microsoft_copilot/**/*
 integration/microsoft_dns:
 - microsoft_dns/**/*
 integration/microsoft_sysmon:
@@ -701,6 +707,8 @@ integration/traffic_server:
 - traffic_server/**/*
 integration/trellix_endpoint_security:
 - trellix_endpoint_security/**/*
+integration/trend_micro_cloud_one:
+- trend_micro_cloud_one/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
 integration/trend_micro_vision_one_endpoint_security:
@@ -763,8 +771,12 @@ integration/zeek:
 - zeek/**/*
 integration/zero_networks:
 - zero_networks/**/*
+integration/zerofox_cloud_platform:
+- zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
+integration/cloudgen_firewall:
+- cloudgen_firewall/**/*
 qa/skip-qa:
 - '**/__about__.py'
 - requirements-agent-release.txt

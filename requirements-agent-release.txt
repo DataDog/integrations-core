@@ -30,7 +30,7 @@ datadog-celery==2.0.1
 datadog-ceph==4.1.0; sys_platform != 'win32'
 datadog-cert-manager==6.0.1
 datadog-checkpoint-quantum-firewall==1.0.0
-datadog-checks-base==37.19.0
+datadog-checks-base==37.20.0
 datadog-checks-dependency-provider==3.0.0
 datadog-checks-downloader==8.0.0
 datadog-cilium==6.0.1
@@ -166,11 +166,11 @@ datadog-ossec-security==2.0.0
 datadog-palo-alto-panorama==1.0.0
 datadog-pan-firewall==3.0.0
 datadog-pdh-check==4.3.0; sys_platform == 'win32'
-datadog-pgbouncer==8.5.0; sys_platform != 'win32'
+datadog-pgbouncer==8.5.1; sys_platform != 'win32'
 datadog-php-fpm==6.0.1
 datadog-ping-federate==2.0.0
 datadog-postfix==3.0.0; sys_platform != 'win32'
-datadog-postgres==23.0.0
+datadog-postgres==23.0.1
 datadog-powerdns-recursor==5.0.1
 datadog-presto==3.1.0
 datadog-process==5.1.0
@@ -181,7 +181,7 @@ datadog-pulsar==3.2.1
 datadog-quarkus==2.0.1
 datadog-rabbitmq==8.1.0
 datadog-ray==3.0.1
-datadog-redisdb==8.1.0
+datadog-redisdb==8.1.1
 datadog-rethinkdb==5.1.0
 datadog-riak==5.1.1
 datadog-riakcs==4.8.0
@@ -189,7 +189,7 @@ datadog-sap-hana==5.1.1
 datadog-scylla==5.0.1
 datadog-sidekiq==3.0.0
 datadog-silk==4.1.1
-datadog-silverstripe-cms==1.4.0
+datadog-silverstripe-cms==1.4.1
 datadog-singlestore==4.2.0
 datadog-slurm==2.0.2; sys_platform == 'linux2'
 datadog-snmp==11.0.0
@@ -228,7 +228,7 @@ datadog-twemproxy==3.0.0
 datadog-twistlock==6.0.1
 datadog-varnish==4.0.0
 datadog-vault==7.0.1
-datadog-velero==3.0.1
+datadog-velero==3.0.2
 datadog-vertica==6.1.1
 datadog-vllm==3.0.1
 datadog-voltdb==6.0.1
