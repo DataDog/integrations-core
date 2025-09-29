@@ -61,16 +61,6 @@ def status(
     )
 
     try:
-        import subprocess
-
-        try:
-            branch_name = subprocess.check_output(
-                ["git", "branch", "--remote", "--contains", "HEAD"],
-                cwd=app.repo.path
-            ).decode("utf-8")
-            app.display_info(f"Current branch: {branch_name}")
-        except Exception as e:
-            app.display_warning(f"Could not determine branch name: {e}")
         repo_path = app.repo.path
         valid_versions = get_valid_versions(repo_path)
         valid_platforms = get_valid_platforms(repo_path, valid_versions)

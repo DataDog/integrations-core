@@ -1079,12 +1079,16 @@ def get_commit_data(commit: str | None = "") -> tuple[int, str, list[str], list[
     cmd.append(commit) if commit else None
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
+    cmd_branch = ["git", "branch", "--remote", "--contains"]
+    cmd_branch.append(commit) if commit else cmd_branch.append("HEAD")
+    branch_name = subprocess.check_output(
+        cmd_branch
+    ).decode("utf-8")
     ticket_pattern = r'\b(?:DBMON|SAASINT|AGENT|AI)-\d+\b'
     pr_pattern = r'#(\d+)'
 
     message, timestamp = result.stdout.strip().split('\n')
-
-    tickets = re.findall(ticket_pattern, message)
+    tickets = set(re.findall(ticket_pattern, message) + re.findall(ticket_pattern, branch_name))
     prs = re.findall(pr_pattern, message)
     if not tickets:
         tickets = [""]
