@@ -49675,7 +49675,7 @@ spec:
           serviceAccountName: kyverno-cleanup-jobs
           containers:
           - name: cleanup
-            image: "bitnamibitnamilegacy/kubectl:1.28.5"
+            image: "bitnamilegacy/kubectl:1.28.5"
             imagePullPolicy: 
             command:
             - /bin/bash
