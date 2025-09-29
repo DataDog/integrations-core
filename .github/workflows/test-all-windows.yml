@@ -33,6 +33,14 @@ on:
         required: false
         default: true
         type: boolean
+      agent-image:
+        required: false
+        default: "datadog/agent-dev:master-py3"
+        type: string
+      agent-image-py2:
+        required: false
+        default: "datadog/agent-dev:master-py2"
+        type: string
       agent-image-windows:
         required: false
         default: "datadog/agent-dev:master-py3-win-servercore"
@@ -67,6 +75,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -86,6 +96,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -124,6 +136,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -142,6 +156,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -160,6 +176,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -178,6 +196,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -196,6 +216,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -214,6 +236,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -232,6 +256,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -250,6 +276,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -268,6 +296,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -286,6 +316,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -304,6 +336,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -322,6 +356,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -340,6 +376,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -378,6 +416,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -396,6 +436,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
@@ -414,6 +456,8 @@ jobs:
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
       agent-image-windows: "${{ inputs.agent-image-windows }}"
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
