@@ -189,6 +189,7 @@ def test_basic_connection(pg_instance: Dict[str, str]):
     Test basic connection acquisition, query execution, and pool stats
     for a single dbname using LRUConnectionPoolManager.
     """
+    pg_instance["dbname"] = "dogs_0"
     conn_args = _create_conn_args(pg_instance, "test_basic_connection")
     manager = LRUConnectionPoolManager(max_db=3, base_conn_args=conn_args, pool_config={"min_size": 1, "max_size": 2})
 

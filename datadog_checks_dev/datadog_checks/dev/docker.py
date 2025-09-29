@@ -289,7 +289,7 @@ class ComposeFileDown(LazyFunction):
             '-f',
             self.compose_file,
             'down',
-            '--volumes',
+            # '--volumes',
             '--remove-orphans',
             '-t',
             '0',
