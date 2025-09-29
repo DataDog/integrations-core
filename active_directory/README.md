@@ -32,6 +32,37 @@ If installing the Datadog Agent on a domain environment, see [the installation r
 
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
+The integration collects metrics from the following Windows performance objects:
+
+- **NTDS**: Core Active Directory metrics including replication, LDAP operations, and directory service threads
+- **Netlogon**: Authentication performance metrics including semaphore statistics for monitoring authentication bottlenecks
+- **Security System-Wide Statistics**: Authentication protocol usage metrics (NTLM vs Kerberos)
+- **DHCP Server**: DHCP failover and binding update metrics (when DHCP Server role is installed)
+- **DFS Replicated Folders**: DFS replication health, conflicts, and staging metrics (when DFSR role is installed)
+  - Note: Metrics are tagged with `instance` containing the DFS replication group name
+
+#### Netlogon Metrics
+
+The Netlogon metrics help monitor authentication performance and identify bottlenecks in domain controller authentication processing:
+
+- `active_directory.netlogon.semaphore_waiters`: Number of threads waiting for the authentication semaphore
+- `active_directory.netlogon.semaphore_holders`: Number of threads currently holding the semaphore
+- `active_directory.netlogon.semaphore_acquires`: Total number of semaphore acquisitions
+- `active_directory.netlogon.semaphore_timeouts`: Number of timeouts waiting for the semaphore
+- `active_directory.netlogon.semaphore_hold_time`: Average time (in seconds) the semaphore is held
+
+These metrics are particularly useful for monitoring authentication load from network access control (NAC) devices, Wi-Fi authentication, and other authentication-heavy scenarios.
+
+##### Use Cases
+
+The Netlogon and Security metrics help address several monitoring scenarios:
+
+- **Monitor authentication bottlenecks**: Identify when authentication requests are queuing up, particularly from Cisco ISE NAC devices or high-volume Wi-Fi authentication
+- **Track authentication processing times**: Use `semaphore_hold_time` to determine if authentication is taking too long
+- **Identify MaxConcurrentApi tuning needs**: High `semaphore_waiters` values indicate the need to adjust the MaxConcurrentApi registry setting
+- **Monitor authentication protocol usage**: Track the ratio of NTLM vs Kerberos authentications to ensure proper protocol usage
+- **Detect authentication timeouts and failures**: Rising `semaphore_timeouts` indicate authentication infrastructure issues
+
 ### Events
 
 The Active Directory check does not include any events.

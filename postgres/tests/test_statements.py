@@ -20,6 +20,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.config import build_config
+from datadog_checks.postgres.postgres import PostgreSql
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
@@ -123,8 +124,6 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
         connections[dbname].cursor().execute(query, args)
 
-    check = integration_check(dbm_instance)
-    check._connect()
     # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = obfuscate_sql
@@ -137,6 +136,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
             _run_query(1)
 
         _run_query(0)
+
         run_one_check(check, cancel=False)
 
         # Call one query
@@ -420,6 +420,7 @@ def dbm_instance(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
+    pg_instance['collect_settings'] = {'enabled': False}
     # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
     # This prevents DBMAsync from skipping job executions, as it is designed
     # to not execute jobs more frequently than their collection period.
@@ -1973,7 +1974,9 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
 # Even though this test is a unit test we leave it unmarked because loading this file loads the fixture
 # that requires booting up the database and makes it very slow to run compared to other unit tests
 def test_get_query_metrics_payload_rows():
-    config, _ = build_config(check={}, init_config={}, instance={"host": "host", "username": "user"})
+    check = PostgreSql('postgres', {}, [{"host": "host", "username": "user"}])
+    check.warning = print
+    config, _ = build_config(check=check)
     statement_metrics = PostgresStatementMetrics({}, config)
     wrapper = {}
 

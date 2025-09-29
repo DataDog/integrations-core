@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "19af2d5a-74cc-42db-98e4-e49a9e6c1de4",
   "app_id": "crewai",
+  "owner": "ml-observability",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -33,3 +33,9 @@ def changed_file_processes(files: list[str]):
         CompletedProcess([], 0, stdout=''),
         CompletedProcess([], 0, stdout=''),
     ]
+
+
+def write_file(folder, file, content):
+    (folder / file).parent.mkdir(exist_ok=True, parents=True)
+    file_path = folder / file
+    file_path.write_text(content)

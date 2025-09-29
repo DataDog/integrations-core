@@ -39,6 +39,7 @@ INSTANCE = {
     'dbname': DB_NAME,
     'tags': ['foo:bar'],
     'disable_generic_tags': True,
+    'collect_settings': {'enabled': True, 'run_sync': True},
 }
 
 
@@ -119,13 +120,17 @@ def pg_replica_logical():
 
 @pytest.fixture
 def metrics_cache(pg_instance):
-    config = build_config(check={'warning': print}, init_config={}, instance=pg_instance)
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.warning = print
+    config, _ = build_config(check)
     return PostgresMetricsCache(config)
 
 
 @pytest.fixture
 def metrics_cache_replica(pg_replica_instance):
-    config, _ = build_config(instance=pg_replica_instance, init_config={}, check={'warning': print})
+    check = PostgreSql('postgres', {}, [pg_replica_instance])
+    check.warning = print
+    config, _ = build_config(check)
     return PostgresMetricsCache(config)
 
 

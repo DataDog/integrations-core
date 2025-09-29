@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.4.1 / 2025-09-24
+
+***Fixed***:
+
+* Updated to build psycopg from source to fix a problem with FIPS compatibility ([#21074](https://github.com/DataDog/integrations-core/pull/21074))
+
 ## 1.4.0 / 2025-09-05
 
 ***Added***:

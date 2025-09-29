@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "6d009536-3383-4071-b45e-7771e0970cf4",
   "app_id": "kubernetes-admission",
+  "owner": "container-platform",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "53fe7c3e-57eb-42ca-8e43-ec92c04b6160",
   "app_id": "anthropic",
+  "owner": "ml-observability",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

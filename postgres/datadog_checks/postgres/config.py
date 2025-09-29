@@ -77,8 +77,6 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     """
     Build the Postgres configuration.
     :param check: The check instance.
-    :param init_config: The init_config for the Postgres check.
-    :param instance: The instance configuration for the Postgres check.
     :return: InstanceConfig
         The instance configuration object.
     """
@@ -214,7 +212,6 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     # The current InstanceConfig cannot be instantiated directly and integrations team is reluctant to fix it
     # in case existing integrations use the faulty behavior.
     # Instead we copy the behavior of the base check and instantiate this way
-    print("Creating config with args", args)
     config = InstanceConfig.model_validate(args, context={"configured_fields": instance_config_fields})
 
     validate_config(config, instance, validation_result)

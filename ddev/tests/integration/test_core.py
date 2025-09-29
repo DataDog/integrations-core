@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import pytest
+
 from ddev.repo.core import Repository
 from ddev.utils.fs import Path
 
@@ -191,6 +193,22 @@ class TestPackageDirectory:
 
         assert integration.package_directory == local_repo / integration.name / 'datadog_checks' / 'go_metro'
 
+    def test_non_existent_package(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+
+        with pytest.raises(OSError):
+            repo.integrations.get('non_existent_package')
+
+    def test_non_existent_when_worktree(self, local_clone):
+        repo = Repository(local_clone.path.name, str(local_clone.path))
+
+        with pytest.raises(OSError):
+            repo.integrations.get('wt')
+
+    def test_worktree_not_in_package_iterator(self, local_clone):
+        repo = Repository(local_clone.path.name, str(local_clone.path))
+        assert 'wt' not in set(repo.integrations.iter_all())
+
 
 class TestPackageFiles:
     def test_base_package_file(self, local_repo):
@@ -227,6 +245,11 @@ class TestReleaseTagPattern:
 
 
 class TestMetrics:
+    @pytest.fixture(autouse=True)
+    def mock_worktrees(self, mocker):
+        # This fake repo is another different fake repo, so we need to mock the worktrees to avoid
+        mocker.patch('ddev.utils.git.GitRepository.worktrees', return_value=[])
+
     def test_has_metrics(self, fake_repo):
         integration = fake_repo.integrations.get('dummy')
 

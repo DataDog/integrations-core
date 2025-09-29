@@ -100,6 +100,7 @@ def ci(app: Application, sync: bool):
             'platform': data['platform'],
             'runner': json.dumps(data['runner'], separators=(',', ':')),
             'repo': '${{ inputs.repo }}',
+            'context': '${{ inputs.context }}',
             # Options
             'python-version': '${{ inputs.python-version }}',
             'latest': '${{ inputs.latest }}',

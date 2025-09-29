@@ -26,6 +26,7 @@ jobs:
       # which tells the command that everything following it
       # should be treated as positional arguments, not options
       pytest-args: '-m flaky'
+      context: "flaky-tests"
     secrets: inherit
 
     permissions:
