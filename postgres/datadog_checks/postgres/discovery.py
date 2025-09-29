@@ -41,7 +41,6 @@ class PostgresAutodiscovery(Discovery):
     def db_pool(self):
         return self._check.db_pool
 
-
     def get_items(self) -> List[str]:
         """
         Get_items() from parent class returns a generator with four objects:

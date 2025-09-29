@@ -45,7 +45,9 @@ def test_snapshot_dbm_true(aggregator: AggregatorStub, integration_check, pg_ins
 
 
 @pytest.mark.snapshot
-def test_snapshot_dbm_true_autodiscovery(aggregator: AggregatorStub, integration_check, pg_instance, snapshot_mode: SnapshotMode):
+def test_snapshot_dbm_true_autodiscovery(
+    aggregator: AggregatorStub, integration_check, pg_instance, snapshot_mode: SnapshotMode
+):
     pg_instance['dbm'] = True
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True}
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True}
@@ -63,4 +65,49 @@ def test_snapshot_dbm_true_autodiscovery(aggregator: AggregatorStub, integration
 
     validate_snapshot(aggregator, check)
 
-    assert False
+
+@pytest.mark.snapshot
+def test_snapshot_custom_metrics(
+    aggregator: AggregatorStub, integration_check, pg_instance, snapshot_mode: SnapshotMode
+):
+    pg_instance['dbm'] = False
+    pg_instance['custom_metrics'] = [
+        {
+            "descriptors": [["datname", "db"]],
+            "metrics": {"age(datfrozenxid) AS age": ["postgresql.xid_age", "GAUGE"]},
+            "query": "SELECT datname, %s FROM pg_database WHERE datallowconn = TRUE;",
+            "relation": False,
+        },
+        {
+            "descriptors": [["slot_name", "replication_slot"]],
+            "metrics": {
+                "pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)": ["postgresql.replication_slot.lag", "GAUGE"]
+            },
+            "query": "SELECT slot_name, %s FROM pg_replication_slots;",
+            "relation": False,
+        },
+    ]
+    check = integration_check(pg_instance)
+    inject_snapshot_observer(check, snapshot_mode)
+    check.run()
+
+    # Sanity check that the check ran
+    aggregator.assert_metric("postgresql.running", count=1)
+    validate_snapshot(aggregator, check)
+
+@pytest.mark.snapshot
+def test_snapshot_custom_queries(aggregator: AggregatorStub, integration_check, pg_instance, snapshot_mode: SnapshotMode):
+    pg_instance['dbm'] = False
+    pg_instance['custom_queries'] = [
+        {
+            'query': 'SELECT 1',
+            'columns': [{'name': 'custom_metric', 'type': 'gauge'}],
+        }
+    ]
+    check = integration_check(pg_instance)
+    inject_snapshot_observer(check, snapshot_mode)
+    check.run()
+
+        # Sanity check that the check ran
+    aggregator.assert_metric("postgresql.running", count=1)
+    validate_snapshot(aggregator, check)

@@ -941,9 +941,14 @@ class PostgresStatementSamples(DBMAsyncJob):
             if row['state'] in {'idle', 'idle in transaction'}:
                 if row['state_change'] and row['query_start']:
                     if isinstance(row['state_change'], str):
-                        obfuscated_plan_event['duration'] = parser.isoparse(row['state_change']).timestamp() - parser.isoparse(row['query_start']).timestamp()
+                        obfuscated_plan_event['duration'] = (
+                            parser.isoparse(row['state_change']).timestamp()
+                            - parser.isoparse(row['query_start']).timestamp()
+                        )
                     elif isinstance(row['state_change'], datetime.datetime):
-                        obfuscated_plan_event['duration'] = (row['state_change'] - row['query_start']).total_seconds() * 1e9
+                        obfuscated_plan_event['duration'] = (
+                            row['state_change'] - row['query_start']
+                        ).total_seconds() * 1e9
                     else:
                         raise ValueError(f"Invalid state_change: {row['state_change']}")
                     # If the transaction is idle then we have a more specific "end time" than the current time at
