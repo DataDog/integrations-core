@@ -582,7 +582,7 @@ def save_html(
 
     groups = group_modules(modules)
 
-    html_headers = "<h3>Compresssed Size Changes</h3>"
+    html_headers = "<h3>Compressed Size Changes</h3>"
     html_headers += f'<h4>Comparing to commit: <a href="https://github.com/DataDog/integrations-core/commit/{old_commit}">{old_commit[:7]}</a></h4>'
     for (platform, py_version), group in groups.items():
         html_subheaders = str()
