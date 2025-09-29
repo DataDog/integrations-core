@@ -102,11 +102,6 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     # If you change a literal value here, make sure to update spec.yaml
     args.update(
         {
-            # Set the default port to None if the host is a socket path
-            "port": instance.get(
-                'port', defaults.instance_port() if not instance.get('host', '').startswith('/') else None
-            ),
-            # Set None values for ssl
             # Database configuration
             "dbm": instance.get(
                 'dbm', instance.get('deep_database_monitoring', defaults.instance_dbm())
