@@ -651,6 +651,20 @@ files:
           value:
             type: boolean
             example: true
+        - name: explain_errors_cache_maxsize
+          hidden: true
+          description: |
+            Set the max size of the cache used for the explain errors.
+          value:
+            type: integer
+            default: 5000
+        - name: explain_errors_cache_ttl
+          hidden: true
+          description: |
+            Set the ttl in seconds of the cache used for the explain errors.
+          value:
+            type: integer
+            default: 86400
         - name: run_sync
           hidden: true
           description: |

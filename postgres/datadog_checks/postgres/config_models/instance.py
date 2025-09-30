@@ -211,6 +211,8 @@ class QuerySamples(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    explain_errors_cache_maxsize: Optional[int] = None
+    explain_errors_cache_ttl: Optional[int] = None
     explain_function: Optional[str] = None
     explain_parameterized_queries: Optional[bool] = None
     explained_queries_cache_maxsize: Optional[int] = None
