@@ -154,6 +154,7 @@ def models(ctx, check, sync, verbose):
                 files_failed[model_file_path] = True
                 for error in errors:
                     check_display_queue.append((echo_failure, error))
+                display_queue[model_file_path] = check_display_queue
                 continue
 
             generated_model_file_lines = contents.splitlines(True)
