@@ -15,6 +15,7 @@ services:
     volumes:
       - ./resources:/docker-entrypoint-initdb.d/
       - ./etc/postgresql:/etc/postgresql/
+      - /tmp/postgres_${POSTGRES_IMAGE}:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: datad0g
       POSTGRES_INITDB_ARGS: "--data-checksums --locale=${POSTGRES_LOCALE}"
@@ -34,6 +35,7 @@ services:
     volumes:
       - ./resources_replica:/docker-entrypoint-initdb.d/
       - ./etc/postgresql_replica:/etc/postgresql/
+      - /tmp/postgres_${POSTGRES_IMAGE}_replica:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: datad0g
       POSTGRES_INITDB_ARGS: "--data-checksums --locale=${POSTGRES_LOCALE}"
@@ -53,6 +55,7 @@ services:
     volumes:
       - ./resources_replica2:/docker-entrypoint-initdb.d/
       - ./etc/postgresql_replica2:/etc/postgresql/
+      - /tmp/postgres_${POSTGRES_IMAGE}_replica_2:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: datad0g
       POSTGRES_INITDB_ARGS: "--data-checksums --locale=${POSTGRES_LOCALE}"
@@ -72,6 +75,7 @@ services:
     volumes:
       - ./resources_logical:/docker-entrypoint-initdb.d/
       - ./etc/postgresql_logical_replica:/etc/postgresql/
+      - /tmp/postgres_${POSTGRES_IMAGE}_logical_replica:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: datad0g
       POSTGRES_INITDB_ARGS: "--data-checksums --locale=${POSTGRES_LOCALE}"
