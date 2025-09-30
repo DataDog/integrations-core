@@ -142,7 +142,7 @@ class SQLServer(AgentCheck):
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
         self.cloud_metadata = self._config.cloud_metadata
-        self.tag_manager = TagManager()
+        self.tag_manager = TagManager(normalizer=self.normalize_tag)
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
 
         self.databases = set()
@@ -405,9 +405,9 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_INSTANCENAME] = instancename
                             self.static_info_cache[STATIC_INFO_FULL_SERVERNAME] = full_servername
 
-                            self.tag_manager.set_tag("sqlserver_servername", servername, replace=True)
+                            self.tag_manager.set_tag("sqlserver_servername", servername, replace=True, normalize=True)
                             if instancename:
-                                self.tag_manager.set_tag("sqlserver_instancename", instancename, replace=True)
+                                self.tag_manager.set_tag("sqlserver_instancename", instancename, replace=True, normalize=True)
                         else:
                             self.log.warning("failed to load servername static information due to empty results")
 
