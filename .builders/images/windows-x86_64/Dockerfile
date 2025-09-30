@@ -13,7 +13,8 @@ SHELL ["cmd", "/S", "/C"]
 
 # https://learn.microsoft.com/en-us/visualstudio/install/build-tools-container#create-and-build-the-dockerfile
 # https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools
-RUN curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe `
+# Bootstrapper version pinned to 17.12.36227.10 (taken from learn.microsoft.com/en-us/visualstudio/releases/2022/release-history#fixed-version-bootstrappers)
+RUN curl -SL --output vs_buildtools.exe https://download.visualstudio.microsoft.com/download/pr/87b94407-0aa3-45fc-b53f-d224027a42b3/00e8cad9ef34839c57f9be8bc4f93c517804777bdef770e8dbdc8ba0e06bc348/vs_BuildTools.exe `
  && (start /w vs_buildtools.exe --quiet --wait --norestart --nocache `
      --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools" `
      --add Microsoft.VisualStudio.Component.VC.140 `
@@ -25,6 +26,8 @@ RUN curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtoo
      --add Microsoft.VisualStudio.Workload.VCTools `
      || IF "%ERRORLEVEL%"=="3010" EXIT 0) `
  && del /q vs_buildtools.exe
+
+ ENV VCVARSALL_BAT="C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
 
 # Upgrade PowerShell
 ENV POWERSHELL_VERSION="7.4.0"
@@ -114,9 +117,44 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\perl\perl\bin" && `
     Remove-Item "strawberry-perl-$Env:PERL_VERSION-64bit.zip"
 
-ENV OPENSSL_VERSION="3.4.1"
+# Nasm
+ENV NASM_VERSION="2.16.03"
+RUN Get-RemoteFile `
+      -Uri https://www.nasm.us/pub/nasm/releasebuilds/$Env:NASM_VERSION/win64/nasm-$Env:NASM_VERSION-win64.zip `
+      -Path "nasm-$Env:NASM_VERSION-win64.zip" `
+    -Hash '3ee4782247bcb874378d02f7eab4e294a84d3d15f3f6ee2de2f47a46aa7226e6' && `
+    7z x "nasm-$Env:NASM_VERSION-win64.zip" -o"C:\nasm" && `
+    Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
+    Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
 
-ENV CURL_VERSION="8.12.1"
+ENV OPENSSL_VERSION="3.5.2"
+RUN Get-RemoteFile `
+      -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
+      -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
+      -Hash 'c53a47e5e441c930c3928cf7bf6fb00e5d129b630e0aa873b08258656e7345ec'; `
+    7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
+    7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
+    cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
+    RunOnVSConsole -Command `
+    'C:\perl\perl\bin\perl.exe Configure && `
+    nmake && `
+    nmake install_sw'
+# libpq and pg_config as needed by psycopg
+ENV PG_VERSION="16.9"
+COPY pg_config.pl C:\pg_config.pl
+RUN Get-RemoteFile `
+      -Uri https://ftp.postgresql.org/pub/source/v$Env:PG_VERSION/postgresql-$Env:PG_VERSION.tar.bz2 `
+      -Path postgresql-$Env:PG_VERSION.tar.bz2 `
+      -Hash '07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005'; `
+    7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
+    7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src && `
+    cd C:\postgresql_src\postgresql-$Env:PG_VERSION\src\tools\msvc && `
+    Copy-Item C:\pg_config.pl -Destination .\config.pl && `
+    RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe build.pl' && `
+    RunOnVSConsole -Command 'C:\perl\perl\bin\perl.exe install.pl C:\postgresql' && `
+    Add-ToPath -Append "C:\postgresql\bin"
+
+ENV CURL_VERSION="8.16.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt

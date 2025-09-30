@@ -1,37 +1,64 @@
 {
-    "manifest_version": "2.0.0",
-    "app_uuid": "7a896a43-4a2e-4be0-a62d-289b1baf70e1",
-    "app_id": "dnsfilter",
-    "display_on_public_website": false,
-    "tile": {
-      "overview": "README.md#Overview",
-      "configuration": "README.md#Setup",
-      "support": "README.md#Support",
-      "changelog": "CHANGELOG.md",
-      "description": "<FILL IN - A brief description of what this offering provides>",
-      "title": "DNSFilter",
-      "media": [],
-      "classifier_tags": [
-        "Category::Log Collection",
-        "Category::Security",
-        "Submitted Data Type::Logs",
-        "Offering::Integration"
-      ]
-    },
-    "assets": {
-      "integration": {
-        "auto_install": false,
-        "source_type_id": 46402079,
-        "source_type_name": "DNSFilter",
-        "events": {
-          "creates_events": false
-        }
+  "manifest_version": "2.0.0",
+  "app_uuid": "7a896a43-4a2e-4be0-a62d-289b1baf70e1",
+  "app_id": "dnsfilter",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into DNSFilter Traffic logs.",
+    "title": "DNSFilter",
+    "media": [
+      {
+        "caption": "DNSFilter - Overview",
+        "image_url": "images/dnsfilter_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "DNSFilter - Security Insights 1",
+        "image_url": "images/dnsfilter_security_insights_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "DNSFilter - Security Insights 2",
+        "image_url": "images/dnsfilter_security_insights_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 46402079,
+      "source_type_name": "DNSFilter",
+      "events": {
+        "creates_events": false
       }
     },
-    "author": {
-      "support_email": "help@datadoghq.com",
-      "name": "Datadog",
-      "homepage": "https://www.datadoghq.com",
-      "sales_email": "info@datadoghq.com"
+    "dashboards": {
+      "DNSFilter - Overview": "assets/dashboards/dnsfilter_overview.json",
+      "DNSFilter - Security Insights": "assets/dashboards/dnsfilter_security_insights.json"
+    },
+    "monitors": {
+      "High number of SERVFAIL responses from a server": "assets/monitors/high_number_of_SERVFAIL_responses_from_a_server.json"
+    },
+    "logs": {
+      "source": "dnsfilter"
     }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
   }
+}

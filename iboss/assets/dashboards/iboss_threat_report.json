@@ -1,0 +1,982 @@
+{
+    "title": "iboss - Threat Metrics Report",
+    "description": "This dashboards offers insights into threat counts, affected assets and users, threat types, and geographical sources and destinations.\n",
+    "widgets": [
+        {
+            "id": 5326129942494294,
+            "definition": {
+                "type": "image",
+                "url": "https://www.iboss.com/storage/2022/09/500x144-logo-black@2x.png",
+                "url_dark_theme": "https://www.iboss.com/core/assets/iboss/img/2022_iboss-wordmark-primary-white.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 1717103428126246,
+            "definition": {
+                "type": "note",
+                "content": "This dashboards offers insights into threat counts, affected assets and users, threat types, and geographical sources and destinations.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "green",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 2463616480369180,
+            "definition": {
+                "type": "note",
+                "content": "**Note**:\n- This dashboard is populated using metrics. Please follow the Configuration steps [here](/integrations/iboss) to enable metrics collection. Ensure the `Collect threat metrics` option is enabled to collect these metrics.\n- All threat metrics are collected once per day, once the complete daily iboss report is available. Please ensure to set the dashboard time range to at least `Past 1 Day` to view the data.",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
+            "id": 880749371009748,
+            "definition": {
+                "title": "Threats Overview",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5995750685351520,
+                        "definition": {
+                            "title": "Threat Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.threat.total_threat_count{$reporter_node}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {},
+                                "type": "bars"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 31311642173040,
+                        "definition": {
+                            "title": "Threat Count Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Threat Count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.threat.total_threat_count{$reporter_node}.rollup(sum, 300)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "red",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1174314089243042,
+                        "definition": {
+                            "title": "Prevented Threat Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.threat.total_prevented_threat_count{$reporter_node}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3694472671930097,
+                        "definition": {
+                            "title": "Prevented Threat Count Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Prevented Threat Count",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.threat.total_prevented_threat_count{$reporter_node}.rollup(sum, 300)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "green",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6633930813074268,
+                        "definition": {
+                            "title": "Threats by Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:iboss.threat.types.threat_count{$reporter_node} by {threat_stat_type}.rollup(sum, 300)",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 11
+            }
+        },
+        {
+            "id": 419025145318470,
+            "definition": {
+                "title": "User and Asset Threat Insights",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3292532927196895,
+                        "definition": {
+                            "type": "note",
+                            "content": "Assets",
+                            "background_color": "green",
+                            "font_size": "24",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6613659389964929,
+                        "definition": {
+                            "title": "Threats by Assets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.threat.asset.threat_count{$reporter_node} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:iboss.threat.asset.prevented_threat_count{$reporter_node} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Threat Count",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_red"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Prevented Threat Count",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_green"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4270499800913247,
+                        "definition": {
+                            "title": "Threat Impacted Assets Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Assets",
+                                            "formula": "round(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:iboss.threat.total_assets_with_threats{$reporter_node}.rollup(avg, 300)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5645648839638907,
+                        "definition": {
+                            "type": "note",
+                            "content": "Users",
+                            "background_color": "green",
+                            "font_size": "24",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1278755273616386,
+                        "definition": {
+                            "title": "Threats by User",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.threat.user.threat_count{$reporter_node} by {user_id}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:iboss.threat.user.prevented_threat_count{$reporter_node} by {user_id}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Threat Count",
+                                            "formula": "query1",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_red"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Prevented Threat Count",
+                                            "formula": "query2",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_green"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5069991749072560,
+                        "definition": {
+                            "title": "Threat Impacted Users Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Users",
+                                            "formula": "round(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:iboss.threat.total_users_with_threats{$reporter_node}.rollup(avg, 300)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 3,
+                            "width": 5,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 12,
+                "height": 7,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 3308837837373478,
+            "definition": {
+                "title": "Source and Destination Threat Insights",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7523343929186827,
+                        "definition": {
+                            "type": "note",
+                            "content": "Sources",
+                            "background_color": "green",
+                            "font_size": "24",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6596579328202455,
+                        "definition": {
+                            "title": "Threats by Source Country",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.threat.source_country.threat_count{$reporter_node} by {source_country}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:iboss.threat.source_country.prevented_threat_count{$reporter_node} by {source_country}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Threat Count",
+                                            "formula": "query1",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_red"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Prevented Threat Count",
+                                            "formula": "query2",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_green"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 0,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6005978387396264,
+                        "definition": {
+                            "title": "Threats by Source IP",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.threat.source_ip.threat_count{$reporter_node} by {source_ip}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:iboss.threat.source_ip.prevented_threat_count{$reporter_node} by {source_ip}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Threat Count",
+                                            "formula": "query1",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_red"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Prevented Threat Count",
+                                            "formula": "query2",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_green"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7106401371177614,
+                        "definition": {
+                            "type": "note",
+                            "content": "Destinations",
+                            "background_color": "green",
+                            "font_size": "24",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "right",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2848284717265200,
+                        "definition": {
+                            "title": "Threats by Destination Country",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.threat.destination_country.threat_count{$reporter_node} by {destination_country}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:iboss.threat.destination_country.prevented_threat_count{$reporter_node} by {destination_country}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Threat Count",
+                                            "formula": "query1",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_red"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Prevented Threat Count",
+                                            "formula": "query2",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_green"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3597010917472951,
+                        "definition": {
+                            "title": "Threats by Destination IP",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:iboss.threat.destination_ip.threat_count{$reporter_node} by {destination_ip}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:iboss.threat.destination_ip.prevented_threat_count{$reporter_node} by {destination_ip}.rollup(sum, 300)",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Threat Count",
+                                            "formula": "query1",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_red"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Prevented Threat Count",
+                                            "formula": "query2",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "white_on_green"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 3,
+                            "width": 5,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 23,
+                "width": 12,
+                "height": 7
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "reporter_node",
+            "prefix": "reporting_node_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

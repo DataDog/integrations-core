@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d0b52e9d-6594-4ff5-9b66-800943f75756",
   "app_id": "consul",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

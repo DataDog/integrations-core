@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 11.0.0 / 2025-09-05
+
+***Changed***:
+
+* Add correct units and/or scale factor for UCD profile memory metrics ([#20818](https://github.com/DataDog/integrations-core/pull/20818))
+
+## 10.1.1 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 10.1.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+
 ## 10.0.0 / 2025-04-17 / Agent 7.66.0
 
 ***Changed***:

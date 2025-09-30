@@ -123,7 +123,7 @@ class ReplicaCollector(MongoCollector):
                     " Votes metrics won't be reported."
                 )
                 return None
-        return api['local']['system.replset'].find_one()
+        return api['local']['system.replset'].find_one(max_time_ms=api._timeout)
 
     def collect(self, api):
         status = api.replset_get_status()

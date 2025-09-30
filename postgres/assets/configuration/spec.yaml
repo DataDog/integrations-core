@@ -282,6 +282,30 @@ files:
       value:
         type: boolean
         example: true
+    - name: locks_idle_in_transaction
+      description: Configure collection of idle in transaction lock age metrics
+      options:
+        - name: enabled
+          description: Enable collection of idle in transaction lock age metrics.
+          value:
+            type: boolean
+            example: true
+            display_default: true
+          hidden: true
+        - name: collection_interval
+          description: Set the collection interval (in seconds) for idle in transaction lock age metrics.
+          value:
+            type: number
+            example: 300
+            display_default: 300
+          hidden: true
+        - name: max_rows
+          description: Set the maximum number of rows to collect per check run.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
+          hidden: true
     - name: collect_checksum_metrics
       description: Collect counts of database failed checksums. Only supported on versions >= 12.
       value:
@@ -349,10 +373,11 @@ files:
         type: string
         example: /usr/local/pgsql/data
     - name: tag_replication_role
+      hidden: true
       description: Tag metrics and checks with `replication_role:<master|standby>`.
       value:
         type: boolean
-        example: false
+        example: true
     - name: table_count_limit
       description: The maximum number of tables to collect metrics from.
       value:
@@ -461,6 +486,21 @@ files:
         type: string
         example: show_pg_stat_statements()
         display_default: pg_stat_statements
+    - name: query_encodings
+      description: |
+        Set this value if your database is encoded in SQL_ASCII and you have clients that use encodings other than UTF-8.
+        When attempting to decode stored query text for query metrics, samples and activity, the agent will use these
+        values in order and return the first successful decoding. Only supported for Postgres 10 and above.
+
+        Note that the values should be the Python versions of the encoding names, which can be referenced at:
+        https://docs.python.org/3/library/codecs.html#standard-encodings
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - utf8
+          - latin1
     - name: query_metrics
       description: Configure collection of query metrics
       options:
@@ -593,7 +633,7 @@ files:
             Enable collection of pg_settings. Requires `dbm: true`.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collection_interval
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to

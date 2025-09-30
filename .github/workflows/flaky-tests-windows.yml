@@ -1,0 +1,59 @@
+name: Daily Flaky Tests (every 8 hours) -  Windows
+# This is a temporary fix to avoid hitting the max 256 jobs per workflow limit
+# We will remove this once we have a better solution
+
+on:
+  workflow_dispatch:
+  schedule:
+  # 4 AM, 12 PM, 8 PM UTC
+  - cron: "0 4,12,20 * * *"
+
+jobs:
+  cache:
+    uses: ./.github/workflows/cache-shared-deps.yml
+
+  test:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-all-windows.yml
+    with:
+      repo: core
+
+      # Options
+      # Because -m starts with a dash,
+      # click (the library used to build the CLI) will
+      # interpret it as an option, not as an argument.
+      # To avoid this, using -- syntax,
+      # which tells the command that everything following it
+      # should be treated as positional arguments, not options
+      pytest-args: '-m flaky'
+      context: "flaky-tests"
+    secrets: inherit
+
+    permissions:
+       # needed for compute-matrix in test-target.yml
+       contents: read
+
+  publish-test-results:
+    needs:
+    - test
+    if: success() || failure()
+    concurrency:
+      group: test-results
+
+    permissions:
+      checks: write # Needed for test-results-master
+      contents: write # Needed for test-results-master
+      pull-requests: write # Needed for test-results-master
+
+    uses: ./.github/workflows/test-results-master.yml
+    secrets: inherit
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

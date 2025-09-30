@@ -52,7 +52,7 @@ def test_check(aggregator, dd_run_check, check):
             for tag_set in expected_tags:
                 assert all(
                     all(any(tag in mt for mt in m.tags) for tag in tag_set) for m in collected_metrics if m.tags
-                ), ('tags ' + str(expected_tags) + ' not found in ' + formatted_metric)
+                ), 'tags ' + str(expected_tags) + ' not found in ' + formatted_metric
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

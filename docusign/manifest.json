@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "06b018f6-ef33-418e-b745-5e6d6a405731",
   "app_id": "docusign",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

@@ -1,8 +1,6 @@
 id: box
 metric_id: box
 backend_only: false
-installation_sources:
-  - box-cloud
 facets:
   - groups:
       - Event
@@ -69,7 +67,7 @@ pipeline:
   name: Box
   enabled: true
   filter:
-    query: source:box-cloud
+    query: source:box
   processors:
     - type: date-remapper
       name: Define `created_at` as the official date of the log

@@ -52,6 +52,10 @@ The check can still collect:
 
 ## Data Collected
 
+### Metrics
+
+See [metadata.csv][9] for a list of metrics provided by this integration.
+
 ### Service Checks
 
 See [service_checks.json][5] for a list of service checks provided by this integration.
@@ -75,3 +79,4 @@ Need help? Contact [Datadog support][6].
 [6]: https://docs.datadoghq.com/help/
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubelet/datadog_checks/kubelet/data/conf.yaml.default
 [8]: https://docs.datadoghq.com/agent/guide/autodiscovery-management/?tab=containerizedagent
+[9]: https://github.com/DataDog/integrations-core/blob/master/kubelet/metadata.csv

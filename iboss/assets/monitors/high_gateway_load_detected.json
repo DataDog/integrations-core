@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2025-05-30",
+	"last_updated_at": "2025-05-30",
+	"title": "High gateway load detected",
+	"description": "It monitors for high load on the gateway, which can result from traffic surges, resource exhaustion, or misconfigured policies. Elevated load may cause latency, dropped connections, or degraded network performance.",
+	"definition": {
+		"id": 173385318,
+		"name": "High gateway load detected",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:iboss.gateway_performance.cpu_utilization{!gateway_name:none,!gateway_name:all_gateways} by {gateway_name} >= 95",
+		"message": "{{#is_warning}}⚠️ **Warning**: Gateway load has exceeded the warning threshold on **{{gateway_name.name}}**.\n\n- **Current Load**: {{value}}%  \n- **Warning Threshold**: {{warn_threshold}}%\n{{/is_warning}}\n\n{{#is_alert}}🚨 **Alert**: Gateway load has exceeded the alert threshold on **{{gateway_name.name}}**.\n\n- **Current Load**: {{value}}%  \n- **Alert Threshold**: {{threshold}}%\n{{/is_alert}}\n\n@example@example.com",
+		"tags": [
+			"integration:iboss"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 95,
+				"warning": 80
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:iboss"
+	]
+}

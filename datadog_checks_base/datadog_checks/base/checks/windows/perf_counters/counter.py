@@ -7,7 +7,8 @@ import weakref
 import pywintypes
 import win32pdh
 
-from ....errors import ConfigTypeError, ConfigValueError
+from datadog_checks.base.errors import ConfigTypeError, ConfigValueError
+
 from .constants import PDH_CSTATUS_INVALID_DATA, PDH_INVALID_DATA
 from .transform import NATIVE_TRANSFORMERS, TRANSFORMERS
 from .utils import construct_counter_path, get_counter_value, get_counter_values, validate_path

@@ -1,0 +1,41 @@
+name: Nightly minimum base package test -  Windows
+# This is a temporary fix to avoid hitting the max 256 jobs per workflow limit
+# We will remove this once we have a better solution
+
+on:
+  # Triggering minimum base package tests can be useful outside of the schedule, for instance for PRs
+  # that add new integrations or ones that bump the Pydantic dependency in the base package.
+  # Until we figure out how best to trigger these automatically we're leaving the door open to easily
+  # trigger this manually with the right branch.
+  workflow_dispatch:
+  schedule:
+  # 5 AM UTC
+  - cron: "0 5 * * *"
+
+jobs:
+  test:
+    uses: ./.github/workflows/test-all-windows.yml
+
+    permissions:
+       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+       id-token: write
+       # needed for compute-matrix in test-target.yml
+       contents: read
+
+    with:
+      repo: core
+
+      # Options
+      minimum-base-package: true
+      test-py2: true
+      pytest-args: '-m "not flaky"'
+      context: "nightly-base-package"
+    secrets: inherit
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

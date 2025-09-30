@@ -8,8 +8,8 @@ import re
 import time
 from contextlib import contextmanager
 
-import psycopg2
-import psycopg2.sql
+import psycopg
+import psycopg.sql
 import pytest
 
 from datadog_checks.base import ConfigurationError
@@ -75,7 +75,7 @@ CHECKSUM_METRICS = {
 @contextmanager
 def get_postgres_connection(dbname="postgres"):
     conn_args = {'host': HOST, 'dbname': dbname, 'user': USER_ADMIN, 'password': PASSWORD_ADMIN}
-    conn = psycopg2.connect(**conn_args)
+    conn = psycopg.connect(**conn_args)
     conn.autocommit = True
     yield conn
 
@@ -87,7 +87,6 @@ def test_autodiscovery_simple(integration_check, pg_instance):
     Test simple autodiscovery.
     """
     pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
-    pg_instance['relations'] = ['pg_index']
     del pg_instance['dbname']
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
@@ -106,7 +105,6 @@ def test_autodiscovery_global_view_db_specified(integration_check, pg_instance):
     """
     pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
     pg_instance["database_autodiscovery"]["global_view_db"] = "dogs_0"
-    pg_instance['relations'] = ['pg_index']
     del pg_instance['dbname']
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
@@ -125,7 +123,6 @@ def test_autodiscovery_max_databases(integration_check, pg_instance):
     """
     pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
     pg_instance['database_autodiscovery']['max_databases'] = 20
-    pg_instance['relations'] = ['pg_index']
     del pg_instance['dbname']
 
     check = integration_check(pg_instance)
@@ -158,11 +155,10 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
 
     pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
     pg_instance['database_autodiscovery']['include'].append(database_to_find)
-    pg_instance['relations'] = ['pg_index']
     del pg_instance['dbname']
     pg_instance["database_autodiscovery"]['refresh'] = 1
     check = integration_check(pg_instance)
-    run_one_check(check)
+    run_one_check(check, cancel=False)
 
     assert check.autodiscovery is not None
     databases = check.autodiscovery.get_items()
@@ -172,7 +168,7 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
     with get_postgres_connection() as conn:
         cursor = conn.cursor()
         try:
-            cursor.execute(psycopg2.sql.SQL("CREATE DATABASE {}").format(psycopg2.sql.Identifier(database_to_find)))
+            cursor.execute(psycopg.sql.SQL("CREATE DATABASE {}").format(psycopg.sql.Identifier(database_to_find)))
 
             time.sleep(pg_instance["database_autodiscovery"]['refresh'])
             databases = check.autodiscovery.get_items()
@@ -180,23 +176,8 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
         finally:
             # Need to drop the new database to clean up the environment for next tests.
             cursor.execute(
-                psycopg2.sql.SQL("DROP DATABASE {} WITH (FORCE);").format(psycopg2.sql.Identifier(database_to_find))
+                psycopg.sql.SQL("DROP DATABASE {} WITH (FORCE);").format(psycopg.sql.Identifier(database_to_find))
             )
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_autodiscovery_relations_disabled(integration_check, pg_instance):
-    """
-    If no relation metrics are being collected, autodiscovery should still run.
-    """
-    pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
-    pg_instance['relations'] = []
-    del pg_instance['dbname']
-    check = integration_check(pg_instance)
-    run_one_check(check, pg_instance)
-
-    assert check.autodiscovery is not None
 
 
 @pytest.mark.integration
@@ -265,18 +246,12 @@ def test_autodiscovery_exceeds_min_interval(aggregator, integration_check, pg_in
     """
     pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
     pg_instance["database_autodiscovery"]["include"] = ["dogs$", "dogs_noschema$", "dogs_nofunc$"]
-    pg_instance['relations'] = [
-        {'relation_regex': '.*'},
-    ]
     pg_instance['min_collection_interval'] = 0.001
     del pg_instance['dbname']
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    aggregator.assert_metric(
-        'dd.postgres._collect_relations_autodiscovery.time',
-    )
     assert len(check.warnings) == 1
     test_structure = re.compile(
         "Collecting metrics on autodiscovery metrics took .* ms, which is longer than "
@@ -293,7 +268,6 @@ def test_autodiscovery_dbname_specified(integration_check, pg_instance):
     If a dbname is specified in the config, autodiscovery should not run.
     """
     pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
-    pg_instance['relations'] = ['breed']
     pg_instance['dbname'] = "dogs_30"
 
     with pytest.raises(ConfigurationError):
@@ -304,7 +278,7 @@ def _set_allow_connection(dbname: str, allow: bool):
     with get_postgres_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            psycopg2.sql.SQL("UPDATE pg_database SET datallowconn = %s WHERE datname = %s;"),
+            psycopg.sql.SQL("UPDATE pg_database SET datallowconn = %s WHERE datname = %s;"),
             (allow, dbname),
         )
         conn.commit()
@@ -315,9 +289,6 @@ def test_handle_cannot_connect(aggregator, integration_check, pg_instance):
     db_to_disable = "dogs_0"
     _set_allow_connection(db_to_disable, False)
     pg_instance["database_autodiscovery"] = {"enabled": True, "include": ["dogs_[0-3]"]}
-    pg_instance['relations'] = [
-        {'relation_regex': '.*'},
-    ]
     del pg_instance['dbname']
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)

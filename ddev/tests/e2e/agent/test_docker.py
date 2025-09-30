@@ -63,11 +63,23 @@ class TestStart:
                 True,
                 id='Specific stable release with jmx exact',
             ),
+            pytest.param(
+                'datadog/agent:latest',
+                'datadog/agent:latest',
+                False,
+                id='Latest stable release',
+            ),
+            pytest.param(
+                'datadog/agent-dev:master-jmx-win-servercore',
+                'datadog/agent-dev:master-py3-jmx-win-servercore',
+                False,
+                id='Servercore without version',
+            ),
         ],
     )
     def test_agent_build(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -88,7 +100,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'use_jmx': use_jmx}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build=agent_build, local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -128,7 +140,7 @@ class TestStart:
 
     def test_env_vars(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -146,7 +158,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(
             agent_build='',
             local_packages={},
@@ -192,7 +204,7 @@ class TestStart:
 
     def test_no_config_file(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -206,7 +218,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, temp_dir / 'config.yaml')
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, temp_dir / 'config.yaml')
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -244,7 +256,7 @@ class TestStart:
 
     def test_windows_container(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -262,7 +274,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'docker_platform': 'windows'}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -299,7 +311,7 @@ class TestStart:
     @pytest.mark.requires_linux
     def test_docker_volumes_linux(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -317,7 +329,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'docker_volumes': ['/a/b/c:/d/e/f']}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -360,7 +372,7 @@ class TestStart:
     @pytest.mark.requires_windows
     def test_docker_volumes_windows_running_linux(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -378,7 +390,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'docker_volumes': ['/a/b/c:/d/e/f', f'{config_file}:/mnt/{config_file.name}']}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -423,7 +435,7 @@ class TestStart:
     @pytest.mark.requires_windows
     def test_docker_volumes_windows_running_windows(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -441,7 +453,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'docker_volumes': [f'{config_file.parent.parent}:C:\\mnt'], 'docker_platform': 'windows'}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -479,7 +491,7 @@ class TestStart:
 
     def test_retry_pull_image(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -501,7 +513,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, temp_dir / 'config.yaml')
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, temp_dir / 'config.yaml')
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -541,7 +553,7 @@ class TestStart:
 
     def test_custom_hosts(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -559,7 +571,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'custom_hosts': [['host2', '127.0.0.1'], ['host1', '127.0.0.1']]}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -603,7 +615,7 @@ class TestStart:
 
     def test_dogstatsd_port(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -621,7 +633,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={'DD_DOGSTATSD_PORT': '9000'})
 
         assert run.call_args_list == [
@@ -665,7 +677,7 @@ class TestStart:
 
     def test_proxies(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -683,7 +695,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'proxy': {'http': 'http://localhost:8080', 'https': 'https://localhost:4443'}}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -727,7 +739,7 @@ class TestStart:
 
     def test_start_commands(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -745,7 +757,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'start_commands': ['echo "hello world"']}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -792,7 +804,7 @@ class TestStart:
 
     def test_post_install_commands(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -810,7 +822,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'post_install_commands': ['echo "hello world"']}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={}, env_vars={})
 
         assert run.call_args_list == [
@@ -857,7 +869,7 @@ class TestStart:
 
     def test_local_packages_linux_container(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -875,7 +887,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={temp_dir / 'foo': '[deps]'}, env_vars={})
 
         assert run.call_args_list == [
@@ -938,7 +950,7 @@ class TestStart:
 
     def test_local_packages_windows_container(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -956,7 +968,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'docker_platform': 'windows'}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={temp_dir / 'foo': '[deps]'}, env_vars={})
 
         assert run.call_args_list == [
@@ -1015,7 +1027,7 @@ class TestStart:
 
     def test_all_post_run_logic(
         self,
-        platform,
+        app,
         temp_dir,
         default_hostname,
         get_integration,
@@ -1033,7 +1045,7 @@ class TestStart:
         environment = 'py3.12'
         metadata = {'start_commands': ['echo "hello world1"'], 'post_install_commands': ['echo "hello world2"']}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, config_file)
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, config_file)
         agent.start(agent_build='', local_packages={temp_dir / 'foo': '[deps]'}, env_vars={})
 
         assert run.call_args_list == [
@@ -1098,14 +1110,14 @@ class TestStart:
 
 
 class TestStop:
-    def test_basic(self, platform, get_integration, docker_path, mocker):
+    def test_basic(self, app, get_integration, docker_path, mocker):
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         integration = 'postgres'
         environment = 'py3.12'
         metadata = {}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, Path('config.yaml'))
         agent.stop()
 
         assert run.call_args_list == [
@@ -1123,14 +1135,14 @@ class TestStop:
             ),
         ]
 
-    def test_stop_commands(self, platform, get_integration, docker_path, mocker):
+    def test_stop_commands(self, app, get_integration, docker_path, mocker):
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         integration = 'postgres'
         environment = 'py3.12'
         metadata = {'stop_commands': ['echo "hello world"']}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, Path('config.yaml'))
         agent.stop()
 
         assert run.call_args_list == [
@@ -1151,14 +1163,14 @@ class TestStop:
 
 
 class TestRestart:
-    def test_basic(self, platform, get_integration, docker_path, mocker):
+    def test_basic(self, app, get_integration, docker_path, mocker):
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         integration = 'postgres'
         environment = 'py3.12'
         metadata = {}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, Path('config.yaml'))
         agent.restart()
 
         assert run.call_args_list == [
@@ -1172,14 +1184,14 @@ class TestRestart:
 
 
 class TestInvoke:
-    def test_basic(self, platform, get_integration, docker_path, mocker):
+    def test_basic(self, app, get_integration, docker_path, mocker):
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
 
         integration = 'postgres'
         environment = 'py3.12'
         metadata = {}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, Path('config.yaml'))
         agent.invoke(['check', 'postgres'])
 
         assert run.call_args_list == [
@@ -1192,7 +1204,7 @@ class TestInvoke:
 
 
 class TestEnterShell:
-    def test_linux_container(self, platform, get_integration, docker_path, mocker):
+    def test_linux_container(self, app, get_integration, docker_path, mocker):
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
         mocker.patch('sys.stdout', return_value=mocker.MagicMock(isatty=lambda: True))
 
@@ -1200,7 +1212,7 @@ class TestEnterShell:
         environment = 'py3.12'
         metadata = {}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, Path('config.yaml'))
         agent.enter_shell()
 
         assert run.call_args_list == [
@@ -1211,7 +1223,7 @@ class TestEnterShell:
             ),
         ]
 
-    def test_windows_container(self, platform, get_integration, docker_path, mocker):
+    def test_windows_container(self, app, get_integration, docker_path, mocker):
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
         mocker.patch('sys.stdout', return_value=mocker.MagicMock(isatty=lambda: True))
 
@@ -1219,7 +1231,7 @@ class TestEnterShell:
         environment = 'py3.12'
         metadata = {'docker_platform': 'windows'}
 
-        agent = DockerAgent(platform, get_integration(integration), environment, metadata, Path('config.yaml'))
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, Path('config.yaml'))
         agent.enter_shell()
 
         assert run.call_args_list == [

@@ -17,8 +17,10 @@ from datadog_checks.postgres.util import (
     QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
     QUERY_PG_REPLICATION_STATS_METRICS,
+    QUERY_PG_STAT_RECOVERY_PREFETCH,
     QUERY_PG_STAT_WAL_RECEIVER,
     QUERY_PG_UPTIME,
+    QUERY_PG_WAIT_EVENT_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     STAT_IO_METRICS,
@@ -42,6 +44,7 @@ PASSWORD_ADMIN = 'dd_admin'
 DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
+POSTGRES_LOCALE = os.environ.get('POSTGRES_LOCALE', "UTF8")
 
 REPLICA_CONTAINER_1_NAME = 'compose-postgres_replica-1'
 REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'
@@ -157,6 +160,7 @@ def _get_expected_tags(
         pg_instance['tags']
         + [f'port:{pg_instance["port"]}']
         + [f'database_hostname:{check.database_hostname}', f'database_instance:{check.database_identifier}']
+        + [f'ddagenthostname:{check.agent_hostname}']
     )
     if role:
         base_tags.append(f'replication_role:{role}')
@@ -203,9 +207,9 @@ def assert_metric_at_least(
             found_values += 1
 
     if count:
-        assert (
-            found_values == count
-        ), f'Expected to have {count} with tags {expected_tags} values for metric {metric_name}, got {found_values}'
+        assert found_values == count, (
+            f'Expected to have {count} with tags {expected_tags} values for metric {metric_name}, got {found_values}'
+        )
     if min_count:
         assert found_values >= min_count, (
             f'Expected to have at least {min_count} with tags {expected_tags} values for metric {metric_name},'
@@ -356,6 +360,13 @@ def check_replication_slots_stats(aggregator, expected_tags, count=1):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
+def check_wait_event_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 10.0:
+        return
+    for metric_name in _iterate_metric_name(QUERY_PG_WAIT_EVENT_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
 def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
     replication_metrics = metrics_cache.get_replication_metrics(VersionUtils.parse_version(POSTGRES_VERSION), False)
     for metric_name in _iterate_metric_name(replication_metrics):
@@ -474,6 +485,14 @@ def check_subscription_state_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 14:
         return
     for metric_name in _iterate_metric_name(SUBSCRIPTION_STATE_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_recovery_prefetch_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 15.0:
+        return
+
+    for metric_name in _iterate_metric_name(QUERY_PG_STAT_RECOVERY_PREFETCH):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 

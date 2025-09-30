@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: cassandra
 metric_id: cassandra
 backend_only: false

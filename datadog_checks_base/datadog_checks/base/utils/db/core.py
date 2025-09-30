@@ -6,10 +6,10 @@ from itertools import chain
 from typing import Any, Callable, Dict, List, Tuple  # noqa: F401
 
 from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.db.types import QueriesExecutor, QueriesSubmitter, Transformer  # noqa: F401
 
-from ...config import is_affirmative
-from ..containers import iter_unique
 from .query import Query
 from .transform import COLUMN_TRANSFORMERS, EXTRA_TRANSFORMERS
 from .utils import SUBMISSION_METHODS, create_submission_transformer, tracked_query

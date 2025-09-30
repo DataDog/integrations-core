@@ -1,0 +1,67 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "b8054f07-7553-43ac-a33a-dc07c81eb94f",
+  "app_id": "mac-audit-logs",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Mac audit logs.",
+    "title": "Mac Audit Logs",
+    "media": [
+      {
+        "caption": "Mac Audit Logs - Overview",
+        "image_url": "images/mac_audit_logs_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mac Audit Logs - Overview",
+        "image_url": "images/mac_audit_logs_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mac Audit Logs - Overview",
+        "image_url": "images/mac_audit_logs_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Mac Audit Logs - Overview",
+        "image_url": "images/mac_audit_logs_4.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Network",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 42802902,
+      "source_type_name": "Mac Audit Logs",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Mac Audit Logs - Overview": "assets/dashboards/mac_audit_logs_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

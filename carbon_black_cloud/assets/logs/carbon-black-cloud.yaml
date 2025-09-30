@@ -1,0 +1,336 @@
+# bypass-global-missing-date-remapper-checks
+id: carbon-black-cloud
+metric_id: carbon-black-cloud
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+pipeline:
+  type: pipeline
+  name: Carbon Black Cloud
+  enabled: true
+  filter:
+    query: source:carbon-black-cloud
+  processors:
+    - type: category-processor
+      name: Category processor for creating `service`
+      enabled: true
+      categories:
+        - filter:
+            query: "@type:auth.event.*"
+          name: auth-events
+        - filter:
+            query: "@type:endpoint.event.*"
+          name: endpoint-events
+        - filter:
+            query: "@type:watchlist.hit"
+          name: watchlist-hits
+        - filter:
+            query: "@alert_url:*"
+          name: alerts
+        - filter:
+            query: "@description:*"
+          name: audit
+      target: service
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: pipeline
+      name: Alerts
+      enabled: true
+      filter:
+        query: service:alerts
+      processors:
+        - type: attribute-remapper
+          name: Map `device_username` to `usr.name`
+          enabled: true
+          sources:
+            - device_username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - name: Lookup on `severity` to `status`
+          enabled: true
+          source: severity
+          target: status
+          lookupTable: |-
+            1,Info
+            2,Info
+            3,Warning
+            4,Warning
+            5,Warning
+            6,Critical
+            7,Critical
+            8,Critical
+            9,Critical
+            10,Critical
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `status` as the official status of the log
+          enabled: true
+          sources:
+            - status
+        - type: grok-parser
+          name: Convert `backend_update_timestamp` to epoch timestamp
+          enabled: true
+          source: backend_update_timestamp
+          samples:
+            - 2025-06-12T08:42:59.278Z
+          grok:
+            supportRules: ""
+            matchRules: rule
+              %{date("yyyy-MM-dd'T'HH:mm:ss.SSSz"):backend_update_epoch_timestamp}
+        - type: grok-parser
+          name: Convert `user_update_timestamp` to epoch timestamp
+          enabled: true
+          source: user_update_timestamp
+          samples:
+            - 2025-06-12T08:42:59.278Z
+          grok:
+            supportRules: ""
+            matchRules: rule
+              %{date("yyyy-MM-dd'T'HH:mm:ss.SSSz"):user_update_epoch_timestamp}
+        - type: arithmetic-processor
+          name: Timestamp difference
+          enabled: true
+          expression: backend_update_epoch_timestamp - user_update_epoch_timestamp
+          target: timestamp_difference
+          replaceMissing: true
+    - type: pipeline
+      name: Check `backend_update_timestamp` is greater
+      enabled: true
+      filter:
+        query: "@timestamp_difference:>=0"
+      processors:
+        - type: date-remapper
+          name: Define `backend_update_timestamp` as the official date of the log
+          enabled: true
+          sources:
+            - backend_update_timestamp
+    - type: pipeline
+      name: Check `user_update_timestamp` is greater
+      enabled: true
+      filter:
+        query: "@timestamp_difference:<0"
+      processors:
+        - type: date-remapper
+          name: Define `user_update_timestamp` as the official date of the log
+          enabled: true
+          sources:
+            - user_update_timestamp
+    - type: pipeline
+      name: Auth Events
+      enabled: true
+      filter:
+        query: service:auth-events
+      processors:
+        - type: grok-parser
+          name: Parse `backend_timestamp` to epoch time
+          enabled: true
+          source: backend_timestamp
+          samples:
+            - 2025-06-04 08:04:13 +0000 UTC
+          grok:
+            supportRules: ""
+            matchRules: rule %{date("yyyy-MM-dd HH:mm:ss Z z"):backend_timestamp}
+        - type: date-remapper
+          name: Define `backend_timestamp` as the official date of the log
+          enabled: true
+          sources:
+            - backend_timestamp
+        - type: attribute-remapper
+          name: Map `auth_user_id` to `usr.id`
+          enabled: true
+          sources:
+            - auth_user_id
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `auth_username` to `usr.name`
+          enabled: true
+          sources:
+            - auth_username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - name: Lookup on `auth_logon_type` to `logon_type`
+          enabled: true
+          source: auth_logon_type
+          target: logon_type
+          lookupTable: |-
+            0,System
+            2,Interactive
+            3,Network
+            4,Batch
+            5,Service
+            7,Unlock
+            8,NetworkCleartext
+            9,NewCredentials
+            10,RemoteInteractive
+            11,CachedInteractive
+            12,CachedRemoteInteractive
+            13,CachedUnlock
+          type: lookup-processor
+    - type: pipeline
+      name: Endpoint Events
+      enabled: true
+      filter:
+        query: service:endpoint-events
+      processors:
+        - type: grok-parser
+          name: Parse `backend_timestamp` to epoch time
+          enabled: true
+          source: backend_timestamp
+          samples:
+            - 2025-06-09 08:15:44 +0000 UTC
+          grok:
+            supportRules: ""
+            matchRules: rule %{date("yyyy-MM-dd HH:mm:ss Z z"):backend_timestamp}
+        - type: date-remapper
+          name: Define `backend_timestamp` as the official date of the log
+          enabled: true
+          sources:
+            - backend_timestamp
+    - type: pipeline
+      name: Watchlist Hits
+      enabled: true
+      filter:
+        query: service:watchlist-hits
+      processors:
+        - type: date-remapper
+          name: Define `create_time` as the official date of the log
+          enabled: true
+          sources:
+            - create_time
+        - name: Lookup on `severity` to `status`
+          enabled: true
+          source: severity
+          target: status
+          lookupTable: |-
+            1,Info
+            2,Info
+            3,Warning
+            4,Warning
+            5,Warning
+            6,Critical
+            7,Critical
+            8,Critical
+            9,Critical
+            10,Critical
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `status` as the official status of the log
+          enabled: true
+          sources:
+            - status
+    - type: pipeline
+      name: Audit
+      enabled: true
+      filter:
+        query: service:audit
+      processors:
+        - type: date-remapper
+          name: Define `create_time` as the official date of the log
+          enabled: true
+          sources:
+            - create_time
+        - type: attribute-remapper
+          name: Map `actor` to `usr.name`
+          enabled: true
+          sources:
+            - actor
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `type` to `evt.name`
+      enabled: true
+      sources:
+        - type
+      sourceType: attribute
+      target: evt.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `device_internal_ip`, `actor_ip` to `network.client.ip`
+      enabled: true
+      sources:
+        - device_internal_ip
+        - actor_ip
+      sourceType: attribute
+      target: network.client.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: geo-ip-parser
+      name: Extracting geolocation information from the Client IP
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
