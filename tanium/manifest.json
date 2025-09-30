@@ -3,7 +3,7 @@
   "app_uuid": "acd85f97-d968-4fd9-9a36-0f131ddafe38",
   "app_id": "tanium",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
