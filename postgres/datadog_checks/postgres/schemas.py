@@ -14,20 +14,22 @@ class SchemaCollector:
         self._collection_payloads_count = 0
         self._queued_rows = []
 
-    def collect_schemas(self):
+    def collect_schemas(self) -> bool:
+        if self._collection_started_at is not None:
+            return False
         self._collection_started_at = time.time() * 1000
         databases = self._get_databases()
         for database in databases:
             with self._get_cursor(database) as cursor:
                 next = self._get_next(cursor)
-                while True:
+                while next:
                     self._queued_rows.append(next)
                     next = self._get_next(cursor)
                     is_last_payload = database is databases[-1] and next is None
                     self.maybe_flush(is_last_payload)
-                    if next is None:
-                        break
+                    
         self._reset()
+        return True
 
     def maybe_flush(self, is_last_payload):
         if len(self._queued_rows) > 10 or is_last_payload:
