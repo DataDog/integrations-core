@@ -76,24 +76,28 @@ jobs:
         run: |
           FILES_CHANGED="${{ steps.changed-files.outputs.files_changed }}"
           
-          DEPENDENCY_FILES=["agent_requirements.in", ".github/workflows/resolve-build-deps.yaml", ".builders/"]
-          BUILDER_FILES=[".builders/"]
-          
-          DEPENDENCY_PATTERN=$(
-            printf '%s\n' "${DEPENDENCY_FILES[@]}" |
-            sed 's/\./\\./g' | # Escape dots for regex
-            tr '\n' '|' |      # Join lines with |
-            sed 's/|$//'       # Remove the trailing |
-          )
-          BUILDER_PATTERN=$(
-            printf '%s\n' "${BUILDER_FILES[@]}" |
-            sed 's/\./\\./g' | # Escape dots for regex
-            tr '\n' '|' |      # Join lines with |
-            sed 's/|$//'       # Remove the trailing |
+          cat << EOF > dependency_files.txt
+          agent_requirements.in
+          .github/workflows/resolve-build-deps.yaml
+          .builders/*
+          EOF
+
+          cat <<EOF > builder_files.txt
+          .builders/*
+          EOF
+
+          DEPENDENCY_CHANGED=$(
+              echo "$FILES_CHANGED" | \
+              grep -qf dependency_files.txt \
+              && echo "true" || echo "false"
+          ) 
+
+          BUILDER_CHANGED=$(
+              echo "$FILES_CHANGED" | \
+              grep -qf builder_files.txt \
+              && echo "true" || echo "false"
           )
 
-          DEPENDENCY_CHANGED=$(echo "$FILES_CHANGED" | grep -qE "$DEPENDENCY_PATTERN" && echo "true" || echo "false") 
-          BUILDER_CHANGED=$(echo "$FILES_CHANGED" | grep -qE "$BUILDER_PATTERN" && echo "true" || echo "false")
 
           echo "dependency_changed=$DEPENDENCY_CHANGED" | tee $GITHUB_OUTPUT
           echo "builder_changed=$BUILDER_CHANGED" | tee $GITHUB_OUTPUT
