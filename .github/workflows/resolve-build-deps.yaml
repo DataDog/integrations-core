@@ -77,13 +77,13 @@ jobs:
           FILES_CHANGED="${{ steps.changed-files.outputs.files_changed }}"
 
           cat << EOF > dependency_files.txt
-          agent_requirements.in
-          .github/workflows/resolve-build-deps.yaml
-          .builders/*
+          agent_requirements\.in
+          \.github/workflows/resolve-build-deps\.yaml
+          \.builders/
           EOF
 
           cat <<EOF > builder_files.txt
-          .builders/*
+          \.builders/
           EOF
 
           DEPENDENCY_CHANGED=$(
