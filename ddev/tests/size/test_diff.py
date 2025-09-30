@@ -4,7 +4,7 @@
 
 import os
 
-from ddev.cli.size.diff import get_diff
+from ddev.cli.size.diff import calculate_diff
 from ddev.cli.size.utils.common_funcs import convert_to_human_readable_size
 
 
@@ -12,42 +12,93 @@ def to_native_path(path: str) -> str:
     return path.replace("/", os.sep)
 
 
-def test_get_diff():
+def test_calculate_diff():
     size_before = [
-        {"Name": "foo", "Version": "1.0.0", "Size_Bytes": 1000, "Type": "Integration"},
-        {"Name": "bar", "Version": "2.0.0", "Size_Bytes": 2000, "Type": "Integration"},
-        {"Name": "deleted", "Version": "3.0.0", "Size_Bytes": 1500, "Type": "Integration"},
+        {
+            "Name": "foo",
+            "Version": "1.0.0",
+            "Size_Bytes": 1000,
+            "Type": "Integration",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
+        },
+        {
+            "Name": "bar",
+            "Version": "2.0.0",
+            "Size_Bytes": 2000,
+            "Type": "Integration",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
+        },
+        {
+            "Name": "deleted",
+            "Version": "3.0.0",
+            "Size_Bytes": 1500,
+            "Type": "Integration",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
+        },
     ]
 
     size_after = [
-        {"Name": "foo", "Version": "1.1.0", "Size_Bytes": 1200, "Type": "Integration"},
-        {"Name": "bar", "Version": "2.0.0", "Size_Bytes": 2000, "Type": "Integration"},
-        {"Name": "new", "Version": "0.1.0", "Size_Bytes": 800, "Type": "Integration"},
+        {
+            "Name": "foo",
+            "Version": "1.1.0",
+            "Size_Bytes": 1200,
+            "Type": "Integration",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
+        },
+        {
+            "Name": "bar",
+            "Version": "2.0.0",
+            "Size_Bytes": 2000,
+            "Type": "Integration",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
+        },
+        {
+            "Name": "new",
+            "Version": "0.1.0",
+            "Size_Bytes": 800,
+            "Type": "Integration",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
+        },
     ]
 
-    result = get_diff(size_before, size_after, "Integration")
+    result = calculate_diff(size_before, size_after, "linux-aarch64", "3.12")
 
     expected = [
         {
-            "Name": "deleted (DELETED)",
+            "Name": "deleted",
             "Version": "3.0.0",
             "Type": "Integration",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
             "Size_Bytes": -1500,
             "Size": convert_to_human_readable_size(-1500),
+            "Change_Type": "Removed",
         },
         {
             "Name": "foo",
             "Version": "1.0.0 -> 1.1.0",
             "Type": "Integration",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
             "Size_Bytes": 200,
             "Size": convert_to_human_readable_size(200),
+            "Change_Type": "Modified",
         },
         {
-            "Name": "new (NEW)",
+            "Name": "new",
             "Version": "0.1.0",
             "Type": "Integration",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
             "Size_Bytes": 800,
             "Size": convert_to_human_readable_size(800),
+            "Change_Type": "New",
         },
     ]
 

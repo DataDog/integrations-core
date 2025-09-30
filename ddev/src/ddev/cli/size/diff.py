@@ -1,275 +1,417 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
+import json
 import os
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Literal
 
 import click
-from rich.console import Console
-from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
+from ddev.cli.size.utils.common_funcs import GitRepo
 from ddev.cli.size.utils.common_params import common_params
 
-from .utils.common_funcs import (
-    CLIParameters,
-    FileDataEntry,
-    FileDataEntryPlatformVersion,
-    GitRepo,
-    convert_to_human_readable_size,
-    export_format,
-    format_modules,
-    get_dependencies,
-    get_files,
-    get_valid_platforms,
-    get_valid_versions,
-    plot_treemap,
-    print_table,
-)
+if TYPE_CHECKING:
+    from ddev.cli.size.utils.common_funcs import CLIParameters, FileDataEntry
 
-console = Console(stderr=True)
 MINIMUM_DATE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
 MINIMUM_LENGTH_COMMIT = 7
 
 
 @click.command()
-@click.argument("first_commit")
-@click.argument("second_commit")
+@click.argument("new_commit")
+@click.option(
+    "--compare-to",
+    "old_commit",
+    help="Commit to compare to. If not specified, will compare to the previous commit on master",
+)
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
+@click.option("--use-artifacts", is_flag=True, help="Fetch sizes from gha artifacts instead of the repo")
+@click.option(
+    "--quality-gate-threshold",
+    type=int,
+    help="Threshold for the size difference. Outputs the html only if the size"
+    " difference is greater than the quality gate threshold",
+)
+@click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
+@click.option("--to-dd-key", type=str, help="Send metrics to Datadog using the specified API key.")
+@click.option(
+    "--to-dd-site",
+    type=str,
+    help="Send metrics to Datadog using the specified site. If not provided datadoghq.com will be used.",
+)
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def diff(
     app: Application,
-    first_commit: str,
-    second_commit: str,
-    platform: Optional[str],
-    version: Optional[str],
+    new_commit: str,
+    old_commit: str | None,
+    platform: str | None,
+    version: str | None,
     compressed: bool,
     format: list[str],
     show_gui: bool,
+    use_artifacts: bool,
+    quality_gate_threshold: int | None,
+    to_dd_org: str | None,
+    to_dd_key: str | None,
+    to_dd_site: str | None,
 ) -> None:
     """
-    Compare the size of integrations and dependencies between two commits.
-    """
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TimeElapsedColumn(),
-        transient=True,
-        console=console,
-    ) as progress:
-        task = progress.add_task("[cyan]Calculating differences...", total=None)
-        if len(first_commit) < MINIMUM_LENGTH_COMMIT and len(second_commit) < MINIMUM_LENGTH_COMMIT:
-            raise click.BadParameter(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
-        elif len(first_commit) < MINIMUM_LENGTH_COMMIT:
-            raise click.BadParameter(
-                f"First commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
-                param_hint="first_commit",
-            )
-        elif len(second_commit) < MINIMUM_LENGTH_COMMIT:
-            raise click.BadParameter(
-                f"Second commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
-                param_hint="second_commit",
-            )
-        if first_commit == second_commit:
-            raise click.BadParameter("Commit hashes must be different")
-        if format:
-            for fmt in format:
-                if fmt not in ["png", "csv", "markdown", "json"]:
-                    raise ValueError(f"Invalid format: {fmt}. Only png, csv, markdown, and json are supported.")
-        repo_url = app.repo.path
+    Compares the size of integrations and dependencies between two commits.
 
-        with GitRepo(repo_url) as gitRepo:
-            try:
-                date_str, _, _ = gitRepo.get_commit_metadata(first_commit)
-                date = datetime.strptime(date_str, "%b %d %Y").date()
-                if date < MINIMUM_DATE:
-                    raise ValueError(f"First commit must be after {MINIMUM_DATE.strftime('%b %d %Y')} ")
-                valid_versions = get_valid_versions(gitRepo.repo_dir)
-                valid_platforms = get_valid_platforms(gitRepo.repo_dir, valid_versions)
-                if platform and platform not in valid_platforms:
-                    raise ValueError(f"Invalid platform: {platform}")
-                elif version and version not in valid_versions:
-                    raise ValueError(f"Invalid version: {version}")
-                modules_plat_ver: list[FileDataEntryPlatformVersion] = []
-                platforms = valid_platforms if platform is None else [platform]
-                versions = valid_versions if version is None else [version]
-                progress.remove_task(task)
-                combinations = [(p, v) for p in platforms for v in versions]
-                for plat, ver in combinations:
-                    parameters: CLIParameters = {
-                        "app": app,
-                        "platform": plat,
-                        "version": ver,
-                        "compressed": compressed,
-                        "format": format,
-                        "show_gui": show_gui,
-                    }
-                    modules_plat_ver.extend(
-                        diff_mode(
+        - If only one commit is given on a feature branch, it's compared to the branch's merge base with master.
+
+        - If only one commit is given while on master, it's compared to the previous commit on master.
+    """
+
+    from .utils.common_funcs import (
+        get_valid_platforms,
+        get_valid_versions,
+    )
+
+    with app.status("Calculating differences..."):
+        repo_url = app.repo.path
+        modules: list[FileDataEntry] = []
+        passes_quality_gate = True
+
+        valid_versions = get_valid_versions(app.repo.path)
+        valid_platforms = get_valid_platforms(app.repo.path, valid_versions)
+        validate_parameters(
+            app,
+            old_commit,
+            new_commit,
+            format,
+            valid_platforms,
+            valid_versions,
+            platform,
+            version,
+            to_dd_org,
+            to_dd_key,
+            to_dd_site,
+        )
+
+        platforms = valid_platforms if platform is None else [platform]
+        versions = valid_versions if version is None else [version]
+        combinations = [(p, v) for p in platforms for v in versions]
+
+        if not old_commit:
+            old_commit = app.repo.git.merge_base(new_commit, "origin/master")
+            print("Comparing to commit: ", old_commit)
+        if use_artifacts:
+            for plat, ver in combinations:
+                parameters_artifacts: CLIParameters = {
+                    "app": app,
+                    "platform": plat,
+                    "version": ver,
+                    "compressed": compressed,
+                    "format": format,
+                    "show_gui": show_gui,
+                }
+
+                try:
+                    old_commit_sizes = get_sizes_from_artifacts(app, old_commit, plat, compressed, "csv")
+                    new_commit_sizes = get_sizes_from_artifacts(app, new_commit, plat, compressed, "json")
+                except Exception as e:
+                    app.abort(str(e))
+
+                diff_modules = calculate_diff(old_commit_sizes, new_commit_sizes, plat, ver)
+                output_diff(parameters_artifacts, diff_modules)
+                modules.extend(diff_modules)
+                total_diff = sum(int(x.get("Size_Bytes", 0)) for x in diff_modules)
+                if quality_gate_threshold and total_diff > quality_gate_threshold:
+                    passes_quality_gate = False
+
+        else:
+            with GitRepo(repo_url) as gitRepo:
+                try:
+                    date_str, _, _ = gitRepo.get_commit_metadata(old_commit)
+                    date = datetime.strptime(date_str, "%b %d %Y").date()
+                    if date < MINIMUM_DATE:
+                        raise ValueError(f"First commit must be after {MINIMUM_DATE.strftime('%b %d %Y')} ")
+
+                    for plat, ver in combinations:
+                        parameters_repo: CLIParameters = {
+                            "app": app,
+                            "platform": plat,
+                            "version": ver,
+                            "compressed": compressed,
+                            "format": format,
+                            "show_gui": show_gui,
+                        }
+                        diff_modules = get_diff(
                             gitRepo,
-                            first_commit,
-                            second_commit,
-                            parameters,
-                            progress,
+                            old_commit,
+                            new_commit,
+                            parameters_repo,
                         )
-                    )
-                if format:
-                    export_format(app, format, modules_plat_ver, "diff", platform, version, compressed)
-            except Exception as e:
-                progress.stop()
-                app.abort(str(e))
+                        output_diff(parameters_repo, diff_modules)
+                        modules.extend(diff_modules)
+                        total_diff = sum(int(x.get("Size_Bytes", 0)) for x in diff_modules)
+                        if quality_gate_threshold and total_diff > quality_gate_threshold:
+                            passes_quality_gate = False
+                except Exception as e:
+                    app.abort(str(e))
+
+        if to_dd_org or to_dd_key:
+            from .utils.common_funcs import send_metrics_to_dd
+
+            mode: Literal["diff"] = "diff"
+            send_metrics_to_dd(app, modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
+
+        if format or not passes_quality_gate:
+            modules = [module for module in modules if module["Size_Bytes"] != 0]
+            if format:
+                from .utils.common_funcs import export_format
+
+                export_format(app, format, modules, "diff", platform, version, compressed)
+            if not passes_quality_gate:
+                from .utils.common_funcs import save_html
+
+                save_html(app, "Diff", modules, "diff.html", old_commit)
         return None
 
 
-def diff_mode(
+def validate_parameters(
+    app: Application,
+    old_commit: str | None,
+    new_commit: str,
+    format: list[str],
+    valid_platforms: set[str],
+    valid_versions: set[str],
+    platform: str | None,
+    version: str | None,
+    to_dd_org: str | None,
+    to_dd_key: str | None,
+    to_dd_site: str | None,
+):
+    errors = []
+    if platform and platform not in valid_platforms:
+        errors.append(f"Invalid platform: {platform}")
+
+    elif version and version not in valid_versions:
+        errors.append(f"Invalid version: {version}")
+
+    if len(new_commit) < MINIMUM_LENGTH_COMMIT and old_commit and len(old_commit) < MINIMUM_LENGTH_COMMIT:
+        errors.append(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
+
+    elif len(new_commit) < MINIMUM_LENGTH_COMMIT:
+        errors.append(
+            f"First commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
+        )
+
+    elif new_commit and len(new_commit) < MINIMUM_LENGTH_COMMIT:
+        errors.append(
+            f"Second commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
+        )
+
+    if new_commit and old_commit == new_commit:
+        errors.append("Commit hashes must be different")
+
+    if format:
+        for fmt in format:
+            if fmt not in ["png", "csv", "markdown", "json"]:
+                errors.append(f"Invalid format: {fmt}. Only png, csv, markdown, json, and html are supported.")
+
+    if to_dd_site and not to_dd_key:
+        errors.append("If --to-dd-site is provided, --to-dd-key must also be provided.")
+
+    if to_dd_site and to_dd_org:
+        errors.append("If --to-dd-org is provided, --to-dd-site must not be provided.")
+
+    if to_dd_key and to_dd_org:
+        errors.append("If --to-dd-org is provided, --to-dd-key must not be provided.")
+
+    if errors:
+        app.abort("\n".join(errors))
+
+
+def get_sizes_from_artifacts(
+    app: Application, commit: str, platform: str, compressed: bool, extension: str | None = "json"
+) -> list[FileDataEntry]:
+    import tempfile
+
+    from .utils.common_funcs import get_sizes_json_from_artifacts
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        print(f"Temporary directory: {temp_dir}")
+        sizes_json = get_sizes_json_from_artifacts(commit, temp_dir, compressed, extension)
+        compression = "compressed" if compressed else "uncompressed"
+        if not sizes_json[compression]:
+            app.abort(f"Sizes not found for {commit=}, {platform=}, {compressed=}")
+            return []
+        if extension == "json" and sizes_json[compression]:
+            modules_json: list[FileDataEntry] = list(json.loads(sizes_json[compression].read_text()))
+            filtered_modules_json = [module for module in modules_json if module.get("Platform") == platform]
+            return filtered_modules_json
+        elif extension == "csv" and sizes_json[compression]:
+            # Assume CSV
+            import csv
+
+            modules_csv: list[FileDataEntry] = []
+            with open(sizes_json[compression], newline="", encoding="utf-8") as csvfile:
+                modules_csv = list(csv.DictReader(csvfile))
+            filtered_modules_csv = [module for module in modules_csv if module.get("Platform") == platform]
+            return filtered_modules_csv
+        return []
+
+
+def get_diff(
     gitRepo: GitRepo,
-    first_commit: str,
-    second_commit: str,
+    old_commit: str,
+    new_commit: str,
     params: CLIParameters,
-    progress: Progress,
-) -> list[FileDataEntryPlatformVersion]:
+) -> list[FileDataEntry]:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
-        gitRepo, params["platform"], params["version"], first_commit, second_commit, params["compressed"], progress
+        gitRepo, params["platform"], params["version"], old_commit, new_commit, params["compressed"]
     )
 
-    integrations = get_diff(files_b, files_a, "Integration")
-    dependencies = get_diff(dependencies_b, dependencies_a, "Dependency")
+    integrations = calculate_diff(files_b, files_a, params["platform"], params["version"])
+    dependencies = calculate_diff(dependencies_b, dependencies_a, params["platform"], params["version"])
 
-    if integrations + dependencies == []:
+    return integrations + dependencies
+
+
+def output_diff(params: CLIParameters, modules: list[FileDataEntry]):
+    if modules == []:
         params["app"].display(
             f"No size differences were detected between the selected commits for {params['platform']}"
         )
         return []
     else:
-        formatted_modules = format_modules(integrations + dependencies, params["platform"], params["version"])
-        formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
-        for module in formatted_modules:
+        modules.sort(key=lambda x: abs(x["Size_Bytes"]), reverse=True)
+        for module in modules:
             if module["Size_Bytes"] > 0:
                 module["Size"] = f"+{module['Size']}"
 
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
-        print_table(params["app"], "Diff", formatted_modules)
+        from .utils.common_funcs import print_table
+
+        print_table(params["app"], "Diff", modules)
 
     treemap_path = None
     if params["format"] and "png" in params["format"]:
         treemap_path = os.path.join("size_diff_visualizations", f"treemap_{params['platform']}_{params['version']}.png")
 
     if params["show_gui"] or treemap_path:
+        from .utils.common_funcs import plot_treemap
+
         plot_treemap(
             params["app"],
-            formatted_modules,
+            modules,
             f"Disk Usage Differences for {params['platform']} and Python version {params['version']}",
             params["show_gui"],
             "diff",
             treemap_path,
         )
 
-    return formatted_modules
-
 
 def get_repo_info(
     gitRepo: GitRepo,
     platform: str,
     version: str,
-    first_commit: str,
-    second_commit: str,
+    old_commit: str,
+    new_commit: str,
     compressed: bool,
-    progress: Progress,
 ) -> tuple[list[FileDataEntry], list[FileDataEntry], list[FileDataEntry], list[FileDataEntry]]:
-    with progress:
-        """
-        Retrieves integration and dependency sizes for two commits in the repo.
+    """
+    Retrieves integration and dependency sizes for two commits in the repo.
 
-        Args:
-            gitRepo: An instance of GitRepo for accessing the repository.
-            platform: Target platform for dependency resolution.
-            version: Python version for dependency resolution.
-            first_commit: The earlier commit SHA to compare.
-            second_commit: The later commit SHA to compare.
-            compressed: Whether to measure compressed sizes.
-            progress: Rich Progress bar.
+    Args:
+        gitRepo: An instance of GitRepo for accessing the repository.
+        platform: Target platform for dependency resolution.
+        version: Python version for dependency resolution.
+        old_commit: The earlier commit SHA to compare.
+        new_commit: The later commit SHA to compare.
+        compressed: Whether to measure compressed sizes.
 
-        Returns:
-            A tuple of four lists:
-                - files_b: Integration sizes at first_commit
-                - dependencies_b: Dependency sizes at first_commit
-                - files_a: Integration sizes at second_commit
-                - dependencies_a: Dependency sizes at second_commit
-        """
+    Returns:
+        A tuple of four lists:
+            - files_b: Integration sizes at old_commit
+            - dependencies_b: Dependency sizes at old_commit
+            - files_a: Integration sizes at new_commit
+            - dependencies_a: Dependency sizes at new_commit
+    """
+    from .utils.common_funcs import get_dependencies, get_files
 
-        repo = gitRepo.repo_dir
-        task = progress.add_task("[cyan]Calculating sizes for the first commit...", total=None)
-        gitRepo.checkout_commit(first_commit)
-        files_b = get_files(repo, compressed, version)
-        dependencies_b = get_dependencies(repo, platform, version, compressed)
-        progress.remove_task(task)
+    repo = gitRepo.repo_dir
+    gitRepo.checkout_commit(old_commit)
+    files_b = get_files(repo, compressed, version, platform)
+    dependencies_b = get_dependencies(repo, platform, version, compressed)
 
-        task = progress.add_task("[cyan]Calculating sizes for the second commit...", total=None)
-        gitRepo.checkout_commit(second_commit)
-        files_a = get_files(repo, compressed, version)
-        dependencies_a = get_dependencies(repo, platform, version, compressed)
-        progress.remove_task(task)
+    gitRepo.checkout_commit(new_commit)
+    files_a = get_files(repo, compressed, version, platform)
+    dependencies_a = get_dependencies(repo, platform, version, compressed)
 
     return files_b, dependencies_b, files_a, dependencies_a
 
 
-def get_diff(
-    size_first_commit: list[FileDataEntry], size_second_commit: list[FileDataEntry], type: str
+def calculate_diff(
+    size_old_commit: list[FileDataEntry], size_new_commit: list[FileDataEntry], platform: str, py_version: str
 ) -> list[FileDataEntry]:
     """
     Computes size differences between two sets of integrations or dependencies.
 
     Args:
-        size_first_commit: Entries from the first (earlier) commit.
-        size_second_commit: Entries from the second (later) commit.
-        type: Integration/Dependency
+        size_old_commit: Entries from the first (earlier) commit.
+        size_new_commit: Entries from the second (later) commit.
 
     Returns:
         A list of FileDataEntry items representing only the entries with a size difference.
         Entries include new, deleted, or changed modules, with delta size in bytes and human-readable format.
     """
+    from .utils.common_funcs import convert_to_human_readable_size
 
-    first_commit = {entry["Name"]: entry for entry in size_first_commit}
-    second_commit = {entry["Name"]: entry for entry in size_second_commit}
+    old_commit = {
+        (entry["Name"], entry["Type"], entry["Platform"], entry["Python_Version"]): entry for entry in size_old_commit
+    }
+    new_commit = {
+        (entry["Name"], entry["Type"], entry["Platform"], entry["Python_Version"]): entry for entry in size_new_commit
+    }
 
-    all_names = set(first_commit) | set(second_commit)
+    all_names = set(old_commit) | set(new_commit)
     diffs: list[FileDataEntry] = []
 
-    for name in all_names:
-        b = first_commit.get(name)
-        a = second_commit.get(name)
+    for name, _type, platform, py_version in all_names:
+        old = old_commit.get((name, _type, platform, py_version))
+        new = new_commit.get((name, _type, platform, py_version))
+        size_old = int(old["Size_Bytes"]) if old else 0
+        size_new = int(new["Size_Bytes"]) if new else 0
+        delta = size_new - size_old
+        percentage = (delta / size_old) * 100 if size_old != 0 else 0
 
-        size_b = b["Size_Bytes"] if b else 0
-        size_a = a["Size_Bytes"] if a else 0
-        delta = size_a - size_b
+        print("Name: ", name, "Type: ", _type, "Platform: ", platform, "Before: ", size_old, "After: ", size_new)
 
-        if delta == 0:
-            continue
+        ver_old = old["Version"] if old else ""
+        ver_new = new["Version"] if new else ""
 
-        ver_b = b["Version"] if b else ""
-        ver_a = a["Version"] if a else ""
-
-        if size_b == 0:
-            name_str = f"{name} (NEW)"
-            version_str = ver_a
-        elif size_a == 0:
-            name_str = f"{name} (DELETED)"
-            version_str = ver_b
+        if size_old == 0:
+            change_type = "New"
+            name_str = f"{name}"
+            version_str = ver_new
+        elif size_new == 0:
+            change_type = "Removed"
+            name_str = f"{name}"
+            version_str = ver_old
         else:
+            change_type = "Modified"
             name_str = name
-            version_str = f"{ver_b} -> {ver_a}" if ver_a != ver_b else ver_a
+            version_str = f"{ver_old} -> {ver_new}" if ver_new != ver_old else ver_new
 
         diffs.append(
             {
                 "Name": name_str,
                 "Version": version_str,
-                "Type": type,
+                "Type": _type,
+                "Platform": platform,
+                "Python_Version": py_version,
                 "Size_Bytes": delta,
                 "Size": convert_to_human_readable_size(delta),
+                "Percentage": round(percentage, 2),
+                "Delta_Type": change_type,
             }
         )
 
