@@ -75,7 +75,7 @@ jobs:
         id: dependency-check
         run: |
           FILES_CHANGED="${{ steps.changed-files.outputs.files_changed }}"
-          
+
           cat << EOF > dependency_files.txt
           agent_requirements.in
           .github/workflows/resolve-build-deps.yaml
@@ -99,8 +99,8 @@ jobs:
           )
 
 
-          echo "dependency_changed=$DEPENDENCY_CHANGED" | tee $GITHUB_OUTPUT
-          echo "builder_changed=$BUILDER_CHANGED" | tee $GITHUB_OUTPUT
+          echo "dependency_changed=$DEPENDENCY_CHANGED" | tee > $GITHUB_OUTPUT
+          echo "builder_changed=$BUILDER_CHANGED" | tee > $GITHUB_OUTPUT
 
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
