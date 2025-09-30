@@ -207,7 +207,7 @@ pipeline:
         - type: grok-parser
           name: Box SSH config
           enabled: true
-          source: message
+          source: nested_message
           samples:
             - "[0210108] writeSSHdconf(): starting handling of ssh daemon
               configuration "
@@ -381,7 +381,7 @@ pipeline:
         - type: grok-parser
           name: Box Control AuthService
           enabled: true
-          source: message
+          source: nested_message
           samples:
             - "phibs: SAML: process binary for SAML/ADFS authentication."
             - MSAD-Offline-Groups Setting MSAD offline group sync cache to
