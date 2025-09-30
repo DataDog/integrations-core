@@ -1127,3 +1127,33 @@ LIMIT {max_rows} ;        """
         {'name': 'locks.idle_in_transaction_age', 'type': 'gauge'},
     ],
 }
+
+# Column statistics from pg_statistic
+# Requires SELECT permissions on specific pg_statistic columns:
+# GRANT SELECT(starelid, staattnum, stawidth, stadistinct) ON pg_statistic TO datadog;
+# Note: Permission errors are caught and suppressed gracefully in postgres.py
+COLUMN_METRICS = {
+    'descriptors': [('schemaname', 'schema'), ('tablename', 'table'), ('attname', 'column')],
+    'metrics': {
+        'avg_width': ('column.avg_width', AgentCheck.gauge),
+        'n_distinct': ('column.n_distinct', AgentCheck.gauge),
+    },
+    'query': """
+SELECT
+  n.nspname AS schemaname,
+  c.relname AS tablename,
+  a.attname AS attname,
+  s.stawidth as avg_width,
+  s.stadistinct as n_distinct
+FROM pg_statistic s
+JOIN pg_class c ON c.oid = s.starelid
+JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum = s.staattnum
+LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE NOT a.attisdropped
+  AND (c.relrowsecurity = false OR NOT row_security_active(c.oid))
+  AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+""",
+    'relation': False,
+    'use_global_db_tag': True,
+    'name': 'column_metrics',
+}

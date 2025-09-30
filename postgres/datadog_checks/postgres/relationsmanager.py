@@ -413,38 +413,7 @@ INDEX_BLOAT = {
     'name': 'index_bloat_metrics',
 }
 
-# Logically grouping with other relation metrics (like index and table bloat) that
-# require the same SELECT permissions for pg_stats
-COLUMN_METRICS_QUERY = """
-SELECT
-  n.nspname AS schemaname,
-  c.relname AS tablename,
-  a.attname AS attname,
-  s.stawidth AS avg_width,
-  s.stadistinct AS n_distinct
-FROM pg_statistic s
-JOIN pg_class c ON c.oid = s.starelid
-JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum = s.staattnum
-LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
-WHERE NOT a.attisdropped
-  AND (c.relrowsecurity = false OR NOT row_security_active(c.oid))
-  AND n.nspname NOT IN ('pg_catalog', 'information_schema')
-  AND {relations}
-"""
-
-COLUMN_METRICS = {
-    'descriptors': [('schemaname', 'schema'), ('tablename', 'table'), ('attname', 'column')],
-    'metrics': {
-        'avg_width': ('column.avg_width', AgentCheck.gauge),
-        'n_distinct': ('column.n_distinct', AgentCheck.gauge),
-    },
-    'query': COLUMN_METRICS_QUERY,
-    'relation': True,
-    'use_global_db_tag': True,
-    'name': 'column_metrics',
-}
-
-RELATION_METRICS = [STATIO_METRICS, COLUMN_METRICS]
+RELATION_METRICS = [STATIO_METRICS]
 DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS, LOCK_METRICS]
 
 

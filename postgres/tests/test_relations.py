@@ -250,6 +250,7 @@ def test_bloat_metrics(aggregator, collect_bloat_metrics, expected_count, integr
 @pytest.mark.usefixtures("dd_environment")
 def test_column_metrics(aggregator, integration_check, pg_instance):
     pg_instance["relations"] = ["persons"]
+    pg_instance["collect_column_metrics"] = True
 
     conn = _get_superconn(pg_instance)
     cursor = conn.cursor()
