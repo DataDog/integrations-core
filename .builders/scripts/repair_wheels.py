@@ -5,65 +5,12 @@ import os
 import re
 import shutil
 import sys
-import time
 from fnmatch import fnmatch
-from functools import cache
-from hashlib import sha256
 from pathlib import Path
-from typing import Iterator, NamedTuple
+from typing import NamedTuple
 from zipfile import ZipFile
 
-import urllib3
-from utils import extract_metadata, normalize_project_name
-
-
-@cache
-def get_wheel_hashes(project) -> dict[str, str]:
-    retry_wait = 2
-    while True:
-        try:
-            response = urllib3.request(
-                'GET',
-                f'https://pypi.org/simple/{project}',
-                headers={"Accept": "application/vnd.pypi.simple.v1+json"},
-            )
-        except urllib3.exceptions.HTTPError as e:
-            err_msg = f'Failed to fetch hashes for `{project}`: {e}'
-        else:
-            if response.status == 200:
-                break
-
-            err_msg = f'Failed to fetch hashes for `{project}`, status code: {response.status}'
-
-        print(err_msg)
-        print(f'Retrying in {retry_wait} seconds')
-        time.sleep(retry_wait)
-        retry_wait *= 2
-        continue
-
-    data = response.json()
-    return {
-        file['filename']: file['hashes']['sha256']
-        for file in data['files']
-        if file['filename'].endswith('.whl') and 'sha256' in file['hashes']
-    }
-
-
-def iter_wheels(source_dir: str) -> Iterator[Path]:
-    for entry in sorted(Path(source_dir).iterdir(), key=lambda entry: entry.name.casefold()):
-        if entry.suffix == '.whl' and entry.is_file():
-            yield entry
-
-
-def wheel_was_built(wheel: Path) -> bool:
-    project_metadata = extract_metadata(wheel)
-    project_name = normalize_project_name(project_metadata['Name'])
-    wheel_hashes = get_wheel_hashes(project_name)
-    if wheel.name not in wheel_hashes:
-        return True
-
-    file_hash = sha256(wheel.read_bytes()).hexdigest()
-    return file_hash != wheel_hashes[wheel.name]
+from utils import iter_wheels
 
 
 def find_patterns_in_wheel(wheel: Path, patterns: list[str]) -> list[str]:
@@ -112,7 +59,7 @@ def check_unacceptable_files(
         sys.exit(1)
 
 
-def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
+def repair_linux(source_built_dir: str, source_external_dir: str, built_dir: str, external_dir: str) -> None:
     from auditwheel.patcher import Patchelf
     from auditwheel.policy import WheelPolicies
     from auditwheel.repair import repair_wheel
@@ -138,19 +85,20 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
     policy['lib_whitelist'].remove('libz.so.1')
     del policy['symbol_versions']['ZLIB']
 
-    for wheel in iter_wheels(source_dir):
+    for wheel in iter_wheels(source_external_dir):
         print(f'--> {wheel.name}')
+        print('Using existing wheel')
 
-        if not wheel_was_built(wheel):
-            print('Using existing wheel')
+        check_unacceptable_files(
+            wheel,
+            invalid_file_patterns=external_invalid_file_patterns,
+        )
+        shutil.move(wheel, external_dir)
+        continue
 
-            check_unacceptable_files(
-                wheel,
-                invalid_file_patterns=external_invalid_file_patterns,
-            )
-            shutil.move(wheel, external_dir)
-            continue
 
+    for wheel in iter_wheels(source_built_dir):
+        print(f'--> {wheel.name}')
         try:
             repair_wheel(
                 policies,
@@ -172,7 +120,7 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
             print('Repaired wheel')
 
 
-def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
+def repair_windows(source_built_dir: str, source_external_dir: str, built_dir: str, external_dir: str) -> None:
     import subprocess
 
     exclusions = ['mqic.dll']
@@ -183,19 +131,20 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
         '*.libs/libcrypto-3*.dll',
     ]
 
-    for wheel in iter_wheels(source_dir):
+    for wheel in iter_wheels(source_external_dir):
         print(f'--> {wheel.name}')
+        print('Using existing wheel')
 
-        if not wheel_was_built(wheel):
-            print('Using existing wheel')
+        check_unacceptable_files(
+            wheel,
+            invalid_file_patterns=external_invalid_file_patterns,
+        )
+        shutil.move(wheel, external_dir)
+        continue
 
-            check_unacceptable_files(
-                wheel,
-                invalid_file_patterns=external_invalid_file_patterns,
-            )
-            shutil.move(wheel, external_dir)
-            continue
 
+    for wheel in iter_wheels(source_built_dir):
+        print(f'--> {wheel.name}')
         # Platform independent wheels: move and rename to make platform specific
         wheel_name = WheelName.parse(wheel.name)
         if wheel_name.platform_tag == 'any':
@@ -214,7 +163,7 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
             sys.exit(process.returncode)
 
 
-def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
+def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: str, external_dir: str) -> None:
     from delocate import delocate_wheel
     from packaging.version import Version
 
@@ -252,14 +201,14 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
     def copy_filt_func(libname):
         return not any(excl.search(libname) for excl in exclusions)
 
-    for wheel in iter_wheels(source_dir):
+    for wheel in iter_wheels(source_external_dir):
         print(f'--> {wheel.name}')
-        if not wheel_was_built(wheel):
-            print('Using existing wheel')
+        print('Using existing wheel')
+        shutil.move(wheel, external_dir)
+        continue
 
-            shutil.move(wheel, external_dir)
-            continue
-
+    for wheel in iter_wheels(source_built_dir):
+        print(f'--> {wheel.name}')
         # Platform independent wheels: move and rename to make platform specific
         wheel_name = WheelName.parse(wheel.name)
         if wheel_name.platform_tag == 'any':
@@ -300,15 +249,16 @@ def main():
     argparser = argparse.ArgumentParser(
         description='Repair wheels found in a directory with the platform-specific tool'
     )
-    argparser.add_argument('--source-dir', required=True)
+    argparser.add_argument('--source-built-dir', required=True)
+    argparser.add_argument('--source-external-dir', required=True)
     argparser.add_argument('--built-dir', required=True)
     argparser.add_argument('--external-dir', required=True)
     args = argparser.parse_args()
 
-    print(f'Repairing wheels in: {args.source_dir}')
+    print(f'Repairing wheels in: {args.source_built_dir}')
     print(f'Outputting built wheels to: {args.built_dir}')
     print(f'Outputting external wheels to: {args.external_dir}')
-    REPAIR_FUNCTIONS[sys.platform](args.source_dir, args.built_dir, args.external_dir)
+    REPAIR_FUNCTIONS[sys.platform](args.source_built_dir, args.source_external_dir, args.built_dir, args.external_dir)
 
 
 if __name__ == '__main__':
