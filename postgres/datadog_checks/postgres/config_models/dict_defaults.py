@@ -48,6 +48,8 @@ def instance_query_samples():
         explained_queries_cache_maxsize=5000,
         seen_samples_cache_maxsize=10000,
         explain_parameterized_queries=True,
+        explain_errors_cache_maxsize=5000,
+        explain_errors_cache_ttl=86400,
         run_sync=False,
     )
 

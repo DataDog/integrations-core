@@ -482,9 +482,9 @@ class RelationsManager(object):
                         RELATION_REGEX,
                         element,
                     )
-                if not element.get(SCHEMAS) or not isinstance(element.get(SCHEMAS), (list, tuple)):
+                if element.get(SCHEMAS) and not isinstance(element.get(SCHEMAS), (list, tuple)):
                     raise ConfigurationError("Expected '%s' to be a list or tuple for %s", SCHEMAS, element)
-                if not element.get(RELKIND) or not isinstance(element.get(RELKIND), (list, tuple)):
+                if element.get(RELKIND) and not isinstance(element.get(RELKIND), (list, tuple)):
                     raise ConfigurationError("Expected '%s' to be a list or tuple for %s", RELKIND, element)
             elif not isinstance(element, str):
                 raise ConfigurationError('Unhandled relations config type: %s', element)
