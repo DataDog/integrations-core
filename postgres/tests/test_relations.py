@@ -248,6 +248,33 @@ def test_bloat_metrics(aggregator, collect_bloat_metrics, expected_count, integr
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
+def test_column_metrics(aggregator, integration_check, pg_instance):
+    pg_instance["relations"] = ["persons"]
+
+    conn = _get_superconn(pg_instance)
+    cursor = conn.cursor()
+    cursor.execute("GRANT SELECT(starelid, staattnum, stawidth, stadistinct) ON pg_statistic TO datadog")
+    # Populate the pg_statistic table
+    cursor.execute("ANALYZE persons")
+    # Get the columns in the persons table
+    cursor.execute(
+        "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'persons'"
+    )
+    persons_columns = [str(row[0], 'utf-8') for row in cursor.fetchall()]
+    cursor.close()
+    conn.close()
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    base_tags = _get_expected_tags(check, pg_instance, db=pg_instance["dbname"], table="persons", schema="public")
+    for column in persons_columns:
+        expected_tags = base_tags + ["column:{}".format(column)]
+        aggregator.assert_metric("postgresql.column.avg_width", count=1, tags=expected_tags)
+        aggregator.assert_metric("postgresql.column.n_distinct", count=1, tags=expected_tags)
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
     pg_instance["relations"] = [
         {"relation_regex": ".*", "schemas": ["hello", "hello2"]},
