@@ -1123,7 +1123,7 @@ def test_column_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    # Column metrics should be collected for all tables in the public schema
+    # Column metrics should be collected for all tables in the persons table
     base_tags = _get_expected_tags(check, pg_instance, db=pg_instance["dbname"], table="persons", schema="public")
     for column in persons_columns:
         expected_tags = base_tags + ["column:{}".format(column)]
