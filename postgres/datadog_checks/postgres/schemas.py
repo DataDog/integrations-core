@@ -1,11 +1,27 @@
 import time
 
+import orjson as json
+
+from datadog_checks.postgres.postgres import PostgreSql
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 
 class SchemaCollector:
-    def __init__(self, check, config):
+    def __init__(self, check: PostgreSql):
         self._check = check
         self._log = check.log
-        self._config = config
+        self._config = check._config.schemas_metadata_config
+
+        self._include_databases = self._config.get("include_databases", [])
+        self._include_schemas = self._config.get("include_schemas", [])
+        self._include_tables = self._config.get("include_tables", [])
+        self._exclude_databases = self._config.get("exclude_databases", [])
+        self._exclude_schemas = self._config.get("exclude_schemas", [])
+        self._exclude_tables = self._config.get("exclude_tables", [])
 
         self._reset()
 
@@ -27,7 +43,7 @@ class SchemaCollector:
                     next = self._get_next(cursor)
                     is_last_payload = database is databases[-1] and next is None
                     self.maybe_flush(is_last_payload)
-                    
+
         self._reset()
         return True
 
@@ -63,22 +79,26 @@ class SchemaCollector:
 
 
 class PostgresSchemaCollector(SchemaCollector):
-    def __init__(self, check, config):
-        super().__init__(check, config)
+    def __init__(self, check):
+        super().__init__(check)
 
     def collect_schemas(self):
         pass
 
     def _get_databases(self):
-        cursor = self._check.get_main_db().cursor()
-        cursor.execute("SELECT datname FROM pg_database")
-        return [row[0] for row in cursor.fetchall()]
+        with self._check._get_main_db() as conn:
+            with conn.cursor() as cursor:
+                query = "SELECT datname FROM pg_database WHERE 1=1"
+                for exclude_regex in self._exclude_databases:
+                    query += " AND datname !~ '{}'".format(exclude_regex)
+                for include_regex in self._include_databases:
+                    query += " AND datname ~ '{}'".format(include_regex)
+                cursor.execute(query)
+                return [row[0] for row in cursor.fetchall()]
 
     def _get_cursor(self):
         cursor = self._check.db_pool.get_connection(self._config.dbname).cursor()
-        cursor.execute("SELECT nspname FROM pg_namespace"
-        "MONSTER SQL STATEMENT GOES HERE"
-        )
+        cursor.execute("SELECT nspname FROM pg_namespaceMONSTER SQL STATEMENT GOES HERE")
         return cursor
 
     def _get_next(self, cursor):

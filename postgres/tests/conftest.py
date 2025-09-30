@@ -8,7 +8,7 @@ import psycopg
 import pytest
 from semver import VersionInfo
 
-from datadog_checks.dev import WaitFor, docker_run
+# from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.config import PostgresConfig
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
@@ -21,8 +21,8 @@ from .common import (
     PORT_REPLICA,
     PORT_REPLICA2,
     PORT_REPLICA_LOGICAL,
-    POSTGRES_IMAGE,
-    POSTGRES_LOCALE,
+    # POSTGRES_IMAGE,
+    # POSTGRES_LOCALE,
     POSTGRES_VERSION,
     USER,
 )
@@ -60,9 +60,9 @@ def dd_environment(e2e_instance):
     """
     Start a standalone postgres server requiring authentication.
     """
-    compose_file = 'docker-compose.yaml'
-    if float(POSTGRES_VERSION) >= 10.0:
-        compose_file = 'docker-compose-replication.yaml'
+    # compose_file = 'docker-compose.yaml'
+    # if float(POSTGRES_VERSION) >= 10.0:
+    #     compose_file = 'docker-compose-replication.yaml'
     return e2e_instance, E2E_METADATA
     # with docker_run(
     #     os.path.join(HERE, 'compose', compose_file),
