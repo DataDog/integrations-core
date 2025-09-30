@@ -142,7 +142,7 @@ class SQLServer(AgentCheck):
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
         self.cloud_metadata = self._config.cloud_metadata
-        self.tag_manager = TagManager(normalizer=self.normalize_tag)
+        self.tag_manager = TagManager(normalizer=lambda tag: self.normalize_tag(tag).lower())
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
 
         self.databases = set()
