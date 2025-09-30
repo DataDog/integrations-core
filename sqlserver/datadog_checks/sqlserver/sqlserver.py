@@ -407,7 +407,9 @@ class SQLServer(AgentCheck):
 
                             self.tag_manager.set_tag("sqlserver_servername", servername, replace=True, normalize=True)
                             if instancename:
-                                self.tag_manager.set_tag("sqlserver_instancename", instancename, replace=True, normalize=True)
+                                self.tag_manager.set_tag(
+                                    "sqlserver_instancename", instancename, replace=True, normalize=True
+                                )
                         else:
                             self.log.warning("failed to load servername static information due to empty results")
 
