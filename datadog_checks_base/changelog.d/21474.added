@@ -1,0 +1,1 @@
+Add tag normalization support to TagManager with optional tag_normalizer parameter and normalize flags for set_tag/set_tags_from_list/delete_tag methods.
