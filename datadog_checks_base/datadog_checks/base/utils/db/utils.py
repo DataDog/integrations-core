@@ -471,13 +471,13 @@ class TagManager:
     multiple times.
     """
 
-    def __init__(self, tag_normalizer: Optional[Callable[[Union[str, bytes]], str]] = None) -> None:
+    def __init__(self, normalizer: Optional[Callable[[Union[str, bytes]], str]] = None) -> None:
         self._tags: Dict[Union[str, TagType], List[str]] = {}
         self._cached_tag_list: Optional[tuple[str, ...]] = None
         self._keyless: TagType = TagType.KEYLESS
-        self._tag_normalizer = tag_normalizer
+        self._normalizer = normalizer
 
-    def set_tag(self, key: Optional[str], value: str, replace: bool = False, normalize: Optional[bool] = None) -> None:
+    def set_tag(self, key: Optional[str], value: str, replace: bool = False, normalize: bool = False) -> None:
         """
         Set a tag with the given key and value.
         If key is None or empty, the value is stored as a keyless tag.
@@ -486,10 +486,10 @@ class TagManager:
             value (str): The tag value
             replace (bool): If True, replaces all existing values for this key
                            If False, appends the value if it doesn't exist
-            normalize (bool, optional): If True, applies tag normalization using the configured normalizer
+            normalize (bool): If True, applies tag normalization using the configured normalizer
         """
-        if normalize and self._tag_normalizer:
-            value = self._tag_normalizer(value)
+        if normalize and self._normalizer:
+            value = self._normalizer(value)
 
         if not key:
             key = self._keyless
@@ -503,14 +503,14 @@ class TagManager:
             # Invalidate the cache since tags have changed
             self._cached_tag_list = None
 
-    def set_tags_from_list(self, tag_list: List[str], replace: bool = False, normalize: Optional[bool] = None) -> None:
+    def set_tags_from_list(self, tag_list: List[str], replace: bool = False, normalize: bool = False) -> None:
         """
         Set multiple tags from a list of strings.
         Strings can be in "key:value" format or just "value" format.
         Args:
             tag_list (List[str]): List of tags in "key:value" format or just "value"
             replace (bool): If True, replaces all existing tags with the new tags list
-            normalize (bool, optional): If True, applies tag normalization using the configured normalizer
+            normalize (bool): If True, applies tag normalization using the configured normalizer
         """
         if replace:
             self._tags.clear()
@@ -523,7 +523,7 @@ class TagManager:
             else:
                 self.set_tag(None, tag, normalize=normalize)
 
-    def delete_tag(self, key: Optional[str], value: Optional[str] = None, normalize: Optional[bool] = None) -> bool:
+    def delete_tag(self, key: Optional[str], value: Optional[str] = None, normalize: bool = False) -> bool:
         """
         Delete a tag or specific value for a tag.
         For keyless tags, use None or empty string as the key.
@@ -531,12 +531,12 @@ class TagManager:
             key (str): The tag key to delete, or None/empty for keyless tags
             value (str, optional): If provided, only deletes this specific value for the key.
                                  If None, deletes all values for the key.
-            normalize (bool, optional): If True, applies tag normalization to the value for lookup
+            normalize (bool): If True, applies tag normalization to the value for lookup
         Returns:
             bool: True if something was deleted, False otherwise
         """
-        if normalize and self._tag_normalizer and value:
-            value = self._tag_normalizer(value)
+        if normalize and self._normalizer and value:
+            value = self._normalizer(value)
 
         if not key:
             key = self._keyless

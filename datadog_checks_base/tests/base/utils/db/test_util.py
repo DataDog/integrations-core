@@ -627,15 +627,15 @@ class TestTagManager:
         return tag.replace(' ', '_').replace('-', '_').lower()
 
     def test_init_with_normalizer(self):
-        """Test initialization of TagManager with tag_normalizer"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
-        assert tag_manager._tag_normalizer == self.mock_tag_normalizer
+        """Test initialization of TagManager with normalizer"""
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
+        assert tag_manager._normalizer == self.mock_tag_normalizer
         assert tag_manager._tags == {}
         assert tag_manager._cached_tag_list is None
 
     def test_set_tag_with_normalization(self):
         """Test setting tags with normalization enabled"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         # Test with normalize=True - only value should be normalized, not key
         tag_manager.set_tag('test-key', 'value with spaces', normalize=True)
@@ -648,7 +648,7 @@ class TestTagManager:
 
     def test_set_tag_without_normalization(self):
         """Test setting tags without normalization"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         # Test with normalize=False
         tag_manager.set_tag('test-key', 'value with spaces', normalize=False)
@@ -660,7 +660,7 @@ class TestTagManager:
 
     def test_set_tags_from_list_with_normalization(self):
         """Test setting tags from list with normalization enabled"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         tag_list = ['env:prod-test', 'service:web app', 'keyless-tag']
         tag_manager.set_tags_from_list(tag_list, normalize=True)
@@ -670,7 +670,7 @@ class TestTagManager:
 
     def test_set_tags_from_list_without_normalization(self):
         """Test setting tags from list without normalization"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         tag_list = ['env:prod-test', 'service:web app', 'keyless-tag']
         tag_manager.set_tags_from_list(tag_list, normalize=False)
@@ -680,7 +680,7 @@ class TestTagManager:
 
     def test_delete_tag_with_normalization(self):
         """Test deleting tags with normalization enabled"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         # Set tag with normalization (only value normalized)
         tag_manager.set_tag('test-key', 'value with spaces', normalize=True)
@@ -694,7 +694,7 @@ class TestTagManager:
 
     def test_delete_tag_without_normalization(self):
         """Test deleting tags without normalization"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         # Set tag without normalization
         tag_manager.set_tag('test-key', 'value with spaces', normalize=False)
@@ -707,7 +707,7 @@ class TestTagManager:
 
     def test_delete_tag_normalization_mismatch(self):
         """Test that deletion fails when normalization doesn't match storage"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         # Set tag with normalization (only value normalized)
         tag_manager.set_tag('test-key', 'value with spaces', normalize=True)
@@ -725,7 +725,7 @@ class TestTagManager:
 
     def test_delete_entire_key_with_normalization(self):
         """Test deleting entire key with normalization"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         # Set multiple values for a key with normalization (only values normalized)
         tag_manager.set_tag('test-key', 'value1', normalize=True)
@@ -755,7 +755,7 @@ class TestTagManager:
 
     def test_case_sensitivity_normalization(self):
         """Test that normalization handles case sensitivity correctly (only values normalized)"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         # Test only value gets normalized, key assumed to be lowercase already
         tag_manager.set_tag('test_key', 'UPPERCASE-VALUE', normalize=True)
@@ -777,7 +777,7 @@ class TestTagManager:
 
     def test_case_sensitivity_in_tag_list(self):
         """Test case sensitivity normalization in tag lists"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         tag_list = ['env:PRODUCTION', 'service:WEB-APP', 'datacenter:US-EAST-1', 'KEYLESS-TAG-UPPERCASE']
         tag_manager.set_tags_from_list(tag_list, normalize=True)
@@ -788,7 +788,7 @@ class TestTagManager:
 
     def test_case_sensitivity_without_normalization(self):
         """Test that case sensitivity is preserved without normalization"""
-        tag_manager = TagManager(tag_normalizer=self.mock_tag_normalizer)
+        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
         # Set tags without normalization - case should be preserved
         tag_manager.set_tag('test_key', 'UPPERCASE-VALUE', normalize=False)
