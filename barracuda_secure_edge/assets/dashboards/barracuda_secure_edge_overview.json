@@ -386,7 +386,6 @@
                             "title": "Auth Logs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -604,7 +603,6 @@
                             "title": "Top Reasons For Auth Events",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -721,7 +719,6 @@
                             "title": "Total Users Logged",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -845,7 +842,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:firewall @rule:* @action:Block"
+                                                "query": "source:barracuda_secure_edge log_component:firewall @rule:* @action:Block"
                                             },
                                             "indexes": [
                                                 "*"
@@ -914,7 +911,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:firewall @rule:* -@action:Block"
+                                                "query": "source:barracuda_secure_edge log_component:firewall @rule:* -@action:Block"
                                             },
                                             "indexes": [
                                                 "*"
@@ -927,7 +924,8 @@
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {
@@ -974,13 +972,12 @@
                             "title": "Firewall Logs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:barracuda_secure_edge service:firewall",
+                                        "query_string": "source:barracuda_secure_edge log_component:firewall",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1036,7 +1033,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:firewall"
+                                                "query": "source:barracuda_secure_edge log_component:firewall"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1060,7 +1057,7 @@
                         "layout": {
                             "x": 6,
                             "y": 2,
-                            "width": 3,
+                            "width": 6,
                             "height": 2
                         }
                     },
@@ -1079,7 +1076,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1094,7 +1090,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:firewall"
+                                                "query": "source:barracuda_secure_edge log_component:firewall"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1145,7 +1141,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:firewall @type:*"
+                                                "query": "source:barracuda_secure_edge log_component:firewall @type:*"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1225,12 +1221,13 @@
                             "title": "SSH Deamon Logs",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:barracuda_secure_edge service:ssh",
+                                        "query_string": "source:barracuda_secure_edge log_component:ssh",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1286,7 +1283,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:ssh"
+                                                "query": "source:barracuda_secure_edge log_component:ssh"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1343,7 +1340,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:ssh"
+                                                "query": "source:barracuda_secure_edge log_component:ssh"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1405,13 +1402,12 @@
                             "title": "Network Logs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:barracuda_secure_edge service:network",
+                                        "query_string": "source:barracuda_secure_edge log_component:network",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1454,6 +1450,7 @@
                             "title": "Total Network Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1467,7 +1464,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:network"
+                                                "query": "source:barracuda_secure_edge log_component:network"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1525,7 +1522,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:network"
+                                                "query": "source:barracuda_secure_edge log_component:network"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1587,12 +1584,13 @@
                             "title": "Auth Access Logs ",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:barracuda_secure_edge service:access",
+                                        "query_string": "source:barracuda_secure_edge log_component:access",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1635,6 +1633,7 @@
                             "title": "Total Auth Access Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1648,7 +1647,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:access"
+                                                "query": "source:barracuda_secure_edge log_component:access"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1706,7 +1705,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:access"
+                                                "query": "source:barracuda_secure_edge log_component:access"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1758,7 +1757,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:access"
+                                                "query": "source:barracuda_secure_edge log_component:access"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1845,7 +1844,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:barracuda_secure_edge service:admin",
+                                        "query_string": "source:barracuda_secure_edge log_component:admin",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1888,6 +1887,7 @@
                             "title": "Total Admin Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1901,7 +1901,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:admin"
+                                                "query": "source:barracuda_secure_edge log_component:admin"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1935,6 +1935,7 @@
                             "title": "Total Admin Error Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1948,7 +1949,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:admin @level:Error"
+                                                "query": "source:barracuda_secure_edge log_component:admin @level:Error"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2006,7 +2007,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:admin"
+                                                "query": "source:barracuda_secure_edge log_component:admin"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2164,6 +2165,7 @@
                             "title": "Total System Error Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2177,7 +2179,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:system @level:\"Error\""
+                                                "query": "source:barracuda_secure_edge log_component:system @level:\"Error\""
                                             },
                                             "indexes": [
                                                 "*"
@@ -2235,7 +2237,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:system"
+                                                "query": "source:barracuda_secure_edge log_component:system"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2303,7 +2305,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:barracuda_secure_edge service:vpn",
+                                        "query_string": "source:barracuda_secure_edge log_component:vpn",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -2346,6 +2348,7 @@
                             "title": "Total VPN Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2359,7 +2362,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:vpn"
+                                                "query": "source:barracuda_secure_edge log_component:vpn"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2417,7 +2420,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:vpn"
+                                                "query": "source:barracuda_secure_edge log_component:vpn"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2460,6 +2463,7 @@
                             "title": "Total VPN Error Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2473,7 +2477,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge service:vpn @level:Error"
+                                                "query": "source:barracuda_secure_edge log_component:vpn @level:Error"
                                             },
                                             "indexes": [
                                                 "*"
