@@ -292,6 +292,7 @@ jobs:
       contents: read
       actions: read
       pull-requests: write
+      id-token: write
     needs:
       # - build
       - build-macos
