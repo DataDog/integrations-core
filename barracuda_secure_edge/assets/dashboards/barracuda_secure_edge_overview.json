@@ -3,52 +3,35 @@
     "description": "SecureEdge dashboard provides a visual summary of firewall activity, security events, user access, and system health to help monitor and analyze network security in real time.",
     "widgets": [
         {
-            "id": 1735739967105627,
+            "id": 7763639993156588,
             "definition": {
                 "title": "",
-                "banner_img": "https://pmddatasolutions.com/wp-content/uploads/2024/04/Barracuda-SecureEdge.jpg",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": []
-            },
-            "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 6,
-                "height": 3
-            }
-        },
-        {
-            "id": 5634058441727079,
-            "definition": {
-                "type": "note",
-                "content": "Barracuda SecureEdge secures sites, devices, and users with an easy-to-deploy cloud-first platform that connects any device, application, or cloud/hybrid environment. SecureEdge provides Zero Trust application access to any type of application, cloud-based security for endpoints, and automated SD-WAN connectivity for sites and industrial facilities of any type or size. Remote users can access applications directly from any type of device, with Zero Trust enforcement, URL filtering, and traffic optimization to ensure application access is always optimized and makes the most of shared Internet lines. Barracuda SecureEdge provides an unprecedented level of control and visibility into user-generated traffic at each endpoint. Barracuda SecureEdge is also available as a service in Azure Virtual WAN and provides companies a way to securely connect to Microsoft Azure Virtual WAN and the Microsoft Global Network backbone.\n\n**Key Features**\n\n-Custom Categories for web filtering\n-Additional web filter actions: Alert and Warn\n-Web search monitoring for predefined categories and custom keywords\n-Silent ad blocking\n-Safe Search\n-Customizable Block pages*",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 6,
-                "y": 0,
-                "width": 6,
-                "height": 3
-            }
-        },
-        {
-            "id": 5684415529173769,
-            "definition": {
-                "title": "Barracuda Secure Edge Logs Overview",
-                "background_color": "vivid_purple",
+                "banner_img": "https://static.datadoghq.com/static/images/logos/barracuda-secure-edge_large.svg",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
+                    {
+                        "id": 7373116018092743,
+                        "definition": {
+                            "type": "note",
+                            "content": "Barracuda SecureEdge secures sites, devices, and users with an easy-to-deploy cloud-first platform that connects any device, application, or cloud/hybrid environment. SecureEdge provides Zero Trust application access to any type of application, cloud-based security for endpoints, and automated SD-WAN connectivity for sites and industrial facilities of any type or size. Remote users can access applications directly from any type of device, with Zero Trust enforcement, URL filtering, and traffic optimization to ensure application access is always optimized and makes the most of shared Internet lines. Barracuda SecureEdge provides an unprecedented level of control and visibility into user-generated traffic at each endpoint. \n\n**Key Features**\n\n- Custom Categories for web filtering \n- Additional web filter actions: Alert and Warn\n- Web search monitoring for predefined categories and custom keywords\n- Silent ad blocking\n- Safe Search\n- Customizable Block pages",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
                     {
                         "id": 6603911867712278,
                         "definition": {
@@ -91,7 +74,132 @@
                         },
                         "layout": {
                             "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 6,
+                "height": 10
+            }
+        },
+        {
+            "id": 6201368572965478,
+            "definition": {
+                "title": "Barracuda Secure Edge Logs Overview",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2418959242368841,
+                        "definition": {
+                            "title": "All Secure Edge Logs Over Event Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:barracuda_secure_edge"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "semantic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
                             "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1154392536644503,
+                        "definition": {
+                            "title": "Total Number Of Logs Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:barracuda_secure_edge"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "service"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
                             "width": 3,
                             "height": 2
                         }
@@ -154,8 +262,8 @@
                         },
                         "layout": {
                             "x": 3,
-                            "y": 0,
-                            "width": 6,
+                            "y": 3,
+                            "width": 3,
                             "height": 2
                         }
                     },
@@ -239,58 +347,10 @@
                             }
                         },
                         "layout": {
-                            "x": 9,
-                            "y": 0,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 3650800545814111,
-                        "definition": {
-                            "title": "All Secure Edge Logs",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:barracuda_secure_edge",
-                                        "indexes": [],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "service",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "content",
-                                            "width": "full"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
                             "x": 0,
-                            "y": 2,
-                            "width": 8,
-                            "height": 3
+                            "y": 5,
+                            "width": 3,
+                            "height": 4
                         }
                     },
                     {
@@ -355,19 +415,19 @@
                             }
                         },
                         "layout": {
-                            "x": 8,
-                            "y": 2,
-                            "width": 4,
-                            "height": 3
+                            "x": 3,
+                            "y": 5,
+                            "width": 3,
+                            "height": 4
                         }
                     }
                 ]
             },
             "layout": {
-                "x": 0,
-                "y": 3,
-                "width": 12,
-                "height": 6
+                "x": 6,
+                "y": 0,
+                "width": 6,
+                "height": 10
             }
         },
         {
@@ -719,6 +779,7 @@
                             "title": "Total Users Logged",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -813,7 +874,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 9,
+                "y": 10,
                 "width": 12,
                 "height": 8
             }
@@ -1064,7 +1125,7 @@
                     {
                         "id": 4415251969355039,
                         "definition": {
-                            "title": "Firewall Event Time",
+                            "title": "Firewall Event Timeline",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1076,6 +1137,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1200,7 +1262,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 17,
+                "y": 18,
                 "width": 12,
                 "height": 8
             }
@@ -1381,7 +1443,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 25,
+                "y": 26,
                 "width": 12,
                 "height": 6
             }
@@ -1563,7 +1625,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 31,
+                "y": 32,
                 "width": 12,
                 "height": 6
             }
@@ -1816,7 +1878,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 37,
+                "y": 38,
                 "width": 12,
                 "height": 6,
                 "is_column_break": true
@@ -1980,7 +2042,7 @@
                     {
                         "id": 3014667008426488,
                         "definition": {
-                            "title": "Admin Event Time",
+                            "title": "Admin Event Timeline",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -2048,7 +2110,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 43,
+                "y": 44,
                 "width": 12,
                 "height": 8
             }
@@ -2210,7 +2272,7 @@
                     {
                         "id": 6896383809812739,
                         "definition": {
-                            "title": "System Event Time",
+                            "title": "System Event Timeline",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -2278,7 +2340,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 51,
+                "y": 52,
                 "width": 12,
                 "height": 8
             }
@@ -2509,7 +2571,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 59,
+                "y": 60,
                 "width": 12,
                 "height": 6
             }
