@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import math
 import re
 import time
 from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
@@ -386,7 +387,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "cloud_metadata": self._check.cloud_metadata,
                 # We don't rely on this time being strictly monotonic, it's just a unique identifier
                 # but having it be the time is helpful for debugging
-                "collection_started_at": time.time() * 1000,
+                "collection_started_at": math.floor(time.time() * 1000),
             }
 
             # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
