@@ -231,6 +231,9 @@ class PostgresMetadata(DBMAsyncJob):
         self.pg_extensions_collection_interval = self.pg_settings_collection_interval
         self.schemas_collection_interval = config.collect_schemas.collection_interval
 
+        # We want to be able to iterate this as a dict with string interpolation
+        self._collect_schemas_config = config.collect_schemas.model_dump()
+
         # by default, send resources every 10 minutes
         self.collection_interval = min(
             self.pg_extensions_collection_interval,
@@ -443,8 +446,7 @@ class PostgresMetadata(DBMAsyncJob):
     def _should_collect_metadata(self, name, metadata_type):
         # We get the config as a dict so we can use string interpolation
         # to iterate over object types
-        schemas_config = self._config.collect_schemas.model_dump()
-        excludes = schemas_config.get("exclude_{metadata_type}s".format(metadata_type=metadata_type), [])
+        excludes = self._collect_schemas_config.get("exclude_{metadata_type}s".format(metadata_type=metadata_type), [])
         for re_str in excludes:
             regex = re.compile(re_str)
             if regex.search(name):
@@ -455,7 +457,7 @@ class PostgresMetadata(DBMAsyncJob):
                 )
                 return False
 
-        includes = schemas_config.get("include_{metadata_type}s".format(metadata_type=metadata_type), [])
+        includes = self._collect_schemas_config.get("include_{metadata_type}s".format(metadata_type=metadata_type), [])
         if len(includes) == 0:
             return True
         for re_str in includes:

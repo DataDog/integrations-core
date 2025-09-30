@@ -197,6 +197,7 @@ def test_explain_parameterized_queries_explain_prepared_statement_no_plan_return
         assert err is None
 
 
+@requires_over_12
 def test_generate_prepared_statement_query_no_parameters(integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     test_query_signature = "12345678"

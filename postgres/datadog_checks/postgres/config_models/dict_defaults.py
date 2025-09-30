@@ -8,6 +8,12 @@
 from . import instance
 
 
+def instance_database_identifier():
+    return instance.DatabaseIdentifier(
+        template="$resolved_hostname",
+    )
+
+
 def instance_database_autodiscovery():
     return instance.DatabaseAutodiscovery(
         enabled=False,
