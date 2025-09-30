@@ -1,1 +1,1 @@
-feat: Fix Ceph version lookup for newer releases of Ceph
+Fix Ceph version lookup for newer releases of Ceph
