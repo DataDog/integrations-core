@@ -76,7 +76,7 @@ jobs:
         run: |
           FILES_CHANGED="${{ steps.changed-files.outputs.files_changed }}"
           
-          DEPENDENCY_FILES=["agent_requirements.in", ".github/workflows/resolve-build-deps.yml", ".builders/"]
+          DEPENDENCY_FILES=["agent_requirements.in", ".github/workflows/resolve-build-deps.yaml", ".builders/"]
           BUILDER_FILES=[".builders/"]
           
           DEPENDENCY_PATTERN=$(
