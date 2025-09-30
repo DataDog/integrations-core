@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect metrics and logs from Kuma, an Open Source service mesh for Kubernetes and VMs. Kuma is the community version of Kong Mesh.",
+    "description": "Collect metrics and logs from Kuma, a service mesh for Kubernetes and VMs. Kuma is the community version of Kong Mesh.",
     "title": "Kuma",
     "media": [
       {
