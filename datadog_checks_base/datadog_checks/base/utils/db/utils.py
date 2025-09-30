@@ -486,7 +486,7 @@ class TagManager:
             value (str): The tag value
             replace (bool): If True, replaces all existing values for this key
                            If False, appends the value if it doesn't exist
-            normalize (bool, optional): If provided, overrides the instance normalize_tags setting
+            normalize (bool, optional): If True, applies tag normalization using the configured normalizer
         """
         if normalize and self._tag_normalizer:
             value = self._tag_normalizer(value)
@@ -510,7 +510,7 @@ class TagManager:
         Args:
             tag_list (List[str]): List of tags in "key:value" format or just "value"
             replace (bool): If True, replaces all existing tags with the new tags list
-            normalize (bool, optional): If provided, overrides the instance normalize_tags setting
+            normalize (bool, optional): If True, applies tag normalization using the configured normalizer
         """
         if replace:
             self._tags.clear()
@@ -531,7 +531,7 @@ class TagManager:
             key (str): The tag key to delete, or None/empty for keyless tags
             value (str, optional): If provided, only deletes this specific value for the key.
                                  If None, deletes all values for the key.
-            normalize (bool, optional): If True, normalizes the key and value to match stored tags
+            normalize (bool, optional): If True, applies tag normalization to the value for lookup
         Returns:
             bool: True if something was deleted, False otherwise
         """
