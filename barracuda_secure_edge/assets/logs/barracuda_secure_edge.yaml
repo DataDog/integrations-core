@@ -131,7 +131,7 @@ pipeline:
       name: Box Firewall Activity
       enabled: true
       filter:
-        query: source:barracuda_secure_edge service:firewall
+        query: source:barracuda_secure_edge log_component:firewall
       processors:
         - type: grok-parser
           name: Box Firewall Activity
@@ -181,7 +181,7 @@ pipeline:
       name: "SSH "
       enabled: true
       filter:
-        query: source:barracuda_secure_edge service:ssh
+        query: source:barracuda_secure_edge log_component:ssh
       processors:
         - type: grok-parser
           name: Box SSH sshd
@@ -223,7 +223,7 @@ pipeline:
       name: Network
       enabled: true
       filter:
-        query: source:barracuda_secure_edge service:network
+        query: source:barracuda_secure_edge log_component:network
       processors:
         - type: grok-parser
           name: Box Network activation
@@ -245,7 +245,7 @@ pipeline:
       name: VPN
       enabled: true
       filter:
-        query: source:barracuda_secure_edge service:vpn
+        query: source:barracuda_secure_edge log_component:vpn
       processors:
         - type: grok-parser
           name: VPN vpn
@@ -280,7 +280,7 @@ pipeline:
       name: Box System mgmaccess
       enabled: true
       filter:
-        query: source:barracuda_secure_edge service:access
+        query: source:barracuda_secure_edge log_component:access
       processors:
         - type: grok-parser
           name: Box System mgmaccess
@@ -305,7 +305,7 @@ pipeline:
       name: Admin
       enabled: true
       filter:
-        query: source:barracuda_secure_edge service:admin
+        query: source:barracuda_secure_edge log_component:admin
       processors:
         - type: grok-parser
           name: Box Config admin
@@ -400,7 +400,7 @@ pipeline:
       name: Box Network dhcp
       enabled: true
       filter:
-        query: source:barracuda_secure_edge service:dhcp
+        query: source:barracuda_secure_edge log_component:dhcp
       processors:
         - type: grok-parser
           name: Box Network dhcp
