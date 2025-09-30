@@ -1102,3 +1102,30 @@ def test_pg_stat_io_metrics(aggregator, integration_check, pg_instance, dbm_enab
     expected_tags = _get_expected_tags(check, pg_instance)
     expected_count = 0 if dbm_enabled is False else 1
     check_stat_io_metrics(aggregator, expected_tags, count=expected_count)
+
+def test_column_metrics(aggregator, integration_check, pg_instance):
+    """Test that column metrics are collected when collect_column_metrics is enabled"""
+    pg_instance["collect_column_metrics"] = True
+
+    conn = _get_superconn(pg_instance)
+    cursor = conn.cursor()
+    cursor.execute("GRANT SELECT(starelid, staattnum, stawidth, stadistinct) ON pg_statistic TO datadog")
+    # Populate the pg_statistic table
+    cursor.execute("ANALYZE persons")
+    # Get the columns in the persons table
+    cursor.execute(
+        "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'persons'"
+    )
+    persons_columns = [str(row[0], 'utf-8') for row in cursor.fetchall()]
+    cursor.close()
+    conn.close()
+
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    # Column metrics should be collected for all tables in the public schema
+    base_tags = _get_expected_tags(check, pg_instance, db=pg_instance["dbname"], table="persons", schema="public")
+    for column in persons_columns:
+        expected_tags = base_tags + ["column:{}".format(column)]
+        aggregator.assert_metric("postgresql.column.avg_width", count=1, tags=expected_tags)
+        aggregator.assert_metric("postgresql.column.n_distinct", count=1, tags=expected_tags)

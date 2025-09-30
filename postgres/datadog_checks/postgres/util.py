@@ -1130,8 +1130,7 @@ LIMIT {max_rows} ;        """
 
 # Column statistics from pg_statistic
 # Requires SELECT permissions on specific pg_statistic columns:
-# GRANT SELECT(starelid, staattnum, stawidth, stadistinct) ON pg_statistic TO datadog;
-# Note: Permission errors are caught and suppressed gracefully in postgres.py
+#   `GRANT SELECT(starelid, staattnum, stawidth, stadistinct) ON pg_statistic TO datadog;`
 COLUMN_METRICS = {
     'descriptors': [('schemaname', 'schema'), ('tablename', 'table'), ('attname', 'column')],
     'metrics': {

@@ -229,7 +229,7 @@ instances:
     ## @param collect_column_metrics - boolean - optional - default: false
     ## Collect column statistics from pg_statistic (average width, number of distinct values).
     ## Requires SELECT permissions on specific pg_statistic columns:
-    ## GRANT SELECT(starelid, staattnum, stawidth, stadistinct) ON pg_statistic TO datadog;
+    ##   `GRANT SELECT(starelid, staattnum, stawidth, stadistinct) ON pg_statistic TO datadog;`
     #
     # collect_column_metrics: false
 

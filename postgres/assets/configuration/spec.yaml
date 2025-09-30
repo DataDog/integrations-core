@@ -282,6 +282,14 @@ files:
       value:
         type: boolean
         example: true
+    - name: collect_column_metrics
+      description: |
+        Collect column statistics from pg_statistic (average width, number of distinct values).
+        Requires SELECT permissions on specific pg_statistic columns:
+          `GRANT SELECT(starelid, staattnum, stawidth, stadistinct) ON pg_statistic TO datadog;`
+      value:
+        type: boolean
+        example: false
     - name: locks_idle_in_transaction
       description: Configure collection of idle in transaction lock age metrics
       options:
