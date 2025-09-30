@@ -153,7 +153,8 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 self.config.proxmox_server,
                 e,
             )
-            hostname_json = {}
+            hostname = vm_name
+            return hostname
         hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", vm_name)
         return hostname
 
