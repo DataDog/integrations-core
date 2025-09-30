@@ -479,9 +479,6 @@ class PostgreSql(AgentCheck):
             )
 
     def _get_local_wal_file_age(self):
-        if not not self._config.data_directory:
-            self.log.warning("WAL directory not configured")
-            return None
         wal_log_dir = os.path.join(self._config.data_directory, "pg_xlog")
         if not os.path.isdir(wal_log_dir):
             self.log.warning(
