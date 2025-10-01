@@ -12,8 +12,8 @@
     "title": "Cofense Triage",
     "media": [
       {
-        "caption": "Cofense Triage - Overview",
-        "image_url": "images/cofense_triage_overview.png",
+        "caption": "Cofense Triage - Insights",
+        "image_url": "images/cofense_triage_insights.png",
         "media_type": "image"
       }
     ],
@@ -35,7 +35,7 @@
       }
     },
     "dashboards": {
-      "Cofense Triage - Overview": "assets/dashboards/cofense_triage_overview.json"
+      "Cofense Triage - Insights": "assets/dashboards/cofense_triage_insights.json"
     },
     "logs": {
       "source": "cofense-triage"
