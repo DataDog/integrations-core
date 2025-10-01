@@ -28,11 +28,27 @@ Mac command:
 ### Configuration
 
 #### Install Guarddog
-  - Run below pip command to install Guarddog system-wide:
-    
-    ```shell
-    sudo -H pip install guarddog
-    ```
+
+Note: 
+  - Guarddog requires python version 3.10 or higher.
+  - GuardDog must be installed at the specified path below within the virtual environment.
+
+Please execute the steps below as the root user to install Guarddog:
+  1. Create a Guarddog directory.
+
+      ```shell
+      mkdir /opt/guarddog
+      ```
+  2. Create a Virtual environment for Guarddog Installation.
+
+      ```shell
+      python3 -m venv /opt/guarddog/guarddog-env
+      ```
+  3. Install Guarddog inside **guarddog-env** environment.
+
+      ```shell
+      /opt/guarddog/guarddog-env/bin/python3 -m pip install guarddog
+      ```
 
 #### Log collection
 

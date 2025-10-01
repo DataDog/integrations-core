@@ -88,7 +88,7 @@ def test_get_guarddog_output(instance, mocker):
 
     mocker.patch("subprocess.run", return_value=mock_completed_process)
 
-    stdout = check.get_guarddog_output(cmd)
+    stdout = check.get_guarddog_output(cmd).stdout
 
     assert stdout == expected_stdout
 
@@ -140,7 +140,7 @@ def test_check_guarddog_command_fails(instance, mocker):
     mocker.patch.object(check, "validate_config")
     mocker.patch("subprocess.run", return_value=Mock(stdout="", stderr="Error occurred", returncode=1))
 
-    with pytest.raises(RuntimeError, match="Guarddog command failed"):
+    with pytest.raises(RuntimeError, match="Error occurred"):
         check.check(None)
 
 
@@ -153,4 +153,68 @@ def test_check_guarddog_output_json_decode_error(instance, mocker):
     mocker.patch("subprocess.run", return_value=Mock(stdout="Not a json", stderr="", returncode=0))
 
     with pytest.raises(json.JSONDecodeError):
+        check.check(None)
+
+
+@pytest.mark.unit
+def test_check_abs_path_guarddog_not_found(instance, mocker):
+    check = GuarddogCheck("guarddog", {}, [instance])
+    check.package_ecosystem = "pypi"
+    check.path = "/path/to/dependency_file"
+    mocker.patch.object(check, "validate_config")
+    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("os.access", return_value=True)
+    mock_stdout = json.dumps([{"result": {"results": {"rule1": True, "rule2": False}}}], separators=(",", ":"))
+    mock_stderr = ""
+    mock_returncode = 0
+    mocker.patch(
+        "subprocess.run",
+        side_effect=[
+            FileNotFoundError("Guarddog Not Found"),  # First call raises FileNotFoundError
+            Mock(stdout=mock_stdout, stderr=mock_stderr, returncode=mock_returncode),  # Second call succeeds
+        ],
+    )
+    mock_send_log = mocker.patch.object(check, "send_log")
+    check.check(None)
+    mock_send_log.assert_called_once()
+    args, _ = mock_send_log.call_args
+    sent_data = args[0]
+    assert json.loads(sent_data["message"])["enrichment_details"]["triggered_rules"] == ["rule1"]
+
+
+@pytest.mark.unit
+def test_check_both_guarddog_command_fails(instance, mocker):
+    check = GuarddogCheck("guarddog", {}, [instance])
+    check.package_ecosystem = "pypi"
+    check.path = "/path/to/dependency_file"
+    mocker.patch.object(check, "validate_config")
+    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("os.access", return_value=True)
+    mocker.patch(
+        "subprocess.run",
+        side_effect=[
+            FileNotFoundError("Guarddog Not Found"),  # First call raises FileNotFoundError
+            Mock(stdout="", stderr="Error occurred", returncode="1"),  # Second call succeeds
+        ],
+    )
+    with pytest.raises(RuntimeError, match="Error occurred"):
+        check.check(None)
+
+
+@pytest.mark.unit
+def test_check_both_guarddog_command_fails_with_not_found(instance, mocker):
+    check = GuarddogCheck("guarddog", {}, [instance])
+    check.package_ecosystem = "pypi"
+    check.path = "/path/to/dependency_file"
+    mocker.patch.object(check, "validate_config")
+    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("os.access", return_value=True)
+    mocker.patch(
+        "subprocess.run",
+        side_effect=[
+            FileNotFoundError("Guarddog Not Found"),
+            FileNotFoundError("Guarddog Not Found"),
+        ],
+    )
+    with pytest.raises(FileNotFoundError, match="Guarddog Not Found"):
         check.check(None)

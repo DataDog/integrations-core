@@ -526,10 +526,9 @@
                     {
                         "id": 6694930026930848,
                         "definition": {
-                            "title": "Top Triggered Rules",
+                            "title": "Distribution by Triggered Rules",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "toplist",
                             "requests": [
                                 {
                                     "queries": [
@@ -561,13 +560,15 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -578,11 +579,9 @@
                                     }
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
                             }
                         },
                         "layout": {
@@ -636,7 +635,6 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -668,7 +666,6 @@
                             "title": "Top Hosts",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "toplist",
                             "requests": [
                                 {
                                     "queries": [
@@ -700,13 +697,15 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 500,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -717,12 +716,9 @@
                                     }
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                },
-                                "palette": "datadog16"
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
                             }
                         },
                         "layout": {
@@ -909,7 +905,6 @@
                             "title": "Top Python Packages Scanned",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "toplist",
                             "requests": [
                                 {
                                     "queries": [
@@ -941,20 +936,15 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_green"
-                                        }
-                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 15,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -965,18 +955,16 @@
                                     }
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
                             }
                         },
                         "layout": {
                             "x": 0,
                             "y": 3,
-                            "width": 5,
-                            "height": 6
+                            "width": 12,
+                            "height": 4
                         }
                     },
                     {
@@ -1032,9 +1020,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 5,
-                            "y": 3,
-                            "width": 7,
+                            "x": 0,
+                            "y": 7,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -1091,9 +1079,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 5,
-                            "y": 6,
-                            "width": 7,
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -1160,7 +1148,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 9,
+                            "y": 10,
                             "width": 12,
                             "height": 4
                         }
@@ -1236,7 +1224,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 13,
+                            "y": 14,
                             "width": 6,
                             "height": 4
                         }
@@ -1301,7 +1289,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 13,
+                            "y": 14,
                             "width": 6,
                             "height": 4
                         }
@@ -1351,7 +1339,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 17,
+                            "y": 18,
                             "width": 6,
                             "height": 4
                         }
@@ -1416,7 +1404,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 17,
+                            "y": 18,
                             "width": 6,
                             "height": 4
                         }
@@ -1492,7 +1480,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 21,
+                            "y": 22,
                             "width": 6,
                             "height": 4
                         }
@@ -1568,7 +1556,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 21,
+                            "y": 22,
                             "width": 6,
                             "height": 4
                         }
@@ -1622,7 +1610,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 25,
+                            "y": 26,
                             "width": 12,
                             "height": 4
                         }
@@ -1633,7 +1621,7 @@
                 "x": 0,
                 "y": 24,
                 "width": 12,
-                "height": 30
+                "height": 31
             }
         },
         {
@@ -1804,7 +1792,6 @@
                             "title": "Top NPM Packages Scanned",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "toplist",
                             "requests": [
                                 {
                                     "queries": [
@@ -1836,20 +1823,15 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_green"
-                                        }
-                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 15,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -1860,18 +1842,16 @@
                                     }
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
                             }
                         },
                         "layout": {
                             "x": 0,
                             "y": 3,
-                            "width": 5,
-                            "height": 6
+                            "width": 12,
+                            "height": 4
                         }
                     },
                     {
@@ -1927,9 +1907,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 5,
-                            "y": 3,
-                            "width": 7,
+                            "x": 0,
+                            "y": 7,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -1986,9 +1966,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 5,
-                            "y": 6,
-                            "width": 7,
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -2056,7 +2036,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 9,
+                            "y": 10,
                             "width": 12,
                             "height": 4
                         }
@@ -2132,7 +2112,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 13,
+                            "y": 14,
                             "width": 6,
                             "height": 4
                         }
@@ -2197,7 +2177,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 13,
+                            "y": 14,
                             "width": 6,
                             "height": 4
                         }
@@ -2247,7 +2227,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 17,
+                            "y": 18,
                             "width": 12,
                             "height": 3
                         }
@@ -2323,7 +2303,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 20,
+                            "y": 21,
                             "width": 6,
                             "height": 4
                         }
@@ -2399,7 +2379,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 20,
+                            "y": 21,
                             "width": 6,
                             "height": 4
                         }
@@ -2453,7 +2433,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 24,
+                            "y": 25,
                             "width": 12,
                             "height": 4
                         }
@@ -2462,9 +2442,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 54,
+                "y": 55,
                 "width": 12,
-                "height": 29,
+                "height": 30,
                 "is_column_break": true
             }
         },
@@ -2636,7 +2616,6 @@
                             "title": "Top Go Packages Scanned",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "toplist",
                             "requests": [
                                 {
                                     "queries": [
@@ -2668,20 +2647,15 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_green"
-                                        }
-                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 15,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -2692,18 +2666,16 @@
                                     }
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
                             }
                         },
                         "layout": {
                             "x": 0,
                             "y": 3,
-                            "width": 5,
-                            "height": 6
+                            "width": 12,
+                            "height": 4
                         }
                     },
                     {
@@ -2759,9 +2731,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 5,
-                            "y": 3,
-                            "width": 7,
+                            "x": 0,
+                            "y": 7,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -2818,9 +2790,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 5,
-                            "y": 6,
-                            "width": 7,
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -2888,7 +2860,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 9,
+                            "y": 10,
                             "width": 12,
                             "height": 4
                         }
@@ -2964,7 +2936,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 13,
+                            "y": 14,
                             "width": 6,
                             "height": 4
                         }
@@ -3040,7 +3012,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 13,
+                            "y": 14,
                             "width": 6,
                             "height": 4
                         }
@@ -3105,7 +3077,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 17,
+                            "y": 18,
                             "width": 6,
                             "height": 4
                         }
@@ -3170,7 +3142,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 17,
+                            "y": 18,
                             "width": 6,
                             "height": 4
                         }
@@ -3224,7 +3196,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 21,
+                            "y": 22,
                             "width": 12,
                             "height": 4
                         }
@@ -3233,9 +3205,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 83,
+                "y": 85,
                 "width": 12,
-                "height": 26
+                "height": 27
             }
         },
         {
@@ -3406,7 +3378,6 @@
                             "title": "Top Github Actions Scanned",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "toplist",
                             "requests": [
                                 {
                                     "queries": [
@@ -3438,20 +3409,15 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_green"
-                                        }
-                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 15,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -3462,18 +3428,16 @@
                                     }
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
                             }
                         },
                         "layout": {
                             "x": 0,
                             "y": 3,
-                            "width": 5,
-                            "height": 6
+                            "width": 12,
+                            "height": 4
                         }
                     },
                     {
@@ -3529,9 +3493,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 5,
-                            "y": 3,
-                            "width": 7,
+                            "x": 0,
+                            "y": 7,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -3588,9 +3552,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 5,
-                            "y": 6,
-                            "width": 7,
+                            "x": 6,
+                            "y": 7,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -3658,7 +3622,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 9,
+                            "y": 10,
                             "width": 12,
                             "height": 4
                         }
@@ -3734,7 +3698,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 13,
+                            "y": 14,
                             "width": 6,
                             "height": 4
                         }
@@ -3810,7 +3774,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 13,
+                            "y": 14,
                             "width": 6,
                             "height": 4
                         }
@@ -3886,7 +3850,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 17,
+                            "y": 18,
                             "width": 6,
                             "height": 4
                         }
@@ -3962,7 +3926,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 17,
+                            "y": 18,
                             "width": 6,
                             "height": 4
                         }
@@ -4016,7 +3980,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 21,
+                            "y": 22,
                             "width": 12,
                             "height": 4
                         }
@@ -4025,9 +3989,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 109,
+                "y": 112,
                 "width": 12,
-                "height": 26
+                "height": 27
             }
         },
         {
@@ -4477,9 +4441,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 135,
+                "y": 139,
                 "width": 12,
-                "height": 1
+                "height": 10
             }
         }
     ],

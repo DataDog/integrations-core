@@ -4,10 +4,9 @@
 import json
 import os
 import subprocess
-from datetime import datetime, timezone
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.time import get_timestamp
+from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 
 from . import constants
 
@@ -26,14 +25,21 @@ class GuarddogCheck(AgentCheck):
             else None
         )
 
-    def get_guarddog_output(self, cmd) -> str:
-        self.log.debug(constants.LOG_TEMPLATE.format(message=cmd))
-        cmd_output = subprocess.run(cmd.split(), capture_output=True, text=True)
-        if cmd_output.returncode != 0:
-            err_message = f"Guarddog command failed: {cmd_output.stderr}"
-            self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
-            raise RuntimeError(err_message)
-        return cmd_output.stdout
+    def get_guarddog_output(self, cmd_with_abs_path) -> subprocess.CompletedProcess:
+        try:
+            self.log.debug(constants.LOG_TEMPLATE.format(message=cmd_with_abs_path))
+            cmd_output_with_abs_path = subprocess.run(cmd_with_abs_path.split(), capture_output=True, text=True)
+            return cmd_output_with_abs_path
+        except FileNotFoundError:
+            try:
+                cmd = cmd_with_abs_path.replace(constants.GUARDDOG_ENVIRONMENT_PATH, "guarddog")
+                self.log.debug(constants.LOG_TEMPLATE.format(message=cmd))
+                cmd_output = subprocess.run(cmd.split(), capture_output=True, text=True)
+                return cmd_output
+            except FileNotFoundError as cmd_error:
+                err_message = "Guarddog is not Installed. Please follow the Guarddog installation steps."
+                self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
+                raise cmd_error
 
     def get_enriched_event(self, enrichment_details, result) -> dict:
         return {
@@ -67,15 +73,21 @@ class GuarddogCheck(AgentCheck):
 
     def check(self, _):
         try:
-            current_time = datetime.now(tz=timezone.utc)
+            current_time = get_current_datetime()
             self.validate_config()
 
             guarddog_command = constants.GUARDDOG_COMMAND.format(
-                package_ecosystem=self.package_ecosystem, path=self.path
+                package_ecosystem=self.package_ecosystem,
+                path=self.path,
             )
-            output = self.get_guarddog_output(guarddog_command)
+            cmd_result = self.get_guarddog_output(guarddog_command)
+            if cmd_result.returncode != 0:
+                cmd_result_err_message = f"Guarddog command failed: {cmd_result.stderr}"
+                self.log.error(constants.LOG_TEMPLATE.format(message=cmd_result_err_message))
+                raise RuntimeError(cmd_result.stderr)
+
             try:
-                results = json.loads(output)
+                results = json.loads(cmd_result.stdout)
                 for result in results:
                     triggered_rules = [
                         key for key, value in result.get("result", {}).get("results", {}).items() if value
