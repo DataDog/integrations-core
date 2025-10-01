@@ -12,7 +12,6 @@ services:
       APP_DB_PASSWORD: "monitor"
       VERTICA_MEMDEBUG: 2
       VERTICA_DB_NAME: "datadog"
-      TZ: "UTC"
     container_name: vertica-ce
     ports:
       - "5433:5433"
