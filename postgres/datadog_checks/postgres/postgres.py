@@ -122,7 +122,6 @@ class PostgreSql(AgentCheck):
         self._version_utils = VersionUtils()
 
         config, validation_result = build_config(self)
-        self.validation_result = validation_result
         self._config = config
         # Log validation errors and warnings
         for error in validation_result.errors:
@@ -133,20 +132,23 @@ class PostgreSql(AgentCheck):
         self.tags = list(self._config.tags)
         self.add_core_tags()
 
-        # Handle the config validation result after we've set tags so those tags are included in the health event
-        self.health.submit_health_event(
-            name=HealthEvent.INITIALIZATION,
-            status=HealthStatus.ERROR
-            if not validation_result.valid
-            else HealthStatus.WARNING
-            if validation_result.warnings
-            else HealthStatus.OK,
-            errors=[str(error) for error in validation_result.errors],
-            warnings=validation_result.warnings,
-            config=sanitize(self._config),
-            instance=sanitize(self.instance),
-            features=validation_result.features,
-        )
+        try:
+            # Handle the config validation result after we've set tags so those tags are included in the health event
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.ERROR
+                if not validation_result.valid
+                else HealthStatus.WARNING
+                if validation_result.warnings
+                else HealthStatus.OK,
+                errors=[str(error) for error in validation_result.errors],
+                warnings=validation_result.warnings,
+                config=sanitize(self._config),
+                instance=sanitize(self.instance),
+                features=validation_result.features,
+            )
+        except Exception as e:
+            self.log.error("Error submitting health event for initialization: %s", e)
 
         # Abort initializing the check if the config is invalid
         if validation_result.valid is False:

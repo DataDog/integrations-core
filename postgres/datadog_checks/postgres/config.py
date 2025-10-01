@@ -77,11 +77,13 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     """
     Build the Postgres configuration.
     :param check: The check instance.
-    :return: InstanceConfig
-        The instance configuration object.
+    :return: InstanceConfig, ValidationResult
+        The instance configuration object and validation result.
     """
 
+    # The `instance` is the user provided configuration for this particular Postgres instance
     instance = check.instance
+    # The `init_config` is the user provided configuration for the check that applies to all instances
     init_config = check.init_config
 
     args = {}
@@ -102,11 +104,6 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     # If you change a literal value here, make sure to update spec.yaml
     args.update(
         {
-            # Set the default port to None if the host is a socket path
-            "port": instance.get(
-                'port', defaults.instance_port() if not instance.get('host', '').startswith('/') else None
-            ),
-            # Set None values for ssl
             # Database configuration
             "dbm": instance.get(
                 'dbm', instance.get('deep_database_monitoring', defaults.instance_dbm())
@@ -115,7 +112,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
                 instance.get('custom_metrics', [])
             ),  # Deprecated, use `custom_queries` instead
             "custom_queries": instance.get('custom_queries', []),
-            "database_identifier": instance.get('database_identifier', {"template": "$resolved_hostname"}),
+            "database_identifier": {
+                **dict_defaults.instance_database_identifier().model_dump(),
+                **(instance.get('database_identifier', {})),
+            },
             "database_autodiscovery": {
                 **dict_defaults.instance_database_autodiscovery().model_dump(),
                 **(instance.get('database_autodiscovery', {})),
@@ -379,17 +379,11 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
             'Use the `exclude_hostname` option instead.'
         )
 
-    # If instance config explicitly enables these features, we add a warning if dbm is not enabled
-    if instance.get('query_activity', {}).get('enabled') and not config.dbm:
-        validation_result.add_warning('The `query_activity` feature requires the `dbm` option to be enabled.')
-    if instance.get('query_samples', {}).get('enabled') and not config.dbm:
-        validation_result.add_warning('The `query_samples` feature requires the `dbm` option to be enabled.')
-    if instance.get('query_metrics', {}).get('enabled') and not config.dbm:
-        validation_result.add_warning('The `query_metrics` feature requires the `dbm` option to be enabled.')
-    if instance.get('collect_settings', {}).get('enabled') and not config.dbm:
-        validation_result.add_warning('The `collect_settings` feature requires the `dbm` option to be enabled.')
-    if instance.get('collect_schemas', {}).get('enabled') and not config.dbm:
-        validation_result.add_warning('The `collect_schemas` feature requires the `dbm` option to be enabled.')
+    # If the user provided config explicitly enables these features, we add a warning if dbm is not enabled
+    dbm_required = ['query_activity', 'query_samples', 'query_metrics', 'collect_settings', 'collect_schemas']
+    for feature in dbm_required:
+        if instance.get(feature, {}).get('enabled') and not config.dbm:
+            validation_result.add_warning(f'The `{feature}` feature requires the `dbm` option to be enabled.')
 
 
 def apply_features(config: InstanceConfig, validation_result: ValidationResult):
@@ -465,10 +459,15 @@ def should_propagate_agent_tags(instance, init_config) -> bool:
 def sanitize(config: Union[InstanceConfig, dict]) -> dict:
     if isinstance(config, InstanceConfig):
         # If config is an InstanceConfig object, convert it to a dict
-        config = config.model_dump(exclude=['custom_metrics', 'custom_queries'])
+        config = config.model_dump(exclude={'custom_metrics', 'custom_queries'})
     sanitized = copy.deepcopy(config)
     sanitized['password'] = '***' if sanitized.get('password') else None
     sanitized['ssl_password'] = '***' if sanitized.get('ssl_password') else None
+    # For the deprecated custom_metrics we inject a function into the instance
+    # The function isn't serializable so we have to strip it
+    for custom_metric in sanitized.get('custom_metrics', []):
+        for key in custom_metric.get('metrics', {}):
+            custom_metric.get('metrics')[key][1] = ''
 
     return sanitized
 

@@ -182,9 +182,9 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         self._explain_errors_cache = TTLCache(
-            maxsize=5000,
+            maxsize=self._config.query_samples.explain_errors_cache_maxsize,
             # only try to re-explain invalid statements once per day
-            ttl=24 * 60 * 60,
+            ttl=self._config.query_samples.explain_errors_cache_ttl,
         )
 
         # explained_statements_ratelimiter: limit how often we try to re-explain the same query
@@ -198,7 +198,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             # assuming ~100 bytes per entry (query & plan signature, key hash, 4 pointers (ordered dict), expiry time)
             # total size: 10k * 100 = 1 Mb
             maxsize=int(config.query_samples.seen_samples_cache_maxsize),
-            ttl=60 * 60 / 15,
+            ttl=60 * 60 / config.query_samples.samples_per_hour_per_query,
         )
 
         self._raw_statement_text_cache = RateLimitingTTLCache(

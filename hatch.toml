@@ -15,7 +15,7 @@ dependencies = [
   "pymdown-extensions~=10.3.0",
   "mkpatcher~=1.0.2",
   # Necessary for syntax highlighting in code blocks
-  "pygments~=2.16.1",
+  "pygments~=2.19.2",
   # Validation
   # https://github.com/linkchecker/linkchecker/pull/669#issuecomment-1267236287
   "linkchecker @ git+https://github.com/linkchecker/linkchecker.git@d9265bb71c2054bf57b8c5734a4825d62505c779",

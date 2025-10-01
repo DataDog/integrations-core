@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import time
 from typing import Dict, List, Union
@@ -231,6 +232,9 @@ class PostgresMetadata(DBMAsyncJob):
         self.pg_extensions_collection_interval = self.pg_settings_collection_interval
         self.schemas_collection_interval = config.collect_schemas.collection_interval
 
+        # We want to be able to iterate this as a dict with string interpolation
+        self._collect_schemas_config = config.collect_schemas.model_dump()
+
         # by default, send resources every 10 minutes
         self.collection_interval = min(
             self.pg_extensions_collection_interval,
@@ -256,10 +260,12 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_schemas_enabled = config.collect_schemas.enabled
         self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
+        self._compiled_patterns_cache = {}
         self._extensions_cached = None
         self._time_since_last_extension_query = 0
         self._time_since_last_settings_query = 0
         self._last_schemas_query_time = 0
+        self.column_buffer_size = 100_000
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
@@ -274,6 +280,14 @@ class PostgresMetadata(DBMAsyncJob):
         if self._tags_no_db:
             t.extend(self._tags_no_db)
         return t
+
+    def _get_compiled_pattern(self, pattern_str):
+        """
+        Get a compiled regex pattern from cache, compiling it if not already cached.
+        """
+        if pattern_str not in self._compiled_patterns_cache:
+            self._compiled_patterns_cache[pattern_str] = re.compile(pattern_str)
+        return self._compiled_patterns_cache[pattern_str]
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -372,19 +386,23 @@ class PostgresMetadata(DBMAsyncJob):
                 "dbms_version": self._payload_pg_version(),
                 "tags": self._tags_no_db,
                 "cloud_metadata": self._check.cloud_metadata,
+                # We don't rely on this time being strictly monotonic, it's just a unique identifier
+                # but having it be the time is helpful for debugging
+                "collection_started_at": math.floor(time.time() * 1000),
             }
 
             # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
             chunk_size = 50
+            payloads_count = 0
 
-            for database in schema_metadata:
+            for di, database in enumerate(schema_metadata):
                 dbname = database["name"]
                 if not self._should_collect_metadata(dbname, "database"):
                     continue
 
                 with self.db_pool.get_connection(dbname) as conn:
                     with conn.cursor(row_factory=dict_row) as cursor:
-                        for schema in database["schemas"]:
+                        for si, schema in enumerate(database["schemas"]):
                             if not self._should_collect_metadata(schema["name"], "schema"):
                                 continue
 
@@ -408,15 +426,27 @@ class PostgresMetadata(DBMAsyncJob):
                                 for t in table_info:
                                     buffer_column_count += len(t.get("columns", []))
 
-                                if buffer_column_count >= 100_000:
+                                if buffer_column_count >= self.column_buffer_size:
+                                    payloads_count += 1
                                     self._flush_schema(base_event, database, schema, tables_buffer)
                                     total_tables += len(tables_buffer)
                                     tables_buffer = []
                                     buffer_column_count = 0
 
-                            if len(tables_buffer) > 0:
-                                self._flush_schema(base_event, database, schema, tables_buffer)
-                                total_tables += len(tables_buffer)
+                            # Send the payload in the last iteration to 1) capture empty schemas and 2) ensure we get
+                            # a final payload for tombstoning
+                            is_final_payload = di == len(schema_metadata) - 1 and si == len(database["schemas"]) - 1
+                            payloads_count += 1
+                            self._flush_schema(
+                                # For very last payload send the payloads count to mark the collection as complete
+                                {**base_event, "collection_payloads_count": payloads_count}
+                                if is_final_payload
+                                else base_event,
+                                database,
+                                schema,
+                                tables_buffer,
+                            )
+                            total_tables += len(tables_buffer)
         except Exception as e:
             self._log.error("Error collecting schema metadata: %s", e)
             status = "error"
@@ -443,10 +473,9 @@ class PostgresMetadata(DBMAsyncJob):
     def _should_collect_metadata(self, name, metadata_type):
         # We get the config as a dict so we can use string interpolation
         # to iterate over object types
-        schemas_config = self._config.collect_schemas.model_dump()
-        excludes = schemas_config.get("exclude_{metadata_type}s".format(metadata_type=metadata_type), [])
+        excludes = self._collect_schemas_config.get("exclude_{metadata_type}s".format(metadata_type=metadata_type), [])
         for re_str in excludes:
-            regex = re.compile(re_str)
+            regex = self._get_compiled_pattern(re_str)
             if regex.search(name):
                 self._log.debug(
                     "Excluding {metadata_type} {name} from metadata collection because of {re_str}".format(
@@ -455,11 +484,11 @@ class PostgresMetadata(DBMAsyncJob):
                 )
                 return False
 
-        includes = schemas_config.get("include_{metadata_type}s".format(metadata_type=metadata_type), [])
+        includes = self._collect_schemas_config.get("include_{metadata_type}s".format(metadata_type=metadata_type), [])
         if len(includes) == 0:
             return True
         for re_str in includes:
-            regex = re.compile(re_str)
+            regex = self._get_compiled_pattern(re_str)
             if regex.search(name):
                 self._log.debug(
                     "Including {metadata_type} {name} in metadata collection because of {re_str}".format(

@@ -8,6 +8,12 @@
 from . import instance
 
 
+def instance_database_identifier():
+    return instance.DatabaseIdentifier(
+        template="$resolved_hostname",
+    )
+
+
 def instance_database_autodiscovery():
     return instance.DatabaseAutodiscovery(
         enabled=False,
@@ -42,6 +48,8 @@ def instance_query_samples():
         explained_queries_cache_maxsize=5000,
         seen_samples_cache_maxsize=10000,
         explain_parameterized_queries=True,
+        explain_errors_cache_maxsize=5000,
+        explain_errors_cache_ttl=86400,
         run_sync=False,
     )
 

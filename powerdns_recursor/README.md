@@ -12,6 +12,8 @@ Track the performance of your PowerDNS Recursor and monitor strange or worrisome
 
 And many more.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

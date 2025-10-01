@@ -47,7 +47,7 @@ def test_initialize_valid_config(mock_check, minimal_instance):
 
 
 def test_initialize_invalid_ssl_mode(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['ssl'] = 'invalid_ssl'
     mock_check.instance = instance
     mock_check.init_config = {}
@@ -57,7 +57,7 @@ def test_initialize_invalid_ssl_mode(mock_check, minimal_instance):
 
 
 def test_initialize_conflicting_collect_default_database_and_ignore_databases(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['collect_default_database'] = True
     instance['ignore_databases'] = ['postgres']
     mock_check.instance = instance
@@ -68,7 +68,7 @@ def test_initialize_conflicting_collect_default_database_and_ignore_databases(mo
 
 
 def test_initialize_non_ascii_application_name(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['application_name'] = 'datadog-агент'
     mock_check.instance = instance
     mock_check.init_config = {}
@@ -79,7 +79,7 @@ def test_initialize_non_ascii_application_name(mock_check, minimal_instance):
 
 def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
     # Enable all features
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance.update(
         {
             'relations': ['public.table1'],
@@ -122,7 +122,7 @@ def test_initialize_features_disabled_by_default(mock_check, minimal_instance):
 
 def test_initialize_features_warn_if_dbm_missing_for_dbm_features(mock_check, minimal_instance):
     # Enable features that require dbm, but do not enable dbm
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['query_samples'] = {'enabled': True}
     instance['collect_settings'] = {'enabled': True}
     instance['collect_schemas'] = {'enabled': True}
@@ -143,7 +143,7 @@ def test_initialize_features_warn_if_dbm_missing_for_dbm_features(mock_check, mi
 
 
 def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['deep_database_monitoring'] = True
     instance['statement_samples'] = {'enabled': True}
     mock_check.instance = instance
@@ -154,7 +154,7 @@ def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
 
 
 def test_initialize_empty_default_hostname_warns(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['empty_default_hostname'] = True
     mock_check.instance = instance
     mock_check.init_config = {}
@@ -185,7 +185,7 @@ def test_propagate_agent_tags(instance, init_config, should_propagate, mock_chec
 
 
 def test_sanitize_config(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['password'] = 'secret'
     instance['ssl_password'] = 'ssl_secret'
     instance['custom_metrics'] = [
@@ -206,7 +206,7 @@ def test_sanitize_config(mock_check, minimal_instance):
 
 
 def test_serialize_config(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['password'] = 'secret'
     instance['ssl_password'] = 'ssl_secret'
     instance['custom_metrics'] = [
@@ -241,7 +241,7 @@ def test_serialize_config(mock_check, minimal_instance):
 
 
 def test_valid_string_numbers(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['query_metrics'] = {'collection_interval': '30'}
     mock_check.instance = instance
     mock_check.init_config = {}
@@ -251,7 +251,7 @@ def test_valid_string_numbers(mock_check, minimal_instance):
 
 
 def test_invalid_numbers(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['query_metrics'] = {'collection_interval': 'not_a_number'}
     mock_check.instance = instance
     mock_check.init_config = {}
@@ -306,7 +306,7 @@ def test_relations_validation(mock_check, minimal_instance):
     ],
 )
 def test_apply_validated_defaults(mock_check, minimal_instance, section, section_config, expected_collection_interval):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance[section] = {**instance.get(section, {}), **section_config}
     mock_check.instance = instance
     mock_check.init_config = {}
@@ -316,7 +316,7 @@ def test_apply_validated_defaults(mock_check, minimal_instance, section, section
 
 
 def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['ssl'] = 'invalid_ssl'
     mock_check.instance = instance
     mock_check.init_config = {}
@@ -337,7 +337,7 @@ def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
     ],
 )
 def test_apply_deprecation_warnings(mock_check, minimal_instance, option, replacement, value):
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance[option] = value
     mock_check.instance = instance
     mock_check.init_config = {}
@@ -348,7 +348,7 @@ def test_apply_deprecation_warnings(mock_check, minimal_instance, option, replac
 
 def test_cloud_validations(mock_check, minimal_instance):
     # AWS
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['aws'] = {'region': 'us-east-1'}
     instance['password'] = None
     mock_check.instance = instance
@@ -358,7 +358,7 @@ def test_cloud_validations(mock_check, minimal_instance):
     assert config.aws.managed_authentication.enabled
 
     # Azure
-    instance = minimal_instance.copy()
+    instance = minimal_instance
     instance['managed_identity'] = {'client_id': '123'}
     instance['password'] = None
     mock_check.instance = instance
