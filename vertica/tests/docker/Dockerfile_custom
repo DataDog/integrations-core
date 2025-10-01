@@ -1,6 +1,6 @@
 ARG VERTICA_VERSION="latest"
 
-FROM vertica/vertica-ce:${VERTICA_VERSION}
+FROM opentext/vertica-k8s:latest
 
 ADD ./custom-entrypoint.sh ${VERTICA_HOME_DIR}/custom-entrypoint.sh
 # Deleting the extension packages prevents those packages from being
