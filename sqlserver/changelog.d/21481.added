@@ -1,0 +1,1 @@
+Add `replace_bind_parameter` to sqlserver obfuscator option to support obfuscate bind parameters like `@P1`.
