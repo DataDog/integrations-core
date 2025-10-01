@@ -85,6 +85,7 @@ def check():
 @pytest.fixture(scope="function")
 def integration_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
     c = None
+
     def _check(instance: dict, init_config: dict = None):
         nonlocal c
         c = PostgreSql('postgres', init_config or {}, [instance])
@@ -95,7 +96,6 @@ def integration_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
     if not c:
         raise Exception("integration_check fixture called but no check created")
     c.cancel()
-    
 
 
 @pytest.fixture
