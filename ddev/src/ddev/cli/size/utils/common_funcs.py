@@ -968,14 +968,8 @@ def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: 
     '''
     dep_sizes_json = get_dep_sizes_json(commit, platform)
     if not dep_sizes_json:
-        previous_sizes = get_previous_dep_sizes_json(app.repo.git.merge_base(commit, "origin/master"))
-        if previous_sizes:
-            compressed_json, uncompressed_json = previous_sizes["compressed"], previous_sizes["uncompressed"]
-            sizes = parse_sizes_json(compressed_json, uncompressed_json, platform)
-            with open(f"{platform}.json", "w") as f:
-                json.dump(sizes, f, indent=2)
-            dep_sizes_json = Path(f"{platform}.json")
-    return dep_sizes_json if dep_sizes_json else None
+        dep_sizes_json = get_previous_dep_sizes(app.repo.git.merge_base(commit, "origin/master"), platform)
+    return Path(dep_sizes_json) if dep_sizes_json else None
 
 
 @cache
@@ -1070,51 +1064,61 @@ def get_current_sizes_json(run_id: str, platform: str) -> Path | None:
 
 
 @cache
-def get_artifact(run_id: str, artifact_name: str) -> Path | None:
+def get_artifact(run_id: str, artifact_name: str, target_dir: str | None = None) -> Path | None:
     print(f"Downloading artifact: {artifact_name} from run_id={run_id}")
     try:
-        subprocess.run(
-            [
-                'gh',
-                'run',
-                'download',
-                run_id,
-                '--name',
-                artifact_name,
-            ],
-            check=True,
-            text=True,
-        )
+        cmd = [
+            'gh',
+            'run',
+            'download',
+            run_id,
+            '--name',
+            artifact_name,
+        ]
+        if target_dir:
+            cmd.extend(['--dir', target_dir])
+
+        subprocess.run(cmd, check=True, text=True)
     except subprocess.CalledProcessError as e:
         print(f"Failed to download artifact: {artifact_name} from run_id={run_id}: {e}")
         return None
 
-    print(f"Artifact downloaded to: {artifact_name}")
-    return Path(artifact_name)
+    artifact_path = Path(target_dir) / artifact_name if target_dir else Path(artifact_name)
+    print(f"Artifact downloaded to: {artifact_path}")
+    return artifact_path
 
 
 @cache
-def get_previous_dep_sizes_json(base_commit: str) -> dict[str, Path] | None:
+def get_previous_dep_sizes(base_commit: str, platform: str) -> Path | None:
     '''
     Gets the dependency sizes for a given commit when dependencies were not resolved.
     '''
-    print(f"Getting previous dependency sizes json for {base_commit=}")
-    run_id = get_run_id(base_commit, MEASURE_DISK_USAGE_WORKFLOW)
-    print(f"Previous run_id: {run_id}")
-    compressed_json = None
-    uncompressed_json = None
-    if run_id:
-        compressed_json = get_artifact(run_id, 'status_compressed.json')
-    if run_id:
-        uncompressed_json = get_artifact(run_id, 'status_uncompressed.json')
-    print(f"Compressed json: {compressed_json}")
-    print(f"Uncompressed json: {uncompressed_json}")
-    if not compressed_json or not uncompressed_json:
-        return None
-    return {
-        "compressed": compressed_json,
-        "uncompressed": uncompressed_json,
-    }
+    with tempfile.TemporaryDirectory() as tmpdir:
+        print(f"Getting previous dependency sizes json for {base_commit=}")
+        run_id = get_run_id(base_commit, MEASURE_DISK_USAGE_WORKFLOW)
+        print(f"Previous run_id: {run_id}")
+        compressed_json = None
+        uncompressed_json = None
+        if run_id:
+            compressed_json = get_artifact(run_id, 'status_compressed.json', tmpdir)
+        if run_id:
+            uncompressed_json = get_artifact(run_id, 'status_uncompressed.json', tmpdir)
+
+        print(f"Compressed json: {compressed_json}")
+        print(f"Uncompressed json: {uncompressed_json}")
+
+        if not compressed_json or not uncompressed_json:
+            return None
+
+        sizes = parse_sizes_json(compressed_json, uncompressed_json, platform)
+
+        sizes_path = Path(tmpdir) / f"{platform}.json"
+        with open(sizes_path, "w") as f:
+            json.dump(sizes, f, indent=2)
+
+        target_path = f"{platform}.json"
+        shutil.copy2(sizes_path, target_path)
+        return Path(target_path)
 
 
 @cache
