@@ -5,6 +5,7 @@ import orjson as json
 from psycopg.rows import dict_row
 
 from datadog_checks.postgres.postgres import PostgreSql
+from datadog_checks.postgres.version_utils import VersionUtils
 
 try:
     import datadog_agent
@@ -74,8 +75,9 @@ class SchemaCollector:
 
 
 PG_TABLES_QUERY_V10_PLUS = """
-SELECT c.oid                 AS id,
-       c.relname             AS name,
+SELECT c.oid                 AS table_id,
+       c.relnamespace        AS schema_id,
+       c.relname             AS table_name,
        c.relhasindex         AS has_indexes,
        c.relowner :: regrole AS owner,
        ( CASE
@@ -88,13 +90,12 @@ FROM   pg_class c
               ON c.reltoastrelid = t.oid
 WHERE  c.relkind IN ( 'r', 'p', 'f' )
        AND c.relispartition != 't'
-       AND c.relnamespace = {schema_oid}
-       {filter};
 """
 
 PG_TABLES_QUERY_V9 = """
-SELECT c.oid                 AS id,
-       c.relname             AS name,
+SELECT c.oid                 AS table_id,
+       c.relnamespace        AS schema_id,
+       c.relname             AS table_name,
        c.relhasindex         AS has_indexes,
        c.relowner :: regrole AS owner,
        t.relname             AS toast_table
@@ -102,8 +103,6 @@ FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
 WHERE  c.relkind IN ( 'r', 'f' )
-       AND c.relnamespace = {schema_oid}
-       {filter};
 """
 
 
@@ -198,12 +197,19 @@ class PostgresSchemaCollector(SchemaCollector):
         with self._check.db_pool.get_connection(database_name) as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
                 schemas_query = self._get_schemas_query()
+                tables_query = self._get_tables_query()
                 query = f"""
                     WITH schemas AS(
                         {schemas_query}
+                    ),
+
+                    tables AS (
+                        {tables_query}
                     )
 
-                    SELECT * FROM schemas
+                    SELECT schemas.schema_name, tables.table_name
+                    FROM schemas
+                        LEFT JOIN tables ON schemas.schema_id = tables.schema_id
                 """
                 print(query)
                 cursor.execute(query)
@@ -215,6 +221,17 @@ class PostgresSchemaCollector(SchemaCollector):
             query += " AND nspname !~ '{}'".format(exclude_regex)
         for include_regex in self._config.include_schemas:
             query += " AND nspname ~ '{}'".format(include_regex)
+        return query
+
+    def _get_tables_query(self):
+        if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
+            query = PG_TABLES_QUERY_V9
+        else:
+            query = PG_TABLES_QUERY_V10_PLUS
+        for exclude_regex in self._config.exclude_tables:
+            query += " AND relname !~ '{}'".format(exclude_regex)
+        for include_regex in self._config.include_tables:
+            query += " AND relname ~ '{}'".format(include_regex)
         return query
 
     def _get_next(self, cursor):
