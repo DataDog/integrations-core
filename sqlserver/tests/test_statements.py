@@ -400,7 +400,9 @@ def test_statement_metrics_and_plans(
                 cursor, SQL_SERVER_QUERY_METRICS_COLUMNS
             )
 
-    expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
+    expected_instance_tags.add(
+        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower())
+    )
     expected_instance_tags_with_db = expected_instance_tags | {"db:{}".format(database)}
 
     # dbm-metrics
