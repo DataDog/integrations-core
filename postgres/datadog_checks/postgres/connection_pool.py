@@ -4,6 +4,7 @@
 
 import threading
 import time
+from abc import ABC, abstractmethod
 from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Tuple, Union
@@ -13,6 +14,91 @@ from psycopg_pool import ConnectionPool
 
 from .cursor import CommenterCursor, SQLASCIITextLoader
 
+
+class TokenProvider(ABC):
+    """
+    Interface for providing a token for managed authentication.
+    """
+    def __init__(self, *, skew_seconds: int = 60):
+        self._skew = skew_seconds
+        self._lock = threading.Lock()
+        self._token: str | None = None
+        self._expires_at: float = 0.0
+
+    def get_token(self) -> str:
+        """
+        Get a token for managed authentication.
+        """
+        now = time.time()
+        with self._lock:
+            if self._token is None or now >= self._expires_at - self._skew:
+                token, expires_at = self._fetch_token()
+                self._token = token
+                self._expires_at = float(expires_at)
+            return self._token  # type: ignore[return-value]
+
+    def invalidate(self) -> None:
+        with self._lock:
+            self._expires_at = 0.0
+
+    @abstractmethod
+    def _fetch_token(self) -> Tuple[str, float]:
+        """
+        Return (token, expires_at_epoch_seconds).
+        Implementations should return the absolute expiry; if the provider
+        has a fixed TTL, compute expires_at = time.time() + ttl_seconds.
+        """
+
+class AWSTokenProvider(TokenProvider):
+    """
+    Token provider for AWS IAM authentication.
+    """
+    TOKEN_TTL_SECONDS = 900 # 15 minutes
+
+    def __init__(self, host: str, port: int, user: str, region: str, *, role_arn: str = None, skew_seconds: int = 60):
+        super().__init__(skew_seconds=skew_seconds)
+        self.host = host
+        self.port = port
+        self.user = user
+        self.region = region
+        self.role_arn = role_arn
+
+    def _fetch_token(self) -> Tuple[str, float]:
+        # Import aws only when this method is called
+        from .aws import generate_rds_iam_token
+        token = generate_rds_iam_token(host=self.host, port=self.port, username=self.user, region=self.region, role_arn=self.role_arn)
+        return token, time.time() + self.TOKEN_TTL_SECONDS
+
+class AzureTokenProvider(TokenProvider):
+    """
+    Token provider for Azure Managed Identity.
+    """
+    def __init__(self, client_id: str, identity_scope: str = None, skew_seconds: int = 60):
+        super().__init__(skew_seconds=skew_seconds)
+        self.client_id = client_id
+        self.identity_scope = identity_scope
+
+    def _fetch_token(self) -> Tuple[str, float]:
+        # Import azure only when this method is called
+        from .azure import generate_managed_identity_token
+        token = generate_managed_identity_token(client_id=self.client_id, identity_scope=self.identity_scope)
+        return token.token, float(token.expires_at)
+
+class TokenAwareConnection(Connection):
+    """
+    Connection that can be used for managed authentication.
+    """
+
+    token_provider: Optional[TokenProvider] = None
+
+    @classmethod
+    def connect(cls, *args, **kwargs):
+        """
+        Override the connection method to pass a refreshable token as the connection password.
+        """
+        if cls.token_provider:
+            kwargs["password"] = cls.token_provider.get_token()
+        return super().connect(*args, **kwargs)
 
 @dataclass(frozen=True)
 class PostgresConnectionArgs:
@@ -25,6 +111,7 @@ class PostgresConnectionArgs:
     host: Optional[str] = None
     port: Optional[int] = None
     password: Optional[str] = None
+    token_provider: Optional[TokenProvider] = None
     ssl_mode: Optional[str] = "allow"
     ssl_cert: Optional[str] = None
     ssl_root_cert: Optional[str] = None
@@ -86,6 +173,7 @@ class LRUConnectionPoolManager:
         pool_config: Optional[Dict[str, Any]] = None,
         statement_timeout: Optional[int] = None,  # milliseconds
         sqlascii_encodings: Optional[list[str]] = None,
+        token_provider: Optional[TokenProvider] = None,
     ) -> None:
         """
         Initialize the pool manager.
@@ -101,6 +189,7 @@ class LRUConnectionPoolManager:
         self.base_conn_args = base_conn_args
         self.statement_timeout = statement_timeout
         self.sqlascii_encodings = sqlascii_encodings
+        self.token_provider = token_provider
 
         self.pool_config = {
             **(pool_config or {}),
@@ -108,6 +197,10 @@ class LRUConnectionPoolManager:
             "max_size": 2,
             "open": True,
         }
+
+        if self.token_provider:
+            TokenAwareConnection.token_provider = self.token_provider
+
         self.lock = threading.Lock()
         self.pools: OrderedDict[str, Tuple[ConnectionPool, float, bool]] = OrderedDict()
         self._closed = False
@@ -139,7 +232,7 @@ class LRUConnectionPoolManager:
         """
         kwargs = self.base_conn_args.as_kwargs(dbname=dbname)
 
-        return ConnectionPool(kwargs=kwargs, configure=self._configure_connection, **self.pool_config)
+        return ConnectionPool(kwargs=kwargs, configure=self._configure_connection, connection_class=TokenAwareConnection, **self.pool_config)
 
     def get_connection(self, dbname: str, persistent: bool = False):
         """
