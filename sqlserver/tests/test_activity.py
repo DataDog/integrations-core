@@ -191,7 +191,9 @@ def test_collect_load_activity(
     fred_conn.close()
     executor.shutdown(wait=True)
 
-    expected_instance_tags.add("sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)))
+    expected_instance_tags.add(
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower())
+    )
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     assert len(dbm_activity) == 1, "should have collected exactly one dbm-activity payload"
@@ -834,7 +836,7 @@ def _expected_dbm_instance_tags(check):
         "database_instance:{}".format("stubbed.hostname"),
         "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
 
