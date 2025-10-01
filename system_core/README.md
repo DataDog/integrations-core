@@ -6,6 +6,8 @@
 
 This check collects the number of CPU cores on a host and CPU times, such as `system`, `user`, `idle`, etc.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

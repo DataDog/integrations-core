@@ -6,6 +6,8 @@
 
 This check collects resource usage metrics from your vSphere cluster-CPU, disk, memory, and network usage. It also watches your vCenter server for events and emits them to Datadog.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

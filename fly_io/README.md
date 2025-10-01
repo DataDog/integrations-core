@@ -8,6 +8,8 @@ This integration is in public beta. Use caution if enabling it on production wor
 
 This check monitors [Fly.io][1] metrics through the Datadog Agent.
 
+**Minimum Agent version:** 7.57.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a Fly application.

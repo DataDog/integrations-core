@@ -4,6 +4,8 @@
 
 This check monitors [vLLM][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.56.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host.

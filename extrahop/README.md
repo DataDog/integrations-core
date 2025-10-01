@@ -11,6 +11,8 @@ This integration ingests the following logs:
 
 This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into detections and investigations through the out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.58.2
+
 ## Setup
 
 ### Generate API credentials in ExtraHop
