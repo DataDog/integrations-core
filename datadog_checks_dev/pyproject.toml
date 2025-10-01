@@ -32,7 +32,7 @@ dependencies = [
     "coverage>=7.4.1",
     "flaky>=3.8.1",
     "mock>=5.2.0",
-    "pytest==8.2.2",
+    "pytest==8.4.2",
     "pytest-asyncio>=0.23.8",
     "pytest-benchmark[histogram]>=5.1.0",
     "pytest-cov>=6.1.0",
