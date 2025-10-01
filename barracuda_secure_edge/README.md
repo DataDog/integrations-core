@@ -28,7 +28,7 @@ Barracuda Secure Edge is a unified Secure Access Service Edge (SASE) platform th
             - log_component:other_tag_component_name
     ```
 
-    Change the `path` and `service` parameter values for your environment. For each path of log type, pre-defined tags are used:
+    Change the `path` and `service` parameter values for your environment. Define multiple file sources in the configuration file as shown above. For each of the file sources, pre-defined tag needs to be added to those logs as follows:
 
     ```
     - box_Auth_access -> log_component:auth

@@ -3,23 +3,108 @@
     "description": "SecureEdge dashboard provides a visual summary of firewall activity, security events, user access, and system health to help monitor and analyze network security in real time.",
     "widgets": [
         {
-            "id": 3029648501220266,
+            "id": 313012450284056,
             "definition": {
-                "type": "image",
-                "url": "https://static.datadoghq.com/static/images/logos/barracuda-secure-edge_large.svg",
-                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/barracuda-secure-edge_reversed_large.svg",
-                "sizing": "cover",
-                "margin": "md",
-                "has_background": true,
-                "has_border": true,
-                "vertical_align": "center",
-                "horizontal_align": "center"
+                "title": "About Barracuda SecureEdge",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2225781325884173,
+                        "definition": {
+                            "type": "image",
+                            "url": "https://static.datadoghq.com/static/images/logos/barracuda-secure-edge_large.svg",
+                            "url_dark_theme": "https://static.datadoghq.com/static/images/logos/barracuda-secure-edge_reversed_large.svg",
+                            "sizing": "cover",
+                            "margin": "md",
+                            "has_background": true,
+                            "has_border": true,
+                            "vertical_align": "center",
+                            "horizontal_align": "center"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1298644854807916,
+                        "definition": {
+                            "type": "note",
+                            "content": "Barracuda SecureEdge secures sites, devices, and users with an easy-to-deploy cloud-first platform that connects any device, application, or cloud/hybrid environment. SecureEdge provides Zero Trust application access to any type of application, cloud-based security for endpoints, and automated SD-WAN connectivity for sites and industrial facilities of any type or size. Remote users can access applications directly from any type of device, with Zero Trust enforcement, URL filtering, and traffic optimization to ensure application access is always optimized and makes the most of shared Internet lines. Barracuda SecureEdge provides an unprecedented level of control and visibility into user-generated traffic at each endpoint. \n\n**Key Features**\n\n- Custom Categories for web filtering \n- Additional web filter actions: Alert and Warn\n- Web search monitoring for predefined categories and custom keywords\n- Silent ad blocking\n- Safe Search\n- Customizable Block pages",
+                            "background_color": "white",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1538355544177160,
+                        "definition": {
+                            "title": "Total Log Volume",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:barracuda_secure_edge"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
             },
             "layout": {
                 "x": 0,
                 "y": 0,
                 "width": 6,
-                "height": 4
+                "height": 11
             }
         },
         {
@@ -360,74 +445,6 @@
                 "y": 0,
                 "width": 6,
                 "height": 11
-            }
-        },
-        {
-            "id": 7373116018092743,
-            "definition": {
-                "type": "note",
-                "content": "Barracuda SecureEdge secures sites, devices, and users with an easy-to-deploy cloud-first platform that connects any device, application, or cloud/hybrid environment. SecureEdge provides Zero Trust application access to any type of application, cloud-based security for endpoints, and automated SD-WAN connectivity for sites and industrial facilities of any type or size. Remote users can access applications directly from any type of device, with Zero Trust enforcement, URL filtering, and traffic optimization to ensure application access is always optimized and makes the most of shared Internet lines. Barracuda SecureEdge provides an unprecedented level of control and visibility into user-generated traffic at each endpoint. \n\n**Key Features**\n\n- Custom Categories for web filtering \n- Additional web filter actions: Alert and Warn\n- Web search monitoring for predefined categories and custom keywords\n- Silent ad blocking\n- Safe Search\n- Customizable Block pages",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 0,
-                "y": 4,
-                "width": 6,
-                "height": 4
-            }
-        },
-        {
-            "id": 6603911867712278,
-            "definition": {
-                "title": "Total Log Volume",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_value",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "name": "query1",
-                                "data_source": "logs",
-                                "search": {
-                                    "query": "source:barracuda_secure_edge"
-                                },
-                                "indexes": [
-                                    "*"
-                                ],
-                                "group_by": [],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar"
-                    }
-                ],
-                "autoscale": true,
-                "precision": 2,
-                "timeseries_background": {
-                    "type": "area"
-                }
-            },
-            "layout": {
-                "x": 0,
-                "y": 8,
-                "width": 6,
-                "height": 3
             }
         },
         {
@@ -776,7 +793,7 @@
                     {
                         "id": 313116993642037,
                         "definition": {
-                            "title": "Total Number Of Hosts",
+                            "title": "Total Users Logged",
                             "title_size": "16",
                             "title_align": "left",
                             "time": {},
@@ -793,15 +810,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge log_component:auth"
+                                                "query": "source:barracuda_secure_edge log_component:auth -@message:*Denied* OR @message:*Login**Allowed*"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [],
                                             "compute": {
-                                                "aggregation": "cardinality",
-                                                "metric": "host"
+                                                "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
