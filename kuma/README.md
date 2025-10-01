@@ -13,6 +13,8 @@ For monitoring the Envoy data planes (sidecars) within your Kuma mesh:
 - Use the [Envoy integration][10] to collect metrics.
 - Use this Kuma integration to collect logs.
 
+**Minimum Agent version:** 7.68.0
+
 ## Setup
 
 The Kuma check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.

@@ -12,6 +12,8 @@ The Datadog CSI node server is responsible for managing Datadog CSI volume lifec
 
 The Datadog CSI Driver integration collects and monitors metrics from your Datadog CSI Driver, providing visibility into publish/unpublish requests and pod health for improved troubleshooting and performance monitoring.
 
+**Minimum Agent version:** 7.70.1
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

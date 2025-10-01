@@ -5,6 +5,8 @@ Use the CrewAI integration to monitor, troubleshoot, and evaluate your applicati
 
 **Note**: Requires Python.
 
+**Minimum Agent version:** 7.64.3
+
 ## Setup
 
 #### Installation

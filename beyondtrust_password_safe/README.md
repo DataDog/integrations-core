@@ -12,6 +12,8 @@ This integration parses and ingest the following types of logs:
 
 Visualize detailed insights into these logs through out-of-the-box dashboards. Cloud SIEM also provides detection rules to help you monitor and respond to potential security threats effectively.
 
+**Minimum Agent version:** 7.70.0
+
 ## Setup
 
 ### Log Collection Overview

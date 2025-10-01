@@ -8,6 +8,8 @@ This integration provides enrichment and visualization for Phishing, Malware, Ma
 
 Get detailed visibility into these events with out-of-the-box dashboards, and strengthen security with pre-built Cloud SIEM detection rules for proactive threat monitoring and response.
 
+**Minimum Agent version:** 7.64.2
+
 ## Setup
 
 Follow the instructions below to configure this integration for your Check Point Harmony Email & Collaboration account.

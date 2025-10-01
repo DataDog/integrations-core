@@ -4,6 +4,8 @@
 
 This check monitors [IBM MQ][1] versions 9.1 and above.
 
+**Minimum Agent version:** 6.8.0
+
 ## Setup
 
 ### Installation

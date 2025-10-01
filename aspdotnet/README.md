@@ -7,6 +7,8 @@ Get metrics from ASP.NET in real time to:
 - Visualize and monitor ASP.NET states.
 - Be notified about ASP.NET failovers and events.
 
+**Minimum Agent version:** 6.6.0
+
 ## Setup
 
 ### Installation

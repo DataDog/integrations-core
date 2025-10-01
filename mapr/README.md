@@ -4,6 +4,8 @@
 
 This check monitors [MapR][1] 6.1+ through the Datadog Agent.
 
+**Minimum Agent version:** 6.15.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host.
