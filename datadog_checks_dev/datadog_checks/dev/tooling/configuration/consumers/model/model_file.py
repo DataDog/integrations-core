@@ -162,7 +162,7 @@ def _define_validator_functions(model_id, validator_data, need_defaults):
         model_file_lines.append('')
         model_file_lines.append(f'            if info.field_name == {option_name!r}:')
         for import_path in import_paths:
-            model_file_lines.append(f'                value = validation.{import_path}(value, field=field)')
+            model_file_lines.append(f'                value = validators.{import_path}(value, field=field)')
 
     if need_defaults:
         model_file_lines.append('        else:')
