@@ -15,5 +15,8 @@
 #
 # logs:
 #   - type: file
-#     path: /var/log/barracuda_secure_edge.log
+#     path: /var/phion/logs/box_Auth_access.log
+#     service: auth
 #     source: barracuda_secure_edge
+#     tags:
+#     - log_component:auth
