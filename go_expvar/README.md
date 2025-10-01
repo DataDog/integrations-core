@@ -8,6 +8,8 @@ Track the memory usage of your Go services and collect metrics instrumented from
 
 If you prefer to instrument your Go code using only [dogstats-go][2], you can still use this integration to collect memory-related metrics.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

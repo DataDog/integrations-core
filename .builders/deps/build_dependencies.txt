@@ -1,4 +1,5 @@
 hatchling==1.21.1
+hatch-requirements-txt
 setuptools==75.6.0
 wheel==0.38.4
 setuptools-scm

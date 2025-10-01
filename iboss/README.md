@@ -74,6 +74,8 @@ Here is the list of monitors for metrics:
 - High proxy error rate detected
 - High proxy response time detected
 
+**Minimum Agent version:** 7.69.0
+
 ## Setup
 
 **Note**: The following steps are required only for collecting metrics. For log collection, see the `Log collection` section below.

@@ -14,6 +14,8 @@ And many more.
 
 This check also creates a service check for every executor task.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

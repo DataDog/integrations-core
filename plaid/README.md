@@ -14,6 +14,8 @@ Here are some insights that can be drawn from your Plaid dashboard:
 - **Type Classification**: Categorize transactions by type for deeper financial insights.
 - **Currency Insights**: Examine iso_currency_code for multi-currency transaction patterns.
 
+**Minimum Agent version:** 7.58.2
+
 ## Setup
 
 1. Log in to [Plaid](https://dashboard.plaid.com/signin/).
