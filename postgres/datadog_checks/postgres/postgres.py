@@ -184,12 +184,12 @@ class PostgreSql(AgentCheck):
             lambda: RelationsManager.validate_relations_config(list(self._config.relations))
         )
         self.check_initializations.append(self.set_resolved_hostname_metadata)
-        self.check_initializations.append(self._send_database_instance_metadata)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_cluster_name)
         self.check_initializations.append(self.load_version)
         self.check_initializations.append(self.load_system_identifier)
         self.check_initializations.append(self.initialize_is_aurora)
+        self.check_initializations.append(self._send_database_instance_metadata)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
