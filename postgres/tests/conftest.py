@@ -8,7 +8,6 @@ from typing import Optional
 
 import psycopg
 import pytest
-from semver import VersionInfo
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
@@ -75,7 +74,6 @@ def dd_environment(e2e_instance):
         yield e2e_instance, E2E_METADATA
 
 
-
 @pytest.fixture(scope="function")
 def integration_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
     c = None
@@ -87,7 +85,7 @@ def integration_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
 
     yield _check
 
-    if c:        
+    if c:
         c.cancel()
 
 
