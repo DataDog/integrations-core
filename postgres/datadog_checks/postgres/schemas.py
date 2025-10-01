@@ -16,15 +16,7 @@ class SchemaCollector:
     def __init__(self, check: PostgreSql):
         self._check = check
         self._log = check.log
-        self._config = check._config.schemas_metadata_config
-        print(self._config)
-
-        self._include_databases = self._config.get("include_databases", [])
-        self._include_schemas = self._config.get("include_schemas", [])
-        self._include_tables = self._config.get("include_tables", [])
-        self._exclude_databases = self._config.get("exclude_databases", [])
-        self._exclude_schemas = self._config.get("exclude_schemas", [])
-        self._exclude_tables = self._config.get("exclude_tables", [])
+        self._config = check._config.collect_schemas
 
         self._reset()
 
@@ -57,7 +49,7 @@ class SchemaCollector:
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
                 "kind": "pg_databases",
-                "collection_interval": self._config.schemas_metadata_config.get("collection_interval"),
+                "collection_interval": self._config.collection_interval,
                 "dbms_version": self._check.version,
                 "tags": self._check.tags,
                 "cloud_metadata": self._check.cloud_metadata,
@@ -66,7 +58,7 @@ class SchemaCollector:
             }
             self._collection_payloads_count += 1
             if is_last_payload:
-                event["collection_payloads_count"] = self._payloads_count
+                event["collection_payloads_count"] = self._collection_payloads_count
             self._check.database_monitoring_metadata(json.dumps(event))
 
             self._queued_rows = []
@@ -79,6 +71,7 @@ class SchemaCollector:
 
     def _get_next(self, cursor):
         pass
+
 
 PG_TABLES_QUERY_V10_PLUS = """
 SELECT c.oid                 AS id,
@@ -181,6 +174,7 @@ WHERE  attrelid IN ({table_ids})
        AND NOT attisdropped;
 """
 
+
 class PostgresSchemaCollector(SchemaCollector):
     def __init__(self, check):
         super().__init__(check)
@@ -192,9 +186,9 @@ class PostgresSchemaCollector(SchemaCollector):
         with self._check._get_main_db() as conn:
             with conn.cursor() as cursor:
                 query = "SELECT datname FROM pg_database WHERE 1=1"
-                for exclude_regex in self._exclude_databases:
+                for exclude_regex in self._config.exclude_databases:
                     query += " AND datname !~ '{}'".format(exclude_regex)
-                for include_regex in self._include_databases:
+                for include_regex in self._config.include_databases:
                     query += " AND datname ~ '{}'".format(include_regex)
                 cursor.execute(query)
                 return [row[0] for row in cursor.fetchall()]
@@ -217,9 +211,9 @@ class PostgresSchemaCollector(SchemaCollector):
 
     def _get_schemas_query(self):
         query = SCHEMA_QUERY
-        for exclude_regex in self._exclude_schemas:
+        for exclude_regex in self._config.exclude_schemas:
             query += " AND nspname !~ '{}'".format(exclude_regex)
-        for include_regex in self._include_schemas:
+        for include_regex in self._config.include_schemas:
             query += " AND nspname ~ '{}'".format(include_regex)
         return query
 

@@ -72,7 +72,7 @@ def dd_environment(e2e_instance):
     #     env_vars={"POSTGRES_IMAGE": POSTGRES_IMAGE, "POSTGRES_LOCALE": POSTGRES_LOCALE},
     #     capture=True,
     # ):
-        # yield e2e_instance, E2E_METADATA
+    # yield e2e_instance, E2E_METADATA
     return e2e_instance, E2E_METADATA
 
 

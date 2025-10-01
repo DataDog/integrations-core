@@ -44,6 +44,7 @@ def test_databases_filters(dbm_instance, integration_check):
     assert 'dogs_34' in databases
     assert 'nope' not in databases
 
+
 def test_get_cursor(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     collector = PostgresSchemaCollector(check)
@@ -54,7 +55,8 @@ def test_get_cursor(dbm_instance, integration_check):
         for row in cursor:
             schemas.append(row['schema_name'])
 
-        assert set(schemas)  == {'datadog', 'hstore', 'public', 'public2', 'rdsadmin_test'}
+        assert set(schemas) == {'datadog', 'hstore', 'public', 'public2', 'rdsadmin_test'}
+
 
 def test_schemas_filters(dbm_instance, integration_check):
     dbm_instance['collect_schemas']['exclude_schemas'] = ['public', 'rdsadmin_test']
@@ -67,4 +69,4 @@ def test_schemas_filters(dbm_instance, integration_check):
         for row in cursor:
             schemas.append(row['schema_name'])
 
-        assert set(schemas) == {'datadog', 'hstore'}        
+        assert set(schemas) == {'datadog', 'hstore'}
