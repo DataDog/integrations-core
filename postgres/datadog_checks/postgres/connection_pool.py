@@ -19,6 +19,7 @@ class TokenProvider(ABC):
     """
     Interface for providing a token for managed authentication.
     """
+
     def __init__(self, *, skew_seconds: int = 60):
         self._skew = skew_seconds
         self._lock = threading.Lock()
@@ -49,11 +50,13 @@ class TokenProvider(ABC):
         has a fixed TTL, compute expires_at = time.time() + ttl_seconds.
         """
 
+
 class AWSTokenProvider(TokenProvider):
     """
     Token provider for AWS IAM authentication.
     """
-    TOKEN_TTL_SECONDS = 900 # 15 minutes
+
+    TOKEN_TTL_SECONDS = 900  # 15 minutes
 
     def __init__(self, host: str, port: int, user: str, region: str, *, role_arn: str = None, skew_seconds: int = 60):
         super().__init__(skew_seconds=skew_seconds)
@@ -66,13 +69,18 @@ class AWSTokenProvider(TokenProvider):
     def _fetch_token(self) -> Tuple[str, float]:
         # Import aws only when this method is called
         from .aws import generate_rds_iam_token
-        token = generate_rds_iam_token(host=self.host, port=self.port, username=self.user, region=self.region, role_arn=self.role_arn)
+
+        token = generate_rds_iam_token(
+            host=self.host, port=self.port, username=self.user, region=self.region, role_arn=self.role_arn
+        )
         return token, time.time() + self.TOKEN_TTL_SECONDS
+
 
 class AzureTokenProvider(TokenProvider):
     """
     Token provider for Azure Managed Identity.
     """
+
     def __init__(self, client_id: str, identity_scope: str = None, skew_seconds: int = 60):
         super().__init__(skew_seconds=skew_seconds)
         self.client_id = client_id
@@ -81,8 +89,10 @@ class AzureTokenProvider(TokenProvider):
     def _fetch_token(self) -> Tuple[str, float]:
         # Import azure only when this method is called
         from .azure import generate_managed_identity_token
+
         token = generate_managed_identity_token(client_id=self.client_id, identity_scope=self.identity_scope)
         return token.token, float(token.expires_at)
+
 
 class TokenAwareConnection(Connection):
     """
@@ -99,6 +109,7 @@ class TokenAwareConnection(Connection):
         if cls.token_provider:
             kwargs["password"] = cls.token_provider.get_token()
         return super().connect(*args, **kwargs)
+
 
 @dataclass(frozen=True)
 class PostgresConnectionArgs:
@@ -232,7 +243,12 @@ class LRUConnectionPoolManager:
         """
         kwargs = self.base_conn_args.as_kwargs(dbname=dbname)
 
-        return ConnectionPool(kwargs=kwargs, configure=self._configure_connection, connection_class=TokenAwareConnection, **self.pool_config)
+        return ConnectionPool(
+            kwargs=kwargs,
+            configure=self._configure_connection,
+            connection_class=TokenAwareConnection,
+            **self.pool_config,
+        )
 
     def get_connection(self, dbname: str, persistent: bool = False):
         """

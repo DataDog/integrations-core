@@ -21,7 +21,14 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager, PostgresConnectionArgs, AWSTokenProvider, AzureTokenProvider, TokenProvider, TokenAwareConnection
+from datadog_checks.postgres.connection_pool import (
+    AWSTokenProvider,
+    AzureTokenProvider,
+    LRUConnectionPoolManager,
+    PostgresConnectionArgs,
+    TokenAwareConnection,
+    TokenProvider,
+)
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.health import PostgresHealth
 from datadog_checks.postgres.metadata import PostgresMetadata
@@ -915,9 +922,18 @@ class PostgreSql(AgentCheck):
 
     def build_token_provider(self) -> TokenProvider:
         if self._config.aws.managed_authentication.enabled:
-            return AWSTokenProvider(host=self._config.host, port=self._config.port, username=self._config.username, region=self._config.aws.region, role_arn=self._config.aws.managed_authentication.role_arn)
+            return AWSTokenProvider(
+                host=self._config.host,
+                port=self._config.port,
+                username=self._config.username,
+                region=self._config.aws.region,
+                role_arn=self._config.aws.managed_authentication.role_arn,
+            )
         elif self._config.azure.managed_authentication.enabled:
-            return AzureTokenProvider(client_id=self._config.azure.managed_authentication.client_id, identity_scope=self._config.azure.managed_authentication.identity_scope)
+            return AzureTokenProvider(
+                client_id=self._config.azure.managed_authentication.client_id,
+                identity_scope=self._config.azure.managed_authentication.identity_scope,
+            )
         else:
             return None
 

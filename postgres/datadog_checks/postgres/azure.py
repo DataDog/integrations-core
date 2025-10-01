@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from azure.identity import ManagedIdentityCredential, AccessToken
+from azure.identity import AccessToken, ManagedIdentityCredential
 
 DEFAULT_PERMISSION_SCOPE = "https://ossrdbms-aad.database.windows.net/.default"
 
