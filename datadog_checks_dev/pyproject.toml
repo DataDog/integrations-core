@@ -84,7 +84,7 @@ cli = [
     # https://github.com/twisted/towncrier/issues/641
     "towncrier==23.11.0",
     "twine>=1.11.0",
-    "virtualenv==20.25.3",
+    "virtualenv<20.22.0",
     # TODO: Remove once every check has a pyproject.toml
 ]
 
