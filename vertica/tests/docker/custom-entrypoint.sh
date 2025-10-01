@@ -123,6 +123,27 @@ if [ -n "${TZ}" ]; then
   fi
 fi
 
+if [ -n "${TZ}" ]; then
+  echo "Custom time zone required - ${TZ}"
+
+  # Map common short forms to canonical zoneinfo entries
+  case "${TZ}" in
+    UTC|utc) ZONEFILE="/usr/share/zoneinfo/Etc/UTC" ;;
+    GMT|gmt) ZONEFILE="/usr/share/zoneinfo/Etc/GMT" ;;
+    *)       ZONEFILE="/usr/share/zoneinfo/${TZ}" ;;
+  esac
+
+  if [ ! -f "${ZONEFILE}" ]; then
+    echo "ERROR: zoneinfo file not found: ${ZONEFILE}"
+    echo "Hint: install tzdata in the image, or use a valid TZ like 'Etc/UTC' or 'America/New_York'"
+    exit 1
+  fi
+
+  # Link /etc/localtime so libc picks it up; /etc/timezone is best-effort (Debian/Ubuntu)
+  sudo ln -snf "${ZONEFILE}" /etc/localtime
+  ( echo "${TZ}" | sudo tee /etc/timezone >/dev/null ) || true
+fi
+
 echo 'Starting up'
 if [ ! -d ${VERTICA_DATA_DIR}/${VERTICA_DB_NAME} ]; then
     # first time through --- create db, etc.

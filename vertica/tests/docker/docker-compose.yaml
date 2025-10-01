@@ -8,6 +8,7 @@ services:
         VERTICA_VERSION: latest
     image: datadog/vertica-ce-custom:latest
     environment:
+      TZ: "Etc/UTC"
       APP_DB_PASSWORD: "monitor"
       VERTICA_MEMDEBUG: 2
       VERTICA_DB_NAME: "datadog"
