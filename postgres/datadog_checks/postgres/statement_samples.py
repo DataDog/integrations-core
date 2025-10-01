@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import datetime
 import re
 import time
 from enum import Enum
@@ -10,6 +11,7 @@ from typing import Dict, Optional, Tuple  # noqa: F401
 
 import psycopg
 from cachetools import TTLCache
+from dateutil import parser
 from psycopg.rows import dict_row
 
 try:
@@ -373,7 +375,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._activity_last_query_start = row['query_start']
             normalized_rows.append(self._normalize_row(row))
         if insufficient_privilege_count > 0:
-            self._log.warning(
+            print(
                 "Insufficient privilege for %s/%s queries when collecting from %s.",
                 insufficient_privilege_count,
                 total_count,
@@ -409,6 +411,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['query'], e)
             else:
                 self._log.debug("Failed to obfuscate query | err=[%s]", e)
+            print("Failed to obfuscate query | err=[%s]", e)
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
@@ -750,6 +753,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
         if explain_err_code and explain_err_code != DBExplainError.explained_with_prepared_statement:
             err_tag = "error:explain-{}".format(explain_err_code.value if explain_err_code else None)
+            print(err_tag)
             if err_msg:
                 err_tag = err_tag + "-" + err_msg
             self._check.count(
@@ -936,14 +940,24 @@ class PostgresStatementSamples(DBMAsyncJob):
             }
             if row['state'] in {'idle', 'idle in transaction'}:
                 if row['state_change'] and row['query_start']:
-                    obfuscated_plan_event['duration'] = (row['state_change'] - row['query_start']).total_seconds() * 1e9
+                    if isinstance(row['state_change'], str):
+                        obfuscated_plan_event['duration'] = (
+                            parser.isoparse(row['state_change']).timestamp()
+                            - parser.isoparse(row['query_start']).timestamp()
+                        )
+                    elif isinstance(row['state_change'], datetime.datetime):
+                        obfuscated_plan_event['duration'] = (
+                            row['state_change'] - row['query_start']
+                        ).total_seconds() * 1e9
+                    else:
+                        raise ValueError(f"Invalid state_change: {row['state_change']}")
                     # If the transaction is idle then we have a more specific "end time" than the current time at
                     # which we're collecting this event. According to the postgres docs, all of the timestamps in
                     # pg_stat_activity are `timestamp with time zone` so the timezone should always be present. However,
                     # if there is something wrong and it's missing then we can't use `state_change` for the timestamp
                     # of the event else we risk the timestamp being significantly off and the event getting dropped
                     # during ingestion.
-                    if row['state_change'].tzinfo:
+                    if hasattr(row['state_change'], "tzinfo"):
                         obfuscated_plan_event['timestamp'] = get_timestamp(row['state_change']) * 1000
 
             if self._collect_raw_query_statement and plan_signature:
@@ -968,17 +982,18 @@ class PostgresStatementSamples(DBMAsyncJob):
                 ):
                     continue
                 yield from self._collect_plan_for_statement(row)
-            except Exception:
+            except Exception as e:
+                print("crashed", e)
                 self._log.exception(
                     "Crashed trying to collect execution plan for statement in dbname=%s", row['datname']
                 )
-                self._check.count(
-                    "dd.postgres.statement_samples.error",
-                    1,
-                    tags=self.tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
-                    hostname=self._check.reported_hostname,
-                    raw=True,
-                )
+                # self._check.count(
+                #     "dd.postgres.statement_samples.error",
+                #     1,
+                #     tags=self.tags + ["error:collect-plan-for-statement-crash"] + self._check._get_debug_tags(),
+                #     hostname=self._check.reported_hostname,
+                #     raw=True,
+                # )
 
     def _create_activity_event(self, rows, active_connections):
         self._time_since_last_activity_event = time.time()
