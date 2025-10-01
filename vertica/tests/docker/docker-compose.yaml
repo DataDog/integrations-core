@@ -1,8 +1,7 @@
 services:
   vertica:
+    pull_policy: build
     build:
-      # We use a custom Dockerfile that adds a modified entrypoint
-      # script that avoids loading the data.
       context: .
       dockerfile: ./Dockerfile_custom
       args:
@@ -10,8 +9,6 @@ services:
     image: datadog/vertica-ce-custom:${VERTICA_VERSION}
     environment:
       APP_DB_PASSWORD: "monitor"
-      # VERTICA_MEMDEBUG=2 solves problems when running this image on M1
-      # https://forum.vertica.com/discussion/242629/support-apple-silicon-m1-for-docker-vertica-ce
       VERTICA_MEMDEBUG: 2
       VERTICA_DB_NAME: "datadog"
       TZ: "UTC"
