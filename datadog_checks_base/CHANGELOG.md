@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 37.21.0 / 2025-09-30
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add DatabaseCheck base class for database integrations ([#21202](https://github.com/DataDog/integrations-core/pull/21202))
+* Add tag normalization support to TagManager with optional tag_normalizer parameter and normalize flags for set_tag/set_tags_from_list/delete_tag methods. ([#21474](https://github.com/DataDog/integrations-core/pull/21474))
+
 ## 37.20.0 / 2025-09-17
 
 ***Added***:
