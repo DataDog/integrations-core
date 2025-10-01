@@ -58,11 +58,11 @@ class AWSTokenProvider(TokenProvider):
 
     TOKEN_TTL_SECONDS = 900  # 15 minutes
 
-    def __init__(self, host: str, port: int, user: str, region: str, *, role_arn: str = None, skew_seconds: int = 60):
+    def __init__(self, host: str, port: int, username: str, region: str, *, role_arn: str = None, skew_seconds: int = 60):
         super().__init__(skew_seconds=skew_seconds)
         self.host = host
         self.port = port
-        self.user = user
+        self.username = username
         self.region = region
         self.role_arn = role_arn
 
@@ -71,7 +71,7 @@ class AWSTokenProvider(TokenProvider):
         from .aws import generate_rds_iam_token
 
         token = generate_rds_iam_token(
-            host=self.host, port=self.port, username=self.user, region=self.region, role_arn=self.role_arn
+            host=self.host, port=self.port, username=self.username, region=self.region, role_arn=self.role_arn
         )
         return token, time.time() + self.TOKEN_TTL_SECONDS
 
