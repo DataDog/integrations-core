@@ -75,12 +75,6 @@ def dd_environment(e2e_instance):
         yield e2e_instance, E2E_METADATA
 
 
-@pytest.fixture
-def check():
-    c = PostgreSql('postgres', {}, [{'dbname': 'dbname', 'host': 'localhost', 'port': '5432', 'username': USER}])
-    c._version = VersionInfo(9, 2, 0)
-    return c
-
 
 @pytest.fixture(scope="function")
 def integration_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
@@ -93,9 +87,8 @@ def integration_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
 
     yield _check
 
-    if not c:
-        raise Exception("integration_check fixture called but no check created")
-    c.cancel()
+    if c:        
+        c.cancel()
 
 
 @pytest.fixture
