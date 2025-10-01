@@ -13,19 +13,14 @@
     "media": [
       {
         "media_type": "image",
-        "caption": "Barracuda SecureEdge Overview",
-        "image_url": "images/secure_edge_overview.png"
+        "caption": "Barracuda SecureEdge Overview Light Mode",
+        "image_url": "images/secure_edge_overview_light.png"
       },
       {
         "media_type": "image",
-        "caption": "Other Event types of SecureEdge",
-        "image_url": "images/secureEdge1.png"
-      },
-      {
-        "media_type": "image",
-        "caption": "Some more Events types of SecureEdge",
-        "image_url": "images/secureEdge2.png"
-      }
+        "caption": "Barracuda SecureEdge Overview Dark Mode",
+        "image_url": "images/secure_edge_overview_dark.png"
+      }      
     ],
     "classifier_tags": [
       "Supported OS::Linux",
