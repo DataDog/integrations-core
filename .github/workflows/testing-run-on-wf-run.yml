@@ -26,12 +26,14 @@ jobs:
           echo "event=${{ github.event.workflow_run.event }}" >> $GITHUB_OUTPUT
           echo "ref_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
-          echo "default_branch=${{ github.event.workflow_run.repository.default_branch }}" >> $GITHUB_OUTPUT
+          echo "pr_number=${{ github.event.workflow_run.pull_requests.number }}" >> $GITHUB_OUTPUT
 
       - name: Get run ID
         run: |
           echo "run_id_variable=${{ github.event.workflow_run.id }}"         
           run_id=$(gh run list --workflow ".github/workflows/resolve-build-deps.yaml" -c ${{ steps.define_sha.outputs.sha }} --json databaseId --jq '.[-1].databaseId')
           echo "run_id_list=$run_id" 
+          if [ ${#DD_API_KEY} -gt 2 ]; then echo "accessible!"; else echo "not accessible"; fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
