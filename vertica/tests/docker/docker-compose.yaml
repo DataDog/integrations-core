@@ -5,8 +5,8 @@ services:
       context: .
       dockerfile: ./Dockerfile_custom
       args:
-        VERTICA_VERSION: ${VERTICA_VERSION}
-    image: datadog/vertica-ce-custom:${VERTICA_VERSION}
+        VERTICA_VERSION: latest
+    image: datadog/vertica-ce-custom:latest
     environment:
       APP_DB_PASSWORD: "monitor"
       VERTICA_MEMDEBUG: 2
