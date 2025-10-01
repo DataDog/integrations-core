@@ -890,6 +890,13 @@ files:
             type: boolean
             example: false
             display_default: false
+        - name: replace_bind_parameter
+          description: |
+            Set to `true` to replace bind parameters (e.g. `@p1`) with `?` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
         - name: keep_trailing_semicolon
           description: |
             Set to `true` to keep trailing semicolons in your normalized SQL statements.
