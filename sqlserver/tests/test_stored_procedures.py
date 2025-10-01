@@ -45,7 +45,7 @@ def _expected_dbm_instance_tags(check):
         "database_instance:{}".format("stubbed.hostname"),
         "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
 
@@ -267,7 +267,7 @@ def test_procedure_metrics(
     expected_instance_tags.add("ddagenthostname:{}".format("stubbed.hostname"))
     expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
     expected_instance_tags.add(
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower())
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower())
     )
 
     # dbm-metrics

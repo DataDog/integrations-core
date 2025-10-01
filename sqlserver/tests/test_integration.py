@@ -100,7 +100,7 @@ def test_check_docker(aggregator, dd_run_check, init_config, instance_docker, da
         "database_instance:{}".format("stubbed.hostname"),
         "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
     expected_service_tags = expected_check_tags + [
         'connection_host:{}'.format(instance_docker.get('host')),
@@ -136,7 +136,7 @@ def test_check_stored_procedure(aggregator, dd_run_check, init_config, instance_
             "database_instance:{}".format("stubbed.hostname"),
             "ddagenthostname:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         + sp_tags.split(',')
     )
@@ -172,7 +172,7 @@ def test_custom_metrics_object_name(aggregator, dd_run_check, init_config_object
             "database_instance:{}".format("stubbed.hostname"),
             "ddagenthostname:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         + ['optional_tag:tag1']
     )
@@ -193,7 +193,7 @@ def test_custom_metrics_alt_tables(aggregator, dd_run_check, init_config_alt_tab
         "database_instance:{}".format("stubbed.hostname"),
         "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     aggregator.assert_metric('sqlserver.LCK_M_S.max_wait_time_ms', tags=instance_tags, count=1)
@@ -228,7 +228,7 @@ def test_autodiscovery_database_metrics(aggregator, dd_run_check, instance_autod
         "database_instance:{}".format("stubbed.hostname"),
         "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     master_tags = [
@@ -275,7 +275,7 @@ def test_autodiscovery_db_service_checks(
         "database_instance:{}".format("stubbed.hostname"),
         "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     # verify that the old status check returns OK
@@ -334,7 +334,7 @@ def test_autodiscovery_exclude_db_service_checks(aggregator, dd_run_check, insta
         "database_instance:{}".format("stubbed.hostname"),
         "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     # assert no connection is created for an excluded database
@@ -382,7 +382,7 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
         "database_instance:{}".format("stubbed.hostname"),
         "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE_SINGLE]
@@ -405,7 +405,7 @@ def test_autodiscovery_perf_counters_ao(aggregator, dd_run_check, instance_autod
         "database_instance:{}".format("stubbed.hostname"),
         "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+        "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
 
     expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE]
@@ -499,7 +499,7 @@ def test_custom_queries(aggregator, dd_run_check, instance_docker, custom_query,
                 "database_instance:{}".format("stubbed.hostname"),
                 "ddagenthostname:{}".format("stubbed.hostname"),
                 "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-                "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+                "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
             ]
             + kwargs.get('tags', [])
         )
@@ -958,7 +958,7 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
             "database_instance:{}".format("stubbed.hostname"),
             "ddagenthostname:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+            "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         + [
             'db:datadog_test-1',
@@ -984,7 +984,7 @@ def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
             "database_instance:{}".format("stubbed.hostname"),
             "ddagenthostname:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+            "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
         + [
             'database_recovery_model_desc:SIMPLE',
@@ -1040,7 +1040,7 @@ def test_propagate_agent_tags(
                     "database_instance:{}".format("stubbed.hostname"),
                     "ddagenthostname:{}".format("stubbed.hostname"),
                     "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-                    "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME, "").lower()),
+                    "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
                 ]
                 + [
                     'connection_host:{}'.format(instance_docker.get('host')),
