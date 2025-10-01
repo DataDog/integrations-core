@@ -22,7 +22,6 @@ def dbm_instance(pg_instance):
     pg_instance['query_samples'] = {'enabled': False}
     pg_instance['query_activity'] = {'enabled': False}
     pg_instance['query_metrics'] = {'enabled': False}
-    pg_instance['collect_resources'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     pg_instance['collect_settings'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     return pg_instance
 
@@ -81,9 +80,9 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
     dbm_instance['relations'] = []
     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
     del dbm_instance['dbname']
-    check = integration_check(dbm_instance)
     if not use_default_ignore_schemas_owned_by:
-        check._config.ignore_schemas_owned_by = ['rds_superuser']
+        dbm_instance["ignore_schemas_owned_by"] = ['rds_superuser']
+    check = integration_check(dbm_instance)
     run_one_check(check, dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
 

@@ -12,6 +12,8 @@ The integration provides comprehensive monitoring of your TGI servers by collect
 
 This enables teams to optimize LLM inference performance, track resource utilization, troubleshoot bottlenecks, and ensure reliable model serving at scale.
 
+**Minimum Agent version:** 7.70.1
+
 ## Setup
 
 Follow these instructions to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

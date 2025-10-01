@@ -14,6 +14,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
@@ -37,7 +38,7 @@ from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
 from .__about__ import __version__
-from .config import PostgresConfig
+from .config import build_config, sanitize
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -110,6 +111,7 @@ class PostgreSql(AgentCheck):
         self._agent_hostname = None
         self._database_hostname = None
         self._db = None
+        self._cloud_metadata: dict[str, dict] = None
         self.version = None
         self.raw_version = None
         self.system_identifier = None
@@ -117,22 +119,40 @@ class PostgreSql(AgentCheck):
         self.is_aurora = None
         self.wal_level = None
         self._version_utils = VersionUtils()
-        # Deprecate custom_metrics in favor of custom_queries
-        if 'custom_metrics' in self.instance:
-            self.warning(
-                "DEPRECATION NOTICE: Please use the new custom_queries option "
-                "rather than the now deprecated custom_metrics"
-            )
-        if 'managed_identity' in self.instance:
-            self.warning(
-                "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
-                " Please use the new azure.managed_authentication option instead."
-            )
 
-        self._config = PostgresConfig(self.instance, self.init_config, self)
-        self.cloud_metadata = self._config.cloud_metadata
-        self.tags = self._config.tags
+        config, validation_result = build_config(self)
+        self._config = config
+        # Log validation errors and warnings
+        for error in validation_result.errors:
+            self.log.error(error)
+        for warning in validation_result.warnings:
+            self.log.warning(warning)
+
+        self.tags = list(self._config.tags)
         self.add_core_tags()
+
+        try:
+            # Handle the config validation result after we've set tags so those tags are included in the health event
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.ERROR
+                if not validation_result.valid
+                else HealthStatus.WARNING
+                if validation_result.warnings
+                else HealthStatus.OK,
+                errors=[str(error) for error in validation_result.errors],
+                warnings=validation_result.warnings,
+                config=sanitize(self._config),
+                instance=sanitize(self.instance),
+                features=validation_result.features,
+            )
+        except Exception as e:
+            self.log.error("Error submitting health event for initialization: %s", e)
+
+        # Abort initializing the check if the config is invalid
+        if validation_result.valid is False:
+            self.log.error("Configuration validation failed: %s", validation_result.errors)
+            raise validation_result.errors[0]
 
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
@@ -153,7 +173,9 @@ class PostgreSql(AgentCheck):
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
         self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
-        self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
+        self.check_initializations.append(
+            lambda: RelationsManager.validate_relations_config(list(self._config.relations))
+        )
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_cluster_name)
@@ -171,7 +193,7 @@ class PostgreSql(AgentCheck):
         )  # type: TTLCache
 
     def _build_autodiscovery(self):
-        if not self._config.discovery_config['enabled']:
+        if not self._config.database_autodiscovery.enabled:
             return None
 
         if not self._config.relations:
@@ -182,8 +204,8 @@ class PostgreSql(AgentCheck):
 
         discovery = PostgresAutodiscovery(
             self,
-            self._config.discovery_config.get('global_view_db', 'postgres'),
-            self._config.discovery_config,
+            self._config.database_autodiscovery.global_view_db,
+            self._config.database_autodiscovery,
             self._config.idle_connection_timeout,
         )
         return discovery
@@ -198,31 +220,29 @@ class PostgreSql(AgentCheck):
             self.tags.append("ddagenthostname:{}".format(self.agent_hostname))
 
     def set_resource_tags(self):
-        if self.cloud_metadata.get("gcp") is not None:
+        if self._config.gcp.project_id and self._config.gcp.instance_id:
             self.tags.append(
                 "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
-                    self.cloud_metadata.get("gcp")["project_id"], self.cloud_metadata.get("gcp")["instance_id"]
+                    self._config.gcp.project_id, self._config.gcp.instance_id
                 )
             )
-        if self.cloud_metadata.get("aws") is not None and 'instance_endpoint' in self.cloud_metadata.get("aws"):
+        if self._config.aws.instance_endpoint:
             self.tags.append(
                 "dd.internal.resource:aws_rds_instance:{}".format(
-                    self.cloud_metadata.get("aws")["instance_endpoint"],
+                    self._config.aws.instance_endpoint,
                 )
             )
         elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
-            self.cloud_metadata["aws"] = self.cloud_metadata.get("aws", {})
-            self.cloud_metadata["aws"]["instance_endpoint"] = self.resolved_hostname
-        if self.cloud_metadata.get("azure") is not None:
-            deployment_type = self.cloud_metadata.get("azure")["deployment_type"]
+        if self._config.azure.deployment_type and self._config.azure.fully_qualified_domain_name:
+            deployment_type = self._config.azure.deployment_type
             # some `deployment_type`s map to multiple `resource_type`s
             resource_type = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
             if resource_type:
                 self.tags.append(
-                    "dd.internal.resource:{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"])
+                    "dd.internal.resource:{}:{}".format(resource_type, self._config.azure.fully_qualified_domain_name)
                 )
         # finally, tag the `database_instance` resource for this instance
         # metrics intake will use this tag to add all the tags for the instance
@@ -379,13 +399,13 @@ class PostgreSql(AgentCheck):
             queries.append(STAT_SUBSCRIPTION_STATS_METRICS)
             queries.append(QUERY_PG_STAT_RECOVERY_PREFETCH)
         if self.version >= V16:
-            if self._config.dbm_enabled:
+            if self._config.dbm:
                 queries.append(STAT_IO_METRICS)
 
-        if self._config.dbm_enabled and self._config.locks_idle_in_transaction['enabled']:
+        if self._config.dbm and self._config.locks_idle_in_transaction.enabled:
             query_def = copy.deepcopy(IDLE_TX_LOCK_AGE_METRICS)
-            query_def['collection_interval'] = self._config.locks_idle_in_transaction['collection_interval']
-            max_rows = self._config.locks_idle_in_transaction.get('max_rows', 100)
+            query_def['collection_interval'] = self._config.locks_idle_in_transaction.collection_interval
+            max_rows = self._config.locks_idle_in_transaction.max_rows
             query_def['query'] = query_def['query'].format(max_rows=max_rows)
             per_database_queries.append(query_def)
 
@@ -416,7 +436,7 @@ class PostgreSql(AgentCheck):
         """
         Cancels and sends cancel signal to all threads.
         """
-        if self._config.dbm_enabled:
+        if self._config.dbm:
             self.statement_samples.cancel()
             self.statement_metrics.cancel()
             self.metadata_samples.cancel()
@@ -537,7 +557,7 @@ class PostgreSql(AgentCheck):
     def database_identifier(self):
         # type: () -> str
         if self._database_identifier is None:
-            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
+            template = Template(self._config.database_identifier.template)
             tag_dict = {}
             tags = self.tags.copy()
             # sort tags to ensure consistent ordering
@@ -554,6 +574,16 @@ class PostgreSql(AgentCheck):
             tag_dict['port'] = str(self._config.port)
             self._database_identifier = template.safe_substitute(**tag_dict)
         return self._database_identifier
+
+    @property
+    def cloud_metadata(self):
+        if self._cloud_metadata is None:
+            self._cloud_metadata = {
+                "aws": self._config.aws.model_dump(),
+                "azure": self._config.azure.model_dump(),
+                "gcp": self._config.gcp.model_dump(),
+            }
+        return self._cloud_metadata
 
     def set_resolved_hostname_metadata(self):
         """
@@ -887,29 +917,22 @@ class PostgreSql(AgentCheck):
         if self._config.host == 'localhost' and self._config.password == '':
             return PostgresConnectionArgs(
                 application_name=self._config.application_name,
-                user=self._config.user,
+                username=self._config.username,
             )
         else:
             password = self._config.password
-            if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
-                # if we are running on AWS, check if IAM auth is enabled
-                aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
-                if aws_managed_authentication['enabled']:
-                    # if IAM auth is enabled, region must be set. Validation is done in the config
-                    region = self.cloud_metadata['aws']['region']
-                    password = aws.generate_rds_iam_token(
-                        host=self._config.host,
-                        username=self._config.user,
-                        port=self._config.port,
-                        region=region,
-                        role_arn=aws_managed_authentication.get('role_arn'),
-                    )
-            elif 'azure' in self.cloud_metadata:
-                azure_managed_authentication = self.cloud_metadata['azure']['managed_authentication']
-                if azure_managed_authentication['enabled']:
-                    client_id = azure_managed_authentication['client_id']
-                    identity_scope = azure_managed_authentication.get('identity_scope', None)
-                    password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
+            if self._config.aws.managed_authentication.enabled:
+                password = aws.generate_rds_iam_token(
+                    host=self._config.host,
+                    username=self._config.username,
+                    port=self._config.port,
+                    region=self._config.aws.region,
+                    role_arn=self._config.aws.managed_authentication.role_arn,
+                )
+            elif self._config.azure.managed_authentication.enabled:
+                client_id = self._config.azure.managed_authentication.client_id
+                identity_scope = self._config.azure.managed_authentication.identity_scope
+                password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
 
             self.log.debug(
                 "Try to connect to %s with %s",
@@ -918,11 +941,11 @@ class PostgreSql(AgentCheck):
             )
             return PostgresConnectionArgs(
                 application_name=self._config.application_name,
-                user=self._config.user,
+                username=self._config.username,
                 host=self._config.host,
                 port=self._config.port,
                 password=password,
-                ssl_mode=self._config.ssl_mode,
+                ssl_mode=self._config.ssl,
                 ssl_cert=self._config.ssl_cert,
                 ssl_root_cert=self._config.ssl_root_cert,
                 ssl_key=self._config.ssl_key,
@@ -1016,7 +1039,7 @@ class PostgreSql(AgentCheck):
                 "timestamp": time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {
-                    "dbm": self._config.dbm_enabled,
+                    "dbm": self._config.dbm,
                     "connection_host": self._config.host,
                 },
             }
@@ -1070,7 +1093,7 @@ class PostgreSql(AgentCheck):
             if self._query_manager.queries:
                 self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
                 self._query_manager.execute(extra_tags=tags)
-            if self._config.dbm_enabled:
+            if self._config.dbm:
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
                 self.metadata_samples.run_job_loop(tags)

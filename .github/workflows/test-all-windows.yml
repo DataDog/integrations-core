@@ -35,19 +35,19 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py3"
         type: string
       agent-image-py2:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py2"
         type: string
       agent-image-windows:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py3-win-servercore"
         type: string
       agent-image-windows-py2:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
       pytest-args:
         description: "Arguments to pass to pytest"

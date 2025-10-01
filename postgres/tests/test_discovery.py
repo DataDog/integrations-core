@@ -12,8 +12,6 @@ import psycopg
 import psycopg.sql
 import pytest
 
-from datadog_checks.base import ConfigurationError
-
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags, check_common_metrics
 from .utils import requires_over_13, run_one_check
 
@@ -259,19 +257,6 @@ def test_autodiscovery_exceeds_min_interval(aggregator, integration_check, pg_in
         "in the postgres yaml configuration.\n"
     )
     assert test_structure.match(check.warnings[0])
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_autodiscovery_dbname_specified(integration_check, pg_instance):
-    """
-    If a dbname is specified in the config, autodiscovery should not run.
-    """
-    pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
-    pg_instance['dbname'] = "dogs_30"
-
-    with pytest.raises(ConfigurationError):
-        integration_check(pg_instance)
 
 
 def _set_allow_connection(dbname: str, allow: bool):

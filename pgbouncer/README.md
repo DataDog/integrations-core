@@ -4,6 +4,8 @@
 
 The PgBouncer check tracks connection pool metrics and lets you monitor traffic to and from your application.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

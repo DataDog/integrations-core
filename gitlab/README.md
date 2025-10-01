@@ -10,6 +10,8 @@ See [Monitoring GitLab with Prometheus][1] for more information.
 
 For more in-depth monitoring of your GitLab pipelines, check out [CI Pipeline Visibility][17]. CI Pipeline Visibility provides granular insights into your user workflow, lets you access detailed Git metadata, and tracks pipeline performance over time.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 This OpenMetrics-based integration has a latest mode (enabled by setting `openmetrics_endpoint` to point to the target endpoint) and a legacy mode (enabled by setting `prometheus_url` instead). To get all the most up-to-date features, Datadog recommends enabling the latest mode. For more information, see [Latest and Legacy Versioning For OpenMetrics-based Integrations][18].
