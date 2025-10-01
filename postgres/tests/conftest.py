@@ -8,6 +8,7 @@ from typing import Optional
 
 import psycopg
 import pytest
+from semver import VersionInfo
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
@@ -72,6 +73,13 @@ def dd_environment(e2e_instance):
         capture=True,
     ):
         yield e2e_instance, E2E_METADATA
+
+
+@pytest.fixture
+def check():
+    c = PostgreSql('postgres', {}, [{'dbname': 'dbname', 'host': 'localhost', 'port': '5432', 'username': USER}])
+    c._version = VersionInfo(9, 2, 0)
+    return c
 
 
 @pytest.fixture(scope="function")
