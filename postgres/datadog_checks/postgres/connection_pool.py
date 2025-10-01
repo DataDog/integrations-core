@@ -38,10 +38,6 @@ class TokenProvider(ABC):
                 self._expires_at = float(expires_at)
             return self._token  # type: ignore[return-value]
 
-    def invalidate(self) -> None:
-        with self._lock:
-            self._expires_at = 0.0
-
     @abstractmethod
     def _fetch_token(self) -> Tuple[str, float]:
         """
@@ -58,7 +54,9 @@ class AWSTokenProvider(TokenProvider):
 
     TOKEN_TTL_SECONDS = 900  # 15 minutes
 
-    def __init__(self, host: str, port: int, username: str, region: str, *, role_arn: str = None, skew_seconds: int = 60):
+    def __init__(
+        self, host: str, port: int, username: str, region: str, *, role_arn: str = None, skew_seconds: int = 60
+    ):
         super().__init__(skew_seconds=skew_seconds)
         self.host = host
         self.port = port
@@ -209,8 +207,7 @@ class LRUConnectionPoolManager:
             "open": True,
         }
 
-        if self.token_provider:
-            TokenAwareConnection.token_provider = self.token_provider
+        TokenAwareConnection.token_provider = self.token_provider
 
         self.lock = threading.Lock()
         self.pools: OrderedDict[str, Tuple[ConnectionPool, float, bool]] = OrderedDict()
