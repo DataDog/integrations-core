@@ -1121,11 +1121,26 @@ def check_commits(commits: list[str]) -> bool:
 
 @cache
 def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: str) -> Path | None:
-    dep_sizes_json = get_dep_sizes_json(commit, platform)
+    '''
+    Lockfiles of dependencies are not updated in the same commit as the dependencies are updated.
+    So in each commit, there is an artifact with the sizes of the wheels that were built to get the actual
+    size of that commit.
+    '''
+    dep_sizes_json = None # get_dep_sizes_json(commit, platform)
     if not dep_sizes_json:
-        dep_sizes_json = get_previous_dep_sizes_json(app.repo.git.merge_base(commit, "master"), platform)
-    return Path(dep_sizes_json) if dep_sizes_json else None
-
+        sizes = None
+        with tempfile.TemporaryDirectory():
+            previous_sizes = get_previous_dep_sizes_json(app.repo.git.merge_base(commit, "origin/master"))
+            if previous_sizes:
+                compressed_json, uncompressed_json = previous_sizes["compressed"], previous_sizes["uncompressed"]
+                sizes = parse_dep_sizes_json(compressed_json, uncompressed_json, platform)
+        if sizes:
+            with open(f"{platform}.json", "w") as f:
+                json.dump(sizes, f, indent=2)
+            dep_sizes_json = Path(f"{platform}.json")
+        else:
+            dep_sizes_json = None
+    return dep_sizes_json
 
 @cache
 def get_dep_sizes_json(current_commit: str, platform: str) -> Path | None:
