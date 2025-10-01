@@ -111,3 +111,17 @@ def test_tables(dbm_instance, integration_check, version):
         'rds_admin_misc',
         'sample_foreign_d73a8c',
     }
+
+@pytest.mark.parametrize("version", ["9", "10"])
+def test_columns(dbm_instance, integration_check, version):
+    check = integration_check(dbm_instance)
+    check.version = version
+    collector = PostgresSchemaCollector(check)
+
+    with collector._get_cursor('datadog_test') as cursor:
+        assert cursor is not None
+        for row in cursor:
+            if row['columns'] and row['columns'] != [None]:
+                for column in row['columns']:
+                    assert column['name'] is not None
+                    assert column['data_type'] is not None

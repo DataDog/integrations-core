@@ -163,14 +163,13 @@ SELECT attname                          AS name,
        Format_type(atttypid, atttypmod) AS data_type,
        NOT attnotnull                   AS nullable,
        pg_get_expr(adbin, adrelid)      AS default,
-       attrelid AS id
+       attrelid AS table_id
 FROM   pg_attribute
        LEFT JOIN pg_attrdef ad
               ON adrelid = attrelid
                  AND adnum = attnum
-WHERE  attrelid IN ({table_ids})
-       AND attnum > 0
-       AND NOT attisdropped;
+WHERE  attnum > 0
+       AND NOT attisdropped
 """
 
 
@@ -198,20 +197,26 @@ class PostgresSchemaCollector(SchemaCollector):
             with conn.cursor(row_factory=dict_row) as cursor:
                 schemas_query = self._get_schemas_query()
                 tables_query = self._get_tables_query()
+                columns_query = COLUMNS_QUERY
                 query = f"""
-                    WITH schemas AS(
+                    WITH 
+                    schemas AS(
                         {schemas_query}
                     ),
-
                     tables AS (
                         {tables_query}
+                    ),
+                    columns AS (
+                        {columns_query}
                     )
 
-                    SELECT schemas.schema_name, tables.table_name
+                    SELECT schemas.schema_name, tables.table_name, array_agg(row_to_json(columns.*)) as columns
                     FROM schemas
                         LEFT JOIN tables ON schemas.schema_id = tables.schema_id
+                        LEFT JOIN columns ON tables.table_id = columns.table_id
+                    GROUP BY schemas.schema_name, tables.table_name
                 """
-                print(query)
+                # print(query)
                 cursor.execute(query)
                 yield cursor
 
