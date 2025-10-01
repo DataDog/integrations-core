@@ -199,6 +199,39 @@ def _obfuscate_sql(query, options=None):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize("collect_prepared_statements", [True, False])
+def test_statement_metrics_prepared_statements(
+    aggregator, dd_run_check, dbm_instance, bob_conn, collect_prepared_statements
+):
+    dbm_instance['query_metrics']['only_query_recent_statements'] = False
+    dbm_instance['query_metrics']['collect_prepared_statements'] = collect_prepared_statements
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    prepared_sql = DEFAULT_FQ_SUCCESS_QUERY
+
+    # Keep the session open so the prepared statement remains present while the check runs
+    with closing(bob_conn.cursor()) as cursor:
+        cursor.execute("PREPARE ps1 FROM '{}'".format(prepared_sql))
+        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)
+        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)
+        cursor.execute("DEALLOCATE PREPARE ps1")
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1
+    event = events[0]
+
+    query_sig = compute_sql_signature(prepared_sql)
+    matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_sig]
+    if collect_prepared_statements:
+        assert len(matching_rows) == 1, "expected one row for prepared statement"
+    else:
+        assert len(matching_rows) == 0, "no rows for prepared statement"
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instance, datadog_agent):
     query_one = 'select * from information_schema.processlist where state in (\'starting\')'
