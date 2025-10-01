@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Union  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.postgres.config_models.instance import Relations
 
 ALL_SCHEMAS = object()
 RELATION_NAME = 'relation_name'
@@ -441,13 +442,13 @@ class RelationsManager(object):
                 # Stub filter to allow for appending
                 relation_filter.append("( 1=1")
 
-            if ALL_SCHEMAS not in r[SCHEMAS]:
-                schema_filter = ','.join("'{}'".format(s) for s in r[SCHEMAS])
+            if ALL_SCHEMAS not in r.get(SCHEMAS, []):
+                schema_filter = ','.join("'{}'".format(s) for s in r.get(SCHEMAS, []))
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
             # TODO: explicitly declare `relkind` compatiblity in the query rather than implicitly checking query text
             if r.get(RELKIND) and 'FROM pg_locks' in query:
-                relkind_filter = ','.join("'{}'".format(s) for s in r[RELKIND])
+                relkind_filter = ','.join("'{}'".format(s) for s in r.get(RELKIND, []))
                 relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
 
             relation_filter.append(')')
@@ -464,40 +465,44 @@ class RelationsManager(object):
     def validate_relations_config(yamlconfig):
         # type: (List[Union[str, Dict]]) -> None
         for element in yamlconfig:
+            if isinstance(element, Relations):
+                element = element.model_dump()
             if isinstance(element, dict):
-                if not (RELATION_NAME in element or RELATION_REGEX in element):
+                if not (element.get(RELATION_NAME) or element.get(RELATION_REGEX)):
                     raise ConfigurationError(
                         "Parameter '%s' or '%s' is required for relation element %s",
                         RELATION_NAME,
                         RELATION_REGEX,
                         element,
                     )
-                if RELATION_NAME in element and RELATION_REGEX in element:
+                if element.get(RELATION_NAME) and element.get(RELATION_REGEX):
                     raise ConfigurationError(
                         "Expecting only of parameters '%s', '%s' for relation element %s",
                         RELATION_NAME,
                         RELATION_REGEX,
                         element,
                     )
-                if not isinstance(element.get(SCHEMAS, []), list):
-                    raise ConfigurationError("Expected '%s' to be a list for %s", SCHEMAS, element)
-                if not isinstance(element.get(RELKIND, []), list):
-                    raise ConfigurationError("Expected '%s' to be a list for %s", RELKIND, element)
+                if element.get(SCHEMAS) and not isinstance(element.get(SCHEMAS), (list, tuple)):
+                    raise ConfigurationError("Expected '%s' to be a list or tuple for %s", SCHEMAS, element)
+                if element.get(RELKIND) and not isinstance(element.get(RELKIND), (list, tuple)):
+                    raise ConfigurationError("Expected '%s' to be a list or tuple for %s", RELKIND, element)
             elif not isinstance(element, str):
                 raise ConfigurationError('Unhandled relations config type: %s', element)
 
     @staticmethod
-    def _build_relations_config(yamlconfig):
-        # type:  (List[Union[str, Dict]]) -> List[Dict[str, Any]]
+    def _build_relations_config(yamlconfig: list[str | Relations]) -> List[Dict[str, Any]]:
         """Builds a list from relations configuration while maintaining compatibility"""
         relations = []
         for element in yamlconfig:
             config = {}
+            if isinstance(element, Relations):
+                element = element.model_dump()
+
             if isinstance(element, str):
                 config = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
             elif isinstance(element, dict):
                 config = element.copy()
-                if len(config.get(SCHEMAS, [])) == 0:
+                if len(config.get(SCHEMAS) or []) == 0:
                     config[SCHEMAS] = [ALL_SCHEMAS]
             relations.append(config)
         return relations
