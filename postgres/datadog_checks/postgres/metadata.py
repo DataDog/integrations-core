@@ -1,10 +1,12 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import json
 import re
 import time
-from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
+from typing import Dict, List, Union
 
 import psycopg
 from psycopg.rows import dict_row
@@ -14,20 +16,18 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-from datadog_checks.base import is_affirmative
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
+
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.config_models import InstanceConfig
 from datadog_checks.postgres.util import get_list_chunks
 
 from .util import payload_pg_version
 from .version_utils import VersionUtils
-
-# default collection intervals in seconds
-DEFAULT_EXTENSIONS_COLLECTION_INTERVAL = 600
-DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
-DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
-DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
-DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 
 # PG_EXTENSION_INFO_QUERY is used to collect extension names and versions from
 # the pg_extension table. Schema names and roles are retrieved from their re-
@@ -224,26 +224,18 @@ class PostgresMetadata(DBMAsyncJob):
         2. collection of pg_settings
     """
 
-    def __init__(self, check, config):
-        self.pg_settings_ignored_patterns = config.settings_metadata_config.get(
-            "ignored_settings_patterns", DEFAULT_SETTINGS_IGNORED_PATTERNS
-        )
-        self.pg_extensions_collection_interval = config.settings_metadata_config.get(
-            "collection_interval", DEFAULT_EXTENSIONS_COLLECTION_INTERVAL
-        )
-        self.pg_settings_collection_interval = config.settings_metadata_config.get(
-            "collection_interval", DEFAULT_SETTINGS_COLLECTION_INTERVAL
-        )
-        self.schemas_collection_interval = config.schemas_metadata_config.get(
-            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
-        )
-        resources_collection_interval = config.resources_metadata_config.get(
-            "collection_interval", DEFAULT_RESOURCES_COLLECTION_INTERVAL
-        )
+    def __init__(self, check: PostgreSql, config: InstanceConfig):
+        self.pg_settings_ignored_patterns = list(config.collect_settings.ignored_settings_patterns)
+        self.pg_settings_collection_interval = config.collect_settings.collection_interval
+        # Extensions currently doesn't have a separate collection interval option
+        self.pg_extensions_collection_interval = self.pg_settings_collection_interval
+        self.schemas_collection_interval = config.collect_schemas.collection_interval
+
+        # We want to be able to iterate this as a dict with string interpolation
+        self._collect_schemas_config = config.collect_schemas.model_dump()
 
         # by default, send resources every 10 minutes
         self.collection_interval = min(
-            resources_collection_interval,
             self.pg_extensions_collection_interval,
             self.pg_settings_collection_interval,
             self.schemas_collection_interval,
@@ -252,8 +244,8 @@ class PostgresMetadata(DBMAsyncJob):
         super(PostgresMetadata, self).__init__(
             check,
             rate_limit=1 / float(self.collection_interval),
-            run_sync=is_affirmative(config.settings_metadata_config.get("run_sync", False)),
-            enabled=is_affirmative(config.resources_metadata_config.get("enabled", True)),
+            run_sync=config.collect_settings.run_sync,
+            enabled=config.collect_settings.enabled or config.collect_schemas.enabled,
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
@@ -262,9 +254,9 @@ class PostgresMetadata(DBMAsyncJob):
         self._check = check
         self._config = config
         self.db_pool = self._check.db_pool
-        self._collect_extensions_enabled = is_affirmative(config.settings_metadata_config.get("enabled", True))
-        self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get("enabled", True))
-        self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get("enabled", False))
+        self._collect_pg_settings_enabled = config.collect_settings.enabled
+        self._collect_extensions_enabled = self._collect_pg_settings_enabled
+        self._collect_schemas_enabled = config.collect_schemas.enabled
         self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
         self._compiled_patterns_cache = {}
@@ -461,9 +453,10 @@ class PostgresMetadata(DBMAsyncJob):
             datadog_agent.emit_agent_telemetry("postgres", "schema_tables_count", total_tables, "gauge")
 
     def _should_collect_metadata(self, name, metadata_type):
-        for re_str in self._config.schemas_metadata_config.get(
-            "exclude_{metadata_type}s".format(metadata_type=metadata_type), []
-        ):
+        # We get the config as a dict so we can use string interpolation
+        # to iterate over object types
+        excludes = self._collect_schemas_config.get("exclude_{metadata_type}s".format(metadata_type=metadata_type), [])
+        for re_str in excludes:
             regex = self._get_compiled_pattern(re_str)
             if regex.search(name):
                 self._log.debug(
@@ -473,9 +466,7 @@ class PostgresMetadata(DBMAsyncJob):
                 )
                 return False
 
-        includes = self._config.schemas_metadata_config.get(
-            "include_{metadata_type}s".format(metadata_type=metadata_type), []
-        )
+        includes = self._collect_schemas_config.get("include_{metadata_type}s".format(metadata_type=metadata_type), [])
         if len(includes) == 0:
             return True
         for re_str in includes:
@@ -578,7 +569,7 @@ class PostgresMetadata(DBMAsyncJob):
         rows = cursor.fetchall()
         table_info = [dict(row) for row in rows]
 
-        limit = self._config.schemas_metadata_config.get("max_tables", 300)
+        limit = self._config.collect_schemas.max_tables
 
         if len(table_info) <= limit:
             return table_info
@@ -606,8 +597,8 @@ class PostgresMetadata(DBMAsyncJob):
         return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
 
     def _get_tables_filter(self):
-        includes = self._config.schemas_metadata_config.get("include_tables", [])
-        excludes = self._config.schemas_metadata_config.get("exclude_tables", [])
+        includes = self._config.collect_schemas.include_tables
+        excludes = self._config.collect_schemas.exclude_tables
         if len(includes) == 0 and len(excludes) == 0:
             return ""
 

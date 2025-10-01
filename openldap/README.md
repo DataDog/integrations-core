@@ -4,6 +4,8 @@
 
 Use the OpenLDAP integration to get metrics from the `cn=Monitor` backend of your OpenLDAP servers.
 
+**Minimum Agent version:** 6.5.0
+
 ## Setup
 
 ### Installation

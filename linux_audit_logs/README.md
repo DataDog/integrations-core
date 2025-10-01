@@ -20,6 +20,8 @@ This integration collects Linux audit logs and sends them to Datadog for analysi
 * [Log Explorer][4]
 * [Cloud SIEM][5]
 
+**Minimum Agent version:** 7.67.0
+
 ## Setup
 
 ### Installation

@@ -5,7 +5,7 @@ mypy-args = [
 ]
 
 [envs.default]
-python = "3.12"
+python = "3.13"
 e2e-env = false
 dependencies = [
   "pyyaml",
