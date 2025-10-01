@@ -5,8 +5,6 @@
 import time
 from unittest.mock import Mock, patch
 
-import pytest
-
 from datadog_checks.postgres.connection_pool import AWSTokenProvider, AzureTokenProvider, TokenProvider
 
 
