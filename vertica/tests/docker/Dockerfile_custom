@@ -1,8 +1,15 @@
+# Dockerfile_custom
 ARG VERTICA_VERSION="latest"
-FROM opentext/vertica-k8s:latest
+FROM opentext/vertica-k8s:${VERTICA_VERSION}
+
+# Install tzdata (pick the one that matches your base OS)
+# RUN microdnf install -y tzdata && microdnf clean all || true
+RUN apt-get update && apt-get install -y --no-install-recommends tzdata && rm -rf /var/lib/apt/lists/* || true
+# RUN apk add --no-cache tzdata || true
+
 
 ADD ./custom-entrypoint.sh ${VERTICA_HOME_DIR}/custom-entrypoint.sh
-RUN rm -rf "${VERTICA_OPT_DIR}/packages"
+RUN chmod +x ${VERTICA_HOME_DIR}/custom-entrypoint.sh \
+ && rm -rf "${VERTICA_OPT_DIR}/packages"
 
-# Use exec form; assume script is executable
-ENTRYPOINT ["bash","-lc","${VERTICA_HOME_DIR}/custom-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash","-lc","${VERTICA_HOME_DIR}/custom-entrypoint.sh"]
