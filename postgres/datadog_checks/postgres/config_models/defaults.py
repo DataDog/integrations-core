@@ -36,6 +36,10 @@ def instance_collect_checksum_metrics():
     return False
 
 
+def instance_collect_column_metrics():
+    return False
+
+
 def instance_collect_count_metrics():
     return True
 

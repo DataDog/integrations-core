@@ -249,6 +249,7 @@ class InstanceConfig(BaseModel):
     collect_bloat_metrics: Optional[bool] = None
     collect_buffercache_metrics: Optional[bool] = None
     collect_checksum_metrics: Optional[bool] = None
+    collect_column_metrics: Optional[bool] = None
     collect_count_metrics: Optional[bool] = None
     collect_database_size_metrics: Optional[bool] = None
     collect_default_database: Optional[bool] = None

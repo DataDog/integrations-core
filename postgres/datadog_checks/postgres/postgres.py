@@ -44,6 +44,7 @@ from .util import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
     BUFFERCACHE_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,
+    COLUMN_METRICS,
     CONNECTION_METRICS,
     COUNT_METRICS,
     FUNCTION_METRICS,
@@ -806,6 +807,9 @@ class PostgreSql(AgentCheck):
         if self._config.collect_count_metrics:
             # Count metrics are collected from all databases discovered
             per_database_metric_scope.append(COUNT_METRICS)
+        if self._config.collect_column_metrics:
+            # Column statistics are collected from all databases discovered
+            per_database_metric_scope.append(COLUMN_METRICS)
         if self.version >= V13:
             metric_scope.append(SLRU_METRICS)
 
