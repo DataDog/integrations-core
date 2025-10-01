@@ -206,4 +206,3 @@ extra:
 extra_css:
   - assets/css/custom.css
   - https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/fira_code.css
-
