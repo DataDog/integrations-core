@@ -11,6 +11,8 @@ This Agent integration collects message offset metrics from your Kafka consumers
 - If you want to collect JMX metrics from your Kafka brokers or Java-based consumers/producers, see the [Kafka Broker integration][19].
 
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

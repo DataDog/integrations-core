@@ -4,6 +4,8 @@
 
 Integrate Keeper with Datadog to gain insights into reporting event logs using pre-built dashboard visualizations. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
+**Minimum Agent version:** 7.67.0
+
 ## Setup
 
 ### Prerequisites

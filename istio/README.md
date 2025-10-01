@@ -11,6 +11,8 @@ Datadog monitors every aspect of your Istio environment, so you can:
 
 To learn more about monitoring your Istio environment with Datadog, [see the Monitor blog post][3].
 
+**Minimum Agent version:** 6.1.0
+
 ## Setup
 
 For general instructions on configuring integrations in containerized environments, see [Configure integrations with Autodiscovery on Kubernetes][4] or [Configure integrations with Autodiscovery on Docker][26].

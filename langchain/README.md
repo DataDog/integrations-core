@@ -9,6 +9,8 @@ See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video
 
 Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [LangChain][1] Python library requests using Datadog metrics and APM.
 
+**Minimum Agent version:** 7.47.0
+
 ## Setup
 
 ### LLM Observability: Get end-to-end visibility into your LLM application using LangChain

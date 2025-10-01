@@ -4,6 +4,8 @@
 
 Get metrics from CoreDNS in real time to visualize and monitor DNS failures and cache hits or misses.
 
+**Minimum Agent version:** 6.6.0
+
 ## Setup
 
 
