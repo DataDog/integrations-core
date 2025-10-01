@@ -3,89 +3,23 @@
     "description": "SecureEdge dashboard provides a visual summary of firewall activity, security events, user access, and system health to help monitor and analyze network security in real time.",
     "widgets": [
         {
-            "id": 7763639993156588,
+            "id": 3029648501220266,
             "definition": {
-                "title": "",
-                "banner_img": "https://static.datadoghq.com/static/images/logos/barracuda-secure-edge_large.svg",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 7373116018092743,
-                        "definition": {
-                            "type": "note",
-                            "content": "Barracuda SecureEdge secures sites, devices, and users with an easy-to-deploy cloud-first platform that connects any device, application, or cloud/hybrid environment. SecureEdge provides Zero Trust application access to any type of application, cloud-based security for endpoints, and automated SD-WAN connectivity for sites and industrial facilities of any type or size. Remote users can access applications directly from any type of device, with Zero Trust enforcement, URL filtering, and traffic optimization to ensure application access is always optimized and makes the most of shared Internet lines. Barracuda SecureEdge provides an unprecedented level of control and visibility into user-generated traffic at each endpoint. \n\n**Key Features**\n\n- Custom Categories for web filtering \n- Additional web filter actions: Alert and Warn\n- Web search monitoring for predefined categories and custom keywords\n- Silent ad blocking\n- Safe Search\n- Customizable Block pages",
-                            "background_color": "white",
-                            "font_size": "14",
-                            "text_align": "left",
-                            "vertical_align": "top",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 6603911867712278,
-                        "definition": {
-                            "title": "Total Log Volume",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_secure_edge"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 6,
-                            "height": 3
-                        }
-                    }
-                ]
+                "type": "image",
+                "url": "https://static.datadoghq.com/static/images/logos/barracuda-secure-edge_large.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/barracuda-secure-edge_reversed_large.svg",
+                "sizing": "cover",
+                "margin": "md",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
             },
             "layout": {
                 "x": 0,
                 "y": 0,
                 "width": 6,
-                "height": 10
+                "height": 4
             }
         },
         {
@@ -112,7 +46,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -161,7 +94,6 @@
                             "title": "Total Number Of Logs Types",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -350,7 +282,7 @@
                             "x": 0,
                             "y": 5,
                             "width": 3,
-                            "height": 4
+                            "height": 5
                         }
                     },
                     {
@@ -418,7 +350,7 @@
                             "x": 3,
                             "y": 5,
                             "width": 3,
-                            "height": 4
+                            "height": 5
                         }
                     }
                 ]
@@ -427,7 +359,75 @@
                 "x": 6,
                 "y": 0,
                 "width": 6,
-                "height": 10
+                "height": 11
+            }
+        },
+        {
+            "id": 7373116018092743,
+            "definition": {
+                "type": "note",
+                "content": "Barracuda SecureEdge secures sites, devices, and users with an easy-to-deploy cloud-first platform that connects any device, application, or cloud/hybrid environment. SecureEdge provides Zero Trust application access to any type of application, cloud-based security for endpoints, and automated SD-WAN connectivity for sites and industrial facilities of any type or size. Remote users can access applications directly from any type of device, with Zero Trust enforcement, URL filtering, and traffic optimization to ensure application access is always optimized and makes the most of shared Internet lines. Barracuda SecureEdge provides an unprecedented level of control and visibility into user-generated traffic at each endpoint. \n\n**Key Features**\n\n- Custom Categories for web filtering \n- Additional web filter actions: Alert and Warn\n- Web search monitoring for predefined categories and custom keywords\n- Silent ad blocking\n- Safe Search\n- Customizable Block pages",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 4,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6603911867712278,
+            "definition": {
+                "title": "Total Log Volume",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:barracuda_secure_edge"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 6,
+                "height": 3
             }
         },
         {
@@ -776,7 +776,7 @@
                     {
                         "id": 313116993642037,
                         "definition": {
-                            "title": "Total Users Logged",
+                            "title": "Total Number Of Hosts",
                             "title_size": "16",
                             "title_align": "left",
                             "time": {},
@@ -874,7 +874,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 10,
+                "y": 11,
                 "width": 12,
                 "height": 8
             }
@@ -1137,7 +1137,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1262,7 +1261,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 18,
+                "y": 19,
                 "width": 12,
                 "height": 8
             }
@@ -1283,7 +1282,6 @@
                             "title": "SSH Deamon Logs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -1443,7 +1441,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 26,
+                "y": 27,
                 "width": 12,
                 "height": 6
             }
@@ -1512,7 +1510,6 @@
                             "title": "Total Network Events",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1569,7 +1566,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1625,7 +1621,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 32,
+                "y": 33,
                 "width": 12,
                 "height": 6
             }
@@ -1646,7 +1642,6 @@
                             "title": "Auth Access Logs ",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -1695,7 +1690,6 @@
                             "title": "Total Auth Access Events",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1752,7 +1746,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1810,7 +1803,6 @@
                             "title": "Auth Access Event Level",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -1878,7 +1870,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 38,
+                "y": 39,
                 "width": 12,
                 "height": 6,
                 "is_column_break": true
@@ -1900,7 +1892,6 @@
                             "title": "Admin Logs ",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -1949,7 +1940,6 @@
                             "title": "Total Admin Events",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -1997,7 +1987,6 @@
                             "title": "Total Admin Error Events",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2054,7 +2043,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2110,7 +2098,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 44,
+                "y": 45,
                 "width": 12,
                 "height": 8
             }
@@ -2131,7 +2119,6 @@
                             "title": "System Logs ",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -2227,7 +2214,6 @@
                             "title": "Total System Error Events",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2284,7 +2270,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2340,7 +2325,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 52,
+                "y": 53,
                 "width": 12,
                 "height": 8
             }
@@ -2361,7 +2346,6 @@
                             "title": "VPN Logs",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -2410,7 +2394,6 @@
                             "title": "Total VPN Events",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2467,7 +2450,6 @@
                                 "value",
                                 "sum"
                             ],
-                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2525,7 +2507,6 @@
                             "title": "Total VPN Error Events",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
@@ -2571,7 +2552,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 60,
+                "y": 61,
                 "width": 12,
                 "height": 6
             }
