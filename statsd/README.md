@@ -6,6 +6,8 @@ This check monitors the availability and uptime of non-Datadog StatsD servers. I
 
 This check does **NOT** forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

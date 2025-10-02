@@ -10,7 +10,6 @@ from datadog_checks.base.checks.windows.perf_counters.base import PerfCountersBa
 from .metrics import METRICS_CONFIG
 
 SERVICE_METRIC_MAP = {
-    'NTDS': ['NTDS'],
     'Netlogon': ['Netlogon', 'Security System-Wide Statistics'],
     'DHCPServer': ['DHCP Server'],
     'DFSR': ['DFS Replicated Folders'],
@@ -34,11 +33,13 @@ class ActiveDirectoryCheckV2(PerfCountersBaseCheckWithLegacySupport):
 
     def get_default_config(self):
         """Build metrics configuration based on service availability."""
-        filtered_metrics_config = {}
+        filtered_metrics_config = {
+            'NTDS': METRICS_CONFIG['NTDS'],  # Include NTDS metrics by default
+        }
         existing_services = _get_existing_services()
 
         for service in existing_services:
-            for metric in SERVICE_METRIC_MAP[service]:
-                filtered_metrics_config[metric] = METRICS_CONFIG[metric]
+            for service_metric_name in SERVICE_METRIC_MAP[service]:
+                filtered_metrics_config[service_metric_name] = METRICS_CONFIG[service_metric_name]
 
         return {'metrics': filtered_metrics_config}

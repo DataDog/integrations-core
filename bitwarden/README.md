@@ -10,6 +10,8 @@ This integration ingests the following logs:
 
 This integration seamlessly collects event logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into event logs through out-of-the-box dashboards and includes ready-to-use Cloud SIEM detection rules for improved monitoring and security.
 
+**Minimum Agent version:** 7.66.1
+
 ## Setup
 
 ### Generate API Credentials in Bitwarden

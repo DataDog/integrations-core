@@ -2,6 +2,8 @@
 
 This integration monitors [Tenable Nessus][1] logs through the Datadog Agent.
 
+**Minimum Agent version:** 7.17.2
+
 ## Setup
 
 Follow the instructions below configure this integration for an Agent running on a host.

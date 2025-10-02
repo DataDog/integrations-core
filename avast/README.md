@@ -13,6 +13,8 @@ The Avast integration collects the following types of logs:
 
 This integration collects logs from the sources listed above and sends them to Datadog for analysis by [Log Explorer][2] and [Cloud SIEM][3].
 
+**Minimum Agent version:** 7.58.0
+
 ## Setup
 
 ### Generate API credentials in Avast

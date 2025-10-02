@@ -4,6 +4,8 @@
 
 This check monitors [Ignite][1].
 
+**Minimum Agent version:** 7.20.0
+
 ## Setup
 
 ### Installation
