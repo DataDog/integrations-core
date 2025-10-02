@@ -73,7 +73,7 @@ datadog-external-dns==6.1.0
 datadog-falco==2.1.0
 datadog-flink==3.1.0
 datadog-fluentd==5.2.0
-datadog-fluxcd==3.0.1
+datadog-fluxcd==3.1.0
 datadog-fly-io==3.0.1
 datadog-foundationdb==3.3.1
 datadog-gearmand==5.0.0; sys_platform != 'win32'
