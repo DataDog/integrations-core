@@ -204,7 +204,7 @@ datadog-spark==7.2.0
 datadog-sqlserver==22.10.0
 datadog-squid==5.1.0
 datadog-ssh-check==4.4.0
-datadog-statsd==3.0.0
+datadog-statsd==3.1.0
 datadog-strimzi==4.0.1
 datadog-supabase==2.0.1
 datadog-supervisord==4.1.0
