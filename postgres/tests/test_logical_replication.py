@@ -33,7 +33,6 @@ from .utils import requires_over_10, requires_over_11, requires_over_14, require
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-@pytest.mark.skip
 @requires_over_11
 @pytest.mark.flaky(max_runs=5)
 def test_common_logical_replica_metrics(aggregator, integration_check, pg_replica_logical):
