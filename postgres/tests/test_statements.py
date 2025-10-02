@@ -6,7 +6,6 @@ import re
 import threading
 import time
 from collections import Counter, namedtuple
-from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
 import psycopg
@@ -16,7 +15,6 @@ from psycopg import ClientCursor
 from semver import VersionInfo
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.config import build_config

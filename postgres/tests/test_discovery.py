@@ -77,7 +77,9 @@ def get_postgres_connection(dbname="postgres"):
     conn.autocommit = True
     yield conn
 
+
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+
 
 def test_autodiscovery_simple(integration_check, pg_instance):
     """
