@@ -42,6 +42,7 @@ datadog-citrix-hypervisor==6.0.1
 datadog-clickhouse==5.3.1
 datadog-cloud-foundry-api==5.2.0
 datadog-cloudera==3.2.0
+datadog-cloudgen-firewall==1.0.0
 datadog-cockroachdb==6.0.1
 datadog-confluent-platform==3.0.0
 datadog-consul==5.0.1
