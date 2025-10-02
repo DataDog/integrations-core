@@ -105,7 +105,7 @@ datadog-impala==4.1.0
 datadog-infiniband==1.2.0; sys_platform == 'linux2'
 datadog-istio==9.1.0
 datadog-ivanti-connect-secure==1.1.0
-datadog-jboss-wildfly==3.1.0
+datadog-jboss-wildfly==3.2.0
 datadog-journald==3.0.0
 datadog-juniper-srx-firewall==1.0.0
 datadog-kafka-consumer==6.8.0
