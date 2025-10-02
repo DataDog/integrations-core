@@ -960,7 +960,7 @@ def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: 
     So in each commit, there is an artifact with the sizes of the wheels that were built to get the actual
     size of that commit.
     '''
-    dep_sizes_json = None  # get_dep_sizes_json(commit, platform)
+    dep_sizes_json = get_dep_sizes_json(commit, platform)
     if not dep_sizes_json:
         dep_sizes_json = get_previous_dep_sizes(app.repo.git.merge_base(commit, "origin/master"), platform, compressed)
     return Path(dep_sizes_json) if dep_sizes_json else None
@@ -975,7 +975,6 @@ def get_dep_sizes_json(current_commit: str, platform: str) -> Path | None:
     run_id = get_run_id(current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
     if run_id:
         dep_sizes_json = get_current_sizes_json(run_id, platform)
-        print(f"Dependency sizes json path: {dep_sizes_json}")
         return dep_sizes_json
     else:
         return None
