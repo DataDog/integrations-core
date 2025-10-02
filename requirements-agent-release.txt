@@ -39,7 +39,7 @@ datadog-cisco-aci==4.10.0
 datadog-cisco-secure-firewall==1.1.0
 datadog-cisco-secure-web-appliance==1.1.0
 datadog-citrix-hypervisor==6.1.0
-datadog-clickhouse==5.3.1
+datadog-clickhouse==6.0.0
 datadog-cloud-foundry-api==5.2.0
 datadog-cloudera==3.2.0
 datadog-cloudgen-firewall==1.0.0
