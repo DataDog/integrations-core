@@ -61,9 +61,31 @@ class Redis(AgentCheck):
         'client_longest_output_list': 'redis.clients.longest_output_list',
         'client_recent_max_input_buffer': 'redis.clients.recent_max_input_buffer',
         'client_recent_max_output_buffer': 'redis.clients.recent_max_output_buffer',
+        'clients_in_timeout_table': 'redis.clients.in_timeout_table',
+        'cluster_connections': 'redis.cluster_connections',
         # Keys
         'evicted_keys': 'redis.keys.evicted',
         'expired_keys': 'redis.keys.expired',
+        # persistence
+        'aof_base_size': 'redis.aof.base_size',
+        'aof_current_rewrite_time_sec': 'redis.aof.current_rewrite.time_sec',
+        'aof_delayed_fsync': 'redis.aof.delayed_fsync',
+        'aof_enabled': 'redis.aof.enabled',
+        'aof_last_bgrewrite_status': 'redis.aof_last_bgrewrite_status', # e.g. ok
+        'aof_last_cow_size': 'redis.aof.last_cow_size',
+        'aof_last_write_status': 'redis.aof.last_write_status', # e.g. ok
+        'aof_pending_bio_fsync': 'redis.aof.pending.bio_fsync',
+        'aof_pending_rewrite': 'redis.aof.pending.rewrite',
+        'aof_rewrite_buffer_length': 'redis.aof.rewrite.buffer_length',
+        'aof_rewrite_scheduled': 'redis.aof.rewrite.scheduled',
+        'aof_rewrites': 'redis.aof.rewrites',
+        'async_loading': 'redis.arync_loading',
+        'current_cow_peak': 'redis.current.cow.peak',
+        'current_cow_size': 'redis.current.cow.size',
+        'current_cow_size_age': 'redis.current.cow.size_age',
+        'current_fork_perc': 'redis.current.fork_perc',
+        'current_save_keys_processed': 'redis.current.save.keys.processed',
+        'current_save_keys_total': 'redis.current.save.keys.total',
         # stats
         'latest_fork_usec': 'redis.perf.latest_fork_usec',
         'bytes_received_per_sec': 'redis.bytes_received_per_sec',
@@ -73,6 +95,14 @@ class Redis(AgentCheck):
         'instantaneous_input_kbps': 'redis.net.instantaneous_input',
         'instantaneous_output_kbps': 'redis.net.instantaneous_output',
         'total_connections_received': 'redis.net.total_connections_received',
+        'acl_access_denied_auth': 'redis.acl.access_denied.auth',
+        'acl_access_denied_channel': 'redis.acl.access_denied.channel',
+        'acl_access_denied_cmd': 'redis.acl.access_denied.cmd',
+        'acl_access_denied_key': 'redis.acl.access_denied.key',
+        'client_output_buffer_limit_disconnections': 'redis.client.output_buffer_limit.disconnections',
+        'client_query_buffer_limit_disconnections': 'redis.client.query_buffer_limit.disconnections',
+        'current_active_defrag_time': 'redis.current.active_defrag_time',
+        'dump_payload_sanitizations': 'redis.dump_payload_sanitizations',
         # pubsub
         'pubsub_channels': 'redis.pubsub.channels',
         'pubsub_patterns': 'redis.pubsub.patterns',
@@ -100,6 +130,13 @@ class Redis(AgentCheck):
         'used_memory_scripts_eval': 'redis.mem.scripts_eval',
         'used_memory_scripts': 'redis.mem.scripts',
         'maxmemory': 'redis.mem.maxmemory',
+        'allocator_active': 'redis.allocator.active',
+        'allocator_allocated': 'redis.allocator.allocated',
+        'allocator_frag_ratio': 'redis.allocator.frag_ratio',
+        'allocator_muzzy': 'redis.allocator.muzzy',
+        'allocator_resident': 'redis.allocator.resident',
+        'allocator_rss_bytes': 'redis.allocator.rss_bytes',
+        'allocator_rss_ratio': 'redis.allocator.rss_ratio',
         # replication
         'master_last_io_seconds_ago': 'redis.replication.last_io_seconds_ago',
         'master_sync_in_progress': 'redis.replication.sync',
@@ -109,6 +146,8 @@ class Redis(AgentCheck):
         'slave_repl_offset': 'redis.replication.slave_repl_offset',
         'total_net_repl_input_bytes': 'redis.replication.input_total_bytes',
         'total_net_repl_output_bytes': 'redis.replication.output_total_bytes',
+        # cluster
+        'cluster_enabled': 'redis.cluster_enabled',
     }
 
     RATE_KEYS = {
