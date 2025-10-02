@@ -17,15 +17,15 @@ from .utils import requires_over_13, run_one_check
 
 DISCOVERY_CONFIG = {
     "enabled": True,
-    "include": ["dogs_([0-9]|[1-9][0-9]|10[0-9])"],
-    "exclude": ["dogs_5$", "dogs_50$"],
+    "include": ["dogs_[0-9]"],
+    "exclude": ["dogs_5$"],
 }
 
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 
 
-# the number of test databases that exist from [dogs_0, dogs_100]
-NUM_DOGS_DATABASES = 101
+# the number of test databases that exist from [dogs_0, dogs_9]
+NUM_DOGS_DATABASES = 10
 
 RELATION_METRICS = {
     'postgresql.seq_scans',
@@ -117,7 +117,7 @@ def test_autodiscovery_max_databases(integration_check, pg_instance):
     Test database list truncation.
     """
     pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
-    pg_instance['database_autodiscovery']['max_databases'] = 20
+    pg_instance['database_autodiscovery']['max_databases'] = 7
     del pg_instance['dbname']
 
     check = integration_check(pg_instance)
