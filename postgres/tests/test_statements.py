@@ -20,7 +20,6 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.config import build_config
-from datadog_checks.postgres.postgres import PostgreSql
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
@@ -1973,8 +1972,8 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
 
 # Even though this test is a unit test we leave it unmarked because loading this file loads the fixture
 # that requires booting up the database and makes it very slow to run compared to other unit tests
-def test_get_query_metrics_payload_rows():
-    check = PostgreSql('postgres', {}, [{"host": "host", "username": "user"}])
+def test_get_query_metrics_payload_rows(integration_check):
+    check = integration_check({"host": "host", "username": "user"})
     check.warning = print
     config, _ = build_config(check=check)
     statement_metrics = PostgresStatementMetrics({}, config)

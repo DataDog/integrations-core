@@ -105,16 +105,17 @@ def check():
 
 @pytest.fixture(scope="function")
 def integration_check() -> Callable[[dict, Optional[dict]], PostgreSql]:
-    c = None
+    checks = []
 
     def _check(instance: dict, init_config: dict = None):
-        nonlocal c
+        nonlocal checks
         c = PostgreSql('postgres', init_config or {}, [instance])
+        checks.append(c)
         return c
 
     yield _check
 
-    if c:
+    for c in checks:
         c.cancel()
 
 
@@ -146,7 +147,7 @@ def pg_replica_logical():
 
 @pytest.fixture
 def metrics_cache(pg_instance):
-    check = PostgreSql('postgres', {}, [pg_instance])
+    check = integration_check(pg_instance)
     check.warning = print
     config, _ = build_config(check)
     return PostgresMetricsCache(config)
@@ -154,7 +155,7 @@ def metrics_cache(pg_instance):
 
 @pytest.fixture
 def metrics_cache_replica(pg_replica_instance):
-    check = PostgreSql('postgres', {}, [pg_replica_instance])
+    check = integration_check(pg_replica_instance)
     check.warning = print
     config, _ = build_config(check)
     return PostgresMetricsCache(config)
