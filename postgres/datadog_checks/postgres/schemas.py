@@ -199,7 +199,7 @@ class PostgresSchemaCollector(SchemaCollector):
                 tables_query = self._get_tables_query()
                 columns_query = COLUMNS_QUERY
                 query = f"""
-                    WITH 
+                    WITH
                     schemas AS(
                         {schemas_query}
                     ),

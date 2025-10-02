@@ -41,7 +41,7 @@ def test_databases_filters(dbm_instance, integration_check):
     assert 'postgres' in databases
     assert 'dogs' not in databases
     assert 'dogs_23' not in databases
-    assert 'dogs_34' in databases
+    assert 'dogs_14' in databases
     assert 'nope' not in databases
 
 
@@ -111,6 +111,7 @@ def test_tables(dbm_instance, integration_check, version):
         'rds_admin_misc',
         'sample_foreign_d73a8c',
     }
+
 
 @pytest.mark.parametrize("version", ["9", "10"])
 def test_columns(dbm_instance, integration_check, version):
