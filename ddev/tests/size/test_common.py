@@ -401,44 +401,18 @@ def test_parse_sizes_json(tmp_path):
             },
         ]
     )
-    uncompressed_data = json.dumps(
-        [
-            {
-                "Name": "dep1",
-                "Size_Bytes": 456,
-                "Size": "4 B",
-                "Type": "Dependency",
-                "Platform": "linux-x86_64",
-            },
-            {
-                "Name": "dep2",
-                "Size_Bytes": 456,
-                "Size": "4 B",
-                "Type": "Dependency",
-                "Platform": "macos-x86_64",
-            },
-            {
-                "Name": "module1",
-                "Size_Bytes": 456,
-                "Size": "4 B",
-                "Type": "Integration",
-                "Platform": "linux-x86_64",
-            },
-        ]
-    )
 
     expected_output = {
         "dep1": {
             "compressed": 123,
-            "uncompressed": 456,
+            "compression": True,
             "version": None,
         }
     }
     compressed_json_path = tmp_path / "compressed.json"
     compressed_json_path.write_text(compressed_data)
-    uncompressed_json_path = tmp_path / "uncompressed.json"
-    uncompressed_json_path.write_text(uncompressed_data)
-    result = parse_sizes_json(compressed_json_path, uncompressed_json_path, "linux-x86_64")
+
+    result = parse_sizes_json(compressed_json_path, "linux-x86_64", True)
 
     assert result == expected_output
 

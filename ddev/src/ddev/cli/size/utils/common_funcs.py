@@ -1088,20 +1088,20 @@ def get_previous_dep_sizes(base_commit: str, platform: str, compressed: bool) ->
     '''
     with tempfile.TemporaryDirectory() as tmpdir:
         print(f"Getting previous dependency sizes json for {base_commit=}")
-        run_id = get_run_id(base_commit, MEASURE_DISK_USAGE_WORKFLOW)
+
+        if (run_id := get_run_id(base_commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
+            return None
+
         print(f"Previous run_id: {run_id}")
 
         sizes_json = None
-
-        if run_id and compressed:
-            sizes_json = get_artifact(run_id, 'status_compressed.json', tmpdir)
-        if run_id and not compressed:
-            sizes_json = get_artifact(run_id, 'status_uncompressed.json', tmpdir)
-
-        print(f"Sizes json: {sizes_json}")
+        artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'
+        sizes_json = get_artifact(run_id, artifact_name, tmpdir)
 
         if not sizes_json:
             return None
+
+        print(f"Sizes json: {sizes_json}")
 
         sizes = parse_sizes_json(sizes_json, platform, compressed)
 
@@ -1110,7 +1110,7 @@ def get_previous_dep_sizes(base_commit: str, platform: str, compressed: bool) ->
             json.dump(sizes, f, indent=2)
 
         target_path = f"{platform}.json"
-        shutil.copy2(sizes_path, target_path)
+        shutil.copy(sizes_path, target_path)
         return Path(target_path)
 
 
