@@ -190,7 +190,7 @@ datadog-riakcs==4.9.0
 datadog-sap-hana==5.2.0
 datadog-scylla==5.1.0
 datadog-sidekiq==3.1.0
-datadog-silk==4.1.1
+datadog-silk==4.2.0
 datadog-silverstripe-cms==1.4.1
 datadog-singlestore==4.2.0
 datadog-slurm==2.0.2; sys_platform == 'linux2'
