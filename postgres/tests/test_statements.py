@@ -1543,6 +1543,7 @@ def test_activity_collection_rate_limit(aggregator, integration_check, dbm_insta
     dbm_instance['query_samples']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['collection_interval'] = activity_interval
     dbm_instance['query_samples']['run_sync'] = False
+    dbm_instance['query_activity']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
