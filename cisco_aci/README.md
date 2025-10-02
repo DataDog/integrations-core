@@ -194,6 +194,6 @@ Contact [Datadog support][9].
 [12]: https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/all/faults/guide/b_APIC_Faults_Errors/b_IFC_Faults_Errors_chapter_01.html
 [13]: https://github.com/DataDog/integrations-core/blob/c5890c7b6946a5e7e9d4c6eda993821eb6b75055/cisco_aci/assets/configuration/spec.yaml#L109-L115
 [14]: https://github.com/DataDog/integrations-core/blob/c5890c7b6946a5e7e9d4c6eda993821eb6b75055/cisco_aci/assets/configuration/spec.yaml#L116-L122  
-[15]: https://app.datadoghq.com/dash/integration/242/cisco-aci---overview
-[16]: https://app.datadoghq.com/logs
+[15]: /dash/integration/242/cisco-aci---overview
+[16]: /logs
 [17]: https://docs.datadoghq.com/logs/log_collection/?tab=host#setup
