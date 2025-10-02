@@ -551,8 +551,8 @@ def construct_pytest_options(
     if latest:
         pytest_options += ' --run-latest-metrics'
 
-    if ddtrace:
-        pytest_options += ' --ddtrace'
+    # if ddtrace:
+    #     pytest_options += ' --ddtrace'
 
     if junit:
         test_group = 'e2e' if e2e else 'unit'
