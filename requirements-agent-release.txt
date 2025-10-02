@@ -226,6 +226,7 @@ datadog-tomcat==4.0.0
 datadog-torchserve==4.0.1
 datadog-traefik-mesh==3.0.1
 datadog-traffic-server==3.2.1
+datadog-trend-micro-cloud-one==1.0.0
 datadog-twemproxy==3.0.0
 datadog-twistlock==6.0.1
 datadog-varnish==4.0.0
