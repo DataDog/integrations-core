@@ -69,13 +69,6 @@ SAMPLE_QUERIES = [
 ]
 
 
-@pytest.fixture(autouse=True)
-def stop_orphaned_threads():
-    # make sure we shut down any orphaned threads and create a new Executor for each test
-    DBMAsyncJob.executor.shutdown(wait=True)
-    DBMAsyncJob.executor = ThreadPoolExecutor()
-
-
 @requires_over_10
 def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     aggregator,
