@@ -65,7 +65,7 @@ datadog-ecs-fargate==7.1.0
 datadog-eks-fargate==6.2.0
 datadog-elastic==9.1.0
 datadog-envoy==6.2.0
-datadog-eset-protect==1.0.0
+datadog-eset-protect==1.1.0
 datadog-esxi==4.0.0
 datadog-etcd==9.0.1
 datadog-exchange-server==4.3.0; sys_platform == 'win32'
