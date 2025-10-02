@@ -60,7 +60,7 @@ datadog-disk==7.2.0
 datadog-dns-check==5.2.0
 datadog-dotnetclr==4.4.0; sys_platform == 'win32'
 datadog-druid==5.1.0
-datadog-duckdb==1.0.0
+datadog-duckdb==1.1.0
 datadog-ecs-fargate==7.0.1
 datadog-eks-fargate==6.1.1
 datadog-elastic==9.0.1
