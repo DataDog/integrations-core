@@ -1106,7 +1106,7 @@ def get_previous_dep_sizes(base_commit: str, platform: str, py_version: str, com
 
         print(f"Sizes json: {sizes_json}")
 
-        sizes = parse_sizes_json(sizes_json, platform, compressed)
+        sizes = parse_sizes_json(sizes_json, platform, py_version, compressed)
 
         sizes_path = Path(tmpdir) / f"{platform}_{py_version}.json"
         with open(sizes_path, "w") as f:
@@ -1118,7 +1118,9 @@ def get_previous_dep_sizes(base_commit: str, platform: str, py_version: str, com
 
 
 @cache
-def parse_sizes_json(sizes_json_path: Path, platform: str, compressed: bool) -> dict[str, dict[str, int]]:
+def parse_sizes_json(
+    sizes_json_path: Path, platform: str, py_version: str, compressed: bool
+) -> dict[str, dict[str, int]]:
     sizes_list = list(json.loads(sizes_json_path.read_text()))
     size_key = "compressed" if compressed else "uncompressed"
     sizes = {
@@ -1128,7 +1130,9 @@ def parse_sizes_json(sizes_json_path: Path, platform: str, compressed: bool) -> 
             "compression": compressed,
         }
         for dep in sizes_list
-        if dep.get("Type") == "Dependency" and dep.get("Platform") == platform
+        if dep.get("Type") == "Dependency"
+        and dep.get("Platform") == platform
+        and dep.get("Python_Version") == py_version
     }
 
     return sizes

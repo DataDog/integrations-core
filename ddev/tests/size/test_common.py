@@ -384,6 +384,7 @@ def test_parse_sizes_json(tmp_path):
                 "Size": "2 B",
                 "Type": "Dependency",
                 "Platform": "linux-x86_64",
+                "Python_Version": "3.12",
             },
             {
                 "Name": "dep2",
@@ -391,6 +392,7 @@ def test_parse_sizes_json(tmp_path):
                 "Size": "2 B",
                 "Type": "Dependency",
                 "Platform": "macos-x86_64",
+                "Python_Version": "3.12",
             },
             {
                 "Name": "module1",
@@ -398,6 +400,7 @@ def test_parse_sizes_json(tmp_path):
                 "Size": "2 B",
                 "Type": "Integration",
                 "Platform": "linux-x86_64",
+                "Python_Version": "3.12",
             },
         ]
     )
@@ -412,7 +415,7 @@ def test_parse_sizes_json(tmp_path):
     compressed_json_path = tmp_path / "compressed.json"
     compressed_json_path.write_text(compressed_data)
 
-    result = parse_sizes_json(compressed_json_path, "linux-x86_64", True)
+    result = parse_sizes_json(compressed_json_path, "linux-x86_64", "3.12", True)
 
     assert result == expected_output
 
