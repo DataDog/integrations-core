@@ -100,11 +100,14 @@ jobs:
   run:
     name: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
     runs-on: ${{ fromJson(inputs.runner) }}
+    timeout-minutes: 60  # Prevent jobs from hanging indefinitely
 
     env:
       FORCE_COLOR: "1"
       PYTHON_VERSION: "${{ inputs.python-version || '3.13' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
+      # Set pytest timeout to prevent hanging tests (especially important for Python 3.13)
+      PYTEST_TIMEOUT_MINUTES: "5"
       # Windows E2E requires Windows containers
       DDEV_E2E_AGENT: "${{ (inputs.platform == 'windows' && inputs.agent-image-windows) || inputs.agent-image }}"
       DDEV_E2E_AGENT_PY2: "${{ (inputs.platform == 'windows' && inputs.agent-image-windows-py2) || inputs.agent-image-py2 }}"
