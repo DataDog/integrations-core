@@ -78,7 +78,7 @@ def status(
             if commit:
                 from ddev.cli.size.utils.common_funcs import get_last_dependency_sizes_artifact
 
-                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat, compressed)
+                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat, ver, compressed)
 
             parameters: CLIParameters = {
                 "app": app,

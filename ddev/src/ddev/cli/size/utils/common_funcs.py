@@ -954,27 +954,31 @@ def get_last_commit_data() -> tuple[str, list[str], list[str]]:
 
 
 @cache
-def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: str, compressed: bool) -> Path | None:
+def get_last_dependency_sizes_artifact(
+    app: Application, commit: str, platform: str, py_version: str, compressed: bool
+) -> Path | None:
     '''
     Lockfiles of dependencies are not updated in the same commit as the dependencies are updated.
     So in each commit, there is an artifact with the sizes of the wheels that were built to get the actual
     size of that commit.
     '''
-    dep_sizes_json = get_dep_sizes_json(commit, platform)
+    dep_sizes_json = get_dep_sizes_json(commit, platform, py_version)
     if not dep_sizes_json:
-        dep_sizes_json = get_previous_dep_sizes(app.repo.git.merge_base(commit, "origin/master"), platform, compressed)
+        dep_sizes_json = get_previous_dep_sizes(
+            app.repo.git.merge_base(commit, "origin/master"), platform, py_version, compressed
+        )
     return Path(dep_sizes_json) if dep_sizes_json else None
 
 
 @cache
-def get_dep_sizes_json(current_commit: str, platform: str) -> Path | None:
+def get_dep_sizes_json(current_commit: str, platform: str, py_version: str) -> Path | None:
     '''
     Gets the dependency sizes json for a given commit and platform when dependencies were resolved.
     '''
     print(f"Getting dependency sizes json for commit: {current_commit}, platform: {platform}")
     run_id = get_run_id(current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
     if run_id:
-        dep_sizes_json = get_current_sizes_json(run_id, platform)
+        dep_sizes_json = get_current_sizes_json(run_id, platform, py_version)
         return dep_sizes_json
     else:
         return None
@@ -1012,7 +1016,7 @@ def get_run_id(commit: str, workflow: str) -> str | None:
 
 
 @cache
-def get_current_sizes_json(run_id: str, platform: str) -> Path | None:
+def get_current_sizes_json(run_id: str, platform: str, py_version: str) -> Path | None:
     '''
     Downloads the dependency sizes json for a given run id and platform when dependencies were resolved.
     '''
@@ -1052,7 +1056,7 @@ def get_current_sizes_json(run_id: str, platform: str) -> Path | None:
             return None
 
         print(f"Found sizes artifact at {sizes_file}")
-        dest_path = sizes_file.rename(f"{platform}.json")
+        dest_path = sizes_file.rename(f"{platform}_{py_version}.json")
         return dest_path
 
 
@@ -1082,7 +1086,7 @@ def get_artifact(run_id: str, artifact_name: str, target_dir: str | None = None)
 
 
 @cache
-def get_previous_dep_sizes(base_commit: str, platform: str, compressed: bool) -> Path | None:
+def get_previous_dep_sizes(base_commit: str, platform: str, py_version: str, compressed: bool) -> Path | None:
     '''
     Gets the dependency sizes for a given commit when dependencies were not resolved.
     '''
@@ -1104,11 +1108,11 @@ def get_previous_dep_sizes(base_commit: str, platform: str, compressed: bool) ->
 
         sizes = parse_sizes_json(sizes_json, platform, compressed)
 
-        sizes_path = Path(tmpdir) / f"{platform}.json"
+        sizes_path = Path(tmpdir) / f"{platform}_{py_version}.json"
         with open(sizes_path, "w") as f:
             json.dump(sizes, f, indent=2)
 
-        target_path = f"{platform}.json"
+        target_path = f"{platform}_{py_version}.json"
         shutil.copy(sizes_path, target_path)
         return Path(target_path)
 
