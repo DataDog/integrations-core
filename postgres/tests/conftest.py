@@ -63,6 +63,8 @@ def dd_environment(e2e_instance):
     """
     Start a standalone postgres server requiring authentication.
     """
+    yield e2e_instance, E2E_METADATA
+    return
     compose_file = 'docker-compose.yaml'
     if float(POSTGRES_VERSION) >= 10.0:
         compose_file = 'docker-compose-replication.yaml'

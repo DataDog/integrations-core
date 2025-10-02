@@ -30,7 +30,7 @@ from datadog_checks.postgres.connection_pool import (
     TokenProvider,
 )
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
-from datadog_checks.postgres.health import PostgresHealth
+from datadog_checks.postgres.health import PostgresHealth, PostgresHealthEvent
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import (
@@ -196,7 +196,6 @@ class PostgreSql(AgentCheck):
         self.check_initializations.append(self.load_version)
         self.check_initializations.append(self.load_system_identifier)
         self.check_initializations.append(self.initialize_is_aurora)
-        self.check_initializations.append(self._send_database_instance_metadata)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
@@ -1081,7 +1080,13 @@ class PostgreSql(AgentCheck):
             self._validate_connection()
 
             # We don't want to cache versions between runs to capture minor updates for metadata
-            self.load_version()
+            # We also use this simple query as a smoke check for database connectivity
+            # when the full validate connection is on cooldown
+            try:
+                self.load_version()
+            except psycopg.OperationalError as e:
+                self.log.error("Error loading version: %s", e)
+                raise DatabaseHealthCheckError(f"Error loading database version: {e}")
 
             # Check wal_level
             self.wal_level = self._get_wal_level()
@@ -1135,11 +1140,14 @@ class PostgreSql(AgentCheck):
             if not isinstance(e, DatabaseHealthCheckError):
                 # Submit a health event for unknown errors
                 # We don't send the error because it may contain sensitive information
-                self.health.submit_health_event(
-                    name=HealthEvent.UNKNOWN_ERROR,
-                    status=HealthStatus.ERROR,
-                    description="Unknown error, please check the agent logs for more details.",
-                )
+                try:
+                    self.health.submit_health_event(
+                        name=PostgresHealthEvent.UNKNOWN_ERROR,
+                        status=HealthStatus.ERROR,
+                        description="Unknown error, please check the agent logs for more details.",
+                    )
+                except Exception as e:
+                    self.log.error("Error submitting health event for unknown error: %s", e)
             raise e
         else:
             self.service_check(
