@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 15.9.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add prepared statements support for query metrics ([#21425](https://github.com/DataDog/integrations-core/pull/21425))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+***Fixed***:
+
+* Consolidate Mysql global variable lookups to a single query ([#21306](https://github.com/DataDog/integrations-core/pull/21306))
+* Setting `disable_innodb_metrics` config option to `true` will now properly disable `mysql.innodb.deadlocks` metric collection ([#21421](https://github.com/DataDog/integrations-core/pull/21421))
+
 ## 15.8.0 / 2025-09-05 / Agent 7.71.0
 
 ***Added***:
