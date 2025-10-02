@@ -21,8 +21,14 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.postgres import aws, azure
-from datadog_checks.postgres.connection_pool import LRUConnectionPoolManager, PostgresConnectionArgs
+from datadog_checks.postgres.connection_pool import (
+    AWSTokenProvider,
+    AzureTokenProvider,
+    LRUConnectionPoolManager,
+    PostgresConnectionArgs,
+    TokenAwareConnection,
+    TokenProvider,
+)
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.health import PostgresHealth
 from datadog_checks.postgres.metadata import PostgresMetadata
@@ -165,6 +171,7 @@ class PostgreSql(AgentCheck):
             base_conn_args=self.build_connection_args(),
             statement_timeout=self._config.query_timeout,
             sqlascii_encodings=self._config.query_encodings,
+            token_provider=self.build_token_provider(),
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
@@ -913,6 +920,23 @@ class PostgreSql(AgentCheck):
             for dynamic_query in self.dynamic_queries:
                 dynamic_query.execute()
 
+    def build_token_provider(self) -> TokenProvider:
+        if self._config.aws.managed_authentication.enabled:
+            return AWSTokenProvider(
+                host=self._config.host,
+                port=self._config.port,
+                username=self._config.username,
+                region=self._config.aws.region,
+                role_arn=self._config.aws.managed_authentication.role_arn,
+            )
+        elif self._config.azure.managed_authentication.enabled:
+            return AzureTokenProvider(
+                client_id=self._config.azure.managed_authentication.client_id,
+                identity_scope=self._config.azure.managed_authentication.identity_scope,
+            )
+        else:
+            return None
+
     def build_connection_args(self) -> PostgresConnectionArgs:
         if self._config.host == 'localhost' and self._config.password == '':
             return PostgresConnectionArgs(
@@ -920,31 +944,12 @@ class PostgreSql(AgentCheck):
                 username=self._config.username,
             )
         else:
-            password = self._config.password
-            if self._config.aws.managed_authentication.enabled:
-                password = aws.generate_rds_iam_token(
-                    host=self._config.host,
-                    username=self._config.username,
-                    port=self._config.port,
-                    region=self._config.aws.region,
-                    role_arn=self._config.aws.managed_authentication.role_arn,
-                )
-            elif self._config.azure.managed_authentication.enabled:
-                client_id = self._config.azure.managed_authentication.client_id
-                identity_scope = self._config.azure.managed_authentication.identity_scope
-                password = azure.generate_managed_identity_token(client_id=client_id, identity_scope=identity_scope)
-
-            self.log.debug(
-                "Try to connect to %s with %s",
-                self._config.host,
-                "password" if password == self._config.password else "token",
-            )
             return PostgresConnectionArgs(
                 application_name=self._config.application_name,
                 username=self._config.username,
                 host=self._config.host,
                 port=self._config.port,
-                password=password,
+                password=self._config.password,
                 ssl_mode=self._config.ssl,
                 ssl_cert=self._config.ssl_cert,
                 ssl_root_cert=self._config.ssl_root_cert,
@@ -956,7 +961,7 @@ class PostgreSql(AgentCheck):
         # TODO: Keeping this main connection outside of the pool for now to keep existing behavior.
         # We should move this to the pool in the future.
         conn_args = self.build_connection_args()
-        conn = psycopg.connect(**conn_args.as_kwargs(dbname=dbname))
+        conn = TokenAwareConnection.connect(**conn_args.as_kwargs(dbname=dbname))
         self.db_pool._configure_connection(conn)
         return conn
 
