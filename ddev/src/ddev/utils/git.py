@@ -68,6 +68,40 @@ class GitRepository:
         sha, subject = self.capture('log', '-1', '--format=%H%n%s').splitlines()
         return GitCommit(sha, subject=subject)
 
+    def log(self, args: list[str], n: int | None = None) -> list[dict[str, str]]:
+        """
+        Returns the last n commits log entries in a dictionary with the keys specified in args.
+        args example: ["hash:%H", "author:%an", "subject:%s"]
+        """
+        if not args:
+            return []
+
+        keys: list[str] = []
+        format_parts: list[str] = []
+        for arg in args:
+            try:
+                key, format = arg.split(":", 1)
+                keys.append(key)
+                format_parts.append(format)
+            except ValueError:
+                raise ValueError(f"Invalid argument: {arg}. Expected format: key:format")
+
+        pretty_format = "%x00".join(format_parts)
+        cmd = ['log', f"--pretty=format:{pretty_format}"]
+        if n is not None:
+            cmd.append(f"-n {n}")
+
+        command_output = self.capture(*cmd).strip().splitlines()
+
+        commits: list[dict[str, str]] = []
+
+        for line in command_output:
+            line_parts = line.split("\x00")
+            commit_dict = dict(zip(keys, line_parts, strict=True))
+            commits.append(commit_dict)
+
+        return commits
+
     def pull(self, ref):
         return self.capture('pull', 'origin', ref)
 

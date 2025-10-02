@@ -44,6 +44,23 @@ def test_get_latest_commit(repository):
     assert short_sha2 not in commit_status1
 
 
+def test_get_log(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    repo.git.capture("config", "user.name", "test_user")
+    (repo.path / "test1.txt").touch()
+    repo.git.capture("add", ".")
+    repo.git.capture("commit", "-m", "test1")
+    (repo.path / "test2.txt").touch()
+    repo.git.capture("add", ".")
+    repo.git.capture("commit", "-m", "test2")
+
+    assert repo.git.log(["author:%an", "message:%f"], n=2) == [
+        {"author": "test_user", "message": "test2"},
+        {"author": "test_user", "message": "test1"},
+    ]
+
+
 def test_tags(repository):
     repo = Repository(repository.path.name, str(repository.path))
 
