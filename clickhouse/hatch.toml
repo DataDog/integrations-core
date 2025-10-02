@@ -3,7 +3,7 @@
 # https://clickhouse.com/docs/faq/operations/production#how-to-choose-between-clickhouse-releases
 # https://github.com/ClickHouse/ClickHouse/blob/master/SECURITY.md
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 version = ["24.8", "25.3", "25.6", "25.7", "25.8"]
 
 [envs.default.overrides]

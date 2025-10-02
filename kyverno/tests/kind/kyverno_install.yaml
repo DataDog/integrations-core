@@ -49569,7 +49569,7 @@ spec:
           serviceAccountName: kyverno-cleanup-jobs
           containers:
           - name: cleanup
-            image: "bitnami/kubectl:1.28.5"
+            image: "bitnamilegacy/kubectl:1.28.5"
             imagePullPolicy: 
             command:
             - /bin/bash
@@ -49622,7 +49622,7 @@ spec:
           serviceAccountName: kyverno-cleanup-jobs
           containers:
           - name: cleanup
-            image: "bitnami/kubectl:1.28.5"
+            image: "bitnamilegacy/kubectl:1.28.5"
             imagePullPolicy: 
             command:
             - /bin/bash
@@ -49675,7 +49675,7 @@ spec:
           serviceAccountName: kyverno-cleanup-jobs
           containers:
           - name: cleanup
-            image: "bitnami/kubectl:1.28.5"
+            image: "bitnamilegacy/kubectl:1.28.5"
             imagePullPolicy: 
             command:
             - /bin/bash
@@ -49728,7 +49728,7 @@ spec:
           serviceAccountName: kyverno-cleanup-jobs
           containers:
           - name: cleanup
-            image: "bitnami/kubectl:1.28.5"
+            image: "bitnamilegacy/kubectl:1.28.5"
             imagePullPolicy: 
             command:
             - /bin/bash
@@ -49781,7 +49781,7 @@ spec:
           serviceAccountName: kyverno-cleanup-jobs
           containers:
           - name: cleanup
-            image: "bitnami/kubectl:1.28.5"
+            image: "bitnamilegacy/kubectl:1.28.5"
             imagePullPolicy: 
             command:
             - /bin/bash

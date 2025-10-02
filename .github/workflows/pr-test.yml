@@ -90,6 +90,7 @@ jobs:
       setup-env-vars: "${{ inputs.setup-env-vars }}"
       python-version: "${{ inputs.python-version }}"
       pytest-args: ${{ inputs.pytest-args }}
+      context: "pr"
     secrets: inherit
 
   save-event:
