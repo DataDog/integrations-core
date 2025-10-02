@@ -228,7 +228,7 @@ datadog-traefik-mesh==3.1.0
 datadog-traffic-server==3.3.0
 datadog-trend-micro-cloud-one==1.0.0
 datadog-twemproxy==3.1.0
-datadog-twistlock==6.0.1
+datadog-twistlock==6.1.0
 datadog-varnish==4.0.0
 datadog-vault==7.0.1
 datadog-velero==3.0.2
