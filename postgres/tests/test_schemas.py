@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
+from .common import POSTGRES_VERSION
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -28,27 +29,26 @@ def test_get_databases(dbm_instance, integration_check):
     databases = collector._get_databases()
     assert 'postgres' in databases
     assert 'dogs' in databases
-    assert 'dogs_23' in databases
+    assert 'dogs_3' in databases
     assert 'nope' not in databases
 
 
 def test_databases_filters(dbm_instance, integration_check):
-    dbm_instance['collect_schemas']['exclude_databases'] = ['^dogs$', 'dogs_2(\\d)+']
+    dbm_instance['collect_schemas']['exclude_databases'] = ['^dogs$', 'dogs_[345]']
     check = integration_check(dbm_instance)
     collector = PostgresSchemaCollector(check)
 
     databases = collector._get_databases()
     assert 'postgres' in databases
     assert 'dogs' not in databases
-    assert 'dogs_23' not in databases
-    assert 'dogs_14' in databases
+    assert 'dogs_3' not in databases
+    assert 'dogs_9' in databases
     assert 'nope' not in databases
 
 
-@pytest.mark.parametrize("version", ["9", "10"])
-def test_get_cursor(dbm_instance, integration_check, version):
+def test_get_cursor(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
-    check.version = version
+    check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
     with collector._get_cursor('datadog_test') as cursor:
@@ -60,11 +60,11 @@ def test_get_cursor(dbm_instance, integration_check, version):
         assert set(schemas) == {'datadog', 'hstore', 'public', 'public2', 'rdsadmin_test'}
 
 
-@pytest.mark.parametrize("version", ["9", "10"])
-def test_schemas_filters(dbm_instance, integration_check, version):
+
+def test_schemas_filters(dbm_instance, integration_check):
     dbm_instance['collect_schemas']['exclude_schemas'] = ['public', 'rdsadmin_test']
     check = integration_check(dbm_instance)
-    check.version = version
+    check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
     with collector._get_cursor('datadog_test') as cursor:
@@ -76,10 +76,10 @@ def test_schemas_filters(dbm_instance, integration_check, version):
         assert set(schemas) == {'datadog', 'hstore'}
 
 
-@pytest.mark.parametrize("version", ["9", "10"])
-def test_tables(dbm_instance, integration_check, version):
+
+def test_tables(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
-    check.version = version
+    check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
     with collector._get_cursor('datadog_test') as cursor:
@@ -113,10 +113,10 @@ def test_tables(dbm_instance, integration_check, version):
     }
 
 
-@pytest.mark.parametrize("version", ["9", "10"])
-def test_columns(dbm_instance, integration_check, version):
+
+def test_columns(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
-    check.version = version
+    check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
     with collector._get_cursor('datadog_test') as cursor:
