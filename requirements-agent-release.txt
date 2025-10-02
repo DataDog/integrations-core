@@ -187,7 +187,7 @@ datadog-redisdb==8.2.0
 datadog-rethinkdb==5.2.0
 datadog-riak==5.2.0
 datadog-riakcs==4.9.0
-datadog-sap-hana==5.1.1
+datadog-sap-hana==5.2.0
 datadog-scylla==5.0.1
 datadog-sidekiq==3.0.0
 datadog-silk==4.1.1
