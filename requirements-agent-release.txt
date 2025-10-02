@@ -112,7 +112,7 @@ datadog-kafka-consumer==6.9.0
 datadog-kafka==4.1.0
 datadog-karpenter==3.1.0
 datadog-keda==2.1.0
-datadog-keycloak==1.0.0
+datadog-keycloak==1.1.0
 datadog-kong==6.0.1
 datadog-krakend==1.0.1
 datadog-kube-apiserver-metrics==7.1.0
