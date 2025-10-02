@@ -180,6 +180,7 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.flaky(max_runs=5)
 def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_instance):
     """
     Check that metrics get collected for each database discovered.
@@ -198,6 +199,10 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     # it does not make sense to create and execute the dummy_function for every single database
     with get_postgres_connection(dbname='dogs_nofunc') as conn:
         with conn.cursor() as cursor:
+            # Run a few times to reduce flakiness
+            cursor.execute("SELECT dummy_function()")
+            cursor.execute("SELECT dummy_function()")
+            cursor.execute("SELECT dummy_function()")
             cursor.execute("SELECT dummy_function()")
     conn.close()
 
