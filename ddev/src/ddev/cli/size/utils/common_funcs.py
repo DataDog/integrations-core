@@ -954,15 +954,15 @@ def get_last_commit_data() -> tuple[str, list[str], list[str]]:
 
 
 @cache
-def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: str) -> Path | None:
+def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: str, compressed: bool) -> Path | None:
     '''
     Lockfiles of dependencies are not updated in the same commit as the dependencies are updated.
     So in each commit, there is an artifact with the sizes of the wheels that were built to get the actual
     size of that commit.
     '''
-    dep_sizes_json = get_dep_sizes_json(commit, platform)
+    dep_sizes_json = None  # get_dep_sizes_json(commit, platform)
     if not dep_sizes_json:
-        dep_sizes_json = get_previous_dep_sizes(app.repo.git.merge_base(commit, "origin/master"), platform)
+        dep_sizes_json = get_previous_dep_sizes(app.repo.git.merge_base(commit, "origin/master"), platform, compressed)
     return Path(dep_sizes_json) if dep_sizes_json else None
 
 
@@ -1083,7 +1083,7 @@ def get_artifact(run_id: str, artifact_name: str, target_dir: str | None = None)
 
 
 @cache
-def get_previous_dep_sizes(base_commit: str, platform: str) -> Path | None:
+def get_previous_dep_sizes(base_commit: str, platform: str, compressed: bool) -> Path | None:
     '''
     Gets the dependency sizes for a given commit when dependencies were not resolved.
     '''
@@ -1091,20 +1091,20 @@ def get_previous_dep_sizes(base_commit: str, platform: str) -> Path | None:
         print(f"Getting previous dependency sizes json for {base_commit=}")
         run_id = get_run_id(base_commit, MEASURE_DISK_USAGE_WORKFLOW)
         print(f"Previous run_id: {run_id}")
-        compressed_json = None
-        uncompressed_json = None
-        if run_id:
-            compressed_json = get_artifact(run_id, 'status_compressed.json', tmpdir)
-        if run_id:
-            uncompressed_json = get_artifact(run_id, 'status_uncompressed.json', tmpdir)
 
-        print(f"Compressed json: {compressed_json}")
-        print(f"Uncompressed json: {uncompressed_json}")
+        sizes_json = None
 
-        if not compressed_json or not uncompressed_json:
+        if run_id and compressed:
+            sizes_json = get_artifact(run_id, 'status_compressed.json', tmpdir)
+        if run_id and not compressed:
+            sizes_json = get_artifact(run_id, 'status_uncompressed.json', tmpdir)
+
+        print(f"Sizes json: {sizes_json}")
+
+        if not sizes_json:
             return None
 
-        sizes = parse_sizes_json(compressed_json, uncompressed_json, platform)
+        sizes = parse_sizes_json(sizes_json, platform, compressed)
 
         sizes_path = Path(tmpdir) / f"{platform}.json"
         with open(sizes_path, "w") as f:
@@ -1116,25 +1116,18 @@ def get_previous_dep_sizes(base_commit: str, platform: str) -> Path | None:
 
 
 @cache
-def parse_sizes_json(
-    compressed_json_path: Path, uncompressed_json_path: Path, platform: str
-) -> dict[str, dict[str, int]]:
-    compressed_list = list(json.loads(compressed_json_path.read_text()))
-    uncompressed_list = list(json.loads(uncompressed_json_path.read_text()))
+def parse_sizes_json(sizes_json_path: Path, platform: str, compressed: bool) -> dict[str, dict[str, int]]:
+    sizes_list = list(json.loads(sizes_json_path.read_text()))
+    size_key = "compressed" if compressed else "uncompressed"
     sizes = {
         dep["Name"]: {
-            "compressed": int(dep["Size_Bytes"]),
+            size_key: int(dep["Size_Bytes"]),
             "version": dep.get("Version"),
+            "compression": compressed,
         }
-        for dep in compressed_list
+        for dep in sizes_list
         if dep.get("Type") == "Dependency" and dep.get("Platform") == platform
     }
-
-    for dep in uncompressed_list:
-        if dep.get("Type") == "Dependency" and dep.get("Platform") == platform:
-            name = dep["Name"]
-            entry = sizes.setdefault(name, {"version": dep.get("Version")})
-            entry["uncompressed"] = int(dep["Size_Bytes"])
 
     return sizes
 
