@@ -703,7 +703,9 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
         (True, 'forced_hostname', 'forced_hostname'),
     ],
 )
-def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, aggregator, pg_instance):
+def test_correct_hostname(
+    dbm_enabled, reported_hostname, expected_hostname, aggregator, pg_instance, integration_check
+):
     pg_instance['dbm'] = dbm_enabled
     pg_instance['collect_activity_metrics'] = True
     pg_instance['query_samples'] = {'enabled': False}
@@ -719,7 +721,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         ) as resolve_db_host,
         mock.patch('datadog_checks.base.stubs.datadog_agent.get_hostname', return_value=expected_hostname),
     ):
-        check = PostgreSql('test_instance', {}, [pg_instance])
+        check = integration_check(pg_instance)
         check.run()
         assert resolve_db_host.called is True
 
@@ -754,7 +756,7 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         (False, 'forced_hostname'),
     ],
 )
-def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname):
+def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, reported_hostname, integration_check):
     pg_instance['dbm'] = dbm_enabled
     pg_instance['query_samples'] = {'enabled': False}
     pg_instance['query_activity'] = {'enabled': False}
@@ -775,7 +777,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
         'database_instance:{}'.format(expected_database_instance),
         'ddagenthostname:{}'.format(expected_database_hostname),
     ]
-    check = PostgreSql('test_instance', {}, [pg_instance])
+    check = integration_check(pg_instance)
     run_one_check(check)
 
     # These tags are a bit dynamic in value, so we get them from the check and ensure they are present

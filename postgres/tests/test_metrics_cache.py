@@ -5,7 +5,6 @@ import pytest
 
 from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
-from datadog_checks.postgres.postgres import PostgreSql
 from datadog_checks.postgres.util import (
     COMMON_METRICS,
     DBM_MIGRATED_METRICS,
@@ -28,8 +27,8 @@ COMMON_AND_MAIN_CHECK_METRICS = dict(COMMON_METRICS, **DBM_MIGRATED_METRICS)
         pytest.param(V9_2, True, {}),
     ],
 )
-def test_aurora_replication_metrics(pg_instance, version, is_aurora, expected_metrics):
-    check = PostgreSql('postgres', {}, [pg_instance])
+def test_aurora_replication_metrics(pg_instance, version, is_aurora, expected_metrics, integration_check):
+    check = integration_check(pg_instance)
     check.warning = print
     config, _ = build_config(check=check)
     cache = PostgresMetricsCache(config)
@@ -49,10 +48,10 @@ def test_aurora_replication_metrics(pg_instance, version, is_aurora, expected_me
         pytest.param(V9_2, False, dict(COMMON_AND_MAIN_CHECK_METRICS, **NEWER_92_METRICS)),
     ],
 )
-def test_dbm_enabled_conn_metric(pg_instance, version, is_dbm_enabled, expected_metrics):
+def test_dbm_enabled_conn_metric(pg_instance, version, is_dbm_enabled, expected_metrics, integration_check):
     pg_instance['dbm'] = is_dbm_enabled
     pg_instance['collect_database_size_metrics'] = False
-    check = PostgreSql('postgres', {}, [pg_instance])
+    check = integration_check(pg_instance)
     check.warning = print
     config, _ = build_config(check=check)
     assert config.collect_database_size_metrics is False
