@@ -9,6 +9,8 @@ The Cisco ACI Integration lets you:
 - Monitor the switches and controllers themselves
 - The ability to monitor devices with [Network Device Monitoring][11]
 
+**Minimum Agent version:** 6.3.2
+
 ## Setup
 
 <div class="alert alert-info">Enabling send_ndm_metadata to send metadata from this integration has potential billing implications. See the <a href="https://www.datadoghq.com/pricing/?product=network-monitoring&tab=ndm#products"> pricing page </a> for more information.</div>

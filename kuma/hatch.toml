@@ -1,8 +1,8 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.12"]
-kuma_version = ["2.10.1"]
+python = ["3.13"]
+kuma_version = ["2.10.6"]
 
 [envs.default.overrides]
 matrix.kuma_version.env-vars = "KUMA_VERSION"

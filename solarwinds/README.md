@@ -4,6 +4,8 @@ Get alerts from SolarWinds Orion to aggregate and triage your alerts in a centra
 
 This integration works by subscribing Datadog to all of your SolarWinds alert notifications.
 
+**Minimum Agent version:** 7.67.0
+
 ## Setup
 
 ### Create trigger actions

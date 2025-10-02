@@ -210,6 +210,27 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: grok-parser
+          name: Parsing actor.details
+          enabled: true
+          source: actor.details
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              actor_json %{data:actor.details:json}
+        - type: attribute-remapper
+          name: Map `email`, `actor.details.email` to `usr.email`
+          enabled: true
+          sources:
+            - email
+            - actor.details.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
     - type: pipeline
       name: Cisco Duo Administrator
       enabled: true
@@ -320,7 +341,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.metadata.event_code
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `isotimestamp`, `ts` to `ocsf.time`
@@ -704,7 +725,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.actor.app_uid
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `access_device.ip.address`, `access_device.ip` to `ocsf.src_endpoint.ip`
@@ -797,7 +818,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.user.email_addr
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `target.type` to `ocsf.user.type`
@@ -939,7 +960,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.actor.user.email_addr
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `actor.type` to `ocsf.actor.user.type`
@@ -1210,7 +1231,7 @@ pipeline:
           sourceType: attribute
           target: ocsf.user.email_addr
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
     - type: pipeline
       name: OCSF sub pipeline for auth factor device enrichment
