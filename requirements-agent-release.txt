@@ -29,6 +29,7 @@ datadog-cassandra==3.0.0
 datadog-celery==2.0.1
 datadog-ceph==4.1.0; sys_platform != 'win32'
 datadog-cert-manager==6.0.1
+datadog-checkpoint-harmony-endpoint==1.0.0
 datadog-checkpoint-quantum-firewall==1.0.0
 datadog-checks-base==37.21.0
 datadog-checks-dependency-provider==3.0.0
@@ -41,6 +42,7 @@ datadog-citrix-hypervisor==6.0.1
 datadog-clickhouse==5.3.1
 datadog-cloud-foundry-api==5.2.0
 datadog-cloudera==3.2.0
+datadog-cloudgen-firewall==1.0.0
 datadog-cockroachdb==6.0.1
 datadog-confluent-platform==3.0.0
 datadog-consul==5.0.1
@@ -224,6 +226,7 @@ datadog-tomcat==4.0.0
 datadog-torchserve==4.0.1
 datadog-traefik-mesh==3.0.1
 datadog-traffic-server==3.2.1
+datadog-trend-micro-cloud-one==1.0.0
 datadog-twemproxy==3.0.0
 datadog-twistlock==6.0.1
 datadog-varnish==4.0.0

@@ -563,6 +563,8 @@ integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
 - pulsar/**/*
+integration/push_security:
+- push_security/**/*
 integration/quarkus:
 - quarkus/**/*
 integration/rabbitmq:
@@ -777,6 +779,8 @@ integration/zerofox_cloud_platform:
 - zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
+integration/barracuda_secure_edge:
+- barracuda_secure_edge/**/*
 integration/cloudgen_firewall:
 - cloudgen_firewall/**/*
 qa/skip-qa:
