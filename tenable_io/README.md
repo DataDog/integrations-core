@@ -11,6 +11,8 @@ The Tenable.io integration collects the following types of logs:
 
 This integration collects logs from the sources listed above and sends them to Datadog.
 
+**Minimum Agent version:** 7.59.1
+
 ## Setup
 
 ### Generate API credentials in Tenable.io

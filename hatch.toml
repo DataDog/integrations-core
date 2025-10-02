@@ -1,11 +1,11 @@
 [envs.docs]
 dependencies = [
-  "mkdocs~=1.5.2",
-  "mkdocs-material~=9.4.6",
+  "mkdocs~=1.6",
+  "mkdocs-material~=9.5",
   # Plugins
-  "mkdocs-minify-plugin~=0.7.1",
+  "mkdocs-minify-plugin~=0.8",
   "mkdocs-git-revision-date-localized-plugin~=1.2.0",
-  "mkdocstrings-python~=1.10.0",
+  "mkdocstrings-python~=1.18.2",
   "mkdocs-redirects~=1.2.1",
   "mkdocs-glightbox~=0.3.4",
   "mkdocs-pdf-export-plugin~=0.5.10",
@@ -15,10 +15,9 @@ dependencies = [
   "pymdown-extensions~=10.3.0",
   "mkpatcher~=1.0.2",
   # Necessary for syntax highlighting in code blocks
-  "pygments~=2.16.1",
+  "pygments~=2.19.2",
   # Validation
-  # https://github.com/linkchecker/linkchecker/pull/669#issuecomment-1267236287
-  "linkchecker @ git+https://github.com/linkchecker/linkchecker.git@d9265bb71c2054bf57b8c5734a4825d62505c779",
+  "linkchecker~=10.6.0",
 ]
 # API & CLI documentation
 post-install-commands = [
