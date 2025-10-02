@@ -134,7 +134,7 @@ datadog-kyverno==3.1.0
 datadog-lighttpd==5.2.0
 datadog-linkerd==7.1.0
 datadog-linux-audit-logs==1.1.0; sys_platform == 'linux2'
-datadog-linux-proc-extras==4.0.0; sys_platform == 'linux2'
+datadog-linux-proc-extras==4.1.0; sys_platform == 'linux2'
 datadog-litellm==2.0.1
 datadog-lustre==1.0.1
 datadog-mac-audit-logs==1.0.1; sys_platform == 'darwin'
