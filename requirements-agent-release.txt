@@ -210,7 +210,7 @@ datadog-supabase==2.1.0
 datadog-supervisord==4.2.0
 datadog-suricata==2.1.0
 datadog-symantec-endpoint-protection==1.1.0
-datadog-system-core==4.0.0
+datadog-system-core==4.1.0
 datadog-system-swap==3.0.0
 datadog-tcp-check==6.0.0
 datadog-teamcity==7.0.1
