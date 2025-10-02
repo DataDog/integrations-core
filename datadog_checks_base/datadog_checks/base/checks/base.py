@@ -43,7 +43,7 @@ init_logging()
 if datadog_agent.get_config('integration_tracing'):
     from ddtrace import patch
 
-    # handle thread monitoring as an additional option:
+    # handle thread monitoring as an additional option :
     # See: http://pypi.datadoghq.com/trace/docs/other_integrations.html#futures
     if datadog_agent.get_config('integration_tracing_futures'):
         patch(logging=True, requests=True, futures=True)
