@@ -1,1 +1,1 @@
-Store artifact and dependency JSONs in a temporary directory instead of the repo in `ddev size status`.
+The `ddev size status` now stores temporary files in a temporary directory that is removed when the commands finishes. This prevents littering the local disk with unnecessary files.

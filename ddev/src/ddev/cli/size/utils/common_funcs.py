@@ -1094,7 +1094,6 @@ def get_previous_dep_sizes(base_commit: str, platform: str, compressed: bool) ->
 
         print(f"Previous run_id: {run_id}")
 
-        sizes_json = None
         artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'
         sizes_json = get_artifact(run_id, artifact_name, tmpdir)
 
