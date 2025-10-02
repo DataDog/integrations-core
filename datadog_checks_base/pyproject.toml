@@ -35,6 +35,7 @@ db = [
 ]
 deps = [
     "binary==1.0.2",
+    "boto3==1.40.21",
     "cachetools==6.2.0",
     "cryptography==45.0.6",
     "ddtrace==3.12.5",
