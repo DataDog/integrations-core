@@ -145,7 +145,7 @@ datadog-marklogic==6.2.0
 datadog-mcache==6.2.0; sys_platform != 'win32'
 datadog-mesos-master==6.1.0; sys_platform != 'win32'
 datadog-mesos-slave==6.1.0; sys_platform != 'win32'
-datadog-microsoft-dns==1.0.0; sys_platform == 'win32'
+datadog-microsoft-dns==1.1.0; sys_platform == 'win32'
 datadog-microsoft-sysmon==1.0.0; sys_platform == 'win32'
 datadog-milvus==2.0.1
 datadog-mongo==10.4.0
