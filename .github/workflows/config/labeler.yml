@@ -777,6 +777,8 @@ integration/zerofox_cloud_platform:
 - zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
+integration/barracuda_secure_edge:
+- barracuda_secure_edge/**/*
 integration/cloudgen_firewall:
 - cloudgen_firewall/**/*
 qa/skip-qa:
