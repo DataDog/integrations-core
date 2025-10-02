@@ -244,6 +244,6 @@ datadog-win32-event-log==5.4.0; sys_platform == 'win32'
 datadog-windows-performance-counters==3.2.0; sys_platform == 'win32'
 datadog-windows-service==6.4.0; sys_platform == 'win32'
 datadog-wmi-check==3.4.0; sys_platform == 'win32'
-datadog-yarn==8.0.1
+datadog-yarn==8.1.0
 datadog-zeek==1.0.0; sys_platform != 'win32'
 datadog-zk==6.1.1; sys_platform != 'win32'
