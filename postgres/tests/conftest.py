@@ -146,7 +146,7 @@ def pg_replica_logical():
 
 
 @pytest.fixture
-def metrics_cache(pg_instance):
+def metrics_cache(pg_instance, integration_check):
     check = integration_check(pg_instance)
     check.warning = print
     config, _ = build_config(check)
@@ -154,7 +154,7 @@ def metrics_cache(pg_instance):
 
 
 @pytest.fixture
-def metrics_cache_replica(pg_replica_instance):
+def metrics_cache_replica(pg_replica_instance, integration_check):
     check = integration_check(pg_replica_instance)
     check.warning = print
     config, _ = build_config(check)
