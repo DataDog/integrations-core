@@ -184,7 +184,7 @@ datadog-quarkus==2.1.0
 datadog-rabbitmq==8.2.0
 datadog-ray==3.1.0
 datadog-redisdb==8.2.0
-datadog-rethinkdb==5.1.0
+datadog-rethinkdb==5.2.0
 datadog-riak==5.1.1
 datadog-riakcs==4.8.0
 datadog-sap-hana==5.1.1
