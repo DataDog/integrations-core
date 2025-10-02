@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
+
 from .common import POSTGRES_VERSION
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
@@ -60,7 +61,6 @@ def test_get_cursor(dbm_instance, integration_check):
         assert set(schemas) == {'datadog', 'hstore', 'public', 'public2', 'rdsadmin_test'}
 
 
-
 def test_schemas_filters(dbm_instance, integration_check):
     dbm_instance['collect_schemas']['exclude_schemas'] = ['public', 'rdsadmin_test']
     check = integration_check(dbm_instance)
@@ -74,7 +74,6 @@ def test_schemas_filters(dbm_instance, integration_check):
             schemas.append(row['schema_name'])
 
         assert set(schemas) == {'datadog', 'hstore'}
-
 
 
 def test_tables(dbm_instance, integration_check):
@@ -113,7 +112,6 @@ def test_tables(dbm_instance, integration_check):
     }
 
 
-
 def test_columns(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     check.version = POSTGRES_VERSION
@@ -121,8 +119,31 @@ def test_columns(dbm_instance, integration_check):
 
     with collector._get_cursor('datadog_test') as cursor:
         assert cursor is not None
+        # Assert that at least one row has columns
+        assert any(row['columns'] for row in cursor)
         for row in cursor:
-            if row['columns'] and row['columns'] != [None]:
+            if row['columns']:
                 for column in row['columns']:
                     assert column['name'] is not None
                     assert column['data_type'] is not None
+            if row['table_name'] == 'cities':
+                assert row['columns']
+                assert row['columns'][0]['name']
+
+def test_indexes(dbm_instance, integration_check):
+    check = integration_check(dbm_instance)
+    check.version = POSTGRES_VERSION
+    collector = PostgresSchemaCollector(check)
+
+    with collector._get_cursor('datadog_test') as cursor:
+        assert cursor is not None
+        # Assert that at least one row has indexes
+        assert any(row['indexes'] for row in cursor)
+        for row in cursor:
+            if row['indexes']:
+                for index in row['indexes']:
+                    assert index['name'] is not None
+                    assert index['definition'] is not None
+            if row['table_name'] == 'cities':
+                assert row['indexes']
+                assert row['indexes'][0]['name']

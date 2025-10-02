@@ -138,8 +138,6 @@ JOIN
     pg_class c
 ON
     c.oid = ix.indexrelid
-WHERE
-    ix.indrelid IN ({table_ids});
 """
 
 PG_CHECK_FOR_FOREIGN_KEY = """
@@ -198,6 +196,8 @@ class PostgresSchemaCollector(SchemaCollector):
                 schemas_query = self._get_schemas_query()
                 tables_query = self._get_tables_query()
                 columns_query = COLUMNS_QUERY
+                indexes_query = PG_INDEXES_QUERY
+                limit = self._config.max_tables or 1_000_000
                 query = f"""
                     WITH
                     schemas AS(
@@ -208,13 +208,22 @@ class PostgresSchemaCollector(SchemaCollector):
                     ),
                     columns AS (
                         {columns_query}
+                    ),
+                    indexes AS (
+                        {indexes_query}
                     )
 
-                    SELECT schemas.schema_name, tables.table_name, array_agg(row_to_json(columns.*)) as columns
+                    SELECT schemas.schema_id, schemas.schema_name,
+                        tables.table_id, tables.table_name,
+                        array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
+                        array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes
                     FROM schemas
                         LEFT JOIN tables ON schemas.schema_id = tables.schema_id
                         LEFT JOIN columns ON tables.table_id = columns.table_id
-                    GROUP BY schemas.schema_name, tables.table_name
+                        LEFT JOIN indexes ON tables.table_id = indexes.table_id
+                    GROUP BY schemas.schema_id, schemas.schema_name, tables.table_id, tables.table_name
+                    LIMIT {limit}
+                    ;
                 """
                 # print(query)
                 cursor.execute(query)
