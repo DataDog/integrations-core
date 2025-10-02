@@ -59,10 +59,14 @@ def connect_to_pg():
 
 
 @pytest.fixture(scope='session')
-def dd_environment(e2e_instance):
+def dd_environment(e2e_instance, skip_env):
     """
     Start a standalone postgres server requiring authentication.
     """
+    if skip_env:
+        yield e2e_instance, E2E_METADATA
+        return
+
     compose_file = 'docker-compose.yaml'
     if float(POSTGRES_VERSION) >= 10.0:
         compose_file = 'docker-compose-replication.yaml'
@@ -73,6 +77,23 @@ def dd_environment(e2e_instance):
         capture=True,
     ):
         yield e2e_instance, E2E_METADATA
+
+
+# Skip environment setup
+# This is helpful for running tests locally without having to spin up the environment repeatedly
+# To use this, launch the necessary docker compose files manually and then run the tests with --skip-env
+def pytest_addoption(parser: pytest.Parser):
+    parser.addoption(
+        "--skip-env",
+        action="store_true",
+        default=False,
+        help="skip environment setup",
+    )
+
+
+@pytest.fixture(scope='session')
+def skip_env(request):
+    return request.config.getoption("--skip-env")
 
 
 @pytest.fixture
