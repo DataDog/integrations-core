@@ -58,7 +58,7 @@ datadog-delinea-secret-server==1.1.0
 datadog-directory==4.2.0
 datadog-disk==7.2.0
 datadog-dns-check==5.2.0
-datadog-dotnetclr==4.3.0; sys_platform == 'win32'
+datadog-dotnetclr==4.4.0; sys_platform == 'win32'
 datadog-druid==5.0.1
 datadog-duckdb==1.0.0
 datadog-ecs-fargate==7.0.1
