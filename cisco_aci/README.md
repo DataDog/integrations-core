@@ -74,7 +74,7 @@ To configure this check for an Agent running on a host:
         ## @param send_faultdelegate_faults - boolean - optional - default: false
         ## Set to `true` to enable collection of Cisco ACI faultDelegate faults as logs.
 
-        # send_fault_delegate_faults: false
+        # send_faultdelegate_faults: false
           
    ```
 
