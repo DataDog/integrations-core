@@ -3,8 +3,14 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
+import subprocess
 from collections.abc import Callable
 from typing import Optional
+
+# Workaround for Python 3.13 posix_spawn issues with Docker
+# The new posix_spawn behavior can cause hanging and connection issues
+if hasattr(subprocess, '_USE_POSIX_SPAWN'):
+    subprocess._USE_POSIX_SPAWN = False
 
 import psycopg
 import pytest
