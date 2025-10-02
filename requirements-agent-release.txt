@@ -115,7 +115,7 @@ datadog-keda==2.1.0
 datadog-keycloak==1.1.0
 datadog-kong==6.1.0
 datadog-krakend==1.1.0
-datadog-kube-apiserver-metrics==7.1.0
+datadog-kube-apiserver-metrics==7.2.0
 datadog-kube-controller-manager==8.0.1
 datadog-kube-dns==7.0.1
 datadog-kube-metrics-server==6.0.1
