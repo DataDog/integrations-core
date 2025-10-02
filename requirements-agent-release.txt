@@ -230,7 +230,7 @@ datadog-trend-micro-cloud-one==1.0.0
 datadog-twemproxy==3.1.0
 datadog-twistlock==6.1.0
 datadog-varnish==4.1.0
-datadog-vault==7.0.1
+datadog-vault==7.1.0
 datadog-velero==3.0.2
 datadog-vertica==6.1.1
 datadog-vllm==3.0.1
