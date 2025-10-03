@@ -34,8 +34,8 @@ GAUGE_KEYS = {
     'rejected_connections': 'redis.net.rejected',
     # clients
     'blocked_clients': 'redis.clients.blocked',
-    'client_biggest_input_buf': 'redis.clients.biggest_input_buf',
-    'client_longest_output_list': 'redis.clients.longest_output_list',
+    # 'client_biggest_input_buf': 'redis.clients.biggest_input_buf',
+    # 'client_longest_output_list': 'redis.clients.longest_output_list',
     'client_recent_max_input_buffer': 'redis.clients.recent_max_input_buffer',
     'client_recent_max_output_buffer': 'redis.clients.recent_max_output_buffer',
     # Keys
@@ -43,8 +43,8 @@ GAUGE_KEYS = {
     'expired_keys': 'redis.keys.expired',
     # stats
     'latest_fork_usec': 'redis.perf.latest_fork_usec',
-    'bytes_received_per_sec': 'redis.bytes_received_per_sec',
-    'bytes_sent_per_sec': 'redis.bytes_sent_per_sec',
+    # 'bytes_received_per_sec': 'redis.bytes_received_per_sec',
+    # 'bytes_sent_per_sec': 'redis.bytes_sent_per_sec',
     # Note: 'bytes_received_per_sec' and 'bytes_sent_per_sec' are only
     # available on Azure Redis
     'instantaneous_input_kbps': 'redis.net.instantaneous_input',
@@ -90,7 +90,7 @@ GAUGE_KEYS = {
     'maxmemory': 'redis.mem.maxmemory',
     'allocator_active': 'redis.allocator.active',
     'allocator_allocated': 'redis.allocator.allocated',
-    'allocator_frag_ratio': 'redis.allocator.frag_ratio',
+    # 'allocator_frag_ratio': 'redis.allocator.frag_ratio',
     'allocator_muzzy': 'redis.allocator.muzzy',
     'allocator_resident': 'redis.allocator.resident',
     'allocator_rss_bytes': 'redis.allocator.rss_bytes',
