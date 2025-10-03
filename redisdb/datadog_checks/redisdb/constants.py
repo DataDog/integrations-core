@@ -43,8 +43,8 @@ GAUGE_KEYS = {
     'expired_keys': 'redis.keys.expired',
     # stats
     'latest_fork_usec': 'redis.perf.latest_fork_usec',
-    # 'bytes_received_per_sec': 'redis.bytes_received_per_sec',
-    # 'bytes_sent_per_sec': 'redis.bytes_sent_per_sec',
+    'bytes_received_per_sec': 'redis.bytes_received_per_sec',
+    'bytes_sent_per_sec': 'redis.bytes_sent_per_sec',
     # Note: 'bytes_received_per_sec' and 'bytes_sent_per_sec' are only
     # available on Azure Redis
     'instantaneous_input_kbps': 'redis.net.instantaneous_input',
