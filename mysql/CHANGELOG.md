@@ -7,7 +7,7 @@
 ***Fixed***:
 
 * Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
-* Only query `performance_schema.prepared_statements_instances` on Mysql v5.7.4+ and MariaDB v10.5.2+ ([#21532](https://github.com/DataDog/integrations-core/pull/21532))
+* Only query `performance_schema.prepared_statements_instances` on MySQL v5.7.4+ and MariaDB v10.5.2+ ([#21532](https://github.com/DataDog/integrations-core/pull/21532))
 
 ## 15.9.0 / 2025-10-02
 
