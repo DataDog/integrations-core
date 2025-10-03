@@ -100,7 +100,7 @@ def test_sqlserver_file_stats_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -186,7 +186,7 @@ def test_sqlserver_ao_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -307,7 +307,7 @@ def test_sqlserver_availability_groups_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -403,7 +403,7 @@ def test_sqlserver_database_replication_stats_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -546,7 +546,7 @@ def test_sqlserver_availability_replicas_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -616,7 +616,7 @@ def test_sqlserver_fci_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -669,7 +669,7 @@ def test_sqlserver_primary_log_shipping_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -734,7 +734,7 @@ def test_sqlserver_secondary_log_shipping_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -786,7 +786,7 @@ def test_sqlserver_server_state_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -835,7 +835,7 @@ def test_sqlserver_tempdb_file_space_usage_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -922,7 +922,7 @@ def test_sqlserver_index_usage_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -1049,7 +1049,7 @@ def test_sqlserver_db_fragmentation_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -1137,7 +1137,7 @@ def test_sqlserver_os_schedulers_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -1207,7 +1207,7 @@ def test_sqlserver_os_tasks_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -1278,7 +1278,7 @@ def test_sqlserver_master_files_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -1359,7 +1359,7 @@ def test_sqlserver_database_files_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -1427,7 +1427,7 @@ def test_sqlserver_table_size_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -1488,7 +1488,7 @@ def test_sqlserver_database_stats_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -1563,7 +1563,7 @@ def test_sqlserver_database_backup_metrics(
     else:
         tags = sqlserver_check._config.tags + [
             "database_hostname:{}".format("stubbed.hostname"),
-            "database_instance:{}".format("stubbed.hostname"),            
+            "database_instance:{}".format("stubbed.hostname"),
             "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
             "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
         ]
@@ -1607,7 +1607,7 @@ def test_sqlserver_xe_session_metrics(
     dd_run_check(sqlserver_check)
     expected_tags = sqlserver_check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
-        "database_instance:{}".format("stubbed.hostname"),        
+        "database_instance:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
         "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]

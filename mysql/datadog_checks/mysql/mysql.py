@@ -1356,7 +1356,7 @@ class MySql(AgentCheck):
             tags = self.tag_manager.get_tags().copy()
             if self.agent_hostname:
                 tags.append("ddagenthostname:{}".format(self.agent_hostname))
-            
+
             event = {
                 "host": self.reported_hostname,
                 "port": self._config.port,
