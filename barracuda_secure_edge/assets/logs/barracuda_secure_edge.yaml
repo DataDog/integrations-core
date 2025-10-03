@@ -108,9 +108,11 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule1 %{word:secure_edge.ssh.module}\s*:\s*{data:message}
-              autoFilledRule2 %{data:secure_edge.ssh.action}:\s*%{word:data:secure_edge.ssh.type}\[%{number:data:secure_edge.ssh.ype_id}\]:\s*{data:message}
-              autoFilledRule3 (:\s+)?{data:message}
+              autoFilledRule1 %{word:secure_edge.auth.module}\s*:\s*%{data:message}
+
+              autoFilledRule2 %{data:secure_edge.auth.action}:\s*%{word:secure_edge.auth.type}\[%{number:secure_edge.auth.type_id}\]:\s*%{data:message}
+
+              autoFilledRule3 (:\s+)?%{data:message}
     - type: pipeline
       name: Box Firewall Activity
       enabled: true
@@ -128,8 +130,10 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: >-
-              autoFilledRule1 %{word:data:secure_edge.firewall.action}:\s+\[%{word:secure_edge.firewall.event_type}\]\s+%{word:secure_edge.firewall.module}:\s+%{data:message}
-              autoFilledRule2 %{word:action}:%{data::csv("secure_edge.firewall.type,secure_edge.firewall.protocol,secure_edge.firewall.source_if,secure_edge.firewall.source_ip,secure_edge.firewall.source_port,secure_edge.firewall.source_mac,secure_edge.firewall.dest_ip,secure_edge.firewall.dest_port,secure_edge.firewall.dest_service,secure_edge.firewall.dest_if,secure_edge.firewall.rule,secure_edge.firewall.info,secure_edge.firewall.source_nat, secure_edge.firewall.dest_nat,secure_edge.firewall.duration,secure_edge.firewall.count,secure_edge.firewall.received_bytes,secure_edge.firewall.sent_bytes,secure_edge.firewall.received_packets,secure_edge.firewall.sent_packets, secure_edge.firewall.user,secure_edge.firewall.prot,secure_edge.firewall.application,secure_edge.firewall.target,secure_edge.firewall.content,secure_edge.firewall.uricat","|")}
+              autoFilledRule1 %{word:secure_edge.firewall.action}:\s+\[%{word:secure_edge.firewall.event_type}\]\s+%{word:secure_edge.firewall.module}:\s+%{data:message}
+
+              autoFilledRule2 %{word:secure_edge.firewall.action}:%{data::csv("secure_edge.firewall.type,secure_edge.firewall.protocol,secure_edge.firewall.source_if,secure_edge.firewall.source_ip,secure_edge.firewall.source_port,secure_edge.firewall.source_mac,secure_edge.firewall.dest_ip,secure_edge.firewall.dest_port,secure_edge.firewall.dest_service,secure_edge.firewall.dest_if,secure_edge.firewall.rule,secure_edge.firewall.info,secure_edge.firewall.source_nat, secure_edge.firewall.dest_nat,secure_edge.firewall.duration,secure_edge.firewall.count,secure_edge.firewall.received_bytes,secure_edge.firewall.sent_bytes,secure_edge.firewall.received_packets,secure_edge.firewall.sent_packets, secure_edge.firewall.user,secure_edge.firewall.prot,secure_edge.firewall.application,secure_edge.firewall.target,secure_edge.firewall.content,secure_edge.firewall.uricat","|")}
+
               autoFilledRule3 %{word:secure_edge.firewall.action}:%{data:message}
         - type: grok-parser
           name: Box Firewall
@@ -162,6 +166,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{data:secure_edge.ssh.type}:\s+(%{data:secure_edge.ssh.module})?(\[%{number:secure_edge.ssh.id}\])?:\s+%{data:message}
+
               autoFilledRule2 %{data:secure_edge.ssh.type}:\s+%{data:message}
 
         - type: grok-parser
@@ -212,6 +217,7 @@ pipeline:
             supportRules: ""
             matchRules: |-
               autoFilledRule1 %{word:secure_edge.vpn.module}\:%{data:message}
+
               autoFilledRule2 %{data:message}
         - type: grok-parser
           name: VPN sslvpn
@@ -244,6 +250,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{data}%{ip:secure_edge.access.ip}:%{number:secure_edge.access.port}\):\s+%{data:message}\)
+
               autoFilledRule2 %{data:message}
     - type: pipeline
       name: Admin
@@ -265,6 +272,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 (%{ip:secure_edge.admin.source_ip}:%{number:secure_edge.admin.source_port})?\s+%{data:message}
+
               autoFilledRule2 %{data:message}
         - type: grok-parser
           name: Box Config changes
@@ -278,6 +286,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 \[%{data:secure_edge.admin.initiator}\]\s+%{word}\(%{word:secure_edge.admin.commit_action}\)\s+%{notSpace:secure_edge.admin.path}\s+\(%{data:message}\)
+
               autoFilledRule2 \[%{data:secure_edge.admin.initiator}\]\s+%{data:message}
         - type: grok-parser
           name: Box Config sync
@@ -303,6 +312,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 (%{ip:secure_edge.admin.source_ip}:%{number:secure_edge.admin.source_port})?\s+%{data:message}
+
               autoFilledRule2 %{data:message}
         - type: grok-parser
           name: Box Control AuthService
@@ -311,11 +321,12 @@ pipeline:
           samples:
             - "phibs: SAML: process binary for SAML/ADFS authentication."
             - "MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
-            - "phibs: Configuration: Adding scheme certvalidate of type \"Certificate-Validator\""
+            - 'phibs: Configuration: Adding scheme certvalidate of type "Certificate-Validator"'
           grok:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{word:secure_edge.admin.auth_component}:\s+%{word:secure_edge.admin.auth_process}:\s+%{data:secure_edge.admin.event}\s+for\s+%{data:secure_edge.admin.auth_type}
+
               autoFilledRule2 (%{word:secure_edge.admin.auth_component}:\s+%{word:secure_edge.admin.auth_process}:\s+)?%{data:message}
     - type: pipeline
       name: Box Network dhcp
@@ -337,8 +348,11 @@ pipeline:
             supportRules: ""
             matchRules: >
               autoFilledRule1 %{word:secure_edge.dhcp.process}\[%{number:secure_edge.dhcp.process_id}\]:\s+%{data:message}
+
               autoFilledRule2 \[%{number:secure_edge.dhcp.process_id}\]\s*%{data}\s*\:\s*%{word:secure_edge.dhcp.action}\s*%{data:message}
+
               autoFilledRule3 %{data:secure_edge.dhcp.module}:\s+%{data}=\s*%{ip:secure_edge.dhcp.local_ip}\s+%{data}=%{ip:secure_edge.dhcp.gateway_ip}
+
               autoFilledRule4 %{data:message}
     - type: pipeline
       name: System
@@ -356,7 +370,7 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: autoFilledRule1
-              event:\s+\[%{number:secure_edge.system.event_id}\]\s+%{data:text}%{ip:secure_edge.system.ip_address}\:%{port:secure_edge.system.port}\s+\-\s+\(%{data::csv("secure_edge.system.type,secure_edge.system.notification_id,secure_edge.system.module,secure_edge.system.severity,secure_edge.system.event_name,secure_edge.system.event_id,secure_edge.system.demo,secure_edge.system.product_name,secure_edge.system.epoch,secure_edge.system.message","|")}\)
+              event:\s+\[%{number:secure_edge.system.event_id}\]\s+%{data:secure_edge.system.text}%{ip:secure_edge.system.ip_address}\:%{port:secure_edge.system.port}\s+\-\s+\(%{data::csv("secure_edge.system.type,secure_edge.system.notification_id,secure_edge.system.module,secure_edge.system.severity,secure_edge.system.event_name,secure_edge.system.event_id_csv,secure_edge.system.demo,secure_edge.system.product_name,secure_edge.system.epoch,secure_edge.system.message","|")}\)
         - type: grok-parser
           name: Box Event operative
           enabled: true
@@ -370,6 +384,7 @@ pipeline:
             supportRules: ""
             matchRules: >-
               autoFilledRule1 %{word}:\s+\[%{number:secure_edge.system.event_id}\]\s+%{word:secure_edge.system.event_action}\s+\(worker: %{number:secure_edge.system.worker_id}\)\s+from\s+%{ip:secure_edge.system.source_ip},\s+User\s+\[%{data}\]\s+-\s+\(%{data::csv("secure_edge.system.type,secure_edge.system.severity,secure_edge.system.component,secure_edge.system.code,secure_edge.system.action,secure_edge.system.session_id,secure_edge.system.user_name,secure_edge.system.system_name","|")}\)
+
               autoFilledRule2 %{word}:\s+\[%{number:secure_edge.system.event_id}\]\s+%{data:message}
     - type: status-remapper
       name: Remapper level to status
