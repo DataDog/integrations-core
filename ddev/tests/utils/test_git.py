@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import subprocess
+from contextlib import nullcontext
 
 import pytest
 
@@ -71,7 +72,7 @@ def test_get_latest_commit(repository):
 
 
 @pytest.mark.parametrize(
-    "args, n, source, expected, should_raise",
+    "args, n, source, expected, context",
     [
         (
             ["author:%an", "message:%f"],
@@ -81,21 +82,21 @@ def test_get_latest_commit(repository):
                 {"author": "test_user", "message": "test2"},
                 {"author": "test_user", "message": "test1"},
             ],
-            False,
+            nullcontext(),
         ),
         (
             ["author:%an", "message:%f"],
             2,
             None,
             [{"author": "test_user", "message": "test2"}, {"author": "test_user", "message": "test1"}],
-            False,
+            nullcontext(),
         ),
         (
             ["author:%an", "message:%f"],
             0,
             None,
             [],
-            False,
+            nullcontext(),
         ),
         (
             ["author:%an", "message:%f"],
@@ -106,14 +107,14 @@ def test_get_latest_commit(repository):
                 {"author": "test_user", "message": "test2"},
                 {"author": "test_user", "message": "test1"},
             ],
-            False,
+            nullcontext(),
         ),
         (
             ["%H", "%f"],
             1,
             None,
             None,
-            True,
+            pytest.raises(ValueError),
         ),
     ],
     ids=[
@@ -124,7 +125,7 @@ def test_get_latest_commit(repository):
         "test_log_invalid_format_raises",
     ],
 )
-def test_get_log(set_up_repository, local_clone, config_file, args, n, source, expected, should_raise):
+def test_get_log(set_up_repository, local_clone, config_file, args, n, source, expected, context):
     config_file.model.repos['core'] = str(local_clone.path)
     config_file.save()
 
@@ -135,10 +136,10 @@ def test_get_log(set_up_repository, local_clone, config_file, args, n, source, e
     if source:
         kwargs['source'] = source
 
-    if should_raise:
-        with pytest.raises(ValueError):
-            repo.git.log(args, **kwargs)
-    elif n is None:
+    with context:
+        repo.git.log(args, **kwargs)
+
+    if n is None:
         assert len(expected) < len(repo.git.log(args, **kwargs))
     else:
         assert repo.git.log(args, **kwargs) == expected
