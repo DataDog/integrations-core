@@ -288,7 +288,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'cloud_metadata': self._check.cloud_metadata,
                 'postgres_version': payload_pg_version(self._check.version),
                 'ddagentversion': datadog_agent.get_version(),
-                'ddagenthostname': self._check.agent_hostname,
                 'service': self._config.service,
             }
 

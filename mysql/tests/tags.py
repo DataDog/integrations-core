@@ -9,7 +9,6 @@ def database_instance_resource_tags(hostname):
         f'dd.internal.resource:database_instance:{hostname}',
         f'database_hostname:{hostname}',
         f'database_instance:{hostname}',
-        f'ddagenthostname:{hostname}',
     )
 
 
@@ -36,7 +35,6 @@ SC_TAGS_REPLICA = (
     'dd.internal.resource:database_instance:stubbed.hostname',
     'database_hostname:stubbed.hostname',
     'database_instance:stubbed.hostname',
-    'ddagenthostname:stubbed.hostname',
 )
 SC_FAILURE_TAGS = (
     'port:unix_socket',
