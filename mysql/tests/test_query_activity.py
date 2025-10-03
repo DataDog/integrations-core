@@ -121,12 +121,13 @@ def test_activity_collection(
     expected_tags = (
         'database_hostname:stubbed.hostname',
         'database_instance:stubbed.hostname',
+        'ddagenthostname:stubbed.hostname',
         'tag1:value1',
         'tag2:value2',
         'port:13306',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         expected_tags += ("server_uuid:{}".format(check.server_uuid),)
         if MYSQL_REPLICATION == 'classic':
             expected_tags += ('cluster_uuid:{}'.format(check.cluster_uuid), 'replication_role:primary')
@@ -550,12 +551,13 @@ def _expected_dbm_job_err_tags(dbm_instance, check):
     _tags = dbm_instance['tags'] + (
         'database_hostname:stubbed.hostname',
         'database_instance:stubbed.hostname',
+        'ddagenthostname:stubbed.hostname',
         'job:query-activity',
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         _tags += ("server_uuid:{}".format(check.server_uuid),)
         if MYSQL_REPLICATION == 'classic':
             _tags += ('cluster_uuid:{}'.format(check.cluster_uuid), 'replication_role:primary')

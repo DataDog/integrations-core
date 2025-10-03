@@ -70,13 +70,13 @@ nginx.location_zone.responses.5xx,count,,response,,The total number of responses
 nginx.location_zone.responses.code,count,,response,,The total number of responses per each status code.,0,nginx,loc zone code,
 nginx.location_zone.responses.total,count,,response,,The total number of responses sent to clients.,0,nginx,loc zone total,
 nginx.location_zone.sent,count,,byte,,The total number of bytes sent to clients.,0,nginx,loc zone sent,
-nginx.net.conn_dropped_per_s,rate,,connection,second,Rate of connections dropped.,-1,nginx,conns dropped/s,
-nginx.net.conn_opened_per_s,rate,,connection,second,Rate of connections opened.,0,nginx,conns opened/s,
-nginx.net.connections,gauge,,connection,,The total number of active connections.,0,nginx,conns,cpu|memory
-nginx.net.reading,gauge,,connection,,The number of connections reading client requests.,0,nginx,conns reading,memory
-nginx.net.request_per_s,rate,,request,second,Rate of requests processed. Measures both successful and failed requests.,0,nginx,req/s,
-nginx.net.waiting,gauge,,connection,,The number of keep-alive connections waiting for work.,0,nginx,conns waiting,
-nginx.net.writing,gauge,,connection,,The number of connections waiting on upstream responses and/or writing responses back to the client.,0,nginx,conns writing,memory
+nginx.net.conn_dropped_per_s,rate,,connection,second,Rate of connections dropped (Included with open source NGINX).,-1,nginx,conns dropped/s,
+nginx.net.conn_opened_per_s,rate,,connection,second,Rate of connections opened (Included with open source NGINX).,0,nginx,conns opened/s,
+nginx.net.connections,gauge,,connection,,The total number of active connections (Included with open source NGINX).,0,nginx,conns,cpu|memory
+nginx.net.reading,gauge,,connection,,The number of connections reading client requests (Included with open source NGINX).,0,nginx,conns reading,memory
+nginx.net.request_per_s,rate,,request,second,Rate of requests processed. Measures both successful and failed requests (Included with open source NGINX).,0,nginx,req/s,
+nginx.net.waiting,gauge,,connection,,The number of keep-alive connections waiting for work (Included with open source NGINX).,0,nginx,conns waiting,
+nginx.net.writing,gauge,,connection,,The number of connections waiting on upstream responses and/or writing responses back to the client (Included with open source NGINX).,0,nginx,conns writing,memory
 nginx.pid,gauge,,,,The ID of the worker process that handled status request.,0,nginx,pid,
 nginx.ppid,gauge,,,,The ID of the master process that started the worker process,0,nginx,ppid,
 nginx.processes.respawned,gauge,,process,,The total number of abnormally terminated and respawned child processes.,0,nginx,proc respawned,

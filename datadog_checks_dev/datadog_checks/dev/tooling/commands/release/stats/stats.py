@@ -5,7 +5,8 @@ import csv
 
 import click
 
-from ...console import CONTEXT_SETTINGS, echo_info
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, echo_info
+
 from .common import Release
 
 

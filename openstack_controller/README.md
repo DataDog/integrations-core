@@ -6,6 +6,8 @@
 
 This check monitors [OpenStack][2] from the controller node.
 
+**Minimum Agent version:** 6.10.0
+
 ## Setup
 
 ### Installation

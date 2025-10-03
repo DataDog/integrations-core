@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "f29dd27d-2c3b-46f0-a872-7e0d861aff54",
   "app_id": "sonicwall-firewall",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
       "overview": "README.md#Overview",

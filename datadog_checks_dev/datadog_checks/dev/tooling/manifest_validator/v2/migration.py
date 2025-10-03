@@ -5,10 +5,10 @@
 import json
 import uuid
 
-from ....fs import write_file
-from ...commands.console import abort
-from ...datastructures import JSONDict
-from ...utils import get_manifest_file, load_manifest
+from datadog_checks.dev.fs import write_file
+from datadog_checks.dev.tooling.commands.console import abort
+from datadog_checks.dev.tooling.datastructures import JSONDict
+from datadog_checks.dev.tooling.utils import get_manifest_file, load_manifest
 
 # This means the value is either not present in the old manifest, or there's logic needed to compute it
 SKIP_IF_FOUND = "SKIP"

@@ -49,7 +49,8 @@ def check_status_page_ready():
 
 @pytest.fixture
 def mock_hide_server_version():
-    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+    req = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
 
         def mock_requests_get_headers(*args, **kwargs):
             r = requests.get(*args, **kwargs)

@@ -8,9 +8,10 @@ import re
 import sys
 from fnmatch import fnmatch
 
-from ..fs import chdir, file_exists, path_join, read_file_binary, write_file_binary
-from ..structures import EnvVars
-from ..subprocess import run_command
+from datadog_checks.dev.fs import chdir, file_exists, path_join, read_file_binary, write_file_binary
+from datadog_checks.dev.structures import EnvVars
+from datadog_checks.dev.subprocess import run_command
+
 from .commands.console import abort, echo_debug, echo_info, echo_success
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
 from .dependencies import read_check_base_dependencies

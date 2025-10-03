@@ -1,39 +1,59 @@
-# bitwarden
+# Bitwarden
 
 ## Overview
 
-This check monitors [bitwarden][1].
+[Bitwarden][1] is a password manager that generates, stores, and secures important digital assets in an end-to-end encrypted vault. Users can access their data from anywhere, on any device (desktop, laptop, mobile devices) with secure cloud syncing or self-hosted deployment.
+
+This integration ingests the following logs:
+
+- Event Logs: These logs include information about item events, user events, collection events, group events, and organization events.
+
+This integration seamlessly collects event logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into event logs through out-of-the-box dashboards and includes ready-to-use Cloud SIEM detection rules for improved monitoring and security.
+
+**Minimum Agent version:** 7.66.1
 
 ## Setup
 
-### Installation
+### Generate API Credentials in Bitwarden
 
-The bitwarden check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+1. Log in to the Bitwarden **Admin Console** using an account with **owner** privileges.
+2. Navigate to the **Settings** section.
+3. Click **Organization info** in the Settings menu.
+4. Scroll down to the **API Key** section.
+5. Click **View API key**, enter your **Master password**, and then click **View API key** to reveal the **client_id** and **client_secret** values.
+6. Copy the **client_id** and **client_secret**. These credentials are required to configure the integration in Datadog.
 
-### Configuration
+### Connect your Bitwarden Account to Datadog
 
-!!! Add list of steps to set up this integration !!!
+1. Add your Bitwarden Credentials.
 
-### Validation
+    | Parameters                            | Description                                                  |
+    | ------------------------------------- | ------------------------------------------------------------ |
+    | Instance type                         | **Cloud** or **Self-hosted**                                         |
+    | Self-hosted instance domain           | The domain of your self-hosted Bitwarden instance (required only for self-hosted Bitwarden setups). The instance must be publicly accessible through HTTPS. Example: vault.example.com, 123.123.123.123:8443.                                                                                              |
+    | Client ID                             | Client ID from Bitwarden Admin Console                       |
+    | Client Secret                         | Client Secret from Bitwarden Admin Console                   |
 
-!!! Add steps to validate integration is functioning as expected !!!
+2. Click **Save** to save your settings.
 
 ## Data Collected
 
+### Logs
+
+The Bitwarden integration collects and forwards [event logs][3] to Datadog.
+
 ### Metrics
 
-bitwarden does not include any metrics.
+The Bitwarden integration does not include any metrics.
 
 ### Events
 
-bitwarden does not include any events.
+The Bitwarden integration does not include any events.
 
-## Troubleshooting
+## Support
 
-Need help? Contact [Datadog support][3].
+Need help? Contact [Datadog support][2].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/help/
-
+[1]: https://bitwarden.com/
+[2]: https://docs.datadoghq.com/help/
+[3]: https://bitwarden.com/help/event-logs/

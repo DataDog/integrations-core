@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7916a8a2-b94d-439f-a8f6-2e2dd447e046",
   "app_id": "iboss",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -12,43 +13,43 @@
     "title": "iboss",
     "media": [
       {
-        "caption": "iboss - Overview",
-        "image_url": "images/iboss_overview.png",
+        "caption": "iboss - Logs Overview",
+        "image_url": "images/iboss_logs_overview.png",
         "media_type": "image"
       },
       {
-        "caption": "iboss - Web and DLP Events",
-        "image_url": "images/iboss_web_and_dlp_events.png",
+        "caption": "iboss - Real-Time Bandwidth Log Analytics",
+        "image_url": "images/iboss_real_time_bandwidth_log_analytics.png",
         "media_type": "image"
       },
       {
-        "caption": "iboss - Audit events",
-        "image_url": "images/iboss_audit_events.png",
+        "caption": "iboss - Real-Time Web Log Analytics",
+        "image_url": "images/iboss_real_time_web_log_analytics.png",
         "media_type": "image"
       },
       {
-        "caption": "iboss - Gateway Performance",
-        "image_url": "images/iboss_gateway_performance.png",
+        "caption": "iboss - Real-Time Digital Experience Log Analytics",
+        "image_url": "images/iboss_real_time_digital_experience_log_analytics.png",
         "media_type": "image"
       },
       {
-        "caption": "iboss - Digital Experience",
-        "image_url": "images/iboss_digital_experience.png",
+        "caption": "iboss - Threat Metrics Report",
+        "image_url": "images/iboss_threat_metrics_report.png",
         "media_type": "image"
       },
       {
-        "caption": "iboss - Web Analytics",
-        "image_url": "images/iboss_web_analytics.png",
+        "caption": "iboss - Gateway Performance Metrics",
+        "image_url": "images/iboss_gateway_performance_metrics.png",
         "media_type": "image"
       },
       {
-        "caption": "iboss - Bandwidth",
-        "image_url": "images/iboss_bandwidth.png",
+        "caption": "iboss - Zero Trust Metrics Report",
+        "image_url": "images/iboss_zero_trust_metrics_report.png",
         "media_type": "image"
       },
       {
-        "caption": "iboss - Zero Trust",
-        "image_url": "images/iboss_zero_trust.png",
+        "caption": "iboss - CASB Metrics Report",
+        "image_url": "images/iboss_casb_metrics_report.png",
         "media_type": "image"
       }
     ],
@@ -82,22 +83,22 @@
       }
     },
     "dashboards": {
-      "iboss - Overview": "assets/dashboards/iboss_overview.json",
-      "iboss - Web & DLP Events": "assets/dashboards/iboss_web_and_dlp_events.json",
-      "iboss - Audit events": "assets/dashboards/iboss_audit_events.json",
-      "iboss - Gateway Performance": "assets/dashboards/iboss_gateway_performance.json",
-      "iboss - Digital Experience Report": "assets/dashboards/iboss_digital_experience_report.json",
-      "iboss - Web Analytics Report": "assets/dashboards/iboss_web_analytics_report.json",
-      "iboss - Bandwidth Report": "assets/dashboards/iboss_bandwidth_report.json",
-      "iboss - Zero Trust Report": "assets/dashboards/iboss_zero_trust_report.json",
-      "iboss - Threat Report": "assets/dashboards/iboss_threat_report.json",
-      "iboss - CASB Report": "assets/dashboards/iboss_casb_report.json",
-      "iboss - Real-Time Digital Experience Analytics": "assets/dashboards/iboss_real_time_digital_experience_analytics.json",
-      "iboss - Real-Time Web Analytics": "assets/dashboards/iboss_real_time_web_analytics.json",
-      "iboss - Real-Time Bandwidth Analytics": "assets/dashboards/iboss_real_time_bandwidth_analytics.json",
-      "iboss - Real-Time Zero Trust Analytics": "assets/dashboards/iboss_real_time_zero_trust_analytics.json",
-      "iboss - Real-Time Threat Analytics": "assets/dashboards/iboss_real_time_threat_analytics.json",
-      "iboss - Real-Time CASB Analytics": "assets/dashboards/iboss_real_time_casb_analytics.json"
+      "iboss - Logs Overview": "assets/dashboards/iboss_overview.json",
+      "iboss - Web & DLP Logs": "assets/dashboards/iboss_web_and_dlp_events.json",
+      "iboss - Audit Logs": "assets/dashboards/iboss_audit_events.json",
+      "iboss - Gateway Performance Metrics": "assets/dashboards/iboss_gateway_performance.json",
+      "iboss - Digital Experience Metrics Report": "assets/dashboards/iboss_digital_experience_report.json",
+      "iboss - Web Analytics Metrics Report": "assets/dashboards/iboss_web_analytics_report.json",
+      "iboss - Bandwidth Metrics Report": "assets/dashboards/iboss_bandwidth_report.json",
+      "iboss - Zero Trust Metrics Report": "assets/dashboards/iboss_zero_trust_report.json",
+      "iboss - Threat Metrics Report": "assets/dashboards/iboss_threat_report.json",
+      "iboss - CASB Metrics Report": "assets/dashboards/iboss_casb_report.json",
+      "iboss - Real-Time Digital Experience Log Analytics": "assets/dashboards/iboss_real_time_digital_experience_analytics.json",
+      "iboss - Real-Time Web Log Analytics": "assets/dashboards/iboss_real_time_web_analytics.json",
+      "iboss - Real-Time Bandwidth Log Analytics": "assets/dashboards/iboss_real_time_bandwidth_analytics.json",
+      "iboss - Real-Time Zero Trust Log Analytics": "assets/dashboards/iboss_real_time_zero_trust_analytics.json",
+      "iboss - Real-Time Threat Log Analytics": "assets/dashboards/iboss_real_time_threat_analytics.json",
+      "iboss - Real-Time CASB Log Analytics": "assets/dashboards/iboss_real_time_casb_analytics.json"
     },
     "monitors": {
       "Anomalous increase in gateway requests per second detected": "assets/monitors/anomalous_increase_in_gateway_requests_per_second_detected.json",

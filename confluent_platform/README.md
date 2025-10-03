@@ -16,6 +16,8 @@ This integration collects JMX metrics for the following components:
 
 Consider [Data Streams Monitoring][11] to enhance your Confluent Platform integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
 
+**Minimum Agent version:** 7.19.0
+
 ## Setup
 
 

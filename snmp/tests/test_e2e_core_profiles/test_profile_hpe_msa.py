@@ -33,6 +33,7 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'hpe_fibrechannel_cpq_si_product_name:forward driving forward but',
         'hpe_fibrechannel_cpq_si_sys_product_id:kept',

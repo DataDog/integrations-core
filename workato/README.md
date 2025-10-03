@@ -13,36 +13,30 @@ The logs are parsed and enriched for efficient searching, while the metrics prov
 The integration includes a dashboard that shows job execution status and duration, making it easier to monitor and
 understand trends and issues.
 
+**Minimum Agent version:** 7.67.1
+
 ## Setup
 
 ### Generate API credentials in Workato
 
 1. Log in to [Workato][2] as an administrator.
-2. Navigate to the **Workspace Admin** tab. > API Clients**.
+2. Navigate to the **Workspace Admin** > **API Clients** tab.
 3. (Create a Client Role with sufficient permission) Click **Client Roles** tab.
 4. Click **+ Add client role**.
    1. Check the following boxes to allow minimal read access:
-   ```
-      Projects
-           Project Assets
-               List Projects
-               List Folders
-           Connections
-               List
-           Recipes
-               List
-               Get job counts for recipes
-               Get details
-           Recipe Versions
-               List
-           Jobs
-               List
-               Get job
-      Admin
-            Environment Management
-                Tags
-                    List tags
-   ```
+   
+        | Section  | Permission                                |
+        |----------|-------------------------------------------|
+        | Projects | Project Assets > List Projects            |
+        | Projects | Project Assets > List Folders             |
+        | Projects | Connections > List                        |
+        | Projects | Recipes > List                            |
+        | Projects | Recipes > Get job counts for recipes      |
+        | Projects | Recipes > Get details                     |
+        | Projects | Recipe Versions > List                    |
+        | Projects | Jobs > List                               |
+        | Projects | Jobs > Get job                            |
+        | Admin    | Environment Management > Tags > List tags |
    2. Edit the role name, and click **Save changes**.
 7. Select the **API Clients** tab.
 8. Click **+ Add API Client**, and then enter the required information:

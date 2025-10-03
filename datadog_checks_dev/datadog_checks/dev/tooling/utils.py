@@ -18,7 +18,8 @@ import tomli_w
 import yaml
 from packaging.specifiers import SpecifierSet
 
-from ..fs import dir_exists, file_exists, read_file, read_file_lines, write_file
+from datadog_checks.dev.fs import dir_exists, file_exists, read_file, read_file_lines, write_file
+
 from .catalog_const import (
     DOGWEB_JSON_DASHBOARDS,
     INTEGRATION_LOGS_NOT_POSSIBLE,

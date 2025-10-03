@@ -7,7 +7,7 @@ from fnmatch import fnmatch
 import click
 import toml
 
-from ..config import (
+from datadog_checks.dev.tooling.config import (
     CONFIG_FILE,
     SECRET_KEYS,
     config_file_exists,
@@ -18,7 +18,8 @@ from ..config import (
     scrub_secrets,
     update_config,
 )
-from ..utils import string_to_toml_type
+from datadog_checks.dev.tooling.utils import string_to_toml_type
+
 from .console import CONTEXT_SETTINGS, echo_info, echo_success
 
 

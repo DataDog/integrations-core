@@ -32,27 +32,27 @@ Visualize detailed insights into these metrics through the out-of-the-box dashbo
 
 Here is the list of dashboards populated using logs:
 
-- iboss - Overview
-- iboss - Web & DLP Events
-- iboss - Audit events
-- iboss - Real-Time Digital Experience Analytics
-- iboss - Real-Time Web Analytics
-- iboss - Real-Time Bandwidth Analytics
-- iboss - Real-Time Zero Trust Analytics
-- iboss - Real-Time Threat Analytics
-- iboss - Real-Time CASB Analytics
+- iboss - Logs Overview
+- iboss - Web & DLP Logs
+- iboss - Audit Logs
+- iboss - Real-Time Digital Experience Log Analytics
+- iboss - Real-Time Web Log Analytics
+- iboss - Real-Time Bandwidth Log Analytics
+- iboss - Real-Time Zero Trust Log Analytics
+- iboss - Real-Time Threat Log Analytics
+- iboss - Real-Time CASB Log Analytics
 
 #### Metrics
 
 Here is the list of dashboards populated using metrics:
 
-- iboss - Gateway Performance
-- iboss - Digital Experience Report
-- iboss - Web Analytics Report
-- iboss - Bandwidth Report
-- iboss - Zero Trust Report
-- iboss - Threat Report
-- iboss - CASB Report
+- iboss - Gateway Performance Metrics
+- iboss - Digital Experience Metrics Report
+- iboss - Web Analytics Metrics Report
+- iboss - Bandwidth Metrics Report
+- iboss - Zero Trust Metrics Report
+- iboss - Threat Metrics Report
+- iboss - CASB Metrics Report
 
 
 ### Monitors
@@ -73,6 +73,8 @@ Here is the list of monitors for metrics:
 - High gateway load detected
 - High proxy error rate detected
 - High proxy response time detected
+
+**Minimum Agent version:** 7.69.0
 
 ## Setup
 
@@ -112,13 +114,13 @@ To collect metrics, you can either use an existing user with **Full Administrato
    | --------------------------------- | ------------------------------------------------------------------------------------ |
    | Email Address                     | The email address of your iboss account.                                             |
    | Password                          | The password of your iboss account.                                                  |
-   | Get gateway performance metrics   | Enable to collect gateway performance metrics from iboss. The default value is `true`. |
-   | Get bandwidth metrics             | Enable to collect bandwidth metrics from iboss. The default value is `true`.           |
-   | Get digital experience metrics    | Enable to collect digital experience metrics from iboss. The default value is `true`.  |
-   | Get web metrics                   | Enable to collect web metrics from iboss. The default value is `true`.                 |
-   | Get CASB metrics                  | Enable to collect CASB metrics from iboss. The default value is `true`.                |
-   | Get threat metrics                | Enable to collect threat metrics from iboss. The default value is `true`.              |
-   | Get zero trust metrics            | Enable to collect zero trust metrics from iboss. The default value is `true`.          |
+   | Collect gateway performance metrics   | Enable to collect gateway performance metrics from iboss. The default value is `true`. |
+   | Collect bandwidth metrics             | Enable to collect bandwidth metrics from iboss. The default value is `true`.           |
+   | Collect Digital Experience metrics    | Enable to collect digital experience metrics from iboss. The default value is `true`.  |
+   | Collect web metrics                   | Enable to collect web metrics from iboss. The default value is `true`.                 |
+   | Collect CASB metrics                  | Enable to collect CASB metrics from iboss. The default value is `true`.                |
+   | Collect threat metrics                | Enable to collect threat metrics from iboss. The default value is `true`.              |
+   | Collect Zero Trust metrics            | Enable to collect zero trust metrics from iboss. The default value is `true`.          |
 
 2. Click **Save**.
 
@@ -170,7 +172,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
 3. Click the **Add Integration** button to add the Syslog integration.
 4. Configure the settings as follows:
    - **Forward From**: Select **Reporter** from the dropdown.
-   - **Select Reporting Database**: Select the Primary Reporting Database.
+   - **Select Reporting Database**: Select the Reporting Database.
    - **Service Name**: Choose a descriptive name for the integration.
    - **Enable Service**: Set this to Enabled.
    - **Log Type**: Select **URL** from the dropdown.
@@ -182,9 +184,13 @@ sudo -u dd-agent -- datadog-agent integration install datadog-iboss==1.0.0
    - **Log Format**: Select **JSON** from the dropdown.
    - **Transfer Interval**: Select **Continuous** from the dropdown.
    - **Field Delimiter**: Select **SPACE** from the dropdown.
-   - **Send DLP/Web/DNS/Malware/Audit Logs**: Set to Enable based on your preference for sending logs.
+   - **Send DLP/Web/DNS/Malware/Audit/ConnectionError Logs**: Set to Enable based on your preference for sending logs.
    - **Fields to Forward**: Add all fields except **DLP Base64 Encoded Meta Data**, **Base64 Encoded Meta Data**, and **Chat GPT Message**.
      <br>After entering the required details, click **Add Service**.
+
+**Note:** 
+- If you have multiple reporter nodes, make sure to repeat steps 3 and 4 for each reporter node.
+- The `Send Connection Error Logs` toggle in iboss should only be visible if `Send Web Logs` toggle is disabled.
 
 ### Validation
 

@@ -9,7 +9,7 @@
 include = '\.pyi?$'
 line-length = 120
 skip-string-normalization = true
-target-version = ["py312"]
+target-version = ["py313"]
 
 
 [tool.mypy]
@@ -54,7 +54,7 @@ exclude = [
     "**/config_models/shared.py",
     "**/config_models/defaults.py",
 ]
-target-version = "py312"
+target-version = "py313"
 line-length = 120
 namespace-packages = ["datadog_checks"]
 
@@ -69,6 +69,7 @@ select = [
   "G",
   "W",
   "I",
+  "TID252",
 ]
 ignore = [
   # From legacy flake8 settings
@@ -96,7 +97,7 @@ quote-style = "preserve"
 known-first-party = ["{template_config['package_name']}"]
 
 [tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
+ban-relative-imports = "parents"
 
 [tool.ruff.lint.per-file-ignores]
 #Tests can use assertions and relative imports

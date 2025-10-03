@@ -6,6 +6,8 @@
 
 This integration enriches and ingests the [Sysmon event logs][5]. Use the pre-built dashboard to get a high-level view of the Sysmon events helping security teams monitor system activity.
 
+**Minimum Agent version:** 7.67.0
+
 ## Setup
 
 ### Installation
@@ -40,6 +42,8 @@ Run powershell.exe as admin and execute the following command:
         sourcecategory: windowsevent
     ```
 
+See the [sample microsoft_sysmon.d/conf.yaml][11] for available configuration options.
+
 3. [Restart the Agent][3].
 
 #### Configure Sysmon
@@ -48,31 +52,32 @@ Follow these steps to install Sysmon:
 1. Download the zip file from the [Sysmon download page][4]. Extract its zip file content.
 2. Create an XML file for configuring Sysmon. For example, if you want to monitor processes created by apps from AppData folders, the configuration file will look like content shown below. You can add more event filters under the `EventFiltering` XML tag for other events in the same way.
 
-  ```xml
-    <Sysmon schemaversion="4.90">
-        <EventFiltering>
-          <ProcessCreate onmatch="include">
-              <Image condition="contains">C:\Users\*\AppData\Local\Temp\</Image>
-              <Image condition="contains">C:\Users\*\AppData\Roaming\</Image>
-          </ProcessCreate>
-        </EventFiltering>
-    </Sysmon>
-  ```
+    ```xml
+      <Sysmon schemaversion="4.90">
+          <HashAlgorithms>md5,sha256</HashAlgorithms>
+          <CheckRevocation/>
+          <EventFiltering>
+            <ProcessCreate onmatch="include">
+                <Image condition="contains">C:\Users\*\AppData\Local\Temp\</Image>
+                <Image condition="contains">C:\Users\*\AppData\Roaming\</Image>
+            </ProcessCreate>
+          </EventFiltering>
+      </Sysmon>
+    ```
 
-3. Execute the command as admin from the extracted folder:
+    **Note:** Sysmon is highly configurable using the XML configuration file, which allows you to:
+    - Control which events to monitor
+    - Filter events based on processes, paths, etc.
 
-  ```powershell
-    .\Sysmon -i [<configfile>]
-  ```
+    Enabling too many Sysmon event types can lead to excessive data ingestion. Community resources such as [sysmon-modular][9] and the [SwiftOnSecurity Sysmon config][10] provide recommended configurations, including examples of event inclusions and exclusions. These are intended as a starting point, and you can refer to them when tuning your own configuration.
 
-**Note:** Sysmon is highly configurable using the configuration (XML) file which allows you to:
-- Control which events to monitor
-- Filter events based on processes, paths, etc.
+3. Run the following command as admin from the extracted folder:
 
-Enabling too many event types can result in excessive data ingestion. Only critical security events should be enabled based on the threat model and monitoring needs.
-These events should be selectively enabled for critical system directories, processes, and users to avoid unnecessary log noise.
+    ```powershell
+      .\Sysmon -i [<configfile>]
+    ```
 
-For more details on configuration, please refer to the [Sysmon docs][7].
+For more details, please refer to the [Sysmon docs][7].
 
 ### Validation
 
@@ -115,3 +120,6 @@ Need help? Contact [Datadog support][1].
 [6]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=windowspowershell#install
 [7]: https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon#configuration-files
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/olafhartong/sysmon-modular/tree/master
+[10]: https://github.com/SwiftOnSecurity/sysmon-config/tree/master
+[11]: https://github.com/DataDog/integrations-core/blob/master/microsoft_sysmon/datadog_checks/microsoft_sysmon/data/conf.yaml.example

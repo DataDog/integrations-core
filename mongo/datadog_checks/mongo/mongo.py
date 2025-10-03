@@ -50,7 +50,7 @@ from . import metrics
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 long = int
 

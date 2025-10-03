@@ -11,7 +11,6 @@ from datadog_checks.mysql import MySql
 
 from . import common
 from .common import MYSQL_FLAVOR, MYSQL_REPLICATION, MYSQL_VERSION_PARSED
-from .utils import deep_compare
 
 
 @pytest.fixture
@@ -33,8 +32,13 @@ def sort_names_split_by_coma(names):
 def normalize_values(actual_payload):
     actual_payload["default_character_set_name"] = "normalized_value"
     actual_payload["default_collation_name"] = "normalized_value"
+    actual_payload["tables"].sort(key=lambda x: x["name"])
     for table in actual_payload['tables']:
         table['create_time'] = "normalized_value"
+        if 'columns' in table:
+            table['columns'].sort(key=lambda x: x['name'])
+        if 'indexes' in table:
+            table['indexes'].sort(key=lambda x: x['name'])
         if 'foreign_keys' in table:
             for f_key in table['foreign_keys']:
                 f_key["referenced_column_names"] = sort_names_split_by_coma(f_key["referenced_column_names"])
@@ -68,6 +72,7 @@ def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     event = next((e for e in dbm_metadata if e['kind'] == 'mysql_variables'), None)
     assert event is not None
     assert event['host'] == "stubbed.hostname"
+    assert event['database_instance'] == "stubbed.hostname"
     assert event['dbms'] == "mysql"
     assert len(event["metadata"]) > 0
 
@@ -106,6 +111,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
 
     is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
+    is_percona = MYSQL_FLAVOR.lower() == 'percona'
     exp_datadog_test_schemas = {
         "name": "datadog_test_schemas",
         "default_character_set_name": "normalized_value",
@@ -321,20 +327,20 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         ],
                         "non_unique": True,
                     },
-                    *(
-                        [
-                            {
-                                "name": "functional_key_part_index",
-                                "index_type": "BTREE",
-                                "cardinality": 0,
-                                "non_unique": True,
-                                "expression": "(`population` + 1)",
-                            }
-                        ]
-                        if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and not is_maria_db
-                        else []
-                    ),
-                ],
+                ]
+                + (
+                    [
+                        {
+                            "name": "functional_key_part_index",
+                            "index_type": "BTREE",
+                            "cardinality": 0,
+                            "non_unique": True,
+                            "expression": "(`population` + 1)",
+                        }
+                    ]
+                    if MYSQL_VERSION_PARSED >= parse_version('8.0.13') and not is_maria_db and not is_percona
+                    else []
+                ),
             },
             {
                 "name": "cities_partitioned",
@@ -656,11 +662,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
         'dd.internal.resource:database_instance:stubbed.hostname',
+        'ddagenthostname:stubbed.hostname',
         'port:13306',
         'tag1:value1',
         'tag2:value2',
     )
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         expected_tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
         if MYSQL_REPLICATION == 'classic':
             expected_tags += ('cluster_uuid:{}'.format(mysql_check.cluster_uuid), 'replication_role:primary')
@@ -672,7 +679,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event["dbms"] == "mysql"
         assert schema_event.get("collection_interval") is not None
         assert schema_event.get("dbms_version") is not None
-        assert (schema_event.get("flavor") == "MariaDB") or (schema_event.get("flavor") == "MySQL")
+        assert schema_event.get("flavor") in ("MariaDB", "MySQL", "Percona")
         assert sorted(schema_event["tags"]) == sorted(expected_tags)
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
@@ -689,8 +696,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     for db_name, actual_payload in actual_payloads.items():
         normalize_values(actual_payload)
+        normalize_values(expected_data_for_db[db_name])
         assert db_name in databases_to_find
-        assert deep_compare(expected_data_for_db[db_name], actual_payload)
+        assert expected_data_for_db[db_name] == actual_payload
 
 
 @pytest.mark.integration

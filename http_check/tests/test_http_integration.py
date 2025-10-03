@@ -41,6 +41,19 @@ def test_check_cert_expiration_up(http_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_up_via_proxy(http_check_via_proxy):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://valid.mock/'}
+    http_check_via_proxy.instance = instance
+
+    status, days_left, seconds_left, msg = http_check_via_proxy.check_cert_expiration(instance, 10, cert_path)
+
+    assert status == AgentCheck.OK, msg
+    assert days_left > 0
+    assert seconds_left > 0
+
+
+@pytest.mark.usefixtures("dd_environment")
 def test_check_cert_expiration_up_tls_verify_false(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://valid.mock/', 'tls_verify': False}
@@ -428,7 +441,7 @@ def test_data_methods(aggregator, http_check):
         aggregator.reset()
 
 
-def test_unexisting_ca_cert_should_throw_error(aggregator, dd_run_check):
+def test_unexisting_ca_cert_should_log_warning(aggregator, dd_run_check):
     instance = {
         'name': 'Test Web VM HTTPS SSL',
         'url': 'https://foo.bar.net/',
@@ -440,11 +453,14 @@ def test_unexisting_ca_cert_should_throw_error(aggregator, dd_run_check):
         'skip_proxy': 'false',
     }
 
-    check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
-
-    dd_run_check(check)
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.CRITICAL)
-    assert 'invalid path: /tmp/unexisting.crt' in aggregator._service_checks[HTTPCheck.SC_STATUS][0].message
+    with (
+        mock.patch('datadog_checks.base.utils.http.logging.Logger.warning') as mock_warning,
+        mock.patch('requests.Session.get'),
+    ):
+        check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
+        dd_run_check(check)
+        mock_warning.assert_called()
+        assert any(instance['tls_ca_cert'] in arg for arg in mock_warning.call_args)
 
 
 def test_instance_auth_token(dd_run_check):

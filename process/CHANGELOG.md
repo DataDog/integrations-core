@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.1.0 / 2025-07-10 / Agent 7.69.0
+
+***Added***:
+
+* Add `reset_cache_on_process_changes` configuration option to control when the shared process list cache is reset ([#20570](https://github.com/DataDog/integrations-core/pull/20570))
+
 ## 5.0.0 / 2024-10-04 / Agent 7.59.0
 
 ***Removed***:

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "76dd5a2d-68d8-4acf-b066-ba00c1524694",
   "app_id": "microsoft-sysmon",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -44,11 +45,6 @@
       {
         "caption": "Microsoft Sysmon - Overview 7",
         "image_url": "images/microsoft_sysmon_overview_7.png",
-        "media_type": "image"
-      },
-      {
-        "caption": "Microsoft Sysmon - Overview 8",
-        "image_url": "images/microsoft_sysmon_overview_8.png",
         "media_type": "image"
       }
     ],

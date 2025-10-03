@@ -17,7 +17,7 @@ from .common import PIPELINES_METRICS, TRIGGERS_METRICS, check, mock_http_respon
     ],
 )
 def test_check(dd_run_check, aggregator, mocker, instance, metrics, request, namespace):
-    mocker.patch("requests.get", wraps=mock_http_responses)
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
     dd_run_check(check(request.getfixturevalue(instance)))
 
     for expected_metric in metrics:
@@ -33,7 +33,7 @@ def test_check(dd_run_check, aggregator, mocker, instance, metrics, request, nam
 def test_invalid_url(dd_run_check, aggregator, pipelines_instance, mocker):
     pipelines_instance["pipelines_controller_endpoint"] = "http://unknowwn"
 
-    mocker.patch("requests.get", wraps=mock_http_responses)
+    mocker.patch("requests.Session.get", wraps=mock_http_responses)
     with pytest.raises(Exception):
         dd_run_check(check(pipelines_instance))
 

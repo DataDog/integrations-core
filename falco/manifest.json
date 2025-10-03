@@ -2,19 +2,25 @@
   "manifest_version": "2.0.0",
   "app_uuid": "d41073d8-fc86-4506-9180-6234c1f4ef70",
   "app_id": "falco",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Falco alert logs.",
+    "description": "Gain insights into Falco alert logs and metrics",
     "title": "Falco",
     "media": [
       {
         "media_type": "image",
         "caption": "Falco - Alerts",
-        "image_url": "images/falco_alerts.png"
+        "image_url": "images/falco_alerts_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Falco - Alerts",
+        "image_url": "images/falco_alerts_2.png"
       }
     ],
     "classifier_tags": [
@@ -54,7 +60,12 @@
       }
     },
     "dashboards": {
-        "Falco - Alerts": "assets/dashboards/falco_alerts.json"
+        "Falco - Alerts": "assets/dashboards/falco_alerts.json",
+        "Falco - Metrics": "assets/dashboards/falco_metrics.json"
+    },
+    "monitors": {
+      "Queue Drops": "assets/monitors/falco_output_queue_drops.json",
+      "Rules Matches": "assets/monitors/falco_rules_matches.json"
     },
     "logs": {
       "source": "falco"

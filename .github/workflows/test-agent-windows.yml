@@ -1,0 +1,65 @@
+name: Test Agent release Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      test-py3:
+        required: false
+        description: Run Python 3 tests
+        default: true
+        type: boolean
+      agent-image:
+        required: false
+        description: Agent 7 image
+        default: "datadog/agent:7-rc"
+        type: string
+      agent-image-windows:
+        required: false
+        description: Agent 7 image on Windows
+        default: "datadog/agent:7-rc-servercore"
+        type: string
+      test-py2:
+        required: false
+        description: Run Python 2 tests
+        default: true
+        type: boolean
+      agent-image-py2:
+        required: false
+        description: Agent 6 image
+        default: "datadog/agent:6-rc"
+        type: string
+      agent-image-windows-py2:
+        required: false
+        description: Agent 6 image on Windows
+        default: "datadog/agent-dev:master-py2-win-servercore"
+        type: string
+
+jobs:
+  test:
+    uses: ./.github/workflows/test-all-windows.yml
+    with:
+      repo: core
+
+      # Options
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      skip-ddev-tests: true
+      context: "test-agent"
+    secrets: inherit
+    permissions:
+       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+       id-token: write
+       # needed for compute-matrix in test-target.yml
+       contents: read
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

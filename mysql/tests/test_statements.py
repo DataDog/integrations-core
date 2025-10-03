@@ -127,15 +127,19 @@ def test_statement_metrics(
 
     with (
         mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as m_obfuscate_sql,
-        mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora,
-        mock.patch.object(mysql_check, '_get_runtime_aurora_tags', passthrough=True) as m_get_runtime_aurora_tags,
+        mock.patch.object(
+            mysql_check, '_get_aurora_replication_role', passthrough=True
+        ) as m_get_aurora_replication_role,
+        mock.patch(
+            'datadog_checks.mysql.global_variables.GlobalVariables.is_aurora', new_callable=mock.PropertyMock
+        ) as m_is_aurora,
     ):
         m_obfuscate_sql.side_effect = _obfuscate_sql
-        m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = {}
+        m_get_aurora_replication_role.return_value = None
+        m_is_aurora.return_value = False
         if aurora_replication_role:
-            m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = {"replication_role": aurora_replication_role}
+            m_is_aurora.return_value = True
+            m_get_aurora_replication_role.return_value = aurora_replication_role
 
         # Run a query
         run_query(query)
@@ -159,7 +163,7 @@ def test_statement_metrics(
     expected_tags = set(_expected_dbm_instance_tags(dbm_instance, mysql_check))
     if aurora_replication_role:
         expected_tags.add("replication_role:" + aurora_replication_role)
-    elif MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+    elif MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
         expected_tags.add("replication_role:primary")
     assert set(event['tags']) == expected_tags
     query_signature = compute_sql_signature(query)
@@ -191,6 +195,39 @@ def test_statement_metrics(
 
 def _obfuscate_sql(query, options=None):
     return re.sub(r'\s+', ' ', query or '').strip()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize("collect_prepared_statements", [True, False])
+def test_statement_metrics_prepared_statements(
+    aggregator, dd_run_check, dbm_instance, bob_conn, collect_prepared_statements
+):
+    dbm_instance['query_metrics']['only_query_recent_statements'] = False
+    dbm_instance['query_metrics']['collect_prepared_statements'] = collect_prepared_statements
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    prepared_sql = DEFAULT_FQ_SUCCESS_QUERY
+
+    # Keep the session open so the prepared statement remains present while the check runs
+    with closing(bob_conn.cursor()) as cursor:
+        cursor.execute("PREPARE ps1 FROM '{}'".format(prepared_sql))
+        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)
+        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)
+        cursor.execute("DEALLOCATE PREPARE ps1")
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1
+    event = events[0]
+
+    query_sig = compute_sql_signature(prepared_sql)
+    matching_rows = [r for r in event['mysql_rows'] if r['query_signature'] == query_sig]
+    if collect_prepared_statements:
+        assert len(matching_rows) == 1, "expected one row for prepared statement"
+    else:
+        assert len(matching_rows) == 0, "no rows for prepared statement"
 
 
 @pytest.mark.integration
@@ -431,14 +468,13 @@ def test_statement_samples_collect(
         expected_tags.add("replication_role:" + aurora_replication_role)
 
     with (
-        mock.patch.object(mysql_check, '_get_is_aurora', passthrough=True) as m_get_is_aurora,
-        mock.patch.object(mysql_check, '_get_runtime_aurora_tags', passthrough=True) as m_get_runtime_aurora_tags,
+        mock.patch.object(
+            mysql_check, '_get_aurora_replication_role', passthrough=True
+        ) as m_get_aurora_replication_role,
     ):
-        m_get_is_aurora.return_value = False
-        m_get_runtime_aurora_tags.return_value = {}
+        m_get_aurora_replication_role.return_value = None
         if aurora_replication_role:
-            m_get_is_aurora.return_value = True
-            m_get_runtime_aurora_tags.return_value = {"replication_role": aurora_replication_role}
+            m_get_aurora_replication_role.return_value = aurora_replication_role
 
         logger.debug("running first check")
         dd_run_check(mysql_check)
@@ -577,7 +613,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     # Fake the performance schema being disabled to validate the reporting of a warning when this condition occurs
-    mysql_check._performance_schema_enabled = False
+    mysql_check.global_variables._variables = {'performance_schema': 'OFF'}
 
     # Run this twice to confirm that duplicate warnings aren't added more than once
     mysql_check._statement_metrics.collect_per_statement_metrics()
@@ -596,7 +632,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     # as we faked the performance schema being disabled, running the check should restore the flag to True
     # this is to "simulate" enabling performance schema without restarting the agent
     # as the next check run will update the flag
-    assert mysql_check.performance_schema_enabled is True
+    assert mysql_check.global_variables.performance_schema_enabled is True
 
     # clear the warnings and rerun collect_per_statement_metrics
     mysql_check.warnings.clear()
@@ -840,7 +876,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     mysql_check._statement_metrics._job_loop_future.result()
     for job in ['statement-metrics', 'statement-samples']:
         expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
-        if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+        if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
             expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
         aggregator.assert_metric(
             "dd.mysql.async_job.inactive_stop",
@@ -866,7 +902,7 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     assert mysql_check._statement_metrics._db is None, "metrics db connection should be gone"
     for job in ['statement-metrics', 'statement-samples']:
         expected_tags = _expected_dbm_job_err_tags(dbm_instance, mysql_check) + ('job:' + job,)
-        if MYSQL_FLAVOR.lower() == 'mysql' and MYSQL_REPLICATION == 'classic':
+        if MYSQL_FLAVOR.lower() in ('mysql', 'percona') and MYSQL_REPLICATION == 'classic':
             expected_tags += ('replication_role:primary', 'cluster_uuid:{}'.format(mysql_check.cluster_uuid))
         aggregator.assert_metric("dd.mysql.async_job.cancel", tags=expected_tags)
 
@@ -875,11 +911,12 @@ def _expected_dbm_instance_tags(dbm_instance, check):
     _tags = dbm_instance.get('tags', ()) + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
         'server:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
         'dbms_flavor:{}'.format(MYSQL_FLAVOR.lower()),
     )
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         _tags += ("server_uuid:{}".format(check.server_uuid),)
         if MYSQL_REPLICATION == 'classic':
             _tags += ('cluster_uuid:{}'.format(check.cluster_uuid),)
@@ -892,12 +929,13 @@ def _expected_dbm_job_err_tags(dbm_instance, check):
     _tags = dbm_instance['tags'] + (
         'database_hostname:{}'.format('stubbed.hostname'),
         'database_instance:{}'.format('stubbed.hostname'),
+        'ddagenthostname:{}'.format('stubbed.hostname'),
         'port:{}'.format(common.PORT),
         'server:{}'.format(common.HOST),
         'dd.internal.resource:database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
     )
-    if MYSQL_FLAVOR.lower() == 'mysql':
+    if MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
         _tags += ("server_uuid:{}".format(check.server_uuid),)
     return _tags
 

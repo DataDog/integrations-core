@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-rules-checks
 id: mongodb
 metric_id: mongodb
 backend_only: false

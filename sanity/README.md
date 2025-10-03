@@ -6,6 +6,8 @@
 
 Integrate Sanity with Datadog to gain insights into content and project-related activity logs through the Sanity API and GROQ-powered Webhook. Pre-built dashboard visualizations provide immediate insights into Sanity activity logs.
 
+**Minimum Agent version:** 7.61.0
+
 ## Setup
 
 ### Generate API Token in Sanity
@@ -29,18 +31,22 @@ Integrate Sanity with Datadog to gain insights into content and project-related 
 
 **Note**: These steps enable collection of project activity logs.
 
-### Webhook Configuration
-Configure the Datadog endpoint to forward Sanity activity logs to Datadog. See [Sanity webhook documentation][4] for more details.
+### Retrieve the Datadog Webhook URL
 
 1. Select an existing API key or create a new one by clicking one of the buttons below: <!-- UI Component to be added by Datadog team -->
-2. Log in to your [Sanity account][2] as an Administrator. You are automatically redirected to the [manage page][3].
-3. Select your project.
-4. In the navigation panel, click **API**.
-5. Click **Create Webhook**.
-6. Add the name and webhook URL generated in step 1.
-7. Select Dataset as `* (all datasets)`.
-8. Under the **Trigger on** section, select the types of Document events you want to send to Datadog.
-9. Under the **Projection** section, paste the below JSON:
+
+**Note**: To set up the webhook, please follow the instructions provided in the Manual Webhook Configuration. Alternatively, you can use the Share Webhook Configurations option to apply a pre-configured setup.
+
+### Manual Webhook Configuration
+
+1. Log in to your [Sanity account][2] as an Administrator. You are automatically redirected to the [manage page][3].
+2. Select your project.
+3. In the navigation panel, click **API**.
+4. Click **Create Webhook**.
+5. Add the name and use the Datadog webhook URL.
+6. Select Dataset as `* (all datasets)`.
+7. Under the **Trigger on** section, select the types of Document events you want to send to Datadog.
+8. Under the **Projection** section, paste the below JSON:
     ```         
       { 
         "documentId": _id, 
@@ -54,8 +60,21 @@ Configure the Datadog endpoint to forward Sanity activity logs to Datadog. See [
       }
     ```
     **Note**: It is recommended to _**uncheck**_ the **Trigger webhook when drafts are modified** checkbox in the Drafts section.
-10. Ensure **POST** is selected under **HTTP method** in the **Advanced settings section**.
-11. Click **Save**.
+9. Ensure **POST** is selected under **HTTP method** in the **Advanced settings section**.
+10. Click **Save**.
+
+### Share Webhook Configuration
+
+**Note**: These are alternative steps for **Manual Webhook Configuration**. Follow only one set of instructions.
+1. Log in to your [Sanity account][2] as an Administrator.
+2. To configure the webhook automatically, please follow the [Sanity webhook configuration][6].
+3. Update the existing URL with the Datadog webhook URL.
+4. Click **Apply webhook**.
+5. In the configuration dialog, set the following parameters:
+    - **Organization**: Select the organization from the dropdown list.
+    - **Project**: Select the relevant project from the dropdown list.
+    - **Dataset**: Select `* (all datasets)`.
+6. Click **Create webhook**.
 
 **Note**: These steps enable collection of document changes along with task and comment activity logs.
 
@@ -82,3 +101,4 @@ For further assistance, contact [Datadog Support][5].
 [3]: https://www.sanity.io/manage
 [4]: https://www.sanity.io/docs/webhooks#
 [5]: https://docs.datadoghq.com/help/
+[6]: https://www.sanity.io/manage/webhooks/share?name=sanity-datadog&description=&url=https%3A%2F%2Fhttp-intake.logs.datadoghq.com%2Fapi%2Fv2%2Flogs%3Fdd-api-key%3D%3CYourDatadogAPIKey%3E%26ddsource%3Dsanity%26service%3Dactivity-logs&on=create&on=update&on=delete&filter=&projection=%7B%0A%20%20%20%20%22documentId%22%3A%20_id%2C%20%0A%20%20%20%20%22documentType%22%3A%20_type%2C%20%0A%20%20%20%20%22projectId%22%3A%20sanity%3A%3AprojectId()%2C%0A%20%20%20%20%22datasetName%22%3A%20sanity%3A%3Adataset()%2C%0A%20%20%20%20%22action%22%3A%20%22document.%22%20%2B%20delta%3A%3Aoperation()%2C%0A%20%20%20%20%22beforeValues%22%3A%20before()%2C%0A%20%20%20%20%22afterValues%22%3A%20after()%2C%0A%20%20%20%20%22timestamp%22%3A%20now()%0A%7D&httpMethod=POST&apiVersion=v2025-02-19&includeDrafts=&includeAllVersions=&headers=%7B%7D

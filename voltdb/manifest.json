@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4ea56824-28da-4beb-8937-c45ef32fdb7f",
   "app_id": "voltdb",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

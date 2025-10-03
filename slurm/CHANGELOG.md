@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 2.0.1 / 2025-06-12
+## 2.0.2 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Update configuration spec to better match the code for the collect_scontrol_stats param ([#20541](https://github.com/DataDog/integrations-core/pull/20541))
+
+## 2.0.1 / 2025-06-12 / Agent 7.68.0
 
 ***Fixed***:
 

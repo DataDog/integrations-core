@@ -245,7 +245,7 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
             'include_aggregated_endpoint': True,
         }
     )
-    mocker.patch('requests.get', wraps=mock_http_responses)
+    mocker.patch('requests.Session.get', wraps=mock_http_responses)
     dd_run_check(check)
 
     meta_metrics = {'rabbitmq.build_info', 'rabbitmq.identity_info'}
@@ -289,7 +289,7 @@ def test_detailed_only_metrics(aggregator, dd_run_check, mocker):
             'include_aggregated_endpoint': True,
         }
     )
-    mocker.patch('requests.get', wraps=mock_http_responses)
+    mocker.patch('requests.Session.get', wraps=mock_http_responses)
     dd_run_check(check)
 
     detailed_only_metrics = (
