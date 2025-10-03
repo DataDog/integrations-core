@@ -663,7 +663,7 @@
                     {
                         "id": 3841321510472020,
                         "definition": {
-                            "title": "Top Hosts",
+                            "title": "Distribution by Host",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -902,7 +902,7 @@
                     {
                         "id": 542655925229082,
                         "definition": {
-                            "title": "Top Python Packages Scanned",
+                            "title": "Distribution by Scanned Python Packages",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1789,7 +1789,7 @@
                     {
                         "id": 8584342983320535,
                         "definition": {
-                            "title": "Top NPM Packages Scanned",
+                            "title": "Distribution by Scanned NPM Packages",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -2613,7 +2613,7 @@
                     {
                         "id": 7496059520251392,
                         "definition": {
-                            "title": "Top Go Packages Scanned",
+                            "title": "Distribution by Scanned Go Packages",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -3375,7 +3375,7 @@
                     {
                         "id": 3784711401666716,
                         "definition": {
-                            "title": "Top Github Actions Scanned",
+                            "title": "Distribution by Scanned Github Actions",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [

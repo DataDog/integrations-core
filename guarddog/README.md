@@ -31,7 +31,7 @@ Mac command:
 
 Note: 
   - Guarddog requires python version 3.10 or higher.
-  - GuardDog must be installed at the specified path below within the virtual environment.
+  - Guarddog must be installed at the specified path below within the virtual environment.
 
 Please execute the steps below as the root user to install Guarddog:
   1. Create a Guarddog directory.
