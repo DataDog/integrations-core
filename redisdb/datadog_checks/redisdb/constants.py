@@ -87,7 +87,6 @@ GAUGE_KEYS = {
     'total_net_repl_input_bytes': 'redis.replication.input_total_bytes',
     'total_net_repl_output_bytes': 'redis.replication.output_total_bytes',
     # ---- Memory (from your example) ----
-    'maxmemory': 'redis.mem.maxmemory',
     'allocator_active': 'redis.allocator.active',
     'allocator_allocated': 'redis.allocator.allocated',
     # 'allocator_frag_ratio': 'redis.allocator.frag_ratio',
@@ -204,7 +203,7 @@ GAUGE_KEYS = {
     'rdb_saves':'redis.rdb.saves',
 
     # ---- Replication (additional) ----
-    'master_failover_state':'redis.replication.failover_state',
+    # 'master_failover_state':'redis.replication.failover_state',
     # 'master_host':'redis.replication.master_host',
     # 'master_link_status':'redis.replication.master_link_status',
     'master_port':'redis.replication.master_port',
@@ -335,7 +334,7 @@ GAUGE_KEYS = {
     'search_used_memory_vector_index':'redis.search.memory.used_vector_index',
 
     # ---- Search fields (<field> / types) ----
-    'search_fields_<field>_IndexErrors':'redis.search.fields.<field>.index_errors',
+    # 'search_fields_<field>_IndexErrors':'redis.search.fields.<field>.index_errors',
     'search_fields_geo_Geo':'redis.search.fields.geo.geo',
     'search_fields_geo_NoIndex':'redis.search.fields.geo.noindex',
     'search_fields_geo_Sortable':'redis.search.fields.geo.sortable',
