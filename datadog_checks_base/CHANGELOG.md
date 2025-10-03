@@ -10,7 +10,7 @@
 * Add DatabaseCheck base class for database integrations ([#21202](https://github.com/DataDog/integrations-core/pull/21202))
 * Add tag normalization support to TagManager with optional tag_normalizer parameter and normalize flags for set_tag/set_tags_from_list/delete_tag methods. ([#21474](https://github.com/DataDog/integrations-core/pull/21474))
 
-## 37.20.0 / 2025-09-17
+## 37.20.0 / 2025-09-17 / Agent 7.71.0
 
 ***Added***:
 

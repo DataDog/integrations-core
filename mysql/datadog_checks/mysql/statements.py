@@ -20,7 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
 
-from .util import DatabaseConfigurationError, connect_with_session_variables, warning_with_tags
+from .util import DatabaseConfigurationError, ManagedAuthConnectionMixin, warning_with_tags
 
 try:
     import datadog_agent
@@ -56,13 +56,13 @@ def _row_key(row):
     return row['schema_name'], row['query_signature']
 
 
-class MySQLStatementMetrics(DBMAsyncJob):
+class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
     """
 
-    def __init__(self, check, config, connection_args):
-        # (MySql, MySQLConfig) -> None
+    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
+        # (MySql, MySQLConfig, Callable, bool) -> None
         collection_interval = float(config.statement_metrics_config.get('collection_interval', 10))
         if collection_interval <= 0:
             collection_interval = 10
@@ -79,7 +79,9 @@ class MySQLStatementMetrics(DBMAsyncJob):
         )
         self._check = check
         self._metric_collection_interval = collection_interval
-        self._connection_args = connection_args
+        self._connection_args_provider = connection_args_provider
+        self._uses_managed_auth = uses_managed_auth
+        self._db_created_at = 0
         self._db = None
         self._config = config
         self.log = get_check_logger()
@@ -100,16 +102,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
             maxsize=self._config.statement_rows_cache_max_size,
             ttl=self._config.statement_rows_cache_ttl,
         )
-
-    def _get_db_connection(self):
-        """
-        lazy reconnect db
-        pymysql connections are not thread safe so we can't reuse the same connection from the main check
-        :return:
-        """
-        if not self._db:
-            self._db = connect_with_session_variables(**self._connection_args)
-        return self._db
 
     def _close_db_conn(self):
         if self._db:
