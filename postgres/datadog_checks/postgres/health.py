@@ -54,5 +54,6 @@ class PostgresHealth(Health):
             # If we have an error parsing the config we may not have tags yet
             self.check.tags if hasattr(self.check, 'tags') else [],
             database_identifier=self.check.database_identifier,
+            ddagenthostname=self.check.agent_hostname,
             **kwargs,
         )

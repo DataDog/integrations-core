@@ -193,8 +193,6 @@ class PostgreSql(AgentCheck):
         """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
         self.tags.append("database_instance:{}".format(self.database_identifier))
-        if self.agent_hostname:
-            self.tags.append("ddagenthostname:{}".format(self.agent_hostname))
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -999,6 +997,7 @@ class PostgreSql(AgentCheck):
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
+                "ddagenthostname": self.agent_hostname,
                 "dbms": "postgres",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
