@@ -964,9 +964,13 @@ def get_last_dependency_sizes_artifact(
     '''
     dep_sizes_json = get_dep_sizes_json(commit, platform, py_version)
     if not dep_sizes_json:
-        dep_sizes_json = get_previous_dep_sizes(
-            app.repo.git.merge_base(commit, "origin/master"), platform, py_version, compressed
-        )
+        base_commit = app.repo.git.merge_base(commit, "origin/master")
+        if base_commit != commit:
+            previous_commit = base_commit
+        else:
+            previous_commit = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
+
+        dep_sizes_json = get_previous_dep_sizes(previous_commit, platform, py_version, compressed)
     return Path(dep_sizes_json) if dep_sizes_json else None
 
 
