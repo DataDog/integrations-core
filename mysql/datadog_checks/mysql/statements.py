@@ -156,7 +156,6 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             'timestamp': time.time() * 1000,
             'mysql_version': self._check.version.version + '+' + self._check.version.build,
             'mysql_flavor': self._check.version.flavor,
-            "ddagenthostname": self._check.agent_hostname,
             'ddagentversion': datadog_agent.get_version(),
             'min_collection_interval': self._metric_collection_interval,
             'tags': tags,

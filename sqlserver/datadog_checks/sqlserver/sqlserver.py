@@ -235,8 +235,6 @@ class SQLServer(AgentCheck):
         """
         self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
-        if self.agent_hostname:
-            self.tag_manager.set_tag("ddagenthostname", self.agent_hostname, replace=True)
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -1071,6 +1069,10 @@ class SQLServer(AgentCheck):
 
     def _send_database_instance_metadata(self):
         if self.database_identifier not in self._database_instance_emitted:
+            tags = self.tag_manager.get_tags().copy()
+            if self.agent_hostname:
+                tags.append("ddagenthostname:{}".format(self.agent_hostname))
+
             event = {
                 "host": self.reported_hostname,
                 "database_instance": self.database_identifier,
@@ -1084,7 +1086,7 @@ class SQLServer(AgentCheck):
                     self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                 ),
                 "integration_version": __version__,
-                "tags": self.tag_manager.get_tags(),
+                "tags": tags,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {

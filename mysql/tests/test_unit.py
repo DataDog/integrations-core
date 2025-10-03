@@ -292,7 +292,7 @@ def test_replication_check_status(
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
-                'ddagenthostname:stubbed.hostname',
+                
             },
         ),
         (
@@ -304,7 +304,7 @@ def test_replication_check_status(
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
-                'ddagenthostname:stubbed.hostname',
+
             },
         ),
         (
@@ -315,7 +315,7 @@ def test_replication_check_status(
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
-                'ddagenthostname:stubbed.hostname',
+
             },
         ),
         (
@@ -327,7 +327,7 @@ def test_replication_check_status(
                 'database_hostname:stubbed.hostname',
                 'database_instance:stubbed.hostname',
                 'dd.internal.resource:database_instance:stubbed.hostname',
-                'ddagenthostname:stubbed.hostname',
+              
             },
         ),
     ],

@@ -223,8 +223,6 @@ class PostgreSql(AgentCheck):
         """
         self.tags.append("database_hostname:{}".format(self.database_hostname))
         self.tags.append("database_instance:{}".format(self.database_identifier))
-        if self.agent_hostname:
-            self.tags.append("ddagenthostname:{}".format(self.agent_hostname))
 
     def set_resource_tags(self):
         if self._config.gcp.project_id and self._config.gcp.instance_id:
@@ -1029,6 +1027,10 @@ class PostgreSql(AgentCheck):
 
     def _send_database_instance_metadata(self):
         if self.database_identifier not in self._database_instance_emitted:
+            tags = [t for t in self._non_internal_tags if not t.startswith('db:')]
+            if self.agent_hostname:
+                tags.append("ddagenthostname:{}".format(self.agent_hostname))
+
             event = {
                 "host": self.reported_hostname,
                 "port": self._config.port,
@@ -1040,7 +1042,7 @@ class PostgreSql(AgentCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': payload_pg_version(self.version),
                 'integration_version': __version__,
-                "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
+                "tags": tags,
                 "timestamp": time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {
