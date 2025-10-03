@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 15.8.1 / 2025-10-03
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
 ## 15.8.0 / 2025-09-05
 
 ***Added***:
