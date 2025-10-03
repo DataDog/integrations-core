@@ -895,7 +895,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     assert len(event['tags']) == 6
     assert event['tags'][0] == 'optional:tag1'
     assert any(tag.startswith('sqlserver_servername:') for tag in event['tags'])
-    assert any(tag.startswith('ddagenthostname:') for tag in event['tags'])
+    assert event['ddagenthostname'] == "stubbed.hostname"
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 300
     assert event['metadata'] == {

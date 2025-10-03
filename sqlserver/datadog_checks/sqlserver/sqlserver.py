@@ -1069,15 +1069,12 @@ class SQLServer(AgentCheck):
 
     def _send_database_instance_metadata(self):
         if self.database_identifier not in self._database_instance_emitted:
-            tags = self.tag_manager.get_tags().copy()
-            if self.agent_hostname:
-                tags.append("ddagenthostname:{}".format(self.agent_hostname))
-
             event = {
                 "host": self.reported_hostname,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
+                "ddagenthostname": self.agent_hostname,
                 "dbms": "sqlserver",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
@@ -1086,7 +1083,7 @@ class SQLServer(AgentCheck):
                     self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                 ),
                 "integration_version": __version__,
-                "tags": tags,
+                "tags": self.tag_manager.get_tags(),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {

@@ -800,7 +800,6 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
         "database_instance:{}".format(expected_database_instance),
         'dd.internal.resource:database_instance:{}'.format(expected_database_instance),
         "dbms_flavor:{}".format(MYSQL_FLAVOR.lower()),
-        'ddagenthostname:{}'.format('stubbed.hostname'),
     )
 
     mysql_check = MySql(common.CHECK_NAME, {}, [instance_complex])
@@ -819,6 +818,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     assert event['database_instance'] == expected_database_instance
     assert event['database_hostname'] == expected_database_hostname
     assert event['dbms'] == "mysql"
+    assert event['ddagenthostname'] == "stubbed.hostname"
     assert sorted(event['tags']) == sorted(expected_tags)
     assert event['integration_version'] == __version__
     assert event['collection_interval'] == 300
