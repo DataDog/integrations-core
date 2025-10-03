@@ -68,10 +68,16 @@ class GitRepository:
         sha, subject = self.capture('log', '-1', '--format=%H%n%s').splitlines()
         return GitCommit(sha, subject=subject)
 
-    def log(self, args: list[str], n: int | None = None) -> list[dict[str, str]]:
+    def log(self, args: list[str], n: int | None = None, source: str = "HEAD") -> list[dict[str, str]]:
         """
-        Returns the last n commits log entries in a dictionary with the keys specified in args.
-        args example: ["hash:%H", "author:%an", "subject:%s"]
+        The log is returned as a list of dictionaries where the keys and values of each element are
+        specified from *args. These need to be provided in the format `"<key>:<git_format_placeholder>"`
+
+        Examples:
+            Get the last n commits from `myBranch` getting the hash, author and subject
+
+            git.log("hash:%H", "author:%an", "subject:%s", n=20, source="myBranch")
+
         """
         if not args:
             return []
@@ -83,13 +89,15 @@ class GitRepository:
                 key, format = arg.split(":", 1)
                 keys.append(key)
                 format_parts.append(format)
-            except ValueError:
-                raise ValueError(f"Invalid argument: {arg}. Expected format: key:format")
+            except ValueError as e:
+                raise ValueError(f"Invalid argument: {arg}. Expected format: key:format") from e
 
         pretty_format = "%x00".join(format_parts)
-        cmd = ['log', f"--pretty=format:{pretty_format}"]
+        cmd = ['--no-pager', 'log', f"--pretty=format:{pretty_format}"]
         if n is not None:
             cmd.append(f"-n {n}")
+
+        cmd.append(source)
 
         command_output = self.capture(*cmd).strip().splitlines()
 

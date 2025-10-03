@@ -44,7 +44,66 @@ def test_get_latest_commit(repository):
     assert short_sha2 not in commit_status1
 
 
-def test_get_log(repository):
+@pytest.mark.parametrize(
+    "args, n, source, expected, should_raise, define_repo",
+    [
+        (
+            ["author:%an", "message:%f"],
+            None,
+            None,
+            [
+                {"author": "test_user", "message": "test2"},
+                {"author": "test_user", "message": "test1"},
+            ],
+            False,
+            True,
+        ),
+        (
+            ["author:%an", "message:%f"],
+            2,
+            None,
+            [{"author": "test_user", "message": "test2"}, {"author": "test_user", "message": "test1"}],
+            False,
+            False,
+        ),
+        (
+            ["author:%an", "message:%f"],
+            0,
+            None,
+            [],
+            False,
+            False,
+        ),
+        (
+            ["author:%an", "message:%f"],
+            3,
+            "my-branch",
+            [
+                {"author": "test_user", "message": "test3"},
+                {"author": "test_user", "message": "test2"},
+                {"author": "test_user", "message": "test1"},
+            ],
+            False,
+            False,
+        ),
+        (
+            ["%H", "%f"],
+            1,
+            None,
+            None,
+            True,
+            False,
+        ),
+    ],
+    ids=[
+        "test_log_no_n",
+        "test_log_two_commits",
+        "test_log_zero_commits",
+        "test_log_branch_three_commits",
+        "test_log_invalid_format_raises",
+    ],
+)
+def test_get_log(repository, args, n, source, expected, should_raise, define_repo):
     repo = Repository(repository.path.name, str(repository.path))
 
     repo.git.capture("config", "user.name", "test_user")
@@ -55,10 +114,31 @@ def test_get_log(repository):
     repo.git.capture("add", ".")
     repo.git.capture("commit", "-m", "test2")
 
-    assert repo.git.log(["author:%an", "message:%f"], n=2) == [
-        {"author": "test_user", "message": "test2"},
-        {"author": "test_user", "message": "test1"},
-    ]
+    if source:
+        try:
+            repo.git.capture("checkout", "-b", "my-branch")
+        except Exception:
+            repo.git.capture("checkout", "my-branch")
+
+        (repo.path / "test3.txt").touch()
+        repo.git.capture("add", ".")
+        repo.git.capture("commit", "-m", "test3")
+
+        repo.git.capture("checkout", "master")
+
+    kwargs = {}
+    if n is not None:
+        kwargs['n'] = n
+    if source:
+        kwargs['source'] = source
+
+    if should_raise:
+        with pytest.raises(ValueError):
+            repo.git.log(args, **kwargs)
+    elif n is None:
+        assert len(expected) < len(repo.git.log(args, **kwargs))
+    else:
+        assert repo.git.log(args, **kwargs) == expected
 
 
 def test_tags(repository):
