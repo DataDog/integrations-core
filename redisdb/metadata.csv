@@ -182,7 +182,7 @@ redis.replication.sync.last_io_seconds_ago,gauge,,second,,Number of seconds sinc
 redis.replication.sync.partial_err,gauge,,,,The number of denied partial resync requests,-1,redis,,,
 redis.replication.sync.partial_ok,gauge,,,,The number of accepted partial resync requests,1,redis,,,
 redis.replication.sync.read_bytes,gauge,,byte,,Number of bytes already transferred,0,redis,,,
-redis.replication.sync.total_bytes,gauge,,byte,,Total number of bytes that need to be transferred. This may be 0 when the size is unknown (for example, when the repl-diskless-sync configuration directive is used),0,redis,,,
+redis.replication.sync.total_bytes,gauge,,byte,,"Total number of bytes that need to be transferred. This may be 0 when the size is unknown (for example, when the repl-diskless-sync configuration directive is used)",0,redis,,,
 redis.replication.sync_left_bytes,gauge,,byte,,Amount of data left before syncing is complete.,-1,redis,replication sync left bytes,,
 redis.reply_buffer.expands,gauge,,,,Total number of output buffer expands,0,redis,,,
 redis.reply_buffer.shrinks,gauge,,,,Total number of output buffer shrinks,0,redis,,,
