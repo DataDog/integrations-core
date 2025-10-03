@@ -373,7 +373,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             if self._check.is_mariadb and self._check.version.version_compatible((10, 5, 2)) is False:
                 self._collect_prepared_statements = False
             # prepared_statements_instances table was added to MySQL 5.7.4
-            elif self._check.version.version_compatible((5, 7, 4) is False):
+            elif self._check.version.version_compatible((5, 7, 4)) is False:
                 self._collect_prepared_statements = False
             else:
                 self._collect_prepared_statements = self._config.statement_metrics_config.get(
