@@ -258,8 +258,7 @@ pipeline:
             matchRules: rule %{regex("(.*?)(?=:)")}:(\s+)?\'%{date("yyyy-M-d H:m:s"):date}
               %{ip:network.client.ip}:%{port:network.client.port}
               \[%{notSpace:user}\] %{regex("Peer Connection
-              Initiated"):log_type}\s+with%{regex("([^()]*)
-              (?=\\()")}\(%{regex("([^]]*)(?=])")}\]%{ip:server_ip}[%]%{data}
+              Initiated"):log_type}\s+with%{regex("(.*?)(?=\\()")}\(%{regex("(.*?)(?=])")}\]%{ip:server_ip}[%]%{data}
         - type: grok-parser
           name: Parsing Virtual IP Logs
           enabled: true
