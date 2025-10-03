@@ -68,7 +68,7 @@ jobs:
       job-name: ddev on Linux
       target: ddev
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -89,7 +89,7 @@ jobs:
       job-name: Datadog Checks Base on Linux
       target: datadog_checks_base
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -109,7 +109,7 @@ jobs:
       job-name: Datadog Checks Dev on Linux
       target: datadog_checks_dev
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -129,7 +129,7 @@ jobs:
       job-name: Datadog Checks Downloader on Linux
       target: datadog_checks_downloader
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -149,7 +149,7 @@ jobs:
       job-name: ActiveMQ
       target: activemq
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -169,7 +169,7 @@ jobs:
       job-name: ActiveMQ XML
       target: activemq_xml
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -189,7 +189,7 @@ jobs:
       job-name: Aerospike
       target: aerospike
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -209,7 +209,7 @@ jobs:
       job-name: Airflow
       target: airflow
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -229,7 +229,7 @@ jobs:
       job-name: Amazon Kafka
       target: amazon_msk
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -249,7 +249,7 @@ jobs:
       job-name: Ambari
       target: ambari
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -269,7 +269,7 @@ jobs:
       job-name: Apache
       target: apache
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -289,7 +289,7 @@ jobs:
       job-name: Appgate SDP
       target: appgate_sdp
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -309,7 +309,7 @@ jobs:
       job-name: ArangoDB
       target: arangodb
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -329,7 +329,7 @@ jobs:
       job-name: Argo Rollouts
       target: argo_rollouts
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -349,7 +349,7 @@ jobs:
       job-name: Argo Workflows
       target: argo_workflows
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -369,7 +369,7 @@ jobs:
       job-name: ArgoCD
       target: argocd
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -389,7 +389,7 @@ jobs:
       job-name: Avi Vantage
       target: avi_vantage
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -409,7 +409,7 @@ jobs:
       job-name: AWS Neuron
       target: aws_neuron
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -429,7 +429,7 @@ jobs:
       job-name: Azure IoT Edge
       target: azure_iot_edge
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -449,7 +449,7 @@ jobs:
       job-name: BentoML
       target: bentoml
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -469,7 +469,7 @@ jobs:
       job-name: Boundary
       target: boundary
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -489,7 +489,7 @@ jobs:
       job-name: Btrfs
       target: btrfs
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -509,7 +509,7 @@ jobs:
       job-name: Cacti
       target: cacti
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -529,7 +529,7 @@ jobs:
       job-name: Calico
       target: calico
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -549,7 +549,7 @@ jobs:
       job-name: Cassandra
       target: cassandra
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -569,7 +569,7 @@ jobs:
       job-name: Cassandra Nodetool
       target: cassandra_nodetool
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -589,7 +589,7 @@ jobs:
       job-name: Celery
       target: celery
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -609,7 +609,7 @@ jobs:
       job-name: Ceph
       target: ceph
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -629,7 +629,7 @@ jobs:
       job-name: cert-manager
       target: cert_manager
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -649,7 +649,7 @@ jobs:
       job-name: Cilium
       target: cilium
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -669,7 +669,7 @@ jobs:
       job-name: Cisco ACI
       target: cisco_aci
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -689,7 +689,7 @@ jobs:
       job-name: Citrix Hypervisor
       target: citrix_hypervisor
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -709,7 +709,7 @@ jobs:
       job-name: ClickHouse
       target: clickhouse
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -729,7 +729,7 @@ jobs:
       job-name: Cloud Foundry API
       target: cloud_foundry_api
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -749,7 +749,7 @@ jobs:
       job-name: Cloudera
       target: cloudera
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -769,7 +769,7 @@ jobs:
       job-name: CockroachDB
       target: cockroachdb
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -789,7 +789,7 @@ jobs:
       job-name: Confluent Platform
       target: confluent_platform
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -809,7 +809,7 @@ jobs:
       job-name: Consul
       target: consul
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -829,7 +829,7 @@ jobs:
       job-name: CoreDNS
       target: coredns
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -849,7 +849,7 @@ jobs:
       job-name: CouchDB
       target: couch
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -869,7 +869,7 @@ jobs:
       job-name: Couchbase
       target: couchbase
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -889,7 +889,7 @@ jobs:
       job-name: CRI-O
       target: crio
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -909,7 +909,7 @@ jobs:
       job-name: Datadog Cluster Agent
       target: datadog_cluster_agent
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -929,7 +929,7 @@ jobs:
       job-name: datadog_csi_driver
       target: datadog_csi_driver
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -949,7 +949,7 @@ jobs:
       job-name: dcgm
       target: dcgm
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -969,7 +969,7 @@ jobs:
       job-name: Directory
       target: directory
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -989,7 +989,7 @@ jobs:
       job-name: Disk on Linux
       target: disk
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1009,7 +1009,7 @@ jobs:
       job-name: DNS on Linux
       target: dns_check
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1029,7 +1029,7 @@ jobs:
       job-name: Druid
       target: druid
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1049,7 +1049,7 @@ jobs:
       job-name: DuckDB
       target: duckdb
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1069,7 +1069,7 @@ jobs:
       job-name: Amazon ECS Fargate
       target: ecs_fargate
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1089,7 +1089,7 @@ jobs:
       job-name: EKS Fargate
       target: eks_fargate
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1109,7 +1109,7 @@ jobs:
       job-name: Elasticsearch
       target: elastic
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1129,7 +1129,7 @@ jobs:
       job-name: Envoy
       target: envoy
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1149,7 +1149,7 @@ jobs:
       job-name: ESXi
       target: esxi
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1169,7 +1169,7 @@ jobs:
       job-name: etcd
       target: etcd
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1189,7 +1189,7 @@ jobs:
       job-name: External DNS
       target: external_dns
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1209,7 +1209,7 @@ jobs:
       job-name: Falco
       target: falco
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1229,7 +1229,7 @@ jobs:
       job-name: Fluentd
       target: fluentd
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1249,7 +1249,7 @@ jobs:
       job-name: fluxcd
       target: fluxcd
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1269,7 +1269,7 @@ jobs:
       job-name: Fly.io
       target: fly_io
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1289,7 +1289,7 @@ jobs:
       job-name: FoundationDB
       target: foundationdb
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1309,7 +1309,7 @@ jobs:
       job-name: Gearman
       target: gearmand
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1329,7 +1329,7 @@ jobs:
       job-name: Gitlab
       target: gitlab
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1349,7 +1349,7 @@ jobs:
       job-name: Gitlab Runner
       target: gitlab_runner
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1369,7 +1369,7 @@ jobs:
       job-name: GlusterFS
       target: glusterfs
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1389,7 +1389,7 @@ jobs:
       job-name: Go Expvar
       target: go_expvar
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1409,7 +1409,7 @@ jobs:
       job-name: Gunicorn
       target: gunicorn
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1429,7 +1429,7 @@ jobs:
       job-name: HAProxy
       target: haproxy
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1449,7 +1449,7 @@ jobs:
       job-name: Harbor
       target: harbor
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1469,7 +1469,7 @@ jobs:
       job-name: Hazelcast
       target: hazelcast
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1489,7 +1489,7 @@ jobs:
       job-name: HDFS Datanode
       target: hdfs_datanode
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1509,7 +1509,7 @@ jobs:
       job-name: HDFS Namenode
       target: hdfs_namenode
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1529,7 +1529,7 @@ jobs:
       job-name: Hive
       target: hive
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1549,7 +1549,7 @@ jobs:
       job-name: HiveMQ
       target: hivemq
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1569,7 +1569,7 @@ jobs:
       job-name: HTTP
       target: http_check
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1589,7 +1589,7 @@ jobs:
       job-name: Hudi
       target: hudi
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1609,7 +1609,7 @@ jobs:
       job-name: Hugging Face TGI
       target: hugging_face_tgi
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1629,7 +1629,7 @@ jobs:
       job-name: IBM ACE
       target: ibm_ace
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1649,7 +1649,7 @@ jobs:
       job-name: IBM Db2
       target: ibm_db2
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1669,7 +1669,7 @@ jobs:
       job-name: IBM i
       target: ibm_i
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1689,7 +1689,7 @@ jobs:
       job-name: IBM MQ on Linux
       target: ibm_mq
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1709,7 +1709,7 @@ jobs:
       job-name: IBM WAS
       target: ibm_was
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1729,7 +1729,7 @@ jobs:
       job-name: Ignite
       target: ignite
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1749,7 +1749,7 @@ jobs:
       job-name: Impala
       target: impala
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1769,7 +1769,7 @@ jobs:
       job-name: Infiniband
       target: infiniband
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1789,7 +1789,7 @@ jobs:
       job-name: Istio
       target: istio
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1809,7 +1809,7 @@ jobs:
       job-name: JBoss_WildFly
       target: jboss_wildfly
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1829,7 +1829,7 @@ jobs:
       job-name: Kafka
       target: kafka
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1849,7 +1849,7 @@ jobs:
       job-name: Kafka Consumer
       target: kafka_consumer
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1869,7 +1869,7 @@ jobs:
       job-name: Karpenter
       target: karpenter
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1889,7 +1889,7 @@ jobs:
       job-name: Keda
       target: keda
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1909,7 +1909,7 @@ jobs:
       job-name: Kong
       target: kong
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1929,7 +1929,7 @@ jobs:
       job-name: KrakenD
       target: krakend
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1949,7 +1949,7 @@ jobs:
       job-name: Kubernetes API server metrics
       target: kube_apiserver_metrics
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1969,7 +1969,7 @@ jobs:
       job-name: Kubernetes Controller Manager
       target: kube_controller_manager
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -1989,7 +1989,7 @@ jobs:
       job-name: Kube DNS
       target: kube_dns
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2009,7 +2009,7 @@ jobs:
       job-name: Kube metrics server
       target: kube_metrics_server
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2029,7 +2029,7 @@ jobs:
       job-name: Kube Proxy
       target: kube_proxy
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2049,7 +2049,7 @@ jobs:
       job-name: Kubernetes Scheduler
       target: kube_scheduler
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2069,7 +2069,7 @@ jobs:
       job-name: Kubeflow
       target: kubeflow
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2089,7 +2089,7 @@ jobs:
       job-name: Kubelet
       target: kubelet
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2109,7 +2109,7 @@ jobs:
       job-name: Kubernetes Cluster Autoscaler
       target: kubernetes_cluster_autoscaler
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2129,7 +2129,7 @@ jobs:
       job-name: Kubernetes State
       target: kubernetes_state
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2149,7 +2149,7 @@ jobs:
       job-name: KubeVirt API
       target: kubevirt_api
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2169,7 +2169,7 @@ jobs:
       job-name: KubeVirt Controller
       target: kubevirt_controller
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2189,7 +2189,7 @@ jobs:
       job-name: KubeVirt Handler
       target: kubevirt_handler
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2209,7 +2209,7 @@ jobs:
       job-name: Kuma
       target: kuma
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2229,7 +2229,7 @@ jobs:
       job-name: Kyoto Tycoon
       target: kyototycoon
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2249,7 +2249,7 @@ jobs:
       job-name: kyverno
       target: kyverno
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2269,7 +2269,7 @@ jobs:
       job-name: Lighttpd
       target: lighttpd
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2289,7 +2289,7 @@ jobs:
       job-name: Linkerd
       target: linkerd
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2309,7 +2309,7 @@ jobs:
       job-name: Linux proc extras
       target: linux_proc_extras
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2329,7 +2329,7 @@ jobs:
       job-name: LiteLLM
       target: litellm
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2349,7 +2349,7 @@ jobs:
       job-name: Lustre
       target: lustre
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2369,7 +2369,7 @@ jobs:
       job-name: Mac Audit Logs
       target: mac_audit_logs
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2389,7 +2389,7 @@ jobs:
       job-name: MapR
       target: mapr
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2409,7 +2409,7 @@ jobs:
       job-name: MapReduce
       target: mapreduce
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2429,7 +2429,7 @@ jobs:
       job-name: Marathon
       target: marathon
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2449,7 +2449,7 @@ jobs:
       job-name: MarkLogic
       target: marklogic
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2469,7 +2469,7 @@ jobs:
       job-name: Memcached
       target: mcache
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2489,7 +2489,7 @@ jobs:
       job-name: Mesos Master
       target: mesos_master
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2509,7 +2509,7 @@ jobs:
       job-name: Milvus
       target: milvus
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2529,7 +2529,7 @@ jobs:
       job-name: MongoDB
       target: mongo
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2575,7 +2575,7 @@ jobs:
       job-name: MySQL
       target: mysql
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2610,7 +2610,7 @@ jobs:
       job-name: Nagios
       target: nagios
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2630,7 +2630,7 @@ jobs:
       job-name: Network on Linux
       target: network
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2650,7 +2650,7 @@ jobs:
       job-name: NFSstat
       target: nfsstat
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2670,7 +2670,7 @@ jobs:
       job-name: NGINX
       target: nginx
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2690,7 +2690,7 @@ jobs:
       job-name: NGINX Ingress Controller
       target: nginx_ingress_controller
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2710,7 +2710,7 @@ jobs:
       job-name: nvidia_nim
       target: nvidia_nim
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2730,7 +2730,7 @@ jobs:
       job-name: Nvidia Triton
       target: nvidia_triton
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2750,7 +2750,7 @@ jobs:
       job-name: Octopus Deploy
       target: octopus_deploy
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2770,7 +2770,7 @@ jobs:
       job-name: OpenLDAP
       target: openldap
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2790,7 +2790,7 @@ jobs:
       job-name: OpenMetrics
       target: openmetrics
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2810,7 +2810,7 @@ jobs:
       job-name: OpenStack
       target: openstack
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2830,7 +2830,7 @@ jobs:
       job-name: OpenStack Controller
       target: openstack_controller
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2850,7 +2850,7 @@ jobs:
       job-name: PGBouncer
       target: pgbouncer
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2870,7 +2870,7 @@ jobs:
       job-name: PHP-FPM
       target: php_fpm
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2890,7 +2890,7 @@ jobs:
       job-name: Postfix
       target: postfix
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2910,7 +2910,7 @@ jobs:
       job-name: Postgres
       target: postgres
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2952,7 +2952,7 @@ jobs:
       job-name: PowerDNS Recursor
       target: powerdns_recursor
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2972,7 +2972,7 @@ jobs:
       job-name: Presto
       target: presto
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -2992,7 +2992,7 @@ jobs:
       job-name: Process
       target: process
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3012,7 +3012,7 @@ jobs:
       job-name: Prometheus
       target: prometheus
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3032,7 +3032,7 @@ jobs:
       job-name: Proxmox
       target: proxmox
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3052,7 +3052,7 @@ jobs:
       job-name: ProxySQL
       target: proxysql
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3072,7 +3072,7 @@ jobs:
       job-name: Pulsar
       target: pulsar
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3092,7 +3092,7 @@ jobs:
       job-name: Quarkus
       target: quarkus
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3112,7 +3112,7 @@ jobs:
       job-name: RabbitMQ
       target: rabbitmq
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3132,7 +3132,7 @@ jobs:
       job-name: Ray
       target: ray
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3152,7 +3152,7 @@ jobs:
       job-name: Redis
       target: redisdb
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3172,7 +3172,7 @@ jobs:
       job-name: RethinkDB
       target: rethinkdb
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3192,7 +3192,7 @@ jobs:
       job-name: Riak
       target: riak
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3212,7 +3212,7 @@ jobs:
       job-name: RiakCS
       target: riakcs
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3232,7 +3232,7 @@ jobs:
       job-name: SAP HANA
       target: sap_hana
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3252,7 +3252,7 @@ jobs:
       job-name: Scylla
       target: scylla
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3272,7 +3272,7 @@ jobs:
       job-name: Silk
       target: silk
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3292,7 +3292,7 @@ jobs:
       job-name: Silverstripe CMS
       target: silverstripe_cms
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3312,7 +3312,7 @@ jobs:
       job-name: SingleStore
       target: singlestore
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3332,7 +3332,7 @@ jobs:
       job-name: Slurm
       target: slurm
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3352,7 +3352,7 @@ jobs:
       job-name: SNMP
       target: snmp
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3372,7 +3372,7 @@ jobs:
       job-name: Snowflake
       target: snowflake
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3392,7 +3392,7 @@ jobs:
       job-name: Solr
       target: solr
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3412,7 +3412,7 @@ jobs:
       job-name: SonarQube
       target: sonarqube
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3432,7 +3432,7 @@ jobs:
       job-name: sonatype_nexus
       target: sonatype_nexus
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3452,7 +3452,7 @@ jobs:
       job-name: Spark
       target: spark
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3472,7 +3472,7 @@ jobs:
       job-name: SQL Server on Linux
       target: sqlserver
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3507,7 +3507,7 @@ jobs:
       job-name: Squid
       target: squid
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3527,7 +3527,7 @@ jobs:
       job-name: SSH
       target: ssh_check
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3547,7 +3547,7 @@ jobs:
       job-name: StatsD
       target: statsd
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3567,7 +3567,7 @@ jobs:
       job-name: Strimzi
       target: strimzi
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3587,7 +3587,7 @@ jobs:
       job-name: Supabase
       target: supabase
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3607,7 +3607,7 @@ jobs:
       job-name: Supervisord
       target: supervisord
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3627,7 +3627,7 @@ jobs:
       job-name: System Core
       target: system_core
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3647,7 +3647,7 @@ jobs:
       job-name: System Swap
       target: system_swap
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3667,7 +3667,7 @@ jobs:
       job-name: TCP on Linux
       target: tcp_check
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3687,7 +3687,7 @@ jobs:
       job-name: TeamCity
       target: teamcity
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3707,7 +3707,7 @@ jobs:
       job-name: Tekton
       target: tekton
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3727,7 +3727,7 @@ jobs:
       job-name: Teleport
       target: teleport
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3747,7 +3747,7 @@ jobs:
       job-name: Temporal
       target: temporal
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3767,7 +3767,7 @@ jobs:
       job-name: Teradata
       target: teradata
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3787,7 +3787,7 @@ jobs:
       job-name: tibco_ems
       target: tibco_ems
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3807,7 +3807,7 @@ jobs:
       job-name: TLS
       target: tls
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3827,7 +3827,7 @@ jobs:
       job-name: Tomcat
       target: tomcat
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3847,7 +3847,7 @@ jobs:
       job-name: TorchServe
       target: torchserve
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3867,7 +3867,7 @@ jobs:
       job-name: Traefik Mesh
       target: traefik_mesh
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3887,7 +3887,7 @@ jobs:
       job-name: Traffic Server
       target: traffic_server
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3907,7 +3907,7 @@ jobs:
       job-name: Twemproxy
       target: twemproxy
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3927,7 +3927,7 @@ jobs:
       job-name: Twistlock
       target: twistlock
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3947,7 +3947,7 @@ jobs:
       job-name: Varnish
       target: varnish
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3967,7 +3967,7 @@ jobs:
       job-name: Vault
       target: vault
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -3987,7 +3987,7 @@ jobs:
       job-name: Velero
       target: velero
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -4007,7 +4007,7 @@ jobs:
       job-name: Vertica
       target: vertica
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -4027,7 +4027,7 @@ jobs:
       job-name: vLLM
       target: vllm
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -4047,7 +4047,7 @@ jobs:
       job-name: VoltDB
       target: voltdb
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -4067,7 +4067,7 @@ jobs:
       job-name: vSphere
       target: vsphere
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -4087,7 +4087,7 @@ jobs:
       job-name: Weaviate
       target: weaviate
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -4107,7 +4107,7 @@ jobs:
       job-name: WebLogic
       target: weblogic
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -4127,7 +4127,7 @@ jobs:
       job-name: Yarn
       target: yarn
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
@@ -4147,7 +4147,7 @@ jobs:
       job-name: ZooKeeper
       target: zk
       platform: linux
-      runner: '["ubuntu-22.04"]'
+      runner: '["ubuntu-24.04"]'
       repo: "${{ inputs.repo }}"
       context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
