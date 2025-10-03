@@ -10,6 +10,32 @@ from ddev.utils.fs import Path
 from tests.helpers.git import ClonedRepo
 
 
+@pytest.fixture(scope="module")
+def set_up_repository(local_clone: ClonedRepo):
+    repo = Repository(local_clone.path.name, str(local_clone.path))
+
+    repo.git.capture("config", "user.name", "test_user")
+
+    repo.git.capture("checkout", "master")
+    (repo.path / "test1.txt").touch()
+    repo.git.capture("add", ".")
+    repo.git.capture("commit", "-m", "test1")
+    (repo.path / "test2.txt").touch()
+    repo.git.capture("add", ".")
+    repo.git.capture("commit", "-m", "test2")
+
+    repo.git.capture("checkout", "-b", "my-branch")
+
+    (repo.path / "test3.txt").touch()
+    repo.git.capture("add", ".")
+    repo.git.capture("commit", "-m", "test3")
+
+    repo.git.capture("checkout", "master")
+
+    yield repo
+    local_clone.reset_branch()
+
+
 def test_current_branch(repository):
     repo = Repository(repository.path.name, str(repository.path))
 
@@ -45,7 +71,7 @@ def test_get_latest_commit(repository):
 
 
 @pytest.mark.parametrize(
-    "args, n, source, expected, should_raise, define_repo",
+    "args, n, source, expected, should_raise",
     [
         (
             ["author:%an", "message:%f"],
@@ -56,7 +82,6 @@ def test_get_latest_commit(repository):
                 {"author": "test_user", "message": "test1"},
             ],
             False,
-            True,
         ),
         (
             ["author:%an", "message:%f"],
@@ -64,14 +89,12 @@ def test_get_latest_commit(repository):
             None,
             [{"author": "test_user", "message": "test2"}, {"author": "test_user", "message": "test1"}],
             False,
-            False,
         ),
         (
             ["author:%an", "message:%f"],
             0,
             None,
             [],
-            False,
             False,
         ),
         (
@@ -84,7 +107,6 @@ def test_get_latest_commit(repository):
                 {"author": "test_user", "message": "test1"},
             ],
             False,
-            False,
         ),
         (
             ["%H", "%f"],
@@ -92,7 +114,6 @@ def test_get_latest_commit(repository):
             None,
             None,
             True,
-            False,
         ),
     ],
     ids=[
@@ -103,29 +124,11 @@ def test_get_latest_commit(repository):
         "test_log_invalid_format_raises",
     ],
 )
-def test_get_log(repository, args, n, source, expected, should_raise, define_repo):
-    repo = Repository(repository.path.name, str(repository.path))
+def test_get_log(set_up_repository, local_clone, config_file, args, n, source, expected, should_raise):
+    config_file.model.repos['core'] = str(local_clone.path)
+    config_file.save()
 
-    repo.git.capture("config", "user.name", "test_user")
-    (repo.path / "test1.txt").touch()
-    repo.git.capture("add", ".")
-    repo.git.capture("commit", "-m", "test1")
-    (repo.path / "test2.txt").touch()
-    repo.git.capture("add", ".")
-    repo.git.capture("commit", "-m", "test2")
-
-    if source:
-        try:
-            repo.git.capture("checkout", "-b", "my-branch")
-        except Exception:
-            repo.git.capture("checkout", "my-branch")
-
-        (repo.path / "test3.txt").touch()
-        repo.git.capture("add", ".")
-        repo.git.capture("commit", "-m", "test3")
-
-        repo.git.capture("checkout", "master")
-
+    repo = set_up_repository
     kwargs = {}
     if n is not None:
         kwargs['n'] = n
