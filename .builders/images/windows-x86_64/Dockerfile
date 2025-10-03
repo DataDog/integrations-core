@@ -127,11 +127,11 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
     Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
 
-ENV OPENSSL_VERSION="3.4.1"
+ENV OPENSSL_VERSION="3.5.4"
 RUN Get-RemoteFile `
       -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
       -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
-      -Hash '002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3'; `
+      -Hash '967311f84955316969bdb1d8d4b983718ef42338639c621ec4c34fddef355e99'; `
     7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
     7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
     cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
