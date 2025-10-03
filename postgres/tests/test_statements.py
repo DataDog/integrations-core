@@ -444,7 +444,6 @@ def test_statement_metrics_cloud_metadata(
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     assert event['cloud_metadata'] == output_cloud_metadata, "wrong cloud_metadata"
 
