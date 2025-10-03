@@ -121,7 +121,6 @@ def test_activity_collection(
     expected_tags = (
         'database_hostname:stubbed.hostname',
         'database_instance:stubbed.hostname',
-        'ddagenthostname:stubbed.hostname',
         'tag1:value1',
         'tag2:value2',
         'port:13306',
@@ -551,7 +550,6 @@ def _expected_dbm_job_err_tags(dbm_instance, check):
     _tags = dbm_instance['tags'] + (
         'database_hostname:stubbed.hostname',
         'database_instance:stubbed.hostname',
-        'ddagenthostname:stubbed.hostname',
         'job:query-activity',
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:stubbed.hostname',
