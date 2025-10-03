@@ -19,6 +19,12 @@
 * Compile and reuse regex patterns ([#21317](https://github.com/DataDog/integrations-core/pull/21317))
 * Fixed support for refreshing IAM authentication and Azure Managed Identity tokens ([#21503](https://github.com/DataDog/integrations-core/pull/21503))
 
+## 23.0.2 / 2025-10-03
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
 ## 23.0.1 / 2025-09-24 / Agent 7.71.0
 
 ***Fixed***:

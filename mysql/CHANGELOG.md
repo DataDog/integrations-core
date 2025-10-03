@@ -15,6 +15,12 @@
 * Consolidate Mysql global variable lookups to a single query ([#21306](https://github.com/DataDog/integrations-core/pull/21306))
 * Setting `disable_innodb_metrics` config option to `true` will now properly disable `mysql.innodb.deadlocks` metric collection ([#21421](https://github.com/DataDog/integrations-core/pull/21421))
 
+## 15.8.1 / 2025-10-03
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
 ## 15.8.0 / 2025-09-05 / Agent 7.71.0
 
 ***Added***:
