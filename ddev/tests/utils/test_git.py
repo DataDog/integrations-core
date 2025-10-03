@@ -137,12 +137,10 @@ def test_get_log(set_up_repository, local_clone, config_file, args, n, source, e
         kwargs['source'] = source
 
     with context:
-        repo.git.log(args, **kwargs)
-
-    if n is None:
-        assert len(expected) < len(repo.git.log(args, **kwargs))
-    else:
-        assert repo.git.log(args, **kwargs) == expected
+        if n is None:
+            assert len(expected) < len(repo.git.log(args, **kwargs))
+        else:
+            assert repo.git.log(args, **kwargs) == expected
 
 
 def test_tags(repository):
