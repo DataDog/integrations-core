@@ -172,6 +172,7 @@ class AgentCheck(object):
         init_config = kwargs.get('init_config', {})
         agentConfig = kwargs.get('agentConfig', {})
         instances = kwargs.get('instances', [])
+        print('test')
 
         if len(args) > 0:
             name = args[0]
