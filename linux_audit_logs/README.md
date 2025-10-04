@@ -12,6 +12,7 @@ This integration provides enrichment and visualization for various log types, in
 - **User and group** management activities  
 - **SELinux user** errors  
 - **Access Vector Cache (AVC)** logs  
+- **System Call** logs
 
 It supports these logs across **Red Hat**, **Ubuntu**, and **CentOS** Linux operating systems.
 
@@ -81,6 +82,25 @@ For Linux, run:
     sudo systemctl restart auditd
     ```
 
+### Set up Audit Rules (optional)
+
+1. Create or Edit the audit rules file:
+    ```shell
+    sudo nano /etc/audit/rules.d/audit.rules
+    ```
+
+2. Configure the audit rules based on your requirements. For reference, see [audit rulesets][9].
+
+3. Reload audit rules:
+    ```shell
+    sudo augenrules --load
+    ```
+
+4. Verify loaded rules:
+    ```shell
+    sudo auditctl -l
+    ```
+
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `linux_audit_logs` under the Checks section.
@@ -136,3 +156,4 @@ Need help? Contact [Datadog support][1].
 [6]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
 [7]: https://github.com/DataDog/integrations-core/blob/master/linux_audit_logs/datadog_checks/linux_audit_logs/data/conf.yaml.example
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/Neo23x0/auditd/tree/master
