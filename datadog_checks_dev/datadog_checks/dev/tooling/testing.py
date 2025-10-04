@@ -522,6 +522,13 @@ def construct_pytest_options(
 ):
     # Prevent no verbosity
     pytest_options = f'--verbosity={verbose or 1}'
+    
+    # Add timeout to prevent hanging tests (especially important for Python 3.13)
+    # Allow override via environment variable for CI flexibility
+    timeout_minutes = int(os.environ.get('PYTEST_TIMEOUT_MINUTES', '5'))
+    timeout_seconds = timeout_minutes * 60
+    pytest_options += f' --timeout={timeout_seconds}'
+    pytest_options += ' --log-level=DEBUG'
 
     if not verbose:
         pytest_options += ' --tb=short'
@@ -544,8 +551,8 @@ def construct_pytest_options(
     if latest:
         pytest_options += ' --run-latest-metrics'
 
-    if ddtrace:
-        pytest_options += ' --ddtrace'
+    # if ddtrace:
+    #     pytest_options += ' --ddtrace'
 
     if junit:
         test_group = 'e2e' if e2e else 'unit'

@@ -201,7 +201,7 @@ def test(
             test_filter=test_filter,
             pytest_args=pytest_args,
             e2e=e2e,
-            ddtrace=ddtrace_check,
+            ddtrace=False,
             memray=memray,
         )
         if coverage:

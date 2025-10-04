@@ -11,6 +11,7 @@ ProxySettings = TypedDict(
     'ProxySettings', {'http': Optional[str], 'https': Optional[str], 'no': List[str]}, total=False
 )
 
+
 # NOTE: a bit involved, but this is basically a type checking-friendly `NamedTuple`-based version of an `Enum`.
 # We don't use an actual `Enum` because for backwards compatibility we need e.g. `ServiceCheck.OK` to be
 # `0` (the integer), instead of an opaque enum instance.
