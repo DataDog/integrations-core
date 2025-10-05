@@ -106,8 +106,13 @@ jobs:
       FORCE_COLOR: "1"
       PYTHON_VERSION: "${{ inputs.python-version || '3.13' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
-      # Set pytest timeout to prevent hanging tests (especially important for Python 3.13)
-      PYTEST_TIMEOUT_MINUTES: "5"
+      # Python 3.13 debugging: Enable hang detection and diagnostics (CI-only issues)
+      DDEV_DEBUG_HANGS: "${{ env.PYTHON_VERSION == '3.13' && '1' || '0' }}"
+      DDEV_TEST_TIMEOUT: "180"  # 3 minutes per test (shorter for CI)
+      DDEV_HANG_TIMEOUT: "300"  # 5 minutes before faulthandler dump (shorter for CI)
+      # Force more verbose Docker output for CI debugging
+      COMPOSE_HTTP_TIMEOUT: "120"
+      DOCKER_CLIENT_TIMEOUT: "120"
       # Windows E2E requires Windows containers
       DDEV_E2E_AGENT: "${{ (inputs.platform == 'windows' && inputs.agent-image-windows) || inputs.agent-image }}"
       DDEV_E2E_AGENT_PY2: "${{ (inputs.platform == 'windows' && inputs.agent-image-windows-py2) || inputs.agent-image-py2 }}"
@@ -241,6 +246,19 @@ jobs:
         # Disable ddtrace for Python 3.13 to avoid potential hanging issues
         DDEV_TEST_ENABLE_TRACING: "0"
       run: |
+        # Function to dump Docker state for debugging Python 3.13 hangs
+        dump_docker_state() {
+          if [ "$PYTHON_VERSION" = "3.13" ] && [ "$DDEV_DEBUG_HANGS" = "1" ]; then
+            echo "[DEBUG] Dumping Docker state..."
+            docker ps -a || true
+            docker compose ls || true
+            docker stats --no-stream || true
+          fi
+        }
+        
+        # Set up trap to dump state on timeout/error
+        trap 'dump_docker_state' ERR EXIT
+        
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
           ddev -v test --cov --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} -- ${{ inputs.pytest-args }} -k "not fips"

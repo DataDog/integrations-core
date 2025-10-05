@@ -523,12 +523,13 @@ def construct_pytest_options(
     # Prevent no verbosity
     pytest_options = f'--verbosity={verbose or 1}'
     
-    # Add timeout to prevent hanging tests (especially important for Python 3.13)
-    # Allow override via environment variable for CI flexibility
-    timeout_minutes = int(os.environ.get('PYTEST_TIMEOUT_MINUTES', '5'))
-    timeout_seconds = timeout_minutes * 60
-    pytest_options += f' --timeout={timeout_seconds}'
-    pytest_options += ' --log-level=DEBUG'
+    # Add timeout for Python 3.13 debugging (only if pytest-timeout is available)
+    import sys
+    if sys.version_info >= (3, 13) and os.environ.get('DDEV_DEBUG_HANGS'):
+        timeout_seconds = int(os.environ.get('DDEV_TEST_TIMEOUT', '300'))  # 5 minutes default
+        # Use 'thread' method to allow signal-based interruption
+        pytest_options += f' --timeout={timeout_seconds} --timeout-method=thread'
+        print(f"[TIMEOUT] Set per-test timeout to {timeout_seconds}s with thread method")
 
     if not verbose:
         pytest_options += ' --tb=short'

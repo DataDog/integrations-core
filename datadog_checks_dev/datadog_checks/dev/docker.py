@@ -263,10 +263,32 @@ class ComposeFileUp(LazyFunction):
             self.command.append(self.service_name)
 
     def __call__(self):
+        import sys
+        from ..subprocess import running_on_ci
+        
+        # CI-specific debugging for Python 3.13 Docker issues
+        if sys.version_info >= (3, 13) and running_on_ci() and os.environ.get('DDEV_DEBUG_HANGS'):
+            print(f"\n[DOCKER] Starting containers: {' '.join(self.command)}")
+            print(f"[DOCKER] Compose file: {self.compose_file}")
+            print(f"[DOCKER] Wait for health: {self.waith_for_health}")
+            
         args = {'check': True}
         if self.capture is not None:
             args['capture'] = self.capture
-        return run_command(self.command, **args)
+        
+        result = run_command(self.command, **args)
+        
+        # Show container status after startup in CI
+        if sys.version_info >= (3, 13) and running_on_ci() and os.environ.get('DDEV_DEBUG_HANGS'):
+            try:
+                status_cmd = ['docker', 'compose', '-f', self.compose_file, 'ps', '--format', 'json']
+                status_result = run_command(status_cmd, capture=True, check=False)
+                if status_result.stdout:
+                    print(f"[DOCKER] Container status: {status_result.stdout}")
+            except Exception as e:
+                print(f"[DOCKER] Could not get container status: {e}")
+        
+        return result
 
 
 class ComposeFileLogs(LazyFunction):

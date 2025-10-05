@@ -379,6 +379,21 @@ TEST_TYPES = (
 
 
 def pytest_configure(config):
+    # Enable faulthandler for Python 3.13 to debug hanging tests
+    import sys
+    if sys.version_info >= (3, 13) and os.environ.get('DDEV_DEBUG_HANGS'):
+        import faulthandler
+        import signal
+        faulthandler.enable()
+        # Dump traceback on SIGUSR1 (Unix) or after timeout
+        if hasattr(signal, 'SIGUSR1'):
+            faulthandler.register(signal.SIGUSR1, all_threads=True, chain=False)
+        # Also set a periodic dump if a test runs too long
+        timeout = int(os.environ.get('DDEV_HANG_TIMEOUT', '300'))  # 5 minutes default
+        faulthandler.dump_traceback_later(timeout, repeat=True, exit=False)
+        print(f"[FAULTHANDLER] Enabled for Python {sys.version_info.major}.{sys.version_info.minor}")
+        print(f"[FAULTHANDLER] Will dump threads after {timeout}s of hanging")
+    
     # pytest will emit warnings if these aren't registered ahead of time
     for ttype in TEST_TYPES:
         config.addinivalue_line('markers', '{}: {}'.format(ttype.name, ttype.description))
@@ -388,6 +403,31 @@ def pytest_configure(config):
 
 def pytest_addoption(parser):
     parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
+
+
+def pytest_runtest_teardown(item, nextitem):
+    """Dump diagnostic info if Python 3.13 debugging is enabled."""
+    import sys
+    if sys.version_info >= (3, 13) and os.environ.get('DDEV_DEBUG_HANGS'):
+        import threading
+        import multiprocessing
+        
+        # Check for lingering threads
+        threads = threading.enumerate()
+        if len(threads) > 1:  # More than just main thread
+            print(f"\n[DEBUG] Active threads after {item.nodeid}:")
+            for thread in threads:
+                print(f"  - {thread.name} (daemon={thread.daemon}, alive={thread.is_alive()})")
+        
+        # Check for lingering processes
+        try:
+            active_children = multiprocessing.active_children()
+            if active_children:
+                print(f"\n[DEBUG] Active processes after {item.nodeid}:")
+                for proc in active_children:
+                    print(f"  - {proc.name} (pid={proc.pid}, alive={proc.is_alive()})")
+        except Exception:
+            pass  # multiprocessing may not be available in all contexts
 
 
 def pytest_collection_modifyitems(config, items):
