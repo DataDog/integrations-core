@@ -1123,6 +1123,7 @@ class AgentCheck(object):
         """
         datadog_agent.write_persistent_cache(f"{self.__persistent_cache_key_prefix}{key}", value)
 
+
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None
         # Example of external_tags format
