@@ -59,9 +59,9 @@ jobs:
         --dependency-commit ${{ needs.define-current-commit.outputs.commit }} \
         --format json"
 
-        if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then # TODO: change to ${{ github.event.workflow_run.event }}
-          cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
-        fi
+        # if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then # TODO: change to ${{ github.event.workflow_run.event }}
+        cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
+        # fi
 
         echo "cmd=$cmd" >> $GITHUB_OUTPUT
 

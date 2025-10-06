@@ -191,11 +191,10 @@ def diff(
             from .utils.common_funcs import send_metrics_to_dd
 
             mode: Literal["diff"] = "diff"
-            print(modules)
             send_metrics_to_dd(app, modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
 
         if format or not passes_quality_gate:
-            modules = [module for module in modules if module["Size_Bytes"] != 0]
+            # modules = [module for module in modules if module["Size_Bytes"] != 0]
             if format:
                 from .utils.common_funcs import export_format
 
@@ -434,10 +433,14 @@ def calculate_diff(
             change_type = "Removed"
             name_str = f"{name}"
             version_str = ver_old
-        else:
+        elif delta != 0:
             change_type = "Modified"
             name_str = name
             version_str = f"{ver_old} -> {ver_new}" if ver_new != ver_old else ver_new
+        else:
+            change_type = "Unchanged"
+            name_str = name
+            version_str = ver_new
 
         diffs.append(
             {
