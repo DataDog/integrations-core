@@ -56,7 +56,6 @@ def test_aof_loading_metrics(aggregator, redis_instance):
         aggregator.assert_metric('redis.aof.loading_loaded_bytes', 43)
         aggregator.assert_metric('redis.aof.loading_loaded_perc', 44)
         aggregator.assert_metric('redis.aof.loading_eta_seconds', 45)
-        aggregator.assert_metric('redis.commands.total_processed', 0)
         aggregator.assert_all_metrics_covered()
         aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 

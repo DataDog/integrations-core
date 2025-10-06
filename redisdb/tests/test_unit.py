@@ -84,7 +84,7 @@ def test__check_total_commands_processed_not_present(check, aggregator, redis_in
     conn.info.return_value = {}
 
     # Run the check
-    redis_check._check_total_commands_processed(conn.info(), [])
+    redis_check._check_info_fields(conn.info(), [])
 
     # Assert that no metrics were sent
     aggregator.assert_metric('redis.net.commands', count=0)
@@ -99,7 +99,7 @@ def test__check_total_commands_processed_present(check, aggregator, redis_instan
     conn.info.return_value = {'total_commands_processed': 1000}
 
     # Run the check
-    redis_check._check_total_commands_processed(conn.info(), ['test_total_commands_processed'])
+    redis_check._check_info_fields(conn.info(), ['test_total_commands_processed'])
 
     # Assert that the `redis.net.commands` metric was sent
     aggregator.assert_metric('redis.net.commands', value=1000, tags=['test_total_commands_processed'])

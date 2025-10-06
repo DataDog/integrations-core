@@ -11,15 +11,12 @@ CONFIG_GAUGE_KEYS = {
 }
 
 GAUGE_KEYS = {
-    # Server
     'io_threads_active': 'redis.server.io_threads_active',
-    # Active defrag metrics
     'active_defrag_running': 'redis.active_defrag.running',
     'active_defrag_hits': 'redis.active_defrag.hits',
     'active_defrag_misses': 'redis.active_defrag.misses',
     'active_defrag_key_hits': 'redis.active_defrag.key_hits',
     'active_defrag_key_misses': 'redis.active_defrag.key_misses',
-    # Append-only metrics
     'aof_last_rewrite_time_sec': 'redis.aof.last_rewrite_time',
     'aof_rewrite_in_progress': 'redis.aof.rewrite',
     'aof_current_size': 'redis.aof.size',
@@ -28,36 +25,23 @@ GAUGE_KEYS = {
     'loading_loaded_bytes': 'redis.aof.loading_loaded_bytes',
     'loading_loaded_perc': 'redis.aof.loading_loaded_perc',
     'loading_eta_seconds': 'redis.aof.loading_eta_seconds',
-    # Network
     'connected_clients': 'redis.net.clients',
     'connected_slaves': 'redis.net.slaves',
     'rejected_connections': 'redis.net.rejected',
-    # clients
     'blocked_clients': 'redis.clients.blocked',
-    # 'client_biggest_input_buf': 'redis.clients.biggest_input_buf',
-    # 'client_longest_output_list': 'redis.clients.longest_output_list',
     'client_recent_max_input_buffer': 'redis.clients.recent_max_input_buffer',
     'client_recent_max_output_buffer': 'redis.clients.recent_max_output_buffer',
-    # Keys
     'evicted_keys': 'redis.keys.evicted',
     'expired_keys': 'redis.keys.expired',
-    # stats
     'latest_fork_usec': 'redis.perf.latest_fork_usec',
-    'bytes_received_per_sec': 'redis.bytes_received_per_sec',
-    'bytes_sent_per_sec': 'redis.bytes_sent_per_sec',
-    # Note: 'bytes_received_per_sec' and 'bytes_sent_per_sec' are only
-    # available on Azure Redis
-    'instantaneous_input_kbps': 'redis.net.instantaneous_input',
-    'instantaneous_output_kbps': 'redis.net.instantaneous_output',
+    'bytes_received_per_sec': 'redis.bytes_received_per_sec', # Note: are only available on Azure Redis
+    'bytes_sent_per_sec': 'redis.bytes_sent_per_sec', # Note: are only available on Azure Redis
     'total_connections_received': 'redis.net.total_connections_received',
-    # pubsub
     'pubsub_channels': 'redis.pubsub.channels',
     'pubsub_patterns': 'redis.pubsub.patterns',
-    # rdb
     'rdb_bgsave_in_progress': 'redis.rdb.bgsave',
     'rdb_changes_since_last_save': 'redis.rdb.changes_since_last',
     'rdb_last_bgsave_time_sec': 'redis.rdb.last_bgsave_time',
-    # memory
     'mem_fragmentation_bytes': 'redis.mem.fragmentation',
     'mem_fragmentation_ratio': 'redis.mem.fragmentation_ratio',
     'mem_total_replication_buffers': 'redis.mem.total_replication_buffers',
@@ -77,7 +61,6 @@ GAUGE_KEYS = {
     'used_memory_scripts_eval': 'redis.mem.scripts_eval',
     'used_memory_scripts': 'redis.mem.scripts',
     'maxmemory': 'redis.mem.maxmemory',
-    # replication
     'master_last_io_seconds_ago': 'redis.replication.last_io_seconds_ago',
     'master_sync_in_progress': 'redis.replication.sync',
     'master_sync_left_bytes': 'redis.replication.sync_left_bytes',
@@ -86,16 +69,12 @@ GAUGE_KEYS = {
     'slave_repl_offset': 'redis.replication.slave_repl_offset',
     'total_net_repl_input_bytes': 'redis.replication.input_total_bytes',
     'total_net_repl_output_bytes': 'redis.replication.output_total_bytes',
-    # ---- Memory (from your example) ----
     'allocator_active': 'redis.allocator.active',
     'allocator_allocated': 'redis.allocator.allocated',
-    # 'allocator_frag_ratio': 'redis.allocator.frag_ratio',
     'allocator_muzzy': 'redis.allocator.muzzy',
     'allocator_resident': 'redis.allocator.resident',
     'allocator_rss_bytes': 'redis.allocator.rss_bytes',
     'allocator_rss_ratio': 'redis.allocator.rss_ratio',
-
-    # ---- Replication (from your example) ----
     'master_last_io_seconds_ago': 'redis.replication.last_io_seconds_ago',
     'master_sync_in_progress': 'redis.replication.sync',
     'master_sync_left_bytes': 'redis.replication.sync_left_bytes',
@@ -104,64 +83,25 @@ GAUGE_KEYS = {
     'slave_repl_offset': 'redis.replication.slave_repl_offset',
     'total_net_repl_input_bytes': 'redis.replication.input_total_bytes',
     'total_net_repl_output_bytes': 'redis.replication.output_total_bytes',
-
-    # ---- ACL ----
     'acl_access_denied_auth':'redis.acl.denied.auth',
     'acl_access_denied_channel':'redis.acl.denied.channel',
     'acl_access_denied_cmd':'redis.acl.denied.cmd',
     'acl_access_denied_key':'redis.acl.denied.key',
-
-    # ---- Allocator (DEBUG & typos resolved) ----
     'allocator_active_lua':'redis.allocator.debug.active_lua',
     'allocator_allocated_lua':'redis.allocator.debug.allocated_lua',
     'allocator_frag_bytes_lua':'redis.allocator.debug.frag_bytes_lua',
-    'allocator_frag_ratio:':'redis.allocator.frag_ratio',  # original key had a trailing colon
+    'allocator_frag_ratio':'redis.allocator.frag_ratio',
     'allocator_resident_lua':'redis.allocator.debug.resident_lua',
-
-    # ---- AOF ----
     'aof_base_size':'redis.aof.base_size',
     'aof_current_rewrite_time_sec':'redis.aof.rewrite.current_time_sec',
     'aof_delayed_fsync':'redis.aof.delayed_fsync',
     'aof_enabled':'redis.aof.enabled',
-    # 'aof_last_bgrewrite_status':'redis.aof.last_bgrewrite_status',
     'aof_last_cow_size':'redis.aof.last_cow_size',
-    # 'aof_last_write_status':'redis.aof.last_write_status',
     'aof_pending_bio_fsync':'redis.aof.pending_bio_fsync',
     'aof_pending_rewrite':'redis.aof.pending_rewrite',
     'aof_rewrite_buffer_length':'redis.aof.rewrite.buffer_length',
     'aof_rewrite_scheduled':'redis.aof.rewrite.scheduled',
     'aof_rewrites':'redis.aof.rewrites',
-
-    # ---- META / System ----
-    # 'arch_bits':'redis.meta.arch_bits',
-    # 'atomicvar_api':'redis.meta.atomicvar_api',
-    # 'config_file':'redis.meta.config_file',
-    # 'configured_hz':'redis.meta.configured_hz',
-    # 'executable':'redis.meta.executable',
-    # 'gcc_version':'redis.meta.gcc_version',
-    # 'hz':'redis.meta.hz',
-    # 'lru_clock':'redis.meta.lru_clock',
-    # 'multiplexing_api':'redis.meta.multiplexing_api',
-    # 'os':'redis.meta.os',
-    # 'process_id':'redis.meta.process_id',
-    # 'process_supervised':'redis.meta.process_supervised',
-    # 'redis_build_id':'redis.meta.redis_build_id',
-    # 'redis_git_dirty':'redis.meta.redis_git_dirty',
-    # 'redis_git_sha1':'redis.meta.redis_git_sha1',
-    # 'redis_mode':'redis.meta.redis_mode',
-    # 'redis_version':'redis.meta.redis_version',
-    # 'server_time_usec':'redis.meta.server_time_usec',
-    # 'shutdown_in_milliseconds':'redis.meta.shutdown_in_milliseconds',
-    # 'tcp_port':'redis.meta.tcp_port',
-    # 'uptime_in_days':'redis.meta.uptime_in_days',
-    # 'uptime_in_seconds':'redis.meta.uptime_in_seconds',
-    # 'run_id':'redis.meta.run_id',
-    # 'maxmemory_human':'redis.meta.maxmemory_human',
-    # 'maxmemory_policy':'redis.meta.maxmemory_policy',
-    # 'total_system_memory':'redis.meta.total_system_memory',
-    # 'total_system_memory_human':'redis.meta.total_system_memory_human',
-
-    # ---- Clients & Pub/Sub ----
     'client_output_buffer_limit_disconnections':'redis.clients.output_buffer_limit_disconnections',
     'client_query_buffer_limit_disconnections':'redis.clients.query_buffer_limit_disconnections',
     'clients_in_timeout_table':'redis.clients.timeout_table',
@@ -169,48 +109,26 @@ GAUGE_KEYS = {
     'watching_clients':'redis.clients.watching',
     'pubsub_clients':'redis.pubsub.clients',
     'pubsubshard_channels':'redis.pubsub.shard_channels',
-
-    # ---- Cluster ----
     'cluster_connections':'redis.cluster.connections',
     'cluster_enabled':'redis.cluster.enabled',
-
-    # ---- Commands / Errors ----
-    # 'cmdstat_XXX':'redis.cmdstat.XXX',
-    # 'errorstat_XXX':'redis.errorstat.XXX',
     'unexpected_error_replies':'redis.errors.unexpected_replies',
     'total_error_replies':'redis.errors.total_replies',
-
-    # ---- Defrag / Eviction ----
     'current_active_defrag_time':'redis.defrag.current_active_time',
     'total_active_defrag_time':'redis.defrag.total_active_time',
     'current_eviction_exceeded_time':'redis.eviction.current_exceeded_time',
     'total_eviction_exceeded_time':'redis.eviction.total_exceeded_time',
-
-    # ---- Copy-on-write / Fork ----
     'current_cow_peak':'redis.cow.current_peak',
     'current_cow_size':'redis.cow.current_size',
     'current_cow_size_age':'redis.cow.current_size_age',
-    # 'current_fork_perc':'redis.fork.current_perc',
     'total_forks':'redis.fork.total',
-
-    # ---- Persistence: RDB ----
     'rdb_current_bgsave_time_sec':'redis.rdb.current_bgsave_time_sec',
-    # 'rdb_last_bgsave_status':'redis.rdb.last_bgsave_status',
     'rdb_last_cow_size':'redis.rdb.last_cow_size',
     'rdb_last_load_keys_expired':'redis.rdb.last_load.keys_expired',
     'rdb_last_load_keys_loaded':'redis.rdb.last_load.keys_loaded',
     'rdb_last_save_time':'redis.rdb.last_save_time',
     'rdb_saves':'redis.rdb.saves',
-
-    # ---- Replication (additional) ----
-    # 'master_failover_state':'redis.replication.failover_state',
-    # 'master_host':'redis.replication.master_host',
-    # 'master_link_status':'redis.replication.master_link_status',
     'master_port':'redis.replication.master_port',
-    # 'master_replid':'redis.replication.master_replid',
-    # 'master_replid2':'redis.replication.master_replid2',
     'master_sync_last_io_seconds_ago':'redis.replication.sync.last_io_seconds_ago',
-    # 'master_sync_perc':'redis.replication.sync.perc',
     'master_sync_read_bytes':'redis.replication.sync.read_bytes',
     'master_sync_total_bytes':'redis.replication.sync.total_bytes',
     'second_repl_offset':'redis.replication.second_repl_offset',
@@ -218,7 +136,6 @@ GAUGE_KEYS = {
     'repl_backlog_first_byte_offset':'redis.replication.backlog_first_byte_offset',
     'repl_backlog_size':'redis.replication.backlog_size',
     'replica_announced':'redis.replication.replica_announced',
-    # 'slaveXXX':'redis.replication.slave.XXX',
     'slave_expires_tracked_keys':'redis.replication.slave.expires_tracked_keys',
     'slave_priority':'redis.replication.slave.priority',
     'slave_read_only':'redis.replication.slave.read_only',
@@ -229,8 +146,6 @@ GAUGE_KEYS = {
     'instantaneous_input_repl_kbps':'redis.replication.instantaneous_input_kbps',
     'instantaneous_output_repl_kbps':'redis.replication.instantaneous_output_kbps',
     'min_slaves_good_slaves':'redis.replication.min_slaves_good_slaves',
-
-    # ---- Event Loop ----
     'eventloop_cmd_per_cycle_max':'redis.eventloop.cmd_per_cycle_max',
     'eventloop_cycles':'redis.eventloop.cycles',
     'eventloop_duration_aof_sum':'redis.eventloop.duration_aof_sum',
@@ -238,36 +153,20 @@ GAUGE_KEYS = {
     'eventloop_duration_cron_sum':'redis.eventloop.duration_cron_sum',
     'eventloop_duration_max':'redis.eventloop.duration_max',
     'eventloop_duration_sum':'redis.eventloop.duration_sum',
-    'instantaneous_eventloop_cycles_per_sec':'redis.eventloop.instantaneous_cycles_per_sec',
     'instantaneous_eventloop_duration_usec':'redis.eventloop.instantaneous_duration_usec',
-
-    # ---- IO Threads ----
-    # 'io_thread_XXX':'redis.io_threads.XXX',
-
-    # ---- Expiration / Keys ----
     'expire_cycle_cpu_milliseconds':'redis.expire_cycle.cpu_milliseconds',
-    # 'expired_stale_perc':'redis.expired.stale_perc',
     'expired_subkeys':'redis.expired.subkeys',
     'expired_time_cap_reached_count':'redis.expired.time_cap_reached_count',
     'total_blocking_keys':'redis.keys.total_blocking',
     'total_blocking_keys_on_nokey':'redis.keys.total_blocking_on_nokey',
     'total_watched_keys':'redis.keys.total_watched',
-
-    # ---- DBs ----
-    # 'dbXXX':'redis.db.XXX',
-
-    # ---- Scripts / Functions / Libraries ----
     'evicted_scripts':'redis.scripts.evicted',
     'number_of_cached_scripts':'redis.scripts.cached',
     'number_of_functions':'redis.functions.count',
     'number_of_libraries':'redis.libraries.count',
-
-    # ---- Loading ----
     'loading':'redis.loading.loading',
     'loading_rdb_used_mem':'redis.loading.rdb_used_mem',
     'loading_start_time':'redis.loading.start_time',
-
-    # ---- Networking & Reply Buffers ----
     'migrate_cached_sockets':'redis.net.migrate_cached_sockets',
     'reply_buffer_expands':'redis.reply_buffer.expands',
     'reply_buffer_shrinks':'redis.reply_buffer.shrinks',
@@ -275,28 +174,12 @@ GAUGE_KEYS = {
     'total_net_output_bytes':'redis.net.total_output_bytes',
     'rss_overhead_bytes':'redis.memory.rss_overhead_bytes',
     'rss_overhead_ratio':'redis.memory.rss_overhead_ratio',
-
-    # ---- Role ----
-    # 'role':'redis.role',
-
-    # ---- Memory (more) ----
-    # 'mem_allocator':'redis.memory.allocator',
     'mem_aof_buffer':'redis.memory.aof_buffer',
     'mem_cluster_links':'redis.memory.cluster_links',
     'mem_not_counted_for_evict':'redis.memory.not_counted_for_evict',
     'mem_overhead_db_hashtable_rehashing':'redis.memory.overhead_db_hashtable_rehashing',
     'mem_replication_backlog':'redis.memory.replication_backlog',
-    # 'used_memory_dataset_perc':'redis.memory.dataset_perc',
-    # 'used_memory_human':'redis.memory.human',
-    # 'used_memory_lua_human':'redis.memory.lua_human',
-    # 'used_memory_peak_human':'redis.memory.peak_human',
-    # 'used_memory_peak_perc':'redis.memory.peak_perc',
     'used_memory_peak_time':'redis.memory.peak_time',
-    # 'used_memory_rss_human':'redis.memory.rss_human',
-    # 'used_memory_scripts_human':'redis.memory.scripts_human',
-    # 'used_memory_vm_total_human':'redis.memory.vm_total_human',
-
-    # ---- Search / RediSearch: totals, memory, cursors, errors, GC ----
     'search_bytes_collected':'redis.search.bytes_collected',
     'search_cursors_internal_active':'redis.search.cursors.internal_active',
     'search_cursors_internal_idle':'redis.search.cursors.internal_idle',
@@ -312,14 +195,12 @@ GAUGE_KEYS = {
     'search_global_idle':'redis.search.global_idle',
     'search_global_total':'redis.search.global_total',
     'search_largest_memory_index':'redis.search.memory.largest_index',
-    # 'search_largest_memory_index_human':'redis.search.memory.largest_index_human',
     'search_marked_deleted_vectors':'redis.search.marked_deleted_vectors',
     'search_number_of_active_indexes':'redis.search.indexes.active',
     'search_number_of_active_indexes_indexing':'redis.search.indexes.active_indexing',
     'search_number_of_active_indexes_running_queries':'redis.search.indexes.running_queries',
     'search_number_of_indexes':'redis.search.indexes.total',
     'search_smallest_memory_index':'redis.search.memory.smallest_index',
-    # 'search_smallest_memory_index_human':'redis.search.memory.smallest_index_human',
     'search_total_active_queries':'redis.search.queries.active',
     'search_total_active_write_threads':'redis.search.write_threads.active',
     'search_total_cycles':'redis.search.total_cycles',
@@ -330,11 +211,7 @@ GAUGE_KEYS = {
     'search_total_query_commands':'redis.search.queries.commands',
     'search_total_query_execution_time_ms':'redis.search.queries.execution_time_ms',
     'search_used_memory_indexes':'redis.search.memory.used_indexes',
-    # 'search_used_memory_indexes_human':'redis.search.memory.used_indexes_human',
     'search_used_memory_vector_index':'redis.search.memory.used_vector_index',
-
-    # ---- Search fields (<field> / types) ----
-    # 'search_fields_<field>_IndexErrors':'redis.search.fields.<field>.index_errors',
     'search_fields_geo_Geo':'redis.search.fields.geo.geo',
     'search_fields_geo_NoIndex':'redis.search.fields.geo.noindex',
     'search_fields_geo_Sortable':'redis.search.fields.geo.sortable',
@@ -354,8 +231,6 @@ GAUGE_KEYS = {
     'search_fields_vector_Flat':'redis.search.fields.vector.flat',
     'search_fields_vector_HNSW':'redis.search.fields.vector.hnsw',
     'search_fields_vector_Vector':'redis.search.fields.vector.vector',
-
-    # ---- Sentinel ----
     'sentinel_masters':'redis.sentinel.masters',
     'sentinel_running_scripts':'redis.sentinel.running_scripts',
     'sentinel_scripts_queue_length':'redis.sentinel.scripts_queue_length',
@@ -363,13 +238,9 @@ GAUGE_KEYS = {
     'sentinel_tilt':'redis.sentinel.tilt',
     'sentinel_tilt_since_seconds':'redis.sentinel.tilt_since_seconds',
     'sentinel_total_tilt':'redis.sentinel.total_tilt',
-
-    # ---- Totals / Ops ----
-    'total_commands_processed':'redis.commands.total_processed',
+    'total_commands_processed':'redis.net.commands',
     'total_reads_processed':'redis.ops.reads_processed',
     'total_writes_processed':'redis.ops.writes_processed',
-
-    # ---- Tracking ----
     'tracking_clients':'redis.tracking.clients',
     'tracking_total_items':'redis.tracking.total_items',
     'tracking_total_keys':'redis.tracking.total_keys',
@@ -389,5 +260,11 @@ RATE_KEYS = {
     'keyspace_misses': 'redis.stats.keyspace_misses',
     'io_threaded_reads_processed': 'redis.stats.io_threaded_reads_processed',
     'io_threaded_writes_processed': 'redis.stats.io_threaded_writes_processed',
+    # eventloop
+    'instantaneous_eventloop_cycles_per_sec':'redis.eventloop.instantaneous_cycles_per_sec',
+    # net
+    'instantaneous_input_kbps': 'redis.net.instantaneous_input',
+    'instantaneous_output_kbps': 'redis.net.instantaneous_output',
+    'instantaneous_ops_per_sec': 'redis.net.instantaneous_ops_per_sec',
 }
 
