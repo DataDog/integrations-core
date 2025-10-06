@@ -103,6 +103,8 @@ def diff(
         total_diff = {}
         old_size = {}
 
+        mode: Literal["diff"] = "diff"
+
         if not old_commit:
             base_commit = app.repo.git.merge_base(new_commit, "origin/master")
             if base_commit != new_commit:
@@ -148,6 +150,10 @@ def diff(
                     passes_quality_gate = check_quality_gate(
                         app, total_diff[(plat, ver)], old_size[(plat, ver)], quality_gate_threshold, plat, ver
                     )
+                if to_dd_org or to_dd_key:
+                    from .utils.common_funcs import send_metrics_to_dd
+
+                    send_metrics_to_dd(app, modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
 
         else:
             with GitRepo(repo_url) as gitRepo:
@@ -184,17 +190,16 @@ def diff(
                             passes_quality_gate = check_quality_gate(
                                 app, total_diff[(plat, ver)], old_size[(plat, ver)], quality_gate_threshold, plat, ver
                             )
+                        if to_dd_org or to_dd_key:
+                            from .utils.common_funcs import send_metrics_to_dd
+
+                            send_metrics_to_dd(app, modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
+
                 except Exception as e:
                     app.abort(str(e))
 
-        if to_dd_org or to_dd_key:
-            from .utils.common_funcs import send_metrics_to_dd
-
-            mode: Literal["diff"] = "diff"
-            send_metrics_to_dd(app, modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
-
         if format or not passes_quality_gate:
-            # modules = [module for module in modules if module["Size_Bytes"] != 0]
+            modules = [module for module in modules if module["Size_Bytes"] != 0]
             if format:
                 from .utils.common_funcs import export_format
 

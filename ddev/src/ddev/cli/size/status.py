@@ -85,6 +85,9 @@ def status(
         versions = valid_versions if py_version is None else [py_version]
         combinations = [(p, v) for p in platforms for v in versions]
 
+        mode: Literal["status"] = "status"
+        commits = [dependency_commit] if dependency_commit else None
+
         for plat, ver in combinations:
             if dependency_commit:
                 from ddev.cli.size.utils.common_funcs import get_last_dependency_sizes_artifact
@@ -106,18 +109,16 @@ def status(
                     dependency_sizes,
                 )
             )
+            if to_dd_org or to_dd_key:
+                from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
+
+                app.display("Sending metrics to Datadog ")
+                send_metrics_to_dd(app, modules_plat_ver, to_dd_org, to_dd_key, to_dd_site, compressed, mode, commits)
+
         if format:
             from ddev.cli.size.utils.common_funcs import export_format
 
             export_format(app, format, modules_plat_ver, "status", platform, py_version, compressed)
-        if to_dd_org or to_dd_key:
-            from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
-
-            print("Sending metrics to Datadog ")
-            mode: Literal["status"] = "status"
-            commits = [dependency_commit] if dependency_commit else None
-            print(f"Sending metrics to Datadog for commits: {commits}")
-            send_metrics_to_dd(app, modules_plat_ver, to_dd_org, to_dd_key, to_dd_site, compressed, mode, commits)
 
     except Exception as e:
         app.abort(str(e))
