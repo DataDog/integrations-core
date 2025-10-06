@@ -13,7 +13,16 @@ import redis
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.common import round_value
 
-from .constants import DEFAULT_MAX_SLOW_ENTRIES, MAX_SLOW_ENTRIES_KEY, REPL_KEY, LINK_DOWN_KEY, DEFAULT_CLIENT_NAME, CONFIG_GAUGE_KEYS, GAUGE_KEYS, RATE_KEYS
+from .constants import (
+    CONFIG_GAUGE_KEYS,
+    DEFAULT_CLIENT_NAME,
+    DEFAULT_MAX_SLOW_ENTRIES,
+    GAUGE_KEYS,
+    LINK_DOWN_KEY,
+    MAX_SLOW_ENTRIES_KEY,
+    RATE_KEYS,
+    REPL_KEY,
+)
 
 
 class Redis(AgentCheck):
@@ -114,9 +123,11 @@ class Redis(AgentCheck):
             conn.ping()
 
             try:
-                info, info_latency_ms = _call_and_time(conn.info, section='all')  # not available on older versions of Redis
+                info, info_latency_ms = _call_and_time(
+                    conn.info, section='all'
+                )  # not available on older versions of Redis
             except redis.ResponseError as e:
-                self.log.debug('`INFO all` command failed, falling back to `INFO`: %s', e) 
+                self.log.debug('`INFO all` command failed, falling back to `INFO`: %s', e)
                 info, info_latency_ms = _call_and_time(conn.info)
             _, ping_latency_ms = _call_and_time(conn.ping)
 
@@ -203,7 +214,6 @@ class Redis(AgentCheck):
                 self.rate(RATE_KEYS[info_name], info[info_name], tags=tags)
             else:
                 self.log.debug('Not collecting INFO field %s', info_name)
-
 
     def _check_key_lengths(self, conn, tags):
         """
