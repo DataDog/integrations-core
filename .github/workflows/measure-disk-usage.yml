@@ -59,9 +59,9 @@ jobs:
         --dependency-commit ${{ needs.define-current-commit.outputs.commit }} \
         --format json"
 
-        # if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then # TODO: change to ${{ github.event.workflow_run.event }}
-        cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
-        # fi
+        if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then # TODO: change to ${{ github.event.workflow_run.event }}
+          cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
+        fi
 
         echo "cmd=$cmd" >> $GITHUB_OUTPUT
 
@@ -126,11 +126,11 @@ jobs:
     - name: Calculate diff
       run: |
         cmd="ddev size diff ${{needs.define-current-commit.outputs.commit}} --format json --use-artifacts"
-        $cmd --compressed  --quality-gate-threshold ${{ env.SIZE_THRESHOLD_PERCENTAGE }} --to-dd-key ${{ secrets.DD_API_KEY }}
+        $cmd --compressed  --quality-gate-threshold ${{ env.SIZE_THRESHOLD_PERCENTAGE }} 
         $cmd
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SIZE_THRESHOLD_PERCENTAGE: 1
+        SIZE_THRESHOLD_PERCENTAGE: -1
 
     - name: Upload JSON compressed diff sizes artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

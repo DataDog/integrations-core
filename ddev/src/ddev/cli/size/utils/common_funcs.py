@@ -994,18 +994,18 @@ def send_metrics_to_dd(
                 ],
             )
         )
+        if mode == "status":
+            key_count = (item['Platform'], item['Python_Version'])
+            if key_count not in n_integrations:
+                n_integrations[key_count] = 0
+            if key_count not in n_dependencies:
+                n_dependencies[key_count] = 0
+            if item['Type'] == 'Integration':
+                n_integrations[key_count] += 1
+            elif item['Type'] == 'Dependency':
+                n_dependencies[key_count] += 1
 
     if mode == "status":
-        key_count = (item['Platform'], item['Python_Version'])
-        if key_count not in n_integrations:
-            n_integrations[key_count] = 0
-        if key_count not in n_dependencies:
-            n_dependencies[key_count] = 0
-        if item['Type'] == 'Integration':
-            n_integrations[key_count] += 1
-        elif item['Type'] == 'Dependency':
-            n_dependencies[key_count] += 1
-
         for (platform, py_version), count in n_integrations.items():
             n_integrations_metrics.append(
                 MetricSeries(
