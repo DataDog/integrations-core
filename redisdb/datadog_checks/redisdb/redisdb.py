@@ -113,7 +113,11 @@ class Redis(AgentCheck):
             # reduce the chance of connection time affecting our latency measurements
             conn.ping()
 
-            info, info_latency_ms = _call_and_time(conn.info)
+            try:
+                info, info_latency_ms = _call_and_time(conn.info, section='all')  # not available on older versions of Redis
+            except redis.ResponseError as e:
+                self.log.debug('`INFO all` command failed, falling back to `INFO`: %s', e) 
+                info, info_latency_ms = _call_and_time(conn.info)
             _, ping_latency_ms = _call_and_time(conn.ping)
 
             self._collect_metadata(info)
@@ -461,8 +465,8 @@ class Redis(AgentCheck):
             self.set_metadata('version', info['redis_version'])
 
 
-def _call_and_time(func):
+def _call_and_time(func, *args, **kwargs):
     start_time = time.perf_counter()
-    rv = func()
+    rv = func(*args, **kwargs)
     end_time = time.perf_counter()
     return rv, round_value((end_time - start_time) * 1000, 2)

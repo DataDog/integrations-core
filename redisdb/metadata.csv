@@ -72,7 +72,7 @@ redis.eventloop.duration_cmd_sum,gauge,,microsecond,,Total time spent on executi
 redis.eventloop.duration_cron_sum,gauge,,microsecond,,"Total time consumption of cron in microseconds (including serverCron and beforeSleep, but excluding IO and AOF flushing).",-1,redis,,,
 redis.eventloop.duration_max,gauge,,microsecond,,The maximal time spent in a single eventloop cycle in microseconds.,-1,redis,,,
 redis.eventloop.duration_sum,gauge,,microsecond,,Total time spent in the eventloop in microseconds (including I/O and command processing),-1,redis,,,
-redis.eventloop.instantaneous_cycles_per_sec,rate,,,,Number of eventloop cycles per second,1,redis,,,
+redis.eventloop.instantaneous_cycles_per_sec,gauge,,,,Number of eventloop cycles per second,1,redis,,,
 redis.eventloop.instantaneous_duration_usec,gauge,,microsecond,,Average time spent in a single eventloop cycle in microseconds,-1,redis,,,
 redis.eviction.current_exceeded_time,gauge,,millisecond,,"The time passed since `redis.mem.used` last rose above `redis.mem.maxmemory`, in milliseconds",1,redis,,,
 redis.eviction.total_exceeded_time,gauge,,millisecond,,"Total time `redis.mem.used` was greater than `redis.mem.maxmemory` since server startup, in milliseconds",-1,redis,,,
