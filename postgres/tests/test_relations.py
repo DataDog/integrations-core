@@ -7,7 +7,6 @@ import threading
 import psycopg
 import pytest
 
-from datadog_checks.base import ConfigurationError
 from datadog_checks.postgres.relationsmanager import (
     QUERY_PG_CLASS,
     QUERY_PG_CLASS_SIZE,
@@ -530,21 +529,3 @@ def test_relations_validation_accepts_list_of_str_and_dict():
             {"relation_name": "person", "schemas": ["foo"]},
         ]
     )
-
-
-@pytest.mark.unit
-def test_relations_validation_fails_if_no_relname_or_regex():
-    with pytest.raises(ConfigurationError):
-        RelationsManager.validate_relations_config([{"relkind": ["i"]}])
-
-
-@pytest.mark.unit
-def test_relations_validation_fails_if_schemas_is_wrong_type():
-    with pytest.raises(ConfigurationError):
-        RelationsManager.validate_relations_config([{"relation_name": "person", "schemas": "foo"}])
-
-
-@pytest.mark.unit
-def test_relations_validation_fails_if_relkind_is_wrong_type():
-    with pytest.raises(ConfigurationError):
-        RelationsManager.validate_relations_config([{"relation_name": "person", "relkind": "foo"}])

@@ -4,6 +4,8 @@
 
 This check monitors [Ray][1] through the Datadog Agent. Ray is an open-source unified compute framework that makes it easy to scale AI and Python workloads, from reinforcement learning to deep learning to tuning, and model serving.
 
+**Minimum Agent version:** 7.48.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
