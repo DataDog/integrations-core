@@ -281,7 +281,20 @@ jobs:
       with:
         name: target-macos-${{ matrix.job.arch }}
         path: output
-
+  
+  measure-disk-usage:
+    name: Measure disk usage
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+      id-token: write
+    needs:
+      # - build
+      - build-macos
+    uses: ./.github/workflows/measure-disk-usage.yml
+    secrets: inherit
+      
 
   publish:
     name: Publish artifacts and update lockfiles via PR

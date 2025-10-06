@@ -103,6 +103,8 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
                 "Size_Bytes": 5678,
                 "Size": 123,
                 "Type": "Dependency",
+                "Platform": "linux-aarch64",
+                "Python_Version": "3.12",
             }
         ]
         dependency_sizes_file = tmp_path / "sizes"
@@ -127,69 +129,180 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         "commit",
         "dependency_sizes_path",
         "create_dependency_sizes_file",
+        "to_dd_site",
         "should_abort",
     ),
     [
-        # Valid cases
-        ("linux-x86_64", "3.12", ["csv"], None, None, None, None, False, False),
-        ("macos-x86_64", "3.12", [], None, None, "1234567890", None, False, False),
-        ("linux-aarch64", "3.12", [], None, None, None, Path("sizes"), True, False),
+        # valid simple
+        (
+            "linux-x86_64",  # platform
+            "3.12",  # version
+            ["csv"],  # format
+            None,  # to_dd_org
+            None,  # to_dd_key
+            None,  # commit
+            None,  # dependency_sizes_path
+            False,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            False,  # should_abort
+        ),
+        # valid with commit
+        (
+            "macos-x86_64",  # platform
+            "3.12",  # version
+            [],  # format
+            None,  # to_dd_org
+            None,  # to_dd_key
+            "1234567890abcdef1234567890abcdef12345678",  # commit
+            None,  # dependency_sizes_path
+            False,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            False,  # should_abort
+        ),
+        # valid with dependency sizes
+        (
+            "linux-aarch64",  # platform
+            "3.12",  # version
+            [],  # format
+            None,  # to_dd_org
+            None,  # to_dd_key
+            None,  # commit
+            Path("sizes"),  # dependency_sizes_path
+            True,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            False,  # should_abort
+        ),
         # Invalid platform
-        ("invalid-platform", "3.12", [], None, None, None, None, False, True),
+        (
+            "invalid-platform",  # platform
+            "3.12",  # version
+            [],  # format
+            None,  # to_dd_org
+            None,  # to_dd_key
+            None,  # commit
+            None,  # dependency_sizes_path
+            False,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            True,  # should_abort
+        ),
         # Invalid version
-        ("linux-x86_64", "2.7", [], None, None, None, None, False, True),
+        (
+            "linux-x86_64",  # platform
+            "2.7",  # version
+            [],  # format
+            None,  # to_dd_org
+            None,  # to_dd_key
+            None,  # commit
+            None,  # dependency_sizes_path
+            False,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            True,  # should_abort
+        ),
         # Invalid dependency sizes file
-        ("linux-x86_64", "3.12", [], None, None, None, Path("sizes"), False, True),
-        # Both commit and dependency_sizes
         (
-            "linux-x86_64",
-            "3.12",
-            [],
-            None,
-            None,
-            "1234567890",
-            Path("sizes"),
-            True,
-            True,
+            "linux-x86_64",  # platform
+            "3.12",  # version
+            [],  # format
+            None,  # to_dd_org
+            None,  # to_dd_key
+            None,  # commit
+            Path("sizes"),  # dependency_sizes_path
+            False,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            True,  # should_abort
         ),
-        # Invalid format
-        ("linux-x86_64", "3.12", ["invalid-format"], None, None, None, None, False, True),
-        # Both to_dd_org and to_dd_key
+        # commit and dependency_sizes
         (
-            "linux-x86_64",
-            "3.12",
-            [],
-            "test-org",
-            "test-key",
-            None,
-            None,
-            False,
-            True,
+            "linux-x86_64",  # platform
+            "3.12",  # version
+            [],  # format
+            None,  # to_dd_org
+            None,  # to_dd_key
+            "1234567890123456789012345678901234567890",  # commit
+            Path("sizes"),  # dependency_sizes_path
+            True,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            True,  # should_abort
         ),
-        # Multiple errors
+        # invalid dependency commit
         (
-            "invalid-platform",
-            "2.7",
-            ["invalid-format"],
-            "test-org",
-            "test-key",
-            "1234567890",
-            Path("sizes"),
-            True,
-            True,
+            "linux-x86_64",  # platform
+            "3.12",  # version
+            [],  # format
+            None,  # to_dd_org
+            None,  # to_dd_key
+            "1234567890",  # commit
+            None,  # dependency_sizes_path
+            True,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            True,  # should_abort
+        ),
+        # invalid format
+        (
+            "linux-x86_64",  # platform
+            "3.12",  # version
+            ["invalid-format"],  # format
+            None,  # to_dd_org
+            None,  # to_dd_key
+            None,  # commit
+            None,  # dependency_sizes_path
+            False,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            True,  # should_abort
+        ),
+        # to_dd_org and to_dd_key
+        (
+            "linux-x86_64",  # platform
+            "3.12",  # version
+            [],  # format
+            "test-org",  # to_dd_org
+            "test-key",  # to_dd_key
+            None,  # commit
+            None,  # dependency_sizes_path
+            False,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            True,  # should_abort
+        ),
+        # multiple errors
+        (
+            "invalid-platform",  # platform
+            "2.7",  # version
+            ["invalid-format"],  # format
+            "test-org",  # to_dd_org
+            "test-key",  # to_dd_key
+            "1234567890",  # commit
+            Path("sizes"),  # dependency_sizes_path
+            True,  # create_dependency_sizes_file
+            None,  # to_dd_site
+            True,  # should_abort
+        ),
+        # to_dd_site and not to_dd_key
+        (
+            "linux-x86_64",  # platform
+            "3.12",  # version
+            [],  # format
+            None,  # to_dd_org
+            None,  # to_dd_key
+            None,  # commit
+            None,  # dependency_sizes_path
+            False,  # create_dependency_sizes_file
+            "test-site",  # to_dd_site
+            True,  # should_abort
         ),
     ],
     ids=[
-        "valid_simple",
-        "valid_with_commit",
-        "valid_with_dependency_sizes",
-        "invalid_platform",
-        "invalid_version",
-        "invalid_dependency_sizes_file",
-        "commit_and_dependency_sizes",
-        "invalid_format",
-        "to_dd_org_and_to_dd_key",
-        "multiple_errors",
+        "valid simple",
+        "valid with commit",
+        "valid with dependency sizes",
+        "invalid platform",
+        "invalid version",
+        "invalid dependency_sizes file",
+        "commit and dependency_sizes",
+        "invalid dependency commit",
+        "invalid format",
+        "to_dd_org and to_dd_key",
+        "multiple errors",
+        "to_dd_site and not to_dd_key",
     ],
 )
 def test_validate_parameters(
@@ -201,6 +314,7 @@ def test_validate_parameters(
     commit,
     dependency_sizes_path,
     create_dependency_sizes_file,
+    to_dd_site,
     should_abort,
     tmp_path,
 ):
@@ -212,6 +326,7 @@ def test_validate_parameters(
         dependency_sizes = tmp_path / dependency_sizes_path
         if create_dependency_sizes_file:
             dependency_sizes.touch()
+
     app = MagicMock()
     app.abort.side_effect = SystemExit
 
@@ -227,6 +342,7 @@ def test_validate_parameters(
                 commit,
                 dependency_sizes,
                 to_dd_key,
+                to_dd_site,
                 app,
             )
         app.abort.assert_called_once()
@@ -241,6 +357,7 @@ def test_validate_parameters(
             commit,
             dependency_sizes,
             to_dd_key,
+            to_dd_site,
             app,
         )
         app.abort.assert_not_called()
