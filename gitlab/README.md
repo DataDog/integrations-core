@@ -105,6 +105,10 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 [Run the Agent's status subcommand][11] and look for `gitlab` under the Checks section.
 
+### CI Visibility
+
+To configure CI Visibility visit the [product set-up page][17]. For more details visit the [official doc][19].
+
 ## Data Collected
 
 ### Metrics
@@ -141,3 +145,4 @@ Need help? Contact [Datadog support][14].
 [16]: https://github.com/DataDog/integrations-core/blob/7.43.x/gitlab/datadog_checks/gitlab/data/conf.yaml.example
 [17]: /ci/getting-started
 [18]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
+[19]: https://docs.datadoghq.com/continuous_integration/pipelines/gitlab/?tab=gitlabcom
