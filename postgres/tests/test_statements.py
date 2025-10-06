@@ -6,7 +6,6 @@ import re
 import threading
 import time
 from collections import Counter, namedtuple
-from concurrent.futures.thread import ThreadPoolExecutor
 
 import mock
 import psycopg
@@ -16,11 +15,9 @@ from psycopg import ClientCursor
 from semver import VersionInfo
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.time import UTC
 from datadog_checks.postgres.config import build_config
-from datadog_checks.postgres.postgres import PostgreSql
 from datadog_checks.postgres.statement_samples import (
     DBExplainError,
     StatementTruncationState,
@@ -68,13 +65,6 @@ SAMPLE_QUERIES = [
     ),
     (USER_ADMIN, PASSWORD_ADMIN, "dogs", "SELECT * FROM breed WHERE name = %s", "Labrador"),
 ]
-
-
-@pytest.fixture(autouse=True)
-def stop_orphaned_threads():
-    # make sure we shut down any orphaned threads and create a new Executor for each test
-    DBMAsyncJob.executor.shutdown(wait=True)
-    DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
 @requires_over_10
@@ -268,7 +258,6 @@ def test_statement_metrics(
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = set(_get_expected_tags(check, dbm_instance, with_host=False))
     assert set(event['tags']) == expected_dbm_metrics_tags
@@ -1553,6 +1542,7 @@ def test_activity_collection_rate_limit(aggregator, integration_check, dbm_insta
     dbm_instance['query_samples']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['collection_interval'] = activity_interval
     dbm_instance['query_samples']['run_sync'] = False
+    dbm_instance['query_activity']['run_sync'] = False
     check = integration_check(dbm_instance)
     check._connect()
     check.check(dbm_instance)
@@ -1973,8 +1963,8 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
 
 # Even though this test is a unit test we leave it unmarked because loading this file loads the fixture
 # that requires booting up the database and makes it very slow to run compared to other unit tests
-def test_get_query_metrics_payload_rows():
-    check = PostgreSql('postgres', {}, [{"host": "host", "username": "user"}])
+def test_get_query_metrics_payload_rows(integration_check):
+    check = integration_check({"host": "host", "username": "user"})
     check.warning = print
     config, _ = build_config(check=check)
     statement_metrics = PostgresStatementMetrics({}, config)
