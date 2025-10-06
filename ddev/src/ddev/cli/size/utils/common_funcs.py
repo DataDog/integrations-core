@@ -104,12 +104,11 @@ def get_valid_platforms(repo_path: Path | str, versions: set[str]) -> set[str]:
     """
     Extracts the platforms we support from the .deps/resolved file names.
     """
-    # resolved_path = os.path.join(repo_path, ".deps", "resolved")
-    # platforms = []
-    # for file in os.listdir(resolved_path):
-    #     if any(version in file for version in versions):
-    #         platforms.append("_".join(file.split("_")[:-1]))
-    platforms = ["macos-aarch64", "macos-x86_64"]
+    resolved_path = os.path.join(repo_path, ".deps", "resolved")
+    platforms = []
+    for file in os.listdir(resolved_path):
+        if any(version in file for version in versions):
+            platforms.append("_".join(file.split("_")[:-1]))
     return set(platforms)
 
 
