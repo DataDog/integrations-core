@@ -8,6 +8,8 @@ Get metrics from Btrfs in real time to:
 
 - Visualize and monitor Btrfs states.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

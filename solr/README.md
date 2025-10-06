@@ -6,6 +6,8 @@
 
 The Solr check tracks the state and performance of a Solr cluster. It collects metrics for the number of documents indexed, cache hits and evictions, average request times, average requests per second, and more.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

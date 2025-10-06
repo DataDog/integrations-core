@@ -4,6 +4,8 @@
 
 This check monitors the number of bytes a host has swapped in and out.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
