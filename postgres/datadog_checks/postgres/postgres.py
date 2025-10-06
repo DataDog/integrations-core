@@ -959,7 +959,13 @@ class PostgreSql(AgentCheck):
         # TODO: Keeping this main connection outside of the pool for now to keep existing behavior.
         # We should move this to the pool in the future.
         conn_args = self.build_connection_args()
-        conn = TokenAwareConnection.connect(**conn_args.as_kwargs(dbname=dbname))
+        kwargs = conn_args.as_kwargs(dbname=dbname)
+
+        # Pass the token_provider as a kwarg so it's available to TokenAwareConnection.connect()
+        if self.db_pool.token_provider:
+            kwargs["token_provider"] = self.db_pool.token_provider
+
+        conn = TokenAwareConnection.connect(**kwargs)
         self.db_pool._configure_connection(conn)
         return conn
 
