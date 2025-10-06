@@ -191,6 +191,7 @@ def diff(
             from .utils.common_funcs import send_metrics_to_dd
 
             mode: Literal["diff"] = "diff"
+            print(modules)
             send_metrics_to_dd(app, modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
 
         if format or not passes_quality_gate:
