@@ -25,7 +25,7 @@ If installing the Datadog Agent on a domain environment, see [the installation r
 **Note**: Versions 1.13.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][10].
 
 #### Service checks
-We recommend enabling the [Windows Services][11] integration to also monitor the state of the Active Directory services.
+Datadog recommends enabling the [Windows Services][11] integration to also monitor the state of the Active Directory services.
 
 Example configuration:
 ```yaml
@@ -101,4 +101,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv
 [9]: https://docs.datadoghq.com/help/
 [10]: https://github.com/DataDog/integrations-core/blob/7.33.x/active_directory/datadog_checks/active_directory/data/conf.yaml.example
-[11]: https://docs.datadoghq.com/integrations/windows_service/
+[11]: https://docs.datadoghq.com/integrations/windows-service/
