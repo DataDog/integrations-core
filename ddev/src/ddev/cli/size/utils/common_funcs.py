@@ -52,6 +52,11 @@ class DependencyEntry(TypedDict):
     Version: str  # Version of the Dependency
 
 
+class DeltaTypeGroup(TypedDict):
+    Modules: list[FileDataEntry]
+    Total: int
+
+
 class CommitEntry(TypedDict):
     Size_Bytes: int  # Total size in bytes at commit
     Version: str  # Version of the Integration/Dependency at commit
@@ -602,19 +607,11 @@ def save_quality_gate_html(
 
     groups = group_modules(modules)
     html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
-    for (platform, py_version), group in groups.items():
+    for (platform, py_version), delta_type_groups in groups.items():
         html_subheaders = str()
 
         sign_total = "+" if total_diff[(platform, py_version)] > 0 else ""
         threshold = convert_to_human_readable_size(old_size[(platform, py_version)] * threshold_percentage)
-
-        added = [g for g in group if g.get("Delta_Type") == "New"]
-        removed = [g for g in group if g.get("Delta_Type") == "Removed"]
-        modified = [g for g in group if g.get("Delta_Type") == "Modified"]
-
-        total_added = sum(int(x.get("Size_Bytes", 0)) for x in added)
-        total_removed = sum(int(x.get("Size_Bytes", 0)) for x in removed)
-        total_modified = sum(int(x.get("Size_Bytes", 0)) for x in modified)
 
         html_subheaders += f"<details><summary><h4>Size Delta for {platform} and Python {py_version}:\n"
         html_subheaders += (
@@ -624,10 +621,9 @@ def save_quality_gate_html(
 
         tables = str()
 
-        # Added summary
-        tables += append_html_entry(total_added, "Added", added)
-        tables += append_html_entry(total_removed, "Removed", removed)
-        tables += append_html_entry(total_modified, "Modified", modified)
+        tables += append_html_entry(delta_type_groups["New"], "Added")
+        tables += append_html_entry(delta_type_groups["Removed"], "Removed")
+        tables += append_html_entry(delta_type_groups["Modified"], "Modified")
 
         close_details = "</details>\n\n"
 
@@ -653,9 +649,8 @@ def save_quality_gate_html_table(
 
     table_rows = []
     groups = group_modules(modules)
-    sorted_groups = sorted(groups.items(), key=lambda item: (item[0][0], item[0][1]))
-
-    for (platform, py_version), _ in sorted_groups:
+    # Order the groups by platform and python version
+    for (platform, py_version), delta_type_groups in sorted(groups.items(), key=lambda x: (x[0][0], x[0][1])):
         diff = total_diff.get((platform, py_version), 0)
         sign_total = "+" if diff > 0 else ""
         delta_compressed_size = f"{sign_total}{convert_to_human_readable_size(diff)}"
@@ -663,12 +658,23 @@ def save_quality_gate_html_table(
         threshold_bytes = old_size.get((platform, py_version), 0) * threshold_percentage / 100
         threshold = f"{convert_to_human_readable_size(threshold_bytes)}"
 
+        sign_added = "+" if delta_type_groups["New"]["Total"] > 0 else ""
+        sign_removed = "+" if delta_type_groups["Removed"]["Total"] > 0 else ""
+        sign_modified = "+" if delta_type_groups["Modified"]["Total"] > 0 else ""
+
+        total_added = f"{sign_added}{convert_to_human_readable_size(delta_type_groups['New']['Total'])}"
+        total_removed = f"{sign_removed}{convert_to_human_readable_size(delta_type_groups['Removed']['Total'])}"
+        total_modified = f"{sign_modified}{convert_to_human_readable_size(delta_type_groups['Modified']['Total'])}"
+
         status = "❌" if diff >= threshold_bytes else "✅"
 
         table_rows.append(
             "<tr>"
             f"<td>{platform}</td>"
             f"<td>{py_version}</td>"
+            f"<td>{total_added}</td>"
+            f"<td>{total_removed}</td>"
+            f"<td>{total_modified}</td>"
             f"<td>{delta_compressed_size}</td>"
             f"<td>{threshold}</td>"
             f"<td>{status}</td>"
@@ -681,7 +687,10 @@ def save_quality_gate_html_table(
         "    <tr>\n"
         "      <th>Platform</th>\n"
         "      <th>Python</th>\n"
-        "      <th>&Delta; (Compressed)</th>\n"
+        "      <th>&Delta; Added</th>\n"
+        "      <th>&Delta; Removed</th>\n"
+        "      <th>&Delta; Modified</th>\n"
+        "      <th>&Delta; Total</th>\n"
         "      <th>Threshold</th>\n"
         "      <th>Status</th>\n"
         "    </tr>\n"
@@ -720,23 +729,37 @@ def get_html_headers(threshold_percentage: int, old_commit: str, passes_quality_
 
 def group_modules(
     modules: list[FileDataEntry],
-) -> dict[tuple[str, str], list[FileDataEntry]]:
-    groups: dict[tuple[str, str], list[FileDataEntry]] = {}
+) -> dict[tuple[str, str], dict[str, DeltaTypeGroup]]:
+    groups: dict[tuple[str, str], dict[str, DeltaTypeGroup]] = {}
+
     for m in modules:
-        key = (m.get("Platform", ""), m.get("Python_Version", ""))
-        if key not in groups:
-            groups[key] = []
-        groups[key].append(m)
+        platform_key = (m.get("Platform", ""), m.get("Python_Version", ""))
+        delta_type = m.get("Delta_Type", "")
+
+        if platform_key not in groups:
+            groups[platform_key] = {
+                "New": {"Modules": [], "Total": 0},
+                "Removed": {"Modules": [], "Total": 0},
+                "Modified": {"Modules": [], "Total": 0},
+            }
+
+        if delta_type in groups[platform_key]:
+            groups[platform_key][delta_type]["Modules"].append(m)
+            groups[platform_key][delta_type]["Total"] += m.get("Size_Bytes", 0)
+
     return groups
 
 
-def append_html_entry(total: int, type: str, entries: list[FileDataEntry]) -> str:
+def append_html_entry(delta_type_group: DeltaTypeGroup, type: str) -> str:
     html = str()
-    if total != 0:
-        sign = "+" if total > 0 else ""
-        html += f"<b>{type}:</b> {len(entries)} item(s), {sign}{convert_to_human_readable_size(total)}\n"
+    if delta_type_group["Total"] != 0:
+        sign = "+" if delta_type_group["Total"] > 0 else ""
+        html += (
+            f"<b>{type}:</b> {len(delta_type_group['Modules'])} item(s), {sign}"
+            f"{convert_to_human_readable_size(delta_type_group['Total'])}\n"
+        )
         html += "<table><tr><th>Type</th><th>Name</th><th>Version</th><th>Size Delta</th><th>Percentage</th></tr>\n"
-        for e in entries:
+        for e in delta_type_group["Modules"]:
             html += f"<tr><td>{e.get('Type', '')}</td><td>{e.get('Name', '')}</td><td>{e.get('Version', '')}</td>"
             html += f"<td>{e.get('Size', '')}</td><td>{e.get('Percentage', '')}%</td></tr>\n"
         html += "</table>\n"
