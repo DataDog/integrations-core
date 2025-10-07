@@ -79,7 +79,7 @@ files:
             default: false
           - name: database_identifier
             description: |
-              Controls how the database is identified. Each unique value of this identifier will appear in DBM as separate
+              Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
               billable instance.
               
               The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
