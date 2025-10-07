@@ -75,7 +75,6 @@ def diff(
         get_valid_versions,
     )
 
-    print(hola)
     app: Application = ctx.obj
     with app.status("Calculating differences..."):
         repo_url = app.repo.path
