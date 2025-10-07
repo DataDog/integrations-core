@@ -188,6 +188,8 @@ jobs:
             --json number \
             --jq '.[0].number')
         echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Find last comment
       if: github.event_name == 'pull_request'
