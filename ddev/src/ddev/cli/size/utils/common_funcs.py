@@ -764,7 +764,7 @@ def append_html_entry(delta_type_group: DeltaTypeGroup, type: str) -> str:
             html += f"<td>{e.get('Size', '')}</td><td>{e.get('Percentage', '')}%</td></tr>\n"
         html += "</table>\n"
     else:
-        html += f"No {type.lower()} dependencies/integrations\n"
+        html += f"No {type.lower()} dependencies/integrations\n\n"
 
     return html
 
