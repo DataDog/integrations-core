@@ -217,16 +217,16 @@ def diff(
                     total_diff,
                     passes_quality_gate,
                 )
-                if not passes_quality_gate:
-                    save_quality_gate_html_table(
-                        app,
-                        modules,
-                        "diff_table.html",
-                        old_commit,
-                        quality_gate_threshold,
-                        old_size,
-                        total_diff,
-                    )
+                save_quality_gate_html_table(
+                    app,
+                    modules,
+                    "diff_table.html",
+                    old_commit,
+                    quality_gate_threshold,
+                    old_size,
+                    total_diff,
+                    passes_quality_gate,
+                )
         return None
 
 

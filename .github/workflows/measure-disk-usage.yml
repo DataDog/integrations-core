@@ -150,7 +150,7 @@ jobs:
       id: check_diff
       if: github.event_name == 'pull_request'
       run: |
-        if [ -s diff_table.html ]; then
+        if [ grep -q "❌" diff_table.html ]; then
           echo "Quality gates not passed"
           echo "passed=false" >> "$GITHUB_OUTPUT"
         else
@@ -185,7 +185,7 @@ jobs:
               });
 
     - name: Create comment
-      if: github.event_name == 'pull_request' && steps.check_diff.outputs.passed == 'false'
+      if: github.event_name == 'pull_request'
       run: |
         PR_NUMBER=$(gh pr list \
             --search ${{ needs.define-current-commit.outputs.commit }} \

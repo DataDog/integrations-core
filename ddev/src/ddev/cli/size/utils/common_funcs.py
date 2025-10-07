@@ -24,7 +24,7 @@ from ddev.cli.application import Application
 from ddev.utils.fs import Path
 from ddev.utils.toml import load_toml_file
 
-METRIC_VERSION = -1
+METRIC_VERSION = -1  # TODO change to 0
 
 RESOLVE_BUILD_DEPS_WORKFLOW = '.github/workflows/resolve-build-deps.yaml'
 MEASURE_DISK_USAGE_WORKFLOW = '.github/workflows/measure-disk-usage.yml'
@@ -644,8 +644,9 @@ def save_quality_gate_html_table(
     threshold_percentage: int,
     old_size: dict[tuple[str, str], int],
     total_diff: dict[tuple[str, str], int],
+    passes_quality_gate: bool,
 ) -> None:
-    html_headers = get_html_headers(threshold_percentage, old_commit, False)
+    html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
 
     table_rows = []
     groups = group_modules(modules)
