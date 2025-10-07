@@ -108,7 +108,7 @@ jobs:
       contents: read
       pull-requests: write
     outputs:
-      passed: ${{ steps.check_diff.outputs.passed }}
+      passed: ${{ steps.ddev_size_diff.outputs.passed }}
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
@@ -129,13 +129,32 @@ jobs:
             ddev config override
 
     - name: Calculate diff
+      id: ddev_size_diff
       run: |
         cmd="ddev size diff ${{needs.define-current-commit.outputs.commit}} --format json --use-artifacts"
         # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
         #   cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         # fi
+
+        set +e
+
         $cmd --compressed  --quality-gate-threshold ${{ env.SIZE_THRESHOLD_PERCENTAGE }} 
-        $cmd # TODO add send metrics to datadog
+        exit_code=$?
+
+        set -e
+
+        if [ $exit_code -eq 2 ]; then
+          echo "Quality gate threshold not passed"
+          echo "passed=false" >> "$GITHUB_OUTPUT"
+        elif [ $exit_code -eq 0 ]; then
+          echo "Quality gate passed"
+          echo "passed=true" >> "$GITHUB_OUTPUT"
+        else
+          exit $exit_code
+        fi
+
+        $cmd 
+
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SIZE_THRESHOLD_PERCENTAGE: -1
@@ -153,18 +172,6 @@ jobs:
         name: diff_uncompressed.json
         path: diff_uncompressed.json
         if-no-files-found: warn
-
-    - name: Check diff
-      id: check_diff
-      if: github.event_name == 'pull_request'
-      run: |
-        if grep -q "❌" diff_table.html ; then
-          echo "Quality gates not passed"
-          echo "passed=false" >> "$GITHUB_OUTPUT"
-        else
-          echo "Quality gates passed"
-          echo "passed=true" >> "$GITHUB_OUTPUT"
-        fi
 
     - name: Output differences
       if: github.event_name == 'pull_request'

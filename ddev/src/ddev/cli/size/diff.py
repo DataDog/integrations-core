@@ -46,9 +46,9 @@ FULL_LENGTH_COMMIT = 40
     help="Send metrics to Datadog using the specified site. If not provided datadoghq.com will be used.",
 )
 @common_params  # platform, compressed, format, show_gui
-@click.pass_obj
+@click.pass_context
 def diff(
-    app: Application,
+    ctx: click.Context,
     new_commit: str,
     old_commit: str | None,
     platform: str | None,
@@ -75,6 +75,7 @@ def diff(
         get_valid_versions,
     )
 
+    app: Application = ctx.obj
     with app.status("Calculating differences..."):
         repo_url = app.repo.path
         modules: list[FileDataEntry] = []
@@ -227,6 +228,10 @@ def diff(
                     total_diff,
                     passes_quality_gate,
                 )
+        if quality_gate_threshold and not passes_quality_gate:
+            app.display_error("Quality gate threshold not passed")
+            ctx.exit(2)
+
         return None
 
 
