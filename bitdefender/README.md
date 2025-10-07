@@ -22,6 +22,8 @@ The Bitdefender integration uses a webhook to ingest Bitdefender EDR logs. The i
 | Ransomware activity detection | Endpoint agent blocks ransomware attack                                                                                                                           |
 | New Incident                  | New Root Cause Analysis (RCA) is displayed under the Incidents section of Control Center. The event contains a list of relevant items extracted from the RCA JSON |
 
+**Minimum Agent version:** 7.59.1
+
 ## Setup
 
 ### Retrieve the Datadog Webhook URL

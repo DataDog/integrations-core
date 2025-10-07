@@ -1,4 +1,4 @@
-aerospike @ https://agent-int-packages.datadoghq.com/built/aerospike/aerospike-7.1.1-20250930221814-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6e8241c018bf031b74106a36a579221e4914b519e59c1a4477530901b5c7ca81
+aerospike @ https://agent-int-packages.datadoghq.com/built/aerospike/aerospike-7.1.1-20251003141152-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=410154baedd470a97f90e619be122201baa029d59bfd50cf060da302cc8a030d
 annotated-types @ https://agent-int-packages.datadoghq.com/external/annotated-types/annotated_types-0.7.0-py3-none-any.whl#sha256=1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53
 asn1crypto @ https://agent-int-packages.datadoghq.com/external/asn1crypto/asn1crypto-1.5.1-py2.py3-none-any.whl#sha256=db4e40728b728508912cbb3d44f19ce188f218e9eba635821bb4b68564f8fd67
 attrs @ https://agent-int-packages.datadoghq.com/external/attrs/attrs-25.3.0-py3-none-any.whl#sha256=427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3
@@ -66,7 +66,7 @@ prometheus-client @ https://agent-int-packages.datadoghq.com/external/prometheus
 protobuf @ https://agent-int-packages.datadoghq.com/external/protobuf/protobuf-6.32.0-cp39-abi3-manylinux2014_x86_64.whl#sha256=75a2aab2bd1aeb1f5dc7c5f33bcb11d82ea8c055c9becbb41c26a8c43fd7092c
 psutil @ https://agent-int-packages.datadoghq.com/built/psutil/psutil-6.0.0-20250929144630-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=af8dd07e6f1bf1d41381ad59dff0a0a36153c7dd5a69becc765010329f17db01
 psycopg @ https://agent-int-packages.datadoghq.com/external/psycopg/psycopg-3.2.10-py3-none-any.whl#sha256=ab5caf09a9ec42e314a21f5216dbcceac528e0e05142e42eea83a3b28b320ac3
-psycopg-c @ https://agent-int-packages.datadoghq.com/built/psycopg-c/psycopg_c-3.2.10-20250930221816-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=afe9cf9688aaba876f1f98b86c89a2dcbf6b5ad3b3048e6d127f7b5a756a370d
+psycopg-c @ https://agent-int-packages.datadoghq.com/built/psycopg-c/psycopg_c-3.2.10-20251003141154-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6cdfe7137a4e4586ebbe4d8c02d05afb27f30958fabf54bbd0bd267eba5a4ffe
 psycopg-pool @ https://agent-int-packages.datadoghq.com/external/psycopg-pool/psycopg_pool-3.2.6-py3-none-any.whl#sha256=5887318a9f6af906d041a0b1dc1c60f8f0dda8340c2572b74e10907b51ed5da7
 pyasn1 @ https://agent-int-packages.datadoghq.com/external/pyasn1/pyasn1-0.4.8-py2.py3-none-any.whl#sha256=39c7e2ec30515947ff4e87fb6f456dfc6e84857d34be479c9d4a4ba4bf46aa5d
 pyasn1-modules @ https://agent-int-packages.datadoghq.com/external/pyasn1-modules/pyasn1_modules-0.4.1-py3-none-any.whl#sha256=49bfa96b45a292b711e986f222502c1c9a5e1f4e568fc30e2574a6c7d07838fd

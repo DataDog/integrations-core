@@ -846,8 +846,7 @@ def send_metrics_to_dd(
     size_type = "compressed" if compressed else "uncompressed"
 
     config_file_info = app.config.orgs.get(org, {}) if org else {'api_key': key, 'site': 'datadoghq.com'}
-    if not is_everything_committed():
-        raise RuntimeError("All files have to be committed in order to send the metrics to Datadog")
+
     if "api_key" not in config_file_info:
         raise RuntimeError("No API key found in config file")
     if "site" not in config_file_info:
@@ -934,11 +933,6 @@ def send_metrics_to_dd(
     api.Metric.send(metrics=n_dependencies_metrics)
 
 
-def is_everything_committed() -> bool:
-    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
-    return result.stdout.strip() == ""
-
-
 def get_last_commit_timestamp() -> int:
     result = subprocess.run(["git", "log", "-1", "--format=%ct"], capture_output=True, text=True, check=True)
     return int(result.stdout.strip())
@@ -960,34 +954,35 @@ def get_last_commit_data() -> tuple[str, list[str], list[str]]:
 
 
 @cache
-def get_last_dependency_sizes_artifact(app: Application, commit: str, platform: str) -> Path | None:
+def get_last_dependency_sizes_artifact(
+    app: Application, commit: str, platform: str, py_version: str, compressed: bool
+) -> Path | None:
     '''
     Lockfiles of dependencies are not updated in the same commit as the dependencies are updated.
     So in each commit, there is an artifact with the sizes of the wheels that were built to get the actual
     size of that commit.
     '''
-    dep_sizes_json = get_dep_sizes_json(commit, platform)
+    dep_sizes_json = get_dep_sizes_json(commit, platform, py_version)
     if not dep_sizes_json:
-        previous_sizes = get_previous_dep_sizes_json(app.repo.git.merge_base(commit, "origin/master"))
-        if previous_sizes:
-            compressed_json, uncompressed_json = previous_sizes["compressed"], previous_sizes["uncompressed"]
-            sizes = parse_sizes_json(compressed_json, uncompressed_json, platform)
-            with open(f"{platform}.json", "w") as f:
-                json.dump(sizes, f, indent=2)
-            dep_sizes_json = Path(f"{platform}.json")
-    return dep_sizes_json if dep_sizes_json else None
+        base_commit = app.repo.git.merge_base(commit, "origin/master")
+        if base_commit != commit:
+            previous_commit = base_commit
+        else:
+            previous_commit = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
+
+        dep_sizes_json = get_previous_dep_sizes(previous_commit, platform, py_version, compressed)
+    return Path(dep_sizes_json) if dep_sizes_json else None
 
 
 @cache
-def get_dep_sizes_json(current_commit: str, platform: str) -> Path | None:
+def get_dep_sizes_json(current_commit: str, platform: str, py_version: str) -> Path | None:
     '''
     Gets the dependency sizes json for a given commit and platform when dependencies were resolved.
     '''
     print(f"Getting dependency sizes json for commit: {current_commit}, platform: {platform}")
     run_id = get_run_id(current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
     if run_id:
-        dep_sizes_json = get_current_sizes_json(run_id, platform)
-        print(f"Dependency sizes json path: {dep_sizes_json}")
+        dep_sizes_json = get_current_sizes_json(run_id, platform, py_version)
         return dep_sizes_json
     else:
         return None
@@ -1025,7 +1020,7 @@ def get_run_id(commit: str, workflow: str) -> str | None:
 
 
 @cache
-def get_current_sizes_json(run_id: str, platform: str) -> Path | None:
+def get_current_sizes_json(run_id: str, platform: str, py_version: str) -> Path | None:
     '''
     Downloads the dependency sizes json for a given run id and platform when dependencies were resolved.
     '''
@@ -1065,78 +1060,84 @@ def get_current_sizes_json(run_id: str, platform: str) -> Path | None:
             return None
 
         print(f"Found sizes artifact at {sizes_file}")
-        dest_path = sizes_file.rename(f"{platform}.json")
+        dest_path = sizes_file.rename(f"{platform}_{py_version}.json")
         return dest_path
 
 
 @cache
-def get_artifact(run_id: str, artifact_name: str) -> Path | None:
+def get_artifact(run_id: str, artifact_name: str, target_dir: str | None = None) -> Path | None:
     print(f"Downloading artifact: {artifact_name} from run_id={run_id}")
     try:
-        subprocess.run(
-            [
-                'gh',
-                'run',
-                'download',
-                run_id,
-                '--name',
-                artifact_name,
-            ],
-            check=True,
-            text=True,
-        )
+        cmd = [
+            'gh',
+            'run',
+            'download',
+            run_id,
+            '--name',
+            artifact_name,
+        ]
+        if target_dir:
+            cmd.extend(['--dir', target_dir])
+
+        subprocess.run(cmd, check=True, text=True)
     except subprocess.CalledProcessError as e:
         print(f"Failed to download artifact: {artifact_name} from run_id={run_id}: {e}")
         return None
 
-    print(f"Artifact downloaded to: {artifact_name}")
-    return Path(artifact_name)
+    artifact_path = Path(target_dir) / artifact_name if target_dir else Path(artifact_name)
+    print(f"Artifact downloaded to: {artifact_path}")
+    return artifact_path
 
 
 @cache
-def get_previous_dep_sizes_json(base_commit: str) -> dict[str, Path] | None:
+def get_previous_dep_sizes(base_commit: str, platform: str, py_version: str, compressed: bool) -> Path | None:
     '''
     Gets the dependency sizes for a given commit when dependencies were not resolved.
     '''
-    print(f"Getting previous dependency sizes json for {base_commit=}")
-    run_id = get_run_id(base_commit, MEASURE_DISK_USAGE_WORKFLOW)
-    print(f"Previous run_id: {run_id}")
-    compressed_json = None
-    uncompressed_json = None
-    if run_id:
-        compressed_json = get_artifact(run_id, 'status_compressed.json')
-    if run_id:
-        uncompressed_json = get_artifact(run_id, 'status_uncompressed.json')
-    print(f"Compressed json: {compressed_json}")
-    print(f"Uncompressed json: {uncompressed_json}")
-    if not compressed_json or not uncompressed_json:
-        return None
-    return {
-        "compressed": compressed_json,
-        "uncompressed": uncompressed_json,
-    }
+    with tempfile.TemporaryDirectory() as tmpdir:
+        print(f"Getting previous dependency sizes json for {base_commit=}")
+
+        if (run_id := get_run_id(base_commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
+            return None
+
+        print(f"Previous run_id: {run_id}")
+
+        artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'
+        sizes_json = get_artifact(run_id, artifact_name, tmpdir)
+
+        if not sizes_json:
+            return None
+
+        print(f"Sizes json: {sizes_json}")
+
+        sizes = parse_sizes_json(sizes_json, platform, py_version, compressed)
+
+        sizes_path = Path(tmpdir) / f"{platform}_{py_version}.json"
+        with open(sizes_path, "w") as f:
+            json.dump(sizes, f, indent=2)
+
+        target_path = f"{platform}_{py_version}.json"
+        shutil.copy(sizes_path, target_path)
+        return Path(target_path)
 
 
 @cache
 def parse_sizes_json(
-    compressed_json_path: Path, uncompressed_json_path: Path, platform: str
+    sizes_json_path: Path, platform: str, py_version: str, compressed: bool
 ) -> dict[str, dict[str, int]]:
-    compressed_list = list(json.loads(compressed_json_path.read_text()))
-    uncompressed_list = list(json.loads(uncompressed_json_path.read_text()))
+    sizes_list = list(json.loads(sizes_json_path.read_text()))
+    size_key = "compressed" if compressed else "uncompressed"
     sizes = {
         dep["Name"]: {
-            "compressed": int(dep["Size_Bytes"]),
+            size_key: int(dep["Size_Bytes"]),
             "version": dep.get("Version"),
+            "compression": compressed,
         }
-        for dep in compressed_list
-        if dep.get("Type") == "Dependency" and dep.get("Platform") == platform
+        for dep in sizes_list
+        if dep.get("Type") == "Dependency"
+        and dep.get("Platform") == platform
+        and dep.get("Python_Version") == py_version
     }
-
-    for dep in uncompressed_list:
-        if dep.get("Type") == "Dependency" and dep.get("Platform") == platform:
-            name = dep["Name"]
-            entry = sizes.setdefault(name, {"version": dep.get("Version")})
-            entry["uncompressed"] = int(dep["Size_Bytes"])
 
     return sizes
 

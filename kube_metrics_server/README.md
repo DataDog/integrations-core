@@ -4,6 +4,8 @@
 
 This check monitors [Kube_metrics_server][1] v0.3.0+, a component used by the Kubernetes control plane.
 
+**Minimum Agent version:** 6.12.0
+
 ## Setup
 
 ### Installation

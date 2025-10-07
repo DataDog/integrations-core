@@ -6,6 +6,8 @@
 
 Integrate Klaviyo with Datadog to gain insights into marketing campaign communication and track eCommerce performance based on Klaviyo events.
 
+**Minimum Agent version:** 7.68.1
+
 ## Setup
 
 Follow the instructions below to configure this integration for Klaviyo Marketing and eCommerce events.

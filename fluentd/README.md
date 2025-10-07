@@ -9,6 +9,8 @@ Get metrics from Fluentd to:
 - Visualize Fluentd performance.
 - Correlate the performance of Fluentd with the rest of your applications.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

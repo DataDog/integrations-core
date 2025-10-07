@@ -12,6 +12,8 @@ This integration enriches and ingests the following events:
 
 This integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into firewall, networking, management, VPN, and proxy policy events through the out-of-the-box dashboards. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
+**Minimum Agent version:** 7.68.0
+
 ## Setup
 
 ### Installation

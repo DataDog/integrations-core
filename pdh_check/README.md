@@ -8,6 +8,8 @@ Get metrics from Windows performance counters in real time to:
 
 - Visualize and monitor Windows performance counters through the PDH API.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
