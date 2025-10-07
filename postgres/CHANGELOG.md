@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 23.1.2 / 2025-10-07
+
+***Fixed***:
+
+* Backfill old keys in options passed from Postgres integration to SQL obfuscator ([#21557](https://github.com/DataDog/integrations-core/pull/21557))
+* Fixes a collision issue when token based authentication is configured for multiple Postgres instances ([#21560](https://github.com/DataDog/integrations-core/pull/21560))
+
 ## 23.1.1 / 2025-10-03
 
 ***Fixed***:
