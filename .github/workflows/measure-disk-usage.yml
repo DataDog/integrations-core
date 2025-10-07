@@ -1,4 +1,4 @@
-name: Measure Disk Usage
+name: Size Quality Gate Check
 
 on:
   # workflow_run:
@@ -197,3 +197,19 @@ jobs:
         gh pr comment $PR_NUMBER --body-file diff_table.html
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  quality-gate-check:
+    runs-on: ubuntu-22.04
+    needs:
+      - calculate-diff
+    if: github.event_name == 'pull_request'
+    steps:
+    - name: Check quality gate
+      run: |
+        if [ "${{ needs.calculate-diff.outputs.passed }}" = "false" ]; then
+          echo "❌ Size Quality Gates Not Passed. Failing the workflow."
+          exit 1
+        else
+          echo "✅ Size Quality Gates Passed."
+        fi
+          

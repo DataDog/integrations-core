@@ -657,7 +657,8 @@ def save_quality_gate_html_table(
         delta_compressed_size = f"{sign_total}{convert_to_human_readable_size(diff)}"
 
         threshold_bytes = old_size.get((platform, py_version), 0) * threshold_percentage / 100
-        threshold = f"{convert_to_human_readable_size(threshold_bytes)}"
+        threshold_sign = "+" if threshold_bytes > 0 else ""
+        threshold = f"{threshold_sign}{convert_to_human_readable_size(threshold_bytes)}"
 
         sign_added = "+" if delta_type_groups["New"]["Total"] > 0 else ""
         sign_removed = "+" if delta_type_groups["Removed"]["Total"] > 0 else ""
