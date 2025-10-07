@@ -99,6 +99,7 @@ def create_ssl_context(config):
                 )
                 try:
                     import certifi
+
                     context.load_verify_locations(cafile=certifi.where())
                 except (ImportError, FileNotFoundError) as e:
                     LOGGER.error('Failed to load fallback certificates from certifi: %s', e)

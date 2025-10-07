@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import ssl
-import os
 
 import mock
 import pytest
@@ -70,13 +69,20 @@ class TestCert:
 
     def test_bad_default_verify_paths(self, monkeypatch, caplog):
         '''The SSL default verify paths can be set incorrectly.'''
-        bad_cert_file =  "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/cert.pem"
-        bad_cert_dir =  "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/certs"
+        bad_cert_file = "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/cert.pem"
+        bad_cert_dir = "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/certs"
         monkeypatch.setenv("SSL_CERT_FILE", bad_cert_file)
         monkeypatch.setenv("SSL_CERT_DIR", bad_cert_dir)
-        bad_ssl_paths = ssl.DefaultVerifyPaths(cafile="None", capath="None", openssl_cafile_env="SSL_CERT_FILE", openssl_capath_env="SSL_CERT_DIR", openssl_cafile=bad_cert_file, openssl_capath=bad_cert_dir)
+        bad_ssl_paths = ssl.DefaultVerifyPaths(
+            cafile="None",
+            capath="None",
+            openssl_cafile_env="SSL_CERT_FILE",
+            openssl_capath_env="SSL_CERT_DIR",
+            openssl_cafile=bad_cert_file,
+            openssl_capath=bad_cert_dir,
+        )
         with mock.patch("ssl.get_default_verify_paths", return_value=bad_ssl_paths):
-            http = RequestsWrapper({"tls_verify":True}, {})
+            http = RequestsWrapper({"tls_verify": True}, {})
             assert ssl.get_default_verify_paths() == bad_ssl_paths
             assert http.session.adapters["https://"].ssl_context.get_ca_certs() != []
             with caplog.at_level(logging.WARNING):
