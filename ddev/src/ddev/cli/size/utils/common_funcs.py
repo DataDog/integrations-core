@@ -24,7 +24,7 @@ from ddev.cli.application import Application
 from ddev.utils.fs import Path
 from ddev.utils.toml import load_toml_file
 
-METRIC_VERSION = -1  # TODO change to 0
+METRIC_VERSION = 1
 
 RESOLVE_BUILD_DEPS_WORKFLOW = '.github/workflows/resolve-build-deps.yaml'
 MEASURE_DISK_USAGE_WORKFLOW = '.github/workflows/measure-disk-usage.yml'
