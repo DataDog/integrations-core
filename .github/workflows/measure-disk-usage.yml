@@ -161,7 +161,7 @@ jobs:
     - name: Output differences
       if: github.event_name == 'pull_request'
       run: |
-        echo diff.html >> $GITHUB_STEP_SUMMARY
+        cat diff.html >> $GITHUB_STEP_SUMMARY
 
     - name: Find last comment
       if: github.event_name == 'pull_request' && steps.check_diff.outputs.passed == 'false'
