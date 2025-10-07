@@ -719,7 +719,7 @@ def get_html_headers(threshold_percentage: float, old_commit: str, passes_qualit
     )
     html_headers += (
         "<p>"
-        "These quality gates apply only to dependencies and integrations packaged with the Datadog Agent."
+        "These Quality Gates apply only to dependencies and integrations packaged with the Datadog Agent.\n\n"
         f"<strong>Threshold:</strong> {threshold_percentage}% per platform and Python version<br>"
         "<strong>Compared to commit:</strong> "
         f'<a href="https://github.com/DataDog/integrations-core/commit/{old_commit}">{old_commit[:7]}</a>'
