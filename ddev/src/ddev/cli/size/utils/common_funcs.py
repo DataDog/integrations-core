@@ -607,6 +607,7 @@ def save_quality_gate_html(
         html = html_headers + "\nNo size differences were found"
 
     else:
+        html_headers += "<h3>Compressed Size Changes</h3>"
         groups = group_modules(modules)
         for (platform, py_version), delta_type_groups in groups.items():
             html_subheaders = str()
@@ -728,7 +729,6 @@ def get_html_headers(threshold_percentage: float, old_commit: str, passes_qualit
         "<strong>Compared to commit:</strong> "
         f'<a href="https://github.com/DataDog/integrations-core/commit/{old_commit}">{old_commit[:7]}</a>'
         "</p>"
-        "<h3>Compressed Size Changes</h3>"
     )
 
     return html_headers

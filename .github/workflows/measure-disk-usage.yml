@@ -177,7 +177,7 @@ jobs:
       id: find_comment
       with:
         issue-number: ${{ github.event.pull_request.number }}
-        body-includes: "<h3>Compressed Size Changes</h3>"
+        body-includes: "Size Quality Gates"
         direction: last
 
     - name: Delete last comment
@@ -210,7 +210,6 @@ jobs:
     runs-on: ubuntu-22.04
     needs:
       - calculate-diff
-    if: github.event_name == 'pull_request'
     steps:
     - name: Check quality gate
       run: |
