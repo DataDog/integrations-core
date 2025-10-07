@@ -6,8 +6,6 @@
 
 Integrate Brevo with Datadog to gain insights into Brevo marketing campaign emails and track Brevo performance based on events and other transactional events using [webhooks][2].
 
-**Minimum Agent version:** 7.56.1
-
 ## Setup
 
 Follow the instructions below to configure this integration for Brevo Marketing and Transactional events through a Webhook.

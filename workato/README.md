@@ -13,8 +13,6 @@ The logs are parsed and enriched for efficient searching, while the metrics prov
 The integration includes a dashboard that shows job execution status and duration, making it easier to monitor and
 understand trends and issues.
 
-**Minimum Agent version:** 7.67.1
-
 ## Setup
 
 ### Generate API credentials in Workato

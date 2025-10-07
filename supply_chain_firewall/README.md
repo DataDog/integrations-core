@@ -7,8 +7,6 @@
 Integrate Supply Chain Firewall with Datadog's pre-built dashboard visualizations to gain insights into Package Manager logs. With Datadog's built-in log pipelines, you can parse and enrich these logs to facilitate easy search and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 
-**Minimum Agent version:** 7.69.1
-
 ## Setup
 
 ### Configuration

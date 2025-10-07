@@ -11,8 +11,6 @@ This integration ingests the following metrics:
 
 The Mailchimp integration collects metrics from campaigns and lists, directing them into Datadog for analysis. This integration provides insights including total campaigns, email performance, click-through rates, open rates, bounce rates, unsubscribes, and abuse reports. It features consolidated statistics for campaigns sent in the last 30 days, along with many additional metrics, all accessible through out-of-the-box dashboards.
 
-**Minimum Agent version:** 7.56.0
-
 ## Setup
 
 ### Generate API credentials in Mailchimp

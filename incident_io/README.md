@@ -6,8 +6,6 @@
 
 Integrate your incident.io account with Datadog to gain insights into incident-related activities.
 
-**Minimum Agent version:** 7.57.0
-
 ## Setup
 
 Follow the instructions below to configure this integration for incident.io incident events through a Webhook.

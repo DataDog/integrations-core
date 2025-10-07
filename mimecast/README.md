@@ -15,8 +15,6 @@ This integration ingests the following logs:
 
 The Mimecast integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into audit, DLP, malicious attachments in email, email sent by user as an impersonated identity, phishing email links, and many more through the out-of-the-box dashboards.
 
-**Minimum Agent version:** 7.54.1
-
 ## Setup
 
 ### Generate API credentials in Mimecast

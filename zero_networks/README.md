@@ -11,8 +11,6 @@ This integration ingests the following logs:
 
 This integration collects the listed logs and channels them into Datadog for analysis. These logs are parsed and enriched through the built-in logs pipeline, enabling effortless search and analysis. The integration provides insight into audit and network-activities through the out-of-the-box dashboards.
 
-**Minimum Agent version:** 7.61.0
-
 ## Setup
 
 ### Generate API credentials in Zero Networks

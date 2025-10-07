@@ -8,8 +8,6 @@ The Shopify Integration collects Event, Product, Customer, and Order logs, sendi
 
 It includes dashboards that show and analyze logs, making it easier to monitor and understand patterns.
 
-**Minimum Agent version:** 7.57.2
-
 ## Setup
 
 ### Generate API credentials in Shopify

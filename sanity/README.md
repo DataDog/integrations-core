@@ -6,8 +6,6 @@
 
 Integrate Sanity with Datadog to gain insights into content and project-related activity logs through the Sanity API and GROQ-powered Webhook. Pre-built dashboard visualizations provide immediate insights into Sanity activity logs.
 
-**Minimum Agent version:** 7.61.0
-
 ## Setup
 
 ### Generate API Token in Sanity

@@ -6,8 +6,6 @@
 
 The RingCentral integration collects voice and audit logs, as well as Voice (Analytics) and A2P SMS metrics, and sends them to Datadog for comprehensive analysis.
 
-**Minimum Agent version:** 7.56.0
-
 ## Setup
 
 ### Generate API Credentials in RingCentral

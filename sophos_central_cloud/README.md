@@ -11,8 +11,6 @@ This integration ingests the following logs:
 
 The Sophos Central Cloud integration seamlessly collects all the above listed logs, channeling them into Datadog for analysis. Leveraging the built-in logs pipeline, these logs are parsed and enriched, enabling effortless search and analysis. The integration provides insight into alerts and events through the out-of-the-box dashboards. Additionally, the integration enriches corresponding endpoint details along with alert and event logs through the **get_endpoint_details** flag.
 
-**Minimum Agent version:** 7.55.0
-
 ## Setup
 
 ### Generate API credentials in Sophos Central Cloud

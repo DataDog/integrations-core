@@ -13,8 +13,6 @@ This integration ingests the following logs:
 The Forcepoint Secure Web Gateway integration gathers these logs and forwards them to Datadog for seamless analysis. Datadog leverages its built-in log pipelines to parse and enrich these logs, facilitating advanced search and detailed insights. With preconfigured out-of-the-box dashboards, the integration offers visibility into web activities. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 
-**Minimum Agent version:** 7.61.0
-
 ## Setup
 
 ### Generate an OAuth token for Forcepoint Secure Web Gateway
