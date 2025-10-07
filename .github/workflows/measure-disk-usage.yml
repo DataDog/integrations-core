@@ -178,12 +178,23 @@ jobs:
       run: |
         cat diff.html >> $GITHUB_STEP_SUMMARY
 
+    - name: Set PR number
+      id: set_pr_number
+      if: github.event_name == 'pull_request'
+      run: |
+        PR_NUMBER=$(gh pr list \
+            --search ${{ needs.define-current-commit.outputs.commit }} \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
+
     - name: Find last comment
       if: github.event_name == 'pull_request'
       uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
       id: find_comment
       with:
-        issue-number: ${{ github.event.pull_request.number }}
+        issue-number: ${{ steps.set_pr_number.outputs.PR_NUMBER }}
         body-includes: "Size Quality Gates"
         direction: last
 
@@ -202,14 +213,9 @@ jobs:
     - name: Create comment
       if: github.event_name == 'pull_request'
       run: |
-        PR_NUMBER=$(gh pr list \
-            --search ${{ needs.define-current-commit.outputs.commit }} \
-            --state open \
-            --json number \
-            --jq '.[0].number')
         GITHUB_RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> diff_table.html
-        gh pr comment $PR_NUMBER --body-file diff_table.html
+        gh pr comment ${{ steps.set_pr_number.outputs.PR_NUMBER }} --body-file diff_table.html
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
