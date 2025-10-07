@@ -1,0 +1,6 @@
+id: forescout
+tests:
+  - sample: "<165>Sep 24 01:07:58 ddsfs eyesight[2992]: System statistics: CPU
+      usage: 17%, Available memory : 12237100 KB, Used memory: 23337288 KB,
+      Available swap: 16777208 KB, Used swap: 11467492 KB"
+    result: null

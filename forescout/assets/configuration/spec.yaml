@@ -1,0 +1,9 @@
+name: forescout
+files:
+- name: forescout.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/forescout.log
+      source: forescout
