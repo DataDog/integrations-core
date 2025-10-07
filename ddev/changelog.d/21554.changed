@@ -1,0 +1,10 @@
+- Updated the `ddev size diff` command syntax from:  
+  ```bash
+  ddev size diff old_commit new_commit
+  ```
+  to 
+  ```bash
+  ddev size diff new_commit --compare-to old_commit
+  ```
+  If `--compare-to` is not provided, the command now defaults to comparing against the merge base,
+  or the previous commit when on the master branch.

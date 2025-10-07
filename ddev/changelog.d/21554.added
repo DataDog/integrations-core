@@ -1,0 +1,8 @@
+- Several new options to `ddev size diff`:
+  - `--use-artifacts`: Calculate sizes directly from GitHub artifacts.
+  - `--to-dd-org`, `--to-dd-key`, `--to-dd-site`: Send size metrics to Datadog (site defaults to `datadoghq.com`).
+  - `--quality-gate-threshold`: Set a percentage threshold for size differences. An HTML report is generated with the size differences.
+
+
+
+
