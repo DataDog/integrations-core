@@ -132,7 +132,7 @@ class AgentCheck(object):
     FIRST_CAP_RE = re.compile(rb'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(rb'([a-z0-9])([A-Z])')
     METRIC_REPLACEMENT = re.compile(rb'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
-    TAG_REPLACEMENT = re.compile(rb'[,\+\*\-/()\[\]{}\s]')
+    TAG_REPLACEMENT = re.compile(rb'[,\+\*/()\[\]{}\s]')
     MULTIPLE_UNDERSCORE_CLEANUP = re.compile(rb'__+')
     DOT_UNDERSCORE_CLEANUP = re.compile(rb'_*\._*')
 
