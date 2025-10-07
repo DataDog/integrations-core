@@ -82,11 +82,12 @@ class TestCert:
             openssl_capath=bad_cert_dir,
         )
         with mock.patch("ssl.get_default_verify_paths", return_value=bad_ssl_paths):
-            http = RequestsWrapper({"tls_verify": True}, {})
-            assert ssl.get_default_verify_paths() == bad_ssl_paths
-            assert http.session.adapters["https://"].ssl_context.get_ca_certs() != []
-            with caplog.at_level(logging.WARNING):
-                http.get("https://google.com")
+            with mock.patch("requests.Session.get"):
+                with caplog.at_level(logging.WARNING):
+                    http = RequestsWrapper({"tls_verify": True}, {})
+                    assert ssl.get_default_verify_paths() == bad_ssl_paths
+                    assert http.session.adapters["https://"].ssl_context.get_ca_certs() != []
+                    http.get("https://example.com")
             assert 'Falling back to certifi certificate bundle.' in caplog.text
 
 
