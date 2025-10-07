@@ -435,7 +435,7 @@ def calculate_diff(
         size_old = int(old["Size_Bytes"]) if old else 0
         size_new = int(new["Size_Bytes"]) if new else 0
         delta = size_new - size_old
-        percentage = (delta / size_old) * 100 if size_old != 0 else 0
+        percentage = (delta / size_old) * 100 if size_old != 0 else 0.0
         total_diff += delta
         old_size += size_old
         ver_old = old["Version"] if old else ""

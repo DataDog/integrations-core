@@ -392,7 +392,7 @@ def test_parse_dep_sizes_json(tmp_path):
 
     result = parse_dep_sizes_json(compressed_json_path, "linux-x86_64", "3.12", True)
 
-    assert result == expected_output
+    assert dict(sorted(result.items())) == dict(sorted(expected_output.items()))
 
 
 def test_get_dependencies_from_json():

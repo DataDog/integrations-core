@@ -49,7 +49,7 @@ class FileDataEntry(TypedDict):
 class DependencyEntry(TypedDict):
     compressed: NotRequired[int]  # Size in bytes
     uncompressed: NotRequired[int]  # Size in bytes
-    Version: str  # Version of the Dependency
+    version: str  # Version of the Dependency
 
 
 class DeltaTypeGroup(TypedDict):
@@ -1404,7 +1404,7 @@ def parse_dep_sizes_json(
             and dep.get("Python_Version") == py_version
         ):
             name = dep["Name"]
-            entry: DependencyEntry = {"Version": dep.get("Version", "")}
+            entry: DependencyEntry = {"version": dep.get("Version", "")}
             if compressed:
                 entry["compressed"] = int(dep["Size_Bytes"])
             else:

@@ -67,9 +67,20 @@ def test_calculate_diff():
         },
     ]
 
-    result = calculate_diff(size_before, size_after, "linux-aarch64", "3.12")
+    result, _, _ = calculate_diff(size_before, size_after, "linux-aarch64", "3.12")
 
     expected = [
+        {
+            "Name": "bar",
+            "Version": "2.0.0",
+            "Type": "Integration",
+            "Platform": "linux-aarch64",
+            "Python_Version": "3.12",
+            "Size_Bytes": 0,
+            "Size": convert_to_human_readable_size(0),
+            "Percentage": 0.0,
+            "Delta_Type": "Unchanged",
+        },
         {
             "Name": "deleted",
             "Version": "3.0.0",
@@ -78,7 +89,8 @@ def test_calculate_diff():
             "Python_Version": "3.12",
             "Size_Bytes": -1500,
             "Size": convert_to_human_readable_size(-1500),
-            "Change_Type": "Removed",
+            "Percentage": -100.0,
+            "Delta_Type": "Removed",
         },
         {
             "Name": "foo",
@@ -88,7 +100,8 @@ def test_calculate_diff():
             "Python_Version": "3.12",
             "Size_Bytes": 200,
             "Size": convert_to_human_readable_size(200),
-            "Change_Type": "Modified",
+            "Percentage": 20.0,
+            "Delta_Type": "Modified",
         },
         {
             "Name": "new",
@@ -98,8 +111,9 @@ def test_calculate_diff():
             "Python_Version": "3.12",
             "Size_Bytes": 800,
             "Size": convert_to_human_readable_size(800),
-            "Change_Type": "New",
+            "Percentage": 0.0,
+            "Delta_Type": "New",
         },
     ]
 
-    assert sorted(result, key=lambda x: x["Name"]) == expected
+    assert sorted(result, key=lambda x: x["Name"]) == sorted(expected, key=lambda x: x["Name"])
