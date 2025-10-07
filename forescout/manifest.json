@@ -28,12 +28,12 @@
       },
       "events": {
         "creates_events": false
-      },
-      "logs": {
-        "source": "forescout"
       }
     },
-    "dashboards": {}
+    "dashboards": {},
+    "logs": {
+      "source": "forescout"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

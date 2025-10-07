@@ -140,7 +140,7 @@ pipeline:
               rule_nac_policy_match_unmatch Source: %{ip:network.client.ip},
               Rule: %{regex(".*(?= , Match:)"):rule_name} , Match:
               "%{regex("[^\"]*"):match}", Category: %{regex("[^\"]*"):category},
-              Details: %{data:details}
+              Details: %{data:details}%{data:details}%{data:details}%{data:details}
 
 
               rule_nac_policy Source: %{ip:network.client.ip}, Rule: %{regex(".*(?=, Details:)"):rule_name}, Details: %{data:details}
