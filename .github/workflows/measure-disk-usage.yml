@@ -8,6 +8,8 @@ on:
   pull_request:
     branches:
       - master
+  merge_group:
+    types: [checks_requested]
 
 env:
   PYTHON_VERSION: "3.13"
