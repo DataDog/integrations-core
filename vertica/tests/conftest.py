@@ -36,6 +36,7 @@ class InitializeDB(LazyFunction):
 
 @pytest.fixture(scope='session')
 def dd_environment():
+    pytest.skip("Skipping Vertica integration tests: the Vertica Docker image is no longer available.")
     compose_file = os.path.join(common.HERE, 'docker', 'docker-compose.yaml')
 
     with docker_run(compose_file, log_patterns=['Vertica is now running'], conditions=[InitializeDB(common.CONFIG)]):
