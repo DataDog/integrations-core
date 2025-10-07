@@ -68,7 +68,7 @@ class TestCert:
             mock_load_cert_chain.assert_called_once()
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
 
-    def test_bad_default_verify_paths(self, monkeypatch):
+    def test_bad_default_verify_paths(self, monkeypatch, caplog):
         '''The SSL default verify paths can be set incorrectly.'''
         bad_cert_file =  "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/cert.pem"
         bad_cert_dir =  "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/certs"
@@ -78,8 +78,10 @@ class TestCert:
         with mock.patch("ssl.get_default_verify_paths", return_value=bad_ssl_paths):
             http = RequestsWrapper({"tls_verify":True}, {})
             assert ssl.get_default_verify_paths() == bad_ssl_paths
-            assert http.session.adapters["https://"].ssl_context.get_ca_certs() == []
-            http.get("https://google.com")
+            assert http.session.adapters["https://"].ssl_context.get_ca_certs() != []
+            with caplog.at_level(logging.WARNING):
+                http.get("https://google.com")
+            assert 'Falling back to certifi certificate bundle.' in caplog.text
 
 
 class TestIgnoreTLSWarning:
