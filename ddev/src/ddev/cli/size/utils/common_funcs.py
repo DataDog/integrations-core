@@ -650,7 +650,7 @@ def save_quality_gate_html_table(
     html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
 
     if modules == []:
-        final_html = html_headers + "\nNo size differences were found"
+        final_html = html_headers + "<h4>No size differences were found</h4>\n"
     else:
         table_rows = []
         groups = group_modules(modules)
