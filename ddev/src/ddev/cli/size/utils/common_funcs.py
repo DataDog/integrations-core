@@ -600,36 +600,37 @@ def save_quality_gate_html(
     Saves the modules list to HTML format, if the ouput is larger than the PR comment size max,
     it ouputs the short version.
     """
-    if modules == []:
-        return
-
     html = str()
-
-    groups = group_modules(modules)
     html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
-    for (platform, py_version), delta_type_groups in groups.items():
-        html_subheaders = str()
 
-        sign_total = "+" if total_diff[(platform, py_version)] > 0 else ""
-        threshold = convert_to_human_readable_size(old_size[(platform, py_version)] * threshold_percentage)
+    if modules == []:
+        html = html_headers + "\nNo size differences were found"
 
-        html_subheaders += f"<details><summary><h4>Size Delta for {platform} and Python {py_version}:\n"
-        html_subheaders += (
-            f"{sign_total}{convert_to_human_readable_size(total_diff[(platform, py_version)])} "
-            f"(Threshold: {threshold})</h4></summary>\n\n"
-        )
+    else:
+        groups = group_modules(modules)
+        for (platform, py_version), delta_type_groups in groups.items():
+            html_subheaders = str()
 
-        tables = str()
+            sign_total = "+" if total_diff[(platform, py_version)] > 0 else ""
+            threshold = convert_to_human_readable_size(old_size[(platform, py_version)] * threshold_percentage)
 
-        tables += append_html_entry(delta_type_groups["New"], "Added")
-        tables += append_html_entry(delta_type_groups["Removed"], "Removed")
-        tables += append_html_entry(delta_type_groups["Modified"], "Modified")
+            html_subheaders += f"<details><summary><h4>Size Delta for {platform} and Python {py_version}:\n"
+            html_subheaders += (
+                f"{sign_total}{convert_to_human_readable_size(total_diff[(platform, py_version)])} "
+                f"(Threshold: {threshold})</h4></summary>\n\n"
+            )
 
-        close_details = "</details>\n\n"
+            tables = str()
 
-        html += f"{html_subheaders}\n{tables}\n{close_details}"
+            tables += append_html_entry(delta_type_groups["New"], "Added")
+            tables += append_html_entry(delta_type_groups["Removed"], "Removed")
+            tables += append_html_entry(delta_type_groups["Modified"], "Modified")
 
-    html = f"{html_headers}\n{html}"
+            close_details = "</details>\n\n"
+
+            html += f"{html_subheaders}\n{tables}\n{close_details}"
+
+        html = f"{html_headers}\n{html}"
 
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(html)
@@ -648,62 +649,65 @@ def save_quality_gate_html_table(
 ) -> None:
     html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
 
-    table_rows = []
-    groups = group_modules(modules)
-    # Order the groups by platform and python version
-    for (platform, py_version), delta_type_groups in sorted(groups.items(), key=lambda x: (x[0][0], x[0][1])):
-        diff = total_diff.get((platform, py_version), 0)
-        sign_total = "+" if diff > 0 else ""
-        delta_compressed_size = f"{sign_total}{convert_to_human_readable_size(diff)}"
+    if modules != []:
+        final_html = html_headers + "\nNo size differences were found"
+    else:
+        table_rows = []
+        groups = group_modules(modules)
+        # Order the groups by platform and python version
+        for (platform, py_version), delta_type_groups in sorted(groups.items(), key=lambda x: (x[0][0], x[0][1])):
+            diff = total_diff.get((platform, py_version), 0)
+            sign_total = "+" if diff > 0 else ""
+            delta_compressed_size = f"{sign_total}{convert_to_human_readable_size(diff)}"
 
-        threshold_bytes = old_size.get((platform, py_version), 0) * threshold_percentage / 100
-        threshold_sign = "+" if threshold_bytes > 0 else ""
-        threshold = f"{threshold_sign}{convert_to_human_readable_size(threshold_bytes)}"
+            threshold_bytes = old_size.get((platform, py_version), 0) * threshold_percentage / 100
+            threshold_sign = "+" if threshold_bytes > 0 else ""
+            threshold = f"{threshold_sign}{convert_to_human_readable_size(threshold_bytes)}"
 
-        sign_added = "+" if delta_type_groups["New"]["Total"] > 0 else ""
-        sign_removed = "+" if delta_type_groups["Removed"]["Total"] > 0 else ""
-        sign_modified = "+" if delta_type_groups["Modified"]["Total"] > 0 else ""
+            sign_added = "+" if delta_type_groups["New"]["Total"] > 0 else ""
+            sign_removed = "+" if delta_type_groups["Removed"]["Total"] > 0 else ""
+            sign_modified = "+" if delta_type_groups["Modified"]["Total"] > 0 else ""
 
-        total_added = f"{sign_added}{convert_to_human_readable_size(delta_type_groups['New']['Total'])}"
-        total_removed = f"{sign_removed}{convert_to_human_readable_size(delta_type_groups['Removed']['Total'])}"
-        total_modified = f"{sign_modified}{convert_to_human_readable_size(delta_type_groups['Modified']['Total'])}"
+            total_added = f"{sign_added}{convert_to_human_readable_size(delta_type_groups['New']['Total'])}"
+            total_removed = f"{sign_removed}{convert_to_human_readable_size(delta_type_groups['Removed']['Total'])}"
+            total_modified = f"{sign_modified}{convert_to_human_readable_size(delta_type_groups['Modified']['Total'])}"
 
-        status = "❌" if diff >= threshold_bytes else "✅"
+            status = "❌" if diff >= threshold_bytes else "✅"
 
-        table_rows.append(
-            "<tr>"
-            f"<td>{platform}</td>"
-            f"<td>{py_version}</td>"
-            f"<td>{total_added}</td>"
-            f"<td>{total_removed}</td>"
-            f"<td>{total_modified}</td>"
-            f"<td>{delta_compressed_size}</td>"
-            f"<td>{threshold}</td>"
-            f"<td>{status}</td>"
-            "</tr>"
+            table_rows.append(
+                "<tr>"
+                f"<td>{platform}</td>"
+                f"<td>{py_version}</td>"
+                f"<td>{total_added}</td>"
+                f"<td>{total_removed}</td>"
+                f"<td>{total_modified}</td>"
+                f"<td>{delta_compressed_size}</td>"
+                f"<td>{threshold}</td>"
+                f"<td>{status}</td>"
+                "</tr>"
+            )
+
+        html_table = (
+            "<table>\n"
+            "  <thead>\n"
+            "    <tr>\n"
+            "      <th>Platform</th>\n"
+            "      <th>Python</th>\n"
+            "      <th>&Delta; Added</th>\n"
+            "      <th>&Delta; Removed</th>\n"
+            "      <th>&Delta; Modified</th>\n"
+            "      <th>&Delta; Total</th>\n"
+            "      <th>Threshold</th>\n"
+            "      <th>Status</th>\n"
+            "    </tr>\n"
+            "  </thead>\n"
+            "  <tbody>\n"
+            f"{''.join(table_rows)}\n"
+            "  </tbody>\n"
+            "</table>"
         )
 
-    html_table = (
-        "<table>\n"
-        "  <thead>\n"
-        "    <tr>\n"
-        "      <th>Platform</th>\n"
-        "      <th>Python</th>\n"
-        "      <th>&Delta; Added</th>\n"
-        "      <th>&Delta; Removed</th>\n"
-        "      <th>&Delta; Modified</th>\n"
-        "      <th>&Delta; Total</th>\n"
-        "      <th>Threshold</th>\n"
-        "      <th>Status</th>\n"
-        "    </tr>\n"
-        "  </thead>\n"
-        "  <tbody>\n"
-        f"{''.join(table_rows)}\n"
-        "  </tbody>\n"
-        "</table>"
-    )
-
-    final_html = f"{html_headers}\n{html_table}"
+        final_html = f"{html_headers}\n{html_table}"
 
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(final_html)

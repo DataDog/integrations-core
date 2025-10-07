@@ -198,7 +198,7 @@ def diff(
                 except Exception as e:
                     app.abort(str(e))
 
-        if format or not passes_quality_gate:
+        if format or quality_gate_threshold:
             modules = [module for module in modules if module["Size_Bytes"] != 0]
             if format:
                 from .utils.common_funcs import export_format
