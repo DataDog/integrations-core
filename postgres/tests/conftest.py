@@ -4,6 +4,7 @@
 """
 Simplified conftest for dummy tests - no postgres environment setup needed.
 """
+
 import pytest
 
 

@@ -7,7 +7,9 @@ These tests do not set up any environment or run actual postgres integration.
 They just print a line every 10 seconds and use spin-wait instead of sleep.
 Total duration: ~10 minutes across all tests running sequentially.
 """
+
 import time
+
 import pytest
 
 
