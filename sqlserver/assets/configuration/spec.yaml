@@ -93,7 +93,8 @@ files:
             display_default: "$resolved_hostname"
             example: "$env-$resolved_hostname-$full_server_name"
           description: |
-            The template to use for the database identifier. The default value is `$resolved_hostname`.
+            The template to use for the database identifier. The default value is `$resolved_hostname`. Using this 
+            option will split out each instance as a host, reflected in DBM as such and will be reflected in metered usage
             You can use the following variables, prefixed by `$` in the template:
             - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
             - host: The provided host of the instance.
