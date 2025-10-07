@@ -653,6 +653,8 @@ def save_quality_gate_html_table(
     if modules == []:
         final_html = html_headers + "<h4>No size differences were found</h4>\n"
     else:
+        html_headers += "<h3>Compressed Size Changes</h3>"
+
         table_rows = []
         groups = group_modules(modules)
 
