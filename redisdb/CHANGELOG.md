@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 8.2.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 8.1.1 / 2025-09-17 / Agent 7.71.0
+
+***Fixed***:
+
+* Downgrade redis module ([#21366](https://github.com/DataDog/integrations-core/pull/21366))
+
 ## 8.1.0 / 2025-09-05
 
 ***Added***:

@@ -4,6 +4,8 @@
 
 This check monitors [AWS Neuron][1] through the Datadog Agent. It enables monitoring of the Inferentia and Trainium devices and delivers insights into your machine learning model's performance.
 
+**Minimum Agent version:** 7.57.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on an EC2 instance. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

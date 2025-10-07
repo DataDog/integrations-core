@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "3c3562fb-8dce-4265-a8de-eacaa30974e1",
   "app_id": "glusterfs",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -73,7 +73,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.dell.memoryDevice',  # Dell constant metric
 ]
 
-DEFAULT_TAGS_TO_SKIP = ['loader', 'device_id', 'device_ip']
+DEFAULT_TAGS_TO_SKIP = ['loader', 'device_id', 'device_ip', 'agent_host']
 
 CORE_ONLY_TAGS = ['device_namespace:default']
 
