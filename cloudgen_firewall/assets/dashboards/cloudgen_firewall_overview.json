@@ -181,7 +181,7 @@
                                             "group_by": [],
                                             "compute": {
                                                 "aggregation": "cardinality",
-                                                "metric": "service"
+                                                "metric": "@sub_component"
                                             },
                                             "storage": "hot"
                                         }
@@ -223,7 +223,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "service",
+                                                    "facet": "@sub_component",
                                                     "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -293,7 +293,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "service",
+                                                    "facet": "@sub_component",
                                                     "limit": 5,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -362,7 +362,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "service",
+                                                    "facet": "@sub_component",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
