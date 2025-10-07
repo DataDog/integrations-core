@@ -150,13 +150,18 @@ jobs:
       id: check_diff
       if: github.event_name == 'pull_request'
       run: |
-        if [ -s diff.html ]; then
+        if [ -s diff_table.html]; then
           echo "Quality gates not passed"
           echo "passed=false" >> "$GITHUB_OUTPUT"
         else
           echo "Quality gates passed"
           echo "passed=true" >> "$GITHUB_OUTPUT"
         fi
+
+    - name: Output differences
+      if: github.event_name == 'pull_request'
+      run: |
+        echo diff.html >> GITHUB_OUTPUT
 
     - name: Find last comment
       if: github.event_name == 'pull_request' && steps.check_diff.outputs.passed == 'false'
@@ -188,7 +193,7 @@ jobs:
             --json number \
             --jq '.[0].number')
         GITHUB_RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-        echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> diff.html
-        gh pr comment $PR_NUMBER --body-file diff.html
+        echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> diff_table.html
+        gh pr comment $PR_NUMBER --body-file diff_table.html
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

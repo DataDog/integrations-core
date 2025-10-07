@@ -204,8 +204,8 @@ def diff(
                 from .utils.common_funcs import export_format
 
                 export_format(app, format, modules, "diff", platform, py_version, compressed)
-            if quality_gate_threshold and not passes_quality_gate:
-                from .utils.common_funcs import save_quality_gate_html
+            if quality_gate_threshold:
+                from .utils.common_funcs import save_quality_gate_html, save_quality_gate_html_table
 
                 save_quality_gate_html(
                     app,
@@ -215,7 +215,18 @@ def diff(
                     quality_gate_threshold,
                     old_size,
                     total_diff,
+                    passes_quality_gate,
                 )
+                if not passes_quality_gate:
+                    save_quality_gate_html_table(
+                        app,
+                        modules,
+                        "diff_table.html",
+                        old_commit,
+                        quality_gate_threshold,
+                        old_size,
+                        total_diff,
+                    )
         return None
 
 

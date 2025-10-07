@@ -589,6 +589,7 @@ def save_quality_gate_html(
     threshold_percentage: int,
     old_size: dict[tuple[str, str], int],
     total_diff: dict[tuple[str, str], int],
+    passes_quality_gate: bool,
 ) -> None:
     """
     Saves the modules list to HTML format, if the ouput is larger than the PR comment size max,
@@ -597,16 +598,13 @@ def save_quality_gate_html(
     if modules == []:
         return
 
-    MAX_HTML_SIZE = 65536  # PR comment size max
     html = str()
 
     groups = group_modules(modules)
-    html_headers = "<h3>⛔ Size Quality Gates Not Passed</h3>"
-    html_headers += f"<h4>The threshold is {threshold_percentage}% per platform and Python version.</h4>"
-    html_headers += "<h3>Compressed Size Changes</h3>"
-    html_headers += f'<h4>Comparing to commit: <a href="https://github.com/DataDog/integrations-core/commit/{old_commit}">{old_commit[:7]}</a></h4>'
+    html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
     for (platform, py_version), group in groups.items():
         html_subheaders = str()
+
         sign_total = "+" if total_diff[(platform, py_version)] > 0 else ""
         threshold = convert_to_human_readable_size(old_size[(platform, py_version)] * threshold_percentage)
 
@@ -620,7 +618,8 @@ def save_quality_gate_html(
 
         html_subheaders += f"<details><summary><h4>Size Delta for {platform} and Python {py_version}:\n"
         html_subheaders += (
-            f"{sign_total}{total_diff[(platform, py_version)]} (Threshold: {threshold})</h4></summary>\n\n"
+            f"{sign_total}{convert_to_human_readable_size(total_diff[(platform, py_version)])} "
+            f"(Threshold: {threshold})</h4></summary>\n\n"
         )
 
         tables = str()
@@ -631,11 +630,6 @@ def save_quality_gate_html(
         tables += append_html_entry(total_modified, "Modified", modified)
 
         close_details = "</details>\n\n"
-        if len(html_headers) + len(html_subheaders) + len(tables) + len(close_details) > MAX_HTML_SIZE:
-            tables = str()
-            tables += append_html_short_entry(total_added, "Added", added)
-            tables += append_html_short_entry(total_removed, "Removed", removed)
-            tables += append_html_short_entry(total_modified, "Modified", modified)
 
         html += f"{html_subheaders}\n{tables}\n{close_details}"
 
@@ -644,6 +638,84 @@ def save_quality_gate_html(
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(html)
     app.display(f"HTML file saved to {file_path}")
+
+
+def save_quality_gate_html_table(
+    app: Application,
+    modules: list[FileDataEntry],
+    file_path: str,
+    old_commit: str,
+    threshold_percentage: int,
+    old_size: dict[tuple[str, str], int],
+    total_diff: dict[tuple[str, str], int],
+) -> None:
+    html_headers = get_html_headers(threshold_percentage, old_commit, False)
+
+    table_rows = []
+    groups = group_modules(modules)
+    sorted_groups = sorted(groups.items(), key=lambda item: (item[0][0], item[0][1]))
+
+    for (platform, py_version), _ in sorted_groups:
+        diff = total_diff.get((platform, py_version), 0)
+        sign_total = "+" if diff > 0 else ""
+        delta_compressed_size = f"{sign_total}{convert_to_human_readable_size(diff)}"
+
+        threshold_bytes = old_size.get((platform, py_version), 0) * threshold_percentage / 100
+        threshold = f"{convert_to_human_readable_size(threshold_bytes)}"
+
+        status = "❌" if diff >= threshold_bytes else "✅"
+
+        table_rows.append(
+            "<tr>"
+            f"<td>{platform}</td>"
+            f"<td>{py_version}</td>"
+            f"<td>{delta_compressed_size}</td>"
+            f"<td>{threshold}</td>"
+            f"<td>{status}</td>"
+            "</tr>"
+        )
+
+    html_table = (
+        "<table>\n"
+        "  <thead>\n"
+        "    <tr>\n"
+        "      <th>Platform</th>\n"
+        "      <th>Python</th>\n"
+        "      <th>&Delta; (Compressed)</th>\n"
+        "      <th>Threshold</th>\n"
+        "      <th>Status</th>\n"
+        "    </tr>\n"
+        "  </thead>\n"
+        "  <tbody>\n"
+        f"{''.join(table_rows)}\n"
+        "  </tbody>\n"
+        "</table>"
+    )
+
+    final_html = f"{html_headers}\n{html_table}"
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(final_html)
+
+    app.display(f"HTML file saved to {file_path}")
+
+
+def get_html_headers(threshold_percentage: int, old_commit: str, passes_quality_gate: bool) -> str:
+    html_headers = (
+        "<h2>⛔ Size Quality Gates Not Passed</h2>"
+        if not passes_quality_gate
+        else "<h2>✅ Size Quality Gates Passed</h2>"
+    )
+    html_headers += (
+        "<p>"
+        f"<strong>Threshold:</strong> {threshold_percentage}% per platform and Python version<br>"
+        "<strong>Compared to commit:</strong> "
+        f'<a href="https://github.com/DataDog/integrations-core/commit/{old_commit}">{old_commit[:7]}</a>'
+        "</p>"
+        "<h3>Compressed Size Changes</h3>"
+    )
+
+    return html_headers
 
 
 def group_modules(
@@ -668,17 +740,6 @@ def append_html_entry(total: int, type: str, entries: list[FileDataEntry]) -> st
             html += f"<tr><td>{e.get('Type', '')}</td><td>{e.get('Name', '')}</td><td>{e.get('Version', '')}</td>"
             html += f"<td>{e.get('Size', '')}</td><td>{e.get('Percentage', '')}%</td></tr>\n"
         html += "</table>\n"
-    else:
-        html += f"No {type.lower()} dependencies/integrations\n"
-
-    return html
-
-
-def append_html_short_entry(total: int, type: str, entries: list[FileDataEntry]) -> str:
-    html = str()
-    if total != 0:
-        sign = "+" if total > 0 else ""
-        html += f"<b>{type}:</b> {len(entries)} item(s), {sign}{convert_to_human_readable_size(total)}\n"
     else:
         html += f"No {type.lower()} dependencies/integrations\n"
 
