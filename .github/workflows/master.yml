@@ -22,6 +22,9 @@ on:
     - '*/metadata.csv'
     # In case some linting formatting config has changed
     - 'pyproject.toml'
+  pull_request:
+    branches:
+    - master
 
 jobs:
   cache:
