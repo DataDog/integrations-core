@@ -102,18 +102,17 @@ def status(
                 "format": format,
                 "show_gui": show_gui,
             }
-            modules_plat_ver.extend(
-                status_mode(
-                    repo_path,
-                    parameters,
-                    dependency_sizes,
-                )
+            status_modules = status_mode(
+                repo_path,
+                parameters,
+                dependency_sizes,
             )
+            modules_plat_ver.extend(status_modules)
             if to_dd_org or to_dd_key:
                 from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
 
                 app.display("Sending metrics to Datadog ")
-                send_metrics_to_dd(app, modules_plat_ver, to_dd_org, to_dd_key, to_dd_site, compressed, mode, commits)
+                send_metrics_to_dd(app, status_modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode, commits)
 
         if format:
             from ddev.cli.size.utils.common_funcs import export_format

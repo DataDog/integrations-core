@@ -153,7 +153,7 @@ def diff(
                 if to_dd_org or to_dd_key:
                     from .utils.common_funcs import send_metrics_to_dd
 
-                    send_metrics_to_dd(app, modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
+                    send_metrics_to_dd(app, diff_modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
 
         else:
             with GitRepo(repo_url) as gitRepo:
@@ -193,7 +193,7 @@ def diff(
                         if to_dd_org or to_dd_key:
                             from .utils.common_funcs import send_metrics_to_dd
 
-                            send_metrics_to_dd(app, modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
+                            send_metrics_to_dd(app, diff_modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
 
                 except Exception as e:
                     app.abort(str(e))
