@@ -34,7 +34,7 @@ FULL_LENGTH_COMMIT = 40
 @click.option("--use-artifacts", is_flag=True, help="Fetch sizes from gha artifacts instead of the repo")
 @click.option(
     "--quality-gate-threshold",
-    type=int,
+    type=float,
     help="Percentage threshold for the size difference. Generates the html only if the size"
     " difference is greater than the quality gate threshold",
 )
@@ -57,7 +57,7 @@ def diff(
     format: list[str],
     show_gui: bool,
     use_artifacts: bool,
-    quality_gate_threshold: int | None,
+    quality_gate_threshold: float | None,
     to_dd_org: str | None,
     to_dd_key: str | None,
     to_dd_site: str | None,
@@ -475,7 +475,7 @@ def calculate_diff(
 
 
 def check_quality_gate(
-    app: Application, total_diff: int, old_size: int, quality_gate_threshold: int, platform: str, py_version: str
+    app: Application, total_diff: int, old_size: int, quality_gate_threshold: float, platform: str, py_version: str
 ) -> bool:
     percentage = (total_diff / old_size) * 100
 

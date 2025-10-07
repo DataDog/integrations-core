@@ -591,7 +591,7 @@ def save_quality_gate_html(
     modules: list[FileDataEntry],
     file_path: str,
     old_commit: str,
-    threshold_percentage: int,
+    threshold_percentage: float,
     old_size: dict[tuple[str, str], int],
     total_diff: dict[tuple[str, str], int],
     passes_quality_gate: bool,
@@ -641,7 +641,7 @@ def save_quality_gate_html_table(
     modules: list[FileDataEntry],
     file_path: str,
     old_commit: str,
-    threshold_percentage: int,
+    threshold_percentage: float,
     old_size: dict[tuple[str, str], int],
     total_diff: dict[tuple[str, str], int],
     passes_quality_gate: bool,
@@ -711,7 +711,7 @@ def save_quality_gate_html_table(
     app.display(f"HTML file saved to {file_path}")
 
 
-def get_html_headers(threshold_percentage: int, old_commit: str, passes_quality_gate: bool) -> str:
+def get_html_headers(threshold_percentage: float, old_commit: str, passes_quality_gate: bool) -> str:
     html_headers = (
         "<h2>⛔ Size Quality Gates Not Passed</h2>"
         if not passes_quality_gate
@@ -719,6 +719,7 @@ def get_html_headers(threshold_percentage: int, old_commit: str, passes_quality_
     )
     html_headers += (
         "<p>"
+        "These quality gates apply only to dependencies and integrations packaged with the Datadog Agent."
         f"<strong>Threshold:</strong> {threshold_percentage}% per platform and Python version<br>"
         "<strong>Compared to commit:</strong> "
         f'<a href="https://github.com/DataDog/integrations-core/commit/{old_commit}">{old_commit[:7]}</a>'
