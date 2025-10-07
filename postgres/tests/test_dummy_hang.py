@@ -11,8 +11,10 @@ Total duration: ~10 minutes across all tests running sequentially.
 import time
 
 import pytest
+from ddtrace import tracer
 
 
+@tracer.wrap(service="dummy-tests", resource="dummy_work")
 def _dummy_work():
     """Dummy function to call repeatedly in spin-wait loop."""
     result = 0
@@ -23,28 +25,46 @@ def _dummy_work():
 
 def _dummy_test(test_name, duration_seconds):
     """Helper function that prints every 10 seconds using spin-wait for the specified duration."""
-    print(f"\n[{test_name}] Starting - will run for {duration_seconds} seconds")
+    with tracer.trace("dummy_test", service="dummy-tests", resource=test_name) as test_span:
+        test_span.set_tag("test.name", test_name)
+        test_span.set_tag("test.duration", duration_seconds)
 
-    start_time = time.time()
-    last_print_time = start_time
+        print(f"\n[{test_name}] Starting - will run for {duration_seconds} seconds")
+        print(f"[TRACE] Created span: {test_span.name} (trace_id={test_span.trace_id}, span_id={test_span.span_id})")
 
-    while True:
-        # Spin-wait by calling dummy function
-        _dummy_work()
+        start_time = time.time()
+        last_print_time = start_time
+        iteration_count = 0
 
-        current_time = time.time()
-        elapsed = current_time - start_time
+        with tracer.trace("spin_wait_loop", service="dummy-tests", resource=f"{test_name}_loop") as loop_span:
+            print(f"[TRACE] Started loop span: {loop_span.name} (span_id={loop_span.span_id})")
 
-        # Check if we should print (every 10 seconds)
-        if current_time - last_print_time >= 10:
-            print(f"[{test_name}] Elapsed: {int(elapsed)}s / {duration_seconds}s")
-            last_print_time = current_time
+            while True:
+                # Spin-wait by calling dummy function
+                _dummy_work()
+                iteration_count += 1
 
-        # Check if we're done
-        if elapsed >= duration_seconds:
-            break
+                current_time = time.time()
+                elapsed = current_time - start_time
 
-    print(f"[{test_name}] Completed")
+                # Check if we should print (every 10 seconds)
+                if current_time - last_print_time >= 10:
+                    with tracer.trace("progress_print", service="dummy-tests") as print_span:
+                        print_span.set_tag("elapsed", int(elapsed))
+                        print_span.set_tag("total_duration", duration_seconds)
+                        print(f"[{test_name}] Elapsed: {int(elapsed)}s / {duration_seconds}s")
+                        print(f"[TRACE] Progress span created (iterations so far: {iteration_count})")
+                    last_print_time = current_time
+
+                # Check if we're done
+                if elapsed >= duration_seconds:
+                    break
+
+            loop_span.set_tag("total_iterations", iteration_count)
+            print(f"[TRACE] Loop span completed with {iteration_count} iterations")
+
+        print(f"[{test_name}] Completed")
+        print(f"[TRACE] Test span completed: {test_span.name}")
 
 
 # 10 tests with durations that add up to ~600 seconds (10 minutes)
