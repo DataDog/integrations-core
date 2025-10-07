@@ -1,0 +1,59 @@
+id: obsidian-security
+tests:
+  - sample: '{"id":"17","timestamp":"2025-09-15T05:53:32Z","source":{"client_browser":"","client_ip":"10.10.10.10","request_id":""},"event":{"action":"CreateConnection","category":"Connections","outcome":"Success"},"identity":{"id":"123242235353253253","org":"abcenfiejofeojew","type":"user","username":"yagami.light@abc.com"},"target":{"connection_id":"123243253534634324","connection_uuid":"a1aaaa1a-7e97-4b4c-99e0-f144bd982787","http_code":200,"service_id":"obsidian"}}'
+    service: audit-logs
+    result: null
+  - sample: '{"obsidian_security_alert":{"id":"12345","ticketId":"1","generatedDatetime":"2025-10-03T05:30:22.157000Z","name":"atoz
+      User Marked
+      Fraud","eventDatetime":"2025-08-22T17:34:28Z","service":{"serviceId":"atoz","name":"atoz","avatar":null},"severity":"MEDIUM","taxonomy":{"tactic":{"name":"Access","description":null},"technique":{"name":"Login","description":null},"behavior":"MALICIOUS"},"actors":[{"id":"abbAbaAA-Nxw98NTyCwJy76alRuW_RkM0Pf-cQhio=","nativeId":"ABVEDEGE2435ASGEG","name":"Ginny","entitySubType":"atoz.User","avatars":null,"services":[{"serviceId":"atoz","name":"atoz","avatar":null}],"tenantId":"api-sfefe.atozsecurity.com","isDeleted":false,"temporalProperties":{"firstObserved":null,"lastObserved":"2025-09-22T02:57:05.132Z","firstActive":null,"lastActive":"2025-09-19T18:51:59Z","created":"2023-11-20T05:26:27Z","deleted":null,"lastModified":null,"terminated":null,"activityStatus":"INACTIVE"},"userGroups":null,"__typename":"Account"}],"targets":[{"id":"SasnZts_rw_F4ZPa_y5u3gIftgPXmaOFEw_GrW_qSMY=","nativeId":"DIC5HTN857AN3PML57YV","name":"Workspace
+      Login","entitySubType":"atoz.Integration","avatars":null,"services":[{"serviceId":"atoz","name":"atoz","avatar":null}],"tenantId":"api-sfefe.atozsecurity.com","isDeleted":false,"temporalProperties":null,"userGroups":null,"__typename":"Application"},{"id":"fI-cqNPQItxYc9Aejr8PAoiRqmRZ3Z-nZUBB0qcVo-Y=","nativeId":null,"name":"Ginny","entitySubType":"atoz.Phone","avatars":null,"services":[{"serviceId":"atoz","name":"atoz","avatar":null}],"tenantId":"api-sfefe.atozsecurity.com","isDeleted":false,"temporalProperties":null,"userGroups":null,"__typename":"Other"}],"humanReadableDescription":{"plain":"Reset
+      user password. Ginny (Ginny@msc.com) reported a fraudulent login
+      attempt.","tagged":"Reset user password. Ginny (Ginny@msc.com) reported a
+      fraudulent login attempt."},"description":"Ginny (Ginny@msc.com) reported
+      a fraudulent login attempt.","descriptionTagged":"Ginny (Ginny@msc.com)
+      reported a fraudulent login
+      attempt.","intelligenceCatalogReference":{"id":"97","alertAction":null,"identifier":"atozUserMarkedFraud","name":"atoz
+      User Marked
+      Fraud","ownershipCategory":"OBSIDIAN","origin":"atoz","taxonomy":{"tactic":{"name":"Access","description":null},"technique":{"name":"Login","description":null},"behavior":"MALICIOUS"},"dashboard":"LOGIN","version":{"major":"1","minor":"0","patch":"0","label":"production"},"tags":["ACT","POSTURE_MANAGEMENT","CLOUD_INTRUSION"],"severity":"MEDIUM","detectionType":"NATIVE","services":[{"serviceId":"atoz","name":"atoz","avatar":null}],"state":"ENABLED","description":"atoz
+      detected an authentication attempt from an unknown actor and the end-user
+      explicitly marked the event as \"fraudulent\".","descriptionShort":"atoz
+      detected an authentication attempt from an unknown actor and the end-user
+      explicitly marked the event as \"fraudulent\".","testingSteps":"1. User
+      must have an application that is protected by atoz 2FA\n2. atoz Mobile
+      must be installed on a device to receive push notifications from atoz\n3.
+      Navigate to login page of application that requires atoz 2FA\n4. Login
+      with credentials\n5. Select the option to use atoz Push\n6. Upon receiving
+      the push notification, select DENY\n7. Select menu option \"It seemed
+      fraudulent","documentationLink":"https://atoz.com/docs/adminapi#authentication-logs","createdBy":{"id":"OBSIDIAN","name":"OBSIDIAN"},"createdDatetime":"2025-09-23T05:52:25.676000Z","updatedDatetime":"2025-09-23T05:52:25.676000Z","runFrequencySeconds":0,"latencySeconds":2700,"alertDeduplication":"","isModified":true,"configuration":{"type":null},"mitreProperties":{"id":"T1078","name":"Valid
+      Accounts (Initial Access)","description":"Compromised credentials may be
+      used to bypass access controls placed on various resources on systems
+      within the network and may even be used for persistent access to remote
+      systems and externally available services, such as VPNs, Outlook Web
+      Access and remote desktop. Compromised credentials may also grant an
+      adversary increased privilege to specific systems or access to restricted
+      areas of the network. Adversaries may choose not to use malware or tools
+      in conjunction with the legitimate access those credentials provide to
+      make it harder to detect their
+      presence.","url":"https://attack.mitre.org/wiki/Technique/T1078"},"computeType":"STREAMING"},"opsProperties":{"outcome":null,"behavior":null},"relatedEmailDomains":["atoz.ai"],"relatedActorEmails":["Ginny@msc.com"],"relatedTargetEmails":[],"relatedTenants":["api-sfefe.atozsecurity.com"],"relatedTenantObjects":[{"tenantId":"api-sfefe.atozsecurity.com","name":"atoz
+      1","serviceId":"atoz","isProduction":true,"sensitivity":{"displayName":"Higher"},"tags":[],"customMeta":null,"platform":"atoz","isIdp":true}],"tuningConfig":null,"labels":[{"name":"MOBILE_CONNECTION","namespace":"resource.ip","value":1,"matchConditions":null}],"alertExtraData":{"ipAddress":"10.10.10.10","ipAddress3":"10.10.10","userAgentString":null,"geoHash3":"teu","isp":"atoz
+      provider","asn":11111,"country":"India","region":"Gujarāt","city":"Tarva","title":null,"department":null,"sessionId":null},"service_tenant_data":{"services":["atoz"],"services_required_matches":1,"tenants":{"atoz":["api-sfefe.atozsecurity.com"],"atoz_required_matches":1}},"isIrBackfill":false,"workflowProperties":{"status":"OPEN","resolutionTag":"BENIGN","resolutionReasons":[],"stateLastUpdated":"2025-09-19T10:44:52.284000Z","resolutionTagLastUpdated":"2025-09-19T10:44:52.284000Z","resolutionReasonLastUpdated":null}}}'
+    service: alerts
+    result: null
+  - sample: '{"obsidian_security_event":{"activeConnections":[{"service_id":"ser.1","instance_id":"123232421421412421","create_time":"2025-09-15T09:40:28.906729Z","name":"Workspace
+      1","active":true,"org_id":"absjfnewkjfnwe","created_by":"505284034950787989","tenant_id":"A01ababab","last_run_times":{"activity":"2025-10-03T09:50:00Z","state":"2025-10-03T00:42:00Z"},"state":"RUNNING","validation_runs":[]}],"actors":[{"id":"asfne12fs_Ad-RfSHHp_2wFNX9GLvWIRldD199rfKEM=","nativeId":"123243551231242412412","name":"Yagami
+      Light","entitySubType":"atoz.User","avatars":null,"services":[{"serviceId":"atoz","name":"atoz","avatar":null}],"tenantId":"A01ababab","isDeleted":false,"temporalProperties":{"firstObserved":null,"lastObserved":null,"firstActive":null,"lastActive":null,"created":"2023-03-24T05:25:13Z","deleted":null,"lastModified":null,"terminated":null,"activityStatus":"UNKNOWN"},"rawRefs":{"alt_email":["yagami.light@abc.com","yagami.light@testdata.io.test-atoz-a.com"],"archived":false,"creation_time":"2023-03-24T05:25:13.000+00:00","email":"yagami.light@testdata.io","emailDomain":"testdata.io","id":"123243551231242412412","ip_whitelisted":false,"isEnrolledIn2Sv":false,"is_admin":true,"last_login_time":"2023-12-07T05:25:25.000Z","name":"Yagami
+      Light","suspended":false},"userGroups":null,"__typename":"Account"}],"api":"activity_token","browserId":null,"datetime":"2025-09-21T06:54:42.748Z","deviceId":null,"eventFrequency":"COMMON","humanReadableDescription":{"plain":"The
+      application 123243533453463475475 was granted token atoz.OauthToken on
+      behalf of Yagami Light","tagged":"The application <targets.1> was granted
+      token <targets.2> on behalf of
+      <actor.0>"},"id":"1a11f111a1aa6392ba0b5bc5a92807321854f708f2e92a61583da587b5cd0061_0","ipAddress":{"raw":"10.10.10.10","isp":"AtoZ
+      Technologies
+      Inc.","isExtractionSkipped":null,"asn":"11111","isMobile":false,"hostname":"btglss.net","vpnProxyDescription":"cloud","vpnProxyType":"hosting","vpnProxyNames":null,"obsidianThreatIntelligence":{"threatClassifications":["VPN_PROXY"],"threatLevel":null},"threatIntelligenceProviders":[{"name":"NetAcuity","raw":{"threat_level":"","is_crawler":false,"is_tor":false,"is_proxy":true}}]},"isPrivilegedEvent":null,"location":{"city":"Boardman","subdivision":"Oregon","country":"United
+      States","postalCode":"97818","geoLocation":{"latitude":45.81,"longitude":-119.7},"geoLocationSource":"GEOIP"},"obsidianEventName":{"type":"AUTHORIZE","description":"some
+      action was authorized; a token was issues to an application","example":"An
+      inbound change was authorized; gsuite admin granted privileges to
+      user"},"processedTime":"2025-09-21T07:11:08.361Z","rawEventName":"authorize","service":{"serviceId":"atoz","name":"atoz","avatar":null},"sessionId":null,"status":"SUCCESS","subService":null,"targets":[{"id":"asfne12fs_Ad-RfSHHp_1aAAA9GLvWIRldD199rfKEM=","nativeId":"123243551231242123123","name":"Yagami
+      Light","entitySubType":"atoz.User","avatars":null,"services":[{"serviceId":"atoz","name":"atoz","avatar":null}],"tenantId":"A01ababab","isDeleted":false,"temporalProperties":{"firstObserved":null,"lastObserved":null,"firstActive":null,"lastActive":null,"created":"2023-03-24T05:25:13Z","deleted":null,"lastModified":null,"terminated":null,"activityStatus":"UNKNOWN"},"rawRefs":{"alt_email":["yagami.light@abc.com","yagami.light@testdata.io.test-atoz-a.com"],"creation_time":"2023-03-24T05:25:13.000+00:00","email":"yagami.light@testdata.io","emailDomain":"testdata.io","id":"123243551231242412412","ip_whitelisted":false,"isEnrolledIn2Sv":false,"is_admin":true,"last_login_time":"2023-12-07T05:25:25.000Z","name":"Yagami
+      Light","suspended":false},"userGroups":null,"__typename":"Account"},{"id":"l3VCHrAqZZ5g-jE_IJE1TBVHdoE492gPg79X_sniAzg=","nativeId":"123243533453463475475","name":"123243533453463475475","entitySubType":"atoz.Application","avatars":null,"services":[{"serviceId":"atoz","name":"atoz","avatar":null}],"tenantId":"A01ababab","isDeleted":false,"temporalProperties":null,"rawRefs":{"client_id":"123243533453463475475","name":"123243533453463475475"},"userGroups":null,"__typename":"Application"},{"id":"A1a-AaaAaAaAqSeTtzNnhf-gkY_RcxrQt1cpHk96XGU=","nativeId":null,"name":"atoz.OauthToken","entitySubType":"atoz.OauthToken","avatars":null,"services":[{"serviceId":"atoz","name":"atoz","avatar":null}],"tenantId":"A01ababab","isDeleted":false,"temporalProperties":null,"rawRefs":{"clientId":"123243533453463475475","id":"123243533453463475475123243551231242412412","scopes":["https://www.atozapis.com/auth/calendar.readonly"],"userKey":"123243551231242412412"},"userGroups":null,"__typename":"Other"}],"tenantId":"A01ababab","userAgent":{"raw":null,"os":{"family":null,"version":null},"browser":{"family":null,"version":null},"device":{"family":null,"version":null},"globalTemporalProperties":null,"localTemporalProperties":null,"environmentalRarity":null},"userGroups":[]}}'
+    service: events
+    result: null
