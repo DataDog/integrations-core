@@ -649,12 +649,12 @@ def save_quality_gate_html_table(
 ) -> None:
     html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
 
-    if modules != []:
+    if modules == []:
         final_html = html_headers + "\nNo size differences were found"
     else:
         table_rows = []
         groups = group_modules(modules)
-        # Order the groups by platform and python version
+
         for (platform, py_version), delta_type_groups in sorted(groups.items(), key=lambda x: (x[0][0], x[0][1])):
             diff = total_diff.get((platform, py_version), 0)
             sign_total = "+" if diff > 0 else ""

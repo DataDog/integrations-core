@@ -9,6 +9,8 @@ on:
     branches:
       - master
   merge_group:
+    # Test requested to pass before merging
+    # needs to trigger in merge queues
     types: [checks_requested]
 
 env:
