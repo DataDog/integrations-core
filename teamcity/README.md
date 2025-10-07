@@ -4,6 +4,8 @@
 
 This integration connects to your TeamCity server to submit metrics, service checks, and events, allowing you to monitor the health of your TeamCity projects' build configurations, build runs, server resources, and more.
 
+For more in-depth monitoring of your TeamCity pipelines, check out [CI Pipeline Visibility][26]. CI Pipeline Visibility provides granular insights into your user workflow, lets you access detailed Git metadata, and tracks pipeline performance over time.
+
 **Minimum Agent version:** 6.0.0
 
 ## Setup
@@ -184,6 +186,11 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "teamcity"}` |
 
+
+### CI Pipeline Visibility
+
+To configure CI Pipeline Visibility visit the [product set-up page][27]. For more details visit the [official doc][26].
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -238,3 +245,5 @@ Need help? Contact [Datadog support][12].
 [23]: https://www.jetbrains.com/help/teamcity/managing-roles-and-permissions.html
 [24]: https://www.jetbrains.com/help/teamcity/creating-and-managing-users.html#Assigning+Roles+to+Users
 [25]: https://www.jetbrains.com/help/teamcity/server-startup-properties.html#TeamCity+Internal+Properties
+[26]: /ci/getting-started
+[27]: /ci/setup/pipeline?provider=teamcity
