@@ -45,7 +45,7 @@ class TestCheck(AgentCheck):
 
 
 def normalized_hash(value: object) -> str:
-    return hash_mutable_stable(value, length=20)
+    return hash_mutable_stable(value)
 
 
 def test_config_set_caches(cache_id: str):

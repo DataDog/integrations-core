@@ -31,4 +31,4 @@ def config_set_persistent_cache_id(
 
     selected_values = init_config_values + instance_config_values
 
-    return hash_mutable_stable(selected_values, length=20)
+    return hash_mutable_stable(selected_values)
