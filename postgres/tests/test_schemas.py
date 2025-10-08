@@ -142,7 +142,7 @@ def test_indexes(dbm_instance, integration_check):
         for row in cursor:
             if row['indexes']:
                 for index in row['indexes']:
-                    assert index['name'] is not None
+                    assert index['names'] is not None
                     assert index['definition'] is not None
             if row['table_name'] == 'cities':
                 assert row['indexes']

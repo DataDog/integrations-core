@@ -117,6 +117,23 @@ WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
        AND nspname NOT LIKE 'pg_temp_%'
 """
 
+COLUMNS_QUERY = """
+SELECT attname                          AS name,
+       Format_type(atttypid, atttypmod) AS data_type,
+       NOT attnotnull                   AS nullable,
+       pg_get_expr(adbin, adrelid)      AS default,
+       attrelid AS table_id
+FROM   pg_attribute
+       LEFT JOIN pg_attrdef ad
+              ON adrelid = attrelid
+                 AND adnum = attnum
+WHERE  attnum > 0
+       AND NOT attisdropped
+"""
+
+
+
+
 PG_INDEXES_QUERY = """
 SELECT
     c.relname AS name,
@@ -140,36 +157,40 @@ ON
     c.oid = ix.indexrelid
 """
 
-PG_CHECK_FOR_FOREIGN_KEY = """
-SELECT count(conname)
-FROM   pg_constraint
-WHERE  contype = 'f'
-       AND conrelid = {oid};
-"""
 
 PG_CONSTRAINTS_QUERY = """
 SELECT conname                   AS name,
        pg_get_constraintdef(oid) AS definition,
-       conrelid AS id
+       conrelid AS table_id
 FROM   pg_constraint
 WHERE  contype = 'f'
-       AND conrelid IN ({table_ids});
 """
 
-COLUMNS_QUERY = """
-SELECT attname                          AS name,
-       Format_type(atttypid, atttypmod) AS data_type,
-       NOT attnotnull                   AS nullable,
-       pg_get_expr(adbin, adrelid)      AS default,
-       attrelid AS table_id
-FROM   pg_attribute
-       LEFT JOIN pg_attrdef ad
-              ON adrelid = attrelid
-                 AND adnum = attnum
-WHERE  attnum > 0
-       AND NOT attisdropped
+
+PARTITION_KEY_QUERY = """
+SELECT relname,
+       pg_get_partkeydef(oid) AS partition_key,
+       oid AS table_id
+FROM   pg_class
 """
 
+NUM_PARTITIONS_QUERY = """
+SELECT count(inhrelid :: regclass) AS num_partitions, inhparent as table_id
+FROM   pg_inherits
+GROUP BY inhparent;
+"""
+
+PARTITION_ACTIVITY_QUERY = """
+SELECT pi.inhparent :: regclass         AS parent_table_name,
+       SUM(COALESCE(psu.seq_scan, 0) + COALESCE(psu.idx_scan, 0)) AS total_activity,
+       pi.inhparent as table_id
+FROM   pg_catalog.pg_stat_user_tables psu
+       join pg_class pc
+         ON psu.relname = pc.relname
+       join pg_inherits pi
+         ON pi.inhrelid = pc.oid
+GROUP BY pi.inhparent
+"""
 
 class PostgresSchemaCollector(SchemaCollector):
     def __init__(self, check):
@@ -197,6 +218,26 @@ class PostgresSchemaCollector(SchemaCollector):
                 tables_query = self._get_tables_query()
                 columns_query = COLUMNS_QUERY
                 indexes_query = PG_INDEXES_QUERY
+                constraints_query = PG_CONSTRAINTS_QUERY
+                partitions_ctes = f"""
+                    ,
+                    partition_keys AS (
+                        {PARTITION_KEY_QUERY}
+                    ),
+                    num_partitions AS (
+                        {NUM_PARTITIONS_QUERY}
+                    )
+                """ if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9" else ""
+                partition_joins = f"""
+                    LEFT JOIN partition_keys ON tables.table_id = partition_keys.table_id
+                    LEFT JOIN num_partitions ON tables.table_id = num_partitions.table_id
+                """ if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9" else ""
+                parition_selects = f"""
+                , 
+                    partition_keys.partition_key,
+                    num_partitions.num_partitions
+                """ if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9" else ""
+                
                 limit = self._config.max_tables or 1_000_000
                 query = f"""
                     WITH
@@ -211,16 +252,24 @@ class PostgresSchemaCollector(SchemaCollector):
                     ),
                     indexes AS (
                         {indexes_query}
+                    ),
+                    constraints AS (
+                        {constraints_query}
                     )
+                    {partitions_ctes}
 
                     SELECT schemas.schema_id, schemas.schema_name,
                         tables.table_id, tables.table_name,
                         array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
-                        array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes
+                        array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
+                        array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL) as foreign_keys
+                        {parition_selects}
                     FROM schemas
                         LEFT JOIN tables ON schemas.schema_id = tables.schema_id
                         LEFT JOIN columns ON tables.table_id = columns.table_id
                         LEFT JOIN indexes ON tables.table_id = indexes.table_id
+                        LEFT JOIN constraints ON tables.table_id = constraints.table_id
+                        {partition_joins}
                     GROUP BY schemas.schema_id, schemas.schema_name, tables.table_id, tables.table_name
                     LIMIT {limit}
                     ;
