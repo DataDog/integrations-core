@@ -117,8 +117,6 @@ jobs:
       # Capture traces for a separate job to do the submission
       TRACE_CAPTURE_BASE_DIR: "trace-captures"
       TRACE_CAPTURE_LOG: "trace-captures/output.log"
-      # ddtrace debug log file
-      DDTRACE_DEBUG_LOG: "trace-captures/ddtrace_debug.log"
       # Prefix for artifact names when using minimum base package
       MINIMUM_BASE_PACKAGE_PREFIX: "${{ inputs.minimum-base-package && 'minimum-base-package-' || '' }}"
 
@@ -135,6 +133,7 @@ jobs:
         echo "TEST_RESULTS_DIR=$TEST_RESULTS_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
         echo "TRACE_CAPTURE_FILE=$TRACE_CAPTURE_BASE_DIR/$JOB_NAME" >> $GITHUB_ENV
         echo "DD_TAGS=team:agent-integrations,platform:${{ inputs.platform }},integration:${{ inputs.target }},agent_image:$DDEV_E2E_AGENT,context:${{ inputs.context }}" >> $GITHUB_ENV
+        echo "DDTRACE_DEBUG_LOG=$GITHUB_WORKSPACE/$TRACE_CAPTURE_BASE_DIR/ddtrace_debug.log" >> $GITHUB_ENV
 
     - name: Set up Windows
       if: runner.os == 'Windows'
