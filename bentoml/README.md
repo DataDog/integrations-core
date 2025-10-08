@@ -64,7 +64,7 @@ BentoML logs can be collected by the Datadog Agent using several methods:
 
 **For containerized environments**:
 
-- Make sure the BentoML log files are mounted inside the Datadog Agent container so they can be accessed and tailed. See [container based log collection][14] for more information.
+- Ensure the BentoML log files are mounted inside the Datadog Agent container so they can be accessed and tailed. See [container based log collection][14] for more information.
 
 **Other log shipping options:**
 
