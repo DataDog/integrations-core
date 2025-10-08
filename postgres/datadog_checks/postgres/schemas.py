@@ -1,5 +1,7 @@
+from abc import ABC, abstractmethod
 import contextlib
 import time
+from typing import TypedDict
 
 import orjson as json
 from psycopg.rows import dict_row
@@ -12,8 +14,25 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+class DatabaseInfo(TypedDict):
+    description: str
+    name: str
+    id: str
+    encoding: str
+    owner: str
 
-class SchemaCollector:
+# The schema collector sends lists of DatabaseObjects to the agent
+# The format is for backwards compatibility with the current backend
+class DatabaseObject(TypedDict):
+    # Splat of database info
+    description: str
+    name: str
+    id: str
+    encoding: str
+    owner: str
+
+
+class SchemaCollector(ABC):
     def __init__(self, check: PostgreSql):
         self._check = check
         self._log = check.log
@@ -35,7 +54,7 @@ class SchemaCollector:
             with self._get_cursor(database) as cursor:
                 next = self._get_next(cursor)
                 while next:
-                    self._queued_rows.append(next)
+                    self._queued_rows.append(self._map_row(database, next))
                     next = self._get_next(cursor)
                     is_last_payload = database is databases[-1] and next is None
                     self.maybe_flush(is_last_payload)
@@ -64,14 +83,26 @@ class SchemaCollector:
 
             self._queued_rows = []
 
-    def _get_databases(self):
+    @abstractmethod
+    def _get_databases(self) -> list[DatabaseInfo]:
         pass
 
+    @abstractmethod
     def _get_cursor(self, database):
         pass
 
+    @abstractmethod
     def _get_next(self, cursor):
         pass
+
+    @abstractmethod
+    def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
+        """
+        Maps a cursor row to a dict that matches the schema expected by DBM.
+        """
+        return {
+            **database, 
+        }
 
 
 PG_TABLES_QUERY_V10_PLUS = """
@@ -192,6 +223,24 @@ FROM   pg_catalog.pg_stat_user_tables psu
 GROUP BY pi.inhparent
 """
 
+
+
+class TableObject(TypedDict):
+    id: str
+    name: str
+    columns: list
+    indexes: list
+    foreign_keys: list
+    
+class SchemaObject(TypedDict):
+    id: str
+    name: str
+    owner: str
+    tables: list[TableObject]
+
+class PostgresDatabaseObject(DatabaseObject):
+    schemas: list[SchemaObject]
+
 class PostgresSchemaCollector(SchemaCollector):
     def __init__(self, check):
         super().__init__(check)
@@ -299,3 +348,23 @@ class PostgresSchemaCollector(SchemaCollector):
 
     def _get_next(self, cursor):
         return cursor.fetchone()
+
+    def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
+        object = super()._map_row(database, cursor_row)
+        object["schemas"] = [
+            {
+                "id": str(cursor_row["schema_id"]),
+                "name": cursor_row["schema_name"],
+                "owner": cursor_row["schema_owner"],
+                "tables": [
+                    {
+                        "id": str(cursor_row["table_id"]),
+                        "name": cursor_row["table_name"],
+                        "columns": cursor_row["columns"],
+                        "indexes": cursor_row["indexes"],
+                        "foreign_keys": cursor_row["foreign_keys"],
+                    }
+                ]
+            }
+        ]
+        return object

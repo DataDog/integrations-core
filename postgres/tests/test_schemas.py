@@ -142,8 +142,17 @@ def test_indexes(dbm_instance, integration_check):
         for row in cursor:
             if row['indexes']:
                 for index in row['indexes']:
-                    assert index['names'] is not None
+                    assert index['name'] is not None
                     assert index['definition'] is not None
             if row['table_name'] == 'cities':
                 assert row['indexes']
                 assert row['indexes'][0]['name']
+
+def test_collect_schemas(dbm_instance, integration_check):
+    check = integration_check(dbm_instance)
+    check.version = POSTGRES_VERSION
+    collector = PostgresSchemaCollector(check)
+
+    collector.collect_schemas()
+
+    
