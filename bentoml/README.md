@@ -40,7 +40,7 @@ instances:
 
 BentoML logs can be collected by the Datadog Agent using several methods:
 
-- **Agent log collection (recommended):** Configure the Datadog Agent to tail BentoML log files. See the [BentoML documentation][12] for more details.
+- **Agent log collection (recommended)**: Configure the Datadog Agent to tail BentoML log files. See the [BentoML documentation][12] for more details.
 
 **For host-based Agents:**
 
