@@ -42,7 +42,7 @@ admission_webhooks_response_duration_count 108
 admission_webhooks_webhooks_received 300
 # HELP admission_webhooks_image_resolution_attempts Number of image resolution attempts
 # TYPE admission_webhooks_image_resolution_attempts counter
-admission_webhooks_image_resolution_attempts{registry="gcr.io/datadoghq",repository="dd-lib-python-init",digest_resolution="enabled",outcome="sha256:test"}
+admission_webhooks_image_resolution_attempts{registry="gcr.io/datadoghq",repository="dd-lib-python-init",digest_resolution="enabled",outcome="sha256:test"} 1
 # HELP aggregator__dogstatsd_contexts Count the number of dogstatsd contexts in the aggregator
 # TYPE aggregator__dogstatsd_contexts gauge
 aggregator__dogstatsd_contexts 1
