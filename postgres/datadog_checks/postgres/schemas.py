@@ -46,38 +46,70 @@ class SchemaCollector(ABC):
         self._collection_started_at = None
         self._collection_payloads_count = 0
         self._queued_rows = []
+        self._total_rows_count = 0
 
     def collect_schemas(self) -> bool:
+        """
+        Collects and submits all applicable schema metadata to the agent.
+        Returns False if the previous collection was still in progress.
+        """
         if self._collection_started_at is not None:
             return False
-        self._collection_started_at = time.time() * 1000
-        databases = self._get_databases()
-        for database in databases:
-            with self._get_cursor(database) as cursor:
-                next = self._get_next(cursor)
-                while next:
-                    self._queued_rows.append(self._map_row(database, next))
+        status = "success"
+        try:
+            self._collection_started_at = int(time.time() * 1000)
+            databases = self._get_databases()
+            for database in databases:
+                with self._get_cursor(database) as cursor:
                     next = self._get_next(cursor)
-                    is_last_payload = database is databases[-1] and next is None
-                    self.maybe_flush(is_last_payload)
+                    while next:
+                        self._queued_rows.append(self._map_row(database, next))
+                        self._total_rows_count += 1
+                        next = self._get_next(cursor)
+                        is_last_payload = database is databases[-1] and next is None
+                        self.maybe_flush(is_last_payload)
 
-        self._reset()
+        except Exception as e:
+            status = "error"
+            self._log.error("Error collecting schema metadata: %s", e)
+        finally:
+            self._collection_started_at = None
+
+            self._check.histogram(
+                "dd.postgres.schema.time",
+                (time.time() - self._collection_started_at) * 1000,
+                tags=self._check.tags + ["status:" + status],
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+            self._check.gauge(
+                "dd.postgres.schema.tables_count",
+                self._total_rows_count,
+                tags=self._check.tags + ["status:" + status],
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+
+            self._reset()
         return True
+
+    @property
+    def base_event(self):
+        return {
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
+            "agent_version": datadog_agent.get_version(),
+            "collection_interval": self._config.collection_interval,
+            "dbms_version": self._check.version,
+            "tags": self._check.tags,
+            "cloud_metadata": self._check.cloud_metadata,
+            "collection_started_at": self._collection_started_at,
+        }
 
     def maybe_flush(self, is_last_payload):
         if len(self._queued_rows) > 10 or is_last_payload:
-            event = {
-                "host": self._check.reported_hostname,
-                "agent_version": datadog_agent.get_version(),
-                "dbms": "postgres",
-                "kind": "pg_databases",
-                "collection_interval": self._config.collection_interval,
-                "dbms_version": self._check.version,
-                "tags": self._check.tags,
-                "cloud_metadata": self._check.cloud_metadata,
-                "metadata": self._queued_rows,
-                "collection_started_at": self._collection_started_at,
-            }
+            event = self.base_event.copy()
+            event["metadata"] = self._queued_rows
             self._collection_payloads_count += 1
             if is_last_payload:
                 event["collection_payloads_count"] = self._collection_payloads_count
@@ -264,6 +296,14 @@ class PostgresSchemaCollector(SchemaCollector):
 
     def collect_schemas(self):
         pass
+
+    @property
+    def base_event(self):
+        return {
+            **super().base_event,
+            "dbms": "postgres",
+            "kind": "pg_databases",
+        }
 
     def _get_databases(self):
         with self._check._get_main_db() as conn:
