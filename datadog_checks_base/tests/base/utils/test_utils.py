@@ -10,8 +10,7 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
-from datadog_checks.base.utils.containers import freeze, hash_mutable, hash_mutable_stable, iter_unique
-from datadog_checks.base.utils.hashing import HashMethod
+from datadog_checks.base.utils.containers import hash_mutable, hash_mutable_stable, iter_unique
 from datadog_checks.base.utils.limiter import Limiter
 from datadog_checks.base.utils.secrets import SecretsSanitizer
 
