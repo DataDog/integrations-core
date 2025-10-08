@@ -5,33 +5,85 @@ from __future__ import annotations
 
 import argparse
 import json
-from base64 import b64decode, b64encode
+import socket
+import sys
+from base64 import b64decode
 from contextlib import closing
 from http.client import HTTPConnection
-from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 def capture(*, record_file: str, port: int) -> None:
-    class RequestHandler(BaseHTTPRequestHandler):
-        def do_PUT(self):
-            content_length = int(self.headers['Content-Length'])
-            body = b64encode(self.rfile.read(content_length)).decode('ascii')
-
-            record = json.dumps(
-                {'path': self.path, 'body': body, 'headers': dict(self.headers.items())}, separators=(',', ':')
-            )
-            with open(record_file, 'a', encoding='utf-8') as f:
-                f.write(f'{record}\n')
-
-            self.log_request(200, content_length)
-            self.send_response_only(200)
-            self.send_header('Server', self.version_string())
-            self.send_header('Date', self.date_time_string())
-            self.end_headers()
-            self.wfile.write(b'OK')
-
-    httpd = HTTPServer(('', port), RequestHandler)
-    httpd.serve_forever()
+    """Minimal socket-based capture server"""
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind(('', port))
+    server_socket.listen(5)
+    
+    print(f"[SOCKET] Starting capture server on port {port}", file=sys.stderr)
+    
+    try:
+        while True:
+            client_socket, address = server_socket.accept()
+            print(f"[SOCKET] Connection from {address}", file=sys.stderr)
+            
+            try:
+                # Read the request
+                request_data = b''
+                while True:
+                    chunk = client_socket.recv(4096)
+                    if not chunk:
+                        break
+                    request_data += chunk
+                    # Simple check: if we have headers and body, we're done
+                    if b'\r\n\r\n' in request_data:
+                        # Parse Content-Length
+                        headers_end = request_data.index(b'\r\n\r\n')
+                        headers = request_data[:headers_end].decode('latin-1')
+                        body_start = headers_end + 4
+                        
+                        content_length = 0
+                        for line in headers.split('\r\n'):
+                            if line.lower().startswith('content-length:'):
+                                content_length = int(line.split(':', 1)[1].strip())
+                        
+                        # Check if we have the full body
+                        if len(request_data) >= body_start + content_length:
+                            break
+                
+                # Parse request
+                headers_end = request_data.index(b'\r\n\r\n')
+                headers_part = request_data[:headers_end].decode('latin-1')
+                body = request_data[headers_end + 4:]
+                
+                # Parse first line for path
+                first_line = headers_part.split('\r\n')[0]
+                method, path, _ = first_line.split(' ', 2)
+                
+                # Parse headers
+                headers_dict = {}
+                for line in headers_part.split('\r\n')[1:]:
+                    if ':' in line:
+                        key, value = line.split(':', 1)
+                        headers_dict[key.strip()] = value.strip()
+                
+                # Print request details
+                print(f"[SOCKET] {method} {path}", file=sys.stderr)
+                print(f"[SOCKET] Headers: {headers_dict}", file=sys.stderr)
+                print(f"[SOCKET] Body ({len(body)} bytes): {body[:200]}...", file=sys.stderr)
+                
+                # Send response
+                response = b'HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK'
+                client_socket.sendall(response)
+                
+            except Exception as e:
+                print(f"[SOCKET] Error handling request: {e}", file=sys.stderr)
+            finally:
+                client_socket.close()
+                
+    except KeyboardInterrupt:
+        print("\n[SOCKET] Shutting down", file=sys.stderr)
+    finally:
+        server_socket.close()
 
 
 def replay(*, record_file: str, port: int) -> None:
@@ -42,7 +94,7 @@ def replay(*, record_file: str, port: int) -> None:
             body = b64decode(record['body'])
             conn.request('PUT', path, body=body, headers=record['headers'])
             response = conn.getresponse()
-            response.read() # Needs to be done to prevent ResponseNotReady.
+            response.read()  # Needs to be done to prevent ResponseNotReady.
             print(response.status, response.reason)
 
 
