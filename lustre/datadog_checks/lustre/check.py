@@ -37,6 +37,8 @@ def _get_stat_type(suffix: str, unit: str) -> str:
     """
     if suffix == 'count':
         return 'count'
+    elif suffix == 'hist':
+        return 'histogram'
     elif unit in RATE_UNITS:
         return 'rate'
     else:
@@ -269,10 +271,6 @@ class LustreCheck(AgentCheck):
             if suffix == 'samples':
                 suffix = 'count'
             if suffix == 'unit':
-                continue
-            if suffix == 'hist':
-                # TODO: Handle histogram metrics if needed
-                self.log.debug("Histograms are currently not supported. Ignoring %s", f"job_stats.{name}")
                 continue
             metric_type = _get_stat_type(suffix, values['unit'])
             self._submit(f'job_stats.{name}.{suffix}', value, metric_type, tags=tags)
@@ -586,7 +584,7 @@ class LustreCheck(AgentCheck):
         self.log.debug('Fetching changelog from index %s to %s for target %s', start_index, end_index, target)
         return self._run_command('lfs', 'changelog', target, start_index, end_index, sudo=True)
 
-    def _submit(self, name: str, value: Union[int, float], metric_type: str, tags: List[str]) -> None:
+    def _submit(self, name: str, value: Union[int, float, Dict[str, Any]], metric_type: str, tags: List[str]) -> None:
         """
         Submits a single metric.
         """
@@ -597,5 +595,10 @@ class LustreCheck(AgentCheck):
         elif metric_type == 'count':
             self.monotonic_count(name, value, tags=tags)
         elif metric_type == 'histogram':
-            self.log.debug("Histograms are currently not supported. Ignoring %s", f"{name}")
-            return
+            if not isinstance(value, Dict):
+                self.log.debug("Unexpected value for metric type histogram: %s", value)
+            cumulative_count = 0
+            for bucket, count in value.items():
+                cumulative_count += count
+                self.monotonic_count(name, cumulative_count, tags=tags+[f'upper_bound:{bucket}'])
+            self.monotonic_count(name, cumulative_count, tags=tags+['upper_bound:+Inf'])
