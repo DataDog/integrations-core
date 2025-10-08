@@ -365,13 +365,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "second"
-                                                }
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -419,13 +413,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1 / query2",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "second"
-                                                }
-                                            }
+                                            "formula": "query1 / query2"
                                         }
                                     ],
                                     "queries": [
@@ -478,13 +466,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1 / query2",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "second"
-                                                }
-                                            }
+                                            "formula": "query1 / query2"
                                         }
                                     ],
                                     "queries": [
