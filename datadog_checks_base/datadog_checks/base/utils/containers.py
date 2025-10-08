@@ -68,7 +68,7 @@ def hash_mutable(m):
     return hash(freeze(m))
 
 
-def hash_mutable_stable(m: Any, length: int = 32) -> str:
+def hash_mutable_stable(m: Any, length: int = 32, secure: bool = True) -> str:
     """
     This method provides a way of hashing a mutable object ensuring that the same object always
     provides the same hash.
@@ -76,15 +76,15 @@ def hash_mutable_stable(m: Any, length: int = 32) -> str:
     Should be used instead of `hash_mutable` when we need to ensure that hashes are
     respected even between different python processes.
 
-    The returned string is the md5 of the frozen object. If you need a shorter hash, you can
-    use the `length` parameter to decide the length of the hash.
-
-    Important: This method is not meant to be used for security purposes.
+    By default, the method returns a secure hash using the fips compliant sha256 algorithm. If security is not
+    a concern when obtaining the hash, set `secure` to False to use the blake2b/s algorightms for
+    good performance and security but not fips compliant.
     """
-    import hashlib
+    from datadog_checks.base.utils.hashing import HashMethod
 
-    frozen_str = str(freeze(m))
-    return hashlib.md5(frozen_str.encode()).hexdigest()[:length]
+    algorithm = HashMethod.secure() if secure else HashMethod.fast()
+
+    return algorithm(str(freeze(m)).encode()).hexdigest()[:length]
 
 
 def iter_unique(*iterables):
