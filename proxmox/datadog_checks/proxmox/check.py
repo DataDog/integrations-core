@@ -298,6 +298,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 vm_id = resource.get('vmid')
                 hostname = self._get_vm_hostname(vm_id, resource_name, node)
             elif resource_type_remapped == NODE_RESOURCE:
+                resource_tags.add('proxmox_type:host')
                 hostname = node
 
             resource_val = {
