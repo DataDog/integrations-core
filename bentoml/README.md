@@ -69,7 +69,7 @@ BentoML logs can be collected by the Datadog Agent using several methods:
 **Other log shipping options**:
 
 - **Fluent Bit**: Forward logs to Datadog using [Fluent Bit][13].
-- **OTLP:** Send logs to the Datadog Agent using the [OpenTelemetry Protocol (OTLP)][14].
+- **OTLP**: Send logs to the Datadog Agent using the [OpenTelemetry Protocol (OTLP)][14].
 
 Choose the log collection method that best fits your environment and operational needs.
 
