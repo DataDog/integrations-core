@@ -145,6 +145,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             url = f"{self.config.proxmox_server}/nodes/{node}/qemu/{vm_id}/agent/get-host-name"
             hostname_response = self.http.get(url)
             hostname_json = hostname_response.json()
+            hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", vm_name)
         except (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError, AttributeError) as e:
             self.log.info(
                 "Failed to get hostname for vm %s on node %s; endpoint: %s; %s",
@@ -154,8 +155,6 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 e,
             )
             hostname = vm_name
-            return hostname
-        hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", vm_name)
         return hostname
 
     def _create_dd_event_for_task(self, task, node_name):
