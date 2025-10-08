@@ -600,5 +600,5 @@ class LustreCheck(AgentCheck):
             cumulative_count = 0
             for bucket, count in value.items():
                 cumulative_count += count
-                self.monotonic_count(name, cumulative_count, tags=tags+[f'upper_bound:{bucket}'])
-            self.monotonic_count(name, cumulative_count, tags=tags+['upper_bound:+Inf'])
+                self.monotonic_count(name, cumulative_count, tags=tags + [f'upper_bound:{bucket}'])
+            self.monotonic_count(name, cumulative_count, tags=tags + ['upper_bound:+Inf'])
