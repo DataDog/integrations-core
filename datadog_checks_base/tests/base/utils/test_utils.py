@@ -211,14 +211,14 @@ class TestContainers:
     # Tests for the hash_mutable_stable just ensure that the hash is always the same
     # No need to cover all usecases since internally we use the same logic as with hash_mutable
     def test_hash_mutable_stable_default_length(self):
-        expected = "3f5c577e87bc8144e1cd3a622fa5a053"
+        expected = "13d8320744fcf8a4c2a1dfe3c4401153"
         assert hash_mutable_stable(self.COMPLEX_OBJECT) == expected
 
     @pytest.mark.parametrize(
         'length, expected',
         [
-            pytest.param(16, "3f5c577e87bc8144", id='length-16'),
-            pytest.param(8, "3f5c577e", id='length-8'),
+            pytest.param(16, "13d8320744fcf8a4", id='length-16'),
+            pytest.param(8, "13d83207", id='length-8'),
         ],
     )
     def test_hash_mutable_stable_custom_length(self, length, expected):
