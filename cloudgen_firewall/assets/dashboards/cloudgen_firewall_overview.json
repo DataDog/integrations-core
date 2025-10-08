@@ -112,6 +112,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -125,12 +126,22 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs service:*"
+                                                "query": "source:barracuda_cloudgen_logs"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@sub_component",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -3514,7 +3525,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 80,
+                "y": 0,
                 "width": 12,
                 "height": 8,
                 "is_column_break": true
@@ -3878,7 +3889,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 88,
+                "y": 8,
                 "width": 12,
                 "height": 8
             }
@@ -4299,7 +4310,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 96,
+                "y": 16,
                 "width": 12,
                 "height": 9
             }
@@ -4658,7 +4669,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 105,
+                "y": 25,
                 "width": 12,
                 "height": 8
             }
@@ -5010,7 +5021,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 113,
+                "y": 33,
                 "width": 12,
                 "height": 8
             }
@@ -5362,7 +5373,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 121,
+                "y": 41,
                 "width": 12,
                 "height": 8
             }
@@ -5715,7 +5726,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 129,
+                "y": 49,
                 "width": 12,
                 "height": 8
             }
@@ -5996,7 +6007,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 137,
+                "y": 57,
                 "width": 12,
                 "height": 9
             }
@@ -6350,7 +6361,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 146,
+                "y": 66,
                 "width": 12,
                 "height": 11
             }
