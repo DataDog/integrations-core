@@ -211,32 +211,9 @@ class TestContainers:
 
     # Tests for the hash_mutable_stable just ensure that the hash is always the same
     # No need to cover all usecases since internally we use the same logic as with hash_mutable
-    def test_hash_mutable_stable_default_length(self):
+    def test_hash_mutable_stable(self):
         expected = "13d8320744fcf8a4c2a1dfe3c4401153"
         assert hash_mutable_stable(self.COMPLEX_OBJECT) == expected
-
-    @pytest.mark.parametrize(
-        'length, expected',
-        [
-            pytest.param(16, "13d8320744fcf8a4", id='length-16'),
-            pytest.param(8, "13d83207", id='length-8'),
-        ],
-    )
-    def test_hash_mutable_stable_custom_length(self, length, expected):
-        """Test custom lengths."""
-        assert hash_mutable_stable(self.COMPLEX_OBJECT, length=length) == expected
-
-    def test_hash_mutable_stable_not_secure(self):
-        # This has has been calculated using blake
-        fast_method = HashMethod.fast()
-        expected = fast_method(str(freeze(self.COMPLEX_OBJECT)).encode()).hexdigest()[:32]
-        assert hash_mutable_stable(self.COMPLEX_OBJECT, length=32, secure=False) == expected
-
-    def test_hash_mutable_stable_not_secure_with_fips(self):
-        with mock.patch('datadog_checks.base.utils.fips.is_enabled', return_value=True):
-            method = HashMethod.secure()
-            expected = method(str(freeze(self.COMPLEX_OBJECT)).encode()).hexdigest()[:32]
-            assert hash_mutable_stable(self.COMPLEX_OBJECT, length=32, secure=False) == expected
 
 
 class TestBytesUnicode:

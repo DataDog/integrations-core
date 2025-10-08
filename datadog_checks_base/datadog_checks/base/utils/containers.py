@@ -68,23 +68,15 @@ def hash_mutable(m):
     return hash(freeze(m))
 
 
-def hash_mutable_stable(m: Any, length: int = 32, secure: bool = True) -> str:
+def hash_mutable_stable(m: Any) -> str:
     """
     This method provides a way of hashing a mutable object ensuring that the same object always
     provides the same hash even in different processes.
-
-    The hashing algorithm is chosen following the following rules:
-    - If FIPS is enabled, the hashing algorithm will always be sha256.
-    - If FIPS is not enabled, the algorithm is chosen based on the `secure` parameter:
-      - If `secure` is True, the hashing algorithm will be sha256.
-      - If `secure` is False, the hashing algorithm will be blake2b/s.
     """
-    from datadog_checks.base.utils.fips import is_enabled
     from datadog_checks.base.utils.hashing import HashMethod
 
-    algorithm = HashMethod.secure() if secure or is_enabled() else HashMethod.fast()
-
-    return algorithm(str(freeze(m)).encode()).hexdigest()[:length]
+    algorithm = HashMethod.secure()
+    return algorithm(str(freeze(m)).encode()).hexdigest()
 
 
 def iter_unique(*iterables):
