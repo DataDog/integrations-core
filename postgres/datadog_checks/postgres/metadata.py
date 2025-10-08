@@ -12,6 +12,8 @@ from typing import Dict, List, Union
 import psycopg
 from psycopg.rows import dict_row
 
+from datadog_checks.postgres.schemas import PostgresSchemaCollector
+
 try:
     import datadog_agent
 except ImportError:
@@ -258,6 +260,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_pg_settings_enabled = config.collect_settings.enabled
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
+        self._schema_collector = PostgresSchemaCollector(check) if config.collect_schemas.enabled else None
         self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
         self._compiled_patterns_cache = {}

@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
 import contextlib
 import time
+from abc import ABC, abstractmethod
 from typing import TypedDict
 
 import orjson as json
@@ -14,12 +14,14 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+
 class DatabaseInfo(TypedDict):
     description: str
     name: str
     id: str
     encoding: str
     owner: str
+
 
 # The schema collector sends lists of DatabaseObjects to the agent
 # The format is for backwards compatibility with the current backend
@@ -101,7 +103,7 @@ class SchemaCollector(ABC):
         Maps a cursor row to a dict that matches the schema expected by DBM.
         """
         return {
-            **database, 
+            **database,
         }
 
 
@@ -163,8 +165,6 @@ WHERE  attnum > 0
 """
 
 
-
-
 PG_INDEXES_QUERY = """
 SELECT
     c.relname AS name,
@@ -224,22 +224,24 @@ GROUP BY pi.inhparent
 """
 
 
-
 class TableObject(TypedDict):
     id: str
     name: str
     columns: list
     indexes: list
     foreign_keys: list
-    
+
+
 class SchemaObject(TypedDict):
     id: str
     name: str
     owner: str
     tables: list[TableObject]
 
+
 class PostgresDatabaseObject(DatabaseObject):
     schemas: list[SchemaObject]
+
 
 DATABASE_INFORMATION_QUERY = """
 SELECT db.oid                        AS id,
@@ -254,6 +256,7 @@ FROM   pg_catalog.pg_database db
          ON datdba = a.oid
         WHERE 1=1
 """
+
 
 class PostgresSchemaCollector(SchemaCollector):
     def __init__(self, check):
@@ -282,7 +285,8 @@ class PostgresSchemaCollector(SchemaCollector):
                 columns_query = COLUMNS_QUERY
                 indexes_query = PG_INDEXES_QUERY
                 constraints_query = PG_CONSTRAINTS_QUERY
-                partitions_ctes = f"""
+                partitions_ctes = (
+                    f"""
                     ,
                     partition_keys AS (
                         {PARTITION_KEY_QUERY}
@@ -290,17 +294,28 @@ class PostgresSchemaCollector(SchemaCollector):
                     num_partitions AS (
                         {NUM_PARTITIONS_QUERY}
                     )
-                """ if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9" else ""
-                partition_joins = f"""
+                """
+                    if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+                    else ""
+                )
+                partition_joins = (
+                    """
                     LEFT JOIN partition_keys ON tables.table_id = partition_keys.table_id
                     LEFT JOIN num_partitions ON tables.table_id = num_partitions.table_id
-                """ if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9" else ""
-                parition_selects = f"""
-                , 
+                """
+                    if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+                    else ""
+                )
+                parition_selects = (
+                    """
+                ,
                     partition_keys.partition_key,
                     num_partitions.num_partitions
-                """ if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9" else ""
-                
+                """
+                    if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+                    else ""
+                )
+
                 limit = self._config.max_tables or 1_000_000
                 query = f"""
                     WITH
@@ -325,7 +340,8 @@ class PostgresSchemaCollector(SchemaCollector):
                         tables.table_id, tables.table_name,
                         array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
                         array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
-                        array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL) as foreign_keys
+                        array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
+                          as foreign_keys
                         {parition_selects}
                     FROM schemas
                         LEFT JOIN tables ON schemas.schema_id = tables.schema_id
@@ -378,7 +394,7 @@ class PostgresSchemaCollector(SchemaCollector):
                         "indexes": cursor_row["indexes"],
                         "foreign_keys": cursor_row["foreign_keys"],
                     }
-                ]
+                ],
             }
         ]
         return object

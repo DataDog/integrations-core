@@ -132,6 +132,7 @@ def test_columns(dbm_instance, integration_check):
                 assert row['columns']
                 assert row['columns'][0]['name']
 
+
 def test_indexes(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     check.version = POSTGRES_VERSION
@@ -150,11 +151,10 @@ def test_indexes(dbm_instance, integration_check):
                 assert row['indexes']
                 assert row['indexes'][0]['name']
 
+
 def test_collect_schemas(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
     collector.collect_schemas()
-
-    
