@@ -7,14 +7,14 @@ from __future__ import annotations
 import contextlib
 import time
 from abc import ABC, abstractmethod
-from typing import TypedDict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
+
 import orjson as json
 from psycopg.rows import dict_row
 
 if TYPE_CHECKING:
-    from datadog_checks.postgres import PostgreSql
     from datadog_checks.base import AgentCheck
+    from datadog_checks.postgres import PostgreSql
 
 from datadog_checks.postgres.version_utils import VersionUtils
 
@@ -47,7 +47,7 @@ class SchemaCollector(ABC):
     def __init__(self, check: AgentCheck):
         self._check = check
         self._log = check.log
-        self._config = check._config.collect_schemas        
+        self._config = check._config.collect_schemas
 
         self._reset()
 
@@ -304,11 +304,10 @@ FROM   pg_catalog.pg_database db
 
 
 class PostgresSchemaCollector(SchemaCollector):
-    def __init__(self, check: PostgreSql):        
+    def __init__(self, check: PostgreSql):
         super().__init__(check)
         self._check = check
 
-    
     @property
     def base_event(self):
         return {
@@ -323,14 +322,14 @@ class PostgresSchemaCollector(SchemaCollector):
                 query = DATABASE_INFORMATION_QUERY
                 for exclude_regex in self._config.exclude_databases:
                     query += " AND datname !~ '{}'".format(exclude_regex)
-                for include_regex in self._config.include_databases:
-                    query += " AND datname ~ '{}'".format(include_regex)
-                
+                if self._config.include_databases:
+                    query += f" AND ({' OR '.join(f"datname ~ '{include_regex}'" for include_regex in self._config.include_databases)})"
+
                 # Autodiscovery trumps exclude and include
                 autodiscovery_databases = self._check.autodiscovery.get_items()
                 if autodiscovery_databases:
                     query += " AND datname IN ({})".format(", ".join(f"'{db}'" for db in autodiscovery_databases))
-                
+
                 cursor.execute(query)
                 return cursor.fetchall()
 
@@ -419,10 +418,12 @@ class PostgresSchemaCollector(SchemaCollector):
         query = SCHEMA_QUERY
         for exclude_regex in self._config.exclude_schemas:
             query += " AND nspname !~ '{}'".format(exclude_regex)
-        for include_regex in self._config.include_schemas:
-            query += " AND nspname ~ '{}'".format(include_regex)
+        if self._config.include_schemas:
+            query += f" AND ({' OR '.join(f"nspname ~ '{include_regex}'" for include_regex in self._config.include_schemas)})"            
         if self._check._config.ignore_schemas_owned_by:
-            query += " AND nspowner :: regrole :: text not IN ({})".format(", ".join(f"'{owner}'" for owner in self._check._config.ignore_schemas_owned_by))
+            query += " AND nspowner :: regrole :: text not IN ({})".format(
+                ", ".join(f"'{owner}'" for owner in self._check._config.ignore_schemas_owned_by)
+            )
         return query
 
     def _get_tables_query(self):
@@ -431,9 +432,9 @@ class PostgresSchemaCollector(SchemaCollector):
         else:
             query = PG_TABLES_QUERY_V10_PLUS
         for exclude_regex in self._config.exclude_tables:
-            query += " AND relname !~ '{}'".format(exclude_regex)
-        for include_regex in self._config.include_tables:
-            query += " AND relname ~ '{}'".format(include_regex)
+            query += " AND c.relname !~ '{}'".format(exclude_regex)
+        if self._config.include_tables:
+            query += f" AND ({' OR '.join(f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables)})"
         return query
 
     def _get_next(self, cursor):
@@ -441,25 +442,36 @@ class PostgresSchemaCollector(SchemaCollector):
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
+        # Map the cursor row to the expected schema, and strip out None values
         object["schemas"] = [
             {
-                "id": str(cursor_row.get("schema_id")),
-                "name": cursor_row.get("schema_name"),
-                "owner": cursor_row.get("schema_owner"),
-                "tables": [
-                    {
-                        "id": str(cursor_row.get("table_id")),
-                        "name": cursor_row.get("table_name"),
-                        "owner": cursor_row.get("owner"),
-                        # The query can create duplicates of the joined tables
-                        "columns": list({v and v['name']:v for v in cursor_row.get("columns") or []}.values()) ,
-                        "indexes": list({v and v['name']:v for v in cursor_row.get("indexes") or []}.values()) ,
-                        "foreign_keys": list({v and v['name']:v for v in cursor_row.get("foreign_keys") or []}.values()) ,
-                        "toast_table": cursor_row.get("toast_table"),
-                        "num_partitions": cursor_row.get("num_partitions"),
-                        "partition_key": cursor_row.get("partition_key"),
-                    }
-                ],
+                k: v
+                for k, v in {
+                    "id": str(cursor_row.get("schema_id")),
+                    "name": cursor_row.get("schema_name"),
+                    "owner": cursor_row.get("schema_owner"),
+                    "tables": [
+                        {
+                            k: v
+                            for k, v in {
+                                "id": str(cursor_row.get("table_id")),
+                                "name": cursor_row.get("table_name"),
+                                "owner": cursor_row.get("owner"),
+                                # The query can create duplicates of the joined tables
+                                "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values()),
+                                "indexes": list({v and v['name']: v for v in cursor_row.get("indexes") or []}.values()),
+                                "foreign_keys": list(
+                                    {v and v['name']: v for v in cursor_row.get("foreign_keys") or []}.values()
+                                ),
+                                "toast_table": cursor_row.get("toast_table"),
+                                "num_partitions": cursor_row.get("num_partitions"),
+                                "partition_key": cursor_row.get("partition_key"),
+                            }.items()
+                            if v is not None
+                        }
+                    ],
+                }.items()
+                if v is not None
             }
         ]
         return object
