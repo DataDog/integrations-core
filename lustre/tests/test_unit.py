@@ -623,3 +623,30 @@ def test_changelog_logging(caplog, mock_lustre_commands):
         assert 'Could not retrieve log cursor, assuming initialization' in log_text
         assert 'Fetching changelog from index 0 to 100' in log_text
         assert 'Collecting changelogs for:' in log_text
+
+
+@pytest.mark.parametrize(
+    'value, expected',
+    [
+        pytest.param({}, [(0, '+Inf')], id='empty dict'),
+        pytest.param(
+            {'32': 2, '4K': 1, '16K': 1, '32K': 2}, [(2, '32'), (3, '4K'), (4, '16K'), (6, '32K')], id='normal dict'
+        ),
+        pytest.param('ok', [], id='not a dict'),
+    ],
+)
+def test_histogram_submission(aggregator, mock_lustre_commands, caplog, value, expected):
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+    }
+    with mock_lustre_commands(mapping):
+        check = LustreCheck('lustre', {}, [{}])
+        with caplog.at_level(logging.DEBUG):
+            check._submit('test.hist', value, 'histogram', [])
+        if not expected:
+            assert "Unexpected value for metric type histogram" in caplog.text
+        for value, upper_bound in expected:
+            aggregator.assert_metric(
+                'lustre.test.hist', value, tags=[f'upper_bound:{upper_bound}'], metric_type=aggregator.MONOTONIC_COUNT
+            )

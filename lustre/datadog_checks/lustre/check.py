@@ -597,6 +597,7 @@ class LustreCheck(AgentCheck):
         elif metric_type == 'histogram':
             if not isinstance(value, Dict):
                 self.log.debug("Unexpected value for metric type histogram: %s", value)
+                return
             cumulative_count = 0
             for bucket, count in value.items():
                 cumulative_count += count
