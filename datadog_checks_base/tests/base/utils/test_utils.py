@@ -230,13 +230,13 @@ class TestContainers:
         # This has has been calculated using blake
         fast_method = HashMethod.fast()
         expected = fast_method(str(freeze(self.COMPLEX_OBJECT)).encode()).hexdigest()[:32]
-        assert hash_mutable_stable(self.COMPLEX_OBJECT, secure=False) == expected
+        assert hash_mutable_stable(self.COMPLEX_OBJECT, length=32, secure=False) == expected
 
     def test_hash_mutable_stable_not_secure_with_fips(self):
         with mock.patch('datadog_checks.base.utils.fips.is_enabled', return_value=True):
             method = HashMethod.secure()
             expected = method(str(freeze(self.COMPLEX_OBJECT)).encode()).hexdigest()[:32]
-            assert hash_mutable_stable(self.COMPLEX_OBJECT, secure=False) == expected
+            assert hash_mutable_stable(self.COMPLEX_OBJECT, length=32, secure=False) == expected
 
 
 class TestBytesUnicode:
