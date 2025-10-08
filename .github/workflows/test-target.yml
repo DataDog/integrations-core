@@ -117,6 +117,8 @@ jobs:
       # Capture traces for a separate job to do the submission
       TRACE_CAPTURE_BASE_DIR: "trace-captures"
       TRACE_CAPTURE_LOG: "trace-captures/output.log"
+      # ddtrace debug log file
+      DDTRACE_DEBUG_LOG: "trace-captures/ddtrace_debug.log"
       # Prefix for artifact names when using minimum base package
       MINIMUM_BASE_PACKAGE_PREFIX: "${{ inputs.minimum-base-package && 'minimum-base-package-' || '' }}"
 
@@ -233,9 +235,12 @@ jobs:
 
     - name: Run Unit & Integration tests
       if: inputs.latest != true && inputs.minimum-base-package != true
+      timeout-minutes: 30
       env:
         # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
+        DD_TRACE_DEBUG: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && 'true' || 'false' }}"
+        DD_TRACE_LOG_FILE: "${{ env.DDTRACE_DEBUG_LOG }}"
       run: |
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
@@ -336,10 +341,13 @@ jobs:
 
     - name: Run E2E tests for the latest version
       if: inputs.latest
+      timeout-minutes: 30
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
         # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
+        DD_TRACE_DEBUG: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && 'true' || 'false' }}"
+        DD_TRACE_LOG_FILE: "${{ env.DDTRACE_DEBUG_LOG }}"
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
         # This is done to avoid ddev from interpreting the arguments as environments
@@ -374,9 +382,27 @@ jobs:
           ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- {0} -k "not fips"', inputs.pytest-args) || '-- all -k "not fips"' }}
         fi
 
-    - name: View trace log
+    - name: View trace capture server log
       if: inputs.repo == 'core' && always()
       run: cat "${{ env.TRACE_CAPTURE_LOG }}"
+
+    - name: View ddtrace debug log
+      if: inputs.repo == 'core' && always()
+      run: |
+        if [ -f "${{ env.DDTRACE_DEBUG_LOG }}" ]; then
+          cat "${{ env.DDTRACE_DEBUG_LOG }}"
+        else
+          echo "No ddtrace debug log found"
+        fi
+
+    - name: Upload debug logs if timeout occurred
+      if: inputs.repo == 'core' && (failure() || cancelled())
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}debug-logs-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
+        path: |
+          ${{ env.TRACE_CAPTURE_LOG }}
+          ${{ env.DDTRACE_DEBUG_LOG }}
 
     - name: Upload captured traces
       if: inputs.repo == 'core' && always()
