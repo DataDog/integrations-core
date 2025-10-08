@@ -78,11 +78,14 @@ def hash_mutable_stable(m: Any, length: int = 32, secure: bool = True) -> str:
 
     By default, the method returns a secure hash using the fips compliant sha256 algorithm. If security is not
     a concern when obtaining the hash, set `secure` to False to use the blake2b/s algorightms for
-    good performance and security but not fips compliant.
+    good performance and security but not FIPS compliant.
+
+    If FIPS is enabled, the hashing algorithm will always be sha256.
     """
+    from datadog_checks.base.utils.fips import is_enabled
     from datadog_checks.base.utils.hashing import HashMethod
 
-    algorithm = HashMethod.secure() if secure else HashMethod.fast()
+    algorithm = HashMethod.secure() if secure or is_enabled() else HashMethod.fast()
 
     return algorithm(str(freeze(m)).encode()).hexdigest()[:length]
 

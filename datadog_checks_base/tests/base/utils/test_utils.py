@@ -10,7 +10,8 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
-from datadog_checks.base.utils.containers import hash_mutable, hash_mutable_stable, iter_unique
+from datadog_checks.base.utils.containers import freeze, hash_mutable, hash_mutable_stable, iter_unique
+from datadog_checks.base.utils.hashing import HashMethod
 from datadog_checks.base.utils.limiter import Limiter
 from datadog_checks.base.utils.secrets import SecretsSanitizer
 
@@ -224,6 +225,18 @@ class TestContainers:
     def test_hash_mutable_stable_custom_length(self, length, expected):
         """Test custom lengths."""
         assert hash_mutable_stable(self.COMPLEX_OBJECT, length=length) == expected
+
+    def test_hash_mutable_stable_not_secure(self):
+        # This has has been calculated using blake
+        fast_method = HashMethod.fast()
+        expected = fast_method(str(freeze(self.COMPLEX_OBJECT)).encode()).hexdigest()[:32]
+        assert hash_mutable_stable(self.COMPLEX_OBJECT, secure=False) == expected
+
+    def test_hash_mutable_stable_not_secure_with_fips(self):
+        with mock.patch('datadog_checks.base.utils.fips.is_enabled', return_value=True):
+            method = HashMethod.secure()
+            expected = method(str(freeze(self.COMPLEX_OBJECT)).encode()).hexdigest()[:32]
+            assert hash_mutable_stable(self.COMPLEX_OBJECT, secure=False) == expected
 
 
 class TestBytesUnicode:
