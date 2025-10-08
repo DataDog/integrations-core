@@ -6,6 +6,8 @@ Get metrics from the external DNS service in real time to visualize and monitor 
 
 For more information about external DNS, see the [Github repo][1].
 
+**Minimum Agent version:** 7.17.0
+
 ## Setup
 
 ### Installation

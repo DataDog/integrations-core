@@ -4,6 +4,8 @@
 
 This check monitors [Nvidia Triton][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.50.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

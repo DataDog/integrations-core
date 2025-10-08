@@ -80,8 +80,10 @@ files:
       default: false
     - name: database_identifier
       description: |
-        Controls how the database is identified. The default value is the resolved hostname for the instance,
-        which respects the `reported_hostname` option.
+        Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+        billable instance.
+
+        The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
 
         This value will be used as-is for the display name of the instance but will be normalized
         when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
@@ -886,6 +888,13 @@ files:
         - name: keep_positional_parameter
           description: |
             Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: replace_bind_parameter
+          description: |
+            Set to `true` to replace bind parameters (e.g. `@p1`) with `?` in your obfuscated SQL statements.
           value:
             type: boolean
             example: false

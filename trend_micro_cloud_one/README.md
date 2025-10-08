@@ -6,6 +6,8 @@
 
 Integrate Trend Micro Cloud One with Datadog to gain insights into endpoint and workload security, file storage security, and network security events using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
+**Minimum Agent version:** 7.69.2
+
 ## Setup
 
 ### Log Collection Overview
@@ -113,7 +115,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
    - **\<port>**: Same `TCP-PORT` configured in [Log Collection][10].
 
    ```bash
-   curl -X POST -k "https://network.<region>.cloudone.trendmicro.com/api/appliances/<appliances-id>/remotesyslogs" --header "api-version: v1" --header "Content-Type: application/json" --header "Authorization: ApiKey <api-key>" --header --data "{\"host\": \"<ip-address>\", \"port\": <port>, \"enabled\": true}"
+   curl -X POST -k "https://network.<region>.cloudone.trendmicro.com/api/appliances/<appliances-id>/remotesyslogs" --header "api-version: v1" --header "Content-Type: application/json" --header "Authorization: ApiKey <api-key>" --data "{\"host\": \"<ip-address>\", \"port\": <port>, \"enabled\": true}"
    ```
 
 9. Repeat the above step for each appliance you want to push to Datadog.

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import TypedDict
+from zipfile import ZipFile
 
 from dotenv import dotenv_values
 from utils import extract_metadata, normalize_project_name
@@ -13,6 +16,10 @@ from utils import extract_metadata, normalize_project_name
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
+
+class WheelSizes(TypedDict):
+    compressed: int
+    uncompressed: int
 
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
@@ -53,6 +60,13 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
         sys.exit(process.returncode)
 
     return process
+
+
+def calculate_wheel_sizes(wheel_path: Path) -> WheelSizes:
+    compressed_size = wheel_path.stat(follow_symlinks=True).st_size
+    with ZipFile(wheel_path) as zf:
+        uncompressed_size = sum(zinfo.file_size for zinfo in zf.infolist())
+    return {'compressed': compressed_size, 'uncompressed': uncompressed_size}
 
 
 def main():
@@ -109,9 +123,14 @@ def main():
 
         # Fetch or build wheels
         command_args = [
-            str(python_path), '-m', 'pip', 'wheel',
-            '-r', str(MOUNT_DIR / 'requirements.in'),
-            '--wheel-dir', str(staged_wheel_dir),
+            str(python_path),
+            '-m',
+            'pip',
+            'wheel',
+            '-r',
+            str(MOUNT_DIR / 'requirements.in'),
+            '--wheel-dir',
+            str(staged_wheel_dir),
             # Temporarily removing extra index urls. See below.
             # '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
         ]
@@ -124,20 +143,36 @@ def main():
         check_process(command_args, env=env_vars)
 
         # Repair wheels
-        check_process([
-            sys.executable, '-u', str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
-            '--source-dir', str(staged_wheel_dir),
-            '--built-dir', str(built_wheels_dir),
-            '--external-dir', str(external_wheels_dir),
-        ])
+        check_process(
+            [
+                sys.executable,
+                '-u',
+                str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
+                '--source-dir',
+                str(staged_wheel_dir),
+                '--built-dir',
+                str(built_wheels_dir),
+                '--external-dir',
+                str(external_wheels_dir),
+            ]
+        )
 
     dependencies: dict[str, tuple[str, str]] = {}
+    sizes: dict[str, WheelSizes] = {}
+
     for wheel_dir in wheels_dir.iterdir():
-        for entry in wheel_dir.iterdir():
-            project_metadata = extract_metadata(entry)
+        for wheel in wheel_dir.iterdir():
+            project_metadata = extract_metadata(wheel)
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
             dependencies[project_name] = project_version
+
+
+            sizes[project_name] = {'version': project_version, **calculate_wheel_sizes(wheel)}
+
+    output_path = MOUNT_DIR / 'sizes.json'
+    with output_path.open('w', encoding='utf-8') as fp:
+        json.dump(sizes, fp, indent=2, sort_keys=True)
 
     final_requirements = MOUNT_DIR / 'frozen.txt'
     with final_requirements.open('w', encoding='utf-8') as f:
