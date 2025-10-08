@@ -1,0 +1,1 @@
+Fixes `disable_innodb_metrics` being read from the wrong config layer
