@@ -241,6 +241,20 @@ class SchemaObject(TypedDict):
 class PostgresDatabaseObject(DatabaseObject):
     schemas: list[SchemaObject]
 
+DATABASE_INFORMATION_QUERY = """
+SELECT db.oid                        AS id,
+       datname                       AS NAME,
+       pg_encoding_to_char(encoding) AS encoding,
+       rolname                       AS owner,
+       description
+FROM   pg_catalog.pg_database db
+       LEFT JOIN pg_catalog.pg_description dc
+              ON dc.objoid = db.oid
+       JOIN pg_roles a
+         ON datdba = a.oid
+        WHERE 1=1
+"""
+
 class PostgresSchemaCollector(SchemaCollector):
     def __init__(self, check):
         super().__init__(check)
@@ -250,14 +264,14 @@ class PostgresSchemaCollector(SchemaCollector):
 
     def _get_databases(self):
         with self._check._get_main_db() as conn:
-            with conn.cursor() as cursor:
-                query = "SELECT datname FROM pg_database WHERE 1=1"
+            with conn.cursor(row_factory=dict_row) as cursor:
+                query = DATABASE_INFORMATION_QUERY
                 for exclude_regex in self._config.exclude_databases:
                     query += " AND datname !~ '{}'".format(exclude_regex)
                 for include_regex in self._config.include_databases:
                     query += " AND datname ~ '{}'".format(include_regex)
                 cursor.execute(query)
-                return [row[0] for row in cursor.fetchall()]
+                return cursor.fetchall()
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name):

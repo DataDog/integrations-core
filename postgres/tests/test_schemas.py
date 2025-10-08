@@ -28,10 +28,11 @@ def test_get_databases(dbm_instance, integration_check):
     collector = PostgresSchemaCollector(check)
 
     databases = collector._get_databases()
-    assert 'postgres' in databases
-    assert 'dogs' in databases
-    assert 'dogs_3' in databases
-    assert 'nope' not in databases
+    datbase_names = [database['name'] for database in databases]
+    assert 'postgres' in datbase_names
+    assert 'dogs' in datbase_names
+    assert 'dogs_3' in datbase_names
+    assert 'nope' not in datbase_names
 
 
 def test_databases_filters(dbm_instance, integration_check):
@@ -40,11 +41,12 @@ def test_databases_filters(dbm_instance, integration_check):
     collector = PostgresSchemaCollector(check)
 
     databases = collector._get_databases()
-    assert 'postgres' in databases
-    assert 'dogs' not in databases
-    assert 'dogs_3' not in databases
-    assert 'dogs_9' in databases
-    assert 'nope' not in databases
+    datbase_names = [database['name'] for database in databases]
+    assert 'postgres' in datbase_names
+    assert 'dogs' not in datbase_names
+    assert 'dogs_3' not in datbase_names
+    assert 'dogs_9' in datbase_names
+    assert 'nope' not in datbase_names
 
 
 def test_get_cursor(dbm_instance, integration_check):
