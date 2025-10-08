@@ -1,12 +1,21 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+from __future__ import annotations
+
 import contextlib
 import time
 from abc import ABC, abstractmethod
 from typing import TypedDict
-
+from typing import TYPE_CHECKING
 import orjson as json
 from psycopg.rows import dict_row
 
-from datadog_checks.postgres.postgres import PostgreSql
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
+    from datadog_checks.base import AgentCheck
+
 from datadog_checks.postgres.version_utils import VersionUtils
 
 try:
@@ -35,10 +44,10 @@ class DatabaseObject(TypedDict):
 
 
 class SchemaCollector(ABC):
-    def __init__(self, check: PostgreSql):
+    def __init__(self, check: AgentCheck):
         self._check = check
         self._log = check.log
-        self._config = check._config.collect_schemas
+        self._config = check._config.collect_schemas        
 
         self._reset()
 
@@ -60,7 +69,11 @@ class SchemaCollector(ABC):
             self._collection_started_at = int(time.time() * 1000)
             databases = self._get_databases()
             for database in databases:
-                with self._get_cursor(database) as cursor:
+                database_name = database['name']
+                if not database_name:
+                    self._check.log("database has no name %v", database)
+                    continue
+                with self._get_cursor(database_name) as cursor:
                     next = self._get_next(cursor)
                     while next:
                         self._queued_rows.append(self._map_row(database, next))
@@ -72,9 +85,8 @@ class SchemaCollector(ABC):
         except Exception as e:
             status = "error"
             self._log.error("Error collecting schema metadata: %s", e)
+            raise e
         finally:
-            self._collection_started_at = None
-
             self._check.histogram(
                 "dd.postgres.schema.time",
                 (time.time() - self._collection_started_at) * 1000,
@@ -100,7 +112,7 @@ class SchemaCollector(ABC):
             "database_instance": self._check.database_identifier,
             "agent_version": datadog_agent.get_version(),
             "collection_interval": self._config.collection_interval,
-            "dbms_version": self._check.version,
+            "dbms_version": str(self._check.version),
             "tags": self._check.tags,
             "cloud_metadata": self._check.cloud_metadata,
             "collection_started_at": self._collection_started_at,
@@ -109,6 +121,7 @@ class SchemaCollector(ABC):
     def maybe_flush(self, is_last_payload):
         if len(self._queued_rows) > 10 or is_last_payload:
             event = self.base_event.copy()
+            event['timestamp'] = int(time.time() * 1000)
             event["metadata"] = self._queued_rows
             self._collection_payloads_count += 1
             if is_last_payload:
@@ -286,17 +299,16 @@ FROM   pg_catalog.pg_database db
               ON dc.objoid = db.oid
        JOIN pg_roles a
          ON datdba = a.oid
-        WHERE 1=1
+        WHERE datname NOT LIKE 'template%'
 """
 
 
 class PostgresSchemaCollector(SchemaCollector):
-    def __init__(self, check):
+    def __init__(self, check: PostgreSql):        
         super().__init__(check)
+        self._check = check
 
-    def collect_schemas(self):
-        pass
-
+    
     @property
     def base_event(self):
         return {
@@ -313,6 +325,12 @@ class PostgresSchemaCollector(SchemaCollector):
                     query += " AND datname !~ '{}'".format(exclude_regex)
                 for include_regex in self._config.include_databases:
                     query += " AND datname ~ '{}'".format(include_regex)
+                
+                # Autodiscovery trumps exclude and include
+                autodiscovery_databases = self._check.autodiscovery.get_items()
+                if autodiscovery_databases:
+                    query += " AND datname IN ({})".format(", ".join(f"'{db}'" for db in autodiscovery_databases))
+                
                 cursor.execute(query)
                 return cursor.fetchall()
 
@@ -403,6 +421,8 @@ class PostgresSchemaCollector(SchemaCollector):
             query += " AND nspname !~ '{}'".format(exclude_regex)
         for include_regex in self._config.include_schemas:
             query += " AND nspname ~ '{}'".format(include_regex)
+        if self._check._config.ignore_schemas_owned_by:
+            query += " AND nspowner :: regrole :: text not IN ({})".format(", ".join(f"'{owner}'" for owner in self._check._config.ignore_schemas_owned_by))
         return query
 
     def _get_tables_query(self):
@@ -423,16 +443,21 @@ class PostgresSchemaCollector(SchemaCollector):
         object = super()._map_row(database, cursor_row)
         object["schemas"] = [
             {
-                "id": str(cursor_row["schema_id"]),
-                "name": cursor_row["schema_name"],
-                "owner": cursor_row["schema_owner"],
+                "id": str(cursor_row.get("schema_id")),
+                "name": cursor_row.get("schema_name"),
+                "owner": cursor_row.get("schema_owner"),
                 "tables": [
                     {
-                        "id": str(cursor_row["table_id"]),
-                        "name": cursor_row["table_name"],
-                        "columns": cursor_row["columns"],
-                        "indexes": cursor_row["indexes"],
-                        "foreign_keys": cursor_row["foreign_keys"],
+                        "id": str(cursor_row.get("table_id")),
+                        "name": cursor_row.get("table_name"),
+                        "owner": cursor_row.get("owner"),
+                        # The query can create duplicates of the joined tables
+                        "columns": list({v and v['name']:v for v in cursor_row.get("columns") or []}.values()) ,
+                        "indexes": list({v and v['name']:v for v in cursor_row.get("indexes") or []}.values()) ,
+                        "foreign_keys": list({v and v['name']:v for v in cursor_row.get("foreign_keys") or []}.values()) ,
+                        "toast_table": cursor_row.get("toast_table"),
+                        "num_partitions": cursor_row.get("num_partitions"),
+                        "partition_key": cursor_row.get("partition_key"),
                     }
                 ],
             }

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures.thread import ThreadPoolExecutor
+import pprint
 from typing import List
 
 import mock
@@ -128,81 +129,82 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
 
     collection_started_at = None
     schema_events = [e for e in dbm_metadata if e['kind'] == 'pg_databases']
+    pprint.pprint(schema_events)
     for i, schema_event in enumerate(schema_events):
-        assert schema_event.get("timestamp") is not None
-        if collection_started_at is None:
-            collection_started_at = schema_event["collection_started_at"]
-        assert schema_event["collection_started_at"] == collection_started_at
+        for mi, _ in enumerate(schema_event['metadata']):
+            assert schema_event.get("timestamp") is not None
+            if collection_started_at is None:
+                collection_started_at = schema_event["collection_started_at"]
+            assert schema_event["collection_started_at"] == collection_started_at
 
-        if i == len(schema_events) - 1:
-            assert schema_event["collection_payloads_count"] == len(schema_events)
-        else:
-            assert "collection_payloads_count" not in schema_event
+            if i == len(schema_events) - 1:
+                assert schema_event["collection_payloads_count"] == len(schema_events)
+            else:
+                assert "collection_payloads_count" not in schema_event
 
-        # there should only be one database, datadog_test
-        database_metadata = schema_event['metadata']
-        assert len(database_metadata) == 1
-        assert 'datadog_test' == database_metadata[0]['name']
+            # there should only be one database, datadog_test
+            database_metadata = schema_event['metadata']
+            assert 'datadog_test' == database_metadata[mi]['name']
 
-        # there should only two schemas, 'public' and 'datadog'. datadog is empty
-        schema = database_metadata[0]['schemas'][0]
-        schema_name = schema['name']
-        assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test', 'hstore']
-        schemas_got.add(schema_name)
-        if schema_name in ['public', 'rdsadmin_test']:
-            for table in schema['tables']:
-                tables_got.append(table['name'])
+            # there should only two schemas, 'public' and 'datadog'. datadog is empty
+            schema = database_metadata[mi]['schemas'][0]
+            schema_name = schema['name']
+            assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test', 'hstore']
+            schemas_got.add(schema_name)
+            if schema_name in ['public', 'rdsadmin_test']:
+                for table in schema['tables']:
+                    tables_got.append(table['name'])
 
-                # make some assertions on fields
-                if table['name'] == "persons":
-                    # check that foreign keys, indexes get reported
-                    keys = list(table.keys())
-                    assert_fields(keys, ["foreign_keys", "columns", "id", "name", "owner"])
-                    # The toast table doesn't seem to be created in the C locale
-                    if POSTGRES_LOCALE != 'C':
-                        assert_fields(keys, ["toast_table"])
-                    assert_fields(list(table['foreign_keys'][0].keys()), ['name', 'definition'])
-                    assert_fields(
-                        list(table['columns'][0].keys()),
-                        [
-                            'name',
-                            'nullable',
-                            'data_type',
-                            'default',
-                        ],
-                    )
-                if table['name'] == "cities":
-                    keys = list(table.keys())
-                    assert_fields(keys, ["indexes", "columns", "id", "name", "owner"])
-                    if POSTGRES_LOCALE != 'C':
-                        assert_fields(keys, ["toast_table"])
-                    assert len(table['indexes']) == 1
-                    assert_fields(
-                        list(table['indexes'][0].keys()),
-                        [
-                            'name',
-                            'definition',
-                            'is_unique',
-                            'is_exclusion',
-                            'is_immediate',
-                            'is_clustered',
-                            'is_valid',
-                            'is_checkxmin',
-                            'is_ready',
-                            'is_live',
-                            'is_replident',
-                            'is_partial',
-                        ],
-                    )
-                if float(POSTGRES_VERSION) >= 11:
-                    if table['name'] in ('test_part', 'test_part_no_activity'):
+                    # make some assertions on fields
+                    if table['name'] == "persons":
+                        # check that foreign keys, indexes get reported
                         keys = list(table.keys())
-                        assert_fields(keys, ["indexes", "num_partitions", "partition_key"])
-                        assert table['num_partitions'] == 2
-                    elif table['name'] == 'test_part_no_children':
+                        assert_fields(keys, ["foreign_keys", "columns", "id", "name", "owner"])
+                        # The toast table doesn't seem to be created in the C locale
+                        if POSTGRES_LOCALE != 'C':
+                            assert_fields(keys, ["toast_table"])
+                        assert_fields(list(table['foreign_keys'][0].keys()), ['name', 'definition'])
+                        assert_fields(
+                            list(table['columns'][0].keys()),
+                            [
+                                'name',
+                                'nullable',
+                                'data_type',
+                                'default',
+                            ],
+                        )
+                    if table['name'] == "cities":
                         keys = list(table.keys())
-                        assert_fields(keys, ["num_partitions", "partition_key"])
-                        assert table['num_partitions'] == 0
+                        assert_fields(keys, ["indexes", "columns", "id", "name", "owner"])
+                        if POSTGRES_LOCALE != 'C':
+                            assert_fields(keys, ["toast_table"])
+                        assert len(table['indexes']) == 1
+                        assert_fields(
+                            list(table['indexes'][0].keys()),
+                            [
+                                'name',
+                                'definition',
+                                'is_unique',
+                                'is_exclusion',
+                                'is_immediate',
+                                'is_clustered',
+                                'is_valid',
+                                'is_checkxmin',
+                                'is_ready',
+                                'is_live',
+                                'is_replident',
+                                'is_partial',
+                            ],
+                        )
+                    if float(POSTGRES_VERSION) >= 11:
+                        if table['name'] in ('test_part', 'test_part_no_activity'):
+                            keys = list(table.keys())
+                            assert_fields(keys, ["indexes", "num_partitions", "partition_key"])
+                            assert table['num_partitions'] == 2
+                        elif table['name'] == 'test_part_no_children':
+                            keys = list(table.keys())
+                            assert_fields(keys, ["num_partitions", "partition_key"])
+                            assert table['num_partitions'] == 0
 
     assert schemas_want == schemas_got
     assert_fields(tables_got, tables_set)

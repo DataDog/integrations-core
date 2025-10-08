@@ -11,7 +11,7 @@ from typing import Dict, List, Union
 import psycopg
 from psycopg.rows import dict_row
 
-from datadog_checks.postgres.schemas import PostgresSchemaCollector
+from .schemas import PostgresSchemaCollector
 
 try:
     import datadog_agent
