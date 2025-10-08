@@ -211,7 +211,7 @@ class TestContainers:
     # Tests for the hash_mutable_stable just ensure that the hash is always the same
     # No need to cover all usecases since internally we use the same logic as with hash_mutable
     def test_hash_mutable_stable(self):
-        expected = "13d8320744fcf8a4c2a1dfe3c4401153"
+        expected = "13d8320744fcf8a4c2a1dfe3c4401153b81f5481ddae622374fcf44712198b3c"
         assert hash_mutable_stable(self.COMPLEX_OBJECT) == expected
 
 
