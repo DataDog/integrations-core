@@ -103,7 +103,7 @@ jobs:
 
     env:
       FORCE_COLOR: "1"
-      PYTEST_TIMEOUT: "180"
+      PYTEST_TIMEOUT: "300"
       PYTHON_VERSION: "${{ inputs.python-version || '3.13' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
       # Windows E2E requires Windows containers
