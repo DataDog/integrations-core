@@ -461,16 +461,16 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
     ],
 )
 def test_validate_parameters(
-    first_commit,
-    second_commit,
-    format_list,
-    platform,
-    version,
-    to_dd_org,
-    to_dd_key,
-    to_dd_site,
-    use_artifacts,
-    error_expected,
+    first_commit: str | None,
+    second_commit: str,
+    format_list: list[str],
+    platform: str | None,
+    version: str | None,
+    to_dd_org: str | None,
+    to_dd_key: str | None,
+    to_dd_site: str | None,
+    use_artifacts: bool,
+    error_expected: bool,
 ):
     valid_platforms = {"linux-x86_64", "windows-x86_64"}
     valid_versions = {"3.9", "3.11"}

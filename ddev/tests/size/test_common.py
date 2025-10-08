@@ -90,7 +90,7 @@ def test_get_valid_versions():
         pytest.param("windows-x86_64", "3.13", "windows-x86_64_3.12.txt", False, id="incorrect_version"),
     ],
 )
-def test_is_correct_dependency(platform, version, dependency_file_name, expected):
+def test_is_correct_dependency(platform: str, version: str, dependency_file_name: str, expected: bool):
     assert is_correct_dependency(platform, version, dependency_file_name) is expected
 
 
@@ -350,14 +350,14 @@ def test_save_markdown():
         pytest.param("not_version = 'not_defined'", "", id="version_not_present"),
     ],
 )
-def test_extract_version_from_about_py(file_content, expected_version):
+def test_extract_version_from_about_py(file_content: str, expected_version: str):
     fake_path = Path("some") / "module" / "__about__.py"
     with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=file_content)):
         version = extract_version_from_about_py(str(fake_path))
     assert version == expected_version
 
 
-def test_parse_dep_sizes_json(tmp_path):
+def test_parse_dep_sizes_json(tmp_path: Path):
     compressed_data = json.dumps(
         [
             {
