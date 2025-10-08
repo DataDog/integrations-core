@@ -16,8 +16,6 @@ Follow the instructions below to install and configure this check for an Agent r
 
 Starting with Agent version `7.71.0`, the BentoML check is included in the [Datadog Agent][2] package. No additional installation is needed on your environment. 
 
-This check uses OpenMetrics to collect metrics from the OpenMetrics endpoint that BentoML exposes, which requires Python 3.
-
 ### Configuration
 
 #### Metrics
@@ -32,6 +30,8 @@ To configure the Datadog Agent to collect BentoML metrics:
 init_config:
 instances:
   - openmetrics_endpoint: http://localhost:3000/metrics
+    tags:
+    - bentoml_service: foo # Tag to easily scope metrics
 ```
 
 2. [Restart the Agent][5].
