@@ -8,6 +8,8 @@ Stay up-to-date on the health of your Elasticsearch cluster, from its overall st
 
 The Datadog Agent's Elasticsearch check collects metrics for search and indexing performance, memory usage and garbage collection, node availability, shard statistics, disk space and performance, pending tasks, and many more. The Agent also sends events and service checks for the overall status of your cluster.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

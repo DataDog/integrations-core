@@ -7,6 +7,8 @@ This integration ingests the following logs:
 
 Integrate ZeroFox Cloud Platform with Datadog to gain insights into Alerts using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
+**Minimum Agent version:** 7.69.2
+
 ## Setup
 
 ### Prerequisites

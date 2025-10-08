@@ -9,6 +9,8 @@ This check monitors [SingleStore][1] through the Datadog Agent. SingleStore offe
 - Improve resource utilization efficiency.
 
 
+**Minimum Agent version:** 7.32.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.

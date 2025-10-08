@@ -53,7 +53,8 @@
       "Slurm DBD Agent Queue Size": "assets/monitors/slurm_dbd_agent.json"
     },
     "dashboards": {
-      "Slurm Overview": "assets/dashboards/slurm_overview.json"
+      "Slurm Overview": "assets/dashboards/slurm_overview.json",
+      "HPC Overview Dashboard": "assets/dashboards/hpc_overview_dashboard.json"
     },
     "saved_views": {
       "Slurm Logs Overview": "assets/saved_views/slurm_overview.json"

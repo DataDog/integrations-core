@@ -1,1 +1,0 @@
-PG: Handle locks without relations like transactionid or virtualxid locks

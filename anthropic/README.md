@@ -9,6 +9,8 @@ monitor operational performance, and evaluate the quality, privacy, and safety o
 
 See the [LLM Observability tracing view video](https://imgix.datadoghq.com/video/products/llm-observability/expedite-troubleshooting.mp4?fm=webm&fit=max) for an example of how you can investigate a trace.
 
+**Minimum Agent version:** 7.59.1
+
 ## Setup
 
 # Configuring Anthropic LLM Evaluations for Datadog
@@ -21,6 +23,8 @@ Datadog's LLM Observability enables end-to-end monitoring of your LLM applicatio
 
 - An **Anthropic account** with access to model deployments.
 - A **valid Anthropic API key** with **write permissions** for model capabilities.
+
+**Minimum Agent version:** 7.59.1
 
 ## Setup
 

@@ -1,1 +1,0 @@
-Set ruff formatting rules in pyproject.toml to inherit from the global ones of the repo.

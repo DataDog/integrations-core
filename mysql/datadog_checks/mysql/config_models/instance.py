@@ -168,6 +168,7 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_prepared_statements: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     only_query_recent_statements: Optional[bool] = None

@@ -21,7 +21,7 @@ on:
       test-py2:
         required: false
         description: Run Python 2 tests
-        default: true
+        default: false
         type: boolean
       agent-image-py2:
         required: false

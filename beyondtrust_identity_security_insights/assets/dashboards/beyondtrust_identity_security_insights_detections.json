@@ -67,7 +67,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -133,7 +133,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -203,7 +203,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -259,7 +259,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:Critical @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @severity:Critical @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -311,7 +311,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:High @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @severity:High @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -363,7 +363,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:Moderate @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @severity:Moderate @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -415,7 +415,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:Low @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @severity:Low @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -466,7 +466,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -596,7 +596,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -622,7 +622,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -687,7 +687,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -758,7 +758,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:Critical @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @severity:Critical @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -837,7 +837,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:High @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @severity:High @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -916,7 +916,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:Moderate @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @severity:Moderate @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -995,7 +995,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @severity:Low @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @severity:Low @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1074,7 +1074,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1144,7 +1144,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection -@entityName:\"\" $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1214,7 +1214,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1348,7 +1348,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
+                                                "query": "source:beyond-trust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1415,7 +1415,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:beyondtrust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type",
+                                        "query_string": "source:beyond-trust-identity-security-insights @incidentType:Detection $Severity $Provider $Entity-Type",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1538,7 +1538,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights status:critical"
+                                                "query": "source:beyond-trust-identity-security-insights status:critical"
                                             }
                                         }
                                     ],
@@ -1589,7 +1589,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights status:high"
+                                                "query": "source:beyond-trust-identity-security-insights status:high"
                                             }
                                         }
                                     ],
@@ -1645,7 +1645,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights status:critical"
+                                                "query": "source:beyond-trust-identity-security-insights status:critical"
                                             }
                                         }
                                     ],
@@ -1710,7 +1710,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights status:medium"
+                                                "query": "source:beyond-trust-identity-security-insights status:medium"
                                             }
                                         }
                                     ],
@@ -1761,7 +1761,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights status:low"
+                                                "query": "source:beyond-trust-identity-security-insights status:low"
                                             }
                                         }
                                     ],
@@ -1812,7 +1812,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights status:info"
+                                                "query": "source:beyond-trust-identity-security-insights status:info"
                                             }
                                         }
                                     ],
@@ -1865,7 +1865,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights status:high"
+                                                "query": "source:beyond-trust-identity-security-insights status:high"
                                             }
                                         }
                                     ],
@@ -1932,7 +1932,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:beyondtrust-identity-security-insights status:medium"
+                                                "query": "source:beyond-trust-identity-security-insights status:medium"
                                             }
                                         }
                                     ],

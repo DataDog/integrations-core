@@ -142,4 +142,4 @@ files:
         value:
           example: 2000
           type: integer
-    - template: instances/default
+      - template: instances/default

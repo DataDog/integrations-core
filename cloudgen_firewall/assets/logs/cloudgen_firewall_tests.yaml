@@ -1,0 +1,416 @@
+id: cloudgen_firewall
+tests:
+ -
+  sample: "2025-09-25T15:21:00+05:30 testsdemoslocals sacumentestlocal/box_Auth_access:  Notice     sacumentestlocal LOGIN ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "Auth"
+        pid: 8652
+        process: "boxconfig"
+        session_status: "Allowed"
+      event: "LOGIN ATTEMPT"
+      level: "Notice"
+      log_element: "sacumentestlocal/box_Auth_access"
+      message: "Login localhost_sacumentestlocal from 127.0.0.1"
+      nested_message: "sacumentestlocal LOGIN ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
+      source: "sacumentestlocal"
+      sub_component: "access"
+      syslog:
+        hostname: "testsdemoslocals"
+        timestamp: 1758793860000
+    message: "2025-09-25T15:21:00+05:30 testsdemoslocals sacumentestlocal/box_Auth_access:  Notice     sacumentestlocal LOGIN ATTEMPT: boxconfig[8652]: Login localhost_sacumentestlocal from 127.0.0.1 : Allowed."
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T15:17:00+05:30 sacumentestlocal sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal event: [1070211] TCP worker 27775 exiting with -30"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "Event"
+        process: "event"
+      level: "Notice"
+      log_element: "sacumentestlocal/box_Event_operative"
+      message: " TCP worker 27775 exiting with -30"
+      nested_message: "sacumentestlocal event: [1070211] TCP worker 27775 exiting with -30"
+      process_id: 1070211.0
+      source: "sacumentestlocal"
+      sub_component: "operative"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758793620000
+    message: "2025-09-25T15:17:00+05:30 sacumentestlocal sacumentestlocal/box_Event_operative:  Notice   sacumentestlocal event: [1070211] TCP worker 27775 exiting with -30"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T15:26:00+05:30 sacumentestlocal sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event: [1071065] Insert Event from 127.0.0.1:10787 - (D|2|control|2|Login|2420|abhishek|sacumentestlocal|1741674380|Login abhishek from 10.10.16.1 : Allowed.)"
+  result:
+    custom:
+      action: "Login"
+      category: "control"
+      cloudgen_firewall:
+        component: "Event"
+        process: "event"
+      description: "Login abhishek from 10.10.16.1 : Allowed."
+      event: "Insert Event"
+      event_id: 1071065.0
+      event_type: "D"
+      level: "Info"
+      log_element: "sacumentestlocal/box_Event_eventS"
+      log_type: "event"
+      message: " Insert Event from 127.0.0.1:10787 - (D|2|control|2|Login|2420|abhishek|sacumentestlocal|1741674380|Login abhishek from 10.10.16.1 : Allowed.)"
+      nested_message: "sacumentestlocal event: [1071065] Insert Event from 127.0.0.1:10787 - (D|2|control|2|Login|2420|abhishek|sacumentestlocal|1741674380|Login abhishek from 10.10.16.1 : Allowed.)"
+      process_id: 1071065.0
+      session_id: 1.74167438E9
+      severity: 2.0
+      source: "sacumentestlocal"
+      source_host: "sacumentestlocal"
+      source_ip: "127.0.0.1"
+      source_port: "10787"
+      sub_component: "eventS"
+      subcategory: 2.0
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758794160000
+      user_id: 2420.0
+      user_name: "abhishek"
+    message: "2025-09-25T15:26:00+05:30 sacumentestlocal sacumentestlocal/box_Event_eventS:  Info     sacumentestlocal event: [1071065] Insert Event from 127.0.0.1:10787 - (D|2|control|2|Login|2420|abhishek|sacumentestlocal|1741674380|Login abhishek from 10.10.16.1 : Allowed.)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T14:52:00+05:30 sacumentestlocal sacumentestlocal/box_Config_admin:  Info     sacumentestlocal New Session GCSID_localhost_sacumentestlocal_127.0.0.1_12313_8016"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "Config"
+      level: "Info"
+      log_element: "sacumentestlocal/box_Config_admin"
+      message: "New Session GCSID_localhost_sacumentestlocal_127.0.0.1_12313_8016"
+      nested_message: "sacumentestlocal New Session GCSID_localhost_sacumentestlocal_127.0.0.1_12313_8016"
+      source: "sacumentestlocal"
+      sub_component: "admin"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792120000
+    message: "2025-09-25T14:52:00+05:30 sacumentestlocal sacumentestlocal/box_Config_admin:  Info     sacumentestlocal New Session GCSID_localhost_sacumentestlocal_127.0.0.1_12313_8016"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T14:53:00+05:30 sacumentestlocal sacumentestlocal/box_Config_changes:  Error     sacumentestlocal [abhishek@10.10.16.1_6810]  Deleting session GCSID_abhishek_10.10.16.1_6810_4607"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "Config"
+      level: "Error"
+      log_element: "sacumentestlocal/box_Config_changes"
+      message: "[abhishek@10.10.16.1_6810]  Deleting session GCSID_abhishek_10.10.16.1_6810_4607"
+      nested_message: "sacumentestlocal [abhishek@10.10.16.1_6810]  Deleting session GCSID_abhishek_10.10.16.1_6810_4607"
+      port: "6810"
+      source: "sacumentestlocal"
+      source_ip: "10.10.16.1"
+      sub_component: "changes"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792180000
+      user_name: "abhishek"
+    message: "2025-09-25T14:53:00+05:30 sacumentestlocal sacumentestlocal/box_Config_changes:  Error     sacumentestlocal [abhishek@10.10.16.1_6810]  Deleting session GCSID_abhishek_10.10.16.1_6810_4607"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T14:54:00+05:30 sacumentestlocal sacumentestlocal/box_Config_daemon_download:  Info     sacumentestlocal [Download-agentid-8353]  Line: Success: software up to date, version  Browser Agent Definitions : 30"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "Config"
+      level: "Info"
+      log_element: "sacumentestlocal/box_Config_daemon_download"
+      message: "[Download-agentid-8353]  Line: Success: software up to date, version  Browser Agent Definitions : 30"
+      nested_message: "sacumentestlocal [Download-agentid-8353]  Line: Success: software up to date, version  Browser Agent Definitions : 30"
+      source: "sacumentestlocal"
+      sub_component: "daemon_download"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792240000
+    message: "2025-09-25T14:54:00+05:30 sacumentestlocal sacumentestlocal/box_Config_daemon_download:  Info     sacumentestlocal [Download-agentid-8353]  Line: Success: software up to date, version  Browser Agent Definitions : 30"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T14:55:00+05:30 sacumentestlocal sacumentestlocal/box_Config_sync: Notice   sacumentestlocal Starting main loop pid=17721"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "Config"
+      level: "Notice"
+      log_element: "sacumentestlocal/box_Config_sync"
+      message: "Starting main loop pid=17721"
+      nested_message: "sacumentestlocal Starting main loop pid=17721"
+      source: "sacumentestlocal"
+      sub_component: "sync"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792300000
+    message: "2025-09-25T14:55:00+05:30 sacumentestlocal sacumentestlocal/box_Config_sync: Notice   sacumentestlocal Starting main loop pid=17721"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T14:56:00+05:30 sacumentestlocal sacumentestlocal/box_Control_AuthService:  Info     sacumentestlocal MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "Control"
+      level: "Info"
+      log_element: "sacumentestlocal/box_Control_AuthService"
+      message: "MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
+      nested_message: "sacumentestlocal MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
+      source: "sacumentestlocal"
+      sub_component: "AuthService"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792360000
+    message: "2025-09-25T14:56:00+05:30 sacumentestlocal sacumentestlocal/box_Control_AuthService:  Info     sacumentestlocal MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T14:57:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall:  Info     sacumentestlocal Block: [Admin Session @127.0.0.1] AdminAction: localhost_ challenge sent"
+  result:
+    custom:
+      action: "localhost_ challenge sent"
+      cloudgen_firewall:
+        component: "Firewall"
+        ip: "127.0.0.1"
+        process: "AdminAction"
+      level: "Info"
+      log_element: "sacumentestlocal/box_Firewall"
+      log_type: "Block"
+      message: "localhost_ challenge sent"
+      method: "[Admin Session @127.0.0.1] AdminAction: localhost_ challenge sent"
+      nested_message: "sacumentestlocal Block: [Admin Session @127.0.0.1] AdminAction: localhost_ challenge sent"
+      session: "Admin Session "
+      source: "sacumentestlocal"
+      status: "Block"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792420000
+      traffic: "[Admin Session @127.0.0.1] AdminAction: localhost_ challenge sent"
+    message: "2025-09-25T14:57:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall:  Info     sacumentestlocal Block: [Admin Session @127.0.0.1] AdminAction: localhost_ challenge sent"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T14:58:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_Activity:  Security sacumentestlocal Block: FWD|UDP|eth0|10.10.17.180|59684|60:45:2e:e0:f1:4b|10.10.17.255|137|netbios-ns||BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "Firewall"
+        ip: "UDP"
+      count: 1.0
+      dest_ip: "10.10.17.255"
+      dest_port: 137.0
+      dest_service: "netbios-ns"
+      duration: 0.0
+      info: 4017.0
+      level: "Security"
+      log_element: "sacumentestlocal/box_Firewall_Activity"
+      message: "Block: FWD|UDP|eth0|10.10.17.180|59684|60:45:2e:e0:f1:4b|10.10.17.255|137|netbios-ns||BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
+      method: "FWD"
+      nested_message: "sacumentestlocal Block: FWD|UDP|eth0|10.10.17.180|59684|60:45:2e:e0:f1:4b|10.10.17.255|137|netbios-ns||BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
+      port: "eth0"
+      protocol: "UDP"
+      received_bytes: 0.0
+      received_packets: 0.0
+      rule: "BOX-LAN-2-LAN"
+      sent_bytes: 0.0
+      sent_packets: 0.0
+      source: "sacumentestlocal"
+      source_if: "eth0"
+      source_ip: "10.10.17.180"
+      source_mac: "60:45:2e:e0:f1:4b"
+      source_port: 59684.0
+      status: "Block"
+      sub_component: "Activity"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792480000
+      traffic: "FWD"
+    message: "2025-09-25T14:58:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_Activity:  Security sacumentestlocal Block: FWD|UDP|eth0|10.10.17.180|59684|60:45:2e:e0:f1:4b|10.10.17.255|137|netbios-ns||BOX-LAN-2-LAN|4017|||0|1|0|0|0|0||||||"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T14:59:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_IPSDownload:  Info sacumentestlocal Starting main loop pid=4623"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "Firewall"
+      level: "Info"
+      log_element: "sacumentestlocal/box_Firewall_IPSDownload"
+      message: "Starting main loop pid=4623"
+      nested_message: "sacumentestlocal Starting main loop pid=4623"
+      source: "sacumentestlocal"
+      sub_component: "IPSDownload"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792540000
+    message: "2025-09-25T14:59:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_IPSDownload:  Info sacumentestlocal Starting main loop pid=4623"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T15:00:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_audit:  Security sacumentestlocal firewall: [Admin Session abhishek@10.10.16.167] AdminAction: Connection terminated (while 'ecachepb')"
+  result:
+    custom:
+      action: "Connection terminated (while 'ecachepb')"
+      cloudgen_firewall:
+        component: "Firewall"
+        ip: "10.10.16.167"
+      level: "Security"
+      log_element: "sacumentestlocal/box_Firewall_audit"
+      message: "firewall: [Admin Session abhishek@10.10.16.167] AdminAction: Connection terminated (while 'ecachepb')"
+      method: "[Admin Session abhishek@10.10.16.167] AdminAction: Connection terminated (while 'ecachepb')"
+      nested_message: "sacumentestlocal firewall: [Admin Session abhishek@10.10.16.167] AdminAction: Connection terminated (while 'ecachepb')"
+      session: "Admin Session abhishek"
+      source: "sacumentestlocal"
+      status: "firewall"
+      sub_component: "audit"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792600000
+      traffic: "[Admin Session abhishek@10.10.16.167] AdminAction: Connection terminated (while 'ecachepb')"
+    message: "2025-09-25T15:00:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_audit:  Security sacumentestlocal firewall: [Admin Session abhishek@10.10.16.167] AdminAction: Connection terminated (while 'ecachepb')"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T15:01:00+05:30 localhosttest localhosttest/box_Firewall_auditop:  Security localhosttest firewall: [Admin Session admin@10.16.1.10] AdminAction: LOGOUT"
+  result:
+    custom:
+      action: "LOGOUT"
+      cloudgen_firewall:
+        component: "Firewall"
+        ip: "10.16.1.10"
+      level: "Security"
+      log_element: "localhosttest/box_Firewall_auditop"
+      message: "firewall: [Admin Session admin@10.16.1.10] AdminAction: LOGOUT"
+      method: "[Admin Session admin@10.16.1.10] AdminAction: LOGOUT"
+      nested_message: "localhosttest firewall: [Admin Session admin@10.16.1.10] AdminAction: LOGOUT"
+      session: "Admin Session admin"
+      source: "localhosttest"
+      status: "firewall"
+      sub_component: "auditop"
+      syslog:
+        hostname: "localhosttest"
+        timestamp: 1758792660000
+      traffic: "[Admin Session admin@10.16.1.10] AdminAction: LOGOUT"
+    message: "2025-09-25T15:01:00+05:30 localhosttest localhosttest/box_Firewall_auditop:  Security localhosttest firewall: [Admin Session admin@10.16.1.10] AdminAction: LOGOUT"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T15:02:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_threat:  Info sacumentestlocal firewall: [Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
+  result:
+    custom:
+      action: "Sync"
+      cloudgen_firewall:
+        component: "Firewall"
+        process: "Sync"
+      level: "Info"
+      log_element: "sacumentestlocal/box_Firewall_threat"
+      log_type: "firewall"
+      message: "BOX IP is 10.10.16.167 Box RSA Pub"
+      method: "[Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
+      nested_message: "sacumentestlocal firewall: [Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
+      source: "sacumentestlocal"
+      status: "Off"
+      sub_component: "threat"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792720000
+      traffic: "[Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
+    message: "2025-09-25T15:02:00+05:30 sacumentestlocal sacumentestlocal/box_Firewall_threat:  Info sacumentestlocal firewall: [Off] Sync: BOX IP is 10.10.16.167 Box RSA Pub"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T15:03:00+05:30 sacumentestlocal sacumentestlocal/box_System_mgmaccess:  Info     sacumentestlocal Handler #749 returned with code 0 (No error.)"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "System"
+      level: "Info"
+      log_element: "sacumentestlocal/box_System_mgmaccess"
+      message: "Handler #749 returned with code 0 (No error.)"
+      nested_message: "sacumentestlocal Handler #749 returned with code 0 (No error.)"
+      source: "sacumentestlocal"
+      sub_component: "mgmaccess"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792780000
+    message: "2025-09-25T15:03:00+05:30 sacumentestlocal sacumentestlocal/box_System_mgmaccess:  Info     sacumentestlocal Handler #749 returned with code 0 (No error.)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T15:04:00+05:30 sacumentestlocal sacumentestlocal/box_SSH_sshd:  Info     sacumentestlocal : pam_unix(sshd:session): session opened for user abhishek by (uid=0)"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "SSH"
+      level: "Info"
+      log_element: "sacumentestlocal/box_SSH_sshd"
+      message: ": pam_unix(sshd:session): session opened for user abhishek by (uid=0)"
+      nested_message: "sacumentestlocal : pam_unix(sshd:session): session opened for user abhishek by (uid=0)"
+      source: "sacumentestlocal"
+      sub_component: "sshd"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792840000
+    message: "2025-09-25T15:04:00+05:30 sacumentestlocal sacumentestlocal/box_SSH_sshd:  Info     sacumentestlocal : pam_unix(sshd:session): session opened for user abhishek by (uid=0)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-25T15:05:00+05:30 sacumentestlocal sacumentestlocal/box_SSH_config:  Info     sacumentestlocal : [0210108] writeSSHdconf(): starting network triggered handling of ssh daemon configuration"
+  result:
+    custom:
+      cloudgen_firewall:
+        component: "SSH"
+      function: "writeSSHdconf"
+      level: "Info"
+      log_element: "sacumentestlocal/box_SSH_config"
+      message: ": [0210108] writeSSHdconf(): starting network triggered handling of ssh daemon configuration"
+      nested_message: "sacumentestlocal : [0210108] writeSSHdconf(): starting network triggered handling of ssh daemon configuration"
+      process_id: 210108.0
+      source: "sacumentestlocal"
+      sub_component: "config"
+      syslog:
+        hostname: "sacumentestlocal"
+        timestamp: 1758792900000
+    message: "2025-09-25T15:05:00+05:30 sacumentestlocal sacumentestlocal/box_SSH_config:  Info     sacumentestlocal : [0210108] writeSSHdconf(): starting network triggered handling of ssh daemon configuration"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1

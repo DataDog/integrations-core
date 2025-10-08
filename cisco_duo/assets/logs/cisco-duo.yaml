@@ -210,6 +210,27 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: grok-parser
+          name: Parsing actor.details
+          enabled: true
+          source: actor.details
+          samples:
+            - '{"ip_address": "1.2.3.4", "hostname": "hostname"}'
+          grok:
+            supportRules: ""
+            matchRules: |
+              actor_json %{data:actor.details:json}
+        - type: attribute-remapper
+          name: Map `email`, `actor.details.email` to `usr.email`
+          enabled: true
+          sources:
+            - email
+            - actor.details.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
     - type: pipeline
       name: Cisco Duo Administrator
       enabled: true

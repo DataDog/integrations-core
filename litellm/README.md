@@ -12,6 +12,8 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 Key metrics such as request/response counts, latency, error rates, token usage, and spend per provider or deployment are monitored. This data enables customers to track usage patterns, detect anomalies, control costs, and troubleshoot issues quickly, ensuring efficient and reliable LLM operations through LiteLLM's health check and Prometheus endpoints.
 
+**Minimum Agent version:** 7.68.0
+
 ## Setup
 
 ### LLM Observability: Get end-to-end visibility into your LLM application using LiteLLM

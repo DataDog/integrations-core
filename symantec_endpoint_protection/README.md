@@ -14,6 +14,8 @@ This integration enriches and ingests the following logs from Symantec Endpoint 
 
 You can also visualize detailed insights into the above-mentioned logs with the out-of-the-box dashboards. Once you've installed the integration, you can find the dashboards by searching for "symantec-endpoint-protection" in the dashboards list.
 
+**Minimum Agent version:** 7.61.0
+
 ## Setup
 
 ### Installation

@@ -160,7 +160,6 @@ def _get_expected_tags(
         pg_instance['tags']
         + [f'port:{pg_instance["port"]}']
         + [f'database_hostname:{check.database_hostname}', f'database_instance:{check.database_identifier}']
-        + [f'ddagenthostname:{check.agent_hostname}']
     )
     if role:
         base_tags.append(f'replication_role:{role}')
@@ -244,7 +243,7 @@ def check_db_count(aggregator, expected_tags, count=1):
         count=count,
         tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public'],
     )
-    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
+    aggregator.assert_metric('postgresql.db.count', value=15, count=1)
 
 
 def check_connection_metrics(aggregator, expected_tags, count=1):

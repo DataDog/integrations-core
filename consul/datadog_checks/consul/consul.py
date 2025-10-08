@@ -643,6 +643,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 # Use the node name as the hostname if configured
                 if self.use_node_name_as_hostname:
                     node_name = node['Node']
+                    tags += ['agent_hostname:{}'.format(self.hostname)]
                 else:
                     node_name = ''
 

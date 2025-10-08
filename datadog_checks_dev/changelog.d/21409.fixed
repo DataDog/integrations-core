@@ -1,0 +1,1 @@
+Fixes InstanceConfig model generation when validators functions are defined in spec.yaml

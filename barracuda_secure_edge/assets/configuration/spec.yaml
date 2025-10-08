@@ -1,0 +1,12 @@
+name: barracuda_secure_edge
+files:
+- name: barracuda_secure_edge.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/phion/logs/box_Auth_access.log
+      service: auth
+      source: barracuda_secure_edge
+      tags:
+        - log_component:auth

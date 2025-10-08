@@ -4,6 +4,8 @@
 
 This check monitors [SAP HANA][1] 2.0, SPS 2 through the Datadog Agent.
 
+**Minimum Agent version:** 7.16.1
+
 ## Setup
 
 ### Installation

@@ -4,6 +4,8 @@
 
 This check submits metrics exposed by the [NVIDIA DCGM Exporter][16] in Datadog Agent format. For more information on NVIDIA Data Center GPU Manager (DCGM), see [NVIDIA DCGM][15].
 
+**Minimum Agent version:** 7.47.0
+
 ## Setup
 
 ### Installation

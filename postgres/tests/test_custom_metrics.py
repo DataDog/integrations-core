@@ -3,14 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-from datadog_checks.postgres import PostgreSql
-
 from .common import _get_expected_tags
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_custom_queries(aggregator, pg_instance, dd_run_check):
+def test_custom_queries(aggregator, pg_instance, dd_run_check, integration_check):
     pg_instance.update(
         {
             'custom_queries': [
@@ -29,7 +27,7 @@ def test_custom_queries(aggregator, pg_instance, dd_run_check):
             ]
         }
     )
-    postgres_check = PostgreSql('postgres', {}, [pg_instance])
+    postgres_check = integration_check(pg_instance)
     dd_run_check(postgres_check)
     tags = _get_expected_tags(postgres_check, pg_instance, with_db=True)
 
@@ -44,7 +42,7 @@ def test_custom_queries(aggregator, pg_instance, dd_run_check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_both_global_and_instance_custom_queries(aggregator, pg_instance, dd_run_check):
+def test_both_global_and_instance_custom_queries(aggregator, pg_instance, dd_run_check, integration_check):
     pg_instance.update(
         {
             'custom_queries': [
@@ -68,7 +66,7 @@ def test_both_global_and_instance_custom_queries(aggregator, pg_instance, dd_run
             },
         ]
     }
-    postgres_check = PostgreSql('postgres', pg_init_config, [pg_instance])
+    postgres_check = integration_check(pg_instance, pg_init_config)
     dd_run_check(postgres_check)
     tags = _get_expected_tags(postgres_check, pg_instance, with_db=True)
 
@@ -83,7 +81,7 @@ def test_both_global_and_instance_custom_queries(aggregator, pg_instance, dd_run
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_only_global_custom_queries(aggregator, pg_instance, dd_run_check):
+def test_only_global_custom_queries(aggregator, pg_instance, dd_run_check, integration_check):
     pg_init_config = {
         'global_custom_queries': [
             {
@@ -94,7 +92,7 @@ def test_only_global_custom_queries(aggregator, pg_instance, dd_run_check):
             },
         ]
     }
-    postgres_check = PostgreSql('postgres', pg_init_config, [pg_instance])
+    postgres_check = integration_check(pg_instance, pg_init_config)
     dd_run_check(postgres_check)
     tags = _get_expected_tags(postgres_check, pg_instance, with_db=True)
 
@@ -108,7 +106,7 @@ def test_only_global_custom_queries(aggregator, pg_instance, dd_run_check):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_only_instance_custom_queries(aggregator, pg_instance, dd_run_check):
+def test_only_instance_custom_queries(aggregator, pg_instance, dd_run_check, integration_check):
     pg_instance.update(
         {
             'custom_queries': [
@@ -132,7 +130,7 @@ def test_only_instance_custom_queries(aggregator, pg_instance, dd_run_check):
             },
         ]
     }
-    postgres_check = PostgreSql('postgres', pg_init_config, [pg_instance])
+    postgres_check = integration_check(pg_instance, pg_init_config)
     dd_run_check(postgres_check)
     tags = _get_expected_tags(postgres_check, pg_instance, with_db=True)
 

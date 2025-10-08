@@ -8,6 +8,8 @@ This integration is in public beta and should be enabled on production workloads
 
 This check monitors [KubeVirt API][1] through the Datadog Agent.
 
+**Minimum Agent version:** 7.59.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

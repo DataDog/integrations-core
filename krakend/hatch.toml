@@ -2,7 +2,7 @@
 check-types = true
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 krakend = ["2.10"]
 
 [envs.default.overrides]

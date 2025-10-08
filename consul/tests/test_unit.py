@@ -561,13 +561,15 @@ def test_network_latency_checks(aggregator):
 
 
 @pytest.mark.parametrize(
-    'use_node_name_as_hostname, expected_hostname, expected_tags',
+    'use_node_name_as_hostname, expected_hostname, expected_tags, expected_agent_hostname',
     [
-        ('false', [''], ['host-1', 'host-2']),
-        ('true', ['host-1'], ['host-1']),
+        ('false', [''], ['host-1', 'host-2'], []),
+        ('true', ['host-1'], ['host-1'], ['agent_hostname:stubbed.hostname']),
     ],
 )
-def test_network_latency_node_name(aggregator, use_node_name_as_hostname, expected_hostname, expected_tags):
+def test_network_latency_node_name(
+    aggregator, use_node_name_as_hostname, expected_hostname, expected_tags, expected_agent_hostname
+):
     consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS['use_node_name_as_hostname'] = use_node_name_as_hostname
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS])
 
@@ -592,7 +594,7 @@ def test_network_latency_node_name(aggregator, use_node_name_as_hostname, expect
     for m in metrics:
         for host in expected_hostname:
             for tag in expected_tags:
-                tags = ['consul_datacenter:dc1', 'consul_node_name:{}'.format(tag)]
+                tags = ['consul_datacenter:dc1', 'consul_node_name:{}'.format(tag)] + expected_agent_hostname
                 aggregator.assert_metric(m, hostname=host, tags=tags)
 
 

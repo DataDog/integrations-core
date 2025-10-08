@@ -4,6 +4,8 @@
 
 This check monitors [CRI-O][1].
 
+**Minimum Agent version:** 6.6.0
+
 ## Setup
 
 ### Installation

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e47d5541-de7d-4ce6-8105-03c6dac5852a",
   "app_id": "teleport",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

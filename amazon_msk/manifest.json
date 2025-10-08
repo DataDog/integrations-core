@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e6dc171a-911d-4440-a409-7951eaadf69f",
   "app_id": "amazon-kafka",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

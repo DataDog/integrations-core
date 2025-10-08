@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
 import copy
 import re
@@ -12,10 +13,18 @@ import psycopg
 from cachetools import TTLCache
 from psycopg.rows import dict_row
 
+from datadog_checks.postgres.config_models import InstanceConfig
+
 try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
+
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
@@ -127,10 +136,6 @@ class StatementTruncationState(Enum):
     unknown = 'unknown'
 
 
-DEFAULT_COLLECTION_INTERVAL = 1
-DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
-
-
 def agent_check_getter(self):
     return self._check
 
@@ -140,29 +145,20 @@ class PostgresStatementSamples(DBMAsyncJob):
     Collects statement samples and execution plans.
     """
 
-    def __init__(self, check, config):
-        collection_interval = float(
-            config.statement_samples_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
-        )
-        if collection_interval <= 0:
-            collection_interval = DEFAULT_COLLECTION_INTERVAL
+    def __init__(self, check: PostgreSql, config: InstanceConfig):
+        collection_interval = config.query_samples.collection_interval
 
         # if regular samples is disabled, only need to collect as often as activity is sampled
-        if not is_affirmative(config.statement_samples_config.get('enabled', True)):
-            collection_interval = config.statement_activity_config.get(
-                'collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL
-            )
+        if not config.query_samples.enabled:
+            collection_interval = config.query_activity.collection_interval
 
         self.db_pool = check.db_pool
 
         super(PostgresStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
-            run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
-            enabled=is_affirmative(
-                config.statement_samples_config.get('enabled', True)
-                or is_affirmative(config.statement_activity_config.get('enabled', True))
-            ),
+            run_sync=config.query_samples.run_sync,
+            enabled=config.query_samples.enabled or config.query_activity.enabled,
             dbms="postgres",
             min_collection_interval=config.min_collection_interval,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
@@ -175,50 +171,53 @@ class PostgresStatementSamples(DBMAsyncJob):
         self.tags = None
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
-        self._explain_function = config.statement_samples_config.get('explain_function', 'datadog.explain_statement')
+        self._explain_function = config.query_samples.explain_function
         self._explain_parameterized_queries = ExplainParameterizedQueries(check, config, self._explain_function)
-        self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
-        self._collect_raw_query_statement = config.collect_raw_query_statement.get("enabled", False)
+        obfuscate_options = self._config.obfuscator_options.model_dump()
+        # Backfill old keys used in the agent obfuscator
+        obfuscate_options['table_names'] = self._config.obfuscator_options.collect_tables
+        obfuscate_options['dollar_quoted_func'] = self._config.obfuscator_options.keep_dollar_quoted_func
+        obfuscate_options['return_json_metadata'] = self._config.obfuscator_options.collect_metadata
+        self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
+
+        self._collect_raw_query_statement = config.collect_raw_query_statement.enabled
 
         self._collection_strategy_cache = TTLCache(
-            maxsize=config.statement_samples_config.get('collection_strategy_cache_maxsize', 1000),
-            ttl=config.statement_samples_config.get('collection_strategy_cache_ttl', 300),
+            maxsize=1000,
+            ttl=300,
         )
 
         self._explain_errors_cache = TTLCache(
-            maxsize=config.statement_samples_config.get('explain_errors_cache_maxsize', 5000),
+            maxsize=self._config.query_samples.explain_errors_cache_maxsize,
             # only try to re-explain invalid statements once per day
-            ttl=config.statement_samples_config.get('explain_errors_cache_ttl', 24 * 60 * 60),
+            ttl=self._config.query_samples.explain_errors_cache_ttl,
         )
 
         # explained_statements_ratelimiter: limit how often we try to re-explain the same query
         self._explained_statements_ratelimiter = RateLimitingTTLCache(
-            maxsize=int(config.statement_samples_config.get('explained_queries_cache_maxsize', 5000)),
-            ttl=60 * 60 / int(config.statement_samples_config.get('explained_queries_per_hour_per_query', 60)),
+            maxsize=int(config.query_samples.explained_queries_cache_maxsize),
+            ttl=60 * 60 / int(config.query_samples.explained_queries_per_hour_per_query),
         )
 
         # seen_samples_ratelimiter: limit the ingestion rate per (query_signature, plan_signature)
         self._seen_samples_ratelimiter = RateLimitingTTLCache(
             # assuming ~100 bytes per entry (query & plan signature, key hash, 4 pointers (ordered dict), expiry time)
             # total size: 10k * 100 = 1 Mb
-            maxsize=int(config.statement_samples_config.get('seen_samples_cache_maxsize', 10000)),
-            ttl=60 * 60 / int(config.statement_samples_config.get('samples_per_hour_per_query', 15)),
+            maxsize=int(config.query_samples.seen_samples_cache_maxsize),
+            ttl=60 * 60 / config.query_samples.samples_per_hour_per_query,
         )
 
         self._raw_statement_text_cache = RateLimitingTTLCache(
-            maxsize=config.collect_raw_query_statement["cache_max_size"],
-            ttl=60 * 60 / config.collect_raw_query_statement["samples_per_hour_per_query"],
+            maxsize=10000,
+            ttl=60 * 60 / 1,
         )
 
-        self._activity_coll_enabled = is_affirmative(self._config.statement_activity_config.get('enabled', True))
-        self._explain_plan_coll_enabled = is_affirmative(self._config.statement_samples_config.get('enabled', True))
+        self._activity_coll_enabled = self._config.query_activity.enabled
+        self._explain_plan_coll_enabled = self._config.query_samples.enabled
 
         # activity events cannot be reported more often than regular samples
-        self._activity_coll_interval = max(
-            self._config.statement_activity_config.get('collection_interval', DEFAULT_ACTIVITY_COLLECTION_INTERVAL),
-            collection_interval,
-        )
-        self._activity_max_rows = self._config.statement_activity_config.get('payload_row_limit', 3500)
+        self._activity_coll_interval = max(self._config.query_activity.collection_interval, collection_interval)
+        self._activity_max_rows = self._config.query_activity.payload_row_limit
         # Keep track of last time we sent an activity event
         self._time_since_last_activity_event = 0
         self._pg_stat_activity_cols = None
@@ -799,7 +798,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             # we should directly jump into self._explain_parameterized_queries.explain_statement
             # instead of trying to explain it then failing
             if self._explain_parameterized_queries._is_parameterized_query(statement):
-                if is_affirmative(self._config.statement_samples_config.get('explain_parameterized_queries', True)):
+                if is_affirmative(self._config.query_samples.explain_parameterized_queries):
                     return self._explain_parameterized_queries.explain_statement(
                         dbname, statement, obfuscated_statement, query_signature
                     )

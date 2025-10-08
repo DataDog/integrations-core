@@ -42,7 +42,7 @@
       "BeyondTrust Identity Security Insights - Detections": "assets/dashboards/beyondtrust_identity_security_insights_detections.json"
     },
     "logs": {
-      "source": "beyondtrust-identity-security-insights"
+      "source": "beyond-trust-identity-security-insights"
     }
   },
   "author": {

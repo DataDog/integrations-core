@@ -6,6 +6,8 @@
 
 The Adyen integration collects transaction, dispute, and payout data using Adyen's webhook capability and ingests it into Datadog for comprehensive analysis.
 
+**Minimum Agent version:** 7.58.0
+
 ## Setup
 
 Follow the instructions below to configure this integration for your Adyen account.

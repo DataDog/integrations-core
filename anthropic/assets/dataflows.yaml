@@ -1,0 +1,3 @@
+provides:
+  - id: anthropic-llm-completions
+    always_on: false

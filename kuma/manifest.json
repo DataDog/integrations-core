@@ -9,9 +9,30 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect metrics and logs from Kuma, an Open Source service mesh for Kubernetes and VMs.",
+    "description": "Collect metrics and logs from Kuma, a service mesh for Kubernetes and VMs. Kuma is the community version of Kong Mesh.",
     "title": "Kuma",
-    "media": [],
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Kuma Control Plane Dashboard - Monitor your service mesh control plane metrics and health",
+        "image_url": "images/kuma_control_plane.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Kuma Control Plane Dashboard (Dark Theme) - Monitor your service mesh control plane metrics and health",
+        "image_url": "images/kuma_control_plane_dark.png"
+      },
+      {
+        "media_type": "image", 
+        "caption": "Kuma Service Communication Dashboard - View service-to-service communication and performance",
+        "image_url": "images/kuma_service_communication.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Kuma Service Communication Dashboard (Dark Theme) - View service-to-service communication and performance",
+        "image_url": "images/kuma_service_communication_dark.png"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",

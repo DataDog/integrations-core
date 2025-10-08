@@ -1,13 +1,15 @@
 id: beyondtrust-identity-security-insights
 metric_id: beyondtrust-identity-security-insights
 backend_only: false
+installation_sources:
+  - beyond-trust-identity-security-insights
 facets: null
 pipeline:
   type: pipeline
   name: BeyondTrust Identity Security Insights
   enabled: true
   filter:
-    query: source:beyondtrust-identity-security-insights
+    query: source:beyond-trust-identity-security-insights
   processors:
     - type: grok-parser
       name: Parse `timestamp` attribute

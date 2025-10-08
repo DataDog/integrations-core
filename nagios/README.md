@@ -13,6 +13,8 @@ This check watches your Nagios server's logs and sends events to Datadog for the
 
 This check can also send Nagios performance data as metrics to Datadog.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

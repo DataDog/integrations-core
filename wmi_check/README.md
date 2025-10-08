@@ -10,6 +10,8 @@
 
 The built-in Windows WMI ecosystem offers rich, and in many cases exclusive, access to Windows and Microsoft features and products telemetry. This WMI Check allows mapping rows and columns from WMI class datasets to Datdog metrics and their tags, making it easier to extract meaningful telemetry. Additionally, it supports joining two WMI class datasets, allowing for correlations between datasets that would otherwise be impossible to achieve.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### [Default] Agent User Privilege

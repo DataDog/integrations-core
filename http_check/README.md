@@ -4,6 +4,8 @@
 
 Monitor the up and down status of local or remote HTTP endpoints. The HTTP check can detect bad response codes (such as 404), identify soon-to-expire SSL certificates, search responses for specific text, and much more. The check also submits HTTP response times as a metric.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

@@ -6,6 +6,8 @@ This check monitors [Windows performance counters][1] through the Datadog Agent.
 
 **Note:** Agent version 7.33.0 is the minimum supported version.
 
+**Minimum Agent version:** 7.32.1
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

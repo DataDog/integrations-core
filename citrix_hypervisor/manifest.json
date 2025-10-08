@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "cf4ad6ea-85ae-4f7d-8e79-7b8d36924425",
   "app_id": "citrix-hypervisor",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

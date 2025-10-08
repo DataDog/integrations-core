@@ -4,6 +4,8 @@
 
 The Agent's KyotoTycoon check tracks get, set, and delete operations, and lets you monitor replication lag.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

@@ -354,6 +354,8 @@ tests:
           key: "SOMEKEY"
           name: "+1 123 456 7890"
           type: "phone"
+        usr:
+          email: "abc@example.com"
       message: |-
         {
           "actor" : {
@@ -681,6 +683,8 @@ tests:
           key: "222222"
           name: "target_user"
           type: "user"
+        usr:
+          email: "test"
       message: |-
         {
           "actor" : {

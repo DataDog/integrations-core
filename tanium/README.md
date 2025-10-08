@@ -10,6 +10,8 @@ This integration ingests the following logs:
 
 This integration collects logs from the sources listed above and transmits them to Datadog for analysis in [Log Explorer][3] and [Cloud SIEM][4].
 
+**Minimum Agent version:** 7.61.0
+
 ## Setup
 
 ### Prerequisites

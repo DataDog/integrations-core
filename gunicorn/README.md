@@ -13,6 +13,8 @@ Gunicorn itself can provide further metrics using DogStatsD, including:
 - Request duration (average, median, max, 95th percentile, etc.)
 - Log message rate by log level (critical, error, warning, exception)
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

@@ -12,6 +12,8 @@ This check monitors [RabbitMQ][2] through the Datadog Agent. It allows you to:
 
 Consider [Data Streams Monitoring][24] to enhance your RabbitMQ integration. This solution enables pipeline visualization and lag tracking, helping you identify and resolve bottlenecks.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

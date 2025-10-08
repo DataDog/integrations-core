@@ -16,6 +16,8 @@ For users of NGINX Plus, the commercial version of NGINX, the Agent can collect 
 - Caches, such as size, hits, and misses
 - SSL, such as handshakes and failed handshakes
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

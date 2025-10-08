@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Kuma][1], a universal open-source control plane for service mesh that supports both Kubernetes and Universal mode (VMs and standalone containers). Kuma is the open-source community version of [Kong Mesh][2], developed by Kong.
+This check monitors [Kuma][1], a universal open-source control plane for service mesh that supports both Kubernetes and Universal mode (VMs and standalone containers). [Kong Mesh][2], the enterprise edition of Kuma, is fully supported through this integration. Beyond the installation steps outlined here, no additional configuration is required.
 
 With the Datadog Kuma integration, you can:
 - Monitor the health and performance of the Kuma control plane.
@@ -12,6 +12,8 @@ With the Datadog Kuma integration, you can:
 For monitoring the Envoy data planes (sidecars) within your Kuma mesh:
 - Use the [Envoy integration][10] to collect metrics.
 - Use this Kuma integration to collect logs.
+
+**Minimum Agent version:** 7.68.0
 
 ## Setup
 

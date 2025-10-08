@@ -27,7 +27,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=4.2.0",
+    "datadog-checks-base>=37.21.0",
 ]
 dynamic = [
     "version",
