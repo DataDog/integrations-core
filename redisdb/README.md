@@ -12,6 +12,8 @@ Whether you use Redis as a database, cache, or message queue, this integration t
 - Expired and evicted keys
 - and many more
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -212,7 +214,9 @@ spec:
         - containerPort: 6379
 ```
 
-**Note**: The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][9] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][10] backend (such as HashiCorp Vault or AWS Secrets Manager).
+**Note**: 
+- If no user is specified in the configuration, the Redis integration authenticates with the `default` user. The password specified in the configuration therefore applies to `default` user.
+- The `"%%env_<ENV_VAR>%%"` template variable logic is used to avoid storing the password in plain text, hence the `REDIS_PASSWORD` environment variable must be set on the Agent container. See the [Autodiscovery Template Variable][9] documentation. Alternatively, the Agent can leverage the `secrets` package to work with any [secrets management][10] backend (such as HashiCorp Vault or AWS Secrets Manager).
 
 ##### Log collection
 

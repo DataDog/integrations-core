@@ -15,7 +15,7 @@ defaults:
     shell: bash
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.13"
   MATRIX_SCRIPT: "ddev/src/ddev/utils/scripts/ci_matrix.py"
 
 jobs:
@@ -35,31 +35,15 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
-    - name: Fetch merge base commits
+    - name: Fetch merge base
       env:
         GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-      # Generic version of the following:
-      # https://gist.github.com/bnb/9de89a07278e9f57cd058a535ab89a9b?permalink_comment_id=4417593#gistcomment-4417593
       run: |-
-        # Fetch commits to a depth so that head and base reach their merge base.
-        comparison=$(gh api\
-          repos/${{ github.repository }}/compare/${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }})
-        behind_by=$(echo -E $comparison | jq -r '.behind_by')
-        ahead_by=$(echo -E $comparison | jq -r '.ahead_by')
-        echo "ahead_by: $ahead_by; behind by: $behind_by"
-        # +1 because fetch depth=1 is the commit itself.
-        if [[ $behind_by -gt 0 ]]; then
-          base_depth=$((behind_by+1))
-          echo "Fetching base to depth $base_depth"
-          git -c protocol.version=2 fetch --no-tags --no-recurse-submodules\
-            --depth=$base_depth origin ${{ github.event.pull_request.base.sha }}
-        fi
-        if [[ $ahead_by -gt 0 ]]; then
-          head_depth=$((ahead_by+1))
-          echo "Fetching head to depth $head_depth"
-          git -c protocol.version=2 fetch --no-tags --no-recurse-submodules\
-            --depth=$head_depth origin ${{ github.event.pull_request.head.sha }}
-        fi
+        merge_base=$(gh api \
+          repos/${{ github.repository }}/compare/${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} \
+          --jq '.merge_base_commit.sha')
+        echo "MERGE_BASE=$merge_base" >> "$GITHUB_ENV"
+        git -c protocol.version=2 fetch --no-tags --no-recurse-submodules --filter=blob:none origin "$merge_base"
 
     - name: Fetch computation script
       if: inputs.repo != 'core'
@@ -70,7 +54,7 @@ jobs:
     - name: Compute
       id: compute
       run: |-
-        python ${{ env.MATRIX_SCRIPT }} -v --ref ${{ github.event.pull_request.base.sha }} >> /tmp/matrix.json
+        python ${{ env.MATRIX_SCRIPT }} -v --ref "$MERGE_BASE" --exact >> /tmp/matrix.json
         echo "data=$(cat /tmp/matrix.json)" >> "$GITHUB_OUTPUT"
 
     - name: Show matrix

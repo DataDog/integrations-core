@@ -9,6 +9,8 @@ Capture RiakCS metrics in Datadog to:
 - Visualize key RiakCS metrics.
 - Correlate RiakCS performance with the rest of your applications.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

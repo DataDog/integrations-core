@@ -13,6 +13,8 @@ This integration is especially valuable for teams using Anthropic at scale who w
 
 You can also see your Anthropic costs in Datadog [Cloud Cost Management][6], allowing you to answer key questions: Which models or workspaces are generating the most cost? Are workloads using the right service tier (Standard, Batch, or Priority)? Are teams effectively using caching or ephemeral sessions? What's the cost breakdown between Claude Opus and Claude Sonnet?
 
+**Minimum Agent version:** 7.69.0
+
 ## Setup
 
 To get started with the Anthropic Admin API integration in Datadog, follow the steps below:

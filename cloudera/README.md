@@ -4,6 +4,8 @@
 
 This integration monitors your [Cloudera Data Platform][1] through the Datadog Agent, allowing you to submit metrics and service checks on the health of your Cloudera Data Hub clusters, hosts, and roles.  
 
+**Minimum Agent version:** 7.42.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
