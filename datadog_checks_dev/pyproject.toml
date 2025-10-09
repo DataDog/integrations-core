@@ -38,6 +38,7 @@ dependencies = [
     "pytest-cov>=2.6.1",
     "pytest-memray>=1.4.0; platform_system=='Linux' or platform_system=='Darwin'",
     "pytest-mock",
+    "pytest-timeout==2.4.0",
     "pyyaml>=5.4.1",
     "requests>=2.22.0",
     "tenacity",
