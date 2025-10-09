@@ -103,6 +103,7 @@ def diff(
         combinations = [(p, v) for p in platforms for v in versions]
         total_diff = {}
         old_size = {}
+        new_size = {}
 
         mode: Literal["diff"] = "diff"
 
@@ -137,12 +138,12 @@ def diff(
                 except Exception as e:
                     app.abort(str(e))
 
-                if old_commit_sizes is None:
+                if not old_commit_sizes:
                     app.abort(f"Failed to get sizes for {old_commit=}")
-                if new_commit_sizes is None:
+                if not new_commit_sizes:
                     app.abort(f"Failed to get sizes for {new_commit=}")
 
-                diff_modules, total_diff[(plat, ver)], old_size[(plat, ver)] = calculate_diff(
+                diff_modules, total_diff[(plat, ver)], old_size[(plat, ver)], new_size[(plat, ver)] = calculate_diff(
                     old_commit_sizes, new_commit_sizes, plat, ver
                 )
                 output_diff(parameters_artifacts, diff_modules)
@@ -177,12 +178,14 @@ def diff(
                             diff_modules,
                             total_diff,
                             old_size,
+                            new_size,
                         ) = get_diff(
                             gitRepo,
                             old_commit,
                             new_commit,
                             total_diff,
                             old_size,
+                            new_size,
                             parameters_repo,
                         )
                         output_diff(parameters_repo, diff_modules)
@@ -215,6 +218,7 @@ def diff(
                     old_commit,
                     quality_gate_threshold,
                     old_size,
+                    new_size,
                     total_diff,
                     passes_quality_gate,
                 )
@@ -225,6 +229,7 @@ def diff(
                     old_commit,
                     quality_gate_threshold,
                     old_size,
+                    new_size,
                     total_diff,
                     passes_quality_gate,
                 )
@@ -303,8 +308,9 @@ def get_diff(
     new_commit: str,
     total_diff: dict[tuple[str, str], int],
     old_size: dict[tuple[str, str], int],
+    new_size: dict[tuple[str, str], int],
     params: CLIParameters,
-) -> tuple[list[FileDataEntry], dict[tuple[str, str], int], dict[tuple[str, str], int]]:
+) -> tuple[list[FileDataEntry], dict[tuple[str, str], int], dict[tuple[str, str], int], dict[tuple[str, str], int]]:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
         gitRepo, params["platform"], params["py_version"], old_commit, new_commit, params["compressed"]
     )
@@ -313,15 +319,19 @@ def get_diff(
         integrations,
         integrations_total_diff,
         integrations_old_size,
+        integrations_new_size,
     ) = calculate_diff(files_b, files_a, params["platform"], params["py_version"])
     (
         dependencies,
         dependencies_total_diff,
         dependencies_old_size,
+        dependencies_new_size,
     ) = calculate_diff(dependencies_b, dependencies_a, params["platform"], params["py_version"])
     total_diff[(params["platform"], params["py_version"])] = integrations_total_diff + dependencies_total_diff
     old_size[(params["platform"], params["py_version"])] = integrations_old_size + dependencies_old_size
-    return integrations + dependencies, total_diff, old_size
+    new_size[(params["platform"], params["py_version"])] = integrations_new_size + dependencies_new_size
+
+    return integrations + dependencies, total_diff, old_size, new_size
 
 
 def output_diff(params: CLIParameters, modules: list[FileDataEntry]) -> None:
@@ -337,7 +347,7 @@ def output_diff(params: CLIParameters, modules: list[FileDataEntry]) -> None:
     if differences == 0:
         params["app"].display(
             f"No size differences were detected between the selected commits for {params['platform']}"
-            f"and Python version {params['py_version']}"
+            f" and Python version {params['py_version']}"
         )
         return
 
@@ -407,7 +417,7 @@ def get_repo_info(
 
 def calculate_diff(
     size_old_commit: list[FileDataEntry], size_new_commit: list[FileDataEntry], platform: str, py_version: str
-) -> tuple[list[FileDataEntry], int, int]:
+) -> tuple[list[FileDataEntry], int, int, int]:
     """
     Computes size differences between two sets of integrations or dependencies.
 
@@ -433,6 +443,7 @@ def calculate_diff(
 
     total_diff = 0
     old_size = 0
+    new_size = 0
 
     for name, _type, platform, py_version in all_names:
         old = old_commit.get((name, _type, platform, py_version))
@@ -443,6 +454,8 @@ def calculate_diff(
         percentage = (delta / size_old) * 100 if size_old != 0 else 0.0
         total_diff += delta
         old_size += size_old
+        new_size += size_new
+
         ver_old = old["Version"] if old else ""
         ver_new = new["Version"] if new else ""
 
@@ -476,7 +489,7 @@ def calculate_diff(
                 "Delta_Type": change_type,
             }
         )
-    return diffs, total_diff, old_size
+    return diffs, total_diff, old_size, new_size
 
 
 def check_quality_gate(

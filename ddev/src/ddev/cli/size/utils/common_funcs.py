@@ -593,6 +593,7 @@ def save_quality_gate_html(
     old_commit: str,
     threshold_percentage: float,
     old_size: dict[tuple[str, str], int],
+    new_size: dict[tuple[str, str], int],
     total_diff: dict[tuple[str, str], int],
     passes_quality_gate: bool,
 ) -> None:
@@ -613,7 +614,7 @@ def save_quality_gate_html(
             html_subheaders = str()
 
             sign_total = "+" if total_diff[(platform, py_version)] > 0 else ""
-            threshold = convert_to_human_readable_size(old_size[(platform, py_version)] * threshold_percentage)
+            threshold = convert_to_human_readable_size(old_size[(platform, py_version)] * threshold_percentage / 100)
 
             html_subheaders += f"<details><summary><h4>Size Delta for {platform} and Python {py_version}:\n"
             html_subheaders += (
@@ -645,6 +646,7 @@ def save_quality_gate_html_table(
     old_commit: str,
     threshold_percentage: float,
     old_size: dict[tuple[str, str], int],
+    new_size: dict[tuple[str, str], int],
     total_diff: dict[tuple[str, str], int],
     passes_quality_gate: bool,
 ) -> None:
@@ -675,16 +677,23 @@ def save_quality_gate_html_table(
             total_removed = f"{sign_removed}{convert_to_human_readable_size(delta_type_groups['Removed']['Total'])}"
             total_modified = f"{sign_modified}{convert_to_human_readable_size(delta_type_groups['Modified']['Total'])}"
 
+            current_size = f"{convert_to_human_readable_size(new_size[(platform, py_version)])}"
+            delta_percentage = (
+                f"{sign_total}{round(total_diff[(platform, py_version)] / old_size[(platform, py_version)] * 100, 2)}%"
+            )
+
             status = "❌" if diff >= threshold_bytes else "✅"
 
             table_rows.append(
                 "<tr>"
                 f"<td>{platform}</td>"
                 f"<td>{py_version}</td>"
+                f"<td>{current_size}</td>"
                 f"<td>{total_added}</td>"
                 f"<td>{total_removed}</td>"
                 f"<td>{total_modified}</td>"
                 f"<td>{delta_compressed_size}</td>"
+                f"<td>{delta_percentage}</td>"
                 f"<td>{threshold}</td>"
                 f"<td>{status}</td>"
                 "</tr>"
@@ -696,10 +705,12 @@ def save_quality_gate_html_table(
             "    <tr>\n"
             "      <th>Platform</th>\n"
             "      <th>Python</th>\n"
+            "      <th>Current Size</th>\n"
             "      <th>&Delta; Added</th>\n"
             "      <th>&Delta; Removed</th>\n"
             "      <th>&Delta; Modified</th>\n"
             "      <th>&Delta; Total</th>\n"
+            "      <th>&Delta; Total %</th>\n"
             "      <th>Threshold</th>\n"
             "      <th>Status</th>\n"
             "    </tr>\n"
@@ -767,10 +778,14 @@ def append_html_entry(delta_type_group: DeltaTypeGroup, type: str) -> str:
             f"<b>{type}:</b> {len(delta_type_group['Modules'])} item(s), {sign}"
             f"{convert_to_human_readable_size(delta_type_group['Total'])}\n"
         )
-        html += "<table><tr><th>Type</th><th>Name</th><th>Version</th><th>Size Delta</th><th>Percentage</th></tr>\n"
+        html += "<table><tr><th>Type</th><th>Name</th><th>Version</th><th>Size Delta</th>"
+
+        html += "<th>Percentage</th></tr>\n" if type not in ["Added", "Removed"] else "</tr>\n"
+
         for e in delta_type_group["Modules"]:
             html += f"<tr><td>{e.get('Type', '')}</td><td>{e.get('Name', '')}</td><td>{e.get('Version', '')}</td>"
-            html += f"<td>{e.get('Size', '')}</td><td>{e.get('Percentage', '')}%</td></tr>\n"
+            html += f"<td>{e.get('Size', '')}</td>"
+            html += f"<td>{e.get('Percentage', '')}%</td></tr>\n" if type not in ["Added", "Removed"] else "</tr>\n"
         html += "</table>\n"
     else:
         html += f"No {type.lower()} dependencies/integrations\n\n"
