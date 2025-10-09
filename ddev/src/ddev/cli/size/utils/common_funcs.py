@@ -939,8 +939,6 @@ def send_metrics_to_dd(
         api_host=f"https://api.{config_file_info['site']}",
     )
 
-    app.display("Sending metrics to Datadog")
-
     # Format the sizes dictionary into a human-readable summary
     summary_lines = []
     for platform, py_versions in sizes.items():
@@ -950,6 +948,8 @@ def send_metrics_to_dd(
                 f"{convert_to_human_readable_size(size_bytes)} ({size_bytes} bytes)"
             )
     summary = "\n".join(summary_lines)
+
+    app.display("Sending metrics to Datadog")
 
     app.display("Metric summary:\n" + summary + "\n")
 
