@@ -114,3 +114,4 @@ dev-mode-dirs = [
 
 [tool.pytest.ini_options]
 testpaths = "tests"
+timeout = 30
