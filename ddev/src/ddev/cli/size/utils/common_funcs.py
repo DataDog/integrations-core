@@ -1031,7 +1031,7 @@ def get_dep_sizes_json(app: Application, current_commit: str, platform: str, py_
 
 @cache
 def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
-    app.display_debug(f"Fetching workflow run ID for {commit[:7]} ({os.path.basename(workflow)})")
+    app.display_debug(f"Fetching workflow run ID for {commit} ({os.path.basename(workflow)})")
 
     result = subprocess.run(
         [
@@ -1055,7 +1055,7 @@ def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
     if run_id:
         app.display_debug(f"Workflow run ID: {run_id}")
     else:
-        app.display_warning(f"No workflow run found for {commit[:7]} ({os.path.basename(workflow)})")
+        app.display_warning(f"No workflow run found for {commit} ({os.path.basename(workflow)})")
 
     return run_id
 
@@ -1146,7 +1146,7 @@ def get_previous_dep_sizes(
         sizes_json = get_artifact(app, run_id, artifact_name, tmpdir)
 
         if not sizes_json:
-            app.display_error(f"No dependency sizes found for {platform} py{py_version} in commit {base_commit[:7]}\n")
+            app.display_error(f"No dependency sizes found for {platform} py{py_version} in commit {base_commit}\n")
             return None
 
         sizes = parse_sizes_json(sizes_json, platform, py_version, compressed)
