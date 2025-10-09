@@ -102,7 +102,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "BentoML Overview shows a quick summary of all reporting BentoML endpoints as well as related monitors and their status.",
+                            "content": "BentoML Overview shows a quick summary of all reporting BentoML endpoints as well as related monitors and their statuses.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
