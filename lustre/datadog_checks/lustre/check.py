@@ -37,7 +37,7 @@ def _get_stat_type(suffix: str, unit: str) -> str:
     """
     if suffix == 'count':
         return 'count'
-    elif suffix == 'hist':
+    elif suffix == 'bucket':
         return 'histogram'
     elif unit in RATE_UNITS:
         return 'rate'
@@ -270,7 +270,9 @@ class LustreCheck(AgentCheck):
         for suffix, value in values.items():
             if suffix == 'samples':
                 suffix = 'count'
-            if suffix == 'unit':
+            elif suffix == 'hist':
+                suffix = 'bucket'
+            elif suffix == 'unit':
                 continue
             metric_type = _get_stat_type(suffix, values['unit'])
             self._submit(f'job_stats.{name}.{suffix}', value, metric_type, tags=tags)
@@ -599,7 +601,13 @@ class LustreCheck(AgentCheck):
                 self.log.debug("Unexpected value for metric type histogram: %s", value)
                 return
             cumulative_count = 0
+            previous_bucket = 0
             for bucket, count in value.items():
                 cumulative_count += count
-                self.monotonic_count(name, cumulative_count, tags=tags + [f'upper_bound:{bucket}'])
-            self.monotonic_count(name, cumulative_count, tags=tags + ['upper_bound:+Inf'])
+                self.monotonic_count(
+                    name, cumulative_count, tags=tags + [f'upper_bound:{bucket}', f'lower_bound:{previous_bucket}']
+                )
+                previous_bucket = bucket
+            self.monotonic_count(
+                name, cumulative_count, tags=tags + ['upper_bound:+Inf', f'lower_bound:{previous_bucket}']
+            )

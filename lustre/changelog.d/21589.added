@@ -1,1 +1,1 @@
-Add histogram metrics for `lustre.jobstats.read_bytes` and `lustre.jobstats.write_bytes`
+Add histogram bucket metrics for `lustre.jobstats.read_bytes` and `lustre.jobstats.write_bytes`
