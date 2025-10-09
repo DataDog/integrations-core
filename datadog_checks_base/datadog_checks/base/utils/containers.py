@@ -34,7 +34,6 @@ class _FreezeKey(object):
 
             # If we get 2 types that cannot be compared, we compare the string representation of the types.
             return str(type(self.value)) < str(type(other.value))
-            raise
         else:
             # We're on Python 2, where `a < b` never fails (returns `False` by default), or
             # we're on Python 3 and values have the same type.
