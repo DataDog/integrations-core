@@ -949,9 +949,11 @@ def send_metrics_to_dd(
             )
     summary = "\n".join(summary_lines)
 
-    app.display("Sending metrics to Datadog")
+    total_metrics = len(metrics) + len(n_integrations_metrics) + len(n_dependencies_metrics)
+    app.display(f"Sending {total_metrics} metrics to Datadog...")
 
-    app.display("Metric summary:\n" + summary + "\n")
+    app.display("\nMetric summary:")
+    app.display(summary)
 
     app.display_debug(f"Metrics: {metrics}")
     api.Metric.send(metrics=metrics)
@@ -992,20 +994,21 @@ def get_last_dependency_sizes_artifact(
     So in each commit, there is an artifact with the sizes of the wheels that were built to get the actual
     size of that commit.
     '''
-    app.display(
-        "Getting last dependency sizes artifact for commit: "
-        f"{commit}, platform: {platform}, Python version: {py_version}, compressed: {compressed}"
-    )
+    size_type = 'compressed' if compressed else 'uncompressed'
+    app.display(f"Retrieving dependency sizes for {commit} ({platform}, py{py_version}, {size_type})")
 
     dep_sizes_json = get_dep_sizes_json(app, commit, platform, py_version)
     if not dep_sizes_json:
+        app.display_debug("No dependency sizes in current commit, searching ancestors")
         base_commit = app.repo.git.merge_base(commit, "origin/master")
         if base_commit != commit:
+            app.display_debug(f"Found base commit: {base_commit}")
             previous_commit = base_commit
         else:
+            app.display_debug("No base commit found, using previous commit")
             previous_commit = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
 
-        app.display(f"\n -> Looking for previous dependency sizes json in commit: {previous_commit}")
+        app.display(f"\n -> Searching for dependency sizes in previous commit: {previous_commit}")
 
         dep_sizes_json = get_previous_dep_sizes(app, previous_commit, platform, py_version, compressed)
     return Path(dep_sizes_json) if dep_sizes_json else None
@@ -1016,7 +1019,7 @@ def get_dep_sizes_json(app: Application, current_commit: str, platform: str, py_
     '''
     Gets the dependency sizes json for a given commit and platform when dependencies were resolved.
     '''
-    app.display(f"\n -> Looking if dependency sizes were resolved in the commit {current_commit}")
+    app.display(f"\n -> Checking if dependency sizes were resolved in commit: {current_commit}")
 
     run_id = get_run_id(app, current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
     if run_id:
@@ -1028,7 +1031,7 @@ def get_dep_sizes_json(app: Application, current_commit: str, platform: str, py_
 
 @cache
 def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
-    app.display(f"Getting run id for commit: {commit}, workflow: {workflow}")
+    app.display_debug(f"Fetching workflow run ID for {commit[:7]} ({os.path.basename(workflow)})")
 
     result = subprocess.run(
         [
@@ -1050,9 +1053,9 @@ def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
 
     run_id = result.stdout.strip() if result.stdout else None
     if run_id:
-        app.display(f"Found run id: {run_id}")
+        app.display_debug(f"Workflow run ID: {run_id}")
     else:
-        app.display_warning(f"No run id found for commit: {commit}, workflow: {workflow}")
+        app.display_warning(f"No workflow run found for {commit[:7]} ({os.path.basename(workflow)})")
 
     return run_id
 
@@ -1062,9 +1065,9 @@ def get_current_sizes_json(app: Application, run_id: str, platform: str, py_vers
     '''
     Downloads the dependency sizes json for a given run id and platform when dependencies were resolved.
     '''
-    app.display(f"Looking for resolved dependency sizes json for run_id={run_id}, platform={platform}")
+    app.display(f"Retrieving dependency sizes artifact (run={run_id}, platform={platform})")
     with tempfile.TemporaryDirectory() as tmpdir:
-        app.display(f"Downloading artifacts to {tmpdir}")
+        app.display_debug(f"Downloading artifacts to {tmpdir}...")
         try:
             subprocess.run(
                 [
@@ -1083,28 +1086,28 @@ def get_current_sizes_json(app: Application, run_id: str, platform: str, py_vers
             )
         except subprocess.CalledProcessError as e:
             if e.stderr and "no valid artifacts found" in e.stderr:
-                app.display_warning(f"No dependencies resolved for run_id={run_id}, platform={platform}")
+                app.display_warning(f"No resolved dependencies found for platform {platform} (run {run_id})")
             else:
-                app.display_error(f"Failed to download current sizes json: {e}")
+                app.display_error(f"Failed to download dependency sizes (run={run_id}, platform={platform}): {e}")
                 app.display_warning(e.stderr)
 
             return None
 
-        app.display(f"Downloaded artifacts to {tmpdir}")
+        app.display_debug("Artifact extraction complete")
         sizes_file = Path(tmpdir) / platform / 'py3' / 'sizes.json'
 
         if not sizes_file.is_file():
-            app.display_warning(f"Sizes artifact not found at {sizes_file}")
+            app.display_warning(f"Dependency sizes artifact missing: {sizes_file.name}")
             return None
 
-        app.display(f"Found sizes artifact at {sizes_file}")
+        app.display_debug(f"Found dependency sizes: {sizes_file.name}")
         dest_path = sizes_file.rename(f"{platform}_{py_version}.json")
         return dest_path
 
 
 @cache
 def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: str | None = None) -> Path | None:
-    app.display(f"Downloading artifact: {artifact_name} from run_id={run_id}")
+    app.display(f"Downloading artifact '{artifact_name}' (run {run_id})...")
     try:
         cmd = [
             'gh',
@@ -1119,12 +1122,12 @@ def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: 
 
         subprocess.run(cmd, check=True, text=True, capture_output=True)
     except subprocess.CalledProcessError as e:
-        app.display_warning(f"Failed to download artifact: {artifact_name} from run_id={run_id}: {e}")
+        app.display_warning(f"Failed to download artifact '{artifact_name}' (run {run_id}): {e}")
         app.display_warning(e.stderr)
         return None
 
     artifact_path = Path(target_dir) / artifact_name if target_dir else Path(artifact_name)
-    app.display(f"Artifact downloaded to: {artifact_path}")
+    app.display_debug(f"Saved to {artifact_path}")
     return artifact_path
 
 
@@ -1143,7 +1146,7 @@ def get_previous_dep_sizes(
         sizes_json = get_artifact(app, run_id, artifact_name, tmpdir)
 
         if not sizes_json:
-            app.display_error("No previous dependency sizes json found")
+            app.display_error(f"No dependency sizes found for {platform} py{py_version} in commit {base_commit[:7]}\n")
             return None
 
         sizes = parse_sizes_json(sizes_json, platform, py_version, compressed)
