@@ -114,6 +114,33 @@ _COUNTS = {
     "rabbitmq_raft_term_total": "raft.term",
     "rabbitmq_schema_db_disk_tx_total": "schema.db.disk_tx",
     "rabbitmq_schema_db_ram_tx_total": "schema.db.ram_tx",
+    # Stream error metrics
+    "rabbitmq_global_stream_error_stream_not_available_total": "global.stream.error.stream_not_available",
+    "rabbitmq_global_stream_error_sasl_challenge_total": "global.stream.error.sasl_challenge",
+    "rabbitmq_global_stream_error_unknown_frame_total": "global.stream.error.unknown_frame",
+    "rabbitmq_global_stream_error_publisher_does_not_exist_total": "global.stream.error.publisher_does_not_exist",
+    "rabbitmq_global_stream_error_stream_already_exists_total": "global.stream.error.stream_already_exists",
+    "rabbitmq_global_stream_error_subscription_id_already_exists_total": (
+        "global.stream.error.subscription_id_already_exists"
+    ),
+    "rabbitmq_global_stream_error_stream_does_not_exist_total": "global.stream.error.stream_does_not_exist",
+    "rabbitmq_global_stream_error_internal_error_total": "global.stream.error.internal_error",
+    "rabbitmq_global_stream_error_vhost_access_failure_total": "global.stream.error.vhost_access_failure",
+    "rabbitmq_global_stream_error_access_refused_total": "global.stream.error.access_refused",
+    "rabbitmq_global_stream_error_subscription_id_does_not_exist_total": (
+        "global.stream.error.subscription_id_does_not_exist"
+    ),
+    "rabbitmq_global_stream_error_precondition_failed_total": "global.stream.error.precondition_failed",
+    "rabbitmq_global_stream_error_authentication_failure_total": "global.stream.error.authentication_failure",
+    "rabbitmq_global_stream_error_frame_too_large_total": "global.stream.error.frame_too_large",
+    "rabbitmq_global_stream_error_sasl_authentication_failure_loopback_total": (
+        "global.stream.error.sasl_authentication_failure_loopback"
+    ),
+    "rabbitmq_global_stream_error_sasl_error_total": "global.stream.error.sasl_error",
+    "rabbitmq_global_stream_error_sasl_mechanism_not_supported_total": (
+        "global.stream.error.sasl_mechanism_not_supported"
+    ),
+    "rabbitmq_stream_segments": "stream.segments",
 }
 
 _GAUGES = {
@@ -234,12 +261,15 @@ _GAUGES = {
     "rabbitmq_queue_messages_unacked_ram": "queue.messages.unacked_ram",
     "rabbitmq_queue_process_memory_bytes": "queue.process_memory_bytes",
     "rabbitmq_queues": "queues",
+    "rabbitmq_detailed_queue_info": "queue.info",
     "rabbitmq_raft_entry_commit_latency_seconds": "raft.entry_commit_latency_seconds",
     "rabbitmq_raft_log_commit_index": "raft.log.commit_index",
     "rabbitmq_raft_log_last_applied_index": "raft.log.last_applied_index",
     "rabbitmq_raft_log_last_written_index": "raft.log.last_written_index",
     "rabbitmq_raft_log_snapshot_index": "raft.log.snapshot_index",
     "rabbitmq_resident_memory_limit_bytes": "resident_memory_limit_bytes",
+    # Stream metrics
+    "rabbitmq_stream_consumer_max_offset_lag": "stream.consumer_max_offset_lag",
 }
 # We submit these metrics as gauges so that we have access to their tags.
 _INFO = {
@@ -337,12 +367,13 @@ _DETAILED_FAMILIES = {
     },
     # Queue Metrics
     "queue_coarse_metrics": {
-        'rabbitmq_queue_messages',
-        'rabbitmq_queue_messages_ready',
-        'rabbitmq_queue_process_reductions_total',
-        'rabbitmq_queue_messages_unacked',
+        "rabbitmq_queue_messages",
+        "rabbitmq_queue_messages_ready",
+        "rabbitmq_queue_process_reductions_total",
+        "rabbitmq_queue_messages_unacked",
+        "rabbitmq_detailed_queue_info",
     },
-    'queue_consumer_count': {"rabbitmq_queue_consumers"},
+    "queue_consumer_count": {"rabbitmq_queue_consumers"},
     "queue_metrics": {
         "rabbitmq_queue_consumers",
         "rabbitmq_queue_consumer_capacity",
@@ -421,6 +452,7 @@ _DETAILED_ONLY_METRICS = {
     "rabbitmq_cluster_vhost_status",
     "rabbitmq_cluster_exchange_name",
     "rabbitmq_cluster_exchange_bindings",
+    "rabbitmq_detailed_queue_info",
 }
 
 
