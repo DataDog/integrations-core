@@ -1,1 +1,1 @@
-Add `certifi` fallback for missing CA certificates
+Update CA certificate loading logic and add fallback to `certifi` when default certificates are not found
