@@ -1117,7 +1117,7 @@ def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: 
         if target_dir:
             cmd.extend(['--dir', target_dir])
 
-        subprocess.run(cmd, check=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(cmd, check=True, text=True, capture_output=True)
     except subprocess.CalledProcessError as e:
         app.display_warning(f"Failed to download artifact: {artifact_name} from run_id={run_id}: {e}")
         app.display_warning(e.stderr)
