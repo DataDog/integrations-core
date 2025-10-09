@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import os
 import ssl
 
 import mock
@@ -11,6 +10,7 @@ from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.tls import TlsConfig
+from datadog_checks.dev.utils import ON_WINDOWS
 
 pytestmark = [pytest.mark.unit]
 
@@ -68,30 +68,11 @@ class TestCert:
             mock_load_cert_chain.assert_called_once()
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
 
-    def test_debug_windows(self, monkeypatch, caplog):
-        bad_cert_file = os.path.join(os.sep, "nonexistent", "path", "to", "ssl", "cert.pem")
-        bad_cert_dir = os.path.join(os.sep, "nonexistent", "path", "to", "ssl", "certs")
-        monkeypatch.setenv("SSL_CERT_FILE", bad_cert_file)
-        monkeypatch.setenv("SSL_CERT_DIR", bad_cert_dir)
-        bad_ssl_paths = ssl.DefaultVerifyPaths(
-            cafile="None",
-            capath="None",
-            openssl_cafile_env="SSL_CERT_FILE",
-            openssl_capath_env="SSL_CERT_DIR",
-            openssl_cafile=bad_cert_file,
-            openssl_capath=bad_cert_dir,
-        )
-        with mock.patch("ssl.get_default_verify_paths", return_value=bad_ssl_paths):
-            with mock.patch("requests.Session.get"):
-                with caplog.at_level(logging.WARNING):
-                    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-                    context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-                    assert context.get_ca_certs() == []
-
+    @pytest.mark.skipif(ON_WINDOWS, reason="Windows uses the default store locations.")
     def test_bad_default_verify_paths(self, monkeypatch, caplog):
         '''The SSL default verify paths can be set incorrectly.'''
-        bad_cert_file = os.path.join(os.sep, "nonexistent", "path", "to", "ssl", "cert.pem")
-        bad_cert_dir = os.path.join(os.sep, "nonexistent", "path", "to", "ssl", "certs")
+        bad_cert_file = "/nonexistent/path/to/ssl/cert.pem"
+        bad_cert_dir = "/nonexistent/path/to/ssl/certs"
         monkeypatch.setenv("SSL_CERT_FILE", bad_cert_file)
         monkeypatch.setenv("SSL_CERT_DIR", bad_cert_dir)
         bad_ssl_paths = ssl.DefaultVerifyPaths(
