@@ -52,7 +52,7 @@
         "metadata_path": "assets/service_checks.json"
       },
       "source_type_id": 10123,
-      "auto_install": true
+      "auto_install": false
     },
     "dashboards": {
       "Snowflake": "assets/dashboards/snowflake.json",
