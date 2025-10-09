@@ -234,7 +234,7 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
             False,  # create_dependency_sizes_file
             None,  # to_dd_site
             True,  # should_abort
-            id="invalid_dependency_commit",
+            id="invalid_commit",
         ),
         pytest.param(
             "linux-x86_64",  # platform

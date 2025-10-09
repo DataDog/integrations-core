@@ -32,9 +32,7 @@ if TYPE_CHECKING:
     "--python", "py_version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed"
 )
 @click.option("--dependency-sizes", type=click.Path(exists=True), help="Path to the dependency sizes file. If no")
-@click.option(
-    "--dependency-commit", help="Commit hash to check the status of. It takes the commit's dependency sizes file."
-)
+@click.option("--commit", help="Commit hash to check the dependency sizes status of.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def status(
@@ -48,7 +46,7 @@ def status(
     to_dd_key: str | None,
     to_dd_site: str | None,
     dependency_sizes: Path | None,
-    dependency_commit: str | None,
+    commit: str | None,
 ) -> None:
     """
     Show the current size of all integrations and dependencies in your local repo.
@@ -73,7 +71,7 @@ def status(
             py_version,
             format,
             to_dd_org,
-            dependency_commit,
+            commit,
             dependency_sizes,
             to_dd_key,
             to_dd_site,
@@ -86,13 +84,13 @@ def status(
         combinations = [(p, v) for p in platforms for v in versions]
 
         mode: Literal["status"] = "status"
-        commits = [dependency_commit] if dependency_commit else None
+        commits = [commit] if commit else None
 
         for plat, ver in combinations:
-            if dependency_commit:
+            if commit:
                 from ddev.cli.size.utils.common_funcs import get_last_dependency_sizes_artifact
 
-                dependency_sizes = get_last_dependency_sizes_artifact(app, dependency_commit, plat, ver, compressed)
+                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat, ver, compressed)
 
             parameters: CLIParameters = {
                 "app": app,
@@ -130,7 +128,7 @@ def validate_parameters(
     py_version: str | None,
     format: list[str],
     to_dd_org: str | None,
-    dependency_commit: str | None,
+    commit: str | None,
     dependency_sizes: Path | None,
     to_dd_key: str | None,
     to_dd_site: str | None,
@@ -143,10 +141,10 @@ def validate_parameters(
     if py_version and py_version not in valid_versions:
         errors.append(f"Invalid version: {py_version!r}")
 
-    if dependency_commit and dependency_sizes:
-        errors.append("Pass either 'dependency_commit' or 'dependency-sizes'. Both options cannot be supplied.")
+    if commit and dependency_sizes:
+        errors.append("Pass either 'commit' or 'dependency-sizes'. Both options cannot be supplied.")
 
-    if dependency_commit and len(dependency_commit) != 40:
+    if commit and len(commit) != 40:
         errors.append("Dependency commit must be a full length commit hash.")
 
     if format:

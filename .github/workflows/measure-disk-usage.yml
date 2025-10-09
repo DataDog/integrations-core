@@ -61,7 +61,7 @@ jobs:
       id: cmd
       run: |
         cmd="ddev size status \
-        --dependency-commit ${{ needs.define-current-commit.outputs.commit }} \
+        --commit ${{ needs.define-current-commit.outputs.commit }} \
         --format json"
 
         if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then # TODO: change to ${{ github.event.workflow_run.event }}
