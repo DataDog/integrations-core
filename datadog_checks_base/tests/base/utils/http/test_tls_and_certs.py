@@ -73,6 +73,8 @@ class TestCert:
         bad_cert_dir = "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/certs"
         monkeypatch.setenv("SSL_CERT_FILE", bad_cert_file)
         monkeypatch.setenv("SSL_CERT_DIR", bad_cert_dir)
+        monkeypatch.setenv("REQUESTS_CA_BUNDLE", r"C:\definitely\missing.pem")
+        monkeypatch.setenv("CURL_CA_BUNDLE", r"C:\definitely\missing.pem")
         bad_ssl_paths = ssl.DefaultVerifyPaths(
             cafile="None",
             capath="None",
