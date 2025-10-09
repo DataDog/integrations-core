@@ -1086,6 +1086,7 @@ def get_current_sizes_json(app: Application, run_id: str, platform: str, py_vers
                 app.display_warning(f"No dependencies resolved for run_id={run_id}, platform={platform}")
             else:
                 app.display_error(f"Failed to download current sizes json: {e}")
+                app.display_warning(e.stderr)
 
             return None
 
@@ -1116,9 +1117,10 @@ def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: 
         if target_dir:
             cmd.extend(['--dir', target_dir])
 
-        subprocess.run(cmd, check=True, text=True)
+        subprocess.run(cmd, check=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
         app.display_warning(f"Failed to download artifact: {artifact_name} from run_id={run_id}: {e}")
+        app.display_warning(e.stderr)
         return None
 
     artifact_path = Path(target_dir) / artifact_name if target_dir else Path(artifact_name)
