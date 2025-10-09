@@ -56,6 +56,47 @@ class TlsConfig(BaseModel, frozen=True):
     tls_verify: bool = True
 
 
+def _load_ca_certs(context, config):
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
+    ca_cert = config.get('tls_ca_cert')
+    try:
+        if ca_cert:
+            ca_cert = os.path.expanduser(ca_cert)
+            if os.path.isdir(ca_cert):
+                context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
+            else:
+                context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
+        else:
+            context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+            if not context.get_ca_certs():
+                LOGGER.warning(
+                    'No CA certificates loaded from system default paths. '
+                    'This may indicate misconfigured SSL_CERT_FILE or SSL_CERT_DIR environment variables. '
+                    'Falling back to certifi certificate bundle.'
+                )
+                try:
+                    import certifi
+
+                    context.load_verify_locations(cafile=certifi.where())
+                except (ImportError, FileNotFoundError) as e:
+                    LOGGER.error('Failed to load fallback certificates from certifi: %s', e)
+    except FileNotFoundError:
+        LOGGER.warning(
+            'TLS CA certificate file not found: %s. Please check the `tls_ca_cert` configuration option.',
+            ca_cert,
+        )
+    intermediate_ca_certs = config.get('tls_intermediate_ca_certs')
+    try:
+        if intermediate_ca_certs:
+            context.load_verify_locations(cadata='\n'.join(intermediate_ca_certs))
+    except ssl.SSLError:
+        LOGGER.warning(
+            "TLS intermediate CA certificate(s) could not be loaded: %s. ",
+            intermediate_ca_certs,
+        )
+
+
 def create_ssl_context(config):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
     # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
@@ -78,32 +119,10 @@ def create_ssl_context(config):
         LOGGER.debug('Setting TLS ciphers to: %s', configured_ciphers)
         context.set_ciphers(configured_ciphers)
 
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
-    ca_cert = config.get('tls_ca_cert')
-    try:
-        if ca_cert:
-            ca_cert = os.path.expanduser(ca_cert)
-            if os.path.isdir(ca_cert):
-                context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
-            else:
-                context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
-        else:
-            context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-    except FileNotFoundError:
-        LOGGER.warning(
-            'TLS CA certificate file not found: %s. Please check the `tls_ca_cert` configuration option.',
-            ca_cert,
-        )
-    intermediate_ca_certs = config.get('tls_intermediate_ca_certs')
-    try:
-        if intermediate_ca_certs:
-            context.load_verify_locations(cadata='\n'.join(intermediate_ca_certs))
-    except ssl.SSLError:
-        LOGGER.warning(
-            "TLS intermediate CA certificate(s) could not be loaded: %s. ",
-            intermediate_ca_certs,
-        )
+    if context.verify_mode == ssl.CERT_NONE:
+        LOGGER.debug('TLS verification is disabled; skipping CA certificate configuration.')
+    else:
+        _load_ca_certs(context, config)
 
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
     client_cert, client_key = config.get('tls_cert'), config.get('tls_private_key')
