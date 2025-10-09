@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import os
 import ssl
 
 import mock
@@ -69,12 +70,10 @@ class TestCert:
 
     def test_bad_default_verify_paths(self, monkeypatch, caplog):
         '''The SSL default verify paths can be set incorrectly.'''
-        bad_cert_file = "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/cert.pem"
-        bad_cert_dir = "/tmp/gitlabci/datadog-agent-build/bin/embedded/ssl/certs"
+        bad_cert_file = os.path.join(os.sep, "nonexistent", "path", "to", "ssl", "cert.pem")
+        bad_cert_dir = os.path.join(os.sep, "nonexistent", "path", "to", "ssl", "certs")
         monkeypatch.setenv("SSL_CERT_FILE", bad_cert_file)
         monkeypatch.setenv("SSL_CERT_DIR", bad_cert_dir)
-        monkeypatch.setenv("REQUESTS_CA_BUNDLE", r"C:\definitely\missing.pem")
-        monkeypatch.setenv("CURL_CA_BUNDLE", r"C:\definitely\missing.pem")
         bad_ssl_paths = ssl.DefaultVerifyPaths(
             cafile="None",
             capath="None",
