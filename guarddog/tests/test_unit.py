@@ -75,6 +75,18 @@ def test_validate_configurations_with_unreadable_dependency_file_path(instance, 
 
 
 @pytest.mark.unit
+def test_check_validate_config(instance, mocker):
+    check = GuarddogCheck("guarddog", {}, [instance])
+    check.package_ecosystem = "pypi"
+    check.path = "/path/to/dependency_file"
+
+    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("os.access", return_value=True)
+
+    assert check.validate_config() is None
+
+
+@pytest.mark.unit
 def test_get_guarddog_output(instance, mocker):
     check = GuarddogCheck("guarddog", {}, [instance])
     expected_stdout = "command output"
@@ -91,17 +103,6 @@ def test_get_guarddog_output(instance, mocker):
     stdout = check.get_guarddog_output(cmd).stdout
 
     assert stdout == expected_stdout
-
-
-@pytest.mark.unit
-def test_check_validate_config_fails(instance, mocker):
-    check = GuarddogCheck("guarddog", {}, [instance])
-    check.package_ecosystem = "pypi"
-    check.path = "/path/to/dependency_file"
-    mocker.patch.object(check, "validate_config", side_effect=ConfigurationError("Invalid configuration"))
-
-    with pytest.raises(ConfigurationError):
-        check.check(None)
 
 
 @pytest.mark.unit

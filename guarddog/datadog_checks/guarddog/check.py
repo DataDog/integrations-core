@@ -24,6 +24,7 @@ class GuarddogCheck(AgentCheck):
             if self.instance.get("dependency_file_path")
             else None
         )
+        self.check_initializations.append(self.validate_config)
 
     def get_guarddog_output(self, cmd_with_abs_path) -> subprocess.CompletedProcess:
         try:
@@ -74,7 +75,6 @@ class GuarddogCheck(AgentCheck):
     def check(self, _):
         try:
             current_time = get_current_datetime()
-            self.validate_config()
 
             guarddog_command = constants.GUARDDOG_COMMAND.format(
                 package_ecosystem=self.package_ecosystem,
