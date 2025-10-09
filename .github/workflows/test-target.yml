@@ -103,7 +103,6 @@ jobs:
 
     env:
       FORCE_COLOR: "1"
-      PYTEST_TIMEOUT: "300"
       PYTHON_VERSION: "${{ inputs.python-version || '3.13' }}"
       SKIP_ENV_NAME: "${{ (inputs.test-py2 && !inputs.test-py3) && 'py3.*' || (!inputs.test-py2 && inputs.test-py3) && 'py2.*' || '' }}"
       # Windows E2E requires Windows containers
@@ -120,6 +119,8 @@ jobs:
       TRACE_CAPTURE_LOG: "trace-captures/output.log"
       # Prefix for artifact names when using minimum base package
       MINIMUM_BASE_PACKAGE_PREFIX: "${{ inputs.minimum-base-package && 'minimum-base-package-' || '' }}"
+      # Add timeout to pytest to force stop hanging integrations.
+      PYTEST_TIMEOUT: "600"
 
     permissions:
        # needed for compute-matrix in test-target.yml
