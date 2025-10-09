@@ -1,7 +1,7 @@
 from collections.abc import Collection
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.containers import hash_mutable
+from datadog_checks.base.utils.containers import hash_mutable_stable
 
 
 def config_set_persistent_cache_id(
@@ -30,4 +30,5 @@ def config_set_persistent_cache_id(
     instance_config_values = tuple(value for key, value in check.instance.items() if key in set_instance_config_options)
 
     selected_values = init_config_values + instance_config_values
-    return str(hash_mutable(selected_values)).replace("-", "")
+
+    return hash_mutable_stable(selected_values)
