@@ -6,8 +6,6 @@
 
 The Cisco Umbrella DNS integration collects DNS and Proxy logs and sends them to Datadog. Using the out-of-the-box logs pipeline, the logs are parsed and enriched for easy searching and analysis. This integration includes several dashboards visualizing total DNS requests, allowed/blocked domains, top blocked categories, proxied traffic over time, and more. If you have Datadog Cloud SIEM, Umbrella DNS logs will be analyzed by threat intelligence for matches against common attacker destinations. DNS logs are also useful for threat hunting and during investigations to compliment logs from other sources.
 
-**Minimum Agent version:** 7.50.2
-
 ## Setup
 
 ### Configuration

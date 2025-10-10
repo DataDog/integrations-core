@@ -10,8 +10,6 @@ This integration ingests the following logs:
 
 This integration collects message logs and send them to Datadog for analysis. The logs are parsed and enriched using Datadog's built-in pipeline, which allows for searching and analysis. Dashboards and Cloud SIEM detection rules are included to help monitor message logs and improve security.
 
-**Minimum Agent version:** 7.67.1
-
 ## Setup
 
 ### Get an API key from the Proofpoint On-Demand Portal

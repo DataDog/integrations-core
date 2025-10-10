@@ -22,8 +22,6 @@ This integration ingests the following logs:
 
 Use out-of-the-box dashboards to gain detailed insights into system events, network events, and data loss prevention events, security detection and observation, and compliance monitoring.
 
-**Minimum Agent version:** 7.56.0
-
 ## Setup
 
 ### Generate API credentials in Trend Micro Vision One Endpoint Security

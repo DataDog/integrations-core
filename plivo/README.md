@@ -5,8 +5,6 @@
 
 The Plivo integration seamlessly collects message (SMS, MMS, and WhatsApp) and voice call data, and sends it to Datadog for comprehensive analysis.
 
-**Minimum Agent version:** 7.51.0
-
 ## Setup
 
 ### Generate API credentials in Plivo

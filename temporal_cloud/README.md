@@ -4,8 +4,6 @@
 
 This integration gathers Temporal Cloud metrics into Datadog, offering insights into system health, workflow efficiency, task execution, and performance bottlenecks.
 
-**Minimum Agent version:** 7.59.1
-
 ## Setup
 
 ### Generate a Metrics endpoint URL in Temporal Cloud

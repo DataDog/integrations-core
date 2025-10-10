@@ -74,8 +74,6 @@ Here is the list of monitors for metrics:
 - High proxy error rate detected
 - High proxy response time detected
 
-**Minimum Agent version:** 7.69.0
-
 ## Setup
 
 **Note**: The following steps are required only for collecting metrics. For log collection, see the `Log collection` section below.
@@ -127,6 +125,7 @@ To collect metrics, you can either use an existing user with **Full Administrato
 ### Installation
 
 **Note**: These steps are only required for collecting logs.
+**Minimum Agent version:** 7.69.0
 
 To install the iboss integration, run the following Agent installation command in your terminal, then complete the configuration steps below. For more information, see the [Integration Management][4] documentation.
 

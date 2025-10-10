@@ -15,8 +15,6 @@ This integration collects logs from the sources listed above and sends them to D
 - [Log Explorer][3]
 - [Cloud SIEM][4]
 
-**Minimum Agent version:** 7.62.3
-
 ## Setup
 
 ### Generate API credentials in Ivanti nZTA

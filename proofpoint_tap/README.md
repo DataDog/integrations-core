@@ -9,8 +9,6 @@ This integration ingests the following logs:
 
 This integration gathers and forwards above mentioned events to Datadog for seamless analysis. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. With preconfigured dashboards, the integration offers clear visibility into activities within the Proofpoint TAP platform. Additionally, it includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
-**Minimum Agent version:** 7.67.1
-
 ## Setup
 
 ### Generate Service Credentials in Proofpoint TAP

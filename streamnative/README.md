@@ -12,8 +12,6 @@ The StreamNative integration collects the following types of [metrics][2]:
 4. Sink Connector
 5. Kafka Connect
 
-**Minimum Agent version:** 7.58.0
-
 ## Setup
 
 ### Generate API credentials in StreamNative

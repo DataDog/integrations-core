@@ -10,8 +10,6 @@ This integration ingests the following logs:
 
 The PingOne integration seamlessly collects the data of PingOne audit logs using the REST APIs. Using the out-of-the-box logs pipeline, the logs are parsed and enriched for easy searching and analysis. This integration includes several dashboards visualizing total Audit events, total successful and total failed login attempts, total successful and total failed kerberos login attempts, and more.
 
-**Minimum Agent version:** 7.54.1
-
 ## Setup
 
 ### Generate API credentials in PingOne
