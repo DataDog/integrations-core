@@ -1,6 +1,6 @@
 {
     "title": "Obsidian Security - Overview",
-    "description": "This Dashboard provides a unified view of Obsidian Security data, combining audit logs, event logs, and alerts.",
+    "description": "This dashboard provides a unified view of Obsidian Security data by combining audit logs, event logs, and alerts.",
     "widgets": [
         {
             "id": 844128196432523,
@@ -26,7 +26,7 @@
             "id": 2776845770585940,
             "definition": {
                 "type": "note",
-                "content": "**[Obsidian Security](https://www.obsidiansecurity.com/)**  is a SaaS security platform that unifies visibility, governance, compliance, and threat defense for critical business applications. It helps organizations protect sensitive data, minimize risk, and streamline management across their SaaS environment.\n\nThis Dashboard provides a unified view of Obsidian Security data, combining audit logs, event logs, and alerts.\n\nFor more information, see the [Obsidian Security](https://docs.datadoghq.com/integrations/obsidian_security/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "**[Obsidian Security](https://www.obsidiansecurity.com/)**  is a SaaS security platform that unifies visibility, governance, compliance, and threat defense for critical business applications. It helps organizations protect sensitive data, minimize risk, and streamline management across their SaaS environment.\n\nThis dashboard provides a unified view of Obsidian Security data by combining audit logs, event logs, and alerts.\n\nFor more information, see the [Obsidian Security](https://docs.datadoghq.com/integrations/obsidian_security/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -95,7 +95,13 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -257,7 +263,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:obsidian-security service:(audit-logs OR events OR alerts) @network.client.ip:* $Service $Client-IP $Client-Country"
+                                                "query": "source:obsidian-security service:(audit-logs OR events OR alerts) -@network.client.ip:\"\" $Service $Client-IP $Client-Country"
                                             },
                                             "indexes": [
                                                 "*"

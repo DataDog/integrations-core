@@ -20,18 +20,15 @@
         "media_type": "image",
         "caption": "Obsidian Security - Alert Insights",
         "image_url": "images/obsidian_security_alert_insights_1.png"
-      },
-      {
+      },{
         "media_type": "image",
         "caption": "Obsidian Security - Alert Insights",
         "image_url": "images/obsidian_security_alert_insights_2.png"
-      },
-      {
+      },{
         "media_type": "image",
         "caption": "Obsidian Security - Alert Insights",
         "image_url": "images/obsidian_security_alert_insights_3.png"
-      },
-      {
+      },{
         "media_type": "image",
         "caption": "Obsidian Security - Alert Insights",
         "image_url": "images/obsidian_security_alert_insights_4.png"
@@ -67,16 +64,16 @@
       "source_type_name": "Obsidian Security",
       "events": {
         "creates_events": false
+      },
+      "dashboards": {
+        "Obsidian Security - Overview": "assets/dashboards/obsidian_security_overview.json",
+        "Obsidian Security - Alert Insights": "assets/dashboards/obsidian_security_alert_insights.json",
+        "Obsidian Security - Event Insights": "assets/dashboards/obsidian_security_event_insights.json",
+        "Obsidian Security - Audit Insights": "assets/dashboards/obsidian_security_audit_insights.json"
+      },
+      "logs": {
+        "source": "obsidian-security"
       }
-    },
-    "dashboards": {
-      "Obsidian Security - Overview": "assets/dashboards/obsidian_security_overview.json",
-      "Obsidian Security - Alert Insights": "assets/dashboards/obsidian_security_alert_insights.json",
-      "Obsidian Security - Event Insights": "assets/dashboards/obsidian_security_event_insights.json",
-      "Obsidian Security - Audit Insights": "assets/dashboards/obsidian_security_audit_insights.json"
-    },
-    "logs": {
-      "source": "obsidian-security"
     }
   },
   "author": {

@@ -728,7 +728,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:obsidian-security service:events @evt.name:AUTHENTICATE @obsidian_security_event.status:FAIL $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
+                                                "query": "source:obsidian-security service:events @evt.name:AUTHENTICATE $Event-Name $Client-IP $Service-Name $Tenant-ID $Client-Country"
                                             },
                                             "indexes": [
                                                 "*"

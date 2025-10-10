@@ -1628,7 +1628,8 @@
                             ],
                             "style": {
                                 "display": {
-                                    "type": "stacked"
+                                    "type": "stacked",
+                                    "legend": "automatic"
                                 },
                                 "palette": "dog_classic"
                             }

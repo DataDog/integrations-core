@@ -223,7 +223,7 @@ pipeline:
             UNKNOWN,Info
             ERROR,Error
             NO_STATUS,Info
-            PARTIAL_SUCCESS,Warning
+            PARTIAL_SUCCESS,Ok
           defaultLookup: Info
           type: lookup-processor
     - type: pipeline

@@ -2457,7 +2457,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:obsidian-security service:alerts @network.client.ip:* $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country",
+                                        "query_string": "source:obsidian-security service:alerts -@network.client.ip:\"\" @network.client.ip:* $Severity $Service-Name $Client-IP $Alert-Name $Tenant-ID $Client-Country",
                                         "indexes": [],
                                         "storage": "hot"
                                     },

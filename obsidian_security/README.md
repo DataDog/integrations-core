@@ -18,7 +18,7 @@ Integrate Obsidian Security with Datadog to gain insights into audit, alerts and
 2. Click the Create token and provide the following details:
    - Token name: A name that can help you identify the token
    - Expiry date: Choose **Forever**
-   - Operation access > Role: Choose **API Role-Level Permissions**
+   - Token access > Role: Choose **API Role-Level Permissions**
    - Service access: Enable **Full data access to all services and tenants**
 3. Click Submit. Copy the Token.
 4. Identify your Obsidian Security region by checking the hostname suffix of your URL:
@@ -28,14 +28,14 @@ Integrate Obsidian Security with Datadog to gain insights into audit, alerts and
 
 ### Connect your Obsidian Security Account to Datadog
 
-1. Add your `Host Region` and `API Token`.
+1. Add your `Region` and `API Token`.
    | Parameters | Description |
    | ---------- | ---------------------------------------------- |
    | Region | The Region of your Obsidian Security |
    | API Token | The API Token of your Obsidian Security |
-   |Get Events| Control the collection of Events from Obsidian Security. <br> Enabled by default.|
-   |Get Alerts| Control the collection of Alerts from Obsidian Security. <br> Enabled by default.|
-   |Get Audit Logs| Control the collection of Audit Logs from Obsidian Security. <br> Enabled by default.|
+   | Get Events | Control the collection of Events from Obsidian Security. <br> Enabled by default.|
+   | Get Alerts | Control the collection of Alerts from Obsidian Security. <br> Enabled by default.|
+   | Get Audit Logs | Control the collection of Audit Logs from Obsidian Security. <br> Enabled by default.|
 2. Click the Save button to save your settings.
 
 ## Data Collected
