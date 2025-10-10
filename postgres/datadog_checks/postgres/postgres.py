@@ -87,7 +87,7 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-MAX_CUSTOM_RESULTS = 100  # Dummy comment
+MAX_CUSTOM_RESULTS = 100  # Dummy comment updated
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
 
