@@ -8,14 +8,84 @@ facets:
     path: evt.name
     source: log
   - groups:
-      - User
-    name: User Email
-    path: usr.email
-    source: log
-  - groups:
       - Event
     name: Event Outcome
     path: evt.outcome
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination City Name
+    path: network.destination.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Code
+    path: network.destination.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Name
+    path: network.destination.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country ISO Code
+    path: network.destination.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country Name
+    path: network.destination.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision ISO Code
+    path: network.destination.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision Name
+    path: network.destination.geoip.subdivision.name
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
     source: log
 pipeline:
   type: pipeline
@@ -29,7 +99,7 @@ pipeline:
       enabled: true
       source: message
       samples:
-        - '<165>Sep 2 11:44:01 ddsfs eyesight[2895]: NAC Policy Log: Source:
+        - '<165>Sep 2 11:44:01 ddsfs forescout-syslog[2895]: NAC Policy Log: Source:
           10.50.15.114, Rule: Policy "Primary Classification" , Match:
           "Windows:Match", Category: Classifier, Details: Host evaluation
           changed from "CounterACT Devices:Pending" to "Windows:Match" due to
@@ -37,7 +107,7 @@ pipeline:
           learned (first time), Function "Workstation" learned (first time),
           Vendor and Model "VMware" learned (first time). Duration: less than a
           second'
-        - "<165>Sep 23 17:53:27 ddsfs eyesight[2992]: Log: Login success by
+        - "<165>Sep 23 17:53:27 ddsfs forescout-syslog[2992]: Log: Login success by
           admin@10.50.13.83. Details: User admin logged in from 10.50.13.83.
           Severity: 6"
       grok:

@@ -7,54 +7,43 @@ tests:
       Reason: Property update: Operating System "Windows" learned (first time),
       Function "Workstation" learned (first time), Vendor and Model "VMware"
       learned (first time). Duration: less than a second'
-    service: nac-events
     result: null
   - sample: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Port bite. Source:
       10.10.10.10. Destination: 20.20.20.20:139"
-    service: threat-protection
     result: null
   - sample: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Scan event. Source:
       10.10.10.10."
-    service: threat-protection
     result: null
   - sample: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Manual event.
       Source: 10.10.10.10"
-    service: threat-protection
     result: null
   - sample: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Block Event: Host:
       10.10.10.10, Target: 20.20.20.20, Time 1469975529, Service: 23/TCP, Is
       Virtual Firewall blocking rule: false, Reason: Port block"
-    service: threat-protection
     result: null
   - sample: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Mail Infection
       Attempt. Source: 10.10.10.10. Details:
       mail_from=sender@from.com,mail_to=recipient@to.com,mail_subject=Check out
       this report"
-    service: threat-protection
     result: null
   - sample: "<165>Sep 23 15:51:32 ddsfs forescout-syslog[2992]: Log: License alert. Details:
       The ForeScout eyeControl license capacity was exceeded.. Severity: 4"
-    service: system-logs
     result: null
   - sample: "<165>Sep 23 17:53:27 ddsfs forescout-syslog[2992]: Log: Login success by
       admin@10.10.10.10. Details: User admin logged in from 10.10.10.10.
       Severity: 6"
-    service: system-logs
     result: null
   - sample: "<165>Sep 25 14:48:09 ddsfs forescout-syslog[2544404]: Log: Login failed demo
       user@10.10.10.10. Details: User abhi failed to login from 10.10.10.10.
       Severity: 4"
-    service: system-logs
     result: null
   - sample: "<165>Sep 23 16:41:22 ddsfs forescout-syslog[2992]: Log: Logout by
       admin@10.10.10.10. Details: User admin@10.10.10.10 logged out. Severity:
       6"
-    service: system-logs
     result: null
   - sample: "<165>Sep 24 01:07:58 ddsfs forescout-syslog[2992]: System statistics: CPU
       usage: 17%, Available memory : 12237100 KB, Used memory: 23337288 KB,
       Available swap: 16777208 KB, Used swap: 11467492 KB"
-    service: system-logs
     result: null
   - sample: "<165>Sep 24 11:28:04 ddsfs forescout-syslog[2992]: Application status:
       CounterACT Appliance is running;Connected clients: admin@10.10.10.10;EM
@@ -75,13 +64,11 @@ tests:
       Data Receiver, Forescout Infrastructure Update Pack, Reports, Packet
       Engine, VMware vSphere, Device Data Publisher, Syslog, User Directory,
       Hardware Inventory, Cloud Data Exchange, DNS Client;;"
-    service: system-logs
     result: null
   - sample: "<165>Sep 19 10:28:46 ddsfs forescout-syslog[2887]: User admin session
       4723885926247600395 changed License Management. Details: Failed to update
       license file on CounterACT Appliance 10.10.10.10. <EOL> Error:<EOL> The
       file format is invalid. The file is not a valid license file."
-    service: user-operations
     result: null
   - sample: "<165>Sep 19 10:10:18 ddsfs forescout-syslog[2887]: User admin session
       935304488040107520 changed License Management. Details: License file has
@@ -89,24 +76,20 @@ tests:
       <EOL> Successful activation details:<EOL> ForeScout forescout-syslog license -
       Type: NFR, Capacity: 100, Status: Valid. Start date: 10 Sep 2025,
       Expiration date: 10 Sep 2028"
-    service: user-operations
     result: null
   - sample: "<165>Sep 18 18:40:13 ddsfs forescout-syslog[232083]: User admin session
       7737223649048649975 changed License Management. Details: Failed to remove
       Connect Module license from CounterACT Appliance 10.50.14.51. <EOL>
       Error:<EOL> Before you can remove the license, first uninstall the module
       in Options > Modules."
-    service: user-operations
     result: null
   - sample: "<165>Sep 19 10:27:57 ddsfs forescout-syslog[2887]: User admin session
       4723885926247600395 changed License Management. Details: Failed to upload
       license file on Enterprise Manager : The file format is invalid. The file
       is not a valid license file."
-    service: user-operations
     result: null
   - sample: "<165>Sep 19 10:57:01 ddsfs forescout-syslog[2887]: User admin session 0 changed
       Segment Configuration. Details: Edited the following Segment Datadog-test
       :<EOL>   <EOL>  Added the following
       Ranges:<EOL>   172.17.0.0-172.17.1.255"
-    service: user-operations
     result: null
