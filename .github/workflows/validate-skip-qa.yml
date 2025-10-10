@@ -8,7 +8,7 @@ on:
 
 jobs:
   validate-skip-qa:
-    if: '!github.event.pull_request.draft'
+    # if: '!github.event.pull_request.draft'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
