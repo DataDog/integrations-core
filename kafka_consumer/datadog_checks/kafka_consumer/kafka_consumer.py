@@ -621,18 +621,44 @@ def _deserialize_json(message):
 
 
 def _deserialize_protobuf(message, schema):
-    """Deserialize a Protobuf message using google.protobuf."""
+    """Deserialize a Protobuf message using google.protobuf with strict validation."""
     try:
-        schema.ParseFromString(message)
+        bytes_consumed = schema.ParseFromString(message)
+
+        # Check if all bytes were consumed (strict validation)
+        if bytes_consumed != len(message):
+            unread_bytes = message[bytes_consumed:]
+            raise ValueError(
+                f"Not all bytes were consumed during Protobuf decoding! "
+                f"Read {bytes_consumed} bytes, but message has {len(message)} bytes. "
+                f"Unread bytes: {unread_bytes.hex()}"
+            )
+
         return MessageToJson(schema)
     except Exception as e:
         raise ValueError(f"Failed to deserialize Protobuf message: {e}")
 
 
 def _deserialize_avro(message, schema):
-    """Deserialize an Avro message using fastavro."""
+    """Deserialize an Avro message using fastavro with strict validation."""
     try:
-        data = schemaless_reader(BytesIO(message), schema)
+        bio = BytesIO(message)
+        initial_position = bio.tell()
+        data = schemaless_reader(bio, schema)
+        final_position = bio.tell()
+
+        # Check if all bytes were consumed (strict validation)
+        bytes_read = final_position - initial_position
+        total_bytes = len(message)
+
+        if bytes_read != total_bytes:
+            unread_bytes = message[bytes_read:]
+            raise ValueError(
+                f"Not all bytes were consumed during Avro decoding! "
+                f"Read {bytes_read} bytes, but message has {total_bytes} bytes. "
+                f"Unread bytes: {unread_bytes.hex()}"
+            )
+
         return json.dumps(data)
     except Exception as e:
         raise ValueError(f"Failed to deserialize Avro message: {e}")

@@ -681,6 +681,107 @@ def test_deserialize_message():
     ) == (None, None, None, None)
 
 
+def test_strict_avro_validation():
+    """Test that Avro deserialization fails when not all bytes are consumed."""
+    key = b'{"name": "Peter Parker"}'
+
+    # Test case 1: Simple primitive string schema with extra bytes
+    # A primitive string in Avro is encoded as: varint length + UTF-8 bytes
+    # An empty string is just: 0x00 (zero length)
+    # If we have 0x00 followed by extra bytes (e.g., magic byte + 4 bytes + stuff),
+    # the string decoder will read the empty string but leave bytes unconsumed
+    string_schema = '"string"'
+    parsed_string_schema = build_schema('avro', string_schema)
+
+    # Message: 0x00 (empty string) + 0x00 (magic byte) + 4 bytes + some random data
+    # The Avro string decoder will only consume the first 0x00, leaving the rest
+    message_with_extra_bytes = b'\x00\x00\x00\x00\x01\x5e\x12\x34\x56\x78'
+
+    # This should now fail because not all bytes are consumed
+    result = deserialize_message(MockedMessage(message_with_extra_bytes, key), 'avro', parsed_string_schema, 'json', '')
+    assert result == (None, None, None, None), "Expected deserialization to fail due to unconsumed bytes"
+
+    # Test case 2: Avro message with trailing garbage bytes after valid data
+    avro_schema = (
+        '{"type": "record", "name": "Book", "namespace": "com.book", '
+        '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+        '{"name": "author", "type": "string"}]}'
+    )
+    parsed_avro_schema = build_schema('avro', avro_schema)
+
+    # Valid Avro message + trailing garbage
+    valid_avro_message = b'\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
+    message_with_trailing_bytes = valid_avro_message + b'\xff\xfe\xfd\xfc'
+
+    # This should now fail because of the trailing bytes
+    result = deserialize_message(
+        MockedMessage(message_with_trailing_bytes, key), 'avro', parsed_avro_schema, 'json', ''
+    )
+    assert result == (None, None, None, None), "Expected deserialization to fail due to trailing bytes"
+
+    # Test case 3: Simple int schema with extra bytes
+    int_schema = '"int"'
+    parsed_int_schema = build_schema('avro', int_schema)
+
+    # Message: 0x02 (int value 1) + extra bytes
+    message_int_with_extra = b'\x02\xde\xad\xbe\xef'
+
+    result = deserialize_message(MockedMessage(message_int_with_extra, key), 'avro', parsed_int_schema, 'json', '')
+    assert result == (None, None, None, None), "Expected deserialization to fail due to unconsumed bytes"
+
+    # Test case 4: Verify that valid messages still work
+    valid_string_message = b'\x0aHello'  # Length 5 (encoded as 0x0a = 10/2 = 5) + "Hello"
+    result = deserialize_message(MockedMessage(valid_string_message, key), 'avro', parsed_string_schema, 'json', '')
+    assert result[0] == '"Hello"', "Expected valid string message to deserialize correctly"
+    assert result[1] is None
+
+    valid_int_message = b'\x02'  # int value 1
+    result = deserialize_message(MockedMessage(valid_int_message, key), 'avro', parsed_int_schema, 'json', '')
+    assert result[0] == '1', "Expected valid int message to deserialize correctly"
+
+
+def test_strict_protobuf_validation():
+    """Test that Protobuf deserialization fails when not all bytes are consumed."""
+    key = b'{"name": "Peter Parker"}'
+
+    # Build the same Book schema used in other tests
+    protobuf_schema = (
+        'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
+        'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
+    )
+    parsed_protobuf_schema = build_schema('protobuf', protobuf_schema)
+
+    # Test case 1: Valid Protobuf message with trailing garbage bytes
+    valid_protobuf_message = (
+        b'\x08\xe8\xba\xb2\xeb\xd1\x9c\x02\x12\x1b\x54\x68\x65\x20\x47\x6f\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65'
+        b'\x1a\x0c\x41\x6c\x61\x6e\x20\x44\x6f\x6e\x6f\x76\x61\x6e'
+    )
+    message_with_trailing_bytes = valid_protobuf_message + b'\xff\xfe\xfd\xfc'
+
+    # This should now fail because of the trailing bytes
+    result = deserialize_message(
+        MockedMessage(message_with_trailing_bytes, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    )
+    assert result == (None, None, None, None), "Expected deserialization to fail due to trailing bytes"
+
+    # Test case 2: Message with extra fields that aren't in the schema
+    # Protobuf will parse this but leave bytes unconsumed if there are truly extra bytes beyond valid fields
+    # Adding a completely invalid trailing byte sequence
+    message_with_invalid_trailer = valid_protobuf_message + b'\x00\x00\x00\x01\x5e'
+
+    result = deserialize_message(
+        MockedMessage(message_with_invalid_trailer, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    )
+    assert result == (None, None, None, None), "Expected deserialization to fail due to unconsumed bytes"
+
+    # Test case 3: Verify that valid messages still work
+    result = deserialize_message(
+        MockedMessage(valid_protobuf_message, key), 'protobuf', parsed_protobuf_schema, 'json', ''
+    )
+    assert result[0] is not None, "Expected valid protobuf message to deserialize correctly"
+    assert 'The Go Programming Language' in result[0]
+
+
 def mocked_time():
     return 400
 
