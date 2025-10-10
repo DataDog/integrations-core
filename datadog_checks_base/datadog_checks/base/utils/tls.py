@@ -56,28 +56,7 @@ class TlsConfig(BaseModel, frozen=True):
     tls_verify: bool = True
 
 
-def create_ssl_context(config):
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
-    # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
-    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
-
-    LOGGER.debug('Creating SSL context with config: %s', config)
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
-    context.check_hostname = is_affirmative(config['tls_verify']) and config.get('tls_validate_hostname', True)
-
-    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-    context.verify_mode = ssl.CERT_REQUIRED if is_affirmative(config['tls_verify']) else ssl.CERT_NONE
-
-    ciphers = config.get('tls_ciphers', [])
-    if isinstance(ciphers, str):
-        # If ciphers is a string, assume that it is formatted correctly
-        configured_ciphers = "ALL" if "ALL" in ciphers else ciphers
-    else:
-        configured_ciphers = "ALL" if "ALL" in ciphers else ":".join(ciphers)
-    if configured_ciphers:
-        LOGGER.debug('Setting TLS ciphers to: %s', configured_ciphers)
-        context.set_ciphers(configured_ciphers)
-
+def _load_ca_certs(context, config):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
     ca_cert = config.get('tls_ca_cert')
@@ -104,6 +83,34 @@ def create_ssl_context(config):
             "TLS intermediate CA certificate(s) could not be loaded: %s. ",
             intermediate_ca_certs,
         )
+
+
+def create_ssl_context(config):
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
+    # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
+    context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+
+    LOGGER.debug('Creating SSL context with config: %s', config)
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
+    context.check_hostname = is_affirmative(config['tls_verify']) and config.get('tls_validate_hostname', True)
+
+    # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
+    context.verify_mode = ssl.CERT_REQUIRED if is_affirmative(config['tls_verify']) else ssl.CERT_NONE
+
+    ciphers = config.get('tls_ciphers', [])
+    if isinstance(ciphers, str):
+        # If ciphers is a string, assume that it is formatted correctly
+        configured_ciphers = "ALL" if "ALL" in ciphers else ciphers
+    else:
+        configured_ciphers = "ALL" if "ALL" in ciphers else ":".join(ciphers)
+    if configured_ciphers:
+        LOGGER.debug('Setting TLS ciphers to: %s', configured_ciphers)
+        context.set_ciphers(configured_ciphers)
+
+    if context.verify_mode == ssl.CERT_NONE:
+        LOGGER.debug('TLS verification is disabled; skipping CA certificate configuration.')
+    else:
+        _load_ca_certs(context, config)
 
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_cert_chain
     client_cert, client_key = config.get('tls_cert'), config.get('tls_private_key')
