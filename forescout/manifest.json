@@ -10,7 +10,48 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Forescout logs",
     "title": "Forescout",
-    "media": [],
+    "media": [
+      {
+        "caption": "Forescout - Overview",
+        "image_url": "images/forescout_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout - Threat Protection",
+        "image_url": "images/forescout_threat_protection_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout - Threat Protection",
+        "image_url": "images/forescout_threat_protection_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout - Threat Protection",
+        "image_url": "images/forescout_threat_protection_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout - NAC Policy Logs",
+        "image_url": "images/forescout_nac_policy_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout - System Logs and Events",
+        "image_url": "images/forescout_system_logs_and_events_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout - System Logs and Events",
+        "image_url": "images/forescout_system_logs_and_events_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout - User Operations",
+        "image_url": "images/forescout_user_operations.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",

@@ -48,7 +48,7 @@ Integrate Forescout with Datadog's pre-built dashboard visualizations to gain in
 1. Login to the Forescout CounterACT appliance using root access via the command shell.
 2. Run the timezone configuration command:
     ```sh
-    fstoll tz
+    fstool tz
     ```
 3. Follow the setup prompts and configure the options as needed:
       ```text
