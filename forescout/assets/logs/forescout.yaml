@@ -201,7 +201,7 @@ pipeline:
         - type: grok-parser
           name: Parse NAC Policy logs
           enabled: true
-          source: message
+          source: additional_details
           samples:
             - "Source: 10.10.10.10, Rule: Manual, Details: Action completed  -
               Send Send Message to Syslog: Message to Syslog : test action,
@@ -289,7 +289,7 @@ pipeline:
         - type: grok-parser
           name: Parse System Log and Events
           enabled: true
-          source: message
+          source: additional_details
           samples:
             - "CounterACT Appliance is running;Connected clients: none.;EM
               connection status: N/A (standalone appliance);Assigned hosts:
@@ -351,7 +351,7 @@ pipeline:
         - type: grok-parser
           name: Parse User Operations Logs
           enabled: true
-          source: message
+          source: additional_details
           samples:
             - "User admin session 4723885926247600395 changed License
               Management. Details: Failed to update license file on CounterACT
@@ -413,6 +413,14 @@ pipeline:
       lookupTable: |-
         successfully,success
         Failed,failed
+      type: lookup-processor
+    - name: Lookup on `action`
+      enabled: true
+      source: action
+      target: action
+      lookupTable: |-
+        activated,activate
+        deactivated,deactivate
       type: lookup-processor
     - type: category-processor
       name: Categorize the `severity`
