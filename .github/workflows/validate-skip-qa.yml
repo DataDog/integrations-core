@@ -2,7 +2,7 @@ name: 'Validate skip QA label'
 
 on:
   pull_request_target:
-    types: [opened, synchronize]
+    types: [opened, synchronize, labeled, unlabeled]
     branches:
       - master
 
