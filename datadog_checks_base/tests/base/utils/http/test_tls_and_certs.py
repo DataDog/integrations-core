@@ -69,7 +69,7 @@ class TestCert:
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
 
     @pytest.mark.skipif(ON_WINDOWS, reason="Windows uses the default store locations.")
-    def test_bad_default_verify_paths_fallback_to_certifi(self, monkeypatch, caplog):
+    def test_bad_default_verify_paths_and_fallback_to_certifi(self, monkeypatch, caplog):
         '''The SSL default verify paths can be set incorrectly.'''
         bad_cert_file = "/nonexistent/path/to/ssl/cert.pem"
         bad_cert_dir = "/nonexistent/path/to/ssl/certs"
