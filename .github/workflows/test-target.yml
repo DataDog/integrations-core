@@ -55,7 +55,7 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: ""
+        default: "datadog/agent:7.71.1-rc.1"
         type: string
       agent-image-py2:
         required: false
@@ -63,7 +63,7 @@ on:
         type: string
       agent-image-windows:
         required: false
-        default: ""
+        default: "datadog/agent:7.71.1-rc.1-servercore"
         type: string
       agent-image-windows-py2:
         required: false
