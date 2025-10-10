@@ -292,6 +292,8 @@ def _assert_complex_config(
                 ),
                 at_least=0,  # TODO this metric includes processlist_host tag which contains a random IP address
             )
+        elif mname == 'mysql.performance.errors_raised' and MYSQL_VERSION_PARSED < parse_version('8.0'):
+            continue
         elif mname == 'mysql.replication.group.member_status':
             aggregator.assert_metric(mname, tags=metric_tags + group_replication_tags, count=expected_counts)
         elif mname in variables.GROUP_REPLICATION_VARS + variables.GROUP_REPLICATION_VARS_8_0_2:
