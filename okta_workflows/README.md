@@ -10,7 +10,15 @@ The Okta Workflows integration collects Okta workflow event logs and sends them 
 ## Setup
 
 ### Generate API Credentials in Okta Workflows
-1. Log in to the [Okta Admin Console][2] as an **admin** which has the [Read-only administrators][3] role.
+You can connect Okta Workflows to Datadog using one of the following authentication methods:
+
+#### Option A: Using OAuth
+1. Log in to the [Okta Admin Console][2].
+2. Navigate to **Applications** > **API Services Integrations** > **Add Integrations** > **Datadog**.
+3. Upon installation, you will be provided with a set of client ID and client secret credentials. Copy these credentials.
+
+#### Option B: Using an API Token
+1. Log in to the [Okta Admin Console][2] as a user with the [Read-only administrators][3] role.
 2. Follow the steps in [this guide][5] to generate an API token.
 
 ### Get Okta Workflows Domain
@@ -21,12 +29,21 @@ The Okta Workflows integration collects Okta workflow event logs and sends them 
      - example.okta-emea.com
 
 ### Connect your Okta Workflows Account to Datadog
-1. Add your API Token and Okta Domain:
+1. Select an authorization method, and based on your chosen method, provide the following parameters:
 
-   | Parameters           | Description                       |
-   |--------------------- |-----------------------------------|
-   | API Token            | The API Key of Okta Workflows    |
-   | Okta Domain          | The Domain of Okta Workflows     |
+   #### If using OAuth:
+   | Parameters           | Description                         |
+   |--------------------- |-----------------------------------  |
+   | Okta Domain          | Domain of your Okta Workflow        |
+   | Client ID            | Client ID for your Okta account     |
+   | Client Secret        | Client Secret for your Okta account |
+
+   #### If using API Token:
+   | Parameters           | Description                         |
+   |--------------------- |-----------------------------------  |
+   | Okta Domain          | Domain of your Okta Workflow        |
+   | API Key              | The API Key for your Okta Workflow  |
+
 
 2. Click the **Save** button to save your settings.
 
@@ -46,7 +63,7 @@ The Okta Workflows integration does not include any events.
 
 ## Support
 
-For further assistance, contact [Datadog Support][3].
+For further assistance, contact [Datadog Support][4].
 
 [1]: https://www.okta.com/products/workflows/
 [2]: https://login.okta.com/
