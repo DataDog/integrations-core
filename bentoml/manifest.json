@@ -41,9 +41,11 @@
       ]
     },
     "dashboards": {
-      "BentoML Placeholder": "assets/dashboards/placeholder.json"
+      "BentoML Overview": "assets/dashboards/bentoml_overview.json"
     },
-    "monitors": {},
+    "monitors": {
+      "BentoML Liveness Monitor": "assets/monitors/bentoml_liveness_monitor.json"
+    },
     "saved_views": {}
   },
   "author": {
