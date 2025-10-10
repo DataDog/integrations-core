@@ -19,7 +19,7 @@ from .metrics import (
     AGGREGATED_ONLY_METRICS,
     DEFAULT_OPENMETRICS,
     MISSING_OPENMETRICS,
-    RABBITMQ_4_0_ADDED,
+    RABBITMQ_4_0_QUEUE_DELIVERY_METRICS,
     SUMMARY_METRICS,
 )
 
@@ -155,7 +155,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
         pytest.param(
             'detailed?family=queue_delivery_metrics',
             "detailed-queue_delivery_metrics.txt",
-            RABBITMQ_4_0_ADDED,
+            RABBITMQ_4_0_QUEUE_DELIVERY_METRICS,
             id="detailed, query queue_delivery_metrics family",
         ),
     ],
