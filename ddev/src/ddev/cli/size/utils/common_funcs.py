@@ -955,13 +955,13 @@ def send_metrics_to_dd(
     app.display("\nMetric summary:")
     app.display(summary)
 
-    app.display_debug(f"Metrics: {metrics}")
+    app.display_debug(f"Sending Metrics: {metrics}")
     api.Metric.send(metrics=metrics)
 
-    app.display_debug(f"N integrations metrics: {n_integrations_metrics}")
+    app.display_debug(f"Sending N integrations metrics: {n_integrations_metrics}")
     api.Metric.send(metrics=n_integrations_metrics)
 
-    app.display_debug(f"N dependencies metrics: {n_dependencies_metrics}")
+    app.display_debug(f"Sending N dependencies metrics: {n_dependencies_metrics}")
     api.Metric.send(metrics=n_dependencies_metrics)
 
 
