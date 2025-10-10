@@ -385,7 +385,7 @@ instances:
     ##     tags:                # (optional) interface level tags
     ##       - "testTagKey:testTagValue"
     ##       - "tagKey2:tagValue2"
-    ##    disabled: true        # (optional) disables monitoring for matched interfaces, default value is false
+    ##     disabled: true        # (optional) disables monitoring for matched interfaces, default value is false
     #
     # interface_configs:
     #   - match_field: name
