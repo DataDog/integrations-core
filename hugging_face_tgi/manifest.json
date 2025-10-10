@@ -46,6 +46,9 @@
       "High queue size": "assets/monitors/queue_size_high.json", 
       "Slow token generation": "assets/monitors/token_generation_slow.json"
     },
+    "dashboards": {
+      "Hugging Face TGI Overview": "assets/dashboards/hugging_face_tgi_overview.json"
+    },
     "saved_views": {}
   },
   "author": {
