@@ -157,6 +157,8 @@ integration/cloud_foundry_api:
 - cloud_foundry_api/**/*
 integration/cloudera:
 - cloudera/**/*
+integration/cloudflare_api_shield:
+- cloudflare_api_shield/**/*
 integration/cockroachdb:
 - cockroachdb/**/*
 integration/cofense_triage:
