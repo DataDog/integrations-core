@@ -1,8 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
 import mock
 import pytest
+import redis
 from redis.exceptions import ResponseError
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -84,7 +87,7 @@ def test__check_total_commands_processed_not_present(check, aggregator, redis_in
     conn.info.return_value = {}
 
     # Run the check
-    redis_check._check_total_commands_processed(conn.info(), [])
+    redis_check._check_info_fields(conn.info(), [])
 
     # Assert that no metrics were sent
     aggregator.assert_metric('redis.net.commands', count=0)
@@ -99,7 +102,7 @@ def test__check_total_commands_processed_present(check, aggregator, redis_instan
     conn.info.return_value = {'total_commands_processed': 1000}
 
     # Run the check
-    redis_check._check_total_commands_processed(conn.info(), ['test_total_commands_processed'])
+    redis_check._check_info_fields(conn.info(), ['test_total_commands_processed'])
 
     # Assert that the `redis.net.commands` metric was sent
     aggregator.assert_metric('redis.net.commands', value=1000, tags=['test_total_commands_processed'])
@@ -163,3 +166,26 @@ def test_slowlog_loud_failure(check, redis_instance):
     with mock.patch.object(redis_check, '_get_conn', return_value=mock_conn):
         with pytest.raises(RuntimeError, match='Some other error'):
             redis_check._check_slowlog()
+
+
+def test_info_command_fallback(check, redis_instance, caplog):
+    """
+    The check should default to `INFO all` and fall back to `INFO`
+    """
+    redis_check = check(redis_instance)
+
+    def mock_info(*args, **kwargs):
+        if kwargs.get('section') == 'all':
+            raise redis.ResponseError()
+        else:
+            return {}
+
+    # Mock the connection object returned by _get_conn
+    mock_conn = mock.MagicMock()
+    mock_conn.info = mock.MagicMock(side_effect=mock_info)
+
+    with mock.patch.object(redis_check, '_get_conn', return_value=mock_conn):
+        with caplog.at_level(logging.DEBUG):
+            redis_check._check_db()
+    mock_conn.info.assert_has_calls((mock.call(section='all'), mock.call(), mock.call('keyspace')))
+    assert any(msg.startswith('`INFO all` command failed, falling back to `INFO`:') for msg in caplog.messages)
