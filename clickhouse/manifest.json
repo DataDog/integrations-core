@@ -39,7 +39,7 @@
       },
       "metrics": {
         "prefix": "clickhouse.",
-        "check": "clickhouse.query.active",
+        "check": "clickhouse.ClickHouseMetrics_Query",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
