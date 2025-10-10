@@ -1,13 +1,13 @@
 name: 'Validate skip QA label'
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize]
     branches:
       - master
 jobs:
   validate-skip-qa:
-    # if: '!github.event.pull_request.draft'
+    if: '!github.event.pull_request.draft'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
