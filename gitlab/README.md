@@ -107,7 +107,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### CI Pipeline Visibility
 
-To configure CI Pipeline Visibility visit the [product set-up page][17]. For more details visit the [official doc][19].
+To configure CI Pipeline Visibility, see the [product setup page][17]. For more details, see [Set up Tracing on a GitLab Pipeline][19].
 
 ## Data Collected
 
