@@ -30,7 +30,7 @@ jobs:
             ddev/**
             datadog_checks_dev/**
             datadog_checks_tests_helper/**
-
+  
       - name: Find comment
         uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
         id: find_comment
