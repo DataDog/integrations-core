@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.2.0 / 2025-10-10
+
+***Added***:
+
+* Add new metric for SSI gradual rollout ([#21599](https://github.com/DataDog/integrations-core/pull/21599))
+
 ## 6.1.0 / 2025-10-02
 
 ***Added***:
