@@ -4,6 +4,7 @@ datadog.cluster_agent.admission_webhooks.cws_exec_mutation_attempts,count,,,,Num
 datadog.cluster_agent.admission_webhooks.cws_pod_mutation_attempts,count,,,,Number of CWS pod mutation attempts by reason and status,0,datadog_cluster_agent,cws pod mutation attempts,,
 datadog.cluster_agent.admission_webhooks.cws_response_duration.count,count,,,,CWS mutating webhook response duration count,0,datadog_cluster_agent,cws response duration count,,
 datadog.cluster_agent.admission_webhooks.cws_response_duration.sum,count,,,,CWS mutating webhook response duration sum,0,datadog_cluster_agent,cws response duration sum,,
+datadog.cluster_agent.admission_webhooks.image_resolution_attempts,count,,,,Number of image resolution attempts for gradual rollout,0,datadog_cluster_agent,image resolution attempts,,
 datadog.cluster_agent.admission_webhooks.library_injection_attempts,count,,,,Number of library injection attempts by language,0,datadog_cluster_agent,library injection attempts,,
 datadog.cluster_agent.admission_webhooks.library_injection_errors,count,,,,Number of library injection failures by language,0,datadog_cluster_agent,library injection errors,,
 datadog.cluster_agent.admission_webhooks.mutation_attempts,gauge,,,,Number of pod mutation attempts by mutation type,0,datadog_cluster_agent,admission webhooks mutation attempts,,
