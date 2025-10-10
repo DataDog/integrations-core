@@ -3,15 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from os import environ
 
-from keystoneauth1 import session
-from keystoneauth1.identity import v3
-from openstack import connection
-from openstack.config import loader
-
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.defaults import DEFAULT_DOMAIN_ID
+
+try:
+    from keystoneauth1 import session
+    from keystoneauth1.identity import v3
+    from openstack import connection
+    from openstack.config import loader
+except:
+    pass
 
 
 class ApiSdk(Api):
@@ -24,6 +27,7 @@ class ApiSdk(Api):
 
         # Set the environment variable to the path of the config file for openstacksdk to find it
         environ["OS_CLIENT_CONFIG_FILE"] = self.config.openstack_config_file_path
+
         self.cloud_config = loader.OpenStackConfig(config_files=[self.config.openstack_config_file_path]).get_one_cloud(
             cloud=self.config.openstack_cloud_name
         )
@@ -72,6 +76,7 @@ class ApiSdk(Api):
             user_domain_name=self.cloud_config.get_auth_args().get('user_domain_name', DEFAULT_DOMAIN_ID),
         )
         keystone_session = session.Session(auth=v3_auth, session=self.http.session)
+
         self.connection = connection.Connection(
             cloud=self.config.openstack_cloud_name, session=keystone_session, region_name=self._region_id
         )

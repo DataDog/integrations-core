@@ -1,0 +1,4 @@
+Stop bundling openstacksdk dependency with the Agent. If using the `openstack_config_file_path` parameter, please install the Openstack SDK manually with this command:
+```shell
+sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install openstacksdk==4.7.0
+```
