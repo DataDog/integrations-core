@@ -1,0 +1,32 @@
+name: Guarddog
+files:
+- name: guarddog.yaml
+  options:
+  - template: logs
+    example:
+    - type: integration
+      service: guarddog
+      source: guarddog
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: package_ecosystem
+      required: true
+      description: "The type of package ecosystem. Supported values: pypi, npm, go and github_action"
+      value:
+        type: string
+        example: <PACKAGE_ECOSYSTEM>
+    - name: dependency_file_path
+      required: true
+      description: "Absolute path to the dependency file you want to monitor."
+      value:
+        type: string
+        example: <DEPENDENCY_FILE_PATH>
+
+    - template: instances/default
+      overrides:
+        min_collection_interval.required: true
+        min_collection_interval.value.example: 86400
+        min_collection_interval.value.minimum: 1
