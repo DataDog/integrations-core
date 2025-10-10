@@ -36,7 +36,13 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: "`qa/skip-qa` label"
-          comment-author: "github-actions"
+
+      - run: |
+          echo ${{ steps.find_comment.outputs.comment-id }}
+          echo ${{ steps.find_comment.outputs.comment-node-id }}
+          echo ${{ steps.find_comment.outputs.comment-body }}
+          echo ${{ steps.find_comment.outputs.comment-author }}
+          echo ${{ steps.find_comment.outputs.comment-created-at }}
 
       - name: Post message - Add skip qa label
         if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
