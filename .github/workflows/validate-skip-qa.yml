@@ -40,12 +40,23 @@ jobs:
             datadog_checks_tests_helper/**
 
       - name: Find comment - Add skip qa label
-        if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
         uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
         id: find_comment_add_label
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: ${{ env.COMMENT_BODY_ADD_LABEL }}
+
+      - name: Delete comment - Add skip qa label
+        if: steps.changed_files.outputs.any_changed == 'false' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa') && steps.find_comment_add_label.outputs.comment-id != ''
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+            script: |
+              const commentId = ${{ steps.find_comment_add_label.outputs.comment-id }};
+              await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: commentId,
+                });
 
       - name: Post message - Add skip qa label
         if: steps.changed_files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'qa/skip-qa') && steps.find_comment_add_label.outputs.comment-id == ''
@@ -95,13 +106,24 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Find comment - Remove skip qa label
-        if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
         uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
         id: find_comment_remove_label
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: "⚠️ **The `qa/skip-qa` label has been added with shippable changes**"
 
+      - name: Delete comment - Remove skip qa label
+        if: steps.changed_files.outputs.any_changed == 'false' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa') && steps.find_comment_remove_label.outputs.comment-id != ''
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+            script: |
+              const commentId = ${{ steps.find_comment_remove_label.outputs.comment-id }};
+              await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: commentId,
+                });
+  
       - name: Post comment - Remove skip qa label
         if: steps.changed_files.outputs.any_changed == 'true' && contains(github.event.pull_request.labels.*.name, 'qa/skip-qa')
         uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
