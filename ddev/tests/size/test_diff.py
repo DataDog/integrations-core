@@ -67,7 +67,7 @@ def test_calculate_diff():
         },
     ]
 
-    result, _, _ = calculate_diff(size_before, size_after, "linux-aarch64", "3.12")
+    result, _, _, _ = calculate_diff(size_before, size_after, "linux-aarch64", "3.12")
 
     expected = [
         {
