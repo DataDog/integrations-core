@@ -235,6 +235,7 @@ jobs:
 
     - name: Run Unit & Integration tests
       if: inputs.latest != true && inputs.minimum-base-package != true
+      timeout-minutes: 60
       env:
         # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
@@ -256,6 +257,7 @@ jobs:
 
     - name: Run Unit & Integration tests with minimum version of base package
       if: inputs.minimum-base-package
+      timeout-minutes: 60
       run: |
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
@@ -274,6 +276,7 @@ jobs:
 
     - name: Run E2E tests with latest base package
       if: inputs.repo == 'core' && !inputs.minimum-base-package
+      timeout-minutes: 60
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
@@ -302,6 +305,7 @@ jobs:
 
     - name: Run E2E tests
       if: inputs.repo != 'core'
+      timeout-minutes: 60
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
@@ -330,14 +334,17 @@ jobs:
 
     - name: Run benchmarks
       if: inputs.benchmark
+      timeout-minutes: 60
       run: ddev test --bench --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Run tests and verify support for the latest version
       if: inputs.latest
+      timeout-minutes: 60
       run: ddev test --latest --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Run E2E tests for the latest version
       if: inputs.latest
+      timeout-minutes: 60
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
         # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
