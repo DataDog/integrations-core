@@ -1,0 +1,40 @@
+{
+    "name": "Forescout unauthorized network access attempt detected",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "source:forescout",
+        "security:attack"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "isMapperMetricsOnly": false,
+    "options": {
+        "detectionMethod": "threshold",
+        "evaluationWindow": 900,
+        "keepAlive": 3600,
+        "maxSignalDuration": 86400
+    },
+    "queries": [
+        {
+            "name": "unauthorized_network_access",
+            "query": "source:forescout service:threat-protection @evt.name:bite-events",
+            "groupByFields": [
+                "@network.client.ip"
+            ],
+            "distinctFields": [],
+            "aggregation": "count"
+        }
+    ],
+    "cases": [
+        {
+            "condition": "unauthorized_network_access > 0",
+            "name": "",
+            "status": "Medium",
+            "notifications": []
+        }
+    ]
+}

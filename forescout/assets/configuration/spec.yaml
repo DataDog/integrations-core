@@ -1,0 +1,10 @@
+name: forescout
+files:
+- name: forescout.yaml
+  options:
+  - template: logs
+    example:
+    - type: tcp/udp
+      port: <port>
+      source: forescout
+      service: forescout

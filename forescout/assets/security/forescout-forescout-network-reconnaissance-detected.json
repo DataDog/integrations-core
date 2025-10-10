@@ -1,0 +1,40 @@
+{
+    "name": "Forescout network reconnaissance detected",
+    "product": [
+        "security_monitoring"
+    ],
+    "defaultRuleId": "",
+    "tags": [
+        "source:forescout",
+        "security:attack"
+    ],
+    "isEnabled": true,
+    "isBeta": true,
+    "isShadowDeployed": true,
+    "isMapperMetricsOnly": false,
+    "options": {
+        "detectionMethod": "threshold",
+        "evaluationWindow": 900,
+        "keepAlive": 3600,
+        "maxSignalDuration": 86400
+    },
+    "queries": [
+        {
+            "name": "network_reconnaissance_detected",
+            "query": "source:forescout service:threat-protection @evt.name:scan-events",
+            "groupByFields": [
+                "@network.client.ip"
+            ],
+            "distinctFields": [],
+            "aggregation": "count"
+        }
+    ],
+    "cases": [
+        {
+            "condition": "network_reconnaissance_detected > 0",
+            "name": "",
+            "status": "Medium",
+            "notifications": []
+        }
+    ]
+}

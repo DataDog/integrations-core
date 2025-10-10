@@ -1,0 +1,95 @@
+id: forescout
+tests:
+  - sample: '<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: NAC Policy Log:
+      Source: 10.10.10.10, Rule: Policy "Primary Classification" , Match:
+      "Windows:Match", Category: Classifier, Details: Host evaluation changed
+      from "CounterACT Devices:Pending" to "Windows:Match" due to condition .
+      Reason: Property update: Operating System "Windows" learned (first time),
+      Function "Workstation" learned (first time), Vendor and Model "VMware"
+      learned (first time). Duration: less than a second'
+    result: null
+  - sample: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Port bite. Source:
+      10.10.10.10. Destination: 20.20.20.20:139"
+    result: null
+  - sample: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Scan event. Source:
+      10.10.10.10."
+    result: null
+  - sample: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Manual event.
+      Source: 10.10.10.10"
+    result: null
+  - sample: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Block Event: Host:
+      10.10.10.10, Target: 20.20.20.20, Time 1469975529, Service: 23/TCP, Is
+      Virtual Firewall blocking rule: false, Reason: Port block"
+    result: null
+  - sample: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Mail Infection
+      Attempt. Source: 10.10.10.10. Details:
+      mail_from=sender@from.com,mail_to=recipient@to.com,mail_subject=Check out
+      this report"
+    result: null
+  - sample: "<165>Sep 23 15:51:32 ddsfs forescout-syslog[2992]: Log: License alert. Details:
+      The ForeScout eyeControl license capacity was exceeded.. Severity: 4"
+    result: null
+  - sample: "<165>Sep 23 17:53:27 ddsfs forescout-syslog[2992]: Log: Login success by
+      admin@10.10.10.10. Details: User admin logged in from 10.10.10.10.
+      Severity: 6"
+    result: null
+  - sample: "<165>Sep 25 14:48:09 ddsfs forescout-syslog[2544404]: Log: Login failed demo
+      user@10.10.10.10. Details: User abhi failed to login from 10.10.10.10.
+      Severity: 4"
+    result: null
+  - sample: "<165>Sep 23 16:41:22 ddsfs forescout-syslog[2992]: Log: Logout by
+      admin@10.10.10.10. Details: User admin@10.10.10.10 logged out. Severity:
+      6"
+    result: null
+  - sample: "<165>Sep 24 01:07:58 ddsfs forescout-syslog[2992]: System statistics: CPU
+      usage: 17%, Available memory : 12237100 KB, Used memory: 23337288 KB,
+      Available swap: 16777208 KB, Used swap: 11467492 KB"
+    result: null
+  - sample: "<165>Sep 24 11:28:04 ddsfs forescout-syslog[2992]: Application status:
+      CounterACT Appliance is running;Connected clients: admin@10.10.10.10;EM
+      connection status: N/A (standalone appliance);Assigned hosts: 144;Engine
+      status: Disabled ;Installed Plugins: Wireless, FireEye HX, Web API,
+      Visibility Content Plugin, NBT Scanner, Security Policy Templates,
+      Centralized Network Controller, Advanced Compliance, IOC Scanner, Cloud
+      Uploader, VMware NSX, Technical Support, Switch Content, External
+      Classifier, Data Publisher, Advanced Tools, DNS Enforce, Azure, IoT
+      Posture Assessment Engine, CEF, Device Profile Library, Connect, Device
+      Classification Engine, Data Exchange (DEX), NIC Vendor DB, Admin API, Web
+      Client, Windows Applications, Flow Analyzer, RADIUS, Linux, Switch,
+      pxGrid, Network Controller, Passive Sensor, OS X, Microsoft SCCM/ECM, DPI,
+      Cloud Classification Gateway, Flow Collector, DNS Query Extension, IoT
+      Posture Assessment Library, HPS Inspection Engine, DHCP Classifier,
+      Windows Vulnerability DB, Active Probing Plugin, Rogue Device, Network
+      Controller Content, HPS Agent Manager, VPN, FireEye NX, Dashboards, AWS,
+      Data Receiver, Forescout Infrastructure Update Pack, Reports, Packet
+      Engine, VMware vSphere, Device Data Publisher, Syslog, User Directory,
+      Hardware Inventory, Cloud Data Exchange, DNS Client;;"
+    result: null
+  - sample: "<165>Sep 19 10:28:46 ddsfs forescout-syslog[2887]: User admin session
+      4723885926247600395 changed License Management. Details: Failed to update
+      license file on CounterACT Appliance 10.10.10.10. <EOL> Error:<EOL> The
+      file format is invalid. The file is not a valid license file."
+    result: null
+  - sample: "<165>Sep 19 10:10:18 ddsfs forescout-syslog[2887]: User admin session
+      935304488040107520 changed License Management. Details: License file has
+      been activated successfully on CounterACT Appliance 10.10.10.10. <EOL>
+      <EOL> Successful activation details:<EOL> ForeScout forescout-syslog license -
+      Type: NFR, Capacity: 100, Status: Valid. Start date: 10 Sep 2025,
+      Expiration date: 10 Sep 2028"
+    result: null
+  - sample: "<165>Sep 18 18:40:13 ddsfs forescout-syslog[232083]: User admin session
+      7737223649048649975 changed License Management. Details: Failed to remove
+      Connect Module license from CounterACT Appliance 10.50.14.51. <EOL>
+      Error:<EOL> Before you can remove the license, first uninstall the module
+      in Options > Modules."
+    result: null
+  - sample: "<165>Sep 19 10:27:57 ddsfs forescout-syslog[2887]: User admin session
+      4723885926247600395 changed License Management. Details: Failed to upload
+      license file on Enterprise Manager : The file format is invalid. The file
+      is not a valid license file."
+    result: null
+  - sample: "<165>Sep 19 10:57:01 ddsfs forescout-syslog[2887]: User admin session 0 changed
+      Segment Configuration. Details: Edited the following Segment Datadog-test
+      :<EOL>   <EOL>  Added the following
+      Ranges:<EOL>   172.17.0.0-172.17.1.255"
+    result: null
