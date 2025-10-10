@@ -13,3 +13,8 @@ files:
             openmetrics_endpoint.description: |
               Endpoint exposing Hugging Face TGI's Prometheus metrics. For more information, refer to
               https://huggingface.co/docs/text-generation-inference/en/basic_tutorials/monitoring 
+    - template: logs
+      example:
+      - type: docker
+        source: hugging_face_tgi
+        service: <SERVICE>
