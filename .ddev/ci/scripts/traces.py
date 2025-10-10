@@ -5,33 +5,33 @@ from __future__ import annotations
 
 import argparse
 import json
-from base64 import b64decode, b64encode
+import socket
+from base64 import b64decode
 from contextlib import closing
 from http.client import HTTPConnection
-from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 def capture(*, record_file: str, port: int) -> None:
-    class RequestHandler(BaseHTTPRequestHandler):
-        def do_PUT(self):
-            content_length = int(self.headers['Content-Length'])
-            body = b64encode(self.rfile.read(content_length)).decode('ascii')
-
-            record = json.dumps(
-                {'path': self.path, 'body': body, 'headers': dict(self.headers.items())}, separators=(',', ':')
-            )
-            with open(record_file, 'a', encoding='utf-8') as f:
-                f.write(f'{record}\n')
-
-            self.log_request(200, content_length)
-            self.send_response_only(200)
-            self.send_header('Server', self.version_string())
-            self.send_header('Date', self.date_time_string())
-            self.end_headers()
-            self.wfile.write(b'OK')
-
-    httpd = HTTPServer(('', port), RequestHandler)
-    httpd.serve_forever()
+    """Minimal socket-based server that just returns 200 OK"""
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind(('127.0.0.1', port))
+    server_socket.listen(1)
+    
+    try:
+        while True:
+            client_socket, _ = server_socket.accept()
+            try:
+                # Single recv to avoid hanging on reading
+                client_socket.recv(4096)
+                # Send 200 OK response
+                client_socket.sendall(b'HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK')
+            finally:
+                client_socket.close()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server_socket.close()
 
 
 def replay(*, record_file: str, port: int) -> None:
@@ -42,7 +42,7 @@ def replay(*, record_file: str, port: int) -> None:
             body = b64decode(record['body'])
             conn.request('PUT', path, body=body, headers=record['headers'])
             response = conn.getresponse()
-            response.read() # Needs to be done to prevent ResponseNotReady.
+            response.read()  # Needs to be done to prevent ResponseNotReady.
             print(response.status, response.reason)
 
 
