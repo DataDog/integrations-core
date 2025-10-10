@@ -73,12 +73,24 @@ tests:
     custom:
       additional_details: "Host: 10.10.10.10, Target: 20.20.20.20, Time: 1469975529, Service: 23/TCP, Is Virtual Firewall blocking rule: false, Reason: Port block"
       appliance: "ddsfs"
+      epoch_time: 1.469975529E9
       event_type_identifier: "Block Event"
       evt:
         name: "block-events"
       identifier: "forescout-syslog"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+        destination:
+          geoip: {}
+          ip: "20.20.20.20"
+          port: 23
+      protocol: "TCP"
+      reason: "Port block"
       service: "threat-protection"
       timestamp: 22851841000
+      virtual_firewall_blocking_rule: false
     message: "<165>Sep 22 11:44:01 ddsfs forescout-syslog[2895]: Block Event: Host: 10.10.10.10, Target: 20.20.20.20, Time: 1469975529, Service: 23/TCP, Is Virtual Firewall blocking rule: false, Reason: Port block"
     service: "threat-protection"
     tags:
@@ -113,7 +125,9 @@ tests:
   sample: "<165>Sep 23 15:51:32 ddsfs forescout-syslog[2992]: Log: License alert. Details: The ForeScout eyeControl license capacity was exceeded.. Severity: 4"
   result:
     custom:
+      activity_type: "License alert"
       appliance: "ddsfs"
+      details: "The ForeScout eyeControl license capacity was exceeded."
       event_type_identifier: "Log"
       evt:
         name: "system-log-events"
@@ -132,15 +146,24 @@ tests:
   sample: "<165>Sep 23 17:53:27 ddsfs forescout-syslog[2992]: Log: Login success by admin@10.10.10.10. Details: User admin logged in from 10.10.10.10. Severity: 6"
   result:
     custom:
+      activity_type: "Login"
       appliance: "ddsfs"
+      details: "User admin logged in from 10.10.10.10"
       event_type_identifier: "Log"
       evt:
         name: "system-log-events"
+        outcome: "success"
       identifier: "forescout-syslog"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
       service: "system-logs"
       severity: 6
       status: "Informational"
       timestamp: 22960407000
+      usr:
+        name: "by admin"
     message: "Login success by admin@10.10.10.10. Details: User admin logged in from 10.10.10.10. Severity: 6"
     service: "system-logs"
     status: "info"
@@ -151,15 +174,24 @@ tests:
   sample: "<165>Sep 25 14:48:09 ddsfs forescout-syslog[2544404]: Log: Login failed demo user@10.10.10.10. Details: User abhi failed to login from 10.10.10.10. Severity: 4"
   result:
     custom:
+      activity_type: "Login"
       appliance: "ddsfs"
+      details: "User abhi failed to login from 10.10.10.10"
       event_type_identifier: "Log"
       evt:
         name: "system-log-events"
+        outcome: "failed"
       identifier: "forescout-syslog"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
       service: "system-logs"
       severity: 4
       status: "Warning"
       timestamp: 23122089000
+      usr:
+        name: "demo user"
     message: "Login failed demo user@10.10.10.10. Details: User abhi failed to login from 10.10.10.10. Severity: 4"
     service: "system-logs"
     status: "warn"
@@ -170,15 +202,23 @@ tests:
   sample: "<165>Sep 23 16:41:22 ddsfs forescout-syslog[2992]: Log: Logout by admin@10.10.10.10. Details: User admin@10.10.10.10 logged out. Severity: 6"
   result:
     custom:
+      activity_type: "Logout"
       appliance: "ddsfs"
+      details: "User admin@10.10.10.10 logged out"
       event_type_identifier: "Log"
       evt:
         name: "system-log-events"
       identifier: "forescout-syslog"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
       service: "system-logs"
       severity: 6
       status: "Informational"
       timestamp: 22956082000
+      usr:
+        name: "admin"
     message: "Logout by admin@10.10.10.10. Details: User admin@10.10.10.10 logged out. Severity: 6"
     service: "system-logs"
     status: "info"
@@ -190,12 +230,17 @@ tests:
   result:
     custom:
       appliance: "ddsfs"
+      available_memory: 1.22371E7
+      available_swap: 1.6777208E7
+      cpu_usage: 17.0
       event_type_identifier: "System statistics"
       evt:
         name: "system-status-messages"
       identifier: "forescout-syslog"
       service: "system-logs"
       timestamp: 22986478000
+      used_memory: 2.3337288E7
+      used_swap: 1.1467492E7
     message: "CPU usage: 17%, Available memory : 12237100 KB, Used memory: 23337288 KB, Available swap: 16777208 KB, Used swap: 11467492 KB"
     service: "system-logs"
     tags:
@@ -206,7 +251,7 @@ tests:
   result:
     custom:
       appliance: "ddsfs"
-      application_status: "<165>Sep 24 11:28:04 ddsfs forescout-syslog[2992]: Application status: CounterACT Appliance is running"
+      application_status: "CounterACT Appliance is running"
       assigned_hosts: 144.0
       em_connection_status: "N/A (standalone appliance)"
       engine_status: "Disabled"
@@ -293,12 +338,24 @@ tests:
   sample: "<165>Sep 19 10:28:46 ddsfs forescout-syslog[2887]: User admin session 4723885926247600395 changed License Management. Details: Failed to update license file on CounterACT Appliance 10.10.10.10. <EOL> Error:<EOL> The file format is invalid. The file is not a valid license file."
   result:
     custom:
+      action: "update"
       appliance: "ddsfs"
+      entity_name: "CounterACT Appliance"
+      error: "The file format is invalid. The file is not a valid license file."
       evt:
         name: "user-operations"
+        outcome: "failed"
       identifier: "forescout-syslog"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
       service: "user-operations"
+      session_id: "4723885926247600395"
+      target: "License Management"
       timestamp: 22588126000
+      usr:
+        name: "admin"
     message: "User admin session 4723885926247600395 changed License Management. Details: Failed to update license file on CounterACT Appliance 10.10.10.10. <EOL> Error:<EOL> The file format is invalid. The file is not a valid license file."
     service: "user-operations"
     tags:
@@ -308,12 +365,24 @@ tests:
   sample: "<165>Sep 19 10:10:18 ddsfs forescout-syslog[2887]: User admin session 935304488040107520 changed License Management. Details: License file has been activated successfully on CounterACT Appliance 10.10.10.10. <EOL> <EOL> Successful activation details:<EOL> ForeScout forescout-syslog license - Type: NFR, Capacity: 100, Status: Valid. Start date: 10 Sep 2025, Expiration date: 10 Sep 2028"
   result:
     custom:
+      action: "activate"
+      additional_license_details: " <EOL> <EOL> Successful activation details:<EOL> ForeScout forescout-syslog license - Type: NFR, Capacity: 100, Status: Valid. Start date: 10 Sep 2025, Expiration date: 10 Sep 2028"
       appliance: "ddsfs"
+      entity_name: "CounterACT Appliance"
       evt:
         name: "user-operations"
+        outcome: "success"
       identifier: "forescout-syslog"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
       service: "user-operations"
+      session_id: "935304488040107520"
+      target: "License Management"
       timestamp: 22587018000
+      usr:
+        name: "admin"
     message: "User admin session 935304488040107520 changed License Management. Details: License file has been activated successfully on CounterACT Appliance 10.10.10.10. <EOL> <EOL> Successful activation details:<EOL> ForeScout forescout-syslog license - Type: NFR, Capacity: 100, Status: Valid. Start date: 10 Sep 2025, Expiration date: 10 Sep 2028"
     service: "user-operations"
     tags:
@@ -323,12 +392,25 @@ tests:
   sample: "<165>Sep 18 18:40:13 ddsfs forescout-syslog[232083]: User admin session 7737223649048649975 changed License Management. Details: Failed to remove Connect Module license from CounterACT Appliance 10.50.14.51. <EOL> Error:<EOL> Before you can remove the license, first uninstall the module in Options > Modules."
   result:
     custom:
+      action: "remove"
       appliance: "ddsfs"
+      entity_name: "CounterACT Appliance"
+      error: "Before you can remove the license, first uninstall the module in Options > Modules."
       evt:
         name: "user-operations"
+        outcome: "failed"
       identifier: "forescout-syslog"
+      module_name: "Connect"
+      network:
+        client:
+          geoip: {}
+          ip: "10.50.14.51"
       service: "user-operations"
+      session_id: "7737223649048649975"
+      target: "License Management"
       timestamp: 22531213000
+      usr:
+        name: "admin"
     message: "User admin session 7737223649048649975 changed License Management. Details: Failed to remove Connect Module license from CounterACT Appliance 10.50.14.51. <EOL> Error:<EOL> Before you can remove the license, first uninstall the module in Options > Modules."
     service: "user-operations"
     tags:
@@ -338,12 +420,20 @@ tests:
   sample: "<165>Sep 19 10:27:57 ddsfs forescout-syslog[2887]: User admin session 4723885926247600395 changed License Management. Details: Failed to upload license file on Enterprise Manager : The file format is invalid. The file is not a valid license file."
   result:
     custom:
+      action: "upload"
       appliance: "ddsfs"
+      entity_name: "Enterprise Manager"
+      error: "The file format is invalid. The file is not a valid license file."
       evt:
         name: "user-operations"
+        outcome: "failed"
       identifier: "forescout-syslog"
       service: "user-operations"
+      session_id: "4723885926247600395"
+      target: "License Management"
       timestamp: 22588077000
+      usr:
+        name: "admin"
     message: "User admin session 4723885926247600395 changed License Management. Details: Failed to upload license file on Enterprise Manager : The file format is invalid. The file is not a valid license file."
     service: "user-operations"
     tags:
@@ -357,8 +447,14 @@ tests:
       evt:
         name: "user-operations"
       identifier: "forescout-syslog"
+      ip_range: "172.17.0.0-172.17.1.255"
+      segment_name: "Datadog-test"
       service: "user-operations"
+      session_id: "0"
+      target: "Segment Configuration"
       timestamp: 22589821000
+      usr:
+        name: "admin"
     message: "User admin session 0 changed Segment Configuration. Details: Edited the following Segment Datadog-test :<EOL>   <EOL>  Added the following Ranges:<EOL>   172.17.0.0-172.17.1.255"
     service: "user-operations"
     tags:
