@@ -264,6 +264,13 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
     )
 
 
+class AttributeErrorMockResponse(MockResponse):
+    """Mock response that raises AttributeError when json() is called."""
+
+    def json(self):
+        raise AttributeError("Qemu Agent not available")
+
+
 @pytest.mark.parametrize(
     ('mock_http_get'),
     [
@@ -283,6 +290,14 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
             },
             id='404',
         ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': AttributeErrorMockResponse()
+                }
+            },
+            id='attribute_error',
+        ),
     ],
     indirect=['mock_http_get'],
 )
@@ -298,36 +313,6 @@ def test_get_hostname_error(dd_run_check, aggregator, instance, caplog):
         "Failed to get hostname for vm 100 on node ip-122-82-3-112; endpoint: http://localhost:8006/api2/json;"
         in caplog.text
     )
-
-
-class AttributeErrorResponse:
-    """Mock response that raises AttributeError when json() is called."""
-
-    def json(self):
-        raise AttributeError("Qemu Agent not available")
-
-
-@pytest.mark.parametrize(
-    ('mock_http_get'),
-    [
-        pytest.param(
-            {'http_error': {'/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': AttributeErrorResponse()}},
-            id='attribute_error',
-        ),
-    ],
-    indirect=['mock_http_get'],
-)
-@pytest.mark.usefixtures('mock_http_get')
-def test_get_hostname_attribute_error(dd_run_check, aggregator, instance, caplog):
-    """Test that AttributeError is handled when Qemu Agent is not available."""
-    check = ProxmoxCheck('proxmox', {}, [instance])
-    check.check_id = 'test:123'
-    caplog.set_level(logging.INFO)
-
-    dd_run_check(check)
-
-    aggregator.assert_metric("proxmox.vm.up", 1, tags=[], hostname="VM 100")
-    assert "Failed to get hostname for vm 100 on node ip-122-82-3-112" in caplog.text
 
 
 @pytest.mark.usefixtures('mock_http_get')
