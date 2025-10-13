@@ -22,11 +22,11 @@ FULL_LENGTH_COMMIT = 40
 
 
 @click.command()
-@click.argument("new_commit")
+@click.argument("commit")
 @click.option(
     "--compare-to",
-    "old_commit",
-    help="Commit to compare to. If not specified, will compare to the previous commit on master",
+    "baseline",
+    help="Commit to compare to.",
 )
 @click.option(
     "--python", "py_version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed"
@@ -49,8 +49,8 @@ FULL_LENGTH_COMMIT = 40
 @click.pass_context
 def diff(
     ctx: click.Context,
-    new_commit: str,
-    old_commit: str | None,
+    commit: str,
+    baseline: str | None,
     platform: str | None,
     py_version: str | None,
     compressed: bool,
@@ -63,11 +63,15 @@ def diff(
     to_dd_site: str | None,
 ) -> None:
     """
-    Compares the size of integrations and dependencies between two commits.
+    Compares the size of integrations and dependencies between COMMIT and the comparisson point defined based on the
+    value of the `--compare-to` option:
 
-        - If only one commit is given on a feature branch, it's compared to the branch's merge base with master.
+        - If `--compare-to` is provided, it will be used as the diff source
+        - If `--compare-to` is not provided, the source will be the merge base with master, if the command is run from
+          a feature branch, or the previous commit if the command is run in the master branch.
 
-        - If only one commit is given while on master, it's compared to the previous commit on master.
+    Both COMMIT and the value of `--compare-to` need to be the full commit sha when the `--use-artifacts` option is
+    provided.
     """
 
     from .utils.common_funcs import (
@@ -85,8 +89,8 @@ def diff(
         valid_platforms = get_valid_platforms(app.repo.path, valid_versions)
         validate_parameters(
             app,
-            old_commit,
-            new_commit,
+            baseline,
+            commit,
             format,
             valid_platforms,
             valid_versions,
@@ -107,14 +111,14 @@ def diff(
 
         mode: Literal["diff"] = "diff"
 
-        if not old_commit:
-            base_commit = app.repo.git.merge_base(new_commit, "origin/master")
-            if base_commit != new_commit:
-                old_commit = base_commit
+        if not baseline:
+            base_commit = app.repo.git.merge_base(commit, "origin/master")
+            if base_commit != commit:
+                baseline = base_commit
             else:
-                old_commit = app.repo.git.log(["hash:%H"], n=2, source=new_commit)[1]["hash"]
+                baseline = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
 
-            app.display(f"Comparing to commit: {old_commit}")
+            app.display(f"Comparing to commit: {baseline}")
         if use_artifacts:
             from .utils.common_funcs import get_status_sizes_from_commit
 
@@ -129,22 +133,22 @@ def diff(
                 }
 
                 try:
-                    old_commit_sizes = get_status_sizes_from_commit(
-                        app, old_commit, plat, ver, compressed, file=False, only_dependencies=False
+                    baseline_sizes = get_status_sizes_from_commit(
+                        app, baseline, plat, ver, compressed, file=False, only_dependencies=False
                     )
-                    new_commit_sizes = get_status_sizes_from_commit(
-                        app, new_commit, plat, ver, compressed, file=False, only_dependencies=False
+                    commit_sizes = get_status_sizes_from_commit(
+                        app, commit, plat, ver, compressed, file=False, only_dependencies=False
                     )
                 except Exception as e:
                     app.abort(str(e))
 
-                if not old_commit_sizes:
-                    app.abort(f"Failed to get sizes for {old_commit=}")
-                if not new_commit_sizes:
-                    app.abort(f"Failed to get sizes for {new_commit=}")
+                if not baseline_sizes:
+                    app.abort(f"Failed to get sizes for {baseline=}")
+                if not commit_sizes:
+                    app.abort(f"Failed to get sizes for {commit=}")
 
                 diff_modules, total_diff[(plat, ver)], old_size[(plat, ver)], new_size[(plat, ver)] = calculate_diff(
-                    old_commit_sizes, new_commit_sizes, plat, ver
+                    baseline_sizes, commit_sizes, plat, ver
                 )
                 output_diff(parameters_artifacts, diff_modules)
                 modules.extend(diff_modules)
@@ -160,7 +164,7 @@ def diff(
         else:
             with GitRepo(repo_url) as gitRepo:
                 try:
-                    date_str, _, _ = gitRepo.get_commit_metadata(old_commit)
+                    date_str, _, _ = gitRepo.get_commit_metadata(baseline)
                     date = datetime.strptime(date_str, "%b %d %Y").date()
                     if date < MINIMUM_DATE:
                         raise ValueError(f"First commit must be after {MINIMUM_DATE.strftime('%b %d %Y')} ")
@@ -181,8 +185,8 @@ def diff(
                             new_size,
                         ) = get_diff(
                             gitRepo,
-                            old_commit,
-                            new_commit,
+                            baseline,
+                            commit,
                             total_diff,
                             old_size,
                             new_size,
@@ -215,7 +219,7 @@ def diff(
                     app,
                     modules,
                     "diff.html",
-                    old_commit,
+                    baseline,
                     quality_gate_threshold,
                     old_size,
                     new_size,
@@ -226,7 +230,7 @@ def diff(
                     app,
                     modules,
                     "diff_table.html",
-                    old_commit,
+                    baseline,
                     quality_gate_threshold,
                     old_size,
                     new_size,
@@ -242,8 +246,8 @@ def diff(
 
 def validate_parameters(
     app: Application,
-    old_commit: str | None,
-    new_commit: str,
+    baseline: str | None,
+    commit: str,
     format: list[str],
     valid_platforms: set[str],
     valid_versions: set[str],
@@ -261,27 +265,27 @@ def validate_parameters(
     elif py_version and py_version not in valid_versions:
         errors.append(f"Invalid version: {py_version}")
 
-    if len(new_commit) < MINIMUM_LENGTH_COMMIT and old_commit and len(old_commit) < MINIMUM_LENGTH_COMMIT:
+    if len(commit) < MINIMUM_LENGTH_COMMIT and baseline and len(baseline) < MINIMUM_LENGTH_COMMIT:
         errors.append(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
 
-    elif len(new_commit) < MINIMUM_LENGTH_COMMIT:
+    elif len(commit) < MINIMUM_LENGTH_COMMIT:
         errors.append(
             f"New commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
         )
 
-    elif old_commit and len(old_commit) < MINIMUM_LENGTH_COMMIT:
+    elif baseline and len(baseline) < MINIMUM_LENGTH_COMMIT:
         errors.append(
             f"Old commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
         )
 
     if use_artifacts:
-        if len(new_commit) < FULL_LENGTH_COMMIT:
+        if len(commit) < FULL_LENGTH_COMMIT:
             errors.append("If --use-artifacts is provided, --new-commit must be a full length commit hash.")
 
-        if old_commit and len(old_commit) < FULL_LENGTH_COMMIT:
+        if baseline and len(baseline) < FULL_LENGTH_COMMIT:
             errors.append("If --use-artifacts is provided, --old-commit must be a full length commit hash.")
 
-    if new_commit and old_commit == new_commit:
+    if baseline == commit:
         errors.append("Commit hashes must be different")
 
     if format:
@@ -304,15 +308,15 @@ def validate_parameters(
 
 def get_diff(
     gitRepo: GitRepo,
-    old_commit: str,
-    new_commit: str,
+    baseline: str,
+    commit: str,
     total_diff: dict[tuple[str, str], int],
     old_size: dict[tuple[str, str], int],
     new_size: dict[tuple[str, str], int],
     params: CLIParameters,
 ) -> tuple[list[FileDataEntry], dict[tuple[str, str], int], dict[tuple[str, str], int], dict[tuple[str, str], int]]:
     files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
-        gitRepo, params["platform"], params["py_version"], old_commit, new_commit, params["compressed"]
+        gitRepo, params["platform"], params["py_version"], baseline, commit, params["compressed"]
     )
 
     (
@@ -379,8 +383,8 @@ def get_repo_info(
     gitRepo: GitRepo,
     platform: str,
     py_version: str,
-    old_commit: str,
-    new_commit: str,
+    baseline: str,
+    commit: str,
     compressed: bool,
 ) -> tuple[list[FileDataEntry], list[FileDataEntry], list[FileDataEntry], list[FileDataEntry]]:
     """
@@ -390,25 +394,25 @@ def get_repo_info(
         gitRepo: An instance of GitRepo for accessing the repository.
         platform: Target platform for dependency resolution.
         version: Python version for dependency resolution.
-        old_commit: The earlier commit SHA to compare.
-        new_commit: The later commit SHA to compare.
+        baseline: The earlier commit SHA to compare.
+        commit: The later commit SHA to compare.
         compressed: Whether to measure compressed sizes.
 
     Returns:
         A tuple of four lists:
-            - files_b: Integration sizes at old_commit
-            - dependencies_b: Dependency sizes at old_commit
-            - files_a: Integration sizes at new_commit
-            - dependencies_a: Dependency sizes at new_commit
+            - files_b: Integration sizes at baseline
+            - dependencies_b: Dependency sizes at baseline
+            - files_a: Integration sizes at commit
+            - dependencies_a: Dependency sizes at commit
     """
     from .utils.common_funcs import get_dependencies, get_files
 
     repo = gitRepo.repo_dir
-    gitRepo.checkout_commit(old_commit)
+    gitRepo.checkout_commit(baseline)
     files_b = get_files(repo, compressed, py_version, platform)
     dependencies_b = get_dependencies(repo, platform, py_version, compressed)
 
-    gitRepo.checkout_commit(new_commit)
+    gitRepo.checkout_commit(commit)
     files_a = get_files(repo, compressed, py_version, platform)
     dependencies_a = get_dependencies(repo, platform, py_version, compressed)
 
@@ -416,14 +420,14 @@ def get_repo_info(
 
 
 def calculate_diff(
-    size_old_commit: list[FileDataEntry], size_new_commit: list[FileDataEntry], platform: str, py_version: str
+    size_baseline: list[FileDataEntry], size_commit: list[FileDataEntry], platform: str, py_version: str
 ) -> tuple[list[FileDataEntry], int, int, int]:
     """
     Computes size differences between two sets of integrations or dependencies.
 
     Args:
-        size_old_commit: Entries from the first (earlier) commit.
-        size_new_commit: Entries from the second (later) commit.
+        size_baseline: Entries from the first (earlier) commit.
+        size_commit: Entries from the second (later) commit.
 
     Returns:
         A list of FileDataEntry items representing only the entries with a size difference.
@@ -431,14 +435,14 @@ def calculate_diff(
     """
     from .utils.common_funcs import convert_to_human_readable_size
 
-    old_commit = {
-        (entry["Name"], entry["Type"], entry["Platform"], entry["Python_Version"]): entry for entry in size_old_commit
+    baseline = {
+        (entry["Name"], entry["Type"], entry["Platform"], entry["Python_Version"]): entry for entry in size_baseline
     }
-    new_commit = {
-        (entry["Name"], entry["Type"], entry["Platform"], entry["Python_Version"]): entry for entry in size_new_commit
+    commit = {
+        (entry["Name"], entry["Type"], entry["Platform"], entry["Python_Version"]): entry for entry in size_commit
     }
 
-    all_names = set(old_commit) | set(new_commit)
+    all_names = set(baseline) | set(commit)
     diffs: list[FileDataEntry] = []
 
     total_diff = 0
@@ -446,8 +450,8 @@ def calculate_diff(
     new_size = 0
 
     for name, _type, platform, py_version in all_names:
-        old = old_commit.get((name, _type, platform, py_version))
-        new = new_commit.get((name, _type, platform, py_version))
+        old = baseline.get((name, _type, platform, py_version))
+        new = commit.get((name, _type, platform, py_version))
         size_old = int(old["Size_Bytes"]) if old else 0
         size_new = int(new["Size_Bytes"]) if new else 0
         delta = size_new - size_old
