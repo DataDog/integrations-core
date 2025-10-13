@@ -137,7 +137,7 @@ jobs:
 
         set +e
 
-        $cmd --compressed  --quality-gate-threshold ${{ secrets.QUALITY_GATE_THRESHOLD_PERCENT }} 
+        $cmd --compressed  --quality-gate-threshold ${{ vars.QUALITY_GATE_THRESHOLD_PERCENT }} 
         exit_code=$?
 
         set -e

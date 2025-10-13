@@ -103,7 +103,6 @@ def diff(
 
         platforms = list(platform or valid_platforms)
         versions = list(py_version or valid_versions)
-        print(platforms, versions)
         combinations = [(p, v) for p in platforms for v in versions]
         total_diff = {}
         old_size = {}
