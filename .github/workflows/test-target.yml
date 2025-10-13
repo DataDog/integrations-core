@@ -238,6 +238,18 @@ jobs:
         mkdir "${{ env.TRACE_CAPTURE_BASE_DIR }}"
         python .ddev/ci/scripts/traces.py capture --port "${{ inputs.trace-agent-port }}" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
+    - name: Verify ddtrace version
+      if: inputs.repo == 'core' && inputs.latest != true && inputs.minimum-base-package != true
+      timeout-minutes: 5
+      run: |-
+        # Run the ddtrace version check if it exists for this integration
+        if [ -f "${{ inputs.target }}/tests/conftest.py" ] && grep -q "def test_ddtrace_version" "${{ inputs.target }}/tests/conftest.py"; then
+          echo "Running ddtrace version verification for ${{ inputs.target }}"
+          ddev -v test ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} -- tests/conftest.py::test_ddtrace_version -s
+        else
+          echo "No ddtrace version test found for ${{ inputs.target }}, skipping verification"
+        fi
+
     - name: Run Unit & Integration tests
       if: inputs.latest != true && inputs.minimum-base-package != true
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
