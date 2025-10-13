@@ -36,15 +36,18 @@ def test_ddtrace_version():
     """Verify ddtrace version for this test run"""
     try:
         import ddtrace
+
         version = ddtrace.__version__
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"DDTRACE VERSION: {version}")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")
         # Assert the expected version for nubtron/bump-ddrace-2
         expected_version = "3.16.0"
         assert version == expected_version, f"Expected ddtrace {expected_version}, got {version}"
     except ImportError:
         pytest.fail("ddtrace is not installed")
+
+
 INSTANCE = {
     'host': HOST,
     'port': PORT,
