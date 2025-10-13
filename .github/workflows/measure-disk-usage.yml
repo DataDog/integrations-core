@@ -37,7 +37,7 @@ jobs:
     - name: Define command
       id: cmd
       run: |
-        cmd="ddev size status \
+        cmd="ddev -v size status \
         --commit ${{ github.event.workflow_run.head_sha }} \
         --format json"
 
