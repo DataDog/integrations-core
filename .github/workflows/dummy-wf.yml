@@ -1,0 +1,10 @@
+on:
+  workflow_run:
+    workflows: ['validate-skip-qa.yml']
+    types: [completed]
+
+jobs:
+  dummy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo github.actor
