@@ -5,7 +5,7 @@ backend_only: false
 installation_sources:
   - barracuda_secure_edge
 facets:
-  - description: "Firewall protocol of the captured Secure Edge event"
+  - description: "Firewall protocol of the captured SecureEdge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -13,7 +13,7 @@ facets:
     path: secure_edge.firewall.protocol
     source: log
     type: string
-  - description: "Firewall rule of the captured Secure Edge event"
+  - description: "Firewall rule of the captured SecureEdge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -21,7 +21,7 @@ facets:
     path: secure_edge.firewall.rule
     source: log
     type: string
-  - description: "Source IP address of the captured Secure Edge event"
+  - description: "Source IP address of the captured SecureEdge event"
     facetType: list
     groups:
       - Barracuda SecureEdge
@@ -31,7 +31,7 @@ facets:
     type: string
 pipeline:
   type: pipeline
-  name: Barracuda Secure Edge
+  name: Barracuda SecureEdge
   enabled: true
   filter:
     query: source:barracuda_secure_edge
