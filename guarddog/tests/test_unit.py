@@ -12,6 +12,44 @@ from datadog_checks.guarddog import GuarddogCheck
 
 dependency_file_path = "/tmp/dependency_file_path/requirements.txt"
 package_ecosystem = "pypi"
+MOCK_RESPONSE = [
+    {
+        "dependency": "flask",
+        "version": "1.0.0",
+        "result": {
+            "issues": 1,
+            "errors": {},
+            "results": {
+                "release_zero": "0.0.0",
+            },
+            "path": "/tmp/tmpmm2wc69i/flask",
+        },
+    },
+    {
+        "dependency": "requests",
+        "version": "1.0.0",
+        "result": {
+            "issues": 1,
+            "errors": {},
+            "results": {
+                "release_zero": "0.0.0",
+            },
+            "path": "/tmp/tmpmm2wc69i/requests",
+        },
+    },
+    {
+        "dependency": "pandas",
+        "version": "1.0.0",
+        "result": {
+            "issues": 1,
+            "errors": {},
+            "results": {
+                "release_zero": "0.0.0",
+            },
+            "path": "/tmp/tmpmm2wc69i/pandas",
+        },
+    },
+]
 
 
 def test_instance_check(dd_run_check, aggregator, instance):
@@ -106,11 +144,14 @@ def test_get_guarddog_output(instance, mocker):
 
 
 @pytest.mark.unit
-def test_check_guarddog_command_successful(instance, mocker):
+def test_check_guarddog_command_successful(example_dependencies, instance, mocker):
     check = GuarddogCheck("guarddog", {}, [instance])
     check.package_ecosystem = "pypi"
     check.path = "/path/to/dependency_file"
-    mock_stdout = json.dumps([{"result": {"results": {"rule1": True, "rule2": False}}}], separators=(",", ":"))
+    mock_stdout = json.dumps(
+        MOCK_RESPONSE,
+        separators=(",", ":"),
+    )
     mock_stderr = ""
     mock_returncode = 0
 
@@ -125,12 +166,13 @@ def test_check_guarddog_command_successful(instance, mocker):
 
     check.check(None)
 
-    mock_send_log.assert_called_once()
+    assert mock_send_log.call_count == len(MOCK_RESPONSE)
 
-    args, _ = mock_send_log.call_args
-    sent_data = args[0]
-
-    assert json.loads(sent_data["message"])["enrichment_details"]["triggered_rules"] == ["rule1"]
+    for call in mock_send_log.call_args_list:
+        args, _ = call
+        sent_data = args[0]
+        assert json.loads(sent_data["message"])['log']["dependency"] in example_dependencies.split("\n")
+        assert json.loads(sent_data["message"])["enrichment_details"]["triggered_rules"] == ["release_zero"]
 
 
 @pytest.mark.unit
@@ -158,14 +200,17 @@ def test_check_guarddog_output_json_decode_error(instance, mocker):
 
 
 @pytest.mark.unit
-def test_check_abs_path_guarddog_not_found(instance, mocker):
+def test_check_abs_path_guarddog_not_found(example_dependencies, instance, mocker):
     check = GuarddogCheck("guarddog", {}, [instance])
     check.package_ecosystem = "pypi"
     check.path = "/path/to/dependency_file"
     mocker.patch.object(check, "validate_config")
     mocker.patch("os.path.exists", return_value=True)
     mocker.patch("os.access", return_value=True)
-    mock_stdout = json.dumps([{"result": {"results": {"rule1": True, "rule2": False}}}], separators=(",", ":"))
+    mock_stdout = json.dumps(
+        MOCK_RESPONSE,
+        separators=(",", ":"),
+    )
     mock_stderr = ""
     mock_returncode = 0
     mocker.patch(
@@ -177,10 +222,13 @@ def test_check_abs_path_guarddog_not_found(instance, mocker):
     )
     mock_send_log = mocker.patch.object(check, "send_log")
     check.check(None)
-    mock_send_log.assert_called_once()
-    args, _ = mock_send_log.call_args
-    sent_data = args[0]
-    assert json.loads(sent_data["message"])["enrichment_details"]["triggered_rules"] == ["rule1"]
+    assert mock_send_log.call_count == len(MOCK_RESPONSE)
+
+    for call in mock_send_log.call_args_list:
+        args, _ = call
+        sent_data = args[0]
+        assert json.loads(sent_data["message"])['log']["dependency"] in example_dependencies.split("\n")
+        assert json.loads(sent_data["message"])["enrichment_details"]["triggered_rules"] == ["release_zero"]
 
 
 @pytest.mark.unit

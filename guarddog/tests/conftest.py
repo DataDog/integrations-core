@@ -12,6 +12,11 @@ INSTANCE = {
 }
 
 
+@pytest.fixture
+def example_dependencies():
+    return "flask\nrequests\npandas"
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
     yield
