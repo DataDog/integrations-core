@@ -6,7 +6,7 @@
             "id": 480110828767514,
             "definition": {
                 "type": "image",
-                "url": "https://cdn-ilecefm.nitrocdn.com/RSlRCEHzSBPBUTPSAFHPqJjsXXkpUKqq/assets/images/source/rev-032e4b5/www.forescout.com/wp-content/uploads/2019/01/forescout-logo.svg",
+                "url": "https://www.forescout.com/wp-content/uploads/2019/01/forescout-logo.svg",
                 "url_dark_theme": "https://docs.forescout.com/assets/img/logo-forescout.svg",
                 "sizing": "contain",
                 "margin": "md",
@@ -570,7 +570,7 @@
             "definition": {
                 "title": "Datadog Cloud SIEM",
                 "title_align": "center",
-                "background_color": "blue",
+                "background_color": "vivid_blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1066,7 +1066,8 @@
                 "x": 0,
                 "y": 20,
                 "width": 12,
-                "height": 10
+                "height": 10,
+                "is_column_break": true
             }
         }
     ],

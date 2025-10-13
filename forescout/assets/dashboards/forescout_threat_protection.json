@@ -6,7 +6,7 @@
             "id": 2986136853484646,
             "definition": {
                 "type": "image",
-                "url": "https://cdn-ilecefm.nitrocdn.com/RSlRCEHzSBPBUTPSAFHPqJjsXXkpUKqq/assets/images/source/rev-032e4b5/www.forescout.com/wp-content/uploads/2019/01/forescout-logo.svg",
+                "url": "https://www.forescout.com/wp-content/uploads/2019/01/forescout-logo.svg",
                 "url_dark_theme": "https://docs.forescout.com/assets/img/logo-forescout.svg",
                 "sizing": "contain",
                 "margin": "md",
@@ -1722,7 +1722,7 @@
                     {
                         "id": 5678931161594277,
                         "definition": {
-                            "title": "Block Events by Reason",
+                            "title": "Top Block Events by Reason",
                             "title_size": "10",
                             "title_align": "left",
                             "type": "toplist",
@@ -1790,9 +1790,9 @@
                         }
                     },
                     {
-                        "id": 6714104103828246,
+                        "id": 773971180633323,
                         "definition": {
-                            "title": "Top Target Port by Blocked Events",
+                            "title": "Protocol by Blocked Events",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1809,7 +1809,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@network.destination.port",
+                                                    "facet": "@protocol",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1860,7 +1860,7 @@
                     {
                         "id": 2657902193527295,
                         "definition": {
-                            "title": "Top Blocked Destination IPs",
+                            "title": "Top Destination IPs by Blocked Events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1923,16 +1923,17 @@
                         "layout": {
                             "x": 0,
                             "y": 7,
-                            "width": 3,
+                            "width": 4,
                             "height": 4
                         }
                     },
                     {
-                        "id": 773971180633323,
+                        "id": 6714104103828246,
                         "definition": {
-                            "title": "Top Protocol by Blocked Events",
+                            "title": "Top Target Port by Blocked Events",
                             "title_size": "16",
                             "title_align": "left",
+                            "type": "toplist",
                             "requests": [
                                 {
                                     "queries": [
@@ -1947,7 +1948,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@protocol",
+                                                    "facet": "@network.destination.port",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1964,9 +1965,6 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
@@ -1983,22 +1981,25 @@
                                     }
                                 }
                             ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "datadog16"
                             }
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 7,
-                            "width": 6,
+                            "width": 4,
                             "height": 4
                         }
                     },
                     {
                         "id": 8981865575750718,
                         "definition": {
-                            "title": "Top Source IPs Blocking Traffic",
+                            "title": "Top Source IPs by Blocked Events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -2059,49 +2060,9 @@
                             }
                         },
                         "layout": {
-                            "x": 9,
+                            "x": 8,
                             "y": 7,
-                            "width": 3,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 910751509456049,
-                        "definition": {
-                            "title": "Event Details",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:forescout service:threat-protection @evt.name:block-events $Appliance $Client-IP $Identifier",
-                                        "indexes": [],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "content",
-                                            "width": "auto"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 11,
-                            "width": 12,
+                            "width": 4,
                             "height": 4
                         }
                     }
@@ -2111,7 +2072,7 @@
                 "x": 0,
                 "y": 51,
                 "width": 12,
-                "height": 16
+                "height": 12
             }
         },
         {
@@ -2444,7 +2405,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 67,
+                "y": 63,
                 "width": 12,
                 "height": 12
             }
