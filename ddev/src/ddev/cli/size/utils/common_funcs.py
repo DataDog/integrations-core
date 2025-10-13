@@ -1077,7 +1077,7 @@ def send_metrics_to_dd(
     n_dependencies: dict[tuple[str, str], int] = {}
 
     gauge_type = MetricIntakeType.GAUGE
-    
+
     sizes: dict[str, dict[str, int]] = {}
 
     for item in modules:
@@ -1145,14 +1145,13 @@ def send_metrics_to_dd(
                 )
             )
 
-    
     configuration = Configuration()
     configuration.request_timeout = (5, 5)
     configuration.api_key = {
         "apiKeyAuth": config_file_info["api_key"],
     }
     configuration.server_variables["site"] = config_file_info["site"]
-    
+
     # Format the sizes dictionary into a human-readable summary
     summary_lines = []
     for platform, py_versions in sizes.items():
@@ -1164,7 +1163,7 @@ def send_metrics_to_dd(
     summary = "\n".join(summary_lines)
 
     total_metrics = len(metrics) + len(n_integrations_metrics) + len(n_dependencies_metrics)
-    
+
     app.display(f"Sending {total_metrics} metrics to Datadog...")
 
     app.display("\nMetric summary:")
@@ -1172,17 +1171,17 @@ def send_metrics_to_dd(
 
     with ApiClient(configuration) as api_client:
         api_instance = MetricsApi(api_client)
-        
+
         app.display_debug(f"Sending Metrics: {metrics}")
         api_instance.submit_metrics(body=MetricPayload(series=metrics))
-        
+
         if mode == "status":
             app.display_debug(f"Sending N integrations metrics: {n_integrations_metrics}")
             api_instance.submit_metrics(body=MetricPayload(series=n_integrations_metrics))
-            
+
             app.display_debug(f"Sending N dependencies metrics: {n_dependencies_metrics}")
             api_instance.submit_metrics(body=MetricPayload(series=n_dependencies_metrics))
-            
+
     print("Metrics sent to Datadog")
 
 
@@ -1232,7 +1231,7 @@ def get_last_dependency_sizes_artifact(
         else:
             app.display_debug("No base commit found, using previous commit")
             previous_commit = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
-                
+
         app.display(f"\n -> Searching for dependency sizes in previous commit: {previous_commit}")
         dep_sizes_json = get_status_sizes_from_commit(
             app, previous_commit, platform, py_version, compressed, file=True, only_dependencies=True
@@ -1281,7 +1280,7 @@ def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
     if run_id:
         app.display_debug(f"Workflow run ID: {run_id}")
     else:
-        app.display_warning(f"No workflow run found for {commit} ({os.path.basename(workflow)})")
+        app.display_error(f"No workflow run found for {commit} ({os.path.basename(workflow)})")
 
     return run_id
 
@@ -1407,14 +1406,14 @@ def get_status_sizes_from_commit(
     Gets the sizes json for a given commit from the measure disk usage workflow.
     '''
     with tempfile.TemporaryDirectory() as tmpdir:
-        if (run_id := get_run_id(commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
+        if (run_id := get_run_id(app, commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
             return []
 
         artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'
         sizes_json = get_artifact(app, run_id, artifact_name, tmpdir)
 
         if not sizes_json:
-            app.display_error(f"No dependency sizes found for {platform} py{py_version} in commit {base_commit}\n")
+            app.display_error(f"No dependency sizes found for {platform} py{py_version} in commit {commit}\n")
             return []
 
         sizes: list[FileDataEntry] | dict[str, DependencyEntry]
