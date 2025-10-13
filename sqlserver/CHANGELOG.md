@@ -22,7 +22,7 @@
 
 * Compile and reuse connection error regex patterns ([#21319](https://github.com/DataDog/integrations-core/pull/21319))
 
-## 22.9.1 / 2025-10-03
+## 22.9.1 / 2025-10-03 / Agent 7.71.1
 
 ***Fixed***:
 
