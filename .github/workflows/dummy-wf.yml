@@ -9,4 +9,6 @@ jobs:
   dummy:
     runs-on: ubuntu-latest
     steps:
-      - run: echo github.actor
+      - run: |
+            echo ${{ github.actor }}
+            echo ${{ github.event.pull_request.number }}
