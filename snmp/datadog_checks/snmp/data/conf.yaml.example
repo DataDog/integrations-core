@@ -370,7 +370,7 @@ instances:
     # collect_topology: true
 
     ## @param collect_vpn - boolean - optional - default: false
-    ## Enable collection of VPN tunnels and route table data
+    ## Enable collection of VPN tunnels and route table data.
     #
     # collect_vpn: true
 
