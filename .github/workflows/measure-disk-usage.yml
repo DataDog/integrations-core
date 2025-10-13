@@ -44,7 +44,7 @@ jobs:
         if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         fi
- 
+
         echo "cmd=$cmd" >> $GITHUB_OUTPUT
 
     - name: Measure disk usage (Uncompressed)
