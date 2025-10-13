@@ -4,7 +4,7 @@
 
 This integration connects to your TeamCity server to submit metrics, service checks, and events, allowing you to monitor the health of your TeamCity projects' build configurations, build runs, server resources, and more.
 
-For more in-depth monitoring of your TeamCity pipelines, check out [CI Pipeline Visibility][26]. CI Pipeline Visibility provides granular insights into your user workflow, lets you access detailed Git metadata, and tracks pipeline performance over time.
+For more in-depth monitoring of your TeamCity pipelines, check out [CI Pipeline Visibility][28]. CI Pipeline Visibility provides granular insights into your user workflow, lets you access detailed Git metadata, and tracks pipeline performance over time.
 
 **Minimum Agent version:** 6.0.0
 
@@ -247,3 +247,4 @@ Need help? Contact [Datadog support][12].
 [25]: https://www.jetbrains.com/help/teamcity/server-startup-properties.html#TeamCity+Internal+Properties
 [26]: https://docs.datadoghq.com/continuous_integration/pipelines/teamcity/
 [27]: /ci/setup/pipeline?provider=teamcity
+[28]: /ci/getting-started
