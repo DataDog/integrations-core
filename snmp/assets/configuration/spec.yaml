@@ -468,7 +468,7 @@ files:
           example: true
           display_default: true
       - name: collect_vpn
-        description: Enable collection of VPN tunnels and route table data
+        description: Enable collection of VPN tunnels and route table data.
         value:
           type: boolean
           example: true
