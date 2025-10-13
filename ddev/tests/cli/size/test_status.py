@@ -123,7 +123,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
     (
         "platform",
         "version",
-        "format",
         "to_dd_org",
         "to_dd_key",
         "commit",
@@ -136,7 +135,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "linux-x86_64",  # platform
             "3.12",  # version
-            ["csv"],  # format
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # commit
@@ -149,7 +147,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "macos-x86_64",  # platform
             "3.12",  # version
-            [],  # format
             None,  # to_dd_org
             None,  # to_dd_key
             "1234567890abcdef1234567890abcdef12345678",  # commit
@@ -162,7 +159,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "linux-aarch64",  # platform
             "3.12",  # version
-            [],  # format
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # commit
@@ -175,7 +171,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "invalid-platform",  # platform
             "3.12",  # version
-            [],  # format
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # commit
@@ -188,7 +183,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "linux-x86_64",  # platform
             "2.7",  # version
-            [],  # format
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # commit
@@ -201,7 +195,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "linux-x86_64",  # platform
             "3.12",  # version
-            [],  # format
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # commit
@@ -214,7 +207,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "linux-x86_64",  # platform
             "3.12",  # version
-            [],  # format
             None,  # to_dd_org
             None,  # to_dd_key
             "1234567890123456789012345678901234567890",  # commit
@@ -226,7 +218,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "linux-x86_64",  # platform
             "3.12",  # version
-            [],  # format
             None,  # to_dd_org
             None,  # to_dd_key
             "1234567890",  # commit
@@ -239,20 +230,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "linux-x86_64",  # platform
             "3.12",  # version
-            ["invalid-format"],  # format
-            None,  # to_dd_org
-            None,  # to_dd_key
-            None,  # commit
-            None,  # dependency_sizes_path
-            False,  # create_dependency_sizes_file
-            None,  # to_dd_site
-            True,  # should_abort
-            id="invalid_format",
-        ),
-        pytest.param(
-            "linux-x86_64",  # platform
-            "3.12",  # version
-            [],  # format
             "test-org",  # to_dd_org
             "test-key",  # to_dd_key
             None,  # commit
@@ -265,7 +242,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "invalid-platform",  # platform
             "2.7",  # version
-            ["invalid-format"],  # format
             "test-org",  # to_dd_org
             "test-key",  # to_dd_key
             "1234567890",  # commit
@@ -278,7 +254,6 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         pytest.param(
             "linux-x86_64",  # platform
             "3.12",  # version
-            [],  # format
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # commit
@@ -286,13 +261,13 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
             False,  # create_dependency_sizes_file
             "test-site",  # to_dd_site
             True,  # should_abort
+            id="to_dd_site_and_not_to_dd_key",
         ),
     ],
 )
 def test_validate_parameters(
     platform: str | None,
     version: str | None,
-    format: list[str] | None,
     to_dd_org: str | None,
     to_dd_key: str | None,
     commit: str | None,
@@ -321,7 +296,6 @@ def test_validate_parameters(
                 valid_versions,
                 platform,
                 version,
-                format,
                 to_dd_org,
                 commit,
                 dependency_sizes,
@@ -336,7 +310,6 @@ def test_validate_parameters(
             valid_versions,
             platform,
             version,
-            format,
             to_dd_org,
             commit,
             dependency_sizes,

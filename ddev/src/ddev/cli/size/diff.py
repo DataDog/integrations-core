@@ -91,7 +91,6 @@ def diff(
             app,
             baseline,
             commit,
-            format,
             valid_platforms,
             valid_versions,
             platform,
@@ -102,8 +101,9 @@ def diff(
             use_artifacts,
         )
 
-        platforms = valid_platforms if platform is None else [platform]
-        versions = valid_versions if py_version is None else [py_version]
+        platforms = list(platform or valid_platforms)
+        versions = list(py_version or valid_versions)
+        print(platforms, versions)
         combinations = [(p, v) for p in platforms for v in versions]
         total_diff = {}
         old_size = {}
@@ -248,7 +248,6 @@ def validate_parameters(
     app: Application,
     baseline: str | None,
     commit: str,
-    format: list[str],
     valid_platforms: set[str],
     valid_versions: set[str],
     platform: str | None,
@@ -287,11 +286,6 @@ def validate_parameters(
 
     if baseline == commit:
         errors.append("Commit hashes must be different")
-
-    if format:
-        for fmt in format:
-            if fmt not in ["png", "csv", "markdown", "json"]:
-                errors.append(f"Invalid format: {fmt}. Only png, csv, markdown, json, and html are supported.")
 
     if to_dd_site and not to_dd_key:
         errors.append("If --to-dd-site is provided, --to-dd-key must also be provided.")

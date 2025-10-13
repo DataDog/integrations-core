@@ -205,12 +205,12 @@ def mock_size_diff_no_diff_dependencies():
         ["commit1", "--compare-to", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed"],
     ],
     ids=[
-        "no options",
+        "no_options",
         "compressed",
-        "all formats",
-        "show gui",
-        "with platform and version",
-        "with platform, version and compressed",
+        "all_formats",
+        "show_gui",
+        "with_platform_and_version",
+        "with_platform_version_and_compressed",
     ],
 )
 def test_diff_options(ddev, mock_size_diff_dependencies, diff_args):
@@ -228,11 +228,11 @@ def test_diff_options(ddev, mock_size_diff_dependencies, diff_args):
         ["commit1", "--compare-to", "commit2", "--show-gui"],
     ],
     ids=[
-        "platform, python and compressed",
-        "no options",
+        "platform_python_and_compressed",
+        "no_options",
         "compressed",
-        "all formats",
-        "show gui",
+        "all_formats",
+        "show_gui",
     ],
 )
 def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_args):
@@ -243,14 +243,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
 
 
 @pytest.mark.parametrize(
-    "first_commit, second_commit, format_list, platform, version, to_dd_org, to_dd_key,"
-    "to_dd_site, use_artifacts, error_expected",
+    "commit, baseline, platform, version, to_dd_org, to_dd_key,to_dd_site, use_artifacts, error_expected",
     [
-        # invalid platform
-        (
-            "abcdefg",  # first_commit
-            "bcdefgh",  # second_commit
-            [],  # format_list
+        pytest.param(
+            "abcdefg",  # commit
+            "bcdefgh",  # baseline
             "invalid-platform",  # platform
             "3.9",  # version
             None,  # to_dd_org
@@ -258,12 +255,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             False,  # use_artifacts
             True,  # error_expected
+            id="invalid_platform",
         ),
-        # invalid version
-        (
-            "abcdefg",  # first_commit
-            "bcdefgh",  # second_commit
-            [],  # format_list
+        pytest.param(
+            "abcdefg",  # commit
+            "bcdefgh",  # baseline
             "linux-x86_64",  # platform
             "invalid-version",  # version
             None,  # to_dd_org
@@ -271,12 +267,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             False,  # use_artifacts
             True,  # error_expected
+            id="invalid_version",
         ),
-        # both commits too short
-        (
-            "abc",  # first_commit
-            "bcd",  # second_commit
-            [],  # format_list
+        pytest.param(
+            "abc",  # commit
+            "bcd",  # baseline
             "linux-x86_64",  # platform
             "3.9",  # version
             None,  # to_dd_org
@@ -284,12 +279,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             False,  # use_artifacts
             True,  # error_expected
+            id="both_commits_too_short",
         ),
-        # first commit too short
-        (
-            "abc",  # first_commit
-            "bcdefgh",  # second_commit
-            [],  # format_list
+        pytest.param(
+            "abc",  # commit
+            "bcdefgh",  # baseline
             "linux-x86_64",  # platform
             "3.9",  # version
             None,  # to_dd_org
@@ -297,12 +291,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             False,  # use_artifacts
             True,  # error_expected
+            id="commit_too_short",
         ),
-        # second commit too short
-        (
-            "abcdefg",  # first_commit
-            "bcd",  # second_commit
-            [],  # format_list
+        pytest.param(
+            "abcdefg",  # commit
+            "bcd",  # baseline
             "linux-x86_64",  # platform
             "3.9",  # version
             None,  # to_dd_org
@@ -310,12 +303,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             False,  # use_artifacts
             True,  # error_expected
+            id="baseline_too_short",
         ),
-        # same commits
-        (
-            "abcdefg",  # first_commit
-            "abcdefg",  # second_commit
-            [],  # format_list
+        pytest.param(
+            "abcdefg",  # commit
+            "abcdefg",  # baseline
             "linux-x86_64",  # platform
             "3.9",  # version
             None,  # to_dd_org
@@ -323,25 +315,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             False,  # use_artifacts
             True,  # error_expected
+            id="same_commits",
         ),
-        # invalid format
-        (
-            "abcdefg",  # first_commit
-            "bcdefgh",  # second_commit
-            ["invalid-format"],  # format_list
-            "linux-x86_64",  # platform
-            "3.9",  # version
-            None,  # to_dd_org
-            None,  # to_dd_key
-            None,  # to_dd_site
-            False,  # use_artifacts
-            True,  # error_expected
-        ),
-        # multiple errors
-        (
-            "abc",  # first_commit
-            "abcdefg",  # second_commit
-            ["invalid-format"],  # format_list
+        pytest.param(
+            "abc",  # commit
+            "abcdefg",  # baseline
             "invalid-platform",  # platform
             "3.9",  # version
             None,  # to_dd_org
@@ -349,12 +327,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             False,  # use_artifacts
             True,  # error_expected
+            id="multiple_errors",
         ),
-        # valid parameters
-        (
-            "abcdefg",  # first_commit
-            "bcdefgh",  # second_commit
-            ["png"],  # format_list
+        pytest.param(
+            "abcdefg",  # commit
+            "bcdefgh",  # baseline
             "linux-x86_64",  # platform
             "3.9",  # version
             None,  # to_dd_org
@@ -362,12 +339,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             False,  # use_artifacts
             False,  # error_expected
+            id="valid_parameters",
         ),
-        # valid parameters without optional values
-        (
-            "abcdefg",  # first_commit
-            "bcdefgh",  # second_commit
-            [],  # format_list
+        pytest.param(
+            "abcdefg",  # commit
+            "bcdefgh",  # baseline
             None,  # platform
             None,  # version
             None,  # to_dd_org
@@ -375,12 +351,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             False,  # use_artifacts
             False,  # error_expected
+            id="valid_parameters_without_optional_values",
         ),
-        # valid parameters with to_dd_site and to_dd_key
-        (
-            "abcdefg",  # first_commit
-            "bcdefgh",  # second_commit
-            [],  # format_list
+        pytest.param(
+            "abcdefg",  # commit
+            "bcdefgh",  # baseline
             None,  # platform
             None,  # version
             None,  # to_dd_org
@@ -388,12 +363,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             "site",  # to_dd_site
             False,  # use_artifacts
             False,  # error_expected
+            id="valid_parameters_with_to_dd_site_and_to_dd_key",
         ),
-        # error with to_dd_site and not to_dd_key
-        (
-            "abcdefg",  # first_commit
-            "bcdefgh",  # second_commit
-            [],  # format_list
+        pytest.param(
+            "abcdefg",  # commit
+            "bcdefgh",  # baseline
             None,  # platform
             None,  # version
             None,  # to_dd_org
@@ -401,12 +375,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             "site",  # to_dd_site
             False,  # use_artifacts
             True,  # error_expected
+            id="error_with_to_dd_site_and_not_to_dd_key",
         ),
-        # error with to_dd_org and to_dd_key
-        (
-            "abcdefg",  # first_commit
-            "bcdefgh",  # second_commit
-            [],  # format_list
+        pytest.param(
+            "abcdefg",  # commit
+            "bcdefgh",  # baseline
             None,  # platform
             None,  # version
             "org",  # to_dd_org
@@ -414,12 +387,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             False,  # use_artifacts
             True,  # error_expected
+            id="error_with_to_dd_org_and_to_dd_key",
         ),
-        # error with use_artifacts and new_commit not full length
-        (
-            "abcdefg",  # first_commit
-            "bcdefgh",  # second_commit
-            ["png"],  # format_list
+        pytest.param(
+            "abcdefg",  # commit
+            "bcdefgh",  # baseline
             "linux-x86_64",  # platform
             "3.9",  # version
             None,  # to_dd_org
@@ -427,12 +399,11 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             True,  # use_artifacts
             True,  # error_expected
+            id="error_with_use_artifacts_and_new_commit_not_full_length",
         ),
-        # valid with use_artifacts and new_commit full length
-        (
-            None,  # first_commit
-            "d8e70aef0f40ab7b9fb4c783d4e250d74154caa1",  # second_commit
-            [],  # format_list
+        pytest.param(
+            None,  # commit
+            "d8e70aef0f40ab7b9fb4c783d4e250d74154caa1",  # baseline
             None,  # platform
             None,  # version
             None,  # to_dd_org
@@ -440,30 +411,13 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_site
             True,  # use_artifacts
             False,  # error_expected
+            id="valid_with_use_artifacts_and_old_commit_full_length",
         ),
-    ],
-    ids=[
-        "invalid platform",
-        "invalid version",
-        "both commits too short",
-        "first commit too short",
-        "second commit too short",
-        "same commits",
-        "invalid format",
-        "multiple errors",
-        "valid parameters",
-        "valid parameters without optional values",
-        "valid parameters with to_dd_site and to_dd_key",
-        "error with to_dd_site and not to_dd_key",
-        "error with to_dd_org and to_dd_key",
-        "error with use_artifacts and new_commit not full length",
-        "valid with use_artifacts and old_commit full length",
     ],
 )
 def test_validate_parameters(
-    first_commit: str | None,
-    second_commit: str,
-    format_list: list[str],
+    commit: str | None,
+    baseline: str,
     platform: str | None,
     version: str | None,
     to_dd_org: str | None,
@@ -482,9 +436,8 @@ def test_validate_parameters(
         with pytest.raises(SystemExit):
             validate_parameters(
                 app,
-                first_commit,
-                second_commit,
-                format_list,
+                commit,
+                baseline,
                 valid_platforms,
                 valid_versions,
                 platform,
@@ -498,9 +451,8 @@ def test_validate_parameters(
     else:
         validate_parameters(
             app,
-            first_commit,
-            second_commit,
-            format_list,
+            commit,
+            baseline,
             valid_platforms,
             valid_versions,
             platform,

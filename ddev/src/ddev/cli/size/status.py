@@ -69,7 +69,6 @@ def status(
             valid_versions,
             platform,
             py_version,
-            format,
             to_dd_org,
             commit,
             dependency_sizes,
@@ -130,7 +129,6 @@ def validate_parameters(
     valid_versions: set[str],
     platform: str | None,
     py_version: str | None,
-    format: list[str],
     to_dd_org: str | None,
     commit: str | None,
     dependency_sizes: Path | None,
@@ -150,11 +148,6 @@ def validate_parameters(
 
     if commit and len(commit) != 40:
         errors.append("Dependency commit must be a full length commit hash.")
-
-    if format:
-        for fmt in format:
-            if fmt not in ["png", "csv", "markdown", "json"]:
-                errors.append(f"Invalid format: {fmt!r}. Only png, csv, markdown, and json are supported.")
 
     if dependency_sizes and not dependency_sizes.is_file():
         errors.append(f"Dependency sizes file does not exist: {dependency_sizes!r}")
