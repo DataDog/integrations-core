@@ -1,14 +1,14 @@
 name: Dummy workflow
 
 on:
-  pull_request:
-    branches:
-      - master
+  workflow_run:
+    workflows:
+      - 'Resolve Dependencies and Build Wheels'
 
 jobs:
   dummy:
     runs-on: ubuntu-latest
     steps:
       - run: |
-            echo ${{ github.actor }}
-            echo ${{ github.event.pull_request.number }}
+            echo ${{ github.event.workflow_run.head_branch }}
+           
