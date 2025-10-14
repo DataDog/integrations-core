@@ -61,10 +61,7 @@ def _load_certifi_fallback(context):
     try:
         import certifi
     except ImportError:
-        LOGGER.warning(
-            'No CA certificates found in system default paths and certifi package is not installed. '
-            'TLS verification may fail.'
-        )
+        LOGGER.warning('Failed to import certifi, TLS verification may fail.')
         return
 
     try:
@@ -105,7 +102,7 @@ def _load_ca_certs(context, config):
 
         # Check if any certs were actually loaded
         if not context.get_ca_certs():
-            LOGGER.debug('No CA certificates loaded from system default paths, attempting certifi fallback.')
+            LOGGER.info('No CA certificates loaded from system default paths, attempting certifi fallback.')
             _load_certifi_fallback(context)
 
     # Load intermediate CA certs if provided

@@ -85,7 +85,7 @@ class TestCert:
         )
         with mock.patch("ssl.get_default_verify_paths", return_value=bad_ssl_paths):
             with mock.patch("requests.Session.get"):
-                with caplog.at_level(logging.DEBUG):
+                with caplog.at_level(logging.INFO):
                     http = RequestsWrapper({"tls_verify": True}, {})
                     assert ssl.get_default_verify_paths() == bad_ssl_paths
                     assert http.session.adapters["https://"].ssl_context.get_ca_certs() != []
