@@ -13,8 +13,13 @@
         "title": "Squid",
         "media": [
             {
-                "caption": "Squid",
-                "image_url": "images/squid.png",
+                "caption": "Squid - 1",
+                "image_url": "images/squid_1.png",
+                "media_type": "image"
+            },
+            {
+                "caption": "Squid - 2",
+                "image_url": "images/squid_2.png",
                 "media_type": "image"
             }
         ],
