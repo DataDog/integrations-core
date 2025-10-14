@@ -39,6 +39,8 @@ instances:
     - kdc
 ```
 
+**Note:** The Datadog Agent might not have access to all the services (e.g. NTDS). See [Service permissions][12] for more information to grant access.
+
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `active_directory` under the Checks section.
@@ -102,3 +104,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://github.com/DataDog/integrations-core/blob/7.33.x/active_directory/datadog_checks/active_directory/data/conf.yaml.example
 [11]: https://docs.datadoghq.com/integrations/windows-service/
+[12]: https://docs.datadoghq.com/integrations/windows-service/#service-permissions
