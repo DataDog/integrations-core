@@ -34,3 +34,5 @@ telemetry_scrape_duration_seconds_sum{registry="detailed",content_type="text/pla
 # HELP telemetry_scrape_size_bytes Scrape size, not encoded
 telemetry_scrape_size_bytes_count{registry="detailed",content_type="text/plain; version=0.0.4"} 5
 telemetry_scrape_size_bytes_sum{registry="detailed",content_type="text/plain; version=0.0.4"} 13684
+rabbitmq_detailed_queue_info{vhost="/",queue="queue2",queue_type="rabbit_classic_queue",membership="leader"} 1
+rabbitmq_detailed_queue_info{vhost="/",queue="queue3",queue_type="rabbit_classic_queue",membership="leader"} 1
