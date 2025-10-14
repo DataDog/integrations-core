@@ -361,6 +361,8 @@ integration/kafka_consumer:
 - kafka_consumer/**/*
 integration/karpenter:
 - karpenter/**/*
+integration/kandji:
+- kandji/**/*
 integration/keda:
 - keda/**/*
 integration/keeper:
