@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 import click
 
@@ -70,8 +70,7 @@ def diff(
         - If `--compare-to` is not provided, the source will be the merge base with master, if the command is run from
           a feature branch, or the previous commit if the command is run in the master branch.
 
-    Both COMMIT and the value of `--compare-to` need to be the full commit sha when the `--use-artifacts` option is
-    provided.
+    Both COMMIT and the value of `--compare-to` need to be the full commit sha.
     """
 
     from .utils.common_funcs import (
@@ -98,7 +97,6 @@ def diff(
             to_dd_org,
             to_dd_key,
             to_dd_site,
-            use_artifacts,
         )
 
         platforms = list(platform or valid_platforms)
@@ -107,8 +105,6 @@ def diff(
         total_diff = {}
         old_size = {}
         new_size = {}
-
-        mode: Literal["diff"] = "diff"
 
         if not baseline:
             base_commit = app.repo.git.merge_base(commit, "origin/master")
@@ -156,9 +152,9 @@ def diff(
                         app, total_diff[(plat, ver)], old_size[(plat, ver)], quality_gate_threshold, plat, ver
                     )
                 if to_dd_org or to_dd_key:
-                    from .utils.common_funcs import send_metrics_to_dd
+                    from .utils.common_funcs import SizeMode, send_metrics_to_dd
 
-                    send_metrics_to_dd(app, diff_modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
+                    send_metrics_to_dd(app, diff_modules, to_dd_org, to_dd_key, to_dd_site, compressed, SizeMode.DIFF)
 
         else:
             with GitRepo(repo_url) as gitRepo:
@@ -198,9 +194,11 @@ def diff(
                                 app, total_diff[(plat, ver)], old_size[(plat, ver)], quality_gate_threshold, plat, ver
                             )
                         if to_dd_org or to_dd_key:
-                            from .utils.common_funcs import send_metrics_to_dd
+                            from .utils.common_funcs import SizeMode, send_metrics_to_dd
 
-                            send_metrics_to_dd(app, diff_modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode)
+                            send_metrics_to_dd(
+                                app, diff_modules, to_dd_org, to_dd_key, to_dd_site, compressed, SizeMode.DIFF
+                            )
 
                 except Exception as e:
                     app.abort(str(e))
@@ -208,9 +206,9 @@ def diff(
         if format or quality_gate_threshold:
             modules = [module for module in modules if module["Size_Bytes"] != 0]
             if format:
-                from .utils.common_funcs import export_format
+                from .utils.common_funcs import SizeMode, export_format
 
-                export_format(app, format, modules, "diff", platform, py_version, compressed)
+                export_format(app, format, modules, SizeMode.DIFF, platform, py_version, compressed)
             if quality_gate_threshold:
                 from .utils.common_funcs import save_quality_gate_html, save_quality_gate_html_table
 
@@ -254,34 +252,16 @@ def validate_parameters(
     to_dd_org: str | None,
     to_dd_key: str | None,
     to_dd_site: str | None,
-    use_artifacts: bool,
 ) -> None:
     errors = []
     if platform and platform not in valid_platforms:
         errors.append(f"Invalid platform: {platform}")
 
-    elif py_version and py_version not in valid_versions:
+    if py_version and py_version not in valid_versions:
         errors.append(f"Invalid version: {py_version}")
 
-    if len(commit) < MINIMUM_LENGTH_COMMIT and baseline and len(baseline) < MINIMUM_LENGTH_COMMIT:
-        errors.append(f"Commit hashes must be at least {MINIMUM_LENGTH_COMMIT} characters long")
-
-    elif len(commit) < MINIMUM_LENGTH_COMMIT:
-        errors.append(
-            f"New commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
-        )
-
-    elif baseline and len(baseline) < MINIMUM_LENGTH_COMMIT:
-        errors.append(
-            f"Old commit hash must be at least {MINIMUM_LENGTH_COMMIT} characters long.",
-        )
-
-    if use_artifacts:
-        if len(commit) < FULL_LENGTH_COMMIT:
-            errors.append("If --use-artifacts is provided, --new-commit must be a full length commit hash.")
-
-        if baseline and len(baseline) < FULL_LENGTH_COMMIT:
-            errors.append("If --use-artifacts is provided, --old-commit must be a full length commit hash.")
+    if len(commit) < FULL_LENGTH_COMMIT or (baseline and len(baseline) < FULL_LENGTH_COMMIT):
+        errors.append(f"Commit hashes must be at least {FULL_LENGTH_COMMIT} characters long")
 
     if baseline == commit:
         errors.append("Commit hashes must be different")
@@ -360,14 +340,14 @@ def output_diff(params: CLIParameters, modules: list[FileDataEntry]) -> None:
         )
 
     if params["show_gui"] or treemap_path:
-        from .utils.common_funcs import plot_treemap
+        from .utils.common_funcs import SizeMode, plot_treemap
 
         plot_treemap(
             params["app"],
             modules,
             f"Disk Usage Differences for {params['platform']} and Python version {params['py_version']}",
             params["show_gui"],
-            "diff",
+            SizeMode.DIFF,
             treemap_path,
         )
 

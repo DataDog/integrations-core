@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 import click
 
@@ -78,11 +78,10 @@ def status(
         )
 
         modules_plat_ver: list[FileDataEntry] = []
-        platforms = valid_platforms if platform is None else [platform]
-        versions = valid_versions if py_version is None else [py_version]
+        platforms = list(platform or valid_platforms)
+        versions = list(py_version or valid_versions)
         combinations = [(p, v) for p in platforms for v in versions]
 
-        mode: Literal["status"] = "status"
         commits = [commit] if commit else None
 
         for plat, ver in combinations:
@@ -110,15 +109,17 @@ def status(
             )
             modules_plat_ver.extend(status_modules)
             if to_dd_org or to_dd_key:
-                from ddev.cli.size.utils.common_funcs import send_metrics_to_dd
+                from ddev.cli.size.utils.common_funcs import SizeMode, send_metrics_to_dd
 
                 app.display("Sending metrics to Datadog ")
-                send_metrics_to_dd(app, status_modules, to_dd_org, to_dd_key, to_dd_site, compressed, mode, commits)
+                send_metrics_to_dd(
+                    app, status_modules, to_dd_org, to_dd_key, to_dd_site, compressed, SizeMode.STATUS, commits
+                )
 
         if format:
-            from ddev.cli.size.utils.common_funcs import export_format
+            from ddev.cli.size.utils.common_funcs import SizeMode, export_format
 
-            export_format(app, format, modules_plat_ver, "status", platform, py_version, compressed)
+            export_format(app, format, modules_plat_ver, SizeMode.STATUS, platform, py_version, compressed)
 
     except Exception as e:
         app.abort(str(e))
@@ -202,14 +203,14 @@ def status_mode(
         )
 
     if params["show_gui"] or treemap_path:
-        from ddev.cli.size.utils.common_funcs import plot_treemap
+        from ddev.cli.size.utils.common_funcs import SizeMode, plot_treemap
 
         plot_treemap(
             params["app"],
             modules,
             f"Disk Usage Status for {params['platform']} and Python version {params['py_version']}",
             params["show_gui"],
-            "status",
+            SizeMode.STATUS,
             treemap_path,
         )
 

@@ -197,12 +197,12 @@ def mock_size_diff_no_diff_dependencies():
 @pytest.mark.parametrize(
     "diff_args",
     [
-        ["commit1", "--compare-to", "commit2"],
-        ["commit1", "--compare-to", "commit2", "--compressed"],
-        ["commit1", "--compare-to", "commit2", "--format", "csv,markdown,json,png"],
-        ["commit1", "--compare-to", "commit2", "--show-gui"],
-        ["commit1", "--compare-to", "commit2", "--platform", "linux-aarch64", "--python", "3.12"],
-        ["commit1", "--compare-to", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed"],
+        ["a" * 40, "--compare-to", "b" * 40],
+        ["a" * 40, "--compare-to", "b" * 40, "--compressed"],
+        ["a" * 40, "--compare-to", "b" * 40, "--format", "csv,markdown,json,png"],
+        ["a" * 40, "--compare-to", "b" * 40, "--show-gui"],
+        ["a" * 40, "--compare-to", "b" * 40, "--platform", "linux-aarch64", "--python", "3.12"],
+        ["a" * 40, "--compare-to", "b" * 40, "--platform", "linux-aarch64", "--python", "3.12", "--compressed"],
     ],
     ids=[
         "no_options",
@@ -221,11 +221,11 @@ def test_diff_options(ddev, mock_size_diff_dependencies, diff_args):
 @pytest.mark.parametrize(
     "diff_args",
     [
-        ["commit1", "--compare-to", "commit2", "--platform", "linux-aarch64", "--python", "3.12", "--compressed"],
-        ["commit1", "--compare-to", "commit2"],
-        ["commit1", "--compare-to", "commit2", "--compressed"],
-        ["commit1", "--compare-to", "commit2", "--format", "csv,markdown,json,png"],
-        ["commit1", "--compare-to", "commit2", "--show-gui"],
+        ["a" * 40, "--compare-to", "b" * 40, "--platform", "linux-aarch64", "--python", "3.12", "--compressed"],
+        ["a" * 40, "--compare-to", "b" * 40],
+        ["a" * 40, "--compare-to", "b" * 40, "--compressed"],
+        ["a" * 40, "--compare-to", "b" * 40, "--format", "csv,markdown,json,png"],
+        ["a" * 40, "--compare-to", "b" * 40, "--show-gui"],
     ],
     ids=[
         "platform_python_and_compressed",
@@ -243,29 +243,27 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
 
 
 @pytest.mark.parametrize(
-    "commit, baseline, platform, version, to_dd_org, to_dd_key,to_dd_site, use_artifacts, error_expected",
+    "commit, baseline, platform, version, to_dd_org, to_dd_key,to_dd_site, error_expected",
     [
         pytest.param(
-            "abcdefg",  # commit
-            "bcdefgh",  # baseline
+            "a" * 40,  # commit
+            "b" * 40,  # baseline
             "invalid-platform",  # platform
             "3.9",  # version
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # to_dd_site
-            False,  # use_artifacts
             True,  # error_expected
             id="invalid_platform",
         ),
         pytest.param(
-            "abcdefg",  # commit
-            "bcdefgh",  # baseline
+            "a" * 40,  # commit
+            "b" * 40,  # baseline
             "linux-x86_64",  # platform
             "invalid-version",  # version
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # to_dd_site
-            False,  # use_artifacts
             True,  # error_expected
             id="invalid_version",
         ),
@@ -277,115 +275,105 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # to_dd_site
-            False,  # use_artifacts
             True,  # error_expected
             id="both_commits_too_short",
         ),
         pytest.param(
             "abc",  # commit
-            "bcdefgh",  # baseline
+            "b" * 40,  # baseline
             "linux-x86_64",  # platform
             "3.9",  # version
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # to_dd_site
-            False,  # use_artifacts
             True,  # error_expected
             id="commit_too_short",
         ),
         pytest.param(
-            "abcdefg",  # commit
+            "a" * 40,  # commit
             "bcd",  # baseline
             "linux-x86_64",  # platform
             "3.9",  # version
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # to_dd_site
-            False,  # use_artifacts
             True,  # error_expected
             id="baseline_too_short",
         ),
         pytest.param(
-            "abcdefg",  # commit
-            "abcdefg",  # baseline
+            "a" * 40,  # commit
+            "a" * 40,  # baseline
             "linux-x86_64",  # platform
             "3.9",  # version
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # to_dd_site
-            False,  # use_artifacts
             True,  # error_expected
             id="same_commits",
         ),
         pytest.param(
             "abc",  # commit
-            "abcdefg",  # baseline
+            "b" * 40,  # baseline
             "invalid-platform",  # platform
             "3.9",  # version
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # to_dd_site
-            False,  # use_artifacts
             True,  # error_expected
             id="multiple_errors",
         ),
         pytest.param(
-            "abcdefg",  # commit
-            "bcdefgh",  # baseline
+            "a" * 40,  # commit
+            "b" * 40,  # baseline
             "linux-x86_64",  # platform
             "3.9",  # version
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # to_dd_site
-            False,  # use_artifacts
             False,  # error_expected
             id="valid_parameters",
         ),
         pytest.param(
-            "abcdefg",  # commit
-            "bcdefgh",  # baseline
+            "a" * 40,  # commit
+            "b" * 40,  # baseline
             None,  # platform
             None,  # version
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # to_dd_site
-            False,  # use_artifacts
             False,  # error_expected
             id="valid_parameters_without_optional_values",
         ),
         pytest.param(
-            "abcdefg",  # commit
-            "bcdefgh",  # baseline
+            "a" * 40,  # commit
+            "b" * 40,  # baseline
             None,  # platform
             None,  # version
             None,  # to_dd_org
             "key",  # to_dd_key
             "site",  # to_dd_site
-            False,  # use_artifacts
             False,  # error_expected
             id="valid_parameters_with_to_dd_site_and_to_dd_key",
         ),
         pytest.param(
-            "abcdefg",  # commit
-            "bcdefgh",  # baseline
+            "a" * 40,  # commit
+            "b" * 40,  # baseline
             None,  # platform
             None,  # version
             None,  # to_dd_org
             None,  # to_dd_key
             "site",  # to_dd_site
-            False,  # use_artifacts
             True,  # error_expected
             id="error_with_to_dd_site_and_not_to_dd_key",
         ),
         pytest.param(
-            "abcdefg",  # commit
-            "bcdefgh",  # baseline
+            "a" * 40,  # commit
+            "b" * 40,  # baseline
             None,  # platform
             None,  # version
             "org",  # to_dd_org
             "key",  # to_dd_key
             None,  # to_dd_site
-            False,  # use_artifacts
             True,  # error_expected
             id="error_with_to_dd_org_and_to_dd_key",
         ),
@@ -397,21 +385,8 @@ def test_diff_no_differences(ddev, mock_size_diff_no_diff_dependencies, diff_arg
             None,  # to_dd_org
             None,  # to_dd_key
             None,  # to_dd_site
-            True,  # use_artifacts
             True,  # error_expected
-            id="error_with_use_artifacts_and_new_commit_not_full_length",
-        ),
-        pytest.param(
-            None,  # commit
-            "d8e70aef0f40ab7b9fb4c783d4e250d74154caa1",  # baseline
-            None,  # platform
-            None,  # version
-            None,  # to_dd_org
-            None,  # to_dd_key
-            None,  # to_dd_site
-            True,  # use_artifacts
-            False,  # error_expected
-            id="valid_with_use_artifacts_and_old_commit_full_length",
+            id="error_with_commit_not_full_length",
         ),
     ],
 )
@@ -423,7 +398,6 @@ def test_validate_parameters(
     to_dd_org: str | None,
     to_dd_key: str | None,
     to_dd_site: str | None,
-    use_artifacts: bool,
     error_expected: bool,
 ):
     valid_platforms = {"linux-x86_64", "windows-x86_64"}
@@ -445,7 +419,6 @@ def test_validate_parameters(
                 to_dd_org,
                 to_dd_key,
                 to_dd_site,
-                use_artifacts,
             )
         app.abort.assert_called_once()
     else:
@@ -460,6 +433,5 @@ def test_validate_parameters(
             to_dd_org,
             to_dd_key,
             to_dd_site,
-            use_artifacts,
         )
         app.abort.assert_not_called()

@@ -12,6 +12,7 @@ import tempfile
 import zipfile
 import zlib
 from datetime import date
+from enum import StrEnum
 from functools import cache
 from types import TracebackType
 from typing import TYPE_CHECKING, Optional, Type, TypedDict, overload
@@ -32,6 +33,11 @@ MEASURE_DISK_USAGE_WORKFLOW = '.github/workflows/measure-disk-usage.yml'
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.patches import Patch
+
+
+class SizeMode(StrEnum):
+    STATUS = "status"
+    DIFF = "diff"
 
 
 class FileDataEntry(TypedDict):
@@ -797,13 +803,13 @@ def export_format(
     app: Application,
     format: list[str],
     modules: list[FileDataEntry],
-    mode: Literal["status", "diff"],
+    mode: SizeMode,
     platform: str | None,
     py_version: str | None,
     compressed: bool,
 ) -> None:
     size_type = "compressed" if compressed else "uncompressed"
-    name = f"{mode}_{size_type}"
+    name = f"{mode.value}_{size_type}"
     if platform:
         name += f"_{platform}"
     if py_version:
@@ -819,7 +825,7 @@ def export_format(
 
         elif output_format == "markdown":
             markdown_filename = f"{name}.md"
-            save_markdown(app, "Status", modules, markdown_filename)
+            save_markdown(app, mode.value, modules, markdown_filename)
 
 
 def plot_treemap(
@@ -827,7 +833,7 @@ def plot_treemap(
     modules: list[FileDataEntry],
     title: str,
     show: bool,
-    mode: Literal["status", "diff"],
+    mode: SizeMode,
     path: Optional[str] = None,
 ) -> None:
     import matplotlib.pyplot as plt
@@ -841,10 +847,10 @@ def plot_treemap(
     ax.set_axis_off()
 
     # Calculate the rectangles
-    if mode == "status":
+    if mode is SizeMode.STATUS:
         rects, colors, legend_handles = plot_status_treemap(modules)
 
-    if mode == "diff":
+    if mode is SizeMode.DIFF:
         rects, colors, legend_handles = plot_diff_treemap(modules)
 
     draw_treemap_rects_with_labels(ax, rects, modules, colors)
@@ -1047,7 +1053,7 @@ def send_metrics_to_dd(
     key: str | None,
     site: str | None,
     compressed: bool,
-    mode: Literal["status", "diff"],
+    mode: SizeMode,
     commits: list[str] | None = None,
 ) -> None:
     from datadog_api_client import ApiClient, Configuration
@@ -1084,7 +1090,7 @@ def send_metrics_to_dd(
         delta_type = item.get('Delta_Type', '')
         metrics.append(
             MetricSeries(
-                metric=f"{metric_name}.size_{mode}",
+                metric=f"{metric_name}.size_{mode.value}",
                 type=gauge_type,
                 points=[MetricPoint(timestamp=timestamp, value=item["Size_Bytes"])],
                 tags=[
@@ -1104,7 +1110,7 @@ def send_metrics_to_dd(
                 ],
             )
         )
-        if mode == "status":
+        if mode is SizeMode.STATUS:
             key_count = (item['Platform'], item['Python_Version'])
             if key_count not in n_integrations:
                 n_integrations[key_count] = 0
@@ -1115,7 +1121,7 @@ def send_metrics_to_dd(
             elif item['Type'] == 'Dependency':
                 n_dependencies[key_count] += 1
 
-    if mode == "status":
+    if mode is SizeMode.STATUS:
         for (platform, py_version), count in n_integrations.items():
             n_integrations_metrics.append(
                 MetricSeries(
@@ -1175,7 +1181,7 @@ def send_metrics_to_dd(
         app.display_debug(f"Sending Metrics: {metrics}")
         api_instance.submit_metrics(body=MetricPayload(series=metrics))
 
-        if mode == "status":
+        if mode is SizeMode.STATUS:
             app.display_debug(f"Sending N integrations metrics: {n_integrations_metrics}")
             api_instance.submit_metrics(body=MetricPayload(series=n_integrations_metrics))
 
@@ -1224,19 +1230,32 @@ def get_last_dependency_sizes_artifact(
     dep_sizes_json = get_dep_sizes_json(app, commit, platform, py_version)
     if not dep_sizes_json:
         app.display_debug("No dependency sizes in current commit, searching ancestors")
-        base_commit = app.repo.git.merge_base(commit, "origin/master")
-        if base_commit != commit:
-            app.display_debug(f"Found base commit: {base_commit}")
-            previous_commit = base_commit
-        else:
-            app.display_debug("No base commit found, using previous commit")
-            previous_commit = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
-
+        previous_commit = get_previous_commit(app, commit)
         app.display(f"\n -> Searching for dependency sizes in previous commit: {previous_commit}")
+        if not previous_commit:
+            return None
         dep_sizes_json = get_status_sizes_from_commit(
             app, previous_commit, platform, py_version, compressed, file=True, only_dependencies=True
         )
     return Path(dep_sizes_json) if dep_sizes_json else None
+
+
+@cache
+def get_previous_commit(app: Application, commit: str) -> str | None:
+    try:
+        base_commit = app.repo.git.merge_base(commit, "origin/master")
+        if base_commit != commit:
+            app.display_debug(f"Found base commit: {base_commit}")
+            return base_commit
+        else:
+            app.display_debug("No base commit found, using previous commit")
+            return app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
+    except Exception as e:
+        if e and "Not a valid commit name" in str(e):
+            app.display_error("No previous commit found")
+        else:
+            app.display_error(f"Failed to get previous commit: {e}")
+        return None
 
 
 @cache
