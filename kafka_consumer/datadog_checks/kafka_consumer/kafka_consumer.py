@@ -603,17 +603,6 @@ def deserialize_message(
 
 
 def _deserialize_bytes_maybe_schema_registry(message, message_format, schema, uses_schema_registry):
-    """Deserialize a message, handling schema registry format if configured.
-
-    Args:
-        message: Raw message bytes from Kafka
-        message_format: Format of the message (json, avro, protobuf)
-        schema: Parsed schema object
-        uses_schema_registry: If True, expect schema registry format (magic byte + 4-byte schema ID)
-
-    Returns:
-        Tuple of (decoded_message, schema_id)
-    """
     if uses_schema_registry:
         # When explicitly configured, go straight to schema registry format
         if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
@@ -669,11 +658,9 @@ def _deserialize_protobuf(message, schema):
 
         # Check if all bytes were consumed (strict validation)
         if bytes_consumed != len(message):
-            unread_bytes = message[bytes_consumed:]
             raise ValueError(
                 f"Not all bytes were consumed during Protobuf decoding! "
                 f"Read {bytes_consumed} bytes, but message has {len(message)} bytes. "
-                f"Unread bytes: {unread_bytes.hex()}"
             )
 
         return MessageToJson(schema)
@@ -694,11 +681,9 @@ def _deserialize_avro(message, schema):
         total_bytes = len(message)
 
         if bytes_read != total_bytes:
-            unread_bytes = message[bytes_read:]
             raise ValueError(
                 f"Not all bytes were consumed during Avro decoding! "
                 f"Read {bytes_read} bytes, but message has {total_bytes} bytes. "
-                f"Unread bytes: {unread_bytes.hex()}"
             )
 
         return json.dumps(data)
