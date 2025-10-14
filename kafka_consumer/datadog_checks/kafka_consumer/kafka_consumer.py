@@ -603,6 +603,8 @@ def deserialize_message(
 
 
 def _deserialize_bytes_maybe_schema_registry(message, message_format, schema, uses_schema_registry):
+    if not message:
+        return "", None
     if uses_schema_registry:
         # When explicitly configured, go straight to schema registry format
         if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
