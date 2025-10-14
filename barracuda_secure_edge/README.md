@@ -14,7 +14,7 @@ The Barracuda SecureEdge check is included in the [Datadog Agent][2] package.
 
 1. A syslog server that can receive logs from the Barracuda SecureEdge instance.
 
-2. Configure syslog streaming through the Barracuda SecureEdge Manager. Follow the instructions found [here][3]. When configuring syslog streaming, you can select different log sources. When enabled, each log source will generate one or more log files in your syslog server under `/var/phion/logs` by default. If your syslog server stores the logs in a different directory, note down this directory as it will be necessary during the configuration step. By default, the Barracuda SecureEdge integration supports the following log files:
+2. Configure syslog streaming through the Barracuda SecureEdge Manager. Follow the [configuration instructions][3]. When configuring syslog streaming, you can select different log sources. When enabled, each log source will generate one or more log files in your syslog server under `/var/phion/logs` by default. If your syslog server stores the logs in a different directory, note down this directory as it will be necessary during the configuration step. By default, the Barracuda SecureEdge integration supports the following log files:
 
     ```
     box_Auth_access.log
