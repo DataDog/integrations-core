@@ -613,12 +613,14 @@ def save_quality_gate_html(
     if not file_path.exists():
         file_path.write_text(html_headers, encoding="utf-8")
 
+    type_str = (
+        f"<h3>{'Compressed' if compressed else 'Uncompressed'} Size Changes "
+        f"{'✅' if passes_quality_gate else '❌'}</h3>"
+    )
     if modules == []:
-        html = html_headers + "\nNo size differences were found"
+        html = f"{type_str}\n<h4>No size differences were found</h4>\n"
 
     else:
-        type_str = f"<details><summary><h3>{'Compressed' if compressed else 'Uncompressed'} Size Changes</h3></summary>"
-
         groups = group_modules(modules)
         for (platform, py_version), delta_type_groups in groups.items():
             html_subheaders = str()
@@ -644,7 +646,7 @@ def save_quality_gate_html(
 
             html += f"{html_subheaders}\n{tables}\n{close_details}"
 
-        html = f"{type_str}\n{html}\n</details>"
+        html = f"<details><summary>{type_str}</summary>\n{html}\n</details>"
 
     with file_path.open(mode="a", encoding="utf-8") as f:
         f.write(html)
@@ -669,13 +671,13 @@ def save_quality_gate_html_table(
     if not file_path.exists():
         file_path.write_text(html_headers, encoding="utf-8")
 
+    type_str = (
+        f"<h3>{'Compressed' if compressed else 'Uncompressed'} Size Changes "
+        f"{'✅' if passes_quality_gate else '❌'}</h3></summary>"
+    )
     if modules == []:
-        final_html = html_headers + "<h4>No size differences were found</h4>\n"
+        final_html = f"{type_str}\n<h4>No size differences were found</h4>"
     else:
-        type_str = (
-            f"<details><summary><h3>{'Compressed' if compressed else 'Uncompressed'} Size Changes "
-            f"{'✅' if passes_quality_gate else '❌'}</h3></summary>"
-        )
         table_rows = []
         groups = group_modules(modules)
 
@@ -740,7 +742,7 @@ def save_quality_gate_html_table(
             "</table>"
         )
 
-        final_html = f"{type_str}\n{html_table}\n</details>"
+        final_html = f"<details><summary>{type_str}</summary>\n{html_table}\n</details>"
 
     with file_path.open(mode="a", encoding="utf-8") as f:
         f.write(final_html)
