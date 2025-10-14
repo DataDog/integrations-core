@@ -366,12 +366,7 @@
                                     "formulas": [
                                         {
                                             "formula": "query1",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "second"
-                                                }
-                                            }
+                                            "number_format": {}
                                         }
                                     ],
                                     "queries": [
@@ -391,6 +386,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Time Since Last Request",
                             "title_align": "left",
                             "title_size": "16",
@@ -420,12 +416,7 @@
                                     "formulas": [
                                         {
                                             "formula": "query1 / query2",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "second"
-                                                }
-                                            }
+                                            "number_format": {}
                                         }
                                     ],
                                     "queries": [
@@ -450,6 +441,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Average Request Duration",
                             "title_align": "left",
                             "title_size": "16",
@@ -478,7 +470,7 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1 / query2 * 10000",
+                                            "formula": "query1 / query2",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
@@ -491,12 +483,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:container.memory.rss{$host}"
+                                            "query": "sum:bentoml.service.adaptive_batch_size.sum{$host}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:container.memory.limit{$host}"
+                                            "query": "sum:bentoml.service.adaptive_batch_size.count{$host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -509,6 +501,7 @@
                                 }
                             ],
                             "show_legend": false,
+                            "time": {},
                             "title": "Average Adaptive Batch Size",
                             "title_align": "left",
                             "title_size": "16",
