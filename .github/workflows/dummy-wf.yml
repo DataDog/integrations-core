@@ -10,5 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
+            echo "Head branch: "
             echo ${{ github.event.workflow_run.head_branch }}
+            echo "Ref: "
+            echo ${{ github.ref_name }}
            
