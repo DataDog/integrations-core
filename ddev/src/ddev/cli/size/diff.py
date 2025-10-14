@@ -12,6 +12,7 @@ import click
 from ddev.cli.application import Application
 from ddev.cli.size.utils.common_funcs import GitRepo
 from ddev.cli.size.utils.common_params import common_params
+from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
     from ddev.cli.size.utils.common_funcs import CLIParameters, FileDataEntry
@@ -79,6 +80,7 @@ def diff(
     )
 
     app: Application = ctx.obj
+
     with app.status("Calculating differences..."):
         repo_url = app.repo.path
         modules: list[FileDataEntry] = []
@@ -215,18 +217,19 @@ def diff(
                 save_quality_gate_html(
                     app,
                     modules,
-                    "diff.html",
+                    compressed,
+                    Path("diff.html"),
                     baseline,
                     quality_gate_threshold,
                     old_size,
-                    new_size,
                     total_diff,
                     passes_quality_gate,
                 )
                 save_quality_gate_html_table(
                     app,
                     modules,
-                    "diff_table.html",
+                    compressed,
+                    Path("diff_table.html"),
                     baseline,
                     quality_gate_threshold,
                     old_size,

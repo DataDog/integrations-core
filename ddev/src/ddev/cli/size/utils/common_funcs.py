@@ -595,11 +595,11 @@ def print_table(
 def save_quality_gate_html(
     app: Application,
     modules: list[FileDataEntry],
-    file_path: str,
+    compressed: bool,
+    file_path: Path,
     old_commit: str,
     threshold_percentage: float,
     old_size: dict[tuple[str, str], int],
-    new_size: dict[tuple[str, str], int],
     total_diff: dict[tuple[str, str], int],
     passes_quality_gate: bool,
 ) -> None:
@@ -610,22 +610,28 @@ def save_quality_gate_html(
     html = str()
     html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
 
+    if not file_path.exists():
+        file_path.write_text(html_headers, encoding="utf-8")
+
     if modules == []:
         html = html_headers + "\nNo size differences were found"
 
     else:
-        html_headers += "<h3>Compressed Size Changes</h3>"
+        type_str = f"<details><summary><h3>{'Compressed' if compressed else 'Uncompressed'} Size Changes</h3></summary>"
+
         groups = group_modules(modules)
         for (platform, py_version), delta_type_groups in groups.items():
             html_subheaders = str()
 
             sign_total = "+" if total_diff[(platform, py_version)] > 0 else ""
-            threshold = convert_to_human_readable_size(old_size[(platform, py_version)] * threshold_percentage / 100)
+            threshold_bytes = old_size[(platform, py_version)] * threshold_percentage / 100
+            threshold = convert_to_human_readable_size(threshold_bytes)
 
-            html_subheaders += f"<details><summary><h4>Size Delta for {platform} and Python {py_version}:\n"
+            html_subheaders += f"<details><summary><h4>&Delta; Size for {platform} and Python {py_version}:\n"
             html_subheaders += (
                 f"{sign_total}{convert_to_human_readable_size(total_diff[(platform, py_version)])} "
-                f"(Threshold: {threshold})</h4></summary>\n\n"
+                f"(Threshold: {threshold}) "
+                f"{'✅' if total_diff[(platform, py_version)] < threshold_bytes else '❌'}</h4></summary>\n\n"
             )
 
             tables = str()
@@ -638,17 +644,19 @@ def save_quality_gate_html(
 
             html += f"{html_subheaders}\n{tables}\n{close_details}"
 
-        html = f"{html_headers}\n{html}"
+        html = f"{type_str}\n{html}\n</details>"
 
-    with open(file_path, "w", encoding="utf-8") as f:
+    with file_path.open(mode="a", encoding="utf-8") as f:
         f.write(html)
+
     app.display(f"HTML file saved to {file_path}")
 
 
 def save_quality_gate_html_table(
     app: Application,
     modules: list[FileDataEntry],
-    file_path: str,
+    compressed: bool,
+    file_path: Path,
     old_commit: str,
     threshold_percentage: float,
     old_size: dict[tuple[str, str], int],
@@ -658,11 +666,16 @@ def save_quality_gate_html_table(
 ) -> None:
     html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
 
+    if not file_path.exists():
+        file_path.write_text(html_headers, encoding="utf-8")
+
     if modules == []:
         final_html = html_headers + "<h4>No size differences were found</h4>\n"
     else:
-        html_headers += "<h3>Compressed Size Changes</h3>"
-
+        type_str = (
+            f"<details><summary><h3>{'Compressed' if compressed else 'Uncompressed'} Size Changes "
+            f"{'✅' if passes_quality_gate else '❌'}</h3></summary>"
+        )
         table_rows = []
         groups = group_modules(modules)
 
@@ -727,9 +740,9 @@ def save_quality_gate_html_table(
             "</table>"
         )
 
-        final_html = f"{html_headers}\n{html_table}"
+        final_html = f"{type_str}\n{html_table}\n</details>"
 
-    with open(file_path, "w", encoding="utf-8") as f:
+    with file_path.open(mode="a", encoding="utf-8") as f:
         f.write(final_html)
 
     app.display(f"HTML file saved to {file_path}")
