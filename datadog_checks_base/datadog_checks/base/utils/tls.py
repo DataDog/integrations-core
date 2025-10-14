@@ -56,45 +56,65 @@ class TlsConfig(BaseModel, frozen=True):
     tls_verify: bool = True
 
 
+def _load_certifi_fallback(context):
+    """Attempt to load CA certificates from certifi as a fallback."""
+    try:
+        import certifi
+    except ImportError:
+        LOGGER.warning('Failed to import certifi, TLS verification may fail.')
+        return
+
+    try:
+        certifi_path = certifi.where()
+        context.load_verify_locations(cafile=certifi_path)
+        LOGGER.info('Successfully loaded CA certificates from certifi bundle: %s', certifi_path)
+    except (FileNotFoundError, IOError) as e:
+        LOGGER.error('Failed to load CA certificates from certifi bundle: %s. TLS verification may fail.', e)
+    except Exception as e:
+        LOGGER.error('Unexpected error loading certifi certificates: %s', e)
+
+
 def _load_ca_certs(context, config):
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_default_certs
     ca_cert = config.get('tls_ca_cert')
-    try:
-        if ca_cert:
-            ca_cert = os.path.expanduser(ca_cert)
+
+    # Handle user-provided CA cert
+    if ca_cert:
+        ca_cert = os.path.expanduser(ca_cert)
+        try:
             if os.path.isdir(ca_cert):
                 context.load_verify_locations(cafile=None, capath=ca_cert, cadata=None)
             else:
                 context.load_verify_locations(cafile=ca_cert, capath=None, cadata=None)
-        else:
+        except FileNotFoundError:
+            LOGGER.warning(
+                'TLS CA certificate file not found: %s. Please check the `tls_ca_cert` configuration option.',
+                ca_cert,
+            )
+            return
+    else:
+        # Try to load system default certs
+        try:
             context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-            if not context.get_ca_certs():
-                LOGGER.warning(
-                    'No CA certificates loaded from system default paths. '
-                    'This may indicate misconfigured SSL_CERT_FILE or SSL_CERT_DIR environment variables. '
-                    'Falling back to certifi certificate bundle.'
-                )
-                try:
-                    import certifi
+        except Exception as e:
+            LOGGER.debug('Failed to load default CA certificates: %s', e)
 
-                    context.load_verify_locations(cafile=certifi.where())
-                except (ImportError, FileNotFoundError) as e:
-                    LOGGER.error('Failed to load fallback certificates from certifi: %s', e)
-    except FileNotFoundError:
-        LOGGER.warning(
-            'TLS CA certificate file not found: %s. Please check the `tls_ca_cert` configuration option.',
-            ca_cert,
-        )
+        # Check if any certs were actually loaded
+        if not context.get_ca_certs():
+            LOGGER.info('No CA certificates loaded from system default paths, attempting certifi fallback.')
+            _load_certifi_fallback(context)
+
+    # Load intermediate CA certs if provided
     intermediate_ca_certs = config.get('tls_intermediate_ca_certs')
-    try:
-        if intermediate_ca_certs:
+    if intermediate_ca_certs:
+        try:
             context.load_verify_locations(cadata='\n'.join(intermediate_ca_certs))
-    except ssl.SSLError:
-        LOGGER.warning(
-            "TLS intermediate CA certificate(s) could not be loaded: %s. ",
-            intermediate_ca_certs,
-        )
+        except ssl.SSLError:
+            LOGGER.warning(
+                "TLS intermediate CA certificate(s) could not be loaded: %s. ",
+                intermediate_ca_certs,
+            )
 
 
 def create_ssl_context(config):
