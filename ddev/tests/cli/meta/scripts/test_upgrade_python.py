@@ -14,7 +14,7 @@ def test_upgrade_python(fake_repo, ddev):
     result = ddev('meta', 'scripts', 'upgrade-python', NEW_PYTHON_VERSION)
 
     assert result.exit_code == 0, result.output
-    assert result.output.endswith('Python upgrades\n\nPassed: 9\n')
+    assert result.output.endswith('Python upgrades\n\nPassed: 12\n')
 
     contents = constant_file.read_text()
     assert f'PYTHON_VERSION = {OLD_PYTHON_VERSION!r}' not in contents
