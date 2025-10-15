@@ -2,7 +2,7 @@
 
 ## General Development Guidelines
 
-* Auto-format code with ddev test -fs.
+* Auto-format code with `ddev test -fs`.
 
 ## Python Type Hinting
 
