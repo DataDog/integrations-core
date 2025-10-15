@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 5.4.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 5.3.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
 ## 5.2.1 / 2025-05-15 / Agent 7.67.0
 
 ***Fixed***:

@@ -50,6 +50,52 @@ METRICS_CONFIG = {
                 'LDAP Bind Time': {'metric_name': 'ldap.bind_time'},
                 'LDAP Successful Binds/sec': {'metric_name': 'ldap.successful_binds_persec'},
                 'LDAP Searches/sec': {'metric_name': 'ldap.searches_persec'},
+                'LDAP Writes/sec': {'metric_name': 'ldap.writes_persec'},
+                'LDAP Active Threads': {'metric_name': 'ldap.active_threads'},
+                'DS Client Binds/sec': {'metric_name': 'ds.client_binds_persec'},
+            }
+        ],
+    },
+    'Netlogon': {
+        'name': 'netlogon',
+        'counters': [
+            {
+                'Semaphore Waiters': 'semaphore_waiters',
+                'Semaphore Holders': 'semaphore_holders',
+                'Semaphore Acquires': {'name': 'semaphore_acquires', 'type': 'count'},
+                'Semaphore Timeouts': {'name': 'semaphore_timeouts', 'type': 'count'},
+                'Average Semaphore Hold Time': 'semaphore_hold_time',
+            }
+        ],
+    },
+    'Security System-Wide Statistics': {
+        'name': 'security',
+        'counters': [
+            {
+                'NTLM Authentications': {'name': 'ntlm_authentications'},
+                'Kerberos Authentications': {'name': 'kerberos_authentications'},
+            }
+        ],
+    },
+    'DHCP Server': {
+        'name': 'dhcp',
+        'counters': [
+            {
+                'Failover: BndUpd Dropped.': {'name': 'failover.binding_updates_dropped'},
+                'Failover: BndUpd pending in outbound queue.': 'failover.binding_updates_pending',
+                'Failover: BndUpd received/sec.': {'name': 'failover.binding_updates_received'},
+                'Failover: BndUpd sent/sec.': {'name': 'failover.binding_updates_sent'},
+            }
+        ],
+    },
+    'DFS Replicated Folders': {
+        'name': 'dfsr',
+        'counters': [
+            {
+                'Conflict Space In Use': {'name': 'conflict_space_in_use'},
+                'Deleted Space In Use': {'name': 'deleted_space_in_use'},
+                'File Installs Retried': {'name': 'file_installs_retried'},
+                'Staging Space In Use': {'name': 'staging_space_in_use'},
             }
         ],
     },

@@ -32,10 +32,6 @@ class CommenterCursor(BaseCommenterCursor, psycopg.ClientCursor):
     pass
 
 
-class CommenterDictCursor(BaseCommenterCursor, psycopg.ClientCursor):
-    pass
-
-
 class SQLASCIITextLoader(psycopg.adapt.Loader):
     """
     Custom loader for SQLASCII encoding.
@@ -45,13 +41,15 @@ class SQLASCIITextLoader(psycopg.adapt.Loader):
     format = psycopg.pq.Format.TEXT
 
     def load(self, data):
+        if data is None:
+            return data
         if isinstance(data, memoryview):
             # Convert memoryview to bytes
             data = data.tobytes()
-        if not isinstance(data, bytes) or data is None:
+        if not isinstance(data, bytes):
             return data
         try:
             return decode_with_encodings(data, self.encodings)
-        except:
+        except Exception:
             # Fallback to utf8 with replacement
             return data.decode('utf-8', errors='backslashreplace')

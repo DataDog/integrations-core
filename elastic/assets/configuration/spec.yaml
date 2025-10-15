@@ -136,21 +136,21 @@ files:
 
         3. columns - The list representing the data to be collected from the JSON query. There are two required pieces
                      of data:
-                       a. value_path - This is the JSON path from the `data_path` to the metric. This path may include
-                                       string keys as well as list indices. For example, if querying for size of parent
-                                       circuit breaker, the `value_path` is `estimated_size_in_bytes`.
-                       b. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a
-                                 tag and applied to every metric collected by this particular query.
-
-                       c. type (optional) - An optional parameter to designates the type of data sent. Possible values
-                                            for `type` include `gauge`, `monotonic_count`, `rate`, and `tag`, with
-                                            `gauge` being the default.
+              1. value_path - This is the JSON path from the `data_path` to the metric. This path may include string
+                              keys as well as list indices. For example, if querying for size of parent circuit
+                              breaker, the `value_path` is `estimated_size_in_bytes`.
+              2. name - The full metric name sent to Datadog. If `type` is `tag`, this column is considered a tag and
+                        applied to every metric collected by this particular query.
+              3. type (optional) - An optional parameter to designates the type of data sent. Possible values for
+                                   `type` include `gauge`, `monotonic_count`, `rate`, and `tag`, with `gauge` being
+                                   the default.
 
         4. payload (optional) - An optional payload can be included when querying the endpoint. This turns the GET
                                 request into a POST request, so a read-only user should be used when writing
                                 custom queries with a payload. Use YAML formatting when including a payload.
 
-        Example:
+      value:
+        example:
         - endpoint: /_search
           data_path: aggregations.genres.buckets
           payload:
@@ -166,7 +166,6 @@ files:
             name: elasticsearch.doc_count
           tags:
           - custom_tag:1
-      value:
         type: array
         items:
           type: object

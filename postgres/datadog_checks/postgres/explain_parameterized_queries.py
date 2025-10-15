@@ -12,6 +12,8 @@ from datadog_checks.base.utils.tracking import tracked_method
 from .util import DBExplainError
 from .version_utils import V12
 
+PARAMETERIZED_QUERY_PATTERN = re.compile(r"(?<!')\$(?!'\$')[\d]+(?!')")
+
 logger = logging.getLogger(__name__)
 
 PREPARE_STATEMENT_QUERY = 'PREPARE dd_{query_signature} AS {statement}'
@@ -81,44 +83,44 @@ class ExplainParameterizedQueries:
                 self._check.version,
             )
             return None, DBExplainError.parameterized_query, '{}'.format(type(e))
-        self._set_plan_cache_mode(dbname)
+        with self._check.db_pool.get_connection(dbname) as conn:
+            try:
+                self._set_plan_cache_mode(conn)
+                self._create_prepared_statement(conn, statement, obfuscated_statement, query_signature)
+            except psycopg.errors.IndeterminateDatatype as e:
+                return None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
+            except psycopg.errors.UndefinedFunction as e:
+                return None, DBExplainError.undefined_function, '{}'.format(type(e))
+            except Exception as e:
+                # if we fail to create a prepared statement, we cannot explain the query
+                return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
 
-        try:
-            self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
-        except psycopg.errors.IndeterminateDatatype as e:
-            return None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
-        except psycopg.errors.UndefinedFunction as e:
-            return None, DBExplainError.undefined_function, '{}'.format(type(e))
-        except Exception as e:
-            # if we fail to create a prepared statement, we cannot explain the query
-            return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
+            try:
+                result = self._explain_prepared_statement(conn, statement, obfuscated_statement, query_signature)
+                if result:
+                    plan = result[0][0][0]
+                    return plan, DBExplainError.explained_with_prepared_statement, None
+                else:
+                    # the explain function was executed but no plan was returned
+                    logger.debug(
+                        "Unable to explain parameterized query. "
+                        "The explain function %s was executed but no plan was returned",
+                        self._explain_function,
+                    )
+                    return None, DBExplainError.no_plan_returned_with_prepared_statement, None
+            except Exception as e:
+                return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
+            finally:
+                self._deallocate_prepared_statement(conn, query_signature)
 
-        try:
-            result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
-            if result:
-                plan = result[0][0][0]
-                return plan, DBExplainError.explained_with_prepared_statement, None
-            else:
-                # the explain function was executed but no plan was returned
-                logger.debug(
-                    "Unable to explain parameterized query. "
-                    "The explain function %s was executed but no plan was returned",
-                    self._explain_function,
-                )
-                return None, DBExplainError.no_plan_returned_with_prepared_statement, None
-        except Exception as e:
-            return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
-        finally:
-            self._deallocate_prepared_statement(dbname, query_signature)
-
-    def _set_plan_cache_mode(self, dbname):
-        self._execute_query(dbname, "SET plan_cache_mode = force_generic_plan")
+    def _set_plan_cache_mode(self, conn):
+        self._execute_query(conn, "SET plan_cache_mode = force_generic_plan")
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _create_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
+    def _create_prepared_statement(self, conn, statement, obfuscated_statement, query_signature):
         try:
             self._execute_query(
-                dbname,
+                conn,
                 PREPARE_STATEMENT_QUERY.format(query_signature=query_signature, statement=statement),
             )
         except Exception as e:
@@ -134,16 +136,14 @@ class ExplainParameterizedQueries:
             raise
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _get_number_of_parameters_for_prepared_statement(self, dbname, query_signature):
-        rows = self._execute_query_and_fetch_rows(
-            dbname, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature)
-        )
+    def _get_number_of_parameters_for_prepared_statement(self, conn, query_signature):
+        rows = self._execute_query_and_fetch_rows(conn, PARAM_TYPES_COUNT_QUERY.format(query_signature=query_signature))
         return rows[0][0] if rows else 0
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _generate_prepared_statement_query(self, dbname: str, query_signature: str) -> str:
+    def _generate_prepared_statement_query(self, conn, query_signature: str) -> str:
         parameters = ""
-        num_params = self._get_number_of_parameters_for_prepared_statement(dbname, query_signature)
+        num_params = self._get_number_of_parameters_for_prepared_statement(conn, query_signature)
 
         if num_params > 0:
             null_parameters = ','.join('null' for _ in range(num_params))
@@ -152,11 +152,11 @@ class ExplainParameterizedQueries:
         return EXECUTE_PREPARED_STATEMENT_QUERY.format(prepared_statement=query_signature, parameters=parameters)
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _explain_prepared_statement(self, dbname, statement, obfuscated_statement, query_signature):
-        prepared_statement_query = self._generate_prepared_statement_query(dbname, query_signature)
+    def _explain_prepared_statement(self, conn, statement, obfuscated_statement, query_signature):
         try:
+            prepared_statement_query = self._generate_prepared_statement_query(conn, query_signature)
             return self._execute_query_and_fetch_rows(
-                dbname,
+                conn,
                 EXPLAIN_QUERY.format(
                     explain_function=self._explain_function,
                     statement=prepared_statement_query,
@@ -174,11 +174,9 @@ class ExplainParameterizedQueries:
             )
             raise
 
-    def _deallocate_prepared_statement(self, dbname, query_signature):
+    def _deallocate_prepared_statement(self, conn, query_signature):
         try:
-            self._execute_query(
-                dbname, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature)
-            )
+            self._execute_query(conn, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature))
         except Exception as e:
             logger.debug(
                 'Failed to deallocate prepared statement query_signature=[%s] | err=[%s]',
@@ -186,22 +184,19 @@ class ExplainParameterizedQueries:
                 e,
             )
 
-    def _execute_query(self, dbname, query):
-        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor() as cursor:
-                logger.debug('Executing query=[%s]', query)
-                cursor.execute(query, ignore_query_metric=True)
+    def _execute_query(self, conn, query):
+        with conn.cursor() as cursor:
+            logger.debug('Executing query=[%s]', query)
+            cursor.execute(query, ignore_query_metric=True)
 
-    def _execute_query_and_fetch_rows(self, dbname, query):
-        with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query, ignore_query_metric=True)
-                return cursor.fetchall()
+    def _execute_query_and_fetch_rows(self, conn, query):
+        with conn.cursor() as cursor:
+            cursor.execute(query, ignore_query_metric=True)
+            return cursor.fetchall()
 
     def _is_parameterized_query(self, statement: str) -> bool:
         # Use regex to match $1 to determine if a query is parameterized
         # BUT single quoted string '$1' should not be considered as a parameter
         # e.g. SELECT * FROM products WHERE id = $1; -- $1 is a parameter
         # e.g. SELECT * FROM products WHERE id = '$1'; -- '$1' is not a parameter
-        parameterized_query_pattern = r"(?<!')\$(?!'\$')[\d]+(?!')"
-        return re.search(parameterized_query_pattern, statement) is not None
+        return PARAMETERIZED_QUERY_PATTERN.search(statement) is not None

@@ -102,7 +102,7 @@ def instance_complex():
             'schema_size_metrics': True,
             'table_size_metrics': True,
             'system_table_size_metrics': True,
-            'table_row_stats_metrics': True,
+            'table_rows_stats_metrics': True,
             'index_metrics': True,
         },
         'tags': tags.METRIC_TAGS,
@@ -622,9 +622,9 @@ def _mysql_docker_repo():
         if MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
         elif MYSQL_VERSION.startswith('8') or MYSQL_VERSION == 'latest':
-            return 'bitnami/mysql'
+            return 'bitnamilegacy/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
-        return 'bitnami/mariadb'
+        return 'bitnamilegacy/mariadb'
     elif MYSQL_FLAVOR == 'percona':
         return 'percona/percona-server'
     else:

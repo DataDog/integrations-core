@@ -81,7 +81,6 @@ pipeline:
         antiexploit,antiexploit
         network-monitor,network-attack-defense-monitor
         uc,user-control
-        storage-antimalware,storage-antimalware
         ransomware-mitigation,ransomware-activity-detection
         new-incident,new-incident
       type: lookup-processor
@@ -554,37 +553,6 @@ pipeline:
           enabled: true
           sources:
             - computer_ips
-          sourceType: attribute
-          target: network.client.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-    - type: pipeline
-      name: Processing of Storage Antimalware logs
-      enabled: true
-      filter:
-        query: service:storage-antimalware
-      processors:
-        - type: string-builder-processor
-          name: "%{params.events.storage_ip} - in attribute storage_ip_extracted"
-          enabled: true
-          template: "%{params.events.storage_ip}"
-          target: storage_ip_extracted
-          replaceMissing: true
-        - type: grok-parser
-          name: Extract storage_ips
-          enabled: true
-          source: storage_ip_extracted
-          samples:
-            - 10.10.10.10,10.10.10.11
-          grok:
-            supportRules: ""
-            matchRules: storage_ip_rule %{data:storage_ips:array(",")}
-        - type: attribute-remapper
-          name: Map `storage_ips` to `network.client.ip`
-          enabled: true
-          sources:
-            - storage_ips
           sourceType: attribute
           target: network.client.ip
           targetType: attribute

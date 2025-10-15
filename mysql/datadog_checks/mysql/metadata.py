@@ -10,7 +10,7 @@ import pymysql
 from datadog_checks.mysql.cursor import CommenterDictCursor
 from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
 
-from .util import connect_with_session_variables
+from .util import ManagedAuthConnectionMixin, connect_with_session_variables
 
 try:
     import datadog_agent
@@ -40,19 +40,19 @@ FROM
 """
 
 
-class MySQLMetadata(DBMAsyncJob):
+class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
     """
     Collects database metadata. Supports:
     1. collection of performance_schema.global_variables
     2. collection of databases(schemas) data
     """
 
-    def __init__(self, check, config, connection_args):
+    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
         self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
         self._databases_data_collection_interval = config.schemas_config.get(
             "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
         )
-        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', False))
+        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', True))
 
         self._settings_collection_interval = float(
             config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
@@ -81,7 +81,9 @@ class MySQLMetadata(DBMAsyncJob):
         self._check = check
         self._config = config
         self._version_processed = False
-        self._connection_args = connection_args
+        self._connection_args_provider = connection_args_provider
+        self._uses_managed_auth = uses_managed_auth
+        self._db_created_at = 0
         self._db = None
         self._databases_data = DatabasesData(self, check, config)
         self._last_settings_collection_time = 0
@@ -89,18 +91,22 @@ class MySQLMetadata(DBMAsyncJob):
 
     def get_db_connection(self):
         """
-        lazy reconnect db
-        pymysql connections are not thread safe so we can't reuse the same connection from the main check
-        :return:
+        Get database connection with metadata-specific ping() logic.
+
+        Overrides the mixin's _get_db_connection() to add ping() support.
+        Metadata checks run far less frequently than other checks, and there are reports
+        that unused pymysql connections sometimes end up being closed unexpectedly.
         """
+        if self._should_reconnect_for_managed_auth():
+            self._close_db_conn()
+
         if not self._db:
-            self._db = connect_with_session_variables(**self._connection_args)
+            conn_args = self._connection_args_provider()
+            self._db = connect_with_session_variables(**conn_args)
+            if self._uses_managed_auth:
+                self._db_created_at = time.time()
         else:
-            # Metadata checks runs far less frequently than other checks, and there are reports
-            # that unused pymysql connections sometimes end up being closed unexpectedly.
-            # This is a simple attempt to ensure that the connection is still valid before
-            # returning it. ping() will by default automatically reconnect
-            # if the connection is lost.
+            # ping() will by default automatically reconnect if the connection is lost
             self._db.ping()
         return self._db
 
@@ -145,7 +151,7 @@ class MySQLMetadata(DBMAsyncJob):
         if self._databases_data_enabled and elapsed_time_databases >= self._databases_data_collection_interval:
             self._last_databases_collection_time = time.time()
             try:
-                self._databases_data._collect_databases_data(self._tags)
+                self._databases_data.collect_databases_data(self._tags)
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting schema data.

@@ -6,6 +6,8 @@ This check monitors [Calico][1] through the Datadog Agent.
 
 The Calico check sends metrics concerning network and security in a Kubernetes cluster set up with Calico.
 
+**Minimum Agent version:** 7.36.0
+
 ## Setup
 
 ### Installation

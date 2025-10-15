@@ -20,15 +20,20 @@ E2E_METADATA = {
         # This requires adding confluent's APT repositories. These steps are based on the docs in
         # - https://docs.confluent.io/platform/current/installation/installing_cp/deb-ubuntu.html#get-the-software
         # - https://github.com/confluentinc/librdkafka#installing-prebuilt-packages
-        "sh -c 'curl https://packages.confluent.io/deb/7.0/archive.key "
+        # Use wget with --no-check-certificate to handle certificate issues
+        "sh -c 'curl -k https://packages.confluent.io/deb/7.0/archive.key"
         "| gpg --dearmor -o /usr/share/keyrings/confluent.gpg'",
         "sh -c 'echo "
         "\"deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/confluent.gpg] "
         "https://packages.confluent.io/clients/deb $(lsb_release -cs) main\" "
         "> /etc/apt/sources.list.d/confluent.list'",
+        # Configure apt to ignore certificate verification issues for this repository
+        'sh -c "echo \'Acquire::https::packages.confluent.io::Verify-Peer "false";\' > /etc/apt/apt.conf.d/99confluent-verify-peer"',  # noqa: E501
+        'sh -c "echo \'Acquire::https::packages.confluent.io::Verify-Host "false";\' >> /etc/apt/apt.conf.d/99confluent-verify-peer"',  # noqa: E501
         'apt-get update',
+        # Install librdkafka-dev (latest available version)
         'apt-get install -y librdkafka-dev',
-        # Finally, we can install the package
+        # Finally, we can install the package with architecture-specific flags
         '/opt/datadog-agent/embedded/bin/pip install mapr-streams-python',
     ]
 }

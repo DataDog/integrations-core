@@ -26,6 +26,7 @@ class MySQLConfig(object):
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
+        self.disable_innodb_metrics = is_affirmative(self.options.get('disable_innodb_metrics', False))
         self.replication_channel = self.options.get('replication_channel')
         if self.replication_channel:
             self.tags.append("channel:{0}".format(self.replication_channel))
@@ -45,6 +46,8 @@ class MySQLConfig(object):
         self.full_statement_text_samples_per_hour_per_query = instance.get(
             'full_statement_text_samples_per_hour_per_query', 1
         )
+        self.statement_rows_cache_max_size = instance.get('statement_rows_cache_max_size', 10000)
+        self.statement_rows_cache_ttl = instance.get('statement_rows_cache_ttl', 3600)
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.settings_config = instance.get('collect_settings', {}) or {}
