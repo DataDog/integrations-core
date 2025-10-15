@@ -115,6 +115,7 @@ def test_jobstats(aggregator, mock_lustre_commands, node_type, fixture_file, exp
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tags(metric, tags=['jobid_var:disable', 'jobid_name:%e.%u'])
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.parametrize(
