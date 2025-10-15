@@ -1,1 +1,0 @@
-Fix helper method `config_set_persistent_cache_id` to ensure that the persistent cache id generated is stable between agent restarts.
