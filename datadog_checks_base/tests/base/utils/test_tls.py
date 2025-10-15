@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import os
 import ssl
 from ssl import SSLContext
@@ -174,11 +175,13 @@ class TestTLSContext:
             context = check.get_tls_context()  # type: MagicMock
             context.load_default_certs.assert_called_with(ssl.Purpose.SERVER_AUTH)
 
-    def test_no_ca_certs_default_tls_verify_false(self):
+    def test_no_ca_certs_default_tls_verify_false(self, caplog):
         check = AgentCheck('test', {}, [{'tls_verify': False}])
-        with patch('ssl.SSLContext'):
+        with patch('ssl.SSLContext'), caplog.at_level(logging.DEBUG):
             context = check.get_tls_context()  # type: MagicMock
-            context.load_default_certs.assert_called_with(ssl.Purpose.SERVER_AUTH)
+            context.load_default_certs.assert_not_called()
+            context.load_verify_locations.assert_not_called()
+            assert 'skipping CA certificate configuration' in caplog.text
 
     def test_ca_cert_file(self):
         with patch('ssl.SSLContext'), TempDir("test_ca_cert_file") as tmp_dir:

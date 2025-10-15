@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.21.1 / 2025-10-09
+
+***Fixed***:
+
+* Fix helper method `config_set_persistent_cache_id` to ensure that the persistent cache id generated is stable between agent restarts. ([#21577](https://github.com/DataDog/integrations-core/pull/21577))
+
 ## 37.21.0 / 2025-09-30
 
 ***Added***:

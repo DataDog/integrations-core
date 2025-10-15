@@ -169,12 +169,12 @@ class DockerAgent(AgentInterface):
         # Run API on a random free port
         env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
 
-        # Disable trace Agent
-        env_vars[AgentEnvVars.APM_ENABLED] = 'false'
+        # Disable trace Agent by default (can be overridden by user-provided env_vars)
+        env_vars.setdefault(AgentEnvVars.APM_ENABLED, 'false')
 
         # Set up telemetry
-        env_vars[AgentEnvVars.TELEMETRY_ENABLED] = '1'
-        env_vars[AgentEnvVars.EXPVAR_PORT] = '5000'
+        env_vars.setdefault(AgentEnvVars.TELEMETRY_ENABLED, '1')
+        env_vars.setdefault(AgentEnvVars.EXPVAR_PORT, '5000')
 
         if (proxy_data := self.metadata.get('proxy')) is not None:
             if (http_proxy := proxy_data.get('http')) is not None:
