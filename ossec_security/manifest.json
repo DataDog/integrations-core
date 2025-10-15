@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "595fcf0f-a306-43bf-a282-a729764961fa",
   "app_id": "ossec-security",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

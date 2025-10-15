@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b978d452-7008-49d0-bb87-62d8639b2205",
   "app_id": "prometheus",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
