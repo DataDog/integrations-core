@@ -2,8 +2,6 @@ id: kandji
 tests:
   - sample: |-
       {
-        "source": "kandji",
-        "service": "audit",
         "id": "01K5TWX6CQ07HFHKSMYQYRDKAB",
         "action": "update",
         "occurred_at": "2025-09-23T09:01:37.420577Z",
@@ -19,11 +17,10 @@ tests:
           "last_name": "Carter"
         }
       }
+    service: "audit-logs"
     result: null
   - sample: >-
       {
-        "source": "kandji",
-        "service": "audit",
         "id": "01K5TPW1DEFFM2SYK7HYJ5TPAB",
         "action": "detect",
         "occurred_at": "2025-09-23T07:16:07.444310Z",
@@ -106,11 +103,10 @@ tests:
           }
         }
       }
+    service: "audit-logs"
     result: null
   - sample: |-
       {
-        "source": "kandji",
-        "service": "audit",
         "id": "01K4SVQ3MR2BSPB21TWNWJAJA2",
         "action": "create",
         "occurred_at": "2025-09-10T13:05:53.181373Z",
@@ -131,11 +127,10 @@ tests:
           }
         }
       }
+    service: "audit-logs"
     result: null
   - sample: >-
       {
-        "source": "kandji",
-        "service": "audit",
         "id": "01K4PQ40BTQPZVS52FJXD0GFB3",
         "action": "detect",
         "occurred_at": "2025-09-09T07:47:49.172851Z",
@@ -195,11 +190,10 @@ tests:
           }
         }
       }
+    service: "audit-logs"
     result: null
   - sample: |-
       {
-        "source": "kandji",
-        "service": "audit",
         "id": "01K4PJA0E0EQEC7QRXTH6WAJ12",
         "action": "update",
         "occurred_at": "2025-09-09T06:23:43.383914Z",
@@ -224,11 +218,10 @@ tests:
           "name": "DDS-Test"
         }
       }
+    service: "audit-logs"
     result: null
   - sample: >-
       {
-        "source": "kandji",
-        "service": "detection",
         "device_id": "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab",
         "device_name": "IT’s MacBook Air",
         "device_serial_number": "C02XMF5VJK7A",
@@ -249,4 +242,5 @@ tests:
         "cve_published_at": "2025-09-24T17:15:39.940000",
         "cve_modified_at": "2025-09-25T15:55:41.970000"
       }
+    service: "detection-logs"
     result: null
