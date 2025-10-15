@@ -22,10 +22,10 @@ If installing the Datadog Agent on a domain environment, see [the installation r
 
 2. [Restart the Agent][5]
 
-**Note**: Versions 1.13.0 or later of this check use a new implementation for metric collection, which requires Python 3. For hosts that are unable to use Python 3, or if you would like to use a legacy version of this check, refer to the following [config][10].
+**Note**: Use version 4.4.0 or later of this check to collect the latest metrics.
 
 #### Service checks
-Datadog recommends enabling the [Windows Services][11] integration to also monitor the state of the Active Directory services.
+Datadog recommends enabling the [Windows Services][10] integration to also monitor the state of the Active Directory services.
 
 Example configuration:
 ```yaml
@@ -39,7 +39,7 @@ instances:
     - kdc
 ```
 
-**Note:** The Datadog Agent might not have access to all the services (e.g. NTDS). See [Service permissions][12] for more information to grant access.
+**Note:** The Datadog Agent might not have access to all the services (e.g. NTDS). See [Service permissions][11] for more information to grant access.
 
 ### Validation
 
@@ -102,6 +102,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv
 [9]: https://docs.datadoghq.com/help/
-[10]: https://github.com/DataDog/integrations-core/blob/7.33.x/active_directory/datadog_checks/active_directory/data/conf.yaml.example
-[11]: https://docs.datadoghq.com/integrations/windows-service/
-[12]: https://docs.datadoghq.com/integrations/windows-service/#service-permissions
+[10]: https://docs.datadoghq.com/integrations/windows-service/
+[11]: https://docs.datadoghq.com/integrations/windows-service/#service-permissions
