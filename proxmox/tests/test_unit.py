@@ -264,12 +264,6 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
     )
 
 
-class AttributeErrorMockResponse(MockResponse):
-    """Mock response that raises AttributeError when json() is called."""
-
-    def json(self):
-        raise AttributeError("Qemu Agent not available")
-
 
 @pytest.mark.parametrize(
     ('mock_http_get'),
@@ -293,10 +287,13 @@ class AttributeErrorMockResponse(MockResponse):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': AttributeErrorMockResponse()
+                    '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(
+                        status_code=200, 
+                        json_data={"data": None, "message": "No QEMU guest agent configured\n"}
+                    )
                 }
             },
-            id='attribute_error',
+            id='qemu_agent_not_configured',
         ),
     ],
     indirect=['mock_http_get'],
