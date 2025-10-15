@@ -1,0 +1,2 @@
+Add Mongo schema max_fields_per_collection option (default 100) to limit payload size.
+
