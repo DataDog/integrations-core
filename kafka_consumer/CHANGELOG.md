@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 6.8.1-beta.1 / 2025-10-15
+
+***Fixed***:
+
+* Set ruff formatting rules in pyproject.toml to inherit from the global ones of the repo. ([#21206](https://github.com/DataDog/integrations-core/pull/21206))
+* Correctly support schema registry bytes in Avro & Protobuf messages ([#21632](https://github.com/DataDog/integrations-core/pull/21632))
+
 ## 6.8.0 / 2025-09-05
 
 ***Added***:
