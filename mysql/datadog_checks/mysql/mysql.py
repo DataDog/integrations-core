@@ -439,7 +439,7 @@ class MySql(AgentCheck):
 
         if self.global_variables.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
-            if self.version.version_compatible((8, 0, 0)):
+            if not self.is_mariadb and self.version.version_compatible((8, 0, 0)) and self._config.dbm_enabled:
                 queries.extend([QUERY_ERRORS_RAISED])
         if self._index_metrics.include_index_metrics:
             queries.extend(self._index_metrics.queries)

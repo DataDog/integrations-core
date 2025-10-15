@@ -243,21 +243,18 @@ QUERY_USER_CONNECTIONS = {
 }
 
 QUERY_ERRORS_RAISED = {
-    'name': 'performance_schema.events_errors_summary_by_user_by_error',
+    'name': 'performance_schema.events_errors_summary_global_by_error',
     'query': """
         SELECT
             SUM_ERROR_RAISED as errors_raised,
             ERROR_NUMBER as error_number,
-            ERROR_NAME as error_name,
-            USER as user
-        FROM performance_schema.events_errors_summary_by_user_by_error
-        WHERE SUM_ERROR_RAISED > 0
+            ERROR_NAME as error_name
+        FROM performance_schema.events_errors_summary_global_by_error
     """.strip(),
     'columns': [
-        {'name': 'mysql.performance.errors_raised_by_user', 'type': 'gauge'},
+        {'name': 'mysql.performance.errors_raised', 'type': 'monotonic_count'},
         {'name': 'error_number', 'type': 'tag'},
         {'name': 'error_name', 'type': 'tag'},
-        {'name': 'user', 'type': 'tag'},
     ],
 }
 
