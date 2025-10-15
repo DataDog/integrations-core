@@ -284,6 +284,7 @@
                 "title": "Threats by Classification",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "requests": [
                     {
                         "queries": [
@@ -291,7 +292,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:kandji service:audit -@metadata.classification:(None OR \"\") $classification $status $file_name $user_name $device_name"
+                                    "query": "source:kandji service:audit @target_type:file_detection -@metadata.classification:(None OR \"\") $classification $status $file_name $user_name $device_name"
                                 },
                                 "indexes": [
                                     "*"
@@ -611,6 +612,7 @@
                     "value",
                     "sum"
                 ],
+                "time": {},
                 "type": "timeseries",
                 "requests": [
                     {
@@ -625,7 +627,7 @@
                                 "name": "query1",
                                 "data_source": "logs",
                                 "search": {
-                                    "query": "source:kandji service:audit @metadata.classification:PUP $classification $status $file_name $user_name $device_name"
+                                    "query": "source:kandji service:audit @target_type:file_detection @metadata.classification:PUP $classification $status $file_name $user_name $device_name"
                                 },
                                 "indexes": [
                                     "*"
