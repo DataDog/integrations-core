@@ -655,7 +655,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {cluster_id}",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,cluster_id:*} by {cluster_id}",
                       "aggregator": "sum"
                     }
                   ],
@@ -722,7 +722,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {cluster_id}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,cluster_id:*} by {cluster_id}.rollup(sum, daily)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -759,7 +759,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$workspace_id,$cluster_id,$job_id,$charge_description,$servicename} by {job_id}",
+                      "query": "sum:all.cost{providername:Databricks,$workspace_id,$cluster_id,$job_id,$charge_description,$servicename,job_id:*} by {job_id}",
                       "aggregator": "sum"
                     }
                   ],
@@ -826,7 +826,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {job_id}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,job_id:*} by {job_id}.rollup(sum, daily)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -903,7 +903,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {cluster_id}",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,cluster_id:*} by {cluster_id}",
                       "aggregator": "sum"
                     },
                     {
