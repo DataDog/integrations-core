@@ -3,7 +3,7 @@
   "app_uuid": "b9c52007-5909-44c7-b4a2-624f0efffa9e",
   "app_id": "solarwinds",
   "owner": "event-management",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
