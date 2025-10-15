@@ -86,10 +86,6 @@ The Netlogon and Security metrics help address several monitoring scenarios:
 
 The Active Directory check does not include any events.
 
-### Service Checks
-
-The Active Directory check does not include any service checks.
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
