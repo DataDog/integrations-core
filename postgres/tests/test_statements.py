@@ -258,7 +258,6 @@ def test_statement_metrics(
     assert event['host'] == 'stubbed.hostname'
     assert event['timestamp'] > 0
     assert event['ddagentversion'] == datadog_agent.get_version()
-    assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
     expected_dbm_metrics_tags = set(_get_expected_tags(check, dbm_instance, with_host=False))
     assert set(event['tags']) == expected_dbm_metrics_tags

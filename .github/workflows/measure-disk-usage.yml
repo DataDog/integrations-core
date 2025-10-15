@@ -37,11 +37,11 @@ jobs:
     - name: Define command
       id: cmd
       run: |
-        cmd="ddev size status \
+        cmd="ddev -v size status \
         --commit ${{ github.event.workflow_run.head_sha }} \
         --format json"
 
-        if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
+        if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.event.workflow_run.head_branch }}" = "master" ]; then 
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         fi
 

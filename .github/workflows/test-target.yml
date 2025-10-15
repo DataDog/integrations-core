@@ -91,6 +91,11 @@ on:
         required: false
         default: "standard"
         type: string
+      step-timeout-minutes:
+        description: "Timeout in minutes for ddev test steps"
+        required: false
+        default: 60
+        type: number
 
 defaults:
   run:
@@ -195,6 +200,7 @@ jobs:
         ddev config set repo ${{ inputs.repo }}
 
     - name: Lint
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: |-
         ddev test --lint ${{ inputs.target }} || {
           echo "::error::Lint failed!"
@@ -203,6 +209,7 @@ jobs:
         }
 
     - name: Prepare for testing
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env: >-
         ${{ fromJson(inputs.setup-env-vars || format(
           '{{
@@ -233,9 +240,11 @@ jobs:
 
     - name: Run Unit & Integration tests
       if: inputs.latest != true && inputs.minimum-base-package != true
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
         # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
+        DD_PROFILING_STACK_V2_ENABLED: "false" # Workaround for ddtrace hangs with Python 3.13. #incident-43814
       run: |
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
@@ -254,6 +263,7 @@ jobs:
 
     - name: Run Unit & Integration tests with minimum version of base package
       if: inputs.minimum-base-package
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: |
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
@@ -272,6 +282,7 @@ jobs:
 
     - name: Run E2E tests with latest base package
       if: inputs.repo == 'core' && !inputs.minimum-base-package
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
@@ -300,6 +311,7 @@ jobs:
 
     - name: Run E2E tests
       if: inputs.repo != 'core'
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
@@ -328,18 +340,22 @@ jobs:
 
     - name: Run benchmarks
       if: inputs.benchmark
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: ddev test --bench --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Run tests and verify support for the latest version
       if: inputs.latest
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: ddev test --latest --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
     - name: Run E2E tests for the latest version
       if: inputs.latest
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
         # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
+        DD_PROFILING_STACK_V2_ENABLED: "false"  # Workaround for ddtrace hangs with Python 3.13. #incident-43814
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
         # This is done to avoid ddev from interpreting the arguments as environments

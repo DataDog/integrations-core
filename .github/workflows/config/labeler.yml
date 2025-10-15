@@ -485,6 +485,8 @@ integration/nvidia_nim:
 - nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
+integration/obsidian_security:
+- obsidian_security/**/*
 integration/octopus_deploy:
 - octopus_deploy/**/*
 integration/oke:
@@ -783,6 +785,8 @@ integration/barracuda_secure_edge:
 - barracuda_secure_edge/**/*
 integration/cloudgen_firewall:
 - cloudgen_firewall/**/*
+integration/zscaler_private_access:
+- zscaler_private_access/**/*
 qa/skip-qa:
 - '**/__about__.py'
 - requirements-agent-release.txt
