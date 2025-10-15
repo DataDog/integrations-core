@@ -66,8 +66,8 @@ Changelog files are named `<PR_NUMBER>.<TYPE>` and placed in the integration's `
 ### Version Bumping Behavior
 
 * `fixed` - Bug fixes. Bumps the **patch** version (e.g., 1.0.0 → 1.0.1)
-* `added` - New features. Bumps the **patch** version (e.g., 1.0.0 → 1.0.1)
-* `changed` - Breaking changes or significant modifications. Bumps the **minor** version (e.g., 1.0.0 → 1.1.0)
+* `added` - New features. Bumps the **minor** version (e.g., 1.0.0 → 1.1.0)
+* `changed` - Breaking changes or significant modifications. Bumps the **major** version (e.g., 1.0.0 → 2.0.0)
 
 ### Command Format
 
