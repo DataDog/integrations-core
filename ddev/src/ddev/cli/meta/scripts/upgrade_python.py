@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import click
 
 from ddev.integration.core import Integration
+from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -101,7 +102,7 @@ def update_ddev_template_files(app: Application, new_version: str, old_version: 
             update_hatch_file(app, folder_path, new_version, old_version, tracker)
 
 
-def update_pyproject_file(target_path, new_version: str, old_version: str, tracker: ValidationTracker):
+def update_pyproject_file(target_path: Path, new_version: str, old_version: str, tracker: ValidationTracker):
     import tomlkit
 
     config_file = target_path / 'pyproject.toml'
