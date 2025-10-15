@@ -122,6 +122,35 @@ def find_free_port(ip):
         return s.getsockname()[1]
 
 
+def find_free_ports(ip: str, count: int) -> list[int]:
+    """Return `count` ports available for listening on the given `ip`.
+
+    Args:
+        ip: The IP address to bind to
+        count: Number of free ports to find
+
+    Returns:
+        A list of available port numbers
+    """
+    sockets: list[socket.socket] = []
+    ports: list[int] = []
+
+    try:
+        # Create and bind all sockets first to reserve the ports
+        for _ in range(count):
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.bind((ip, 0))
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sockets.append(s)
+            ports.append(s.getsockname()[1])
+
+        return ports
+    finally:
+        # Close all sockets
+        for s in sockets:
+            s.close()
+
+
 def get_ip():
     """Return the IP address used to connect to external networks."""
     with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as s:
