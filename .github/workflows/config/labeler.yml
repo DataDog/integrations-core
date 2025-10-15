@@ -331,8 +331,6 @@ integration/karpenter:
 - karpenter/**/*
 integration/kandji:
 - kandji/**/*
-integration/kaspersky:
-- kaspersky/**/*
 integration/keda:
 - keda/**/*
 integration/keycloak:
