@@ -1,7 +1,7 @@
 {
     "version": 2,
-    "created_at": "2025-10-08T14:16:24.754-04:00",
-    "last_updated_at": "2025-10-08T14:16:24.754-04:00",
+    "created_at": "2025-10-08",
+    "last_updated_at": "2025-10-08",
     "title": "BentoML Endpoint Liveness Check",
     "description": "This monitor checks if the BentoML endpoint is live and operational.",
     "definition": {
