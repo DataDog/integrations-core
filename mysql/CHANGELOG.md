@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 15.9.2 / 2025-10-08
+
+***Fixed***:
+
+* Fixes `disable_innodb_metrics` being read from the wrong config layer ([#21591](https://github.com/DataDog/integrations-core/pull/21591))
+
 ## 15.9.1 / 2025-10-03
 
 ***Fixed***:
@@ -22,7 +28,7 @@
 * Consolidate Mysql global variable lookups to a single query ([#21306](https://github.com/DataDog/integrations-core/pull/21306))
 * Setting `disable_innodb_metrics` config option to `true` will now properly disable `mysql.innodb.deadlocks` metric collection ([#21421](https://github.com/DataDog/integrations-core/pull/21421))
 
-## 15.8.1 / 2025-10-03
+## 15.8.1 / 2025-10-03 / Agent 7.71.1
 
 ***Fixed***:
 

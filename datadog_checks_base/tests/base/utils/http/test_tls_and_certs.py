@@ -10,6 +10,7 @@ from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.tls import TlsConfig
+from datadog_checks.dev.utils import ON_WINDOWS
 
 pytestmark = [pytest.mark.unit]
 
@@ -66,6 +67,30 @@ class TestCert:
 
             mock_load_cert_chain.assert_called_once()
             mock_load_cert_chain.assert_called_with(expected_cert, keyfile=expected_key, password=None)
+
+    @pytest.mark.skipif(ON_WINDOWS, reason="Windows uses the default store locations.")
+    def test_bad_default_verify_paths_and_fallback_to_certifi(self, monkeypatch, caplog):
+        '''The SSL default verify paths can be set incorrectly.'''
+        bad_cert_file = "/nonexistent/path/to/ssl/cert.pem"
+        bad_cert_dir = "/nonexistent/path/to/ssl/certs"
+        monkeypatch.setenv("SSL_CERT_FILE", bad_cert_file)
+        monkeypatch.setenv("SSL_CERT_DIR", bad_cert_dir)
+        bad_ssl_paths = ssl.DefaultVerifyPaths(
+            cafile="None",
+            capath="None",
+            openssl_cafile_env="SSL_CERT_FILE",
+            openssl_capath_env="SSL_CERT_DIR",
+            openssl_cafile=bad_cert_file,
+            openssl_capath=bad_cert_dir,
+        )
+        with mock.patch("ssl.get_default_verify_paths", return_value=bad_ssl_paths):
+            with mock.patch("requests.Session.get"):
+                with caplog.at_level(logging.INFO):
+                    http = RequestsWrapper({"tls_verify": True}, {})
+                    assert ssl.get_default_verify_paths() == bad_ssl_paths
+                    assert http.session.adapters["https://"].ssl_context.get_ca_certs() != []
+                    http.get("https://example.com")
+            assert 'No CA certificates loaded from system default paths, attempting certifi fallback.' in caplog.text
 
 
 class TestIgnoreTLSWarning:
