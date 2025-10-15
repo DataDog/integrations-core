@@ -53,9 +53,9 @@
         "title_size": "16",
         "title_align": "left",
         "time": {
-          "type": "fixed",
-          "from": 1751932800000,
-          "to": 1754611200000,
+          "type": "live",
+          "unit": "month",
+          "value": 1,
           "hide_incomplete_cost_data": true
         },
         "type": "query_value",
@@ -100,9 +100,9 @@
         "title_size": "16",
         "title_align": "left",
         "time": {
-          "type": "fixed",
-          "from": 1751932800000,
-          "to": 1754611200000,
+          "type": "live",
+          "unit": "month",
+          "value": 1,
           "hide_incomplete_cost_data": true
         },
         "type": "query_value",
@@ -147,9 +147,9 @@
         "title_size": "16",
         "title_align": "left",
         "time": {
-          "type": "fixed",
-          "from": 1749826086865,
-          "to": 1752504486865,
+          "type": "live",
+          "unit": "month",
+          "value": 1,
           "hide_incomplete_cost_data": true
         },
         "type": "query_value",
