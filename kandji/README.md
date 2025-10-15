@@ -1,6 +1,6 @@
 ## Overview
 
-[Kandji][1] is an Apple device management and security platform that helps organizations automate deployment, enforce compliance, and secure macOS and iOS devices.
+[Kandji][1] is an Apple device management and security platform that helps organizations automate deployment, enforce compliance, secure macOS, and iOS devices.
 
 This integration ingests the following logs:
 - **Audit**: Provides information about security events, device lifecycle changes, and admin/user actions.
@@ -20,7 +20,7 @@ Integrate Kandji with Datadog to gain insights into audit, threats and detection
 1. Log in to Kandji Platform using **Admin** or **Owner** account and click on **Settings**.
 2. Click the **Access** tab.
 3. Scroll down to the **API Token** section and click the **Add Token** button. 
-4. Enter a **Name** and a **Description** for your API token.
+4. Enter **Name** and **Description** for your API token.
 5. Click **Create**.
 6. Copy the **Token**, then check the box confirming: **I have copied the token and understand that I will not be able to see these details again.**
 7. Click **Next**.
