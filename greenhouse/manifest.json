@@ -14,7 +14,12 @@
     "media": [
       {
         "caption": "Greenhouse - Audit Logs",
-        "image_url": "images/greenhouse_audit_logs.png",
+        "image_url": "images/greenhouse_audit_image1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Greenhouse - Audit Logs",
+        "image_url": "images/greenhouse_audit_image2.png",
         "media_type": "image"
       }
     ],

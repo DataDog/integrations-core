@@ -160,7 +160,6 @@ def _get_expected_tags(
         pg_instance['tags']
         + [f'port:{pg_instance["port"]}']
         + [f'database_hostname:{check.database_hostname}', f'database_instance:{check.database_identifier}']
-        + [f'ddagenthostname:{check.agent_hostname}']
     )
     if role:
         base_tags.append(f'replication_role:{role}')

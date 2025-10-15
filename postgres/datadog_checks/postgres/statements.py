@@ -185,7 +185,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._baseline_metrics = {}
         self._last_baseline_metrics_expiry = None
         self._track_io_timing_cache = None
-        self._obfuscate_options = to_native_string(self._config.obfuscator_options.model_dump_json())
+        obfuscate_options = self._config.obfuscator_options.model_dump()
+        # Backfill old keys used in the agent obfuscator
+        obfuscate_options['table_names'] = self._config.obfuscator_options.collect_tables
+        obfuscate_options['dollar_quoted_func'] = self._config.obfuscator_options.keep_dollar_quoted_func
+        obfuscate_options['return_json_metadata'] = self._config.obfuscator_options.collect_metadata
+        self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=config.query_metrics.full_statement_text_cache_max_size,
@@ -279,7 +284,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 'cloud_metadata': self._check.cloud_metadata,
                 'postgres_version': payload_pg_version(self._check.version),
                 'ddagentversion': datadog_agent.get_version(),
-                'ddagenthostname': self._check.agent_hostname,
                 'service': self._config.service,
             }
 
