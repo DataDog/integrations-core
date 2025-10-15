@@ -17,7 +17,7 @@ tests:
           "last_name": "Carter"
         }
       }
-    service: "audit-logs"
+    service: "audit"
     result: null
   - sample: >-
       {
@@ -103,7 +103,7 @@ tests:
           }
         }
       }
-    service: "audit-logs"
+    service: "audit"
     result: null
   - sample: |-
       {
@@ -127,7 +127,7 @@ tests:
           }
         }
       }
-    service: "audit-logs"
+    service: "audit"
     result: null
   - sample: >-
       {
@@ -190,7 +190,7 @@ tests:
           }
         }
       }
-    service: "audit-logs"
+    service: "audit"
     result: null
   - sample: |-
       {
@@ -218,7 +218,7 @@ tests:
           "name": "DDS-Test"
         }
       }
-    service: "audit-logs"
+    service: "audit"
     result: null
   - sample: >-
       {
@@ -242,5 +242,5 @@ tests:
         "cve_published_at": "2025-09-24T17:15:39.940000",
         "cve_modified_at": "2025-09-25T15:55:41.970000"
       }
-    service: "detection-logs"
+    service: "detection"
     result: null
