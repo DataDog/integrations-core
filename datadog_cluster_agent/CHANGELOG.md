@@ -15,7 +15,7 @@
 * Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
 * Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
 
-## 6.0.2 / 2025-10-10
+## 6.0.2 / 2025-10-10 / Agent 7.71.2
 
 ***Added***:
 
