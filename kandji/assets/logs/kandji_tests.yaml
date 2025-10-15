@@ -18,7 +18,6 @@ tests:
           "last_name": "Carter"
         }
       }
-    service: "audit"
     result:
       custom:
         action: "update"
@@ -138,7 +137,6 @@ tests:
           }
         }
       }
-    service: "audit"
     result:
       custom:
         action: "detect"
@@ -308,7 +306,6 @@ tests:
           }
         }
       }
-    service: "audit"
     result:
       custom:
         action: "create"
@@ -413,7 +410,6 @@ tests:
           }
         }
       }
-    service: "audit"
     result:
       custom:
         action: "detect"
@@ -545,7 +541,6 @@ tests:
           "name": "DDS-Test"
         }
       }
-    service: "audit"
     result:
       custom:
         action: "update"
@@ -612,7 +607,6 @@ tests:
         "cve_published_at": "2025-09-24T17:15:39.940000",
         "cve_modified_at": "2025-09-25T15:55:41.970000"
       }
-    service: "detection"
     result:
       custom:
         blueprint_id: "41b6cc51-7905-436a-9e33-b1468ceeb08d"
