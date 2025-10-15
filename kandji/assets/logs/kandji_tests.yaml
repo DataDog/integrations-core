@@ -1,6 +1,7 @@
 id: kandji
 tests:
-  - sample: |-
+  - 
+    sample: |-
       {
         "id": "01K5TWX6CQ07HFHKSMYQYRDKAB",
         "action": "update",
@@ -52,7 +53,8 @@ tests:
           "id" : "01K5TWX6CQ07HFHKSMYQYRDKAB",
           "actor_id" : "aa2ec25a-a125-45b5-9489-b9cd66d2d60f"
         }
-  - sample: >-
+  - 
+    sample: >-
       {
         "id": "01K5TPW1DEFFM2SYK7HYJ5TPAB",
         "action": "detect",
@@ -283,7 +285,8 @@ tests:
           "id" : "01K5TPW1DEFFM2SYK7HYJ5TPAB",
           "actor_id" : "EDR"
         }
-  - sample: |-
+  - 
+    sample: |-
       {
         "id": "01K4SVQ3MR2BSPB21TWNWJAJA2",
         "action": "create",
@@ -348,7 +351,8 @@ tests:
           "id" : "01K4SVQ3MR2BSPB21TWNWJAJA2",
           "actor_id" : "kandji"
         }
-  - sample: >-
+  - 
+    sample: >-
       {
         "id": "01K4PQ40BTQPZVS52FJXD0GFB3",
         "action": "detect",
@@ -514,7 +518,8 @@ tests:
           "id" : "01K4PQ40BTQPZVS52FJXD0GFB3",
           "actor_id" : "VULNERABILITY_MANAGEMENT"
         }
-  - sample: |-
+  - 
+    sample: |-
       {
         "id": "01K4PJA0E0EQEC7QRXTH6WAJ12",
         "action": "update",
@@ -584,7 +589,8 @@ tests:
           "id" : "01K4PJA0E0EQEC7QRXTH6WAJ12",
           "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef"
         }
-  - sample: >-
+  - 
+    sample: >-
       {
         "device_id": "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab",
         "device_name": "IT’s MacBook Air",
