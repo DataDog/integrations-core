@@ -1,0 +1,399 @@
+{
+    "author_name": "Datadog",
+    "description": "## Windows Certificate Store Integration Dashboard\n\nThis is an example Windows Certificate Store dashboard demonstrating the information that the integration collects.\n\nFor further reading, see:\n\n- [Windows Certificate Store Integration Documentation](https://docs.datadoghq.com/integrations/windows-certificate/)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "certificate_store",
+            "prefix": "certificate_store"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "subject_common_name",
+            "prefix": "subject_cn"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "subject_organization",
+            "prefix": "subject_o"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "server",
+            "prefix": "server"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "crl_issuer_organizational_unit",
+            "prefix": "crl_issuer_ou"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "crl_issuer_organization",
+            "prefix": "crl_issuer_o"
+        }
+    ],
+    "title": "Windows Certificate Store Overview",
+    "widgets": [
+        {
+            "definition": {
+                "has_background": true,
+                "has_border": true,
+                "horizontal_align": "center",
+                "sizing": "contain",
+                "type": "image",
+                "url": "https://static.datadoghq.com/static/images/logos/windows-certificate_large.svg",
+                "vertical_align": "center"
+            },
+            "id": 4652925140828556,
+            "layout": {
+                "height": 6,
+                "width": 4,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Certificate Expiration",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "check": "windows_certificate.cert_expiration",
+                            "group_by": [
+                                "certificate_thumbprint",
+                                "certificate_serial_number",
+                                "subject_cn",
+                                "subject_o"
+                            ],
+                            "grouping": "cluster",
+                            "tags": [
+                                "$certificate_store",
+                                "$subject_common_name",
+                                "$server",
+                                "$subject_organization"
+                            ],
+                            "title": "Certificate Expiration",
+                            "title_align": "center",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 5168903633321084,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "Included service check:\n\n* `windows_certificate.cert_expiration` - Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`, returns `WARNING` if the certificate expires in less than `days_warning`. Otherwise returns `OK`.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 6717423497232037,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Days Until Expiration",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_red",
+                                                    "value": 7
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_yellow",
+                                                    "value": 30
+                                                },
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_green",
+                                                    "value": 29
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:windows_certificate.days_remaining{$certificate_store, $subject_common_name, $subject_organization, $server} by {certificate_serial_number,certificate_store,server,subject_cn,subject_o}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "text_formats": []
+                                }
+                            ],
+                            "time": {},
+                            "title": "Days Till Expiration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 8075828250602019,
+                        "layout": {
+                            "height": 3,
+                            "width": 7,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 3432759619201891,
+            "layout": {
+                "height": 6,
+                "width": 7,
+                "x": 4,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Certificate Chain Validation",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "check": "windows_certificate.cert_chain_validation",
+                            "group_by": [
+                                "certificate_thumbprint",
+                                "certificate_serial_number",
+                                "subject_cn",
+                                "subject_o"
+                            ],
+                            "grouping": "cluster",
+                            "tags": [
+                                "$certificate_store",
+                                "$server",
+                                "$subject_common_name",
+                                "$subject_organization"
+                            ],
+                            "time": {},
+                            "title": "Certificate Chain Validation",
+                            "title_align": "center",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 6414981643608492,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "Included service check:\n\n* `windows_certificate.cert_chain_validation` - Returns `CRITICAL` if the certificate chain validation fails. Otherwise, returns `OK`.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "top",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 3738342516660791,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 953152928036775,
+            "layout": {
+                "height": 6,
+                "is_column_break": true,
+                "width": 4,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Certificate Revocation List (CRL) Expiration",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "check": "windows_certificate.crl_expiration",
+                            "group_by": [
+                                "crl_thumbprint",
+                                "crl_issuer_ou",
+                                "crl_issuer_o"
+                            ],
+                            "grouping": "cluster",
+                            "tags": [
+                                "$certificate_store",
+                                "$server",
+                                "$crl_issuer_organization",
+                                "$crl_issuer_organizational_unit"
+                            ],
+                            "title": "CRL Expiration",
+                            "title_align": "center",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 5689817485904897,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "yellow",
+                            "content": "Included service check:\n\n* `windows_certificate.crl_expiration` - Returns `CRITICAL` if the certificate revocation list (CRL) has expired. Returns `WARNING` if the CRL expires in less than `crl_days_warning`. Otherwise, returns `OK`.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 1151232319823573,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 4,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Days Until Expiration",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_red",
+                                                    "value": 7
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_yellow",
+                                                    "value": 30
+                                                },
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_green",
+                                                    "value": 29
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:windows_certificate.crl_days_remaining{$server,$crl_issuer_organizational_unit,$crl_issuer_organization, $certificate_store} by {crl_thumbprint,certificate_store,server,crl_issuer_ou,crl_issuer_o}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "text_formats": []
+                                }
+                            ],
+                            "time": {},
+                            "title": "Days Till Expiration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 3192229415736192,
+                        "layout": {
+                            "height": 3,
+                            "width": 7,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 8220542056351322,
+            "layout": {
+                "height": 6,
+                "width": 7,
+                "x": 4,
+                "y": 0
+            }
+        }
+    ]
+}

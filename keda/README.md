@@ -4,6 +4,8 @@
 
 This check monitors [KEDA][1] through the Datadog Agent. For more information, see [KEDA monitoring][10].
 
+**Minimum Agent version:** 7.62.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -96,7 +98,7 @@ spec:
 
 _Available for Agent versions >6.0_
 
-Kyverno logs can be collected from the different KEDA pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
+KEDA logs can be collected from the different KEDA pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][10].
 
 See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 

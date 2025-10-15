@@ -1,0 +1,32 @@
+{
+	"version": 2,
+	"created_at": "2025-08-22",
+	"last_updated_at": "2025-08-22",
+	"title": "Outbound Link Utilization >90%",
+	"description": "This monitor detects when the outbound link utilization across an access circuit over the last 5 minutes is greater than 90%.",
+	"definition": {
+		"id": 183692872,
+		"name": "[Versa] Outbound Link Utilization >90% on {{access_circuit.name}} at {{site.name}} over the last 5 minutes",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:versa.link.tx_util{*} by {site,access_circuit,device_hostname,device_id,device_namespace,device_ip} > 90",
+		"message": "{{#is_alert}}\nOutbound Link Utilization exceeded 90% in the last 5 minutes.\n\nSite: {{site.name}}\nAccess Circuit: {{access_circuit.name}}\nDevice: {{device_hostname.name}}\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nInbound Link Utilization is <90% in the last 5 minutes.\n\nSite: {{site.name}}\nAccess Circuit: {{access_circuit.name}}\nDevice: {{device_hostname.name}}\n{{/is_alert_recovery}}\n\nTo know more about the status of your device, you can have more information from the [NDM page for the device {{device_hostname.name}}](/devices?inspectedDevice={{device_namespace.name}}%3A{{device_ip.name}}).",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 90
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false,
+			"new_group_delay": 60,
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:versa"
+	]
+}

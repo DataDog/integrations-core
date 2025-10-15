@@ -4,28 +4,19 @@
 
 ## Overview
 
-**Note:** Datadog no longer maintains or recommends the use of this integration. Instead, use the [Windows performance counters integration][2] in all cases due to its significantly lower overhead and thus better scalability.
+**Note 1:** Although the WMI check can still be used to collect Windows Performance Counters (and was previously the only method available), it is now recommended to use the dedicated [Windows Performance Counters integration][2]. This integration leverages the native Performance Counters API, making it more efficient and easier to configure. In practice, you should avoid using the `Win32_PerfFormattedData_XYZ` WMI class, as it merely acts as an alias for a Performance Counter Object/Counterset.
 
-Get metrics from your Windows applications and servers with Windows Management Instrumentation (WMI) in real time to
+**Note 2:**  Certain WMI classes, such as `Win32_Product` or `Win32_UserAccount`, are not well-suited for frequent queries, as they can be slow to respond or may cause high CPU usage. Before using any WMI class to collect telemetry, carefully test its performance to ensure it is appropriate for use in a production environment.
 
-- Visualize their performance.
-- Correlate their activity with the rest of your applications.
+The built-in Windows WMI ecosystem offers rich, and in many cases exclusive, access to Windows and Microsoft features and products telemetry. This WMI Check allows mapping rows and columns from WMI class datasets to Datdog metrics and their tags, making it easier to extract meaningful telemetry. Additionally, it supports joining two WMI class datasets, allowing for correlations between datasets that would otherwise be impossible to achieve.
+
+**Minimum Agent version:** 6.0.0
 
 ## Setup
 
-### Installation
+### [Default] Agent User Privilege
 
-If you are only collecting standard metrics from Microsoft Windows and other packaged applications, there are no installation steps. If you need to define new metrics to collect from your application, then you have a few options:
-
-1. Submit performance counters using System.Diagnostics in .NET, then access them with WMI.
-2. Implement a COM-based WMI provider for your application. You would typically only do this if you are using a non-.NET language.
-
-To learn more about using System.Diagnostics, see the [PerformanceCounter Class][3]). After adding your metric you should be able to find it in WMI. To browse the WMI namespaces, you may find [WMI Explorer][4] useful. You can find the same information with Powershell using [Get-WmiObject][5]. Also, review the information in [Retrieving WMI metrics][6].
-
-If you assign the new metric a category of My_New_Metric, the WMI path is
-`\\<ComputerName>\ROOT\CIMV2:Win32_PerfFormattedData_My_New_Metric`
-
-If the metric isn't showing up in WMI, try running `winmgmt /resyncperf` to force the computer to reregister the performance libraries with WMI.
+[The default user][15] configured during the standard Agent installation is sufficient to collect telemetry from many WMI classes. However, some WMI classes may require a user with elevated privileges to access their data.
 
 ### Configuration
 
@@ -189,9 +180,39 @@ The WMI check does not include any events.
 
 The WMI check does not include any service checks.
 
+## Finding WMI classes
+
+#### List WMI Namespaces
+
+Many WMI classes reside in the default `ROOT\cimv2` namespace, but Windows features and products often define additional namespaces that expose namespace-specific WMI classes. To list all available namespaces on a host, run the following PowerShell command:
+
+```
+PS> Get-WmiObject -Namespace Root -Class __Namespace | Select Name
+```
+
+#### List WMI Namespace Classes
+
+To list all WMI classes available in `XYZ` namespace run the following PowerShell command:
+
+```
+Get-WmiObject -List -Namespace ROOT\xyz | Select Name
+```
+
+... or drop `-Namespace` parameter for the default namespace.
+
+To find a WMI class `abc` one can run the following PowerShell command:
+
+```
+Get-WmiObject -List | WHERE{$_.Name -Like "*abc*"}
+```
+
+#### WMI Provider Documentation
+
+Microsoft provide detailed documentation for many but not all WMI classes in [WMI Providers][13]
+
 ## Troubleshooting
 
-Need help? Contact [Datadog support][13].
+Need help? Contact [Datadog support][14].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/wmi_check/images/wmimetric.png
 [2]: https://docs.datadoghq.com/integrations/windows_performance_counters/
@@ -205,4 +226,6 @@ Need help? Contact [Datadog support][13].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
 [12]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
-[13]: https://docs.datadoghq.com/help/
+[13]: https://learn.microsoft.com/en-us/windows/win32/wmisdk/wmi-providers
+[14]: https://docs.datadoghq.com/help/
+[15]: https://docs.datadoghq.com/agent/guide/windows-agent-ddagent-user/

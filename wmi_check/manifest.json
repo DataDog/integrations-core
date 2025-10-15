@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "ddd1578f-d511-4d57-b5dd-33c0ea7c391e",
   "app_id": "wmi",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -9,7 +10,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect and graph any WMI metrics.",
-    "title": "WMI Check (legacy)",
+    "title": "WMI Check",
     "media": [],
     "classifier_tags": [
       "Category::Windows",

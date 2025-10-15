@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "276c2367-72a9-4f50-95d6-998e4b2ca0df",
   "app_id": "linux-audit-logs",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

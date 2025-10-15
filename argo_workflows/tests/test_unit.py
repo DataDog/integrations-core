@@ -91,7 +91,6 @@ V3_6_METRICS = {
     ],
 )
 def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_response, fixture_file, description):
-
     mock_http_response(file_path=fixture_file)
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
     dd_run_check(check)
@@ -100,7 +99,6 @@ def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_respo
         aggregator.assert_metric(f'argo_workflows.{m_name}', metric_type=m_type)
 
     if fixture_file == 'tests/fixtures/metricsv3-6+.txt':
-
         for m_name, m_type in V3_6_METRICS:
             aggregator.assert_metric(f'argo_workflows.{m_name}', metric_type=m_type)
 

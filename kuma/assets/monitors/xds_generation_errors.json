@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "created_at": "2025-06-30",
+    "last_updated_at": "2025-06-30",
+    "title": "Kuma xDS Configuration Generation Errors",
+    "tags": [
+        "integration:kuma"
+    ],
+    "description": "The xDS protocol enables dynamic configuration updates from the control plane to data plane proxies. This monitor alerts when configuration generation errors occur, which can prevent policy updates from reaching the data plane.",
+    "definition": {
+        "message": "{{#is_alert}}\n\nKuma is experiencing xDS configuration generation errors on {{instance_id.name}} in zone {{zone.name}}.\n\nError rate: {{value}} errors per second\n\nConfiguration generation errors prevent policy updates from being applied to data plane proxies. This can lead to:\n- Outdated routing rules\n- Missing security policies  \n- Incorrect load balancing configurations\n\nCheck the control plane logs for detailed error messages.\n\n{{/is_alert}}",
+        "name": "[Kuma] xDS Configuration Generation Errors",
+        "options": {
+            "thresholds": {
+                "critical": 5,
+                "warning": 1
+            },
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {},
+            "notify_no_data": false,
+            "renotify_interval": 300,
+            "require_full_window": false,
+            "timeout_h": 0,
+            "evaluation_delay": 0
+        },
+        "priority": 2,
+        "query": "avg(last_5m):sum:kuma.xds.generation_errors.count{*} by {instance_id,zone}.as_rate() > 5",
+        "tags": [
+            "integration:kuma"
+        ],
+        "type": "query alert"
+    }
+} 

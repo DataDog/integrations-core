@@ -141,7 +141,6 @@ def test_config_errors(test_instance, expected_exception):
 def test_device_without_ports_directory(aggregator, instance, caplog, mock_fs):
     # Test device without ports directory
     with mock.patch('os.path.isdir') as mock_isdir:
-
         mock_isdir.side_effect = lambda path: False if path.endswith('ports') else True
 
         check = InfinibandCheck('infiniband', {}, [instance])
@@ -184,7 +183,6 @@ def test_device_without_directories(aggregator, instance, caplog, mock_fs, direc
 def test_alternative_path(aggregator, instance, mock_fs):
     # Test alternative path
     with mock.patch('os.path.exists') as mock_exists:
-
         mock_exists.side_effect = lambda x: not x.startswith('/sys')
 
         check = InfinibandCheck('infiniband', {}, [instance])

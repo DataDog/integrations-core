@@ -36,7 +36,7 @@ class Kong(AgentCheck):
                 name, value, tags = row
                 self.gauge(name, value, tags)
             except Exception:
-                self.log.error(u'Could not submit metric: %s', row)
+                self.log.error('Could not submit metric: %s', row)
 
     def _fetch_data(self):
         if 'kong_status_url' not in self.instance:

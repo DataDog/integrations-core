@@ -16,6 +16,10 @@ def shared_pid_cache_duration():
     return 120
 
 
+def shared_reset_cache_on_process_changes():
+    return True
+
+
 def shared_shared_process_list_cache_duration():
     return 120
 

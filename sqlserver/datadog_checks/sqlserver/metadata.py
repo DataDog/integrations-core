@@ -15,7 +15,7 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
@@ -57,8 +57,6 @@ class SqlserverMetadata(DBMAsyncJob):
     """
 
     def __init__(self, check, config: SQLServerConfig):
-        # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
         self.collection_interval = self._config.settings_config.get(
@@ -68,7 +66,7 @@ class SqlserverMetadata(DBMAsyncJob):
         super(SqlserverMetadata, self).__init__(
             check,
             run_sync=is_affirmative(self._config.settings_config.get('run_sync', False)),
-            enabled=is_affirmative(self._config.settings_config.get('enabled', False)),
+            enabled=is_affirmative(self._config.settings_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
@@ -145,7 +143,7 @@ class SqlserverMetadata(DBMAsyncJob):
                         self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                         self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                     ),
-                    "tags": self.tags,
+                    "tags": self._check.tag_manager.get_tags(),
                     "timestamp": time.time() * 1000,
                     "cloud_metadata": self._check.cloud_metadata,
                     "metadata": settings_rows,

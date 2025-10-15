@@ -15,7 +15,7 @@ from .common import ACME_METRICS, CERT_METRICS, CONTROLLER_METRICS, MOCK_INSTANC
 @pytest.fixture()
 def error_metrics():
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(status_code=502, headers={'Content-Type': "text/plain"}),
     ):
         yield
@@ -34,7 +34,7 @@ def test_check(aggregator, dd_run_check):
     def mock_requests_get(url, *args, **kwargs):
         return MockResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', 'cert_manager.txt'))
 
-    with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+    with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
         dd_run_check(check)
 
     expected_metrics = dict(CERT_METRICS)

@@ -12,9 +12,7 @@ def test(aggregator, dd_run_check, mock_http_response):
         # HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
         # TYPE go_memstats_last_gc_time_seconds gauge
         go_memstats_last_gc_time_seconds{{foo="bar"}} {}
-        """.format(
-            get_timestamp() - 1.2
-        )
+        """.format(get_timestamp() - 1.2)
     )
     check = get_check({'metrics': [{'go_memstats_last_gc_time_seconds': {'type': 'time_elapsed'}}]})
     dd_run_check(check)

@@ -11,49 +11,32 @@ import os
 import re
 from collections import deque
 from os.path import basename
-from typing import (  # noqa: F401
+from typing import (
     TYPE_CHECKING,
     Any,
-    AnyStr,
-    Callable,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
+    Deque,  # noqa: F401
 )
 
 import lazy_loader
 
 from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.agent.utils import should_profile_memory
+from datadog_checks.base.utils.common import ensure_bytes, to_native_string
+from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
+from datadog_checks.base.utils.tagging import GENERIC_TAGS
+from datadog_checks.base.utils.tracing import traced_class
 
-from ..config import is_affirmative
-from ..constants import ServiceCheck
-from ..errors import ConfigurationError
-from ..types import (
-    AgentConfigType,  # noqa: F401
-    Event,  # noqa: F401
-    ExternalTagType,  # noqa: F401
-    InitConfigType,  # noqa: F401
-    InstanceType,  # noqa: F401
-    ProxySettings,  # noqa: F401
-    ServiceCheckStatus,  # noqa: F401
-)
-from ..utils.agent.utils import should_profile_memory
-from ..utils.common import ensure_bytes, to_native_string
-from ..utils.fips import enable_fips
-from ..utils.tagging import GENERIC_TAGS
-from ..utils.tracing import traced_class
+from ._config_ast import parse as _parse_ast_config
 
 if AGENT_RUNNING:
-    from ..log import CheckLoggingAdapter, init_logging
+    from datadog_checks.base.log import CheckLoggingAdapter, init_logging
 
 else:
-    from ..stubs.log import CheckLoggingAdapter, init_logging
+    from datadog_checks.base.stubs.log import CheckLoggingAdapter, init_logging
 
 init_logging()
 
@@ -146,12 +129,12 @@ class AgentCheck(object):
     # a mapping type, then each key will be considered a `name` and will be sent with its (str) value.
     METADATA_TRANSFORMERS = None
 
-    FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
-    ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
-    METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
-    TAG_REPLACEMENT = re.compile(br'[,\+\*\-/()\[\]{}\s]')
-    MULTIPLE_UNDERSCORE_CLEANUP = re.compile(br'__+')
-    DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
+    FIRST_CAP_RE = re.compile(rb'(.)([A-Z][a-z]+)')
+    ALL_CAP_RE = re.compile(rb'([a-z0-9])([A-Z])')
+    METRIC_REPLACEMENT = re.compile(rb'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
+    TAG_REPLACEMENT = re.compile(rb'[,\+\*\-/()\[\]{}\s]')
+    MULTIPLE_UNDERSCORE_CLEANUP = re.compile(rb'__+')
+    DOT_UNDERSCORE_CLEANUP = re.compile(rb'_*\._*')
 
     # allows to set a limit on the number of metric name and tags combination
     # this check can send per run. This is useful for checks that have an unbounded
@@ -302,10 +285,16 @@ class AgentCheck(object):
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
-        self.check_initializations.append(self.load_configuration_models)
+        self.check_initializations.extend(
+            [
+                self.load_configuration_models,
+                self.__initialize_persistent_cache_key_prefix,
+            ]
+        )
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+        self.__persistent_cache_key_prefix: str = ""
 
         if os.environ.get("GOFIPS", "0") == "1":
             enable_fips()
@@ -498,6 +487,18 @@ class AgentCheck(object):
         # type: () -> bool
         self._log_deprecation('in_developer_mode')
         return False
+
+    def persistent_cache_id(self) -> str:
+        """
+        Returns the ID that identifies this check instance in the Agent persistent cache.
+
+        Overriding this method modifies the default behavior of the AgentCheck and can
+        be used to customize when the persistent cache is invalidated. The default behavior
+        defines the persistent cache ID as the digest of the full check configuration.
+
+        Some per-check isolation is still applied to avoid different checks with the same ID to share the same keys.
+        """
+        return self.check_id.split(":")[-1]
 
     def log_typos_in_options(self, user_config, models_config, level):
         # See Performance Optimizations in this package's README.md.
@@ -1017,13 +1018,15 @@ class AgentCheck(object):
             attributes['timestamp'] = int(timestamp * 1000)
 
         datadog_agent.send_log(json.encode(attributes), self.check_id)
+
         if cursor is not None:
-            self.write_persistent_cache('log_cursor_{}'.format(stream), json.encode(cursor))
+            self.write_persistent_cache(f'log_cursor_{stream}', json.encode(cursor))
 
     def get_log_cursor(self, stream='default'):
         # type: (str) -> dict[str, Any] | None
         """Returns the most recent log cursor from disk."""
-        data = self.read_persistent_cache('log_cursor_{}'.format(stream))
+        data = self.read_persistent_cache(f'log_cursor_{stream}')
+
         return json.decode(data) if data else None
 
     def _log_deprecation(self, deprecation_key, *args):
@@ -1090,9 +1093,12 @@ class AgentCheck(object):
 
         return entrypoint
 
-    def _persistent_cache_id(self, key):
-        # type: (str) -> str
-        return '{}_{}'.format(self.check_id, key)
+    def __initialize_persistent_cache_key_prefix(self):
+        if self.__persistent_cache_key_prefix:
+            return
+
+        namespace = ':'.join(self.check_id.split(':')[:-1])
+        self.__persistent_cache_key_prefix = f'{namespace}:{self.persistent_cache_id()}_'
 
     def read_persistent_cache(self, key):
         # type: (str) -> str
@@ -1102,9 +1108,9 @@ class AgentCheck(object):
             key (str):
                 the key to retrieve
         """
-        return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
+        return datadog_agent.read_persistent_cache(f"{self.__persistent_cache_key_prefix}{key}")
 
-    def write_persistent_cache(self, key, value):
+    def write_persistent_cache(self, key: str, value: str):
         # type: (str, str) -> None
         """Stores `value` in a persistent cache for this check instance.
         The cache is located in a path where the agent is guaranteed to have read & write permissions. Namely in
@@ -1118,7 +1124,7 @@ class AgentCheck(object):
             value (str):
                 the value to store
         """
-        datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
+        datadog_agent.write_persistent_cache(f"{self.__persistent_cache_key_prefix}{key}", value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None
@@ -1145,10 +1151,10 @@ class AgentCheck(object):
         And substitute illegal metric characters
         """
         name = ensure_bytes(name)
-        metric_name = self.FIRST_CAP_RE.sub(br'\1_\2', name)
-        metric_name = self.ALL_CAP_RE.sub(br'\1_\2', metric_name).lower()
-        metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
-        return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
+        metric_name = self.FIRST_CAP_RE.sub(rb'\1_\2', name)
+        metric_name = self.ALL_CAP_RE.sub(rb'\1_\2', metric_name).lower()
+        metric_name = self.METRIC_REPLACEMENT.sub(rb'_', metric_name)
+        return self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', metric_name).strip(b'_')
 
     def warning(self, warning_message, *args, **kwargs):
         # type: (str, *Any, **Any) -> None
@@ -1242,10 +1248,10 @@ class AgentCheck(object):
             if prefix is not None:
                 prefix = self.convert_to_underscore_separated(prefix)
         else:
-            name = self.METRIC_REPLACEMENT.sub(br'_', metric)
-            name = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', name).strip(b'_')
+            name = self.METRIC_REPLACEMENT.sub(rb'_', metric)
+            name = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', name).strip(b'_')
 
-        name = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', name)
+        name = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(rb'_', name)
 
         if prefix is not None:
             name = ensure_bytes(prefix) + b"." + name
@@ -1261,9 +1267,9 @@ class AgentCheck(object):
         """
         if isinstance(tag, str):
             tag = tag.encode('utf-8', 'ignore')
-        tag = self.TAG_REPLACEMENT.sub(br'_', tag)
-        tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', tag)
-        tag = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', tag).strip(b'_')
+        tag = self.TAG_REPLACEMENT.sub(rb'_', tag)
+        tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(rb'_', tag)
+        tag = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', tag).strip(b'_')
         return to_native_string(tag)
 
     def check(self, instance):
@@ -1286,26 +1292,20 @@ class AgentCheck(object):
             self._clear_diagnosis()
             # Ignore check initializations if running in a separate process
             if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
-                from ..utils.replay.execute import run_with_isolation
+                from datadog_checks.base.utils.replay.execute import run_with_isolation
 
                 run_with_isolation(self, aggregator, datadog_agent)
             else:
-                while self.check_initializations:
-                    initialization = self.check_initializations.popleft()
-                    try:
-                        initialization()
-                    except Exception:
-                        self.check_initializations.appendleft(initialization)
-                        raise
+                self.run_check_initializations()
 
                 instance = copy.deepcopy(self.instances[0])
 
                 if 'set_breakpoint' in self.init_config:
-                    from ..utils.agent.debug import enter_pdb
+                    from datadog_checks.base.utils.agent.debug import enter_pdb
 
                     enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
                 elif self.should_profile_memory():
-                    # self.init_config.get('profile_memory') could be `/tmp/datadog-agent-memory-profiler*`
+                    # The 'profile_memory' key in self.init_config could be `/tmp/datadog-agent-memory-profiler*`
                     # that is generated by Datadog Agent.
                     # If we use `--m-dir` for `agent check` command, a hidden flag, it should be same as a given value.
                     namespaces = [self.init_config.get('profile_memory')]
@@ -1335,6 +1335,15 @@ class AgentCheck(object):
                 self.metric_limiter.reset()
 
         return error_report
+
+    def run_check_initializations(self):
+        while self.check_initializations:
+            initialization = self.check_initializations.popleft()
+            try:
+                initialization()
+            except Exception:
+                self.check_initializations.appendleft(initialization)
+                raise
 
     def event(self, event):
         # type: (Event) -> None
@@ -1456,7 +1465,7 @@ class AgentCheck(object):
 
     def profile_memory(self, func, namespaces=None, args=(), kwargs=None, extra_tags=None):
         # type: (Callable[..., Any], Optional[Sequence[str]], Sequence[Any], Optional[Dict[str, Any]], Optional[List[str]]) -> None  # noqa: E501
-        from ..utils.agent.memory import profile_memory
+        from datadog_checks.base.utils.agent.memory import profile_memory
 
         if namespaces is None:
             namespaces = self.check_id.split(':', 1)
@@ -1488,9 +1497,4 @@ class AgentCheck(object):
         if process.returncode != 0:
             raise ValueError(f'Failed to load config: {stderr.decode()}')
 
-        decoded = stdout.strip().decode()
-        try:
-            return eval(decoded)
-        # a single, literal unquoted string
-        except Exception:
-            return decoded
+        return _parse_ast_config(stdout.strip().decode())

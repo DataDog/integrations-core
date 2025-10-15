@@ -6,6 +6,8 @@ This check monitors [FoundationDB][1] through the Datadog Agent. Aside from
 checking that the FoundationDB cluster is healthy, it also collects numerous metrics
 and, optionally, FoundationDB transaction logs.
 
+**Minimum Agent version:** 7.35.0
+
 ## Setup
 
 Both the check and metrics apply to the FoundationDB cluster as a whole,

@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "716a8b3d-6ca3-43fb-ba0d-c71665b4243e",
   "app_id": "checkpoint-harmony-email-and-collaboration",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

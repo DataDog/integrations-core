@@ -33,7 +33,7 @@ class NetworkCheck(AgentCheck):
         try:
             statuses = self._check(instance)
         except Exception:
-            self.log.exception(u"Failed to run instance '%s'.", instance.get('name', u""))
+            self.log.exception("Failed to run instance '%s'.", instance.get('name', ""))
         else:
             if isinstance(statuses, tuple):
                 # Assume the check only returns one service check

@@ -9,9 +9,9 @@ mypy-deps = [
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 version = ["8.4", "10.0"]
-tls = ["false", "true"]
+tls = ["with-tls", "without-tls"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
@@ -20,4 +20,7 @@ matrix.version.env-vars = [
     { key = "VOLTDB_VERSION", value = "10.0.0", if = ["10.0"] },
     { key = "VOLTDB_IMAGE", value = "datadog/docker-library:voltdb_10_0", if = ["10.0"] }
 ]
-matrix.tls.env-vars = "TLS_ENABLED"
+matrix.tls.env-vars = [
+    { key = "TLS_ENABLED", value = "true", if = ["with-tls"] },
+    { key = "TLS_ENABLED", value = "false", if = ["without-tls"] }
+]

@@ -5,6 +5,8 @@
 
 This integration provides enrichment and visulization for admin and audit logs. It helps to visualize detailed insights into admin and audit log analysis using out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.57.0
+
 ## Setup
 
 ### Installation

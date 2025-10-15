@@ -1,0 +1,12 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+bentoml.endpoint_livez,gauge,,,,"A liveness probe endpoint that checks if the Service is still alive and needs to restart. This metrics reports a 1 if the endpoint is healthy, 0 otherwise.",0,bentoml,,,
+bentoml.endpoint_readyz,gauge,,,,"A readiness probe endpoint that indicates if the Service is ready to accept traffic. This metrics reports a 1 if the endpoint is healthy, 0 otherwise.",0,bentoml,,,
+bentoml.service.adaptive_batch_size.bucket,count,,,,"The number of observations since last data collection that fall within a specific upper_bound tag for adaptive batch sizes used during Service execution histogram measurements.",0,bentoml,,,
+bentoml.service.adaptive_batch_size.count,count,,,,"The number of observations since last data collection for adaptive batch sizes used during Service execution histogram measurements.",0,bentoml,,,
+bentoml.service.adaptive_batch_size.sum,count,,,,"The total batch size units across all observations since last data collection for adaptive batch sizes used during Service execution histogram measurements.",0,bentoml,,,
+bentoml.service.request.count,count,,request,,The number of new requests that a Service has processed since last submission,0,bentoml,,,
+bentoml.service.request.duration.bucket,count,,,,"The number of observations since last data collection that fall within a specific upper_bound tag for request processing duration histogram measurements.",0,bentoml,,,
+bentoml.service.request.duration.count,count,,,,"The number of requests processed since last data collection histogram measurements.",0,bentoml,,,
+bentoml.service.request.duration.sum,count,,second,,"The total sum of request processing time in seconds across all observations since last data collection histogram measurements.",0,bentoml,,,
+bentoml.service.request.in_progress,gauge,,request,,The number of requests that are currently being processed by a Service.,0,bentoml,,,
+bentoml.service.time_since_last_request,gauge,,second,,The amount of time in seconds since the last request was processed by a Service.,0,bentoml,,,

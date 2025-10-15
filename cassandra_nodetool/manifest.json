@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a66c231d-54c2-4422-9575-7031709854d8",
   "app_id": "cassandra-nodetool",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

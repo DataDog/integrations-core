@@ -6,6 +6,8 @@
 
 This check monitors [IBM Db2][2] through the Datadog Agent.
 
+**Minimum Agent version:** 6.11.0
+
 ## Setup
 
 ### Installation
@@ -19,7 +21,7 @@ The [ibm_db][4] client library is required. To install it, ensure you have a wor
 ##### Unix
 
 ```text
-sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install ibm_db==3.2.3
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install ibm_db==3.2.6
 ```
 
 Note: If you are on an Agent running Python 2, use `ibm_db==3.0.1` instead of `ibm_db=3.1.0`.
@@ -47,7 +49,7 @@ For Agent versions >= 7.0 and < 7.58:
 For Agent versions >= 7.58:
 
 ```text
-"C:\Program Files\Datadog\Datadog Agent\embedded3\python.exe" -m pip install ibm_db==3.2.3
+"C:\Program Files\Datadog\Datadog Agent\embedded3\python.exe" -m pip install ibm_db==3.2.6
 ```
 
 On Linux there may be need for XML functionality. If you encounter errors during

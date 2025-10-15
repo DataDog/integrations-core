@@ -12,7 +12,6 @@ class KedaCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'keda'
 
     def __init__(self, name, init_config, instances=None):
-
         super(KedaCheck, self).__init__(
             name,
             init_config,

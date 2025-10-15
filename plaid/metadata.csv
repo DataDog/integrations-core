@@ -1,0 +1,4 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+plaid.account.iso_currency_code,count,,process,,Count of accounts by ISO currency code,0,plaid,account currency codes,
+plaid.account.subtype,count,,process,,Count of accounts grouped by account subtype,0,plaid,account subtypes,
+plaid.account.type,count,,process,,Count of accounts grouped by account type,0,plaid,account types,

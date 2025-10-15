@@ -6,8 +6,9 @@ from datadog_checks.base import OpenMetricsBaseCheck
 
 DEFAULT_METRICS = {
     'admission_webhooks_certificate_expiry': 'admission_webhooks.certificate_expiry',
-    'admission_webhooks_cws_exec_instrumentation_attempts': 'admission_webhooks.cws_exec_instrumentation_attempts',
-    'admission_webhooks_cws_pod_instrumentation_attempts': 'admission_webhooks.cws_pod_instrumentation_attempts',
+    'admission_webhooks_cws_exec_mutation_attempts': 'admission_webhooks.cws_exec_mutation_attempts',
+    'admission_webhooks_cws_pod_mutation_attempts': 'admission_webhooks.cws_pod_mutation_attempts',
+    'admission_webhooks_cws_response_duration': 'admission_webhooks.cws_response_duration',
     'admission_webhooks_library_injection_attempts': 'admission_webhooks.library_injection_attempts',
     'admission_webhooks_library_injection_errors': 'admission_webhooks.library_injection_errors',
     'admission_webhooks_mutation_attempts': 'admission_webhooks.mutation_attempts',
@@ -21,6 +22,7 @@ DEFAULT_METRICS = {
     'admission_webhooks_reconcile_success': 'admission_webhooks.reconcile_success',
     'admission_webhooks_response_duration': 'admission_webhooks.response_duration',
     'admission_webhooks_webhooks_received': 'admission_webhooks.webhooks_received',
+    'admission_webhooks_image_resolution_attempts': 'admission_webhooks.image_resolution_attempts',
     'autoscaling_workload_autoscaler_conditions': 'autoscaling.workload.autoscaler_conditions',
     'autoscaling_workload_horizontal_scaling_actions': 'autoscaling.workload.horizontal_scaling_actions',
     'autoscaling_workload_horizontal_scaling_applied_replicas': 'autoscaling.workload.horizontal_scaling_applied_replicas',  # noqa: E501

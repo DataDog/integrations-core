@@ -134,6 +134,11 @@ INSTANCE_COLLECT_ALL = {
     'channels': [CHANNEL, BAD_CHANNEL],
 }
 
+INSTANCE_COLLECT_ALL_VIA_NAMES = {
+    **INSTANCE_COLLECT_ALL,
+    'auto_discover_queues_via_names': True,
+}
+
 INSTANCE_QUEUE_REGEX_TAG = {
     'channel': CHANNEL,
     'queue_manager': QUEUE_MANAGER,
@@ -226,6 +231,8 @@ CHANNEL_STATUS_METRICS = [
     ('ibm_mq.channel.mca_status', GAUGE),
     ('ibm_mq.channel.msgs', GAUGE),
     ('ibm_mq.channel.ssl_key_resets', GAUGE),
+    ('ibm_mq.channel.conn_status', GAUGE),
+    ('ibm_mq.channel.connections_active', GAUGE),
 ]
 
 CHANNEL_STATS_METRICS = [

@@ -2,6 +2,29 @@
 
 <!-- towncrier release notes start -->
 
+## 7.2.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 7.1.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Adds remaining BETA flowcontrol metrics to kube_apiserver_metrics check ([#20757](https://github.com/DataDog/integrations-core/pull/20757))
+
+***Fixed***:
+
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 7.0.0 / 2025-07-10 / Agent 7.69.0
+
+***Changed***:
+
+* Bump datadog_checks_base to 37.16.0 ([#20711](https://github.com/DataDog/integrations-core/pull/20711))
+
 ## 6.2.0 / 2025-01-25 / Agent 7.63.0
 
 ***Added***:
