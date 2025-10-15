@@ -114,24 +114,20 @@ def mock_context_manager(obj=None):
     yield obj
 
 
-def find_free_port(ip):
+def __get_free_port_from_socket(_socket: socket.socket, ip: str) -> int:
+    _socket.bind((ip, 0))
+    _socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    return _socket.getsockname()[1]
+
+
+def find_free_port(ip: str) -> int:
     """Return a port available for listening on the given `ip`."""
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind((ip, 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]
+        return __get_free_port_from_socket(s, ip)
 
 
 def find_free_ports(ip: str, count: int) -> list[int]:
-    """Return `count` ports available for listening on the given `ip`.
-
-    Args:
-        ip: The IP address to bind to
-        count: Number of free ports to find
-
-    Returns:
-        A list of available port numbers
-    """
+    """Return `count` ports available for listening on the given `ip`."""
     sockets: list[socket.socket] = []
     ports: list[int] = []
 
@@ -139,10 +135,8 @@ def find_free_ports(ip: str, count: int) -> list[int]:
         # Create and bind all sockets first to reserve the ports
         for _ in range(count):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.bind((ip, 0))
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sockets.append(s)
-            ports.append(s.getsockname()[1])
+            ports.append(__get_free_port_from_socket(s, ip))
 
         return ports
     finally:
