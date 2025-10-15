@@ -1,5 +1,5 @@
 {
-    "title": "Forescout - Overview",
+    "title": "Forescout Overview",
     "description": "This dashboard offers a comprehensive summary of forescout logs.",
     "widgets": [
         {
@@ -55,7 +55,7 @@
                     {
                         "id": 8022549680990038,
                         "definition": {
-                            "title": "Total NAC Logs",
+                            "title": "Total NAC logs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -95,7 +95,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -107,7 +111,7 @@
                     {
                         "id": 4615863602624238,
                         "definition": {
-                            "title": "NAC Logs over Time",
+                            "title": "NAC logs over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -171,7 +175,7 @@
                     {
                         "id": 1774318830768547,
                         "definition": {
-                            "title": "Total Threat Protection Logs",
+                            "title": "Total threat protection logs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -211,7 +215,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -223,7 +231,7 @@
                     {
                         "id": 6838297063376855,
                         "definition": {
-                            "title": "Threat Protection Logs over Time",
+                            "title": "Threat protection logs over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -287,7 +295,7 @@
                     {
                         "id": 3755135647476946,
                         "definition": {
-                            "title": "Total User Operations Logs",
+                            "title": "Total user operations logs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -327,7 +335,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -339,7 +351,7 @@
                     {
                         "id": 6191884271208696,
                         "definition": {
-                            "title": "User Operations Logs over Time",
+                            "title": "User operations logs over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -403,7 +415,7 @@
                     {
                         "id": 1283564860205330,
                         "definition": {
-                            "title": "Total System Logs",
+                            "title": "Total system logs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -443,7 +455,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -455,7 +471,7 @@
                     {
                         "id": 8851002463389406,
                         "definition": {
-                            "title": "System Logs over Time",
+                            "title": "System logs over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -519,7 +535,7 @@
                     {
                         "id": 1074582072588840,
                         "definition": {
-                            "title": "Event Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -703,7 +719,7 @@
                     {
                         "id": 5637582141964113,
                         "definition": {
-                            "title": "Critical Security Signals",
+                            "title": "Critical security signals",
                             "type": "toplist",
                             "requests": [
                                 {
@@ -927,7 +943,7 @@
                     {
                         "id": 145497858656265,
                         "definition": {
-                            "title": "High Security Signals",
+                            "title": "High security signals",
                             "type": "toplist",
                             "requests": [
                                 {
@@ -995,7 +1011,7 @@
                     {
                         "id": 5478511460240243,
                         "definition": {
-                            "title": "Medium Security Signals",
+                            "title": "Medium security signals",
                             "type": "toplist",
                             "requests": [
                                 {

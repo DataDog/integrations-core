@@ -1,5 +1,5 @@
 {
-    "title": "Forescout - System Logs and Events",
+    "title": "Forescout System Logs and Events",
     "description": "This dashboard provides insights into system logs, license alerts, login activity, and system status.",
     "widgets": [
         {
@@ -55,7 +55,7 @@
                     {
                         "id": 4489236436548263,
                         "definition": {
-                            "title": "Total Logs",
+                            "title": "Total logs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -95,7 +95,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -107,7 +111,7 @@
                     {
                         "id": 8812841324238605,
                         "definition": {
-                            "title": "Logs over Time",
+                            "title": "Logs over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -171,7 +175,7 @@
                     {
                         "id": 211060289607598,
                         "definition": {
-                            "title": "Distribution of Events by Type",
+                            "title": "Distribution of events by type",
                             "title_size": "10",
                             "title_align": "left",
                             "requests": [
@@ -241,7 +245,7 @@
                     {
                         "id": 8755111550365272,
                         "definition": {
-                            "title": "Distribution of Events by Severity",
+                            "title": "Distribution of events by severity",
                             "title_size": "10",
                             "title_align": "left",
                             "requests": [
@@ -311,7 +315,7 @@
                     {
                         "id": 1293027319313244,
                         "definition": {
-                            "title": "Top Appliances by Activity",
+                            "title": "Top appliances by activity",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -381,7 +385,7 @@
                     {
                         "id": 4550377222743950,
                         "definition": {
-                            "title": "Event Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -439,7 +443,7 @@
                     {
                         "id": 3378031042964512,
                         "definition": {
-                            "title": "Total License Alerts",
+                            "title": "Total license alerts",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -479,7 +483,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -491,7 +499,7 @@
                     {
                         "id": 7415053057953813,
                         "definition": {
-                            "title": "License Alerts over Time",
+                            "title": "License alerts over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -555,7 +563,7 @@
                     {
                         "id": 5911484297829210,
                         "definition": {
-                            "title": "Event Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -613,7 +621,7 @@
                     {
                         "id": 4143608658565981,
                         "definition": {
-                            "title": "Total Successful Logins",
+                            "title": "Total successful logins",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -652,7 +660,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -664,7 +676,7 @@
                     {
                         "id": 7032219319060791,
                         "definition": {
-                            "title": "Successful Logins over Time",
+                            "title": "Successful logins over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -732,7 +744,7 @@
                     {
                         "id": 6096003298501547,
                         "definition": {
-                            "title": "Total Failed Logins",
+                            "title": "Total failed logins",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -771,7 +783,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -783,7 +799,7 @@
                     {
                         "id": 5284060443463181,
                         "definition": {
-                            "title": "Failed Logins over Time",
+                            "title": "Failed logins over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -851,7 +867,7 @@
                     {
                         "id": 8522588033749910,
                         "definition": {
-                            "title": "Login Failure Rate",
+                            "title": "Login failure rate",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -911,7 +927,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -923,7 +943,7 @@
                     {
                         "id": 1143757696508750,
                         "definition": {
-                            "title": "Failed Login Details",
+                            "title": "Failed login details",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -1009,7 +1029,7 @@
                     {
                         "id": 8689055584670456,
                         "definition": {
-                            "title": "Top Users from Failed Login Attempted",
+                            "title": "Top users from failed login attempted",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1085,7 +1105,7 @@
                     {
                         "id": 7495958236196026,
                         "definition": {
-                            "title": "Top Users from Successful Login Attempted",
+                            "title": "Top users from successful login attempted",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "bar_chart",
@@ -1160,7 +1180,7 @@
                     {
                         "id": 5195716645956812,
                         "definition": {
-                            "title": "Top IP Addresses from Failed Login Attempted",
+                            "title": "Top IP addresses from failed login attempted",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1236,7 +1256,7 @@
                     {
                         "id": 5612890611508673,
                         "definition": {
-                            "title": "Top IP Addresses from Successful Login Attempted",
+                            "title": "Top IP addresses from successful login attempted",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "bar_chart",
@@ -1311,7 +1331,7 @@
                     {
                         "id": 2613129597884190,
                         "definition": {
-                            "title": "Top Appliance from Failed Login Attempted",
+                            "title": "Top appliance from failed login attempted",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -1387,7 +1407,7 @@
                     {
                         "id": 2704752839353060,
                         "definition": {
-                            "title": "Top Appliance from Successful Login Attempted",
+                            "title": "Top appliance from successful login attempted",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "bar_chart",
@@ -1462,7 +1482,7 @@
                     {
                         "id": 5611231552610330,
                         "definition": {
-                            "title": "Event Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -1520,7 +1540,7 @@
                     {
                         "id": 2992615192965102,
                         "definition": {
-                            "title": "Avg. CPU Usage",
+                            "title": "Avg. CPU usage",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1599,7 +1619,7 @@
                     {
                         "id": 7018363149273063,
                         "definition": {
-                            "title": "Avg. Memory Utilization",
+                            "title": "Avg. memory utilization",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1705,7 +1725,7 @@
                     {
                         "id": 628267346585357,
                         "definition": {
-                            "title": "CPU Usage over Time",
+                            "title": "CPU usage over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -1775,7 +1795,7 @@
                     {
                         "id": 5939271575753447,
                         "definition": {
-                            "title": "Event Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [

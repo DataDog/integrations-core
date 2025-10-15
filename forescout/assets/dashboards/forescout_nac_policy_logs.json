@@ -1,5 +1,5 @@
 {
-    "title": "Forescout - NAC Policy Logs",
+    "title": "Forescout NAC Policy Logs",
     "description": "This dashboard provides insights into NAC policy match logs, highlighting source IPs, matched policies, and enforcement actions.",
     "widgets": [
         {
@@ -55,7 +55,7 @@
                     {
                         "id": 6105816879883499,
                         "definition": {
-                            "title": "Total NAC Policy Match Logs",
+                            "title": "Total NAC policy match logs",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -96,7 +96,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -108,7 +112,7 @@
                     {
                         "id": 4838119200763342,
                         "definition": {
-                            "title": "NAC Policy Match Logs over Time",
+                            "title": "NAC policy match logs over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -172,7 +176,7 @@
                     {
                         "id": 7944677926196273,
                         "definition": {
-                            "title": "Top Triggered Rules",
+                            "title": "Top triggered rules",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -242,7 +246,7 @@
                     {
                         "id": 1201393602556749,
                         "definition": {
-                            "title": "Top Source IPs Triggering Policies",
+                            "title": "Top source IPs triggering policies",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -312,7 +316,7 @@
                     {
                         "id": 5052186085029342,
                         "definition": {
-                            "title": "Event Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [

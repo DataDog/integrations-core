@@ -1,5 +1,5 @@
 {
-    "title": "Forescout - User Operations",
+    "title": "Forescout User Operations",
     "description": "This dashboard provides insights into user operations, including license management and segment configuration changes.",
     "widgets": [
         {
@@ -55,7 +55,7 @@
                     {
                         "id": 8340119907013017,
                         "definition": {
-                            "title": "Total License Management Activities",
+                            "title": "Total license management activities",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -95,7 +95,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -107,7 +111,7 @@
                     {
                         "id": 8905769981960266,
                         "definition": {
-                            "title": "License Management Activities over Time by Outcome",
+                            "title": "License management activities over time by outcome",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -182,7 +186,7 @@
                     {
                         "id": 4478095316180677,
                         "definition": {
-                            "title": "License Activities Failures by Operations",
+                            "title": "License activities failures by operations",
                             "title_size": "10",
                             "title_align": "left",
                             "requests": [
@@ -252,7 +256,7 @@
                     {
                         "id": 305454916128190,
                         "definition": {
-                            "title": "License Management Activities over Time by Operations",
+                            "title": "License management activities over time by operations",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -327,7 +331,7 @@
                     {
                         "id": 6899341319650280,
                         "definition": {
-                            "title": "Top License Failure Reasons",
+                            "title": "Top license failure reasons",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -396,7 +400,7 @@
                     {
                         "id": 8129329956235792,
                         "definition": {
-                            "title": "Top Appliance IP by License Management Activity",
+                            "title": "Top appliance IP by license management activity",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -465,7 +469,7 @@
                     {
                         "id": 653927775448185,
                         "definition": {
-                            "title": "Top Users by License Management Actions",
+                            "title": "Top users by license management actions",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -534,7 +538,7 @@
                     {
                         "id": 7295785343035285,
                         "definition": {
-                            "title": "License Upload Session Details",
+                            "title": "License upload session details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -592,7 +596,7 @@
                     {
                         "id": 2850927459248075,
                         "definition": {
-                            "title": "Total Segment Config Activities",
+                            "title": "Total segment config activities",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -632,7 +636,11 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -644,7 +652,7 @@
                     {
                         "id": 5804319990363451,
                         "definition": {
-                            "title": "Segment Config Activities over Time",
+                            "title": "Segment config activities over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -708,7 +716,7 @@
                     {
                         "id": 6847179242797462,
                         "definition": {
-                            "title": "Top Users by Segment Config Activities",
+                            "title": "Top users by segment config activities",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -777,7 +785,7 @@
                     {
                         "id": 4042734048355455,
                         "definition": {
-                            "title": "Event Details",
+                            "title": "Event details",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
@@ -820,7 +828,8 @@
                 "x": 0,
                 "y": 19,
                 "width": 12,
-                "height": 8
+                "height": 8,
+                "is_column_break": true
             }
         }
     ],
