@@ -5,7 +5,7 @@ from pathlib import Path
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from utils.common_funcs import GitRepo
+from utils.models import GitRepo
 
 console = Console()
 

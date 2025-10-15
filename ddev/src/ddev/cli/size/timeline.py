@@ -13,27 +13,20 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeEl
 
 from ddev.cli.application import Application
 from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.size.utils.models import GitRepo
 
-from .utils.common_funcs import (
+from .utils.dependencies import is_correct_dependency
+from .utils.files import compress, extract_version_from_about_py, is_valid_integration_file
+from .utils.general import convert_to_human_readable_size, get_valid_platforms, get_valid_versions
+from .utils.models import (
     CommitEntry,
     CommitEntryPlatformWithDelta,
     CommitEntryWithDelta,
-    GitRepo,
     InitialParametersTimelineDependency,
     InitialParametersTimelineIntegration,
     WrongDependencyFormat,
-    compress,
-    convert_to_human_readable_size,
-    extract_version_from_about_py,
-    get_valid_platforms,
-    get_valid_versions,
-    is_correct_dependency,
-    is_valid_integration_file,
-    print_table,
-    save_csv,
-    save_json,
-    save_markdown,
 )
+from .utils.output import print_table, save_csv, save_json, save_markdown
 
 MINIMUM_DATE_DEPENDENCIES = datetime.strptime(
     "Apr 3 2024", "%b %d %Y"

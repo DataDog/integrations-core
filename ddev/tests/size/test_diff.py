@@ -5,7 +5,7 @@
 import os
 
 from ddev.cli.size.diff import calculate_diff
-from ddev.cli.size.utils.common_funcs import convert_to_human_readable_size
+from ddev.cli.size.utils.general import convert_to_human_readable_size
 
 
 def to_native_path(path: str) -> str:

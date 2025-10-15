@@ -98,18 +98,17 @@ def mock_size_diff_dependencies():
 
     with (
         patch(
-            "ddev.cli.size.utils.common_funcs.get_valid_platforms",
+            "ddev.cli.size.utils.general.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch(
-            "ddev.cli.size.utils.common_funcs.get_valid_versions",
+            "ddev.cli.size.utils.general.get_valid_versions",
             return_value=({"3.12"}),
         ),
         patch("ddev.cli.size.diff.GitRepo", return_value=mock_git_repo),
-        patch("ddev.cli.size.utils.common_funcs.tempfile.mkdtemp", return_value="fake_repo"),
-        patch("ddev.cli.size.utils.common_funcs.get_files", side_effect=get_compressed_files_side_effect),
-        patch("ddev.cli.size.utils.common_funcs.get_dependencies", side_effect=get_compressed_dependencies_side_effect),
-        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.size.utils.files.tempfile.mkdtemp", return_value="fake_repo"),
+        patch("ddev.cli.size.utils.files.get_files", side_effect=get_compressed_files_side_effect),
+        patch("ddev.cli.size.utils.dependencies.get_dependencies", side_effect=get_compressed_dependencies_side_effect),
     ):
         yield
 
@@ -169,27 +168,22 @@ def mock_size_diff_no_diff_dependencies():
     with (
         patch("ddev.cli.size.diff.GitRepo", return_value=fake_repo),
         patch(
-            "ddev.cli.size.utils.common_funcs.get_valid_platforms",
+            "ddev.cli.size.utils.general.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),
         ),
         patch(
-            "ddev.cli.size.utils.common_funcs.get_valid_versions",
+            "ddev.cli.size.utils.general.get_valid_versions",
             return_value=({"3.12"}),
         ),
-        patch("ddev.cli.size.utils.common_funcs.tempfile.mkdtemp", return_value="fake_repo"),
-        patch("ddev.cli.size.utils.common_funcs.os.path.exists", return_value=True),
-        patch("ddev.cli.size.utils.common_funcs.os.path.isdir", return_value=True),
-        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
-        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["linux-aarch64_3.12"]),
+        patch("ddev.cli.size.utils.files.tempfile.mkdtemp", return_value="fake_repo"),
         patch(
-            "ddev.cli.size.utils.common_funcs.get_files",
+            "ddev.cli.size.utils.files.get_files",
             side_effect=get_files_side_effect,
         ),
         patch(
-            "ddev.cli.size.utils.common_funcs.get_dependencies",
+            "ddev.cli.size.utils.dependencies.get_dependencies",
             side_effect=get_dependencies_side_effect,
         ),
-        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
     ):
         yield
 

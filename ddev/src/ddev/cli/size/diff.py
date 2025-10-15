@@ -10,12 +10,12 @@ from typing import TYPE_CHECKING
 import click
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_funcs import GitRepo
 from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.size.utils.models import GitRepo
 from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
-    from ddev.cli.size.utils.common_funcs import CLIParameters, FileDataEntry
+    from ddev.cli.size.utils.models import CLIParameters, FileDataEntry
 
 MINIMUM_DATE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
 MINIMUM_LENGTH_COMMIT = 7
@@ -74,7 +74,7 @@ def diff(
     Both COMMIT and the value of `--compare-to` need to be the full commit sha.
     """
 
-    from .utils.common_funcs import (
+    from .utils.general import (
         get_valid_platforms,
         get_valid_versions,
     )
@@ -117,7 +117,7 @@ def diff(
 
             app.display(f"Comparing to commit: {baseline}")
         if use_artifacts:
-            from .utils.common_funcs import get_status_sizes_from_commit
+            from .utils.artifacts import get_status_sizes_from_commit
 
             for plat, ver in combinations:
                 parameters_artifacts: CLIParameters = {
@@ -154,7 +154,8 @@ def diff(
                         app, total_diff[(plat, ver)], old_size[(plat, ver)], quality_gate_threshold, plat, ver
                     )
                 if to_dd_org or to_dd_key:
-                    from .utils.common_funcs import SizeMode, send_metrics_to_dd
+                    from .utils.metrics import send_metrics_to_dd
+                    from .utils.models import SizeMode
 
                     send_metrics_to_dd(app, diff_modules, to_dd_org, to_dd_key, to_dd_site, compressed, SizeMode.DIFF)
 
@@ -196,7 +197,8 @@ def diff(
                                 app, total_diff[(plat, ver)], old_size[(plat, ver)], quality_gate_threshold, plat, ver
                             )
                         if to_dd_org or to_dd_key:
-                            from .utils.common_funcs import SizeMode, send_metrics_to_dd
+                            from .utils.metrics import send_metrics_to_dd
+                            from .utils.models import SizeMode
 
                             send_metrics_to_dd(
                                 app, diff_modules, to_dd_org, to_dd_key, to_dd_site, compressed, SizeMode.DIFF
@@ -208,11 +210,12 @@ def diff(
         if format or quality_gate_threshold:
             modules = [module for module in modules if module["Size_Bytes"] != 0]
             if format:
-                from .utils.common_funcs import SizeMode, export_format
+                from .utils.models import SizeMode
+                from .utils.output import export_format
 
                 export_format(app, format, modules, SizeMode.DIFF, platform, py_version, compressed)
             if quality_gate_threshold:
-                from .utils.common_funcs import save_quality_gate_html, save_quality_gate_html_table
+                from .utils.output import save_quality_gate_html, save_quality_gate_html_table
 
                 save_quality_gate_html(
                     app,
@@ -332,7 +335,7 @@ def output_diff(params: CLIParameters, modules: list[FileDataEntry]) -> None:
         return
 
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
-        from .utils.common_funcs import print_table
+        from .utils.output import print_table
 
         print_table(params["app"], "Diff", modules)
 
@@ -343,7 +346,8 @@ def output_diff(params: CLIParameters, modules: list[FileDataEntry]) -> None:
         )
 
     if params["show_gui"] or treemap_path:
-        from .utils.common_funcs import SizeMode, plot_treemap
+        from .utils.models import SizeMode
+        from .utils.output import plot_treemap
 
         plot_treemap(
             params["app"],
@@ -381,7 +385,8 @@ def get_repo_info(
             - files_a: Integration sizes at commit
             - dependencies_a: Dependency sizes at commit
     """
-    from .utils.common_funcs import get_dependencies, get_files
+    from .utils.dependencies import get_dependencies
+    from .utils.files import get_files
 
     repo = gitRepo.repo_dir
     gitRepo.checkout_commit(baseline)
@@ -409,7 +414,7 @@ def calculate_diff(
         A list of FileDataEntry items representing only the entries with a size difference.
         Entries include new, deleted, or changed modules, with delta size in bytes and human-readable format.
     """
-    from .utils.common_funcs import convert_to_human_readable_size
+    from .utils.general import convert_to_human_readable_size
 
     baseline = {
         (entry["Name"], entry["Type"], entry["Platform"], entry["Python_Version"]): entry for entry in size_baseline

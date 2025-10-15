@@ -14,7 +14,7 @@ from ddev.cli.size.utils.common_params import common_params
 from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
-    from ddev.cli.size.utils.common_funcs import (
+    from ddev.cli.size.utils.models import (
         CLIParameters,
         FileDataEntry,
     )
@@ -54,7 +54,7 @@ def status(
     and prints the results to the terminal.
 
     """
-    from ddev.cli.size.utils.common_funcs import (
+    from ddev.cli.size.utils.general import (
         get_valid_platforms,
         get_valid_versions,
     )
@@ -86,7 +86,7 @@ def status(
 
         for plat, ver in combinations:
             if commit:
-                from ddev.cli.size.utils.common_funcs import get_last_dependency_sizes_artifact
+                from ddev.cli.size.utils.artifacts import get_last_dependency_sizes_artifact
 
                 dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat, ver, compressed)
                 if not dependency_sizes:
@@ -109,7 +109,8 @@ def status(
             )
             modules_plat_ver.extend(status_modules)
             if to_dd_org or to_dd_key:
-                from ddev.cli.size.utils.common_funcs import SizeMode, send_metrics_to_dd
+                from ddev.cli.size.utils.metrics import send_metrics_to_dd
+                from ddev.cli.size.utils.models import SizeMode
 
                 app.display("Sending metrics to Datadog ")
                 send_metrics_to_dd(
@@ -117,7 +118,8 @@ def status(
                 )
 
         if format:
-            from ddev.cli.size.utils.common_funcs import SizeMode, export_format
+            from ddev.cli.size.utils.models import SizeMode
+            from ddev.cli.size.utils.output import export_format
 
             export_format(app, format, modules_plat_ver, SizeMode.STATUS, platform, py_version, compressed)
 
@@ -171,15 +173,13 @@ def status_mode(
     params: CLIParameters,
     dependency_sizes: Path | None,
 ) -> list[FileDataEntry]:
-    from ddev.cli.size.utils.common_funcs import (
-        get_dependencies,
-        get_files,
-        print_table,
-    )
+    from ddev.cli.size.utils.dependencies import get_dependencies
+    from ddev.cli.size.utils.files import get_files
+    from ddev.cli.size.utils.output import print_table
 
     with params["app"].status("Calculating sizes..."):
         if dependency_sizes:
-            from ddev.cli.size.utils.common_funcs import get_dependencies_from_json
+            from ddev.cli.size.utils.dependencies import get_dependencies_from_json
 
             modules = get_files(
                 repo_path, params["compressed"], params["py_version"], params["platform"]
@@ -203,7 +203,8 @@ def status_mode(
         )
 
     if params["show_gui"] or treemap_path:
-        from ddev.cli.size.utils.common_funcs import SizeMode, plot_treemap
+        from ddev.cli.size.utils.models import SizeMode
+        from ddev.cli.size.utils.output import plot_treemap
 
         plot_treemap(
             params["app"],

@@ -45,26 +45,20 @@ def mock_size_status():
     ]
 
     with (
-        patch("ddev.cli.size.utils.common_funcs.get_gitignore_files", return_value=set()),
+        patch("ddev.cli.size.utils.files.get_gitignore_files", return_value=set()),
         patch(
-            "ddev.cli.size.utils.common_funcs.get_valid_platforms",
+            "ddev.cli.size.utils.general.get_valid_platforms",
             return_value=({'linux-x86_64', 'macos-x86_64', 'linux-aarch64', 'macos-aarch64', 'windows-x86_64'}),
         ),
         patch(
-            "ddev.cli.size.utils.common_funcs.get_valid_versions",
+            "ddev.cli.size.utils.general.get_valid_versions",
             return_value=({'3.12'}),
         ),
-        patch("ddev.cli.size.utils.common_funcs.get_files", return_value=fake_files),
-        patch("ddev.cli.size.utils.common_funcs.get_dependencies", return_value=fake_deps),
-        patch(
-            "ddev.cli.size.utils.common_funcs.os.path.relpath",
-            side_effect=lambda path, _: path.replace(f"fake_root{os.sep}", ""),
-        ),
-        patch("ddev.cli.size.utils.common_funcs.compress", return_value=1234),
-        patch("ddev.cli.size.utils.common_funcs.os.walk", return_value=mock_walk),
-        patch("ddev.cli.size.utils.common_funcs.os.listdir", return_value=["fake_dep.whl"]),
-        patch("ddev.cli.size.utils.common_funcs.os.path.isfile", return_value=True),
-        patch("ddev.cli.size.utils.common_funcs.open", MagicMock()),
+        patch("ddev.cli.size.utils.files.get_files", return_value=fake_files),
+        patch("ddev.cli.size.utils.dependencies.get_dependencies", return_value=fake_deps),
+        patch("ddev.cli.size.utils.files.os.walk", return_value=mock_walk),
+        patch("ddev.cli.size.utils.dependencies.os.listdir", return_value=["fake_dep.whl"]),
+        patch("ddev.cli.size.utils.dependencies.os.path.isfile", return_value=True),
     ):
         yield mock_app
 
@@ -111,7 +105,7 @@ def test_status(ddev, mock_size_status, tmp_path, args, use_dependency_sizes):
         dependency_sizes_file.write_text("{}")
         command.extend(["--dependency-sizes", str(dependency_sizes_file)])
 
-        with patch("ddev.cli.size.utils.common_funcs.get_dependencies_from_json", return_value=fake_deps):
+        with patch("ddev.cli.size.utils.dependencies.get_dependencies_from_json", return_value=fake_deps):
             result = ddev(*command)
             assert result.exit_code == 0
     else:
