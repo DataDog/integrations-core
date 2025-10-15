@@ -1,0 +1,1 @@
+Added support for upgrading `integrations-core/pyproject.toml` in the `upgrade-python` command to update Python versions defined in the file.
