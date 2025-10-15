@@ -219,6 +219,13 @@ class MongoConfig(object):
             # if DBM is enabled and the schemas config is not explicitly disabled, then it is enabled
             enabled = True
         max_collections = self._schemas_config.get('max_collections')
+        max_fields_per_collection = self._schemas_config.get('max_fields_per_collection')
+        if max_fields_per_collection is None:
+            max_fields_per_collection = 100
+        else:
+            max_fields_per_collection = int(max_fields_per_collection)
+        if max_fields_per_collection <= 0:
+            max_fields_per_collection = None
         return {
             'enabled': enabled,
             'collection_interval': self._schemas_config.get('collection_interval', 3600),
@@ -227,6 +234,7 @@ class MongoConfig(object):
             'max_collections': int(max_collections) if max_collections else None,
             'max_depth': int(self._schemas_config.get('max_depth', 5)),  # Default to 5
             'collect_search_indexes': is_affirmative(self._schemas_config.get('collect_search_indexes', False)),
+            'max_fields_per_collection': max_fields_per_collection,
         }
 
     def _get_database_autodiscovery_config(self, instance):

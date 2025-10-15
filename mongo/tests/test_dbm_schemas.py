@@ -134,3 +134,69 @@ def test_mongo_schemas_config_deprecations(instance_integration_cluster_autodisc
     instance_integration_cluster_autodiscovery['collect_schemas'] = {'enabled': True}
     mongo_check = check(instance_integration_cluster_autodiscovery)
     assert mongo_check._config.schemas['enabled'] is True
+
+
+@pytest.mark.unit
+def test_mongo_schemas_max_fields_cap(instance_integration_cluster_autodiscovery, check):
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['schemas'] = {
+        'enabled': True,
+        'run_sync': True,
+        'sample_size': 2,
+        'max_fields_per_collection': 2,
+    }
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
+
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    schema_job = mongo_check._schemas
+
+    sample_docs = [
+        {'field_a': 1, 'field_b': 'a', 'field_c': 'c'},
+        {'field_a': 2, 'field_d': {'nested': 'value'}},
+    ]
+
+    mock_api = mock.MagicMock()
+    mock_api.sample.return_value = sample_docs
+    schema_job._check.api_client = mock_api
+
+    schema = schema_job._discover_collection_schema('db', 'collection')
+    assert len(schema) == 2
+    assert schema[0]['name'] == 'field_a'
+    assert {entry['name'] for entry in schema} == {'field_a', 'field_b'}
+    mock_api.sample.assert_called_once_with('db', 'collection', 2)
+
+
+@pytest.mark.unit
+def test_mongo_schemas_max_fields_cap_disabled(instance_integration_cluster_autodiscovery, check):
+    instance_integration_cluster_autodiscovery['dbm'] = True
+    instance_integration_cluster_autodiscovery['schemas'] = {
+        'enabled': True,
+        'run_sync': True,
+        'sample_size': 2,
+        'max_fields_per_collection': 0,
+    }
+    instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
+    instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
+
+    mongo_check = check(instance_integration_cluster_autodiscovery)
+    schema_job = mongo_check._schemas
+
+    sample_docs = [
+        {'field_a': 1, 'field_b': 'a', 'field_c': 'c'},
+        {'field_a': 2, 'field_d': {'nested': 'value'}},
+    ]
+
+    mock_api = mock.MagicMock()
+    mock_api.sample.return_value = sample_docs
+    schema_job._check.api_client = mock_api
+
+    schema = schema_job._discover_collection_schema('db', 'collection')
+    assert len(schema) == 5
+    assert {entry['name'] for entry in schema} == {
+        'field_a',
+        'field_b',
+        'field_c',
+        'field_d',
+        'field_d.nested',
+    }

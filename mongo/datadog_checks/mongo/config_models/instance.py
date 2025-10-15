@@ -39,6 +39,7 @@ class CollectSchemas(BaseModel):
     enabled: Optional[bool] = None
     max_collections: Optional[float] = None
     max_depth: Optional[float] = None
+    max_fields_per_collection: Optional[int] = None
     sample_size: Optional[float] = None
 
 
@@ -118,6 +119,7 @@ class Schemas(BaseModel):
     enabled: Optional[bool] = None
     max_collections: Optional[float] = None
     max_depth: Optional[float] = None
+    max_fields_per_collection: Optional[int] = None
     sample_size: Optional[float] = None
 
 

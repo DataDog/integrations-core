@@ -33,6 +33,7 @@ class MongoSchemas(DBMAsyncJob):
         self._sample_size = self._schemas_config["sample_size"]
         self._max_depth = self._schemas_config["max_depth"]
         self._collect_search_indexes = self._schemas_config["collect_search_indexes"]
+        self._max_fields_per_collection = self._schemas_config["max_fields_per_collection"]
         self._max_collections_per_database = check._config.database_autodiscovery_config['max_collections_per_database']
 
         super(MongoSchemas, self).__init__(
@@ -147,6 +148,19 @@ class MongoSchemas(DBMAsyncJob):
                 }
                 for value_type in sorted(types)
             )
+
+        if self._max_fields_per_collection:
+            total_fields = len(schema)
+            if total_fields > self._max_fields_per_collection:
+                schema.sort(key=lambda entry: (-entry["prevalence"], entry["name"], entry["type"]))
+                schema = schema[: self._max_fields_per_collection]
+                self._check.log.debug(
+                    "Truncated schema field list for %s.%s from %d to %d entries",
+                    dbname,
+                    collname,
+                    total_fields,
+                    len(schema),
+                )
 
         return schema
 

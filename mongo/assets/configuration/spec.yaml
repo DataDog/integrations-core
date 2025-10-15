@@ -301,6 +301,15 @@ files:
           value:
             type: number
             example: 5
+        - name: max_fields_per_collection
+          description: |
+            Set the maximum number of fields (including nested paths and type variants) to include for each collection.
+            Fields are prioritized by prevalence before trimming. Set to 0 to disable the limit.
+            Defaults to 100.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
         - name: collect_search_indexes
           description: |
             Set to `true` to collect search indexes for each collection.
@@ -353,6 +362,15 @@ files:
           value:
             type: number
             example: 5
+        - name: max_fields_per_collection
+          description: |
+            Set the maximum number of fields (including nested paths and type variants) to include for each collection.
+            Fields are prioritized by prevalence before trimming. Set to 0 to disable the limit.
+            Defaults to 100.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
         - name: collect_search_indexes
           description: |
             Set to `true` to collect search indexes for each collection.
