@@ -959,7 +959,7 @@
                     },
                     {
                       "alias": "% Memory Allocation",
-                      "formula": "1 - (query3 / query4)",
+                      "formula": "100 * (1 - (query3 / query4))",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",
