@@ -261,6 +261,7 @@ instances:
         ## @param max_fields_per_collection - integer - optional - default: 100
         ## Set the maximum number of fields (including nested paths and type variants) to include for each collection.
         ## Fields are prioritized by prevalence before trimming. Set to 0 to disable the limit.
+        ## Defaults to 100.
         #
         # max_fields_per_collection: 100
 
@@ -315,6 +316,7 @@ instances:
         ## @param max_fields_per_collection - integer - optional - default: 100
         ## Set the maximum number of fields (including nested paths and type variants) to include for each collection.
         ## Fields are prioritized by prevalence before trimming. Set to 0 to disable the limit.
+        ## Defaults to 100.
         #
         # max_fields_per_collection: 100
 
