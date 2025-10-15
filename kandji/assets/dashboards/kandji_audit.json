@@ -569,7 +569,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:kandji service:audit @target_type:admin -@usr.name:\"\" $actor_type $target_type $target_component $action"
+                                                "query": "source:kandji service:audit @target_type:admin -@usr.name:\" \" $actor_type $target_type $target_component $action"
                                             },
                                             "indexes": [
                                                 "*"
