@@ -22,7 +22,7 @@ class TopCollector(MongoCollector):
         return True
 
     def collect(self, api):
-        dbtop = api["admin"].command('top')
+        dbtop = api["admin"].command('top', maxTimeMS=api._timeout)
         for ns, ns_metrics in dbtop['totals'].items():
             if "." not in ns:
                 continue

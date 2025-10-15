@@ -6,7 +6,13 @@
 
 Integrate Metabase with Datadog to gain insights into activity event logs, view logs, and query logs through the Metabase API. The data is normalized and enriched before ingestion. Pre-built dashboard visualizations provide immediate insights into Metabase logs.
 
+**Minimum Agent version:** 7.57.2
+
 ## Setup
+
+### Prerequisites
+
+- This integration requires a Metabase Pro or Enterprise plan.
 
 ### Generate API credentials in Metabase
 

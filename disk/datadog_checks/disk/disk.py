@@ -64,7 +64,7 @@ class Disk(AgentCheck):
         self._timeout = instance.get('timeout', 5)
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
-        self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+        self._blkid_label_re = re.compile('LABEL="(.*?)"', re.I)
         self._lowercase_device_tag = is_affirmative(instance.get('lowercase_device_tag', False))
 
         if self._use_lsblk and self._blkid_cache_file:
@@ -126,16 +126,16 @@ class Disk(AgentCheck):
                 disk_usage = timeout(self._timeout)(psutil.disk_usage)(part.mountpoint)
             except TimeoutException:
                 self.log.warning(
-                    u'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
-                    u'You might want to change the timeout length in the settings.',
+                    'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
+                    'You might want to change the timeout length in the settings.',
                     self._timeout,
                     part.mountpoint,
                 )
                 continue
             except Exception as e:
                 self.log.debug(
-                    u'Unable to get disk metrics for %s: %s. '
-                    u'You can exclude this mountpoint in the settings if it is invalid.',
+                    'Unable to get disk metrics for %s: %s. '
+                    'You can exclude this mountpoint in the settings if it is invalid.',
                     part.mountpoint,
                     e,
                 )
@@ -292,16 +292,16 @@ class Disk(AgentCheck):
             inodes = timeout(self._timeout)(os.statvfs)(mountpoint)
         except TimeoutException:
             self.log.warning(
-                u'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
-                u'You might want to change the timeout length in the settings.',
+                'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
+                'You might want to change the timeout length in the settings.',
                 self._timeout,
                 mountpoint,
             )
             return metrics
         except Exception as e:
             self.log.debug(
-                u'Unable to get disk metrics for %s: %s. '
-                u'You can exclude this mountpoint in the settings if it is invalid.',
+                'Unable to get disk metrics for %s: %s. '
+                'You can exclude this mountpoint in the settings if it is invalid.',
                 mountpoint,
                 e,
             )

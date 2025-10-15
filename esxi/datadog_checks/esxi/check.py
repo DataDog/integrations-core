@@ -189,8 +189,7 @@ class EsxiCheck(AgentCheck):
 
             if resource_filter['property'] not in allowed_prop_names:
                 self.log.warning(
-                    "Ignoring filter %r because property '%s' is not valid "
-                    "for resource type %s. Should be one of %r.",
+                    "Ignoring filter %r because property '%s' is not valid for resource type %s. Should be one of %r.",
                     resource_filter,
                     resource_filter['property'],
                     resource_filter['resource'],

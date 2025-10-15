@@ -7,6 +7,8 @@ Get metrics from Aerospike Database in real time to:
 - Visualize and monitor Aerospike states.
 - Be notified about Aerospike failovers and events.
 
+**Minimum Agent version:** 6.10.0
+
 ## Setup
 
 NOTE: The current aerospike integration is only compatible with Aerospike server v4.9 or above, see Aerospike's [Python Client Library Release Notes][1] for more info.

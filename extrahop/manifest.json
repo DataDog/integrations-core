@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "76e1c087-314f-4d90-860e-c6eaee7a6eeb",
   "app_id": "extrahop",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -13,9 +14,15 @@
     "media": [
       {
         "caption": "ExtraHop - Detections",
-        "image_url": "images/extrahop_detections.png",
+        "image_url": "images/extrahop_dashboard_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "ExtraHop - Detections",
+        "image_url": "images/extrahop_dashboard_2.png",
         "media_type": "image"
       }
+      
     ],
     "classifier_tags": [
       "Category::Log Collection",

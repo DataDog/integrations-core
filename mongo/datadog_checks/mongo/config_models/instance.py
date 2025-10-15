@@ -29,6 +29,19 @@ class Aws(BaseModel):
     instance_endpoint: Optional[str] = None
 
 
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collect_search_indexes: Optional[bool] = None
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_collections: Optional[float] = None
+    max_depth: Optional[float] = None
+    sample_size: Optional[float] = None
+
+
 class Field(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -129,6 +142,7 @@ class InstanceConfig(BaseModel):
     additional_metrics: Optional[tuple[str, ...]] = None
     aws: Optional[Aws] = None
     cluster_name: Optional[str] = None
+    collect_schemas: Optional[CollectSchemas] = None
     collections: Optional[tuple[str, ...]] = None
     collections_indexes_stats: Optional[bool] = None
     connection_scheme: Optional[str] = None

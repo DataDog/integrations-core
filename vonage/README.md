@@ -10,17 +10,18 @@ This integration provides the following benefits:
 3. **Trend identification**: Allows businesses to spot trends in customer interactions, aiding proactive engagement.
 4. **Informed decision-making**: Provides insights that drive strategic decisions for growth and improvement.
 
+**Minimum Agent version:** 7.58.1
+
 ## Setup
 
 1. Log into [Vonage](https://www.vonage.com/log-in/).
 2. Navigate to Vonage [dashboard](https://dashboard.nexmo.com/).
-3. Here, you can obtain both the API key and API secret. 
+3. Here, you can obtain both the API key and API secret.
 4. Navigate to [Applications](https://dashboard.nexmo.com/applications).
 5. Click on + Create a new Application to create a new application.
 6. Enable the Messages Capabilities.
 7. Enable the Voice Capabilities.
 8. To make a call using the dashboard, Please refer to this [link](https://developer.vonage.com/en/voice/voice-api/getting-started?lang=using-dashboard).
-
 
 ### Configuration
 
@@ -32,13 +33,15 @@ Configure the Datadog endpoint to forward Vonage logs to Datadog.
 |----------|----------|
 | API key | API Key of the Vonage account. |
 | API secret | API Secret of the Vonage account. |
+| Include Message | Include body of the messages in logs. (True or False) |
+
 
 
 ## Data Collected
 
 ### Logs
 
-Logs are designed to collect and manage logs of SMS messages and voice calls. They capture essential details such as timestamps, sender and recipient information, message content, call duration, and call status.
+Logs are designed to collect and manage logs of SMS messages, voice calls and Audit logs. They capture essential details such as timestamps, sender and recipient information, message content, call duration, call status and types of audit events in the Vonage account.
 
 ## Troubleshooting
 

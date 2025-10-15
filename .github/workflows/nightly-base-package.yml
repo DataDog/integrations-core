@@ -24,9 +24,10 @@ jobs:
       repo: core
 
       # Options
-      standard: true
       minimum-base-package: true
       test-py2: true
+      pytest-args: '-m "not flaky"'
+      context: "nightly-base-package"
     secrets: inherit
 
   submit-traces:

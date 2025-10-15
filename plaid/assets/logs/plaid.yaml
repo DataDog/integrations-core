@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: plaid
 # See app_id in your integration's manifest.json file to learn more:
 # https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file

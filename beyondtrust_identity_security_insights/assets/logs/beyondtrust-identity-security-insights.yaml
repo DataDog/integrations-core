@@ -1,0 +1,68 @@
+id: beyondtrust-identity-security-insights
+metric_id: beyondtrust-identity-security-insights
+backend_only: false
+installation_sources:
+  - beyond-trust-identity-security-insights
+facets: null
+pipeline:
+  type: pipeline
+  name: BeyondTrust Identity Security Insights
+  enabled: true
+  filter:
+    query: source:beyond-trust-identity-security-insights
+  processors:
+    - type: grok-parser
+      name: Parse `timestamp` attribute
+      enabled: true
+      source: timestamp
+      samples:
+        - 06/25/2025 06:45:14
+      grok:
+        supportRules: ""
+        matchRules: parse_time_string %{date("MM/dd/yyyy
+          HH:mm:ss"):timestamp}|%{date("M/d/yyyy H:m:s"):timestamp}
+    - type: grok-parser
+      name: Parse `source` attribute
+      enabled: true
+      source: source
+      samples:
+        - okta/https://trial-3510400.okta.com
+      grok:
+        supportRules: ""
+        matchRules: provider_extract_rule %{regex("[^/]+"):provider}.*
+    - type: string-builder-processor
+      name: Prepare `service` string
+      enabled: true
+      template: "%{provider}-detection"
+      target: service
+      replaceMissing: true
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: message-remapper
+      name: Define `definitionSummary` as the official message of the log
+      enabled: true
+      sources:
+        - definitionSummary
+    - name: Lookup on `severity` to `status`
+      enabled: true
+      source: severity
+      target: status
+      lookupTable: |-
+        Critical,critical
+        High,warning
+        Moderate,notice
+        Low,info
+      type: lookup-processor
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status

@@ -5,7 +5,7 @@
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 import json
 import time
 from collections import defaultdict
@@ -20,11 +20,9 @@ from datadog_checks.mysql.queries import (
     SQL_COLUMNS,
     SQL_DATABASES,
     SQL_FOREIGN_KEYS,
-    SQL_INDEXES,
-    SQL_INDEXES_8_0_13,
-    SQL_INDEXES_EXPRESSION_COLUMN_CHECK,
     SQL_PARTITION,
     SQL_TABLES,
+    get_indexes_query,
 )
 
 from .util import get_list_chunks
@@ -33,7 +31,6 @@ DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL = 600
 
 
 class SubmitData:
-
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
         self._base_event = base_event
@@ -57,6 +54,7 @@ class SubmitData:
         self._total_columns_sent = 0
         self._columns_count = 0
         self.db_info.clear()
+        self.db_to_tables.clear()
         self.any_tables_found = False
 
     def store_db_infos(self, db_infos):
@@ -118,7 +116,6 @@ def agent_check_getter(self):
 
 
 class DatabasesData:
-
     TABLES_CHUNK_SIZE = 500
     DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
@@ -169,8 +166,7 @@ class DatabasesData:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _fetch_database_data(self, cursor, start_time, db_name):
         tables = self._get_tables(db_name, cursor)
-        tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
-        for tables_chunk in tables_chunks:
+        for tables_chunk in get_list_chunks(tables, self.TABLES_CHUNK_SIZE):
             schema_collection_elapsed_time = time.time() - start_time
             if schema_collection_elapsed_time > self._max_execution_time:
                 self._data_submitter.submit()
@@ -188,7 +184,7 @@ class DatabasesData:
         self._data_submitter.submit()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_databases_data(self, tags):
+    def collect_databases_data(self, tags):
         """
         Collects database information and schemas and submits them to the agent's queue as dictionaries.
 
@@ -252,22 +248,25 @@ class DatabasesData:
                             - data_length (int): The data length of the partition in bytes. If partition has
                                                  subpartitions, this is the sum of all subpartitions data_length.
         """
-        self._data_submitter.reset()
+        self._data_submitter.reset()  # Ensure we start fresh
         self._tags = tags
-        with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            self._data_submitter.set_base_event_data(
-                self._check.reported_hostname,
-                self._check.database_identifier,
-                self._tags,
-                self._check._config.cloud_metadata,
-                self._check.version.version,
-                self._check.version.flavor,
-            )
-            db_infos = self._query_db_information(cursor)
-            self._data_submitter.store_db_infos(db_infos)
-            self._fetch_for_databases(db_infos, cursor)
-            self._data_submitter.submit()
-            self._log.debug("Finished collect_schemas_data")
+        self._data_submitter.set_base_event_data(
+            self._check.reported_hostname,
+            self._check.database_identifier,
+            self._tags,
+            self._check._config.cloud_metadata,
+            self._check.version.version,
+            self._check.version.flavor,
+        )
+        try:
+            with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
+                db_infos = self._query_db_information(cursor)
+                self._data_submitter.store_db_infos(db_infos)
+                self._fetch_for_databases(db_infos, cursor)
+                self._data_submitter.submit()
+        finally:
+            self._data_submitter.reset()  # Ensure we reset in case of errors
+        self._log.debug("Finished collect_databases_data")
 
     def _fetch_for_databases(self, db_infos, cursor):
         start_time = time.time()
@@ -316,7 +315,6 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, db_name, cursor):
-
         if len(table_list) == 0:
             return 0, []
 
@@ -357,12 +355,7 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(cursor, query=SQL_INDEXES_EXPRESSION_COLUMN_CHECK)
-        query = (
-            SQL_INDEXES_8_0_13.format(table_names)
-            if cursor.fetchone()["column_count"] > 0
-            else SQL_INDEXES.format(table_names)
-        )
+        query = get_indexes_query(self._check.version, self._check.is_mariadb, table_names)
         self._cursor_run(cursor, query=query, params=db_name)
         rows = cursor.fetchall()
         if not rows:
@@ -376,7 +369,10 @@ class DatabasesData:
 
             # Update index-level info
             index_data["name"] = index_name
-            index_data["cardinality"] = int(row["cardinality"])
+
+            # in-memory table BTREE indexes have no cardinality apparently, so we default to 0
+            # https://bugs.mysql.com/bug.php?id=58520
+            index_data["cardinality"] = int(row["cardinality"]) if row["cardinality"] is not None else 0
             index_data["index_type"] = str(row["index_type"])
             index_data["non_unique"] = bool(row["non_unique"])
             if row["expression"]:

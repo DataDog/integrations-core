@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "46e76528-8e93-4a7c-9299-387ce0a905c6",
   "app_id": "openai",
+  "owner": "ml-observability",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -79,7 +80,8 @@
     "dashboards": {
       "OpenAI Overview Dashboard": "assets/dashboards/overview_dashboard.json",
       "OpenAI Usage Overview": "assets/dashboards/usage_overview_dashboard.json",
-      "OpenAI Cost Overview": "assets/dashboards/cost_overview_dashboard.json"
+      "OpenAI Cost Overview": "assets/dashboards/cost_overview_dashboard.json",
+      "OpenAI Admin Usage Overview": "assets/dashboards/usage_admin_overview_dashboard.json"
     },
     "monitors": {
       "OpenAI API usage is approaching rate limit": "assets/monitors/request_limits.json",

@@ -11,7 +11,6 @@ from .metrics import ISTIOD_METRICS, ISTIOD_VERSION, MESH_METRICS, construct_met
 
 
 class IstioCheckV2(OpenMetricsBaseCheckV2):
-
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):

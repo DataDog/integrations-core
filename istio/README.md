@@ -7,8 +7,11 @@ Datadog monitors every aspect of your Istio environment, so you can:
 - Break down the performance of your service mesh with [request, bandwidth, and resource consumption metrics](#metrics).
 - Map network communication between containers, pods, and services over the mesh with [Cloud Network Monitoring][1].
 - Drill into distributed traces for applications transacting over the mesh with [APM][2].
+- Use [Datadog App and API Protection][30] to secure your Istio service mesh with real-time threat detection and blocking at the edge of your infrastructure.
 
 To learn more about monitoring your Istio environment with Datadog, [see the Monitor blog post][3].
+
+**Minimum Agent version:** 6.1.0
 
 ## Setup
 
@@ -20,13 +23,17 @@ If you have multiple instances of Datadog collecting Istio metrics, make sure yo
 
 Metrics marked as `[OpenMetrics V1]`, `[OpenMetrics V2]`, or `[OpenMetrics V1 and V2]` are only available using the corresponding mode of the Istio integration. Metrics marked as `Istio v1.5+` are collected using Istio version 1.5 or later.
 
-### Installation
+### Installation (Metrics)
 
 Istio is included in the Datadog Agent. [Install the Datadog Agent][5] on your Istio servers or in your cluster and point it at Istio.
 
 #### Envoy
 
 If you want to monitor the Envoy proxies in Istio, configure the [Envoy integration][6].
+
+### Installation (Security - App and API Protection)
+
+The installation process requires a different approach than enabling this integration. The installation instructions are available in the [Enabling App and API Protection for Istio][31] documentation.
 
 ### Configuration
 
@@ -45,7 +52,6 @@ The default [`istio.d/auto_conf.yaml`][9] file automatically sets up monitoring 
 To customize the data plane portion of the integration, create a custom Istio configuration file `istio.yaml`. See [Configure integrations on Kubernetes][4] or [Configure integrations with Autodiscovery on Docker][26] for options in creating this file.
 
 This file must contain:
-
 ```yaml
 ad_identifiers:
   - proxyv2
@@ -282,3 +288,5 @@ Additional helpful documentation, links, and articles:
 [25]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
 [26]: https://docs.datadoghq.com/containers/docker/integrations/
 [27]: https://istio.io/latest/docs/tasks/observability/logs/access-log/
+[30]: https://docs.datadoghq.com/security/application_security/?source=istio-tile-overview
+[31]: https://docs.datadoghq.com/security/application_security/setup/istio/?source=istio-tile-setup

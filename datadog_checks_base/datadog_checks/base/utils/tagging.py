@@ -5,7 +5,7 @@
 try:
     import tagger
 except ImportError:
-    from ..stubs import tagger  # noqa: F401
+    from datadog_checks.base.stubs import tagger  # noqa: F401
 
 
 GENERIC_TAGS = {

@@ -1,0 +1,63 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "fec157b4-467e-4faa-8db6-b80baea69b00",
+  "app_id": "cloudgen-firewall",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Barracuda CloudGen Firewall is an NGFW that protects networks and Internet traffic",
+    "title": "Barracuda CloudGen Firewall",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Barracuda CloudGen Firewall Overview",
+        "image_url": "images/cloudgen_firewall_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Other Event types of CloudGen Firewall",
+        "image_url": "images/cloudgen_firewall_logs.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Some more Event types of CloudGen Firewall",
+        "image_url": "images/cloudgen_firewall_logs1.png"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 47743103,
+      "source_type_name": "cloudgen_firewall",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+        "Barracuda CloudGen Firewall overview": "assets/dashboards/cloudgen_firewall_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

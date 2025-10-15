@@ -1,0 +1,56 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "3bd4335c-19ec-46dc-8c15-0192d6206ebf",
+  "app_id": "versa",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor your Versa SD-WAN environment with Datadog.",
+    "title": "Versa",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Network",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 55887572,
+      "source_type_name": "Versa",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "versa.",
+        "check": "versa.device.reachable",
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "dashboards": {
+        "Versa SD-WAN": "assets/dashboards/versa.json"
+    },
+    "monitors": {
+      "Inbound Link Utilization >90%": "assets/monitors/inbound_link_utilization_high.json",
+      "Outbound Link Utilization >90%": "assets/monitors/outbound_link_utilization_high.json",
+      "SLA Breach PDU Loss >1%": "assets/monitors/sla_pdu_loss_high.json",
+      "Device is unreachable": "assets/monitors/device_unreachable.json"
+    },
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

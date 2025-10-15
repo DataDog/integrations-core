@@ -57,6 +57,8 @@ NODE_MAP = {
     ],
     "metrics": [
         {"name": "node.memory", "index": 4},
+    ],
+    "extended_metrics": [
         {"name": "node.cpu_load", "index": 6},
         {"name": "node.free_mem", "index": 7},
         {"name": "node.tmp_disk", "index": 8},

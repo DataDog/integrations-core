@@ -97,12 +97,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.cpu.usage.total{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.usage.total{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:kubernetes.cpu.limits{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.limits{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -156,7 +156,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.network.tx_bytes{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.network.tx_bytes{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -178,7 +178,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.network.rx_bytes{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.network.rx_bytes{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -329,12 +329,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.memory.usage{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.usage{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:kubernetes.memory.limits{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.limits{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -388,7 +388,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.containers.restarts{($cluster AND $namespace AND kube_app_component:cluster-agent OR kube_app_instance:cluster-agent)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.containers.restarts{$cluster AND $namespace AND kube_app_component:cluster-agent} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -519,12 +519,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.cpu.usage.total{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.usage.total{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:kubernetes.cpu.limits{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.cpu.limits{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -578,7 +578,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.network.tx_bytes{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.network.tx_bytes{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -600,7 +600,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.network.rx_bytes{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.network.rx_bytes{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -797,12 +797,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.memory.usage{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.usage{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:kubernetes.memory.limits{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner AND $cluster AND $namespace)} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.memory.limits{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -855,7 +855,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:kubernetes.containers.restarts{(kube_app_component:clusterchecks-agent OR kube_app_instance:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
+                                            "query": "avg:kubernetes.containers.restarts{(kube_app_component:clusterchecks-agent OR kube_app_component:cluster-checks-runner) AND $cluster AND $namespace} by {pod_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1854,53 +1854,497 @@
             }
         },
         {
-            "id": 1439774421918952,
+            "id": 3584696036455332,
             "definition": {
-                "title": "Number of workload metrics for local autoscaling recommendations",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_table",
-                "requests": [
+                "title": "Kubernetes Autoscaling",
+                "background_color": "gray",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
                     {
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:datadog.cluster_agent.autoscaling.workload.store_load_entities{$cluster, $namespace} by {deployment,loadname}",
-                                "aggregator": "max"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "sort": {
-                            "count": 25,
-                            "order_by": [
+                        "id": 4896611287717894,
+                        "definition": {
+                            "type": "note",
+                            "content": "Workload Scaling",
+                            "background_color": "gray",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8519461387372339,
+                        "definition": {
+                            "title": "Autoscaling Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
                                 {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.cluster_agent.autoscaling.workload.autoscaler_conditions{$cluster, $leader, namespace:$namespace.value} by {autoscaler_name,type}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
                             ]
                         },
-                        "formulas": [
-                            {
-                                "cell_display_mode": "trend",
-                                "cell_display_mode_options": {
-                                    "trend_type": "area",
-                                    "y_scale": "shared"
-                                },
-                                "alias": "Number of Entities",
-                                "formula": "query1"
-                            }
-                        ]
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5906275171965601,
+                        "definition": {
+                            "title": "Vertical Scaling Received Requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:datadog.cluster_agent.autoscaling.workload.vertical_scaling_received_requests{$cluster, $leader,namespace:$namespace.value} by {autoscaler_name,resource_name}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3947121334748244,
+                        "definition": {
+                            "title": "Vertical Scaling Received Limits",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:datadog.cluster_agent.autoscaling.workload.vertical_scaling_received_limits{$cluster,$leader, namespace:$namespace.value} by {autoscaler_name,resource_name}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 1,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4731264513906853,
+                        "definition": {
+                            "title": "Horizontal Scaling Applied Replicas",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:datadog.cluster_agent.autoscaling.workload.horizontal_scaling_applied_replicas{$cluster, $leader,namespace:$namespace.value} by {autoscaler_name,source}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5281936737214277,
+                        "definition": {
+                            "title": "Horizontal Scaling Received Replicas",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:datadog.cluster_agent.autoscaling.workload.horizontal_scaling_received_replicas{$cluster, $leader,namespace:$namespace.value} by {autoscaler_name}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1854903998565256,
+                        "definition": {
+                            "title": "Horizontal Scaling Actions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:datadog.cluster_agent.autoscaling.workload.horizontal_scaling_actions{$cluster ,$leader,namespace:$namespace.value} by {autoscaler_name,status}.as_count()"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 3,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6892522903863235,
+                        "definition": {
+                            "type": "note",
+                            "content": "Local Fallback\n",
+                            "background_color": "gray",
+                            "font_size": "16",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "bottom",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1557301390156542,
+                        "definition": {
+                            "title": "Local Fallback Activated",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:datadog.cluster_agent.autoscaling.workload.local.fallback_enabled{$cluster, $leader,namespace:$namespace.value} by {autoscaler_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "orange",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5380764579530860,
+                        "definition": {
+                            "title": "Local Fallback Recommended Replicas",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:datadog.cluster_agent.autoscaling.workload.local.horizontal_scaling_recommended_replicas{$cluster, $leader,namespace:$namespace.value} by {autoscaler_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 6,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1439774421918952,
+                        "definition": {
+                            "title": "Number of workload metrics for local autoscaling recommendations",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:datadog.cluster_agent.autoscaling.workload.store_load_entities{$cluster,$leader,namespace:$namespace.value} by {deployment,loadname}",
+                                            "aggregator": "max"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 25,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "trend",
+                                            "cell_display_mode_options": {
+                                                "trend_type": "area",
+                                                "y_scale": "shared"
+                                            },
+                                            "alias": "Number of Entities",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 6,
+                            "width": 4,
+                            "height": 2
+                        }
                     }
-                ],
-                "has_search_bar": "auto"
+                ]
             },
             "layout": {
                 "x": 0,
-                "y": 9,
-                "width": 4,
-                "height": 3
+                "y": 26,
+                "width": 12,
+                "height": 9
             }
         }
     ],

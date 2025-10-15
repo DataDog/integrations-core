@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "104e8e43-bf5b-44f1-8ef3-76ad53a39c05",
   "app_id": "plaid",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -38,6 +39,11 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
+      },
+      "metrics": {
+        "prefix": "plaid.",
+        "check": "plaid.account.iso_currency_code",
+        "metadata_path": "metadata.csv"
       }
     },
     "dashboards": {

@@ -18,7 +18,7 @@ def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance):
     check = NvidiaNIMCheck("nvidia_nim", {}, [instance])
     check.check_id = "test:123"
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         side_effect=[
             MockResponse(file_path=get_fixture_path("nim_metrics.txt")),
             MockResponse(file_path=get_fixture_path("nim_version.json")),

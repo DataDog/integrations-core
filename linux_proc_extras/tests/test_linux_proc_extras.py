@@ -13,7 +13,6 @@ pytestmark = pytest.mark.unit
 
 # Really a basic check to see if all metrics are there
 def test_check(aggregator, check):
-
     check.tags = []
     check.set_paths()
 

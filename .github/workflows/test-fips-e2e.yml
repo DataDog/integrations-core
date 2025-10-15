@@ -33,7 +33,7 @@ jobs:
 
     env:
       FORCE_COLOR: "1"
-      PYTHON_VERSION: "3.12"
+      PYTHON_VERSION: "3.13"
       # Test results for later processing
       TEST_RESULTS_BASE_DIR: "test-results"
       # Tracing to monitor our test suite
@@ -140,8 +140,8 @@ jobs:
       if: always()
       run: |-
         mkdir -p "${{ env.TEST_RESULTS_DIR }}"
-        if [[ -d ${{ inputs.target || 'tls' }}/.junit ]]; then
-          mv ${{ inputs.target || 'tls' }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+        if [[ -d ${{ inputs.target || 'tls' }}/junit ]]; then
+          mv ${{ inputs.target || 'tls' }}/junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
         fi
 
     - name: Upload test results

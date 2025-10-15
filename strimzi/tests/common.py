@@ -6,6 +6,7 @@ import os
 from datadog_checks.dev import get_here
 
 STRIMZI_VERSION = os.environ["STRIMZI_VERSION"]
+KUBERNETES_VERSION = os.environ["KUBERNETES_VERSION"]
 HERE = get_here()
 
 MOCKED_CLUSTER_OPERATOR_INSTANCE = {'cluster_operator_endpoint': 'http://cluster-operator:8080/metrics'}

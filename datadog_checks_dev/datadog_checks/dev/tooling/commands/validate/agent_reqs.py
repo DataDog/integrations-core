@@ -3,12 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ....utils import read_file
-from ...constants import AGENT_V5_ONLY, NOT_CHECKS, get_agent_release_requirements
-from ...release import get_package_name
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_version_string, parse_agent_req_file
-from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_info, echo_success, echo_warning
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_error,
+    echo_failure,
+    echo_info,
+    echo_success,
+    echo_warning,
+)
+from datadog_checks.dev.tooling.constants import AGENT_V5_ONLY, NOT_CHECKS, get_agent_release_requirements
+from datadog_checks.dev.tooling.release import get_package_name
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_version_string, parse_agent_req_file
+from datadog_checks.dev.utils import read_file
 
 
 @click.command(

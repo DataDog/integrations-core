@@ -18,7 +18,8 @@ import tomli_w
 import yaml
 from packaging.specifiers import SpecifierSet
 
-from ..fs import dir_exists, file_exists, read_file, read_file_lines, write_file
+from datadog_checks.dev.fs import dir_exists, file_exists, read_file, read_file_lines, write_file
+
 from .catalog_const import (
     DOGWEB_JSON_DASHBOARDS,
     INTEGRATION_LOGS_NOT_POSSIBLE,
@@ -170,7 +171,13 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
     repo_choice = (
         'core'
         if core
-        else 'extras' if extras else 'agent' if agent else 'marketplace' if marketplace else config.get('repo', 'core')
+        else 'extras'
+        if extras
+        else 'agent'
+        if agent
+        else 'marketplace'
+        if marketplace
+        else config.get('repo', 'core')
     )
     config['repo_choice'] = repo_choice
     message = None
@@ -182,7 +189,9 @@ def initialize_root(config, agent=False, core=False, extras=False, marketplace=F
             repo = (
                 'datadog-agent'
                 if repo_choice == 'agent'
-                else 'marketplace' if repo_choice == 'marketplace' else f'integrations-{repo_choice}'
+                else 'marketplace'
+                if repo_choice == 'marketplace'
+                else f'integrations-{repo_choice}'
             )
             message = f'`{repo}` directory `{root}` does not exist, defaulting to the current location.'
 

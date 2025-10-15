@@ -1,0 +1,19 @@
+snapshot_time             1749628896.485828991 secs.nsecs
+start_time                1748858812.990375805 secs.nsecs
+elapsed_time              770083.495453186 secs.nsecs
+req_waittime              304 samples [usecs] 1131 5500 449789 762587611
+req_active                304 samples [reqs] 1 3 341 423
+ldlm_glimpse_enqueue      22 samples [reqs] 1 1 22 22
+ldlm_extent_enqueue       15 samples [reqs] 1 1 15 15
+read_bytes                2 samples [bytes] 4096 4096 8192 33554432
+write_bytes               15 samples [bytes] 27 26759 102925 1935414425
+ost_setattr               19 samples [usecs] 1170 5500 30504 67950046
+ost_read                  2 samples [usecs] 1865 1917 3782 7153114
+ost_write                 15 samples [usecs] 2011 4793 38984 111948778
+ost_connect               13 samples [usecs] 1279 1505 17866 24604304
+ost_disconnect            12 samples [usecs] 1295 1695 16718 23440992
+ost_punch                 9 samples [usecs] 1168 1274 10974 13390860
+ost_statfs                4 samples [usecs] 1211 1550 5253 6974215
+ost_sync                  12 samples [usecs] 3009 3497 39052 127363500
+ldlm_cancel               36 samples [usecs] 1144 1365 44611 55459819
+obd_ping                  145 samples [usecs] 1148 1951 195254 264501358

@@ -1,0 +1,1838 @@
+id: klaviyo
+tests:
+  - sample: |-
+      {
+        "metric_name": "Received Email",
+        "profile_id": "01JXZDTRS5ZWET33T7930NVH2X",
+        "attributes": {
+          "datetime": "2025-07-10T20:41:13+00:00",
+          "uuid": "37d77a80-5dce-11f0-8001-1ce63ac70994",
+          "timestamp": 1752180073,
+          "event_properties": {
+            "_ip": "166.137.246.54",
+            "$event_id": "1752180073",
+            "Email Domain": "klaviyo-demo.com",
+            "Subject": "Internal Klaviyo - Subject Line",
+            "Campaign Name": "Internal Klaviyo - Test Campaign Name"
+          }
+        },
+        "links": {
+          "self": "https://a.klaviyo.com/api/events/6jsMbujVKTe/"
+        },
+        "id": "6jsMbujVKTe",
+        "type": "event"
+      }
+    result:
+        custom:
+            attributes:
+                datetime: "2025-07-10T20:41:13+00:00"
+                event_properties:
+                    $event_id: "1752180073"
+                    Campaign Name: "Internal Klaviyo - Test Campaign Name"
+                    Email Domain: "klaviyo-demo.com"
+                    Subject: "Internal Klaviyo - Subject Line"
+                    _ip: "166.137.246.54"
+                timestamp: 1752180073
+                uuid: "37d77a80-5dce-11f0-8001-1ce63ac70994"
+            id: "6jsMbujVKTe"
+            klaviyo:
+                campaign_name: "Internal Klaviyo - Test Campaign Name"
+            links:
+                self: "https://a.klaviyo.com/api/events/6jsMbujVKTe/"
+            metric_name: "Received Email"
+            network:
+                client:
+                    geoip: { }
+            profile_id: "01JXZDTRS5ZWET33T7930NVH2X"
+            service: "marketing-events"
+            status: "info"
+            type: "event"
+        message: |-
+            {
+              "metric_name" : "Received Email",
+              "profile_id" : "01JXZDTRS5ZWET33T7930NVH2X",
+              "attributes" : {
+                "datetime" : "2025-07-10T20:41:13+00:00",
+                "uuid" : "37d77a80-5dce-11f0-8001-1ce63ac70994",
+                "timestamp" : 1752180073,
+                "event_properties" : {
+                  "_ip" : "166.137.246.54",
+                  "$event_id" : "1752180073",
+                  "Email Domain" : "klaviyo-demo.com",
+                  "Subject" : "Internal Klaviyo - Subject Line",
+                  "Campaign Name" : "Internal Klaviyo - Test Campaign Name"
+                }
+              },
+              "links" : {
+                "self" : "https://a.klaviyo.com/api/events/6jsMbujVKTe/"
+              },
+              "id" : "6jsMbujVKTe",
+              "type" : "event"
+            }
+        service: "marketing-events"
+        status: "info"
+        tags:
+            - "source:LOGS_SOURCE"
+        timestamp: 1752180073000
+  - sample: >-
+      {
+        "metric_name": "Reset Password",
+        "profile_id": "01JXFPJ6GZBSW06VGH5YC1BZ2R",
+        "attributes": {
+          "datetime": "2025-07-10T20:40:34+00:00",
+          "uuid": "20988d00-5dce-11f0-8001-abb877364eba",
+          "timestamp": 1752180034,
+          "event_properties": {
+            "$value": 0,
+            "$event_id": "1752180034",
+            "action": "Reset Password",
+            "PasswordResetLink": "https://www.website.com/reset/1234567890987654321"
+          }
+        },
+        "links": {
+          "self": "https://a.klaviyo.com/api/events/6jsMdJ68urY/"
+        },
+        "id": "6jsMdJ68urY",
+        "type": "event"
+      }
+    result:
+        custom:
+            attributes:
+                datetime: "2025-07-10T20:40:34+00:00"
+                event_properties:
+                    $event_id: "1752180034"
+                    $value: 0
+                    PasswordResetLink: "https://www.website.com/reset/1234567890987654321"
+                    action: "Reset Password"
+                timestamp: 1752180034
+                uuid: "20988d00-5dce-11f0-8001-abb877364eba"
+            id: "6jsMdJ68urY"
+            links:
+                self: "https://a.klaviyo.com/api/events/6jsMdJ68urY/"
+            metric_name: "Reset Password"
+            profile_id: "01JXFPJ6GZBSW06VGH5YC1BZ2R"
+            service: "other-events"
+            type: "event"
+        message: |-
+            {
+              "metric_name" : "Reset Password",
+              "profile_id" : "01JXFPJ6GZBSW06VGH5YC1BZ2R",
+              "attributes" : {
+                "datetime" : "2025-07-10T20:40:34+00:00",
+                "uuid" : "20988d00-5dce-11f0-8001-abb877364eba",
+                "timestamp" : 1752180034,
+                "event_properties" : {
+                  "$value" : 0,
+                  "$event_id" : "1752180034",
+                  "action" : "Reset Password",
+                  "PasswordResetLink" : "https://www.website.com/reset/1234567890987654321"
+                }
+              },
+              "links" : {
+                "self" : "https://a.klaviyo.com/api/events/6jsMdJ68urY/"
+              },
+              "id" : "6jsMdJ68urY",
+              "type" : "event"
+            }
+        service: "other-events"
+        tags:
+            - "source:LOGS_SOURCE"
+        timestamp: 1752180034000
+  - sample: |-
+      {
+        "metric_name": "Placed Order",
+        "profile_id": "01JXZDTSG33JAJB9JRXRA0VGVV",
+        "attributes": {
+          "datetime": "2025-07-10T20:40:33+00:00",
+          "uuid": "1ffff680-5dce-11f0-8001-be92381409b3",
+          "timestamp": 1752180033,
+          "event_properties": {
+            "BillingAddress": {
+              "Zip": "02111",
+              "Company": "",
+              "RegionCode": "MA",
+              "Phone": "5005550006",
+              "FirstName": "Matt",
+              "Address2": "6th floor",
+              "Country": "USA",
+              "Region": "Massachusetts",
+              "LastName": "Kemp (Sample)",
+              "City": "Boston",
+              "Address1": "125 Summer St",
+              "CountryCode": "US"
+            },
+            "Categories": [
+              "Fiction",
+              "Classics",
+              "Children"
+            ],
+            "$value": 29.98,
+            "ShippingAddress": {
+              "Zip": "02111",
+              "Company": "",
+              "RegionCode": "MA",
+              "Phone": "5005550006",
+              "FirstName": "Matt",
+              "Address2": "6th floor",
+              "Country": "USA",
+              "Region": "Massachusetts",
+              "LastName": "Kemp (Sample)",
+              "City": "Boston",
+              "Address1": "125 Summer St",
+              "CountryCode": "US"
+            },
+            "$event_id": "1752180033",
+            "Brands": [
+              "Kids Books",
+              "Harcourt Classics"
+            ],
+            "Items": [
+              {
+                "Brand": "Kids Books",
+                "RowTotal": 9.99,
+                "ProductName": "Winnie the Pooh",
+                "Categories": [
+                  "Fiction",
+                  "Children"
+                ],
+                "ItemPrice": 9.99,
+                "Quantity": 1,
+                "ImageURL": "http://www.example.com/path/to/product/image.png",
+                "ProductID": "1111",
+                "SKU": "WINNIEPOOH",
+                "ProductURL": "http://www.example.com/path/to/product"
+              },
+              {
+                "Brand": "Harcourt Classics",
+                "RowTotal": 19.99,
+                "ProductName": "A Tale of Two Cities",
+                "Categories": [
+                  "Fiction",
+                  "Classics"
+                ],
+                "ItemPrice": 19.99,
+                "Quantity": 1,
+                "ImageURL": "http://www.example.com/path/to/product/image2.png",
+                "ProductID": "1112",
+                "SKU": "TALEOFTWO",
+                "ProductURL": "http://www.example.com/path/to/product2"
+              }
+            ],
+            "DiscountCode": "Free Shipping",
+            "DiscountValue": 5,
+            "OrderId": "1234",
+            "ItemNames": [
+              "Winnie the Pooh",
+              "A Tale of Two Cities"
+            ]
+          }
+        },
+        "links": {
+          "self": "https://a.klaviyo.com/api/events/6jsMbvMP9e5/"
+        },
+        "id": "6jsMbvMP9e5",
+        "type": "event",
+        "status": "info"
+      }
+    result:
+        custom:
+            attributes:
+                datetime: "2025-07-10T20:40:33+00:00"
+                event_properties:
+                    $event_id: "1752180033"
+                    $value: 29.98
+                    BillingAddress:
+                        Address1: "125 Summer St"
+                        Address2: "6th floor"
+                        City: "Boston"
+                        Company: ""
+                        Country: "USA"
+                        CountryCode: "US"
+                        FirstName: "Matt"
+                        LastName: "Kemp (Sample)"
+                        Phone: "5005550006"
+                        Region: "Massachusetts"
+                        RegionCode: "MA"
+                        Zip: "02111"
+                    Brands:
+                        - "Kids Books"
+                        - "Harcourt Classics"
+                    Categories:
+                        - "Fiction"
+                        - "Classics"
+                        - "Children"
+                    DiscountCode: "Free Shipping"
+                    DiscountValue: 5
+                    ItemNames:
+                        - "Winnie the Pooh"
+                        - "A Tale of Two Cities"
+                    Items:
+                        - Brand: "Kids Books"
+                          RowTotal: 9.99
+                          ProductName: "Winnie the Pooh"
+                          Categories:
+                              - "Fiction"
+                              - "Children"
+                          ItemPrice: 9.99
+                          Quantity: 1
+                          ImageURL: "http://www.example.com/path/to/product/image.png"
+                          ProductID: "1111"
+                          SKU: "WINNIEPOOH"
+                          ProductURL: "http://www.example.com/path/to/product"
+                        - Brand: "Harcourt Classics"
+                          RowTotal: 19.99
+                          ProductName: "A Tale of Two Cities"
+                          Categories:
+                              - "Fiction"
+                              - "Classics"
+                          ItemPrice: 19.99
+                          Quantity: 1
+                          ImageURL: "http://www.example.com/path/to/product/image2.png"
+                          ProductID: "1112"
+                          SKU: "TALEOFTWO"
+                          ProductURL: "http://www.example.com/path/to/product2"
+                    OrderId: "1234"
+                    ShippingAddress:
+                        Address1: "125 Summer St"
+                        Address2: "6th floor"
+                        City: "Boston"
+                        Company: ""
+                        Country: "USA"
+                        CountryCode: "US"
+                        FirstName: "Matt"
+                        LastName: "Kemp (Sample)"
+                        Phone: "5005550006"
+                        Region: "Massachusetts"
+                        RegionCode: "MA"
+                        Zip: "02111"
+                timestamp: 1752180033
+                uuid: "1ffff680-5dce-11f0-8001-be92381409b3"
+            id: "6jsMbvMP9e5"
+            klaviyo:
+                billing_region_code: "US-MA"
+                billing_zip_code: "02111"
+                product_categories: "Fiction,Classics,Children"
+                products: "1111,1112 - Winnie the Pooh,A Tale of Two Cities"
+                shipping_region_code: "US-MA"
+                shipping_zip_code: "02111"
+            links:
+                self: "https://a.klaviyo.com/api/events/6jsMbvMP9e5/"
+            metric_name: "Placed Order"
+            profile_id: "01JXZDTSG33JAJB9JRXRA0VGVV"
+            service: "ecommerce-events"
+            status: "info"
+            type: "event"
+        message: |-
+            {
+              "metric_name" : "Placed Order",
+              "profile_id" : "01JXZDTSG33JAJB9JRXRA0VGVV",
+              "attributes" : {
+                "datetime" : "2025-07-10T20:40:33+00:00",
+                "uuid" : "1ffff680-5dce-11f0-8001-be92381409b3",
+                "timestamp" : 1752180033,
+                "event_properties" : {
+                  "BillingAddress" : {
+                    "Zip" : "02111",
+                    "Company" : "",
+                    "RegionCode" : "MA",
+                    "Phone" : "5005550006",
+                    "FirstName" : "Matt",
+                    "Address2" : "6th floor",
+                    "Country" : "USA",
+                    "Region" : "Massachusetts",
+                    "LastName" : "Kemp (Sample)",
+                    "City" : "Boston",
+                    "Address1" : "125 Summer St",
+                    "CountryCode" : "US"
+                  },
+                  "Categories" : [ "Fiction", "Classics", "Children" ],
+                  "$value" : 29.98,
+                  "ShippingAddress" : {
+                    "Zip" : "02111",
+                    "Company" : "",
+                    "RegionCode" : "MA",
+                    "Phone" : "5005550006",
+                    "FirstName" : "Matt",
+                    "Address2" : "6th floor",
+                    "Country" : "USA",
+                    "Region" : "Massachusetts",
+                    "LastName" : "Kemp (Sample)",
+                    "City" : "Boston",
+                    "Address1" : "125 Summer St",
+                    "CountryCode" : "US"
+                  },
+                  "$event_id" : "1752180033",
+                  "Brands" : [ "Kids Books", "Harcourt Classics" ],
+                  "Items" : [ {
+                    "Brand" : "Kids Books",
+                    "RowTotal" : 9.99,
+                    "ProductName" : "Winnie the Pooh",
+                    "Categories" : [ "Fiction", "Children" ],
+                    "ItemPrice" : 9.99,
+                    "Quantity" : 1,
+                    "ImageURL" : "http://www.example.com/path/to/product/image.png",
+                    "ProductID" : "1111",
+                    "SKU" : "WINNIEPOOH",
+                    "ProductURL" : "http://www.example.com/path/to/product"
+                  }, {
+                    "Brand" : "Harcourt Classics",
+                    "RowTotal" : 19.99,
+                    "ProductName" : "A Tale of Two Cities",
+                    "Categories" : [ "Fiction", "Classics" ],
+                    "ItemPrice" : 19.99,
+                    "Quantity" : 1,
+                    "ImageURL" : "http://www.example.com/path/to/product/image2.png",
+                    "ProductID" : "1112",
+                    "SKU" : "TALEOFTWO",
+                    "ProductURL" : "http://www.example.com/path/to/product2"
+                  } ],
+                  "DiscountCode" : "Free Shipping",
+                  "DiscountValue" : 5,
+                  "OrderId" : "1234",
+                  "ItemNames" : [ "Winnie the Pooh", "A Tale of Two Cities" ]
+                }
+              },
+              "links" : {
+                "self" : "https://a.klaviyo.com/api/events/6jsMbvMP9e5/"
+              },
+              "id" : "6jsMbvMP9e5",
+              "type" : "event",
+              "status" : "info"
+            }
+        service: "ecommerce-events"
+        status: "info"
+        tags:
+            - "source:LOGS_SOURCE"
+        timestamp: 1752180033000
+  - sample: |-
+      {
+        "metric_name": "Opened Email",
+        "profile_id": "01K1WZ55QAJNB5PPNSG59X6PJ0",
+        "flow_name": "Customer Thank You - New vs. Returning",
+        "attributes": {
+          "datetime": "2025-08-06T13:39:56+00:00",
+          "uuid": "d6ba9e00-72ca-11f0-8001-62dc5e6734c0",
+          "timestamp": 1754487596,
+          "event_properties": {
+            "Inbox Provider": "Gsuite",
+            "$_cohort$message_send_cohort": "1754485652:XDj2Nt",
+            "Subject": "You're what makes us great",
+            "Email Domain": "mayalane.com",
+            "$message_interaction": "XDj2Nt",
+            "$ESP": 2,
+            "machine_open": true,
+            "$message": "XDj2Nt",
+            "$event_id": "XDj2Nt:01K1ZQWXCHYYF6HGNHYK9CC9KT:1754487596",
+            "$flow": "U4tfMv",
+            "Recipient Email Address": "brian+shop8@mayalane.com",
+            "$internal": {
+              "Handoff Time": 1754485652,
+              "Transmission ID": "01K1ZQWXCHYYF6HGNHYK9CC9KT",
+              "User Agent": "Mozilla/5.0",
+              "Friendly From Domain": "barefootcoders.com"
+            },
+            "Campaign Name": "New Customer Thank You: Email #1"
+          }
+        },
+        "links": {
+          "self": "https://a.klaviyo.com/api/events/6pmr8Cqxkap/"
+        },
+        "id": "6pmr8Cqxkap",
+        "type": "event"
+      }
+    result:
+        custom:
+          attributes:
+            datetime: "2025-08-06T13:39:56+00:00"
+            event_properties:
+              $ESP: 2
+              $_cohort$message_send_cohort: "1754485652:XDj2Nt"
+              $event_id: "XDj2Nt:01K1ZQWXCHYYF6HGNHYK9CC9KT:1754487596"
+              $flow: "U4tfMv"
+              $internal:
+                Friendly From Domain: "barefootcoders.com"
+                Handoff Time: 1754485652
+                Transmission ID: "01K1ZQWXCHYYF6HGNHYK9CC9KT"
+                User Agent: "Mozilla/5.0"
+              $message: "XDj2Nt"
+              $message_interaction: "XDj2Nt"
+              Campaign Name: "New Customer Thank You: Email #1"
+              Email Domain: "mayalane.com"
+              Inbox Provider: "Gsuite"
+              Recipient Email Address: "brian+shop8@mayalane.com"
+              Subject: "You're what makes us great"
+              machine_open: true
+            timestamp: 1754487596
+            uuid: "d6ba9e00-72ca-11f0-8001-62dc5e6734c0"
+          flow_name: "Customer Thank You - New vs. Returning"
+          id: "6pmr8Cqxkap"
+          klaviyo:
+            campaign_name: "New Customer Thank You: Email #1"
+            flow_name: "Customer Thank You - New vs. Returning"
+          links:
+            self: "https://a.klaviyo.com/api/events/6pmr8Cqxkap/"
+          metric_name: "Opened Email"
+          profile_id: "01K1WZ55QAJNB5PPNSG59X6PJ0"
+          service: "marketing-events"
+          status: "info"
+          type: "event"
+        message: |-
+          {
+            "metric_name" : "Opened Email",
+            "profile_id" : "01K1WZ55QAJNB5PPNSG59X6PJ0",
+            "flow_name" : "Customer Thank You - New vs. Returning",
+            "attributes" : {
+              "datetime" : "2025-08-06T13:39:56+00:00",
+              "uuid" : "d6ba9e00-72ca-11f0-8001-62dc5e6734c0",
+              "timestamp" : 1754487596,
+              "event_properties" : {
+                "Inbox Provider" : "Gsuite",
+                "$_cohort$message_send_cohort" : "1754485652:XDj2Nt",
+                "Subject" : "You're what makes us great",
+                "Email Domain" : "mayalane.com",
+                "$message_interaction" : "XDj2Nt",
+                "$ESP" : 2,
+                "machine_open" : true,
+                "$message" : "XDj2Nt",
+                "$event_id" : "XDj2Nt:01K1ZQWXCHYYF6HGNHYK9CC9KT:1754487596",
+                "$flow" : "U4tfMv",
+                "Recipient Email Address" : "brian+shop8@mayalane.com",
+                "$internal" : {
+                  "Handoff Time" : 1754485652,
+                  "Transmission ID" : "01K1ZQWXCHYYF6HGNHYK9CC9KT",
+                  "User Agent" : "Mozilla/5.0",
+                  "Friendly From Domain" : "barefootcoders.com"
+                },
+                "Campaign Name" : "New Customer Thank You: Email #1"
+              }
+            },
+            "links" : {
+              "self" : "https://a.klaviyo.com/api/events/6pmr8Cqxkap/"
+            },
+            "id" : "6pmr8Cqxkap",
+            "type" : "event"
+          }
+        service: "marketing-events"
+        status: "info"
+        tags:
+         - "source:LOGS_SOURCE"
+        timestamp: 1754487596000
+  - sample: |-
+      {
+        "metric_name": "Ordered Product",
+        "profile_id": "01K1XQCC9V79XP3CNKNMRBT6GT",
+        "attributes": {
+          "datetime": "2025-08-05T18:20:20+00:00",
+          "uuid": "d8338a00-7228-11f0-8001-d86a6b406da7",
+          "timestamp": 1754418020,
+          "event_properties": {
+            "Variant ID": 46305476280420,
+            "Variant Option: Title": "Default Title",
+            "Customer Locale": "en-US",
+            "Quantity": 1,
+            "ProductID": 8128980484196,
+            "Vendor": "My Store",
+            "Name": "Magic Carpet",
+            "Variant Name": "Default Title",
+            "$value": 2100,
+            "$event_id": "5777917050980:13904611934308:0",
+            "$extra": {
+              "translations": {
+                "presentment_title": "",
+                "presentment_variant_title": ""
+              },
+              "price_set": {
+                "shop_money": {
+                  "amount": 2100,
+                  "currency": "USD"
+                },
+                "presentment_money": {
+                  "amount": 2100,
+                  "currency": "USD"
+                }
+              }
+            },
+            "SKU": "123SKU",
+            "Collections": [
+              "Abstract Art"
+            ],
+            "Tags": [
+              "shopify-tagged"
+            ]
+          }
+        },
+        "links": {
+          "self": "https://a.klaviyo.com/api/events/6peNeyigRiY/"
+        },
+        "id": "6peNeyigRiY",
+        "type": "event"
+      }
+    result:
+        custom:
+          attributes:
+            datetime: "2025-08-05T18:20:20+00:00"
+            event_properties:
+              $event_id: "5777917050980:13904611934308:0"
+              $extra:
+                price_set:
+                  presentment_money:
+                    amount: 2100
+                    currency: "USD"
+                  shop_money:
+                    amount: 2100
+                    currency: "USD"
+                translations:
+                  presentment_title: ""
+                  presentment_variant_title: ""
+              $value: 2100
+              Collections:
+               - "Abstract Art"
+              Customer Locale: "en-US"
+              Name: "Magic Carpet"
+              ProductID: 8128980484196
+              Quantity: 1
+              SKU: "123SKU"
+              Tags:
+               - "shopify-tagged"
+              Variant ID: 46305476280420
+              Variant Name: "Default Title"
+              'Variant Option: Title': "Default Title"
+              Vendor: "My Store"
+            timestamp: 1754418020
+            uuid: "d8338a00-7228-11f0-8001-d86a6b406da7"
+          id: "6peNeyigRiY"
+          klaviyo:
+            products: "8128980484196 - Magic Carpet"
+          links:
+            self: "https://a.klaviyo.com/api/events/6peNeyigRiY/"
+          metric_name: "Ordered Product"
+          profile_id: "01K1XQCC9V79XP3CNKNMRBT6GT"
+          service: "ecommerce-events"
+          status: "info"
+          type: "event"
+        message: |-
+          {
+            "metric_name" : "Ordered Product",
+            "profile_id" : "01K1XQCC9V79XP3CNKNMRBT6GT",
+            "attributes" : {
+              "datetime" : "2025-08-05T18:20:20+00:00",
+              "uuid" : "d8338a00-7228-11f0-8001-d86a6b406da7",
+              "timestamp" : 1754418020,
+              "event_properties" : {
+                "Variant ID" : 46305476280420,
+                "Variant Option: Title" : "Default Title",
+                "Customer Locale" : "en-US",
+                "Quantity" : 1,
+                "ProductID" : 8128980484196,
+                "Vendor" : "My Store",
+                "Name" : "Magic Carpet",
+                "Variant Name" : "Default Title",
+                "$value" : 2100,
+                "$event_id" : "5777917050980:13904611934308:0",
+                "$extra" : {
+                  "translations" : {
+                    "presentment_title" : "",
+                    "presentment_variant_title" : ""
+                  },
+                  "price_set" : {
+                    "shop_money" : {
+                      "amount" : 2100,
+                      "currency" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : 2100,
+                      "currency" : "USD"
+                    }
+                  }
+                },
+                "SKU" : "123SKU",
+                "Collections" : [ "Abstract Art" ],
+                "Tags" : [ "shopify-tagged" ]
+              }
+            },
+            "links" : {
+              "self" : "https://a.klaviyo.com/api/events/6peNeyigRiY/"
+            },
+            "id" : "6peNeyigRiY",
+            "type" : "event"
+          }
+        service: "ecommerce-events"
+        status: "info"
+        tags:
+         - "source:LOGS_SOURCE"
+        timestamp: 1754418020000
+  - sample: >-
+      {
+        "metric_name": "Placed Order",
+        "profile_id": "01K1XQCC9V79XP3CNKNMRBT6GT",
+        "attributes": {
+          "datetime": "2025-08-05T18:20:10+00:00",
+          "uuid": "d23da900-7228-11f0-8001-32bc1719f29c",
+          "timestamp": 1754418010,
+          "event_properties": {
+            "$currency_code": "USD",
+            "Item Count": 1,
+            "Source Name": "web",
+            "ShippingRate": "Economy",
+            "OptedInToSmsOrderUpdates": false,
+            "$value": 6300,
+            "Customer Locale": "en-US",
+            "$event_id": "5777917050980",
+            "Items": [
+              "Magic Carpet"
+            ],
+            "$extra": {
+              "confirmation_number": "ARWRYXR0Z",
+              "total_cash_rounding_refund_adjustment_set": {
+                "shop_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                }
+              },
+              "current_total_discounts_set": {
+                "shop_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                }
+              },
+              "billing_address": {
+                "zip": "19975",
+                "country_code": "US",
+                "country": "United States",
+                "province": "Delaware",
+                "city": "Selbyville",
+                "address1": "31221 Americana Parkway",
+                "latitude": 38.4694439,
+                "name": "Larry Barry",
+                "last_name": "Barry",
+                "province_code": "DE",
+                "first_name": "Larry",
+                "longitude": -75.1137177
+              },
+              "line_items": [
+                {
+                  "total_discount": "0.00",
+                  "gift_card": false,
+                  "requires_shipping": true,
+                  "total_discount_set": {
+                    "shop_money": {
+                      "amount": "0.00",
+                      "currency_code": "USD"
+                    },
+                    "presentment_money": {
+                      "amount": "0.00",
+                      "currency_code": "USD"
+                    }
+                  },
+                  "title": "Magic Carpet",
+                  "product_exists": true,
+                  "line_price_set": {
+                    "shop_money": {
+                      "amount": 6300,
+                      "currency_code": "USD"
+                    },
+                    "presentment_money": {
+                      "amount": 6300,
+                      "currency_code": "USD"
+                    }
+                  },
+                  "variant_id": 46305476280420,
+                  "vendor": "My Store",
+                  "translations": {
+                    "presentment_title": "",
+                    "presentment_variant_title": ""
+                  },
+                  "price": 2100,
+                  "product_id": 8128980484196,
+                  "id": 13904611934308,
+                  "grams": 0,
+                  "sku": "123SKU",
+                  "line_price": 6300,
+                  "product": {
+                    "body_html": "<p>3 x 4</p>",
+                    "images": [
+                      {
+                        "src": "https://cdn.shopify.com/s/files/1/0726/5288/2020/files/magiccarpet2025.png?v=1754047681",
+                        "width": 1954,
+                        "thumb_src": "https://cdn.shopify.com/s/files/1/0726/5288/2020/files/magiccarpet2025_x240.png?v=1754047681",
+                        "height": 2649
+                      }
+                    ],
+                    "product_type": "Painting",
+                    "variant_options": {
+                      "Title": "Default Title"
+                    },
+                    "vendor": "My Store",
+                    "variant": {
+                      "translations": {
+                        "presentment_variant_title": ""
+                      },
+                      "options": {
+                        "Title": "Default Title"
+                      },
+                      "id": 46305476280420,
+                      "sku": "123SKU",
+                      "title": "Default Title"
+                    },
+                    "handle": "magic-carpet",
+                    "id": 8128980484196,
+                    "title": "Magic Carpet",
+                    "tags": "shopify-tagged"
+                  },
+                  "fulfillable_quantity": 3,
+                  "quantity": 3,
+                  "taxable": true,
+                  "fulfillment_service": "manual",
+                  "variant_inventory_management": "shopify",
+                  "current_quantity": 3,
+                  "admin_graphql_api_id": "gid://shopify/LineItem/13904611934308",
+                  "name": "Magic Carpet",
+                  "price_set": {
+                    "shop_money": {
+                      "amount": "2100.00",
+                      "currency_code": "USD"
+                    },
+                    "presentment_money": {
+                      "amount": "2100.00",
+                      "currency_code": "USD"
+                    }
+                  }
+                }
+              ],
+              "total_discounts_set": {
+                "shop_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                }
+              },
+              "presentment_currency": "USD",
+              "total_cash_rounding_payment_adjustment_set": {
+                "shop_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                }
+              },
+              "landing_site": "/",
+              "merchant_business_entity_id": "37712494692",
+              "number": 11,
+              "checkout_id": 37131175133284,
+              "checkout_token": "196295873699a958546bd9284ce9e409",
+              "current_total_discounts": "0.00",
+              "customer_locale": "en-US",
+              "id": 5777917050980,
+              "app_id": 580111,
+              "subtotal_price": "6300.00",
+              "order_status_url": "https://qx0wtr-1y.myshopify.com/72652882020/orders/2e5c63a1dad1fd79265d096dfaa57915/authenticate?key=763c84f48cc52a64d8f08de84e85c4e9",
+              "current_total_price_set": {
+                "shop_money": {
+                  "amount": "6300.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "6300.00",
+                  "currency_code": "USD"
+                }
+              },
+              "total_shipping_price_set": {
+                "shop_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                }
+              },
+              "test": true,
+              "subtotal_price_set": {
+                "shop_money": {
+                  "amount": "6300.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "6300.00",
+                  "currency_code": "USD"
+                }
+              },
+              "tax_exempt": false,
+              "payment_gateway_names": [
+                "bogus"
+              ],
+              "total_tax": "0.00",
+              "tags": "",
+              "current_subtotal_price_set": {
+                "shop_money": {
+                  "amount": "6300.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "6300.00",
+                  "currency_code": "USD"
+                }
+              },
+              "current_total_tax": "0.00",
+              "shipping_lines": [
+                {
+                  "code": "Economy",
+                  "price": "0.00",
+                  "is_removed": false,
+                  "id": 4901692112996,
+                  "source": "shopify",
+                  "current_discounted_price_set": {
+                    "shop_money": {
+                      "amount": "0.00",
+                      "currency_code": "USD"
+                    },
+                    "presentment_money": {
+                      "amount": "0.00",
+                      "currency_code": "USD"
+                    }
+                  },
+                  "price_set": {
+                    "shop_money": {
+                      "amount": "0.00",
+                      "currency_code": "USD"
+                    },
+                    "presentment_money": {
+                      "amount": "0.00",
+                      "currency_code": "USD"
+                    }
+                  },
+                  "title": "Economy",
+                  "discounted_price_set": {
+                    "shop_money": {
+                      "amount": "0.00",
+                      "currency_code": "USD"
+                    },
+                    "presentment_money": {
+                      "amount": "0.00",
+                      "currency_code": "USD"
+                    }
+                  },
+                  "discounted_price": "0.00"
+                }
+              ],
+              "name": "#1011",
+              "cart_token": "hWN1SQkj4QbLb1NKF6pwXgwM",
+              "total_tax_set": {
+                "shop_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                }
+              },
+              "estimated_taxes": false,
+              "current_total_tax_set": {
+                "shop_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                }
+              },
+              "current_subtotal_price": "6300.00",
+              "total_outstanding": "0.00",
+              "order_number": 1011,
+              "created_at": "2025-08-05T14:19:52-04:00",
+              "total_line_items_price_set": {
+                "shop_money": {
+                  "amount": "6300.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "6300.00",
+                  "currency_code": "USD"
+                }
+              },
+              "taxes_included": false,
+              "buyer_accepts_marketing": true,
+              "confirmed": true,
+              "total_weight": 0,
+              "contact_email": "brian+shop12@mayalane.com",
+              "total_discounts": "0.00",
+              "client_details": {
+                "accept_language": "en-US",
+                "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
+                "browser_ip": "2601:140:9700:2530:242b:7ae2:7ed:d2a1"
+              },
+              "updated_at": "2025-08-05T14:19:54-04:00",
+              "referring_site": "",
+              "processed_at": "2025-08-05T14:19:50-04:00",
+              "currency": "USD",
+              "shipping_address": {
+                "zip": "19975",
+                "country_code": "US",
+                "country": "United States",
+                "province": "Delaware",
+                "city": "Selbyville",
+                "address1": "31221 Americana Parkway",
+                "latitude": 38.4694439,
+                "name": "Larry Barry",
+                "last_name": "Barry",
+                "province_code": "DE",
+                "first_name": "Larry",
+                "longitude": -75.1137177
+              },
+              "source_name": "web",
+              "browser_ip": "2601:140:9700:2530:242b:7ae2:7ed:d2a1",
+              "current_shipping_price_set": {
+                "shop_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "0.00",
+                  "currency_code": "USD"
+                }
+              },
+              "email": "brian+shop12@mayalane.com",
+              "total_price_set": {
+                "shop_money": {
+                  "amount": "6300.00",
+                  "currency_code": "USD"
+                },
+                "presentment_money": {
+                  "amount": "6300.00",
+                  "currency_code": "USD"
+                }
+              },
+              "total_price": "6300.00",
+              "full_landing_site": "http://qx0wtr-1y.myshopify.com/",
+              "total_line_items_price": "6300.00",
+              "duties_included": false,
+              "total_tip_received": "0.00",
+              "sms_order_updates_details": {
+                "created_at": "2025-08-05T14:19:52-04:00",
+                "order_id": 5777917050980,
+                "email": "brian+shop12@mayalane.com"
+              },
+              "token": "2e5c63a1dad1fd79265d096dfaa57915",
+              "current_total_price": "6300.00",
+              "webhook_id": "dc48c824-ebb6-444f-b42d-281dde4e7851",
+              "admin_graphql_api_id": "gid://shopify/Order/5777917050980",
+              "financial_status": "paid",
+              "customer": {
+                "tax_exempt": false,
+                "email_marketing_consent": {
+                  "consent_updated_at": "2025-08-05T14:19:53-04:00",
+                  "state": "subscribed",
+                  "opt_in_level": "single_opt_in"
+                },
+                "created_at": "2025-08-05T14:19:51-04:00",
+                "last_name": "Barry",
+                "verified_email": true,
+                "tags": "",
+                "default_address": {
+                  "zip": "19975",
+                  "country": "United States",
+                  "city": "Selbyville",
+                  "address1": "31221 Americana Parkway",
+                  "last_name": "Barry",
+                  "province_code": "DE",
+                  "country_code": "US",
+                  "default": true,
+                  "province": "Delaware",
+                  "country_name": "United States",
+                  "name": "Larry Barry",
+                  "id": 9025902346340,
+                  "customer_id": 7824081551460,
+                  "first_name": "Larry"
+                },
+                "updated_at": "2025-08-05T14:19:53-04:00",
+                "admin_graphql_api_id": "gid://shopify/Customer/7824081551460",
+                "currency": "USD",
+                "id": 7824081551460,
+                "state": "disabled",
+                "first_name": "Larry",
+                "email": "brian+shop12@mayalane.com"
+              }
+            },
+            "Collections": [
+              "Abstract Art"
+            ],
+            "Total Discounts": "0.00"
+          }
+        },
+        "links": {
+          "self": "https://a.klaviyo.com/api/events/6peNgN4t4ss/"
+        },
+        "id": "6peNgN4t4ss",
+        "type": "event"
+      }
+    result:
+        custom:
+          attributes:
+            datetime: "2025-08-05T18:20:10+00:00"
+            event_properties:
+              $currency_code: "USD"
+              $event_id: "5777917050980"
+              $extra:
+                admin_graphql_api_id: "gid://shopify/Order/5777917050980"
+                app_id: 580111
+                billing_address:
+                  address1: "31221 Americana Parkway"
+                  city: "Selbyville"
+                  country: "United States"
+                  country_code: "US"
+                  first_name: "Larry"
+                  last_name: "Barry"
+                  latitude: 38.4694439
+                  longitude: -75.1137177
+                  name: "Larry Barry"
+                  province: "Delaware"
+                  province_code: "DE"
+                  zip: "19975"
+                browser_ip: "2601:140:9700:2530:242b:7ae2:7ed:d2a1"
+                buyer_accepts_marketing: true
+                cart_token: "hWN1SQkj4QbLb1NKF6pwXgwM"
+                checkout_id: 37131175133284
+                checkout_token: "196295873699a958546bd9284ce9e409"
+                client_details:
+                  accept_language: "en-US"
+                  browser_ip: "2601:140:9700:2530:242b:7ae2:7ed:d2a1"
+                  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15"
+                confirmation_number: "ARWRYXR0Z"
+                confirmed: true
+                contact_email: "brian+shop12@mayalane.com"
+                created_at: "2025-08-05T14:19:52-04:00"
+                currency: "USD"
+                current_shipping_price_set:
+                  presentment_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                current_subtotal_price: "6300.00"
+                current_subtotal_price_set:
+                  presentment_money:
+                    amount: "6300.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "6300.00"
+                    currency_code: "USD"
+                current_total_discounts: "0.00"
+                current_total_discounts_set:
+                  presentment_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                current_total_price: "6300.00"
+                current_total_price_set:
+                  presentment_money:
+                    amount: "6300.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "6300.00"
+                    currency_code: "USD"
+                current_total_tax: "0.00"
+                current_total_tax_set:
+                  presentment_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                customer:
+                  admin_graphql_api_id: "gid://shopify/Customer/7824081551460"
+                  created_at: "2025-08-05T14:19:51-04:00"
+                  currency: "USD"
+                  default_address:
+                    address1: "31221 Americana Parkway"
+                    city: "Selbyville"
+                    country: "United States"
+                    country_code: "US"
+                    country_name: "United States"
+                    customer_id: 7824081551460
+                    default: true
+                    first_name: "Larry"
+                    id: 9025902346340
+                    last_name: "Barry"
+                    name: "Larry Barry"
+                    province: "Delaware"
+                    province_code: "DE"
+                    zip: "19975"
+                  email: "brian+shop12@mayalane.com"
+                  email_marketing_consent:
+                    consent_updated_at: "2025-08-05T14:19:53-04:00"
+                    opt_in_level: "single_opt_in"
+                    state: "subscribed"
+                  first_name: "Larry"
+                  id: 7824081551460
+                  last_name: "Barry"
+                  state: "disabled"
+                  tags: ""
+                  tax_exempt: false
+                  updated_at: "2025-08-05T14:19:53-04:00"
+                  verified_email: true
+                customer_locale: "en-US"
+                duties_included: false
+                email: "brian+shop12@mayalane.com"
+                estimated_taxes: false
+                financial_status: "paid"
+                full_landing_site: "http://qx0wtr-1y.myshopify.com/"
+                id: 5777917050980
+                landing_site: "/"
+                line_items:
+                 -
+                  total_discount: "0.00"
+                  gift_card: false
+                  requires_shipping: true
+                  total_discount_set:
+                    shop_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                    presentment_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                  title: "Magic Carpet"
+                  product_exists: true
+                  line_price_set:
+                    shop_money:
+                      amount: 6300
+                      currency_code: "USD"
+                    presentment_money:
+                      amount: 6300
+                      currency_code: "USD"
+                  variant_id: 46305476280420
+                  vendor: "My Store"
+                  translations:
+                    presentment_title: ""
+                    presentment_variant_title: ""
+                  price: 2100
+                  product_id: 8128980484196
+                  id: 13904611934308
+                  grams: 0
+                  sku: "123SKU"
+                  line_price: 6300
+                  product:
+                    body_html: "<p>3 x 4</p>"
+                    images:
+                     -
+                      src: "https://cdn.shopify.com/s/files/1/0726/5288/2020/files/magiccarpet2025.png?v=1754047681"
+                      width: 1954
+                      thumb_src: "https://cdn.shopify.com/s/files/1/0726/5288/2020/files/magiccarpet2025_x240.png?v=1754047681"
+                      height: 2649
+                    product_type: "Painting"
+                    variant_options:
+                      Title: "Default Title"
+                    vendor: "My Store"
+                    variant:
+                      translations:
+                        presentment_variant_title: ""
+                      options:
+                        Title: "Default Title"
+                      id: 46305476280420
+                      sku: "123SKU"
+                      title: "Default Title"
+                    handle: "magic-carpet"
+                    id: 8128980484196
+                    title: "Magic Carpet"
+                    tags: "shopify-tagged"
+                  fulfillable_quantity: 3
+                  quantity: 3
+                  taxable: true
+                  fulfillment_service: "manual"
+                  variant_inventory_management: "shopify"
+                  current_quantity: 3
+                  admin_graphql_api_id: "gid://shopify/LineItem/13904611934308"
+                  name: "Magic Carpet"
+                  price_set:
+                    shop_money:
+                      amount: "2100.00"
+                      currency_code: "USD"
+                    presentment_money:
+                      amount: "2100.00"
+                      currency_code: "USD"
+                merchant_business_entity_id: "37712494692"
+                name: "#1011"
+                number: 11
+                order_number: 1011
+                order_status_url: "https://qx0wtr-1y.myshopify.com/72652882020/orders/2e5c63a1dad1fd79265d096dfaa57915/authenticate?key=763c84f48cc52a64d8f08de84e85c4e9"
+                payment_gateway_names:
+                 - "bogus"
+                presentment_currency: "USD"
+                processed_at: "2025-08-05T14:19:50-04:00"
+                referring_site: ""
+                shipping_address:
+                  address1: "31221 Americana Parkway"
+                  city: "Selbyville"
+                  country: "United States"
+                  country_code: "US"
+                  first_name: "Larry"
+                  last_name: "Barry"
+                  latitude: 38.4694439
+                  longitude: -75.1137177
+                  name: "Larry Barry"
+                  province: "Delaware"
+                  province_code: "DE"
+                  zip: "19975"
+                shipping_lines:
+                 -
+                  code: "Economy"
+                  price: "0.00"
+                  is_removed: false
+                  id: 4901692112996
+                  source: "shopify"
+                  current_discounted_price_set:
+                    shop_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                    presentment_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                  price_set:
+                    shop_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                    presentment_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                  title: "Economy"
+                  discounted_price_set:
+                    shop_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                    presentment_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                  discounted_price: "0.00"
+                sms_order_updates_details:
+                  created_at: "2025-08-05T14:19:52-04:00"
+                  email: "brian+shop12@mayalane.com"
+                  order_id: 5777917050980
+                source_name: "web"
+                subtotal_price: "6300.00"
+                subtotal_price_set:
+                  presentment_money:
+                    amount: "6300.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "6300.00"
+                    currency_code: "USD"
+                tags: ""
+                tax_exempt: false
+                taxes_included: false
+                test: true
+                token: "2e5c63a1dad1fd79265d096dfaa57915"
+                total_cash_rounding_payment_adjustment_set:
+                  presentment_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                total_cash_rounding_refund_adjustment_set:
+                  presentment_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                total_discounts: "0.00"
+                total_discounts_set:
+                  presentment_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                total_line_items_price: "6300.00"
+                total_line_items_price_set:
+                  presentment_money:
+                    amount: "6300.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "6300.00"
+                    currency_code: "USD"
+                total_outstanding: "0.00"
+                total_price: "6300.00"
+                total_price_set:
+                  presentment_money:
+                    amount: "6300.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "6300.00"
+                    currency_code: "USD"
+                total_shipping_price_set:
+                  presentment_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                total_tax: "0.00"
+                total_tax_set:
+                  presentment_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                  shop_money:
+                    amount: "0.00"
+                    currency_code: "USD"
+                total_tip_received: "0.00"
+                total_weight: 0
+                updated_at: "2025-08-05T14:19:54-04:00"
+                webhook_id: "dc48c824-ebb6-444f-b42d-281dde4e7851"
+              $value: 6300
+              Collections:
+               - "Abstract Art"
+              Customer Locale: "en-US"
+              Item Count: 1
+              Items:
+               - "Magic Carpet"
+              OptedInToSmsOrderUpdates: false
+              ShippingRate: "Economy"
+              Source Name: "web"
+              Total Discounts: "0.00"
+            timestamp: 1754418010
+            uuid: "d23da900-7228-11f0-8001-32bc1719f29c"
+          id: "6peNgN4t4ss"
+          klaviyo:
+            billing_region_code: "US-DE"
+            billing_zip_code: "19975"
+            product_categories: "Painting"
+            products: "8128980484196 - Magic Carpet"
+            shipping_region_code: "US-DE"
+            shipping_zip_code: "19975"
+          links:
+            self: "https://a.klaviyo.com/api/events/6peNgN4t4ss/"
+          metric_name: "Placed Order"
+          profile_id: "01K1XQCC9V79XP3CNKNMRBT6GT"
+          service: "ecommerce-events"
+          status: "info"
+          type: "event"
+        message: |-
+          {
+            "metric_name" : "Placed Order",
+            "profile_id" : "01K1XQCC9V79XP3CNKNMRBT6GT",
+            "attributes" : {
+              "datetime" : "2025-08-05T18:20:10+00:00",
+              "uuid" : "d23da900-7228-11f0-8001-32bc1719f29c",
+              "timestamp" : 1754418010,
+              "event_properties" : {
+                "$currency_code" : "USD",
+                "Item Count" : 1,
+                "Source Name" : "web",
+                "ShippingRate" : "Economy",
+                "OptedInToSmsOrderUpdates" : false,
+                "$value" : 6300,
+                "Customer Locale" : "en-US",
+                "$event_id" : "5777917050980",
+                "Items" : [ "Magic Carpet" ],
+                "$extra" : {
+                  "confirmation_number" : "ARWRYXR0Z",
+                  "total_cash_rounding_refund_adjustment_set" : {
+                    "shop_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "current_total_discounts_set" : {
+                    "shop_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "billing_address" : {
+                    "zip" : "19975",
+                    "country_code" : "US",
+                    "country" : "United States",
+                    "province" : "Delaware",
+                    "city" : "Selbyville",
+                    "address1" : "31221 Americana Parkway",
+                    "latitude" : 38.4694439,
+                    "name" : "Larry Barry",
+                    "last_name" : "Barry",
+                    "province_code" : "DE",
+                    "first_name" : "Larry",
+                    "longitude" : -75.1137177
+                  },
+                  "line_items" : [ {
+                    "total_discount" : "0.00",
+                    "gift_card" : false,
+                    "requires_shipping" : true,
+                    "total_discount_set" : {
+                      "shop_money" : {
+                        "amount" : "0.00",
+                        "currency_code" : "USD"
+                      },
+                      "presentment_money" : {
+                        "amount" : "0.00",
+                        "currency_code" : "USD"
+                      }
+                    },
+                    "title" : "Magic Carpet",
+                    "product_exists" : true,
+                    "line_price_set" : {
+                      "shop_money" : {
+                        "amount" : 6300,
+                        "currency_code" : "USD"
+                      },
+                      "presentment_money" : {
+                        "amount" : 6300,
+                        "currency_code" : "USD"
+                      }
+                    },
+                    "variant_id" : 46305476280420,
+                    "vendor" : "My Store",
+                    "translations" : {
+                      "presentment_title" : "",
+                      "presentment_variant_title" : ""
+                    },
+                    "price" : 2100,
+                    "product_id" : 8128980484196,
+                    "id" : 13904611934308,
+                    "grams" : 0,
+                    "sku" : "123SKU",
+                    "line_price" : 6300,
+                    "product" : {
+                      "body_html" : "<p>3 x 4</p>",
+                      "images" : [ {
+                        "src" : "https://cdn.shopify.com/s/files/1/0726/5288/2020/files/magiccarpet2025.png?v=1754047681",
+                        "width" : 1954,
+                        "thumb_src" : "https://cdn.shopify.com/s/files/1/0726/5288/2020/files/magiccarpet2025_x240.png?v=1754047681",
+                        "height" : 2649
+                      } ],
+                      "product_type" : "Painting",
+                      "variant_options" : {
+                        "Title" : "Default Title"
+                      },
+                      "vendor" : "My Store",
+                      "variant" : {
+                        "translations" : {
+                          "presentment_variant_title" : ""
+                        },
+                        "options" : {
+                          "Title" : "Default Title"
+                        },
+                        "id" : 46305476280420,
+                        "sku" : "123SKU",
+                        "title" : "Default Title"
+                      },
+                      "handle" : "magic-carpet",
+                      "id" : 8128980484196,
+                      "title" : "Magic Carpet",
+                      "tags" : "shopify-tagged"
+                    },
+                    "fulfillable_quantity" : 3,
+                    "quantity" : 3,
+                    "taxable" : true,
+                    "fulfillment_service" : "manual",
+                    "variant_inventory_management" : "shopify",
+                    "current_quantity" : 3,
+                    "admin_graphql_api_id" : "gid://shopify/LineItem/13904611934308",
+                    "name" : "Magic Carpet",
+                    "price_set" : {
+                      "shop_money" : {
+                        "amount" : "2100.00",
+                        "currency_code" : "USD"
+                      },
+                      "presentment_money" : {
+                        "amount" : "2100.00",
+                        "currency_code" : "USD"
+                      }
+                    }
+                  } ],
+                  "total_discounts_set" : {
+                    "shop_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "presentment_currency" : "USD",
+                  "total_cash_rounding_payment_adjustment_set" : {
+                    "shop_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "landing_site" : "/",
+                  "merchant_business_entity_id" : "37712494692",
+                  "number" : 11,
+                  "checkout_id" : 37131175133284,
+                  "checkout_token" : "196295873699a958546bd9284ce9e409",
+                  "current_total_discounts" : "0.00",
+                  "customer_locale" : "en-US",
+                  "id" : 5777917050980,
+                  "app_id" : 580111,
+                  "subtotal_price" : "6300.00",
+                  "order_status_url" : "https://qx0wtr-1y.myshopify.com/72652882020/orders/2e5c63a1dad1fd79265d096dfaa57915/authenticate?key=763c84f48cc52a64d8f08de84e85c4e9",
+                  "current_total_price_set" : {
+                    "shop_money" : {
+                      "amount" : "6300.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "6300.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "total_shipping_price_set" : {
+                    "shop_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "test" : true,
+                  "subtotal_price_set" : {
+                    "shop_money" : {
+                      "amount" : "6300.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "6300.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "tax_exempt" : false,
+                  "payment_gateway_names" : [ "bogus" ],
+                  "total_tax" : "0.00",
+                  "tags" : "",
+                  "current_subtotal_price_set" : {
+                    "shop_money" : {
+                      "amount" : "6300.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "6300.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "current_total_tax" : "0.00",
+                  "shipping_lines" : [ {
+                    "code" : "Economy",
+                    "price" : "0.00",
+                    "is_removed" : false,
+                    "id" : 4901692112996,
+                    "source" : "shopify",
+                    "current_discounted_price_set" : {
+                      "shop_money" : {
+                        "amount" : "0.00",
+                        "currency_code" : "USD"
+                      },
+                      "presentment_money" : {
+                        "amount" : "0.00",
+                        "currency_code" : "USD"
+                      }
+                    },
+                    "price_set" : {
+                      "shop_money" : {
+                        "amount" : "0.00",
+                        "currency_code" : "USD"
+                      },
+                      "presentment_money" : {
+                        "amount" : "0.00",
+                        "currency_code" : "USD"
+                      }
+                    },
+                    "title" : "Economy",
+                    "discounted_price_set" : {
+                      "shop_money" : {
+                        "amount" : "0.00",
+                        "currency_code" : "USD"
+                      },
+                      "presentment_money" : {
+                        "amount" : "0.00",
+                        "currency_code" : "USD"
+                      }
+                    },
+                    "discounted_price" : "0.00"
+                  } ],
+                  "name" : "#1011",
+                  "cart_token" : "hWN1SQkj4QbLb1NKF6pwXgwM",
+                  "total_tax_set" : {
+                    "shop_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "estimated_taxes" : false,
+                  "current_total_tax_set" : {
+                    "shop_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "current_subtotal_price" : "6300.00",
+                  "total_outstanding" : "0.00",
+                  "order_number" : 1011,
+                  "created_at" : "2025-08-05T14:19:52-04:00",
+                  "total_line_items_price_set" : {
+                    "shop_money" : {
+                      "amount" : "6300.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "6300.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "taxes_included" : false,
+                  "buyer_accepts_marketing" : true,
+                  "confirmed" : true,
+                  "total_weight" : 0,
+                  "contact_email" : "brian+shop12@mayalane.com",
+                  "total_discounts" : "0.00",
+                  "client_details" : {
+                    "accept_language" : "en-US",
+                    "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
+                    "browser_ip" : "2601:140:9700:2530:242b:7ae2:7ed:d2a1"
+                  },
+                  "updated_at" : "2025-08-05T14:19:54-04:00",
+                  "referring_site" : "",
+                  "processed_at" : "2025-08-05T14:19:50-04:00",
+                  "currency" : "USD",
+                  "shipping_address" : {
+                    "zip" : "19975",
+                    "country_code" : "US",
+                    "country" : "United States",
+                    "province" : "Delaware",
+                    "city" : "Selbyville",
+                    "address1" : "31221 Americana Parkway",
+                    "latitude" : 38.4694439,
+                    "name" : "Larry Barry",
+                    "last_name" : "Barry",
+                    "province_code" : "DE",
+                    "first_name" : "Larry",
+                    "longitude" : -75.1137177
+                  },
+                  "source_name" : "web",
+                  "browser_ip" : "2601:140:9700:2530:242b:7ae2:7ed:d2a1",
+                  "current_shipping_price_set" : {
+                    "shop_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "0.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "email" : "brian+shop12@mayalane.com",
+                  "total_price_set" : {
+                    "shop_money" : {
+                      "amount" : "6300.00",
+                      "currency_code" : "USD"
+                    },
+                    "presentment_money" : {
+                      "amount" : "6300.00",
+                      "currency_code" : "USD"
+                    }
+                  },
+                  "total_price" : "6300.00",
+                  "full_landing_site" : "http://qx0wtr-1y.myshopify.com/",
+                  "total_line_items_price" : "6300.00",
+                  "duties_included" : false,
+                  "total_tip_received" : "0.00",
+                  "sms_order_updates_details" : {
+                    "created_at" : "2025-08-05T14:19:52-04:00",
+                    "order_id" : 5777917050980,
+                    "email" : "brian+shop12@mayalane.com"
+                  },
+                  "token" : "2e5c63a1dad1fd79265d096dfaa57915",
+                  "current_total_price" : "6300.00",
+                  "webhook_id" : "dc48c824-ebb6-444f-b42d-281dde4e7851",
+                  "admin_graphql_api_id" : "gid://shopify/Order/5777917050980",
+                  "financial_status" : "paid",
+                  "customer" : {
+                    "tax_exempt" : false,
+                    "email_marketing_consent" : {
+                      "consent_updated_at" : "2025-08-05T14:19:53-04:00",
+                      "state" : "subscribed",
+                      "opt_in_level" : "single_opt_in"
+                    },
+                    "created_at" : "2025-08-05T14:19:51-04:00",
+                    "last_name" : "Barry",
+                    "verified_email" : true,
+                    "tags" : "",
+                    "default_address" : {
+                      "zip" : "19975",
+                      "country" : "United States",
+                      "city" : "Selbyville",
+                      "address1" : "31221 Americana Parkway",
+                      "last_name" : "Barry",
+                      "province_code" : "DE",
+                      "country_code" : "US",
+                      "default" : true,
+                      "province" : "Delaware",
+                      "country_name" : "United States",
+                      "name" : "Larry Barry",
+                      "id" : 9025902346340,
+                      "customer_id" : 7824081551460,
+                      "first_name" : "Larry"
+                    },
+                    "updated_at" : "2025-08-05T14:19:53-04:00",
+                    "admin_graphql_api_id" : "gid://shopify/Customer/7824081551460",
+                    "currency" : "USD",
+                    "id" : 7824081551460,
+                    "state" : "disabled",
+                    "first_name" : "Larry",
+                    "email" : "brian+shop12@mayalane.com"
+                  }
+                },
+                "Collections" : [ "Abstract Art" ],
+                "Total Discounts" : "0.00"
+              }
+            },
+            "links" : {
+              "self" : "https://a.klaviyo.com/api/events/6peNgN4t4ss/"
+            },
+            "id" : "6peNgN4t4ss",
+            "type" : "event"
+          }
+        service: "ecommerce-events"
+        status: "info"
+        tags:
+         - "source:LOGS_SOURCE"
+        timestamp: 1754418010000

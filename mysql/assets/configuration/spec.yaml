@@ -79,8 +79,10 @@ files:
             default: false
           - name: database_identifier
             description: |
-              Controls how the database is identified. The default value is the resolved hostname for the instance,
-              which respects the `reported_hostname` option.
+              Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+              billable instance.
+              
+              The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
 
               This value will be used as-is for the display name of the instance but will be normalized
               when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
@@ -395,7 +397,7 @@ files:
                   Enable collection of performance_schema.global_variables. Requires `dbm: true`.
                 value:
                   type: boolean
-                  example: false
+                  example: true
               - name: collection_interval
                 description: |
                   Set the database settings collection interval (in seconds). Each collection involves a single query to
@@ -403,8 +405,36 @@ files:
                 value:
                   type: number
                   example: 600
-          - name: schemas_collection
+          - name: collect_schemas
             description: |
+              Configure collection of schemas (databases).
+              Only tables and schemas for which the user has been granted SELECT privileges are collected.
+            options:
+              - name: enabled
+                description: |
+                  Enable schema collection. Requires `dbm: true`. Defaults to false.
+                value:
+                  type: boolean
+                  example: false
+              - name: collection_interval
+                description: |
+                  Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+                value:
+                  type: number
+                  example: 600
+              - name: max_execution_time
+                description: |
+                  Set the maximum time for schema collection (in seconds). Defaults to 60 seconds.
+                  Capped by `collect_schemas.collection_interval`
+                value:
+                  type: number
+                  example: 60
+          - name: schemas_collection
+            deprecation:
+              Agent version: 7.69.0
+              Migration: Use `collect_schemas` instead.
+            description: |
+              DEPRECATED: Use `collect_schemas` instead.
               Configure collection of schemas (databases).
               Only tables and schemas for which the user has been granted SELECT privileges are collected.
             options:
@@ -453,6 +483,15 @@ files:
                   type: boolean
                   example: false
                   display_default: false
+              - name: collect_prepared_statements
+                hidden: true
+                description: |
+                  Enable collection of prepared statements metrics. Prerequisites: `only_query_recent_statements: false`.
+                  Defaults to true.
+                value:
+                  type: boolean
+                  example: true
+                  display_default: true
 
           - name: query_samples
             description: Configure collection of query samples
