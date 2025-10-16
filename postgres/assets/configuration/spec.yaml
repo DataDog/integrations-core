@@ -597,17 +597,17 @@ files:
             type: integer
             example: 20_000_000
     - name: query_samples
-      description: Configure collection of query samples
+      description: Configure collection of explain plan samples
       options:
         - name: enabled
           description: |
-            Enable collection of query samples. Requires `dbm: true`.
+            Enable collection of explain plans. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
           description: |
-            Set the query sample collection interval (in seconds). Each collection involves a single query to
+            Set the explain plan collection interval (in seconds). Each collection involves a single query to
             `pg_stat_activity` followed by at most one `EXPLAIN` query per unique normalized query seen.
           value:
             type: number
@@ -626,7 +626,7 @@ files:
             example: 60
         - name: samples_per_hour_per_query
           description: |
-            Set the rate limit for how many query sample events will be ingested per hour per normalized execution
+            Set the rate limit for how many explain plan events will be ingested per hour per normalized execution
             plan.
           value:
             type: integer
@@ -676,11 +676,11 @@ files:
             type: boolean
             example: false
     - name: query_activity
-      description: Configure collection of query activity
+      description: Configure collection of query activity samples
       options:
         - name: enabled
           description: |
-            Enable collection of query activity. Requires `dbm: true`.
+            Enable collection of query activity samples. Requires `dbm: true`.
           value:
             type: boolean
             example: true
@@ -846,8 +846,9 @@ files:
       options:
         - name: instance_endpoint
           description: |
-            Equal to the Endpoint.Address of the instance the agent is connecting to.
-            This value is optional if the value of `host` is already configured to the instance endpoint.
+            Set to the Endpoint.Address of the instance the agent is connecting to.
+            Use this value to allow association of RDS metrics with the instance when 
+            connecting to the instance through a proxy or CNAME.
 
             For more information on instance endpoints,
             see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
