@@ -2,6 +2,48 @@
 
 <!-- towncrier release notes start -->
 
+## 23.1.2 / 2025-10-07
+
+***Fixed***:
+
+* Backfill old keys in options passed from Postgres integration to SQL obfuscator ([#21557](https://github.com/DataDog/integrations-core/pull/21557))
+* Fixes a collision issue when token based authentication is configured for multiple Postgres instances ([#21560](https://github.com/DataDog/integrations-core/pull/21560))
+
+## 23.1.1 / 2025-10-03
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 23.1.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add gauge postgresql.locks.idle_in_transaction_age to measure age (s) of idle-in-transaction sessions holding exclusive relation locks; tags: pid, db, session_user, app, client_hostname, lock_mode, relation, relation_owner; limit 100 rows. ([#21182](https://github.com/DataDog/integrations-core/pull/21182))
+* Add agent health event for Postgres config validation ([#21347](https://github.com/DataDog/integrations-core/pull/21347))
+* Refactor Postgres configuration with fixes and clarifications on default values ([#21347](https://github.com/DataDog/integrations-core/pull/21347))
+* PG: Handle locks without relations like transactionid or virtualxid locks ([#21393](https://github.com/DataDog/integrations-core/pull/21393))
+* Add tombstone fields for Postgres schema collection ([#21431](https://github.com/DataDog/integrations-core/pull/21431))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+***Fixed***:
+
+* Compile and reuse regex patterns ([#21317](https://github.com/DataDog/integrations-core/pull/21317))
+* Fixed support for refreshing IAM authentication and Azure Managed Identity tokens ([#21503](https://github.com/DataDog/integrations-core/pull/21503))
+
+## 23.0.2 / 2025-10-03 / Agent 7.71.1
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 23.0.1 / 2025-09-24 / Agent 7.71.0
+
+***Fixed***:
+
+* Updated to build psycopg from source to fix a problem with FIPS compatibility ([#21074](https://github.com/DataDog/integrations-core/pull/21074))
+
 ## 23.0.0 / 2025-09-05
 
 ***Changed***:
@@ -15,7 +57,7 @@
 * Add Postgres Health class for submitting Postgres health events ([#21193](https://github.com/DataDog/integrations-core/pull/21193))
 * Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
 
-## 22.18.0 / 2025-09-04
+## 22.18.0 / 2025-09-04 / Agent 7.70.1
 
 ***Added***:
 

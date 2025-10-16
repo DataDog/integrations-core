@@ -21,6 +21,8 @@ If you have a mixed cluster of traditional EKS nodes and Fargate pods, you can m
 
 **Note**: Cloud Network Monitoring (CNM) is not supported for EKS Fargate.
 
+**Minimum Agent version:** 7.18.0
+
 ## Setup
 
 ### Prerequisites
@@ -228,7 +230,7 @@ The following is output from a sample Redis deployment's pod where the Admission
 
 The sidecar uses the image repository and tags set in `datadog-agent.yaml`.
   
-{{< highlight yaml "hl_lines=15-37" >}}
+```yaml
 metadata:
   labels:
     app: redis
@@ -266,7 +268,7 @@ spec:
       requests:
         cpu: 200m
         memory: 256Mi
-{{< /highlight >}}
+```
 
 ##### Custom configuration with sidecar profiles and custom selectors - Datadog Operator
 
@@ -311,7 +313,7 @@ Apply this configuration and wait for the Cluster Agent to reach a running state
 
 The following is output from a Redis deployment's pod where the Admission Controller injected an Agent sidecar based on the pod label `app: redis` instead of the label `agent.datadoghq.com/sidecar: fargate`:
 
-{{< highlight yaml "hl_lines=29-38" >}}
+```yaml
 metadata: 
   labels:
     app: redis
@@ -350,7 +352,7 @@ spec:
       limits:
         cpu: "800m"
         memory: "512Mi"
-{{< /highlight >}}
+```
 
 The environment variables and resource settings are automatically applied based on the new Fargate profile configured in the `DatadogAgent`.
 
@@ -400,7 +402,7 @@ The following is output from a sample Redis Deployment's pod where the Admission
 
 The sidecar uses the image repository and tags set in `datadog-values.yaml`.
 
-{{< highlight yaml "hl_lines=15-37" >}}
+```yaml
 metadata:
   labels:
     app: redis
@@ -438,7 +440,7 @@ spec:
       requests:
         cpu: 200m
         memory: 256Mi
- {{< /highlight >}}
+```
 
 ##### Custom configuration with sidecar profiles and custom selectors - Helm
 
@@ -481,7 +483,7 @@ Apply this configuration and wait for the Cluster Agent to reach a running state
 
 The following is output from a Redis deployment's pod where the Admission Controller injected an Agent sidecar based on the pod label `app: redis` instead of the label `agent.datadoghq.com/sidecar: fargate`:
 
-{{< highlight yaml "hl_lines=29-37" >}}
+```yaml
 metadata:
   labels:
     app: redis
@@ -520,7 +522,7 @@ spec:
       limits:
         cpu: "800m"
         memory: "512Mi"
-{{< /highlight >}}
+```
 
 The environment variables and resource settings are automatically applied based on the new Fargate profile configured in the Helm configuration.
 

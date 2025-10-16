@@ -3,6 +3,8 @@
 [AWS App Mesh][1] is a service mesh that provides application-level networking to your micro services running on Amazon ECS Fargate or Amazon EKS clusters.
 
 
+**Minimum Agent version:** 6.15.0
+
 ## Setup
 
 <!-- xxx tabs xxx -->

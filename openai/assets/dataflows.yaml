@@ -5,3 +5,4 @@ provides:
     always_on: false
   - id: openai-llm-completions
     always_on: false
+    granular: true

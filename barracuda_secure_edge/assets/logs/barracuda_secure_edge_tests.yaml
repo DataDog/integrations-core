@@ -1,0 +1,223 @@
+id: barracuda_secure_edge
+tests:
+ -
+  sample: "2025 09 26 22:28:00 +05:30 Info     : pam_unix(sudo:session): pam_unix(sshd:auth): Login vkj from 10.10.16.171: Denied: Unknown user vkj"
+  result:
+    custom:
+      level: "Info"
+      nested_message: ": pam_unix(sudo:session): pam_unix(sshd:auth): Login vkj from 10.10.16.171: Denied: Unknown user vkj"
+      syslog:
+        timestamp: 1758905880000
+    message: "2025 09 26 22:28:00 +05:30 Info     : pam_unix(sudo:session): pam_unix(sshd:auth): Login vkj from 10.10.16.171: Denied: Unknown user vkj"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 22:48:00 +05:30 Info     event: [1071065] Insert Event from 127.0.0.1:43134 - (D|2|ccactivate|1|License|4700|Query Activation State for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for the license activation state failed)"
+  result:
+    custom:
+      level: "Info"
+      nested_message: "event: [1071065] Insert Event from 127.0.0.1:43134 - (D|2|ccactivate|1|License|4700|Query Activation State for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for the license activation state failed)"
+      syslog:
+        timestamp: 1758907080000
+    message: "2025 09 26 22:48:00 +05:30 Info     event: [1071065] Insert Event from 127.0.0.1:43134 - (D|2|ccactivate|1|License|4700|Query Activation State for  Failed|CloudGen-WAN|1743586634|Querying licensing servers for the license activation state failed)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:47:00 +05:30 Internal event: [1070310] Confirm (worker: 2759) from 10.10.16.1,  User [root] - (D|2|ccactivate|1|License|4700|Query Activation State for  Failed|CloudGen-WAN)"
+  result:
+    custom:
+      level: "Internal"
+      nested_message: "event: [1070310] Confirm (worker: 2759) from 10.10.16.1,  User [root] - (D|2|ccactivate|1|License|4700|Query Activation State for  Failed|CloudGen-WAN)"
+      syslog:
+        timestamp: 1758892620000
+    message: "2025 09 26 18:47:00 +05:30 Internal event: [1070310] Confirm (worker: 2759) from 10.10.16.1,  User [root] - (D|2|ccactivate|1|License|4700|Query Activation State for  Failed|CloudGen-WAN)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:48:00 +05:30 Error   SET operation denied for user deepak — insufficient permissions"
+  result:
+    custom:
+      level: "Error"
+      nested_message: "SET operation denied for user deepak — insufficient permissions"
+      syslog:
+        timestamp: 1758892680000
+    message: "2025 09 26 18:48:00 +05:30 Error   SET operation denied for user deepak — insufficient permissions"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:49:00 +05:30 Info     [localhost_wanhub@127.0.0.1_43774]  File Commit start"
+  result:
+    custom:
+      level: "Info"
+      nested_message: "[localhost_wanhub@127.0.0.1_43774]  File Commit start"
+      syslog:
+        timestamp: 1758892740000
+    message: "2025 09 26 18:49:00 +05:30 Info     [localhost_wanhub@127.0.0.1_43774]  File Commit start"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:50:00 +05:30 Notice   Starting main loop pid=9123"
+  result:
+    custom:
+      level: "Notice"
+      nested_message: "Starting main loop pid=9123"
+      syslog:
+        timestamp: 1758892800000
+    message: "2025 09 26 18:50:00 +05:30 Notice   Starting main loop pid=9123"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:51:00 +05:30 Security control: [root@10.10.16.1] NGAdmin login failed Invalid Password"
+  result:
+    custom:
+      level: "Security"
+      nested_message: "control: [root@10.10.16.1] NGAdmin login failed Invalid Password"
+      syslog:
+        timestamp: 1758892860000
+    message: "2025 09 26 18:51:00 +05:30 Security control: [root@10.10.16.1] NGAdmin login failed Invalid Password"
+    status: "ok"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:52:00 +05:30 Info     MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
+  result:
+    custom:
+      level: "Info"
+      nested_message: "MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
+      syslog:
+        timestamp: 1758892920000
+    message: "2025 09 26 18:52:00 +05:30 Info     MSAD-Offline-Groups Setting MSAD offline group sync cache to 117.49 MByte (auto-calculated)"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:53:00 +05:30 Warning  firewall: [DNS] Operation: Failed to find file /opt/phion/preserve/customapp.dnsapp. Stopping work on custom apps and clearing respective caches"
+  result:
+    custom:
+      level: "Warning"
+      nested_message: "firewall: [DNS] Operation: Failed to find file /opt/phion/preserve/customapp.dnsapp. Stopping work on custom apps and clearing respective caches"
+      syslog:
+        timestamp: 1758892980000
+    message: "2025 09 26 18:53:00 +05:30 Warning  firewall: [DNS] Operation: Failed to find file /opt/phion/preserve/customapp.dnsapp. Stopping work on custom apps and clearing respective caches"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:55:00 +05:30 Info    Allow: LOUT|UDP|p2|10.10.16.116|123|00:0c:29:ca:a2:3c|3.111.45.100|123|ntp||BOX-NTP-OUT|0|10.10.16.116|3.111.45.100|0|1|0|0|0|0||||||"
+  result:
+    custom:
+      level: "Info"
+      nested_message: "Allow: LOUT|UDP|p2|10.10.16.116|123|00:0c:29:ca:a2:3c|3.111.45.100|123|ntp||BOX-NTP-OUT|0|10.10.16.116|3.111.45.100|0|1|0|0|0|0||||||"
+      syslog:
+        timestamp: 1758893100000
+    message: "2025 09 26 18:55:00 +05:30 Info    Allow: LOUT|UDP|p2|10.10.16.116|123|00:0c:29:ca:a2:3c|3.111.45.100|123|ntp||BOX-NTP-OUT|0|10.10.16.116|3.111.45.100|0|1|0|0|0|0||||||"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:56:00 +05:30 Notice   xdhcp1.0[5145]: no dhcpcd process for provider with linkname xdhcp1.0 active"
+  result:
+    custom:
+      level: "Notice"
+      nested_message: "xdhcp1.0[5145]: no dhcpcd process for provider with linkname xdhcp1.0 active"
+      syslog:
+        timestamp: 1758893160000
+    message: "2025 09 26 18:56:00 +05:30 Notice   xdhcp1.0[5145]: no dhcpcd process for provider with linkname xdhcp1.0 active"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:57:00 +05:30 Notice   [0141026] 0 make_box(a,ARGS): initialising network device specific syscontrol settings "
+  result:
+    custom:
+      level: "Notice"
+      nested_message: "[0141026] 0 make_box(a,ARGS): initialising network device specific syscontrol settings"
+      syslog:
+        timestamp: 1758893220000
+    message: "2025 09 26 18:57:00 +05:30 Notice   [0141026] 0 make_box(a,ARGS): initialising network device specific syscontrol settings "
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:58:00 +05:30 Info     Handler #17 returned with code 2 (IOStreamSock: Connect(10.10.16.116:814): Connection refused)2025 05 08 09:24:54 +00:00 Info     Connected new handler #76 of type 'Statistics Box'"
+  result:
+    custom:
+      level: "Info"
+      nested_message: "Handler #17 returned with code 2 (IOStreamSock: Connect(10.10.16.116:814): Connection refused)2025 05 08 09:24:54 +00:00 Info     Connected new handler #76 of type 'Statistics Box'"
+      syslog:
+        timestamp: 1758893280000
+    message: "2025 09 26 18:58:00 +05:30 Info     Handler #17 returned with code 2 (IOStreamSock: Connect(10.10.16.116:814): Connection refused)2025 05 08 09:24:54 +00:00 Info     Connected new handler #76 of type 'Statistics Box'"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 18:59:00 +05:30 Notice   sshd: notice: Shell (/bin/bash) opened for user root@10.10.16.1:63675 (uid=0)"
+  result:
+    custom:
+      level: "Notice"
+      nested_message: "sshd: notice: Shell (/bin/bash) opened for user root@10.10.16.1:63675 (uid=0)"
+      syslog:
+        timestamp: 1758893340000
+    message: "2025 09 26 18:59:00 +05:30 Notice   sshd: notice: Shell (/bin/bash) opened for user root@10.10.16.1:63675 (uid=0)"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 19:00:00 +05:30 Internal [0210112] writeSSHdconf(): finished activation of ssh daemon configuration"
+  result:
+    custom:
+      level: "Internal"
+      nested_message: "[0210112] writeSSHdconf(): finished activation of ssh daemon configuration"
+      syslog:
+        timestamp: 1758893400000
+    message: "2025 09 26 19:00:00 +05:30 Internal [0210112] writeSSHdconf(): finished activation of ssh daemon configuration"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 19:01:00 +05:30 Info     -------- VPN Server Startup Version = 5.0.0.1 (pid=7371, ppid=1, inst=CSC_VPN) -----------"
+  result:
+    custom:
+      level: "Info"
+      nested_message: "-------- VPN Server Startup Version = 5.0.0.1 (pid=7371, ppid=1, inst=CSC_VPN) -----------"
+      syslog:
+        timestamp: 1758893460000
+    message: "2025 09 26 19:01:00 +05:30 Info     -------- VPN Server Startup Version = 5.0.0.1 (pid=7371, ppid=1, inst=CSC_VPN) -----------"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025 09 26 19:02:00 +05:30 Info     sslvpn: ACTIVATE Allow TLSv1.1 is not set, using default: true"
+  result:
+    custom:
+      level: "Info"
+      nested_message: "sslvpn: ACTIVATE Allow TLSv1.1 is not set, using default: true"
+      syslog:
+        timestamp: 1758893520000
+    message: "2025 09 26 19:02:00 +05:30 Info     sslvpn: ACTIVATE Allow TLSv1.1 is not set, using default: true"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
