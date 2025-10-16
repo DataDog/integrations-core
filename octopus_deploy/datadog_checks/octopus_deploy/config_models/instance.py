@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -111,7 +112,7 @@ class InstanceConfig(BaseModel):
     environments: Optional[Environments] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
-    kerberos_auth: Optional[str] = None
+    kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
     kerberos_force_initiate: Optional[bool] = None
