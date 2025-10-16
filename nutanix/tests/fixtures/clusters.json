@@ -1,0 +1,449 @@
+{
+  "data": [
+    {
+      "$reserved": {
+        "$fv": "v4.r1"
+      },
+      "$objectType": "clustermgmt.v4.config.Cluster",
+      "extId": "0006411c-0286-bc71-9f02-191e334d457b",
+      "vmCount": 4,
+      "backupEligibilityScore": 1,
+      "name": "datadoghq.com-Default-Org-dkhrzg",
+      "nodes": {
+        "numberOfNodes": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.config.NodeReference",
+        "nodeList": [
+          {
+            "nodeUuid": "71877eae-8fc1-4aae-8d20-70196dfb2f8d",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "clustermgmt.v4.config.NodeListItemReference",
+            "controllerVmIp": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPAddress",
+              "ipv4": {
+                "$reserved": {
+                  "$fv": "v1.r0"
+                },
+                "$objectType": "common.v1.config.IPv4Address",
+                "value": "10.0.0.93",
+                "prefixLength": 32
+              }
+            },
+            "hostIp": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPAddress",
+              "ipv4": {
+                "$reserved": {
+                  "$fv": "v1.r0"
+                },
+                "$objectType": "common.v1.config.IPv4Address",
+                "value": "10.0.0.9",
+                "prefixLength": 32
+              }
+            }
+          }
+        ]
+      },
+      "config": {
+        "incarnationId": 1760438417538161,
+        "hypervisorTypes": [
+          "AHV"
+        ],
+        "timezone": "UTC",
+        "clusterSoftwareMap": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "clustermgmt.v4.config.SoftwareMapReference",
+            "softwareType": "NCC",
+            "version": "ncc-5.1.1"
+          },
+          {
+            "softwareType": "NOS",
+            "version": "el8.5-release-ganges-7.0.1.9-stable-77c5ee17793c980a77ac811ef5a00526da1dfa2e"
+          }
+        ],
+        "isRemoteSupportEnabled": false,
+        "isLts": false,
+        "isPasswordRemoteLoginEnabled": false,
+        "isAvailable": true,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.config.ClusterConfigReference",
+        "buildInfo": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.BuildReference",
+          "buildType": "release",
+          "version": "7.0",
+          "fullVersion": "el8.5-release-ganges-7.0.1.9-stable-77c5ee17793c980a77ac811ef5a00526da1dfa2e",
+          "commitId": "77c5ee17793c980a77ac811ef5a00526da1dfa2e",
+          "shortCommitId": "77c5ee"
+        },
+        "clusterFunction": [
+          "AOS",
+          "ONE_NODE"
+        ],
+        "authorizedPublicKeyList": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "clustermgmt.v4.config.PublicKey",
+            "name": "71877eae-8fc1-4aae-8d20-70196dfb2f8d",
+            "key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCv4TadyuFYidVeVMKar0y7hZQfCgQqmApXBgQI4c+kSOF+DKn4hw3nznR6mP+wiimxGRXuuIJ89WUW5+4ip5t+DUw82juE35EaPJyeHVMRQMrBiOaOEqEcEiYviTOWMHDnzoJl6AwE7D3z2Z4w2514mbcIrxfl/c/l+z0jsSuQd9mkU75nrbFrEttGNw/7qqXZPwTFiEDa6nuP4ubvzxGE00anN0VMseYMvHWnvLvWGei1mKJksmiH7vXFrWBBHHGYhmxOHYewed8mHhyytoT7AxwDkW7619LmeWWrxWg4XD89Ovw9zLUj/skKANcUTvYXg+9HJJwUg2ONzAaXMGAB9cZyY5fIkJp8uGXd+JuRCfkBBoTwpIS1uAjOsUCjZJ9P9j8AvBCOo8AQG36YbjveE6HIgp8GlHyGeMD2wWLM5dicxr6A+s66DtEoOc6xPgUAdQpKJkYWL8jwevhs2DA3rGcKSQzaKTGdCj2HpXMk2smBRyN9V/ZLjGDcZWmP028= nutanix@ntnx-i-0e356d0d9f45aca82-a-cvm"
+          }
+        ],
+        "redundancyFactor": 1,
+        "clusterArch": "X86_64",
+        "faultToleranceState": {
+          "currentMaxFaultTolerance": 0,
+          "desiredMaxFaultTolerance": 0,
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.FaultToleranceState",
+          "domainAwarenessLevel": "DISK",
+          "currentClusterFaultTolerance": "CFT_0N_AND_0D",
+          "desiredClusterFaultTolerance": "CFT_0N_AND_0D"
+        },
+        "pulseStatus": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.PulseStatus",
+          "isEnabled": true
+        }
+      },
+      "network": {
+        "externalSubnet": "10.0.0.0/255.255.255.128",
+        "internalSubnet": "192.168.5.0/255.255.255.0",
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.config.ClusterNetworkReference",
+        "externalAddress": {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.IPAddress",
+          "ipv4": {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPv4Address",
+            "value": "10.0.0.25",
+            "prefixLength": 32
+          }
+        },
+        "externalDataServiceIp": {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.IPAddress",
+          "ipv4": {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPv4Address",
+            "value": "10.0.0.92",
+            "prefixLength": 32
+          }
+        },
+        "nameServerIpList": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPAddressOrFQDN",
+            "ipv4": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "10.0.0.2",
+              "prefixLength": 32
+            }
+          }
+        ],
+        "ntpServerIpList": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPAddressOrFQDN",
+            "ipv4": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "169.254.169.123",
+              "prefixLength": 32
+            }
+          }
+        ],
+        "backplane": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.BackplaneNetworkParams",
+          "isSegmentationEnabled": false
+        }
+      },
+      "upgradeStatus": "SUCCEEDED"
+    },
+    {
+      "$reserved": {
+        "$fv": "v4.r1"
+      },
+      "$objectType": "clustermgmt.v4.config.Cluster",
+      "extId": "b6d83094-9404-48de-9c74-ca6bddc3a01d",
+      "name": "Unnamed",
+      "nodes": {
+        "numberOfNodes": 1,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.config.NodeReference",
+        "nodeList": [
+          {
+            "nodeUuid": "f1f36a0c-a24d-414a-83ce-9a19e516a651",
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "clustermgmt.v4.config.NodeListItemReference",
+            "controllerVmIp": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPAddress",
+              "ipv4": {
+                "$reserved": {
+                  "$fv": "v1.r0"
+                },
+                "$objectType": "common.v1.config.IPv4Address",
+                "value": "10.0.0.197",
+                "prefixLength": 32
+              }
+            }
+          }
+        ]
+      },
+      "config": {
+        "incarnationId": 3951962087714212062,
+        "hypervisorTypes": [
+          "$UNKNOWN"
+        ],
+        "timezone": "America/Los_Angeles",
+        "clusterSoftwareMap": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "clustermgmt.v4.config.SoftwareMapReference",
+            "softwareType": "NCC",
+            "version": "ncc-5.2.0"
+          },
+          {
+            "softwareType": "PRISM_CENTRAL",
+            "version": "el8.5-release-ganges-7.3-stable-1db507847ce4c9922de2ebdb6b6f70fef6afb77b"
+          }
+        ],
+        "isRemoteSupportEnabled": false,
+        "isPasswordRemoteLoginEnabled": true,
+        "isAvailable": true,
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.config.ClusterConfigReference",
+        "buildInfo": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.BuildReference",
+          "buildType": "release",
+          "version": "7.3",
+          "fullVersion": "el8.5-release-ganges-7.3-stable-1db507847ce4c9922de2ebdb6b6f70fef6afb77b",
+          "commitId": "1db507847ce4c9922de2ebdb6b6f70fef6afb77b",
+          "shortCommitId": "1db507"
+        },
+        "clusterFunction": [
+          "PRISM_CENTRAL"
+        ],
+        "authorizedPublicKeyList": [
+          {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "clustermgmt.v4.config.PublicKey",
+            "name": "f1f36a0c-a24d-414a-83ce-9a19e516a651",
+            "key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDuV+GZgWXuUCgJTK7lK2k3lexrXdTvoN/1izTzOjf+v6myWAttY3j67WmO+1heSFkBGQ0CG3qEtE9uXL6m4rgMbyiL89yAqwzQjHhfhX1gV4GVoMFDlvKs+vD5L4zrJNzTLJ/Hosnv50V/01My5goLVkOZCjts8fHklBb9a0M64H38IUbbE62fKFmklk4naeWBrKt83T6PW/9OCe9vdXnwodDe3hx8w8jv2kWotKOcpM/gvCgLEZ9Dz7peVcoPQxcD7yFKT4lABipxLK0RsUZa/m8CwBz56blBIkxP/89VMGfl7lE86dPhermpgJoHWuAgEY199XAzjEA1dfD4sTemzmVQ/bd+VpG9Z9z/AsMnmL5Rz9QkOSBip1plSaSNLp64K8z/S6/jaGtfNbWthrKzt17ea1HxabISxH4OY2kIbDGeDCnIfG2SinWJMHFLdv32O4B2QAmaSV4vgQy3PsNlb606yb3MEhT7I81l13C+aT+y+jVKq4SICA0cvw4lSus= nutanix@ntnx-10-0-0-197-a-pcvm"
+          }
+        ],
+        "redundancyFactor": 1,
+        "clusterArch": "X86_64",
+        "faultToleranceState": {
+          "currentMaxFaultTolerance": 0,
+          "desiredMaxFaultTolerance": 0,
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.FaultToleranceState",
+          "domainAwarenessLevel": "NODE",
+          "currentClusterFaultTolerance": "CFT_0N_AND_0D",
+          "desiredClusterFaultTolerance": "CFT_0N_AND_0D"
+        },
+        "pulseStatus": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.PulseStatus",
+          "isEnabled": true
+        }
+      },
+      "network": {
+        "externalSubnet": "10.0.0.192/255.255.255.192",
+        "internalSubnet": "10.0.0.192/255.255.255.192",
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.config.ClusterNetworkReference",
+        "externalAddress": {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.IPAddress"
+        },
+        "externalDataServiceIp": {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.IPAddress"
+        },
+        "nameServerIpList": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPAddressOrFQDN",
+            "ipv4": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "8.8.8.8",
+              "prefixLength": 32
+            }
+          }
+        ],
+        "ntpServerIpList": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPAddressOrFQDN",
+            "fqdn": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.FQDN",
+              "value": "0.pool.ntp.org"
+            }
+          },
+          {
+            "fqdn": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.FQDN",
+              "value": "2.pool.ntp.org"
+            }
+          },
+          {
+            "fqdn": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.FQDN",
+              "value": "1.pool.ntp.org"
+            }
+          }
+        ],
+        "backplane": {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "clustermgmt.v4.config.BackplaneNetworkParams",
+          "isSegmentationEnabled": false
+        }
+      }
+    }
+  ],
+  "$reserved": {
+    "$fv": "v4.r1"
+  },
+  "$objectType": "clustermgmt.v4.config.ListClustersApiResponse",
+  "metadata": {
+    "flags": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "hasError",
+        "value": false
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isPaginated",
+        "value": true
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isTruncated",
+        "value": false
+      }
+    ],
+    "$reserved": {
+      "$fv": "v1.r0"
+    },
+    "$objectType": "common.v1.response.ApiResponseMetadata",
+    "links": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.response.ApiLink",
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters?$limit=50&$page=0",
+        "rel": "first"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters?$limit=50&$page=0",
+        "rel": "self"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters?$limit=50&$page=0",
+        "rel": "last"
+      }
+    ],
+    "totalAvailableResults": 2
+  }
+}

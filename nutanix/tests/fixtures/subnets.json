@@ -1,0 +1,285 @@
+{
+  "data": [
+    {
+      "$reserved": {
+        "$fv": "v4.r1",
+        "ETag": 7
+      },
+      "$objectType": "networking.v4.config.Subnet",
+      "extId": "e92e0714-b467-4640-ab3a-3c436c9606b3",
+      "name": "Nutanix Private Management",
+      "subnetType": "VLAN",
+      "networkId": 1,
+      "dhcpOptions": {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "networking.v4.config.DhcpOptions",
+        "domainNameServers": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPAddress",
+            "ipv4": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "8.8.8.8",
+              "prefixLength": 32
+            }
+          },
+          {
+            "ipv4": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "8.8.4.4",
+              "prefixLength": 32
+            }
+          }
+        ]
+      },
+      "ipConfig": [
+        {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "networking.v4.config.IPConfig",
+          "ipv4": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "networking.v4.config.IPv4Config",
+            "ipSubnet": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "networking.v4.config.IPv4Subnet",
+              "ip": {
+                "$reserved": {
+                  "$fv": "v1.r0"
+                },
+                "$objectType": "common.v1.config.IPv4Address",
+                "value": "10.0.0.128",
+                "prefixLength": 32
+              },
+              "prefixLength": 28
+            },
+            "defaultGatewayIp": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "10.0.0.129",
+              "prefixLength": 32
+            },
+            "dhcpServerAddress": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "10.0.0.142",
+              "prefixLength": 32
+            },
+            "poolList": [
+              {
+                "$reserved": {
+                  "$fv": "v4.r1"
+                },
+                "$objectType": "networking.v4.config.IPv4Pool",
+                "startIp": {
+                  "$reserved": {
+                    "$fv": "v1.r0"
+                  },
+                  "$objectType": "common.v1.config.IPv4Address",
+                  "value": "10.0.0.132",
+                  "prefixLength": 32
+                },
+                "endIp": {
+                  "$reserved": {
+                    "$fv": "v1.r0"
+                  },
+                  "$objectType": "common.v1.config.IPv4Address",
+                  "value": "10.0.0.141",
+                  "prefixLength": 32
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "clusterReference": "0006411c-0286-bc71-9f02-191e334d457b",
+      "virtualSwitchReference": "da09e03a-b1c2-400b-9be1-1b18d334775f",
+      "isExternal": false,
+      "bridgeName": "br0",
+      "isAdvancedNetworking": false,
+      "hypervisorType": "acropolis"
+    },
+    {
+      "$reserved": {
+        "$fv": "v4.r1",
+        "ETag": 5
+      },
+      "$objectType": "networking.v4.config.Subnet",
+      "extId": "8a56a484-1d6a-43f3-a4c7-22334801c155",
+      "name": "UVM Subnet",
+      "subnetType": "VLAN",
+      "networkId": 2,
+      "dhcpOptions": {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "networking.v4.config.DhcpOptions",
+        "domainNameServers": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.config.IPAddress",
+            "ipv4": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "8.8.8.8",
+              "prefixLength": 32
+            }
+          }
+        ]
+      },
+      "ipConfig": [
+        {
+          "$reserved": {
+            "$fv": "v4.r1"
+          },
+          "$objectType": "networking.v4.config.IPConfig",
+          "ipv4": {
+            "$reserved": {
+              "$fv": "v4.r1"
+            },
+            "$objectType": "networking.v4.config.IPv4Config",
+            "ipSubnet": {
+              "$reserved": {
+                "$fv": "v4.r1"
+              },
+              "$objectType": "networking.v4.config.IPv4Subnet",
+              "ip": {
+                "$reserved": {
+                  "$fv": "v1.r0"
+                },
+                "$objectType": "common.v1.config.IPv4Address",
+                "value": "10.0.0.192",
+                "prefixLength": 32
+              },
+              "prefixLength": 26
+            },
+            "defaultGatewayIp": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "10.0.0.193",
+              "prefixLength": 32
+            },
+            "dhcpServerAddress": {
+              "$reserved": {
+                "$fv": "v1.r0"
+              },
+              "$objectType": "common.v1.config.IPv4Address",
+              "value": "10.0.0.254",
+              "prefixLength": 32
+            },
+            "poolList": [
+              {
+                "$reserved": {
+                  "$fv": "v4.r1"
+                },
+                "$objectType": "networking.v4.config.IPv4Pool",
+                "startIp": {
+                  "$reserved": {
+                    "$fv": "v1.r0"
+                  },
+                  "$objectType": "common.v1.config.IPv4Address",
+                  "value": "10.0.0.196",
+                  "prefixLength": 32
+                },
+                "endIp": {
+                  "$reserved": {
+                    "$fv": "v1.r0"
+                  },
+                  "$objectType": "common.v1.config.IPv4Address",
+                  "value": "10.0.0.253",
+                  "prefixLength": 32
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "clusterReference": "0006411c-0286-bc71-9f02-191e334d457b",
+      "virtualSwitchReference": "da09e03a-b1c2-400b-9be1-1b18d334775f",
+      "isExternal": false,
+      "bridgeName": "br0",
+      "isAdvancedNetworking": false,
+      "hypervisorType": "acropolis"
+    }
+  ],
+  "$reserved": {
+    "$fv": "v4.r1"
+  },
+  "$objectType": "networking.v4.config.ListSubnetsApiResponse",
+  "metadata": {
+    "flags": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "hasError",
+        "value": false
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isPaginated",
+        "value": true
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isTruncated",
+        "value": false
+      }
+    ],
+    "$reserved": {
+      "$fv": "v1.r0"
+    },
+    "$objectType": "common.v1.response.ApiResponseMetadata",
+    "links": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.response.ApiLink",
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/networking/v4.0/config/subnets?$page=0&$limit=50",
+        "rel": "first"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/networking/v4.0/config/subnets?$page=0&$limit=50",
+        "rel": "self"
+      },
+      {
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/networking/v4.0/config/subnets?$page=0&$limit=50",
+        "rel": "last"
+      }
+    ],
+    "totalAvailableResults": 2
+  }
+}
