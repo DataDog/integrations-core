@@ -1104,7 +1104,7 @@ files:
     - name: collect_raw_query_statement
       description: |
         Configure the collection of raw query statements in query samples and explain plans.
-        Raw query statments and explain plans may contain sensitive information (e.g., passwords)
+        Raw query statements and explain plans may contain sensitive information (e.g., passwords)
         or personally identifiable information in query text.
         Enabling this option will allow the collection and ingestion of raw query statements and 
         explain plans into Datadog, which can then become viewable in query samples or explain plans. 
