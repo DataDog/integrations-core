@@ -848,7 +848,8 @@ files:
           description: |
             Set to the Endpoint.Address of the instance the agent is connecting to.
             Use this value to allow association of RDS metrics with the instance when 
-            connecting to the instance through a proxy or CNAME.
+            connecting to the instance through a proxy or CNAME, or if you set `reported_hostname`
+            to a different value from the instance endpoint.
 
             For more information on instance endpoints,
             see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
