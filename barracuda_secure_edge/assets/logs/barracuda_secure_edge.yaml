@@ -79,13 +79,13 @@ pipeline:
             - "LOGIN ATTEMPT: NGAdmin[26612]: Login root from 10.10.16.1 :
               Denied: Invalid Password"
           grok:
-            supportRules: ""
+            supportRules: operation %{data:secure_edge.auth.operation}:\s*
             matchRules: >-
-              autoFilledRule1 %{data:secure_edge.auth.operation}:\s*%{word:secure_edge.auth.type}\[%{number:secure_edge.auth.type_id}\]: Login %{data:secure_edge.auth.user} from %{ip:secure_edge.auth.origin} : %{word:secure_edge.auth.outcome}(.)?(: %{data:secure_edge.auth.outcome_reason})?
+              autoFilledRule1 %{operation}%{word:secure_edge.auth.type}\[%{number:secure_edge.auth.type_id}\]: Login %{data:secure_edge.auth.user} from %{ip:secure_edge.auth.origin} : %{word:secure_edge.auth.outcome}(.)?(: %{data:secure_edge.auth.outcome_reason})?
 
-              autoFilledRule2 : %{data:secure_edge.auth.operation}: %{word:secure_edge.auth.type}\(%{data:secure_edge.auth.type_id}\): Login %{data:secure_edge.auth.user} from %{data:secure_edge.auth.origin}: %{word:secure_edge.auth.outcome}(.)?(: %{data:secure_edge.auth.outcome_reason})?
+              autoFilledRule2 : %{operation}%{word:secure_edge.auth.type}\(%{data:secure_edge.auth.type_id}\): Login %{data:secure_edge.auth.user} from %{data:secure_edge.auth.origin}: %{word:secure_edge.auth.outcome}(.)?(: %{data:secure_edge.auth.outcome_reason})?
 
-              autoFilledRule3 %{data:secure_edge.auth.operation}: (: )?%{word:secure_edge.auth.type}\(%{data:secure_edge.auth.type_id}\): Login %{data:secure_edge.auth.user} from %{data:secure_edge.auth.origin}: %{word:secure_edge.auth.outcome}(.)?(: %{data:secure_edge.auth.outcome_reason})?
+              autoFilledRule3 %{operation}(: )?%{word:secure_edge.auth.type}\(%{data:secure_edge.auth.type_id}\): Login %{data:secure_edge.auth.user} from %{data:secure_edge.auth.origin}: %{word:secure_edge.auth.outcome}(.)?(: %{data:secure_edge.auth.outcome_reason})?
 
               autoFilledRule4 %{word:secure_edge.auth.module}\s*:\s*%{data:message}
     - type: pipeline
