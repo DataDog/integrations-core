@@ -676,25 +676,25 @@ files:
             type: boolean
             example: false
     - name: query_activity
-      description: Configure collection of query activity samples
+      description: Configure collection of in-flight query samples
       options:
         - name: enabled
           description: |
-            Enable collection of query activity samples. Requires `dbm: true`.
+            Enable collection of in-flight query samples. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
           description: |
-            Set the query activity collection interval (in seconds). This number cannot be smaller than
-            query_samples configured collection_interval.
+            Set the in-flight query sample collection interval (in seconds). This number cannot be smaller than
+            the `query_samples` configured collection_interval.
           value:
             type: number
             example: 10
           hidden: true
         - name: payload_row_limit
           description: |
-            Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+            Set the maximum number of pg_stat_activity rows you want to report. If the table is larger
             than the maximum rows set, then the top N longest running transactions will be reported.
           value:
             type: number

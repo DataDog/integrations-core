@@ -514,17 +514,17 @@ instances:
         #
         # explain_parameterized_queries: true
 
-    ## Configure collection of query activity samples
+    ## Configure collection of in-flight query samples
     #
     # query_activity:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of query activity samples. Requires `dbm: true`.
+        ## Enable collection of in-flight query samples. Requires `dbm: true`.
         #
         # enabled: true
 
         ## @param payload_row_limit - number - optional - default: 3500
-        ## Set the query activity maximum number of pg_stat_activity rows you want to report. If the table is larger
+        ## Set the maximum number of pg_stat_activity rows you want to report. If the table is larger
         ## than the maximum rows set, then the top N longest running transactions will be reported.
         #
         # payload_row_limit: 3500
