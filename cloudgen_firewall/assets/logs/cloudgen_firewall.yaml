@@ -1,4 +1,5 @@
 # bypass-global-grok-parser-rules-checks
+# bypass-global-grok-parser-count-per-pipeline-checks
 id: cloudgen_firewall
 metric_id: cloudgen-firewall
 backend_only: false
