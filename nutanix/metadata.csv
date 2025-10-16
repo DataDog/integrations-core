@@ -1,2 +1,50 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-nutanix.health.up,count,,,,"Value of 1 if the agent can connect to the Prism Central, and 0 otherwise.",0,nutanix,health,,
+nutanix.health.up,gauge,,,,"Value of 1 if the agent can connect to the Prism Central, and 0 otherwise.",0,nutanix,health,,prism_central
+nutanix.cluster.count,gauge,,,,Number of clusters,0,nutanix,cluster count,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.vm_count,gauge,,,,Number of VMs in the cluster,0,nutanix,vm count,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.node_count,gauge,,,,Number of nodes in the cluster,0,nutanix,node count,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.redundancy_factor,gauge,,,,Cluster redundancy factor,0,nutanix,redundancy,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.available,gauge,,,,Cluster availability status (1 if available),0,nutanix,available,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.cpu.usage_percent,gauge,,percent,,Cluster CPU usage percentage,0,nutanix,cpu usage,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.memory.usage_percent,gauge,,percent,,Cluster memory usage percentage,0,nutanix,memory usage,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.memory.usage_bytes,gauge,,byte,,Cluster memory usage in bytes,0,nutanix,memory bytes,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.storage.capacity_bytes,gauge,,byte,,Total storage capacity in bytes,0,nutanix,storage capacity,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.storage.usage_bytes,gauge,,byte,,Storage usage in bytes,0,nutanix,storage usage,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.storage.free_bytes,gauge,,byte,,Free storage in bytes,0,nutanix,storage free,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.iops.read,gauge,,operation,second,Cluster read IOPS,0,nutanix,read iops,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.iops.write,gauge,,operation,second,Cluster write IOPS,0,nutanix,write iops,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.throughput.read_bytes_per_sec,gauge,,byte,second,Cluster read throughput in bytes per second,0,nutanix,read throughput,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.throughput.write_bytes_per_sec,gauge,,byte,second,Cluster write throughput in bytes per second,0,nutanix,write throughput,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.latency.read_ms,gauge,,millisecond,,Cluster read latency in milliseconds,0,nutanix,read latency,,nutanix_cluster_id nutanix_cluster_name
+nutanix.cluster.latency.write_ms,gauge,,millisecond,,Cluster write latency in milliseconds,0,nutanix,write latency,,nutanix_cluster_id nutanix_cluster_name
+nutanix.storage_container.count,gauge,,,,Number of storage containers,0,nutanix,container count,,storage_container_name storage_container_id nutanix_cluster_id
+nutanix.host.count,gauge,,,,Number of hosts,0,nutanix,host count,,nutanix_host_id nutanix_host_name nutanix_cluster_id
+nutanix.host.cpu.usage_percent,gauge,,percent,,Host CPU usage percentage,0,nutanix,host cpu,,nutanix_host_id nutanix_host_name nutanix_cluster_id
+nutanix.host.memory.usage_percent,gauge,,percent,,Host memory usage percentage,0,nutanix,host memory,,nutanix_host_id nutanix_host_name nutanix_cluster_id
+nutanix.host.memory.usage_bytes,gauge,,byte,,Host memory usage in bytes,0,nutanix,host memory bytes,,nutanix_host_id nutanix_host_name nutanix_cluster_id
+nutanix.host.disk.iops.read,gauge,,operation,second,Host disk read IOPS,0,nutanix,host disk read,,nutanix_host_id nutanix_host_name nutanix_cluster_id
+nutanix.host.disk.iops.write,gauge,,operation,second,Host disk write IOPS,0,nutanix,host disk write,,nutanix_host_id nutanix_host_name nutanix_cluster_id
+nutanix.host.disk.throughput.read_bytes_per_sec,gauge,,byte,second,Host disk read throughput in bytes per second,0,nutanix,host disk read bps,,nutanix_host_id nutanix_host_name nutanix_cluster_id
+nutanix.host.disk.throughput.write_bytes_per_sec,gauge,,byte,second,Host disk write throughput in bytes per second,0,nutanix,host disk write bps,,nutanix_host_id nutanix_host_name nutanix_cluster_id
+nutanix.host.network.throughput.rx_bytes_per_sec,gauge,,byte,second,Host network receive throughput in bytes per second,0,nutanix,host net rx,,nutanix_host_id nutanix_host_name nutanix_cluster_id
+nutanix.host.network.throughput.tx_bytes_per_sec,gauge,,byte,second,Host network transmit throughput in bytes per second,0,nutanix,host net tx,,nutanix_host_id nutanix_host_name nutanix_cluster_id
+nutanix.vm.count,gauge,,,,Number of VMs,0,nutanix,vm count,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.cpu_count,gauge,,,,Number of vCPUs allocated to the VM,0,nutanix,vm vcpus,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.memory_size_bytes,gauge,,byte,,VM memory size in bytes,0,nutanix,vm memory size,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.cpu.usage_percent,gauge,,percent,,VM CPU usage percentage,0,nutanix,vm cpu usage,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.cpu.ready_time_ppm,gauge,,,,VM CPU ready time in parts per million (inefficiency indicator),0,nutanix,vm cpu ready,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.memory.usage_percent,gauge,,percent,,VM memory usage percentage,0,nutanix,vm mem usage,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.memory.usage_bytes,gauge,,byte,,VM memory usage in bytes,0,nutanix,vm mem bytes,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.disk.iops.read,gauge,,operation,second,VM disk read IOPS,0,nutanix,vm disk read,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.disk.iops.write,gauge,,operation,second,VM disk write IOPS,0,nutanix,vm disk write,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.disk.throughput.read_bytes_per_sec,gauge,,byte,second,VM disk read throughput in bytes per second,0,nutanix,vm disk read bps,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.disk.throughput.write_bytes_per_sec,gauge,,byte,second,VM disk write throughput in bytes per second,0,nutanix,vm disk write bps,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.disk.latency.read_ms,gauge,,millisecond,,VM disk read latency in milliseconds,0,nutanix,vm disk read lat,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.disk.latency.write_ms,gauge,,millisecond,,VM disk write latency in milliseconds,0,nutanix,vm disk write lat,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.network.throughput.rx_bytes_per_sec,gauge,,byte,second,VM network receive throughput in bytes per second,0,nutanix,vm net rx,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.vm.network.throughput.tx_bytes_per_sec,gauge,,byte,second,VM network transmit throughput in bytes per second,0,nutanix,vm net tx,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
+nutanix.event.occurred,count,,,,Count of events by type and severity,0,nutanix,event,,event_type severity
+nutanix.alert.critical,gauge,,,,Number of critical alerts,0,nutanix,alert critical,,prism_central
+nutanix.alert.warning,gauge,,,,Number of warning alerts,0,nutanix,alert warning,,prism_central
+nutanix.alert.info,gauge,,,,Number of info alerts,0,nutanix,alert info,,prism_central
+nutanix.alert.active,gauge,,,,Active alerts by type severity and status,0,nutanix,alert active,,alert_type severity status
