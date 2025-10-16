@@ -443,7 +443,7 @@
                     {
                         "id": 3378031042964512,
                         "definition": {
-                            "title": "Total license alerts",
+                            "title": "Total alerts",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -499,7 +499,7 @@
                     {
                         "id": 7415053057953813,
                         "definition": {
-                            "title": "License alerts over time",
+                            "title": "Alerts over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,

@@ -55,7 +55,7 @@
                     {
                         "id": 8340119907013017,
                         "definition": {
-                            "title": "Total license management activities",
+                            "title": "Total events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -111,7 +111,7 @@
                     {
                         "id": 8905769981960266,
                         "definition": {
-                            "title": "License management activities over time by outcome",
+                            "title": "Events over time by outcome",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -186,7 +186,7 @@
                     {
                         "id": 4478095316180677,
                         "definition": {
-                            "title": "License activities failures by operations",
+                            "title": "Events failures by operations",
                             "title_size": "10",
                             "title_align": "left",
                             "requests": [
@@ -256,7 +256,7 @@
                     {
                         "id": 305454916128190,
                         "definition": {
-                            "title": "License management activities over time by operations",
+                            "title": "Events over time by operations",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -331,7 +331,7 @@
                     {
                         "id": 6899341319650280,
                         "definition": {
-                            "title": "Top license failure reasons",
+                            "title": "Top failure reasons",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -400,7 +400,7 @@
                     {
                         "id": 8129329956235792,
                         "definition": {
-                            "title": "Top appliance IP by license management activity",
+                            "title": "Top appliance IP by events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -469,7 +469,7 @@
                     {
                         "id": 653927775448185,
                         "definition": {
-                            "title": "Top users by license management actions",
+                            "title": "Top users by events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -596,7 +596,7 @@
                     {
                         "id": 2850927459248075,
                         "definition": {
-                            "title": "Total segment config activities",
+                            "title": "Total events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -652,7 +652,7 @@
                     {
                         "id": 5804319990363451,
                         "definition": {
-                            "title": "Segment config activities over time",
+                            "title": "Events over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -716,7 +716,7 @@
                     {
                         "id": 6847179242797462,
                         "definition": {
-                            "title": "Top users by segment config activities",
+                            "title": "Top users by events",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
