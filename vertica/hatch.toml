@@ -4,6 +4,10 @@
 python = ["3.12"]
 version = ["10.1", "11.1", "12.0", "23.3"]
 
+[envs.default]
+# E2E tests disabled because Vertica Docker image is no longer available
+e2e-env = false
+
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "VERTICA_VERSION", value = "10.1.1-0", if = ["10.1"] },
