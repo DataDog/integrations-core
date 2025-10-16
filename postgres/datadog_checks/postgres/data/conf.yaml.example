@@ -480,17 +480,17 @@ instances:
         # collection_interval: 1
 
         ## @param explain_function - string - optional - default: datadog.explain_statement
-        ## Override the default function used to collect execution plans for queries.
+        ## Override the default function used to collect explain plans for queries.
         #
         # explain_function: datadog.explain_statement
 
         ## @param explained_queries_per_hour_per_query - integer - optional - default: 60
-        ## Set the rate limit for how many execution plans will be collected per hour per normalized query.
+        ## Set the rate limit for how many explain plans will be collected per hour per normalized query.
         #
         # explained_queries_per_hour_per_query: 60
 
         ## @param samples_per_hour_per_query - integer - optional - default: 15
-        ## Set the rate limit for how many explain plan events will be ingested per hour per normalized execution
+        ## Set the rate limit for how many explain plan events will be ingested per hour per normalized explain
         ## plan.
         #
         # samples_per_hour_per_query: 15
@@ -504,7 +504,7 @@ instances:
 
         ## @param seen_samples_cache_maxsize - integer - optional - default: 10000
         ## Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
-        ## for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+        ## for databases with a very large number of unique normalized explain plans which exceed the cache's limit.
         #
         # seen_samples_cache_maxsize: 10000
 
@@ -638,7 +638,8 @@ instances:
         ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
         ## Set to the Endpoint.Address of the instance the agent is connecting to.
         ## Use this value to allow association of RDS metrics with the instance when 
-        ## connecting to the instance through a proxy or CNAME.
+        ## connecting to the instance through a proxy or CNAME, or if you set `reported_hostname`
+        ## to a different value from the instance endpoint.
         ##
         ## For more information on instance endpoints,
         ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
@@ -842,11 +843,11 @@ instances:
         #
         # keep_json_path: false
 
-    ## Configure the collection of raw query statements in query activity and execution plans.
-    ## Raw query statements and execution plans may contain sensitive information (e.g., passwords)
+    ## Configure the collection of raw query statements in query samples and explain plans.
+    ## Raw query statments and explain plans may contain sensitive information (e.g., passwords)
     ## or personally identifiable information in query text.
     ## Enabling this option will allow the collection and ingestion of raw query statements and 
-    ## execution plans into Datadog, which can then become viewable in query samples or explain plans. 
+    ## explain plans into Datadog, which can then become viewable in query samples or explain plans. 
     ## This option is disabled by default.
     ## Note: Collection of raw query statements is currently in preview.
     ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.
