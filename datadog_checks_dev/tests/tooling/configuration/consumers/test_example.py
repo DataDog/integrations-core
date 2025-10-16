@@ -1771,3 +1771,139 @@ def test_multi_instances_w_nested_options():
             # option_3: true
         """
     )
+
+def test_invalid_option_level_fields():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: test_option
+            description: test description
+            invalid_option_field: this_should_fail
+            another_bad_option_field: also_bad
+            value:
+              type: string
+              example: test
+        """
+    )
+
+    files = consumer.render()
+    _, errors = files['test.yaml.example']
+    
+    assert "invalid_option_field" in errors[0]
+    assert "another_bad_option_field" in errors[0]
+    assert "option level" in errors[0].lower()
+
+def test_valid_option_level_fields():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: test_option
+            description: test description
+            required: true
+            hidden: false
+            display_priority: 10
+            enabled: true
+            secret: false
+            deprecation:
+              Agent version: 8.0.0
+            metadata_tags:
+              - tag1
+            template: instances
+            value:
+              type: string
+              example: test
+        """
+    )
+
+    files = consumer.render()
+    _, errors = files['test.yaml.example']
+    
+    assert not errors
+
+
+def test_invalid_value_level_fields():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: test_option
+            description: test description
+            value:
+              type: string
+              example: something
+              invalid_value_field: this_should_fail
+              another_bad_value_field: also_bad
+        """
+    )
+
+    files = consumer.render()
+    _, errors = files['test.yaml.example']
+    
+    assert "invalid_value_field" in errors[0]
+    assert "another_bad_value_field" in errors[0]
+    assert "value level" in errors[0].lower()
+
+
+def test_valid_value_level_fields():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: test_option
+            description: test description
+            value:
+              type: string
+              example: something
+              display_default: default_value
+              compact_example: true
+              pattern: ^[a-z]+$
+              minLength: 1
+              maxLength: 100
+        """
+    )
+
+    files = consumer.render()
+    _, errors = files['test.yaml.example']
+
+    assert not errors
+
+
+def test_option_level_example_field():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: logs
+            description: Log configuration
+            example:
+              - type: file
+                path: /var/log/test.log
+        """
+    )
+
+    files = consumer.render()
+    _, errors = files['test.yaml.example']
+    
+    assert not errors
