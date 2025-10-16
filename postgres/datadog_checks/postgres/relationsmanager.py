@@ -67,7 +67,7 @@ IDX_METRICS = {
     'query': """
 SELECT
   current_database(),
-  schemaname,
+  nspname,
   relname,
   indexrelname,
   is_valid,
@@ -78,7 +78,7 @@ SELECT
   idx_blks_hit,
   index_size
 FROM (SELECT
-      N.nspname AS schemaname,
+      N.nspname AS nspname,
       C.relname AS relname,
       I.relname AS indexrelname,
       X.indisvalid::text AS is_valid,
@@ -137,8 +137,12 @@ QUERY_PG_CLASS_SIZE = {
     'name': 'pg_class_size',
     'query': """
 SELECT current_database(),
-       s.schemaname, s.table, s.partition_of,
-       s.relpages, s.reltuples, s.relallvisible,
+       s.nspname,
+       s.table,
+       s.partition_of,
+       s.relpages,
+       s.reltuples,
+       s.relallvisible,
        s.relation_size + s.toast_size,
        s.relation_size,
        s.index_size,
@@ -146,7 +150,7 @@ SELECT current_database(),
        s.relation_size + s.index_size + s.toast_size
 FROM
     (SELECT
-      N.nspname as schemaname,
+      N.nspname as nspname,
       relname as table,
       I.inhparent::regclass AS partition_of,
       C.relpages, C.reltuples, C.relallvisible,
