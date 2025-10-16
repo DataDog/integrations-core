@@ -3,6 +3,7 @@ provides:
     always_on: true
   - id: openai-cloud-cost-data
     always_on: false
+    granular: true
   - id: openai-llm-completions
     always_on: false
     granular: true
