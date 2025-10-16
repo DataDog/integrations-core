@@ -1,3 +1,4 @@
+# bypass-global-grok-parser-match-rules-checks
 id: ivanti-connect-secure
 metric_id: ivanti-connect-secure
 backend_only: false
