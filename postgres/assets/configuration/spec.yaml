@@ -614,19 +614,19 @@ files:
             example: 1
         - name: explain_function
           description: |
-            Override the default function used to collect execution plans for queries.
+            Override the default function used to collect explain plans for queries.
           value:
             type: string
             example: datadog.explain_statement
         - name: explained_queries_per_hour_per_query
           description: |
-            Set the rate limit for how many execution plans will be collected per hour per normalized query.
+            Set the rate limit for how many explain plans will be collected per hour per normalized query.
           value:
             type: integer
             example: 60
         - name: samples_per_hour_per_query
           description: |
-            Set the rate limit for how many explain plan events will be ingested per hour per normalized execution
+            Set the rate limit for how many explain plan events will be ingested per hour per normalized explain
             plan.
           value:
             type: integer
@@ -642,7 +642,7 @@ files:
         - name: seen_samples_cache_maxsize
           description: |
             Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
-            for databases with a very large number of unique normalized execution plans which exceed the cache's limit.
+            for databases with a very large number of unique normalized explain plans which exceed the cache's limit.
           value:
             type: integer
             example: 10000
@@ -1103,11 +1103,11 @@ files:
             display_default: false
     - name: collect_raw_query_statement
       description: |
-        Configure the collection of raw query statements in query activity and execution plans.
-        Raw query statements and execution plans may contain sensitive information (e.g., passwords)
+        Configure the collection of raw query statements in query samples and explain plans.
+        Raw query statments and explain plans may contain sensitive information (e.g., passwords)
         or personally identifiable information in query text.
         Enabling this option will allow the collection and ingestion of raw query statements and 
-        execution plans into Datadog, which can then become viewable in query samples or explain plans. 
+        explain plans into Datadog, which can then become viewable in query samples or explain plans. 
         This option is disabled by default.
         Note: Collection of raw query statements is currently in preview.
         If you are interested in participating, please reach out to your Datadog Customer Success Manager.
