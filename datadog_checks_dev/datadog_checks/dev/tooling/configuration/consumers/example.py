@@ -2,9 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from io import StringIO
+from datadog_checks.dev.tooling.configuration.constants import OPENAPI_SCHEMA_PROPERTIES
 
 import yaml
 
+ALLOWED_OPTION_FIELDS = {
+    'name', 'description', 'required', 'hidden', 'display_priority',
+    'deprecation', 'multiple', 'multiple_instances_defined', 'metadata_tags',
+    'options', 'value', 'secret', 'enabled', 'example',
+    'template', 'overrides'
+}
+ALLOWED_VALUE_FIELDS = OPENAPI_SCHEMA_PROPERTIES | {'example', 'display_default', 'compact_example'}
 DESCRIPTION_LINE_LENGTH_LIMIT = 120
 
 
@@ -103,6 +111,12 @@ def write_description(option, writer, indent, option_type):
 
 def write_option(option, writer, indent='', start_list=False):
     option_name = option['name']
+
+    invalid_option_fields = [field for field in option if field not in ALLOWED_OPTION_FIELDS]
+    
+    if invalid_option_fields:
+        writer.new_error(f"The following option level fields are not valid {invalid_option_fields}. Option fields must be one of the following: {sorted(ALLOWED_OPTION_FIELDS)}")
+
     if 'value' in option:
         value = option['value']
         required = option['required']
@@ -115,6 +129,11 @@ def write_option(option, writer, indent='', start_list=False):
             ' - ',
             'required' if required else 'optional',
         )
+
+        invalid_value_fields = [field for field in value if field not in ALLOWED_VALUE_FIELDS]
+
+        if invalid_value_fields:
+            writer.new_error(f"The following value level fields are not valid {invalid_value_fields}. Value fields must be one of the following: {sorted(ALLOWED_VALUE_FIELDS)}")
 
         example = value.get('example')
         example_type = type(example)
