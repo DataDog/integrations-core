@@ -923,11 +923,7 @@ def test_errors_raised_metric_with_dbm(aggregator, dd_run_check, instance_basic,
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, count=1)
 
     # The metric should only be present when MySQL/Percona >= 8.0 AND DBM is enabled
-    if (
-        MYSQL_FLAVOR.lower() != 'mariadb'
-        and MYSQL_VERSION_PARSED >= parse_version('8.0')
-        and dbm_enabled
-    ):
+    if MYSQL_FLAVOR.lower() != 'mariadb' and MYSQL_VERSION_PARSED >= parse_version('8.0') and dbm_enabled:
         aggregator.assert_metric('mysql.performance.errors_raised', at_least=1)
     else:
         # In all other cases the metric should not be present
