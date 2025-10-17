@@ -1,0 +1,57 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "546bd512-64a9-4b1f-ad03-f3c896f33fef",
+  "app_id": "cloudflare-api-shield",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Cloudflare API Shield logs",
+    "title": "Cloudflare API Shield",
+    "media": [
+      {
+        "caption": "Cloudflare API Shield - Security",
+        "image_url": "images/cloudflare_api_shield_security.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cloudflare API Shield - Audit",
+        "image_url": "images/cloudflare_api_shield_audit.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Cloud",
+      "Category::Network",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 54869720,
+      "source_type_name": "Cloudflare API Shield",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Cloudflare API Shield - Security": "assets/dashboards/cloudflare_api_shield_security.json",
+      "Cloudflare API Shield - Audit": "assets/dashboards/cloudflare_api_shield_audit.json"
+    },
+    "logs": {
+      "source": "cloudflare-api-shield"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
