@@ -338,10 +338,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.net.bytes_out.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=BrokerTopicMetrics,name=BytesInPerSec'
@@ -349,10 +349,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.net.bytes_in.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=BrokerTopicMetrics,name=MessagesInPerSec'
@@ -360,10 +360,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.messages_in.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=BrokerTopicMetrics,name=BytesRejectedPerSec'
@@ -371,10 +371,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.net.bytes_rejected.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
 
     #
     # Per Topic Broker Stats (only v0.8.x)
@@ -388,10 +388,10 @@ jmx_metrics:
             alias: kafka.topic.messages_in.rate
         tags:
           topic: $1
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
 
     #
     # Brokers: Per Topic Metrics (v0.9.0.x+)
@@ -403,10 +403,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.topic.messages_in.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=BytesOutPerSec,topic=.*'
@@ -414,10 +414,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.topic.net.bytes_out.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=BytesInPerSec,topic=.*'
@@ -425,10 +425,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.topic.net.bytes_in.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean_regex: 'kafka\.server:type=BrokerTopicMetrics,name=BytesRejectedPerSec,topic=.*'
@@ -436,10 +436,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.topic.net.bytes_rejected.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
 
     #
     # Request timings
@@ -451,10 +451,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.request.fetch.failed.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=BrokerTopicMetrics,name=FailedProduceRequestsPerSec'
@@ -462,10 +462,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.request.produce.failed.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=Produce(?:,version=.*)?'
@@ -473,10 +473,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.request.produce.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean: 'kafka.network:type=RequestMetrics,name=TotalTimeMs,request=Produce'
@@ -487,10 +487,10 @@ jmx_metrics:
           99thPercentile:
             metric_type: gauge
             alias: kafka.request.produce.time.99percentile
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchConsumer(?:,version=.*)?'
@@ -498,10 +498,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.request.fetch_consumer.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean_regex: 'kafka.network:type=RequestMetrics,name=RequestsPerSec,request=FetchFollower(?:,version=.*)?'
@@ -509,10 +509,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.request.fetch_follower.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean: 'kafka.network:type=RequestMetrics,name=TotalTimeMs,request=FetchConsumer'
@@ -523,10 +523,10 @@ jmx_metrics:
           99thPercentile:
             metric_type: gauge
             alias: kafka.request.fetch_consumer.time.99percentile
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean: 'kafka.network:type=RequestMetrics,name=TotalTimeMs,request=FetchFollower'
@@ -537,10 +537,10 @@ jmx_metrics:
           99thPercentile:
             metric_type: gauge
             alias: kafka.request.fetch_follower.time.99percentile
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean: 'kafka.network:type=RequestMetrics,name=TotalTimeMs,request=UpdateMetadata'
@@ -551,10 +551,10 @@ jmx_metrics:
           99thPercentile:
             metric_type: gauge
             alias: kafka.request.update_metadata.time.99percentile
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean: 'kafka.network:type=RequestMetrics,name=TotalTimeMs,request=Metadata'
@@ -565,10 +565,10 @@ jmx_metrics:
           99thPercentile:
             metric_type: gauge
             alias: kafka.request.metadata.time.99percentile
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean: 'kafka.network:type=RequestMetrics,name=TotalTimeMs,request=Offsets'
@@ -579,10 +579,10 @@ jmx_metrics:
           99thPercentile:
             metric_type: gauge
             alias: kafka.request.offsets.time.99percentile
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean: 'kafka.network:type=RequestChannel,name=RequestQueueSize'
@@ -590,10 +590,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.request.channel.queue.size
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.network'
         bean: 'kafka.network:type=SocketServer,name=NetworkProcessorAvgIdlePercent'
@@ -601,10 +601,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.net.processor.avg.idle.pct.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent'
@@ -612,10 +612,10 @@ jmx_metrics:
           OneMinuteRate:
             metric_type: gauge
             alias: kafka.request.handler.avg.idle.pct.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
 
     #
     # Request Purgatory (only v0.8.2.x)
@@ -627,10 +627,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.request.producer_request_purgatory.size
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=FetchRequestPurgatory,name=PurgatorySize'
@@ -638,10 +638,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.request.fetch_request_purgatory.size
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
 
     #
     # Request Purgatory (v0.9.0.x onwards)
@@ -653,10 +653,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.request.producer_request_purgatory.size
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=DelayedOperationPurgatory,name=PurgatorySize,delayedOperation=Fetch'
@@ -664,10 +664,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.request.fetch_request_purgatory.size
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
 
     #
     # Replication stats
@@ -679,10 +679,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.replication.under_replicated_partitions
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ReplicaManager,name=UnderMinIsrPartitionCount'
@@ -690,10 +690,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.replication.under_min_isr_partition_count
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ReplicaManager,name=IsrShrinksPerSec'
@@ -701,10 +701,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.replication.isr_shrinks.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ReplicaManager,name=IsrExpandsPerSec'
@@ -712,10 +712,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.replication.isr_expands.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.controller'
         bean: 'kafka.controller:type=ControllerStats,name=LeaderElectionRateAndTimeMs'
@@ -723,10 +723,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.replication.leader_elections.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.controller'
         bean: 'kafka.controller:type=ControllerStats,name=UncleanLeaderElectionsPerSec'
@@ -734,10 +734,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.replication.unclean_leader_elections.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.controller'
         bean: 'kafka.controller:type=KafkaController,name=OfflinePartitionsCount'
@@ -745,10 +745,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.replication.offline_partitions_count
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.controller'
         bean: 'kafka.controller:type=KafkaController,name=ActiveControllerCount'
@@ -756,10 +756,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.replication.active_controller_count
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ReplicaManager,name=PartitionCount'
@@ -767,10 +767,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.replication.partition_count
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ReplicaManager,name=LeaderCount'
@@ -778,10 +778,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.replication.leader_count
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=ReplicaFetcherManager,name=MaxLag,clientId=Replica'
@@ -789,10 +789,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.replication.max_lag
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
 
     #
     # Log flush stats
@@ -804,10 +804,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.log.flush_rate.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
 
     #
     # Zookeeper stats
@@ -819,10 +819,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.session.zookeeper.disconnect.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=SessionExpireListener,name=ZooKeeperExpiresPerSec'
@@ -830,10 +830,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.session.zookeeper.expire.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=SessionExpireListener,name=ZooKeeperReadOnlyConnectsPerSec'
@@ -841,10 +841,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.session.zookeeper.readonly.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=SessionExpireListener,name=ZooKeeperSyncConnectsPerSec'
@@ -852,10 +852,10 @@ jmx_metrics:
           Count:
             metric_type: rate
             alias: kafka.session.zookeeper.sync.rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
 
     #
     # Session stats
@@ -867,10 +867,10 @@ jmx_metrics:
           Value:
             metric_type: gauge
             alias: kafka.session.fetch.count
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=FetchSessionCache,name=IncrementalFetchSessionEvictionsPerSec'
@@ -878,10 +878,10 @@ jmx_metrics:
           Count:
             alias: kafka.session.fetch.eviction
             metric_type: rate
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
     #
     # Listeners stats
     #
@@ -894,7 +894,7 @@ jmx_metrics:
             alias: kafka.server.socket.connection_count
         tags:
           listener: $1
-        dynamic_tags:
-          kafka_cluster_id:
-            bean: kafka.server:type=KafkaServer,name=ClusterId
-            attribute: Value
+      dynamic_tags:
+        - tag_name: kafka_cluster_id
+          bean: kafka.server:type=KafkaServer,name=ClusterId
+          attribute: Value
