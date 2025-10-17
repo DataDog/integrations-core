@@ -13,7 +13,6 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
-
 FIXTURES_DIR = Path(__file__).parent
 
 

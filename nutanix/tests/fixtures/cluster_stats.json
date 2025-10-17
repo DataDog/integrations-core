@@ -1,4 +1,3 @@
 {
-  "data": [],
-  "error": "400 Client Error: BAD REQUEST for url: https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b"
+  "data": []
 }
