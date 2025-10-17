@@ -6,24 +6,14 @@
 
 This integration monitors configured dependency files using Guarddog scans and sends the scan output to Datadog for analysis, providing visual insights through out-of-the-box dashboards and the Log Explorer. It also helps monitor and respond to security threats with ready-to-use Cloud SIEM detection rules.
 
+**Note:**
+- **Minimum Agent version:** 7.73.0
+
 ## Setup
 
 ### Installation
 
 The Guarddog check is already included with the [Datadog Agent][7] package, so no extra installation is required.
-
-If you are running Agent version earlier than **7.71.0**, install the Guarddog integration manually by running the command below :
-
-Linux command:
-
-  ```shell
-  sudo -u dd-agent -- datadog-agent integration install datadog-guarddog==1.0.0
-  ```
-
-Mac command:
-  ```shell
-  sudo datadog-agent integration install datadog-guarddog==1.0.0
-  ```
 
 ### Configuration
 

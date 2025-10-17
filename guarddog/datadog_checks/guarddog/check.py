@@ -28,18 +28,18 @@ class GuarddogCheck(AgentCheck):
 
     def get_guarddog_output(self, cmd_with_abs_path) -> subprocess.CompletedProcess:
         try:
-            self.log.debug(constants.LOG_TEMPLATE.format(message=cmd_with_abs_path))
+            self.log.debug("Running command: %s", cmd_with_abs_path)
             cmd_output_with_abs_path = subprocess.run(cmd_with_abs_path.split(), capture_output=True, text=True)
             return cmd_output_with_abs_path
         except FileNotFoundError:
             try:
                 cmd = cmd_with_abs_path.replace(constants.GUARDDOG_ENVIRONMENT_PATH, "guarddog")
-                self.log.debug(constants.LOG_TEMPLATE.format(message=cmd))
+                self.log.debug(cmd)
                 cmd_output = subprocess.run(cmd.split(), capture_output=True, text=True)
                 return cmd_output
             except FileNotFoundError as cmd_error:
                 err_message = "Guarddog is not Installed. Please follow the Guarddog installation steps."
-                self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
+                self.log.error(err_message)
                 raise cmd_error
 
     def get_enriched_event(self, enrichment_details, result) -> dict:
@@ -51,7 +51,7 @@ class GuarddogCheck(AgentCheck):
     def validate_config(self) -> None:
         if self.package_ecosystem not in constants.VALID_ECOSYSTEMS:
             err_message = f"Invalid Package Ecosystem provided: {self.package_ecosystem}"
-            self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
+            self.log.error(err_message)
             raise ConfigurationError(err_message)
 
         elif not self.path:
@@ -59,17 +59,17 @@ class GuarddogCheck(AgentCheck):
                 "Dependency File Path is required for package ecosystem: "
                 f"{self.package_ecosystem} to run the guarddog scan",
             )
-            self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
+            self.log.error(err_message)
             raise ConfigurationError(err_message)
 
         elif not os.path.exists(self.path):
             err_message = f"Dependency file does not exist at the configured path: {self.path}"
-            self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
+            self.log.error(err_message)
             raise ConfigurationError(err_message)
 
         elif not os.access(self.path, os.R_OK):
             err_message = f"Dependency file not readable by agent: {self.path}"
-            self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
+            self.log.error(err_message)
             raise ConfigurationError(err_message)
 
     def check(self, _):
@@ -83,7 +83,7 @@ class GuarddogCheck(AgentCheck):
             cmd_result = self.get_guarddog_output(guarddog_command)
             if cmd_result.returncode != 0:
                 cmd_result_err_message = f"Guarddog command failed: {cmd_result.stderr}"
-                self.log.error(constants.LOG_TEMPLATE.format(message=cmd_result_err_message))
+                self.log.error(cmd_result_err_message)
                 raise RuntimeError(cmd_result.stderr)
 
             try:
@@ -104,5 +104,5 @@ class GuarddogCheck(AgentCheck):
                 raise
         except Exception as e:
             err_message = f"Some error occurred during the check operation: {str(e)}"
-            self.log.error(constants.LOG_TEMPLATE.format(message=err_message))
+            self.log.error(err_message)
             raise
