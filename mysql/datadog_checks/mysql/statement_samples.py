@@ -733,10 +733,15 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
             except pymysql.err.DatabaseError as e:
                 if len(e.args) != 2:
                     raise
+                mysql_error_code = e.args[0] if len(e.args) > 0 else None
                 error_msg = f"{e.args[0]}: {e.args[1]}" if len(e.args) >= 2 else str(e)
-                error_state = ExplainState(
-                    strategy=strategy, error_code=DBExplainErrorCode.failed_function, error_message=error_msg
+                error_code = (
+                    DBExplainErrorCode.failed_function
+                    if mysql_error_code
+                    in (pymysql.constants.ER.TABLEACCESS_DENIED_ERROR, pymysql.constants.ER.PROCACCESS_DENIED_ERROR)
+                    else DBExplainErrorCode.database_error
                 )
+                error_state = ExplainState(strategy=strategy, error_code=error_code, error_message=error_msg)
                 error_states.append(error_state)
                 self._log.debug(
                     'Failed to collect execution plan. error=%s, strategy=%s, schema=%s, statement="%s"',
