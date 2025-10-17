@@ -399,7 +399,13 @@ def test_statement_metrics_cloud_metadata(
         (
             'information_schema',
             'select * from testdb.users',
-            [{'strategy': 'PROCEDURE', 'code': 'database_error', 'message': "<class 'pymysql.err.OperationalError'>"}],
+            [
+                {
+                    'strategy': 'PROCEDURE',
+                    'code': 'database_error',
+                    'message': "1044: Access denied for user 'dog'@'%' to database 'information_schema'",
+                }
+            ],
             StatementTruncationState.not_truncated.value,
         ),
         (
@@ -409,7 +415,7 @@ def test_statement_metrics_cloud_metadata(
                 {
                     'strategy': 'FQ_PROCEDURE',
                     'code': 'database_error',
-                    'message': "<class 'pymysql.err.ProgrammingError'>",
+                    'message': "1146: Table 'datadog.users' doesn't exist",
                 }
             ],
             StatementTruncationState.not_truncated.value,
