@@ -107,6 +107,20 @@ env:
     )
 
     write_file(
+        repo_path,
+        'pyproject.toml',
+        f"""[tool.black]
+            target-version = ["py{OLD_PYTHON_VERSION.replace('.', '')}"]
+
+            [tool.ruff]
+            target-version = "py{OLD_PYTHON_VERSION.replace('.', '')}"
+
+            [tool.mypy]
+            python_version = "{OLD_PYTHON_VERSION}"
+        """,
+    )
+
+    write_file(
         repo_path / 'ddev',
         'pyproject.toml',
         f"""[tool.black]
