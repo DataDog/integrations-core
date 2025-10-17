@@ -1,0 +1,1 @@
+Fixes an issue querying table and index relation metrics on the public schema

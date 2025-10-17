@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 15.9.2 / 2025-10-08
+
+***Fixed***:
+
+* Fixes `disable_innodb_metrics` being read from the wrong config layer ([#21591](https://github.com/DataDog/integrations-core/pull/21591))
+
 ## 15.9.1 / 2025-10-03
 
 ***Fixed***:

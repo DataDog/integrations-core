@@ -369,6 +369,11 @@ instances:
     #
     # collect_topology: true
 
+    ## @param collect_vpn - boolean - optional - default: false
+    ## Enable collection of VPN tunnels and route table data.
+    #
+    # collect_vpn: true
+
     ## @param interface_configs - list of mappings - optional
     ## This option is used to override interface inbound/outbound speed and add interface tags.
     ## Example:
@@ -380,6 +385,7 @@ instances:
     ##     tags:                # (optional) interface level tags
     ##       - "testTagKey:testTagValue"
     ##       - "tagKey2:tagValue2"
+    ##     disabled: true        # (optional) disables monitoring for matched interfaces, default value is false
     #
     # interface_configs:
     #   - match_field: name
@@ -395,6 +401,9 @@ instances:
     #     tags:
     #     - monitored:true
     #     - customKey:customValue
+    #   - match_field: name
+    #     match_value: eth5
+    #     disabled: true
 
     ## Configure ICMP pings for all hosts in SNMP autodiscovery
     ## Each device is pinged with these settings each time the SNMP
