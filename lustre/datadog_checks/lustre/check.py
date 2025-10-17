@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 import subprocess
 from datetime import datetime, timezone
@@ -63,6 +64,30 @@ def _handle_ip_in_param(parts: List[str]) -> Tuple[List[str], bool]:
     except ValueError:
         return [], False
     return [*parts[: index - 3], new_part, *parts[index + 1 :]], True
+
+
+def _sanitize_command(bin_path: str) -> None:
+    """
+    Validate that the binary path is safe to execute.
+
+    Ensures the path is absolute and is an expected Lustre binary.
+
+    Raises:
+        ValueError: If the path is not absolute or not an expected binary
+    """
+    # Allowlist of expected Lustre binaries
+    EXPECTED_BINARIES = {'lctl', 'lnetctl', 'lfs'}
+
+    # Check if the path is absolute
+    if not os.path.isabs(bin_path):
+        raise ValueError(f'Binary path must be absolute: {bin_path}')
+
+    # Extract the binary name from the path
+    binary_name = os.path.basename(bin_path)
+
+    # Check if it's an expected Lustre binary
+    if binary_name not in EXPECTED_BINARIES:
+        raise ValueError(f'Unexpected binary: {binary_name}. Expected one of: {EXPECTED_BINARIES}')
 
 
 class LustreCheck(AgentCheck):
@@ -204,6 +229,7 @@ class LustreCheck(AgentCheck):
         if bin not in self._bin_mapping:
             raise ValueError('Unknown binary: {}'.format(bin))
         bin_path = self._bin_mapping[bin]
+        _sanitize_command(bin_path)
         cmd = [bin_path, *args]
         if sudo:
             cmd.insert(0, "sudo")

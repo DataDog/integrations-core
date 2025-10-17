@@ -623,3 +623,33 @@ def test_changelog_logging(caplog, mock_lustre_commands):
         assert 'Could not retrieve log cursor, assuming initialization' in log_text
         assert 'Fetching changelog from index 0 to 100' in log_text
         assert 'Collecting changelogs for:' in log_text
+
+
+@pytest.mark.parametrize(
+    'bin_path, should_pass',
+    [
+        pytest.param('/usr/sbin/lctl', True, id='valid_lctl'),
+        pytest.param('/usr/sbin/lnetctl', True, id='valid_lnetctl'),
+        pytest.param('/usr/bin/lfs', True, id='valid_lfs'),
+        pytest.param('/custom/path/lctl', True, id='custom_path_lctl'),
+        pytest.param('lctl', False, id='relative_path'),
+        pytest.param('./lctl', False, id='relative_with_dot'),
+        pytest.param('/bin/bash', False, id='shell_bash'),
+        pytest.param('/bin/sh', False, id='shell_sh'),
+        pytest.param('/usr/bin/zsh', False, id='shell_zsh'),
+        pytest.param('/usr/bin/python', False, id='unexpected_binary'),
+        pytest.param('/sbin/sudo', False, id='sudo_binary'),
+        pytest.param('/usr/bin/cat', False, id='cat_binary'),
+    ],
+)
+def test_sanitize_command(bin_path, should_pass):
+    """Test _sanitize_command with various binary paths."""
+    from datadog_checks.lustre.check import _sanitize_command
+
+    if should_pass:
+        # Should not raise an exception
+        _sanitize_command(bin_path)
+    else:
+        # Should raise ValueError
+        with pytest.raises(ValueError):
+            _sanitize_command(bin_path)
