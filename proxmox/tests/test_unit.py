@@ -27,6 +27,8 @@ from .common import (
     STORAGE_RESOURCE_METRICS,
     VM_PERF_METRICS,
 )
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_api_up(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
@@ -39,6 +41,8 @@ def test_api_up(dd_run_check, aggregator, instance):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_no_tags(dd_run_check, aggregator, instance):
     new_instance = copy.deepcopy(instance)
@@ -48,6 +52,8 @@ def test_no_tags(dd_run_check, aggregator, instance):
     aggregator.assert_metric(
         "proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:up']
     )
+
+
 @pytest.mark.parametrize(
     ('mock_http_get'),
     [
@@ -71,6 +77,8 @@ def test_api_down(dd_run_check, aggregator, instance):
     aggregator.assert_metric(
         "proxmox.api.up", 0, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:down', 'testing']
     )
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_version_metadata(dd_run_check, datadog_agent, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
@@ -85,6 +93,8 @@ def test_version_metadata(dd_run_check, datadog_agent, aggregator, instance):
         'version.raw': '8.4.1',
     }
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_resource_count_metrics(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
@@ -185,6 +195,8 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
         ],
         hostname='',
     )
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_resource_up_metrics(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
@@ -250,6 +262,8 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
         ],
         hostname='',
     )
+
+
 @pytest.mark.parametrize(
     ('mock_http_get'),
     [
@@ -273,8 +287,7 @@ def test_resource_up_metrics(dd_run_check, aggregator, instance):
             {
                 'http_error': {
                     '/api2/json/nodes/ip-122-82-3-112/qemu/100/agent/get-host-name': MockResponse(
-                        status_code=200, 
-                        json_data={"data": None, "message": "No QEMU guest agent configured\n"}
+                        status_code=200, json_data={"data": None, "message": "No QEMU guest agent configured\n"}
                     )
                 }
             },
@@ -295,6 +308,8 @@ def test_get_hostname_error(dd_run_check, aggregator, instance, caplog):
         "Failed to get hostname for vm 100 on node ip-122-82-3-112; endpoint: http://localhost:8006/api2/json;"
         in caplog.text
     )
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_external_tags(dd_run_check, aggregator, instance, datadog_agent):
     check = ProxmoxCheck('proxmox', {}, [instance])
@@ -328,6 +343,8 @@ def test_external_tags(dd_run_check, aggregator, instance, datadog_agent):
             ]
         },
     )
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_resource_metrics(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
@@ -395,6 +412,8 @@ def test_resource_metrics(dd_run_check, aggregator, instance):
     for metric in RESOURCE_METRICS:
         aggregator.assert_metric(metric, count=0, tags=sdn_tags)
         aggregator.assert_metric(metric, count=0, tags=pool_tags)
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_perf_metrics(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
@@ -464,18 +483,24 @@ def test_perf_metrics(dd_run_check, aggregator, instance):
     for metric in PERF_METRICS:
         aggregator.assert_metric(metric, count=0, tags=sdn_tags)
         aggregator.assert_metric(metric, count=0, tags=pool_tags)
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_perf_metrics_error(dd_run_check, caplog, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
     caplog.set_level(logging.DEBUG)
     dd_run_check(check)
     assert "Invalid metric entry found; metric name: disk.used, resource id: storage/ip-122-82-3-112" in caplog.text
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_ha_metrics(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric('proxmox.ha.quorum', hostname='ip-122-82-3-112', tags=['node_status:OK'])
     aggregator.assert_metric('proxmox.ha.quorate', hostname='ip-122-82-3-112', tags=['node_status:OK'])
+
+
 @pytest.mark.parametrize(
     ('collect_tasks, task_types, expected_events'),
     [
@@ -526,6 +551,8 @@ def test_events(get_current_datetime, dd_run_check, aggregator, instance, collec
         aggregator.assert_event(**event)
 
     assert len(aggregator.events) == len(expected_events)
+
+
 @pytest.mark.parametrize(
     ('resource_filters, expected_vms, expected_nodes'),
     [
@@ -722,6 +749,8 @@ def test_host_resource_filters(
 
     num_xpected_hosts = len(expected_vms) + len(expected_nodes)
     datadog_agent.assert_external_tags_count(num_xpected_hosts)
+
+
 @pytest.mark.parametrize(
     ('resource_filters, expected_containers, expected_storages, expected_pools, expected_sdns'),
     [
@@ -849,6 +878,8 @@ def test_additional_resource_filters(
     aggregator.assert_metric("proxmox.storage.count", count=len(expected_storages))
     aggregator.assert_metric("proxmox.pool.count", count=len(expected_pools))
     aggregator.assert_metric("proxmox.sdn.count", count=len(expected_sdns))
+
+
 @pytest.mark.parametrize(
     ('resource_filters, expected_message'),
     [
@@ -941,6 +972,8 @@ def test_resource_filters_errors(dd_run_check, resource_filters, expected_messag
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
     assert expected_message in caplog.text
+
+
 @pytest.mark.parametrize(
     ('resource_filters, expected_events'),
     [
