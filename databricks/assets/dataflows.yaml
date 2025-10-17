@@ -2,3 +2,5 @@ provides:
   - id: databricks-cloud-cost-metrics
     always_on: false
     granular: true
+  - id: databricks-reference-tables
+    always_on: false
