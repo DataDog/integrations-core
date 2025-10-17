@@ -1,0 +1,9 @@
+QUEUE_NAME      PRIO STATUS          MAX JL/U JL/P JL/H NJOBS  PEND   RUN  SUSP  RSV PJOBS
+admin            50  Open:Active       -    -    -    -     0     0     0     0    0     0
+owners           43  Open:Active       -    -    -    -     0     0     0     0    0     0
+priority         43  Open:Active       -    -    -    -     0     0     0     0    0     0
+night            40  Open:Inact_Win    -    -    -    -     0     0     0     0    0     0
+short            35  Open:Active       -    -    -    -     0     0     0     0    0     0
+normal           30  Open:Active       -    -    -    -     4     2     2     0    0     1
+interactive      30  Open:Active       -    -    -    -     0     0     0     0    0     0
+idle             20  Open:Active       -    -    -    -     0     0     0     0    0     0

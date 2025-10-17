@@ -1,0 +1,2 @@
+HOST_NAME                                          type                           model                          cpuf     ncpus    maxmem     maxswp     server   RESOURCES            rexpri   nprocs   ncores   nthreads maxtmp
+ip-11-21-111-198.ec2.internal                      X86_64                         Intel_E5                       12.50    4        16030M         -      Yes      (mg)                 0        1        4        1        81886M

@@ -1,70 +1,86 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base import AgentCheck
 
-# from datadog_checks.base.utils.db import QueryManager
-# from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-# from json import JSONDecodeError
+from .client import LSFClient
+from .common import BHOSTS, LSCLUSTERS
+from .config_models import ConfigMixin
 
 
-class IbmSpectrumLsfCheck(AgentCheck):
-
-    # This will be the prefix of every metric the integration sends
+class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'ibm_spectrum_lsf'
 
     def __init__(self, name, init_config, instances):
         super(IbmSpectrumLsfCheck, self).__init__(name, init_config, instances)
+        self.client = LSFClient()
+        self.check_initializations.append(self.parse_config)
 
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
+    def parse_config(self):
+        self.tags = self.config.tags if self.config.tags else []
+        self.tags.append(f"lsf_cluster_name:{self.config.cluster_name}")
 
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
+    def process_tags(self, tag_mapping, line_data):
+        tags = []
+        for tag in tag_mapping:
+            val = line_data[tag['id']]
+            key = tag['name']
+            tags.append(f"{key}:{val}")
+
+        return tags
+
+    def submit_metrics(self, metric_mapping, line_data, tags):
+        for metric in metric_mapping:
+            val = line_data[metric['id']]
+            transformer = metric.get("transform")
+            if transformer:
+                val = transformer(val)
+
+            name = metric['name']
+            self.gauge(name, val, tags=self.tags + tags)
+
+    def collect_metrics_from_command(self, client_func, mapping):
+        output, err, exit_code = client_func()
+        cmd_name = mapping['name']
+        if exit_code != 0:
+            self.log.error("Failed to get %s output: %s", cmd_name, err)
+            return
+
+        output_lines = output.strip().split('\n')
+        headers = output_lines.pop(0)
+        if len(headers.split()) != mapping.get('expected_columns'):
+            self.log.warning("Skipping %s metrics; unexpected return value", cmd_name)
+            return
+
+        for line in output_lines:
+            line_data = line.split()
+            tags = self.process_tags(mapping.get('tags'), line_data)
+            self.submit_metrics(mapping.get('metrics'), line_data, tags)
+
+    def collect_clusters(self):
+        """
+        CLUSTER_NAME   STATUS   MASTER_HOST                          ADMIN    HOSTS  SERVERS
+        cluster1       ok       ip-11-21-111-198.ec2.internal     ec2-user        1        1
+        """
+        self.collect_metrics_from_command(self.client.lsclusters, LSCLUSTERS)
+
+    def collect_bhosts(self):
+        """
+        HOST_NAME          STATUS          JL/U    MAX  NJOBS    RUN  SSUSP  USUSP    RSV
+        ip-10-11-220-188.ec2.internal ok              -      4      0      0      0      0      0
+        """
+        self.collect_metrics_from_command(self.client.bhosts, BHOSTS)
 
     def check(self, _):
-        # type: (Any) -> None
-        # The following are useful bits of code to help new users get started.
+        _, err, exit_code = self.client.lsid()
+        if exit_code == 0:
+            self.gauge("can_connect", 1, self.tags)
+        else:
+            self.log.error("Failed to get lsid output: %s. Skipping check", err)
+            self.gauge("can_connect", 0, self.tags)
+            return
 
-        # Perform HTTP Requests with our HTTP wrapper.
-        # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(self.url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
-
-        # except (HTTPError, InvalidURL, ConnectionError, Timeout) as e:
-        #     self.log.debug("Could not connect", exc_info=True)
-
-        # except JSONDecodeError as e:
-        #    self.log.debug("Could not parse JSON", exc_info=True)
-
-        # except ValueError as e:
-        #    self.log.debug("Unexpected value", exc_info=True)
-
-        # This is how you submit metrics
-        # There are different types of metrics that you can submit (gauge, event).
-        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
-        # self.gauge("test", 1.23, tags=['foo:bar'])
-
-        # Perform database queries using the Query Manager
-        # self._query_manager.execute()
-
-        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs
-        # You can define a dictionary in the __init__ method.
-        # self.write_persistent_cache("key", "value")
-        # value = self.read_persistent_cache("key")
-        pass
+        self.client.start_monitoring(self.config.min_collection_interval)
+        self.collect_clusters()
+        self.collect_bhosts()

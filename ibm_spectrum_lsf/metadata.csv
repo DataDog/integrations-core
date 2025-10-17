@@ -1,1 +1,13 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+ibm_spectrum_lsf.can_connect,gauge,,,,,0,ibm_spectrum_lsf,lsf cluster status,,
+ibm_spectrum_lsf.cluster.hosts,gauge,,,,,lsf hosts,,
+ibm_spectrum_lsf.cluster.servers,gauge,,,,,lsf servers,,
+ibm_spectrum_lsf.cluster.status,gauge,,,,,0,ibm_spectrum_lsf,lsf cluster status,,
+ibm_spectrum_lsf.server.max_jobs,gauge,,,,,0,ibm_spectrum_lsf,lsf cluster status,,
+ibm_spectrum_lsf.server.num_jobs,gauge,,,,,0,ibm_spectrum_lsf,lsf cluster status,,
+ibm_spectrum_lsf.server.reserved,gauge,,,,,0,ibm_spectrum_lsf,lsf cluster status,,
+ibm_spectrum_lsf.server.running,gauge,,,,,0,ibm_spectrum_lsf,lsf cluster status,,
+ibm_spectrum_lsf.server.slots_per_user,gauge,,,,,0,ibm_spectrum_lsf,lsf cluster status,,
+ibm_spectrum_lsf.server.status,gauge,,,,,0,ibm_spectrum_lsf,lsf cluster status,,
+ibm_spectrum_lsf.server.suspended,gauge,,,,,0,ibm_spectrum_lsf,lsf cluster status,,
+ibm_spectrum_lsf.server.user_suspended,gauge,,,,,0,ibm_spectrum_lsf,lsf cluster status,,

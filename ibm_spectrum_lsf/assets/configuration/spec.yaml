@@ -7,4 +7,9 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: cluster_name
+      required: true
+      description: The exact name of the IBM cluster to monitor.
+      value:
+        type: string
     - template: instances/default

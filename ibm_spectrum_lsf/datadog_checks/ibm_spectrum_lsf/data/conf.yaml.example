@@ -13,7 +13,11 @@ init_config:
 #
 instances:
 
-  -
+    ## @param cluster_name - string - required
+    ## The exact name of the IBM cluster to monitor.
+    #
+  - cluster_name: <CLUSTER_NAME>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
