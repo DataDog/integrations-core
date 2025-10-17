@@ -1,0 +1,5 @@
+provides:
+  - id: cisco-aci-network-device-metrics
+    always_on: false
+  - id: cisco-aci-network-event-logs
+    always_on: false

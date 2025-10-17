@@ -1,1 +1,0 @@
-Always connect to pgbouncer using ClientCursor and simple query protocol.
