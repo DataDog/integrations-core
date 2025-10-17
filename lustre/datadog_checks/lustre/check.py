@@ -8,7 +8,6 @@ from ipaddress import ip_address
 from typing import Any, Dict, List, Set, Tuple, Union
 
 import yaml
-
 from datadog_checks.base import AgentCheck, is_affirmative
 
 from .constants import (
@@ -207,7 +206,7 @@ class LustreCheck(AgentCheck):
         cmd = f'{"sudo " if sudo else ""}{bin_path} {" ".join(args)}'
         try:
             self.log.debug('Running command: %s', cmd)
-            output = subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True)
+            output = subprocess.run(cmd, timeout=5, shell=False, capture_output=True, text=True)
             if not output.returncode == 0 and output.stderr:
                 self.log.debug(
                     'Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr
