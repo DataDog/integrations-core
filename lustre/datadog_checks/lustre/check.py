@@ -204,7 +204,9 @@ class LustreCheck(AgentCheck):
         if bin not in self._bin_mapping:
             raise ValueError('Unknown binary: {}'.format(bin))
         bin_path = self._bin_mapping[bin]
-        cmd = f'{"sudo " if sudo else ""}{bin_path} {" ".join(args)}'
+        cmd = [bin_path, *args]
+        if sudo:
+            cmd.insert(0, "sudo")
         try:
             self.log.debug('Running command: %s', cmd)
             output = subprocess.run(cmd, timeout=5, shell=False, capture_output=True, text=True)
