@@ -8,20 +8,21 @@ This integration ingests the following logs:
 - **Alerts**: Alerts logs highlight risks and threats identified by Obsidian Security using machine learning, expert rules, and other detection methods.
 - **Events**: Event logs capture activities occurring within cloud services, showing which actors performed actions and which targets were affected.
 
-Integrate Obsidian Security with Datadog to gain insights into audit, alerts and event logs using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate Obsidian Security with Datadog to gain insights into audit, alerts, and event logs using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration can be used with Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
 ### Generate API Token from the Obsidian Security
 
-1. Log into Obsidian Security using admin account and Navigate to Settings > API access tokens.
-2. Click the Create token and provide the following details:
-   - Token name: A name that can help you identify the token
-   - Expiry date: Choose **Forever**
-   - Token access > Role: Choose **API Role-Level Permissions**
-   - Service access: Enable **Full data access to all services and tenants**
-3. Click Submit. Copy the Token.
-4. Identify your Obsidian Security region by checking the hostname suffix of your URL:
+1. Log into Obsidian Security using admin account and navigate to **Settings** > **API access tokens**.
+2. Click **Create token** and provide the following details:
+   - Token name: A name that can help you identify the token.
+   - Expiry date: Choose **Forever**.
+   - **Token access** > **Role**: Choose **API Role-Level Permissions**.
+   - Service access: Enable **Full data access to all services and tenants**.
+3. Click **Submit**. 
+4. Copy the Token.
+5. Identify your Obsidian Security region by checking the hostname suffix of your URL:
    - \*.obsec.eu -> Europe
    - \*.sy.obsec.io -> Australia
    - \*.obsec.io -> America
