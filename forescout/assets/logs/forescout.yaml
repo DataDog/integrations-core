@@ -113,7 +113,7 @@ pipeline:
       grok:
         supportRules: >-
           _parse_header <%{integer}>(%{date("MMM  d
-          HH:mm:ss")|:timestamp}|%{date("MMM d HH:mm:ss")|:timestamp})
+          HH:mm:ss")|:timestamp}|%{date("MMM dd HH:mm:ss")|:timestamp})
           %{notSpace:appliance} %{regex(".*(?=\\[)"):identifier}\[%{integer}\]:
 
           _parse_additional_details %{data:additional_details}
@@ -173,7 +173,8 @@ pipeline:
       enabled: true
       categories:
         - filter:
-            query: "@evt.name:(bite-events OR scan-events OR lockdown-events OR block-events
+            query:
+              "@evt.name:(bite-events OR scan-events OR lockdown-events OR block-events
               OR email-worm-events)"
           name: threat-protection
         - filter:
