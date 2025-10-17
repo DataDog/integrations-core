@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "507d48b6-cfda-4f62-b95a-67de98a50cc6",
   "app_id": "amazon-app-mesh",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
