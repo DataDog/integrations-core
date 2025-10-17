@@ -6,6 +6,8 @@
 
 Integrate Trend Micro Cloud One with Datadog to gain insights into endpoint and workload security, file storage security, and network security events using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
+**Minimum Agent version:** 7.69.2
+
 ## Setup
 
 ### Log Collection Overview
@@ -13,13 +15,14 @@ Integrate Trend Micro Cloud One with Datadog to gain insights into endpoint and 
 **Note**: To collect all log types, you must configure both log collection methods.
 
 The following table shows the log collection methods, the logs collected, and the dashboards populated for each method.
+
 | Log Collection Method | Logs Collected | Dashboards Populated |
 |-----------------------------------------|---------------------------------------------------------------------------|------------------------------|
-| [Agent and Event Forwarder Configuration][8] | <li> Workload Security <ul> <li> System Events <li> Anti-Malware Events <li> Application Control Events <li> Firewall Events <li> Integrity Monitoring Events <li> Intrusion Prevention Events <li> Log Inspection Events <li> Device Control Events </ul> <li> Network Security <ul> <li> Reputation Events <li> IPS Events </ul> | <li> Trend Micro Cloud One - Workload Security Insights <li> Trend Micro Cloud One - System Events <li> Trend Micro Cloud One - Anti-Malware Events <li> Trend Micro Cloud One - Application Control and Device Control Events <li> Trend Micro Cloud One - Firewall Events <li> Trend Micro Cloud One - Integrity Monitoring Log Events <li> Trend Micro Cloud One - Intrusion Prevention Events <li> Trend Micro Cloud One - Log Inspection and Web Reputation Events <li> Trend Micro Cloud One - Network Security Insights |
-| [File Storage Security API Configuration][9] | <li> File Storage Security Events | <li> Trend Micro Cloud One - File Storage Security Insights |
+| [Agent and Event Forwarder Configuration][8] | **Workload Security**  <br>- System Events  <br>- Anti-Malware Events  <br>- Application Control Events  <br>- Firewall Events  <br>- Integrity Monitoring Events  <br>- Intrusion Prevention Events  <br>- Log Inspection Events  <br>- Device Control Events  <br><br>**Network Security**  <br>- Reputation Events  <br>- IPS Events | - Trend Micro Cloud One - Workload Security Insights  <br>- Trend Micro Cloud One - System Events  <br>- Trend Micro Cloud One - Anti-Malware Events  <br>- Trend Micro Cloud One - Application Control and Device Control Events  <br>- Trend Micro Cloud One - Firewall Events  <br>- Trend Micro Cloud One - Integrity Monitoring Log Events  <br>- Trend Micro Cloud One - Intrusion Prevention Events  <br>- Trend Micro Cloud One - Log Inspection and Web Reputation Events  <br>- Trend Micro Cloud One - Network Security Insights |
+| [File Storage Security API Configuration][9] | - File Storage Security Events | - Trend Micro Cloud One - File Storage Security Insights |
 
 ### Agent and Event Forwarder Configuration
-
+****
 #### Installation
 
 To install the Trend Micro Cloud One integration, run the following Agent installation command in your terminal, then complete the configuration steps. For more information, see the [Integration Management][3] documentation.
@@ -76,21 +79,17 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
    - **Facility**: Select `Local 0`.
 4. Click **OK**.
 5. Forward System events:
-   <ol type="i">
-      <li>Go to <strong>Administration</strong> > <strong>System Settings</strong> > <strong>Event Forwarding</strong>.</li>
-      <li>From Forward System Events to a remote computer (via Syslog) using configuration, select an existing configuration from dropdown.</li>
-      <li>Click <strong>Save</strong>.</li>
-   </ol>
+   - i. Go to **Administration** > **System Settings** > **Event Forwarding**.
+   - ii. From Forward System Events to a remote computer (via Syslog) using configuration, select an existing configuration from dropdown.
+   - iii. Click **Save**.
 6. Forward Security events:
-   <ol type="i">
-      <li>Go to <strong>Policies</strong>.</li>
-      <li>Double-click the policy whose events you want to push to Datadog.</li>
-      <li>Go to <strong>Settings</strong> > <strong>Event Forwarding</strong>.</li>
-      <li>Under Event Forwarding Frequency (from the Agent/Appliance), use Period between sending of events to select how often the security events are forwarded.</li>
-      <li>Under Event Forwarding Configuration (from the Agent/Appliance), use Anti-Malware Syslog Configuration and other protection modules' lists and select an existing Syslog configuration.</li>
-      <li>Click <strong>Save</strong>.</li>
-      <li>Repeat steps <strong>ii</strong> to <strong>vi</strong> for each base policy you want to push to Datadog.</li>
-   </ol>
+   - i. Go to **Policies**.
+   - ii. Double-click the policy whose events you want to push to Datadog.
+   - iii. Go to **Settings** > **Event Forwarding**.
+   - iv. Under Event Forwarding Frequency (from the Agent/Appliance), use Period between sending of events to select how often the security events are forwarded.
+   - v. Under Event Forwarding Configuration (from the Agent/Appliance), use Anti-Malware Syslog Configuration and other protection modules' lists and select an existing Syslog configuration.
+   - vi. Click **Save**.
+   - vii. Repeat steps **ii** to **vi** for each base policy you want to push to Datadog.
 
 #### Configure syslog message forwarding from Network Security
 
@@ -113,7 +112,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
    - **\<port>**: Same `TCP-PORT` configured in [Log Collection][10].
 
    ```bash
-   curl -X POST -k "https://network.<region>.cloudone.trendmicro.com/api/appliances/<appliances-id>/remotesyslogs" --header "api-version: v1" --header "Content-Type: application/json" --header "Authorization: ApiKey <api-key>" --header --data "{\"host\": \"<ip-address>\", \"port\": <port>, \"enabled\": true}"
+   curl -X POST -k "https://network.<region>.cloudone.trendmicro.com/api/appliances/<appliances-id>/remotesyslogs" --header "api-version: v1" --header "Content-Type: application/json" --header "Authorization: ApiKey <api-key>" --data "{\"host\": \"<ip-address>\", \"port\": <port>, \"enabled\": true}"
    ```
 
 9. Repeat the above step for each appliance you want to push to Datadog.

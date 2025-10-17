@@ -7,6 +7,8 @@ Get metrics from linux_proc_extras service in real time to:
 - Visualize and monitor linux_proc_extras states
 - Be notified about linux_proc_extras failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

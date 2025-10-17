@@ -34,22 +34,32 @@ jobs:
       run: |
             ddev config override
 
-    - name: Measure disk usage
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Define command
+      id: cmd
       run: |
-        cmd="ddev size status \
+        cmd="ddev -v size status \
         --commit ${{ github.event.workflow_run.head_sha }} \
         --format json"
 
-        # Send metrics to Datadog only on push to master
-        if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
+        if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.event.workflow_run.head_branch }}" = "master" ]; then 
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         fi
-        
-        $cmd
 
-        $cmd --compressed
+        echo "cmd=$cmd" >> $GITHUB_OUTPUT
+
+    - name: Measure disk usage (Uncompressed)
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "Running for uncompressed sizes"
+        ${{ steps.cmd.outputs.cmd }}
+        
+    - name: Measure disk usage (Compressed)
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "Running for compressed sizes"
+        ${{ steps.cmd.outputs.cmd }} --compressed
 
     - name: Upload JSON uncompressed sizes artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

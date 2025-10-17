@@ -4,6 +4,8 @@
 
 This check monitors [Flux][1] through the Datadog Agent. Flux is a set of continuous and progressive delivery solutions for Kubernetes that is open and extensible.
 
+**Minimum Agent version:** 7.49.1
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

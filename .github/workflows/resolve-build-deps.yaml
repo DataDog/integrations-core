@@ -64,7 +64,7 @@ jobs:
           REPO="${{ github.repository }}"
 
           CHANGED_FILES=$(gh api "repos/$REPO/compare/${{ steps.set_sha.outputs.prev_sha }}...${{ steps.set_sha.outputs.curr_sha }}" --paginate | \
-          jq -r '.files | map(.filename) | join(" ")')
+          jq -r 'select(.files != null) | .files | map(.filename) | join(" ")')
 
           echo "files_changed=$CHANGED_FILES" >> $GITHUB_OUTPUT
           echo "files_changed=$CHANGED_FILES"

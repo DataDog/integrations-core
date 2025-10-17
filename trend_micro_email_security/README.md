@@ -9,6 +9,8 @@ This integration ingests the following logs:
 
 Use out-of-the-box dashboards to visualize detailed insights into email traffic analysis, real-time threat detection, security detection and observation, and compliance monitoring.
 
+**Minimum Agent version:** 7.55.2
+
 ## Setup
 
 ### Generate API credentials in Trend Micro Email Security

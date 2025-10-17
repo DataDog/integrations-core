@@ -5,6 +5,8 @@
 Integrate Carbon Black Cloud with Datadog to gain insights into Alerts, Audit Logs, Auth Events, Endpoint Events and Watchlist Hits using pre-built dashboard visualizations. Additionally, integration includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security.
 
 
+**Minimum Agent version:** 7.67.1
+
 ## Setup
 
 ### Configure AWS S3 Bucket

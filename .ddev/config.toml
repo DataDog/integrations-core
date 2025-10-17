@@ -53,6 +53,8 @@ exclude = true
 [overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
 aerospike = ['Apache-2.0']
+# https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/identity/azure-identity/LICENSE
+azure-identity = ['MIT']
 # https://github.com/pyca/cryptography/blob/main/LICENSE
 cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
 # https://github.com/confluentinc/confluent-kafka-python/blob/master/LICENSE

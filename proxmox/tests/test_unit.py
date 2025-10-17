@@ -120,6 +120,7 @@ def test_resource_count_metrics(dd_run_check, aggregator, instance):
             'proxmox_server:http://localhost:8006/api2/json',
             'testing',
             'proxmox_type:node',
+            'proxmox_type:host',
             'proxmox_name:ip-122-82-3-112',
             'proxmox_id:node/ip-122-82-3-112',
         ],
@@ -328,6 +329,7 @@ def test_external_tags(dd_run_check, aggregator, instance, datadog_agent):
                 'proxmox_id:node/ip-122-82-3-112',
                 'proxmox_name:ip-122-82-3-112',
                 'proxmox_type:node',
+                'proxmox_type:host',
             ]
         },
     )

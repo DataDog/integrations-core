@@ -4,6 +4,8 @@
 
 This integration monitors the Local Machine certificates in the [Windows Certificate Store][1] to check whether any have expired.
 
+**Minimum Agent version:** 7.66.0
+
 ## Setup
 
 ### Installation

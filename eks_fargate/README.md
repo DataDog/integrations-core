@@ -21,6 +21,8 @@ If you have a mixed cluster of traditional EKS nodes and Fargate pods, you can m
 
 **Note**: Cloud Network Monitoring (CNM) is not supported for EKS Fargate.
 
+**Minimum Agent version:** 7.18.0
+
 ## Setup
 
 ### Prerequisites

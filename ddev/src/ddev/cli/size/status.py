@@ -78,7 +78,12 @@ def status(
             if commit:
                 from ddev.cli.size.utils.common_funcs import get_last_dependency_sizes_artifact
 
-                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat)
+                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat, ver, compressed)
+                if not dependency_sizes:
+                    app.display_error(
+                        "Could not find dependency sizes in the artifacts: falling back to local lockfiles"
+                    )
+
             parameters: CLIParameters = {
                 "app": app,
                 "platform": plat,
