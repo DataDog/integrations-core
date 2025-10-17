@@ -20,7 +20,6 @@ MOCK_INSTANCE = {
     "pc_port": 9440,
     "username": "admin",
     "password": "secret",
-    "tags": ["test:nutanix"],
 }
 
 

@@ -1,4 +1,0 @@
-{
-  "data": [],
-  "error": "404 Client Error: NOT FOUND for url: https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/dataprotection/v4.0/config/protection-policies?%24limit=50"
-}
