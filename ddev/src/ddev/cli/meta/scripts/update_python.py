@@ -17,6 +17,26 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
     from ddev.validation.tracker import ValidationTracker
 
+# Python.org URLs
+PYTHON_FTP_URL = "https://www.python.org/ftp/python/"
+PYTHON_MACOS_PKG_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/python-{version}-macos11.pkg"
+PYTHON_SBOM_LINUX_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz.spdx.json"
+PYTHON_SBOM_WINDOWS_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/python-{version}-amd64.exe.spdx.json"
+
+# Regex patterns for Dockerfile updates
+# Linux: ENV PYTHON3_VERSION=3.13.7 (no quotes, matches version at end of line)
+LINUX_VERSION_PATTERN = re.compile(r'(ENV PYTHON3_VERSION=)(\d+\.\d+\.\d+)$', re.MULTILINE)
+# Windows: ENV PYTHON_VERSION="3.13.7" (with quotes)
+WINDOWS_VERSION_PATTERN = re.compile(r'(ENV PYTHON_VERSION=")(\d+\.\d+\.\d+)(")', re.MULTILINE)
+
+# SHA256 patterns must match the Python-specific ones:
+# Linux: SHA256 that comes after VERSION="${PYTHON3_VERSION}"
+LINUX_SHA_PATTERN = re.compile(r'VERSION="\$\{PYTHON3_VERSION\}"[^\n]*\n[^\n]*SHA256="([0-9a-f]+)"', re.MULTILINE)
+# Windows: -Hash in the same RUN block with python-$Env:PYTHON_VERSION-amd64.exe
+WINDOWS_SHA_PATTERN = re.compile(
+    r'python-\$Env:PYTHON_VERSION-amd64\.exe[^\n]*\n[^\n]*-Hash\s+\'([0-9a-f]+)\'', re.MULTILINE
+)
+
 
 @click.command('update-python-version', short_help='Upgrade the Python version used in the repository.')
 @click.pass_obj
@@ -125,19 +145,6 @@ def update_dockerfiles_python_version(
         tracker.error(('Dockerfiles',), message=f'Missing SHA256 hash entry: {error}')
         return
 
-    # Linux: ENV PYTHON3_VERSION=3.13.7 (no quotes, matches version at end of line)
-    # Windows: ENV PYTHON_VERSION="3.13.7" (with quotes)
-    linux_version_pattern = re.compile(r'(ENV PYTHON3_VERSION=)(\d+\.\d+\.\d+)$', re.MULTILINE)
-    windows_version_pattern = re.compile(r'(ENV PYTHON_VERSION=")(\d+\.\d+\.\d+)(")', re.MULTILINE)
-
-    # SHA256 patterns must match the Python-specific ones:
-    # Linux: SHA256 that comes after VERSION="${PYTHON3_VERSION}"
-    # Windows: -Hash in the same RUN block with python-$Env:PYTHON_VERSION-amd64.exe
-    linux_sha_pattern = re.compile(r'VERSION="\$\{PYTHON3_VERSION\}"[^\n]*\n[^\n]*SHA256="([0-9a-f]+)"', re.MULTILINE)
-    windows_sha_pattern = re.compile(
-        r'python-\$Env:PYTHON_VERSION-amd64\.exe[^\n]*\n[^\n]*-Hash\s+\'([0-9a-f]+)\'', re.MULTILINE
-    )
-
     for dockerfile in dockerfiles:
         if not dockerfile.exists():
             tracker.error((dockerfile.name,), message=f'File not found: {dockerfile}')
@@ -150,8 +157,8 @@ def update_dockerfiles_python_version(
             continue
 
         is_windows = 'windows-x86_64' in dockerfile.parts
-        version_pattern = windows_version_pattern if is_windows else linux_version_pattern
-        sha_pattern = windows_sha_pattern if is_windows else linux_sha_pattern
+        version_pattern = WINDOWS_VERSION_PATTERN if is_windows else LINUX_VERSION_PATTERN
+        sha_pattern = WINDOWS_SHA_PATTERN if is_windows else LINUX_SHA_PATTERN
         target_sha = windows_sha if is_windows else linux_sha
 
         def replace_version(match: re.Match[str], _is_windows=is_windows) -> str:
@@ -211,7 +218,7 @@ def update_macos_python_version(app: Application, new_version: str, tracker: Val
         tracker.error(('macOS workflow',), message='Could not find PYTHON3_DOWNLOAD_URL')
         return
 
-    new_url = f'https://www.python.org/ftp/python/{new_version}/python-{new_version}-macos11.pkg'
+    new_url = PYTHON_MACOS_PKG_URL_TEMPLATE.format(version=new_version)
     indent = target_line[: target_line.index('PYTHON3_DOWNLOAD_URL')]
     new_line = f'{indent}PYTHON3_DOWNLOAD_URL: "{new_url}"'
 
@@ -270,11 +277,9 @@ def get_latest_python_version(app: Application, major_minor: str) -> str | None:
     Returns:
         Latest version string (e.g., "3.13.1") or None if not found
     """
-    url = "https://www.python.org/ftp/python/"
-
     try:
         # Explicitly verify SSL/TLS certificate
-        response = requests.get(url, timeout=30, verify=True)
+        response = requests.get(PYTHON_FTP_URL, timeout=30, verify=True)
         response.raise_for_status()
     except requests.RequestException as e:
         app.display_error(f"Error fetching Python versions: {e}")
@@ -328,18 +333,13 @@ def get_python_sha256_hashes(app: Application, version: str) -> dict[str, str]:
     if not validate_version_string(version):
         raise ValueError(f"Invalid version format: {version}")
 
-    # Steps:
-    # 1. Construct SBOM URLs for the files we need:
-    #    - Linux source tarball:
-    #      https://www.python.org/ftp/python/{version}/Python-{version}.tgz.spdx.json
-    #    - Windows AMD64 installer:
-    #      https://www.python.org/ftp/python/{version}/python-{version}-amd64.exe.spdx.json
-    SBOM_URLS = [
-        f"https://www.python.org/ftp/python/{version}/Python-{version}.tgz.spdx.json",
-        f"https://www.python.org/ftp/python/{version}/python-{version}-amd64.exe.spdx.json",
+    # Construct SBOM URLs for the files we need
+    sbom_urls = [
+        PYTHON_SBOM_LINUX_URL_TEMPLATE.format(version=version),
+        PYTHON_SBOM_WINDOWS_URL_TEMPLATE.format(version=version),
     ]
 
-    # 2. Download and parse each SBOM JSON file
+    # Download and parse each SBOM JSON file
     async def get_sbom_data(client, url):
         try:
             # Explicitly verify SSL/TLS certificates
@@ -362,7 +362,7 @@ def get_python_sha256_hashes(app: Application, version: str) -> dict[str, str]:
         async with httpx.AsyncClient(verify=True) as client:
             return await asyncio.gather(*(get_sbom_data(client, url) for url in urls))
 
-    sbom_packages = asyncio.run(fetch_sbom_data(SBOM_URLS))
+    sbom_packages = asyncio.run(fetch_sbom_data(sbom_urls))
 
     # Find the CPython package in the SBOM packages
     linux_cpython_package = next((package for package in sbom_packages[0] if package.get('name') == "CPython"), None)
