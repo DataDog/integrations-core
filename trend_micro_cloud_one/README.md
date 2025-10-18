@@ -15,9 +15,10 @@ Integrate Trend Micro Cloud One with Datadog to gain insights into endpoint and 
 **Note**: To collect all log types, you must configure both log collection methods.
 
 The following table shows the log collection methods, the logs collected, and the dashboards populated for each method.
+
 | Log Collection Method | Logs Collected | Dashboards Populated |
 |-----------------------------------------|---------------------------------------------------------------------------|------------------------------|
-| [Agent and Event Forwarder Configuration][8] | **Workload Security** <br>- System Events <br>- Anti-Malware Events <br>- Application Control Events <br>- Firewall Events <br>- Integrity Monitoring Events <br>- Intrusion Prevention Events <br>- Log Inspection Events <br>- Device Control Events <br><br>**Network Security** <br>- Reputation Events <br>- IPS Events | - Trend Micro Cloud One - Workload Security Insights <br>- Trend Micro Cloud One - System Events <br>- Trend Micro Cloud One - Anti-Malware Events <br>- Trend Micro Cloud One - Application Control and Device Control Events <br>- Trend Micro Cloud One - Firewall Events <br>- Trend Micro Cloud One - Integrity Monitoring Log Events <br>- Trend Micro Cloud One - Intrusion Prevention Events <br>- Trend Micro Cloud One - Log Inspection and Web Reputation Events <br>- Trend Micro Cloud One - Network Security Insights |
+| [Agent and Event Forwarder Configuration][8] | **Workload Security**  <br>- System Events  <br>- Anti-Malware Events  <br>- Application Control Events  <br>- Firewall Events  <br>- Integrity Monitoring Events  <br>- Intrusion Prevention Events  <br>- Log Inspection Events  <br>- Device Control Events  <br><br>**Network Security**  <br>- Reputation Events  <br>- IPS Events | - Trend Micro Cloud One - Workload Security Insights  <br>- Trend Micro Cloud One - System Events  <br>- Trend Micro Cloud One - Anti-Malware Events  <br>- Trend Micro Cloud One - Application Control and Device Control Events  <br>- Trend Micro Cloud One - Firewall Events  <br>- Trend Micro Cloud One - Integrity Monitoring Log Events  <br>- Trend Micro Cloud One - Intrusion Prevention Events  <br>- Trend Micro Cloud One - Log Inspection and Web Reputation Events  <br>- Trend Micro Cloud One - Network Security Insights |
 | [File Storage Security API Configuration][9] | - File Storage Security Events | - Trend Micro Cloud One - File Storage Security Insights |
 
 ### Agent and Event Forwarder Configuration
@@ -77,18 +78,18 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_cloud_
    - Enable Include time zone in events.
    - **Facility**: Select `Local 0`.
 4. Click **OK**.
-5. Forward System events:<br>
-   i. Go to **Administration** > **System Settings** > **Event Forwarding**.<br>
-   ii. From Forward System Events to a remote computer (via Syslog) using configuration, select an existing configuration from dropdown.<br>
-   iii. Click **Save**.
-6. Forward Security events:<br>
-   i. Go to **Policies**.<br>
-   ii. Double-click the policy whose events you want to push to Datadog.<br>
-   iii. Go to **Settings** > **Event Forwarding**.<br>
-   iv. Under Event Forwarding Frequency (from the Agent/Appliance), use Period between sending of events to select how often the security events are forwarded.<br>
-   v. Under Event Forwarding Configuration (from the Agent/Appliance), use Anti-Malware Syslog Configuration and other protection modules' lists and select an existing Syslog configuration.<br>
-   vi. Click **Save**.<br>
-   vii. Repeat steps **ii** to **vi** for each base policy you want to push to Datadog.
+5. Forward System events:
+   - i. Go to **Administration** > **System Settings** > **Event Forwarding**.
+   - ii. From Forward System Events to a remote computer (via Syslog) using configuration, select an existing configuration from dropdown.
+   - iii. Click **Save**.
+6. Forward Security events:
+   - i. Go to **Policies**.
+   - ii. Double-click the policy whose events you want to push to Datadog.
+   - iii. Go to **Settings** > **Event Forwarding**.
+   - iv. Under Event Forwarding Frequency (from the Agent/Appliance), use Period between sending of events to select how often the security events are forwarded.
+   - v. Under Event Forwarding Configuration (from the Agent/Appliance), use Anti-Malware Syslog Configuration and other protection modules' lists and select an existing Syslog configuration.
+   - vi. Click **Save**.
+   - vii. Repeat steps **ii** to **vi** for each base policy you want to push to Datadog.
 
 #### Configure syslog message forwarding from Network Security
 

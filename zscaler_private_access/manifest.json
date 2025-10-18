@@ -65,7 +65,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 56444351,
       "source_type_name": "Zscaler Private Access",
       "configuration": {
