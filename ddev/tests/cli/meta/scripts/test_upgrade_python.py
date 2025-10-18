@@ -4,14 +4,14 @@
 from .conftest import NEW_PYTHON_VERSION, OLD_PYTHON_VERSION
 
 
-def test_upgrade_python(fake_repo, ddev):
+def test_update_py_config(fake_repo, ddev):
     constant_file = fake_repo.path / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
     contents = constant_file.read_text()
 
     assert f'PYTHON_VERSION = {OLD_PYTHON_VERSION!r}' in contents
     assert f'PYTHON_VERSION = {NEW_PYTHON_VERSION!r}' not in contents
 
-    result = ddev('meta', 'scripts', 'upgrade-python', NEW_PYTHON_VERSION)
+    result = ddev('meta', 'scripts', 'update-python-config', NEW_PYTHON_VERSION)
 
     assert result.exit_code == 0, result.output
     assert result.output.endswith('Python upgrades\n\nPassed: 9\n')

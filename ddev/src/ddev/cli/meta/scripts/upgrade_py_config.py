@@ -15,19 +15,19 @@ if TYPE_CHECKING:
     from ddev.src.ddev.validation.tracker import ValidationTracker
 
 
-@click.command('upgrade-python', short_help='Upgrade the Python version throughout the repository')
+@click.command('update-python-config', short_help='Update Python version references in repository config files')
 @click.argument('version')
 @click.pass_obj
-def upgrade_python(app: Application, version: str):
-    """Upgrade the Python version of all test environments.
+def update_python_config(app: Application, version: str):
+    """Update Python version references in config files across all integrations.
 
     \b
-    `$ ddev meta scripts upgrade-python 3.11`
+    `$ ddev meta scripts update-python-config 3.11`
     """
 
     from ddev.repo.constants import PYTHON_VERSION as old_version
 
-    tracker = app.create_validation_tracker('Python upgrades')
+    tracker = app.create_validation_tracker('Python config updates')
 
     for target in integrations(app):
         update_hatch_file(app, target.path, version, old_version, tracker)
