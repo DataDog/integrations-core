@@ -11,7 +11,6 @@ from ddev.cli.size.utils.common_funcs import (
     compress,
     convert_to_human_readable_size,
     extract_version_from_about_py,
-    format_modules,
     get_dependencies_from_json,
     get_dependencies_list,
     get_dependencies_sizes,
@@ -21,7 +20,7 @@ from ddev.cli.size.utils.common_funcs import (
     get_valid_versions,
     is_correct_dependency,
     is_valid_integration_file,
-    parse_sizes_json,
+    parse_dep_sizes_json,
     save_csv,
     save_json,
     save_markdown,
@@ -91,7 +90,7 @@ def test_get_valid_versions():
         pytest.param("windows-x86_64", "3.13", "windows-x86_64_3.12.txt", False, id="incorrect_version"),
     ],
 )
-def test_is_correct_dependency(platform, version, dependency_file_name, expected):
+def test_is_correct_dependency(platform: str, version: str, dependency_file_name: str, expected: bool):
     assert is_correct_dependency(platform, version, dependency_file_name) is expected
 
 
@@ -151,7 +150,12 @@ def test_get_dependencies_sizes():
     mock_response.__exit__.return_value = None
     with patch("requests.get", return_value=mock_response):
         file_data = get_dependencies_sizes(
-            ["dependency1"], ["https://example.com/dependency1/dependency1-1.1.1-.whl"], ["1.1.1"], True
+            ["dependency1"],
+            ["https://example.com/dependency1/dependency1-1.1.1-.whl"],
+            ["1.1.1"],
+            True,
+            "linux-x86_64",
+            "3.12",
         )
 
     assert file_data == [
@@ -161,36 +165,10 @@ def test_get_dependencies_sizes():
             "Size_Bytes": 11,
             "Size": convert_to_human_readable_size(11),
             "Type": "Dependency",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.12",
         }
     ]
-
-
-def test_format_modules():
-    modules = [
-        {"Name": "module1", "Type": "A", "Size_Bytes": 1500},
-        {"Name": "module2", "Type": "B", "Size_Bytes": 3000},
-    ]
-    platform = "linux-aarch64"
-    version = "3.12"
-
-    expected_output = [
-        {
-            "Name": "module1",
-            "Type": "A",
-            "Size_Bytes": 1500,
-            "Platform": "linux-aarch64",
-            "Python_Version": "3.12",
-        },
-        {
-            "Name": "module2",
-            "Type": "B",
-            "Size_Bytes": 3000,
-            "Platform": "linux-aarch64",
-            "Python_Version": "3.12",
-        },
-    ]
-
-    assert format_modules(modules, platform, version) == expected_output
 
 
 def test_get_files_grouped_and_with_versions():
@@ -227,7 +205,7 @@ def test_get_files_grouped_and_with_versions():
         ),
         patch("ddev.cli.size.utils.common_funcs.check_python_version", return_value=True),
     ):
-        result = get_files(repo_path, compressed=False, py_version="3.12")
+        result = get_files(repo_path, compressed=False, py_version="3.12", platform="linux-x86_64")
 
     expected = [
         {
@@ -236,6 +214,8 @@ def test_get_files_grouped_and_with_versions():
             "Size_Bytes": 3000,
             "Size": "2.93 KB",
             "Type": "Integration",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.12",
         },
         {
             "Name": "integration2",
@@ -243,6 +223,8 @@ def test_get_files_grouped_and_with_versions():
             "Size_Bytes": 3000,
             "Size": "2.93 KB",
             "Type": "Integration",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.12",
         },
     ]
 
@@ -368,14 +350,14 @@ def test_save_markdown():
         pytest.param("not_version = 'not_defined'", "", id="version_not_present"),
     ],
 )
-def test_extract_version_from_about_py(file_content, expected_version):
+def test_extract_version_from_about_py(file_content: str, expected_version: str):
     fake_path = Path("some") / "module" / "__about__.py"
     with patch("ddev.cli.size.utils.common_funcs.open", mock_open(read_data=file_content)):
         version = extract_version_from_about_py(str(fake_path))
     assert version == expected_version
 
 
-def test_parse_sizes_json(tmp_path):
+def test_parse_dep_sizes_json(tmp_path: Path):
     compressed_data = json.dumps(
         [
             {
@@ -385,14 +367,7 @@ def test_parse_sizes_json(tmp_path):
                 "Type": "Dependency",
                 "Platform": "linux-x86_64",
                 "Python_Version": "3.12",
-            },
-            {
-                "Name": "dep2",
-                "Size_Bytes": 123,
-                "Size": "2 B",
-                "Type": "Dependency",
-                "Platform": "macos-x86_64",
-                "Python_Version": "3.12",
+                "Version": "1.1.1",
             },
             {
                 "Name": "module1",
@@ -401,6 +376,7 @@ def test_parse_sizes_json(tmp_path):
                 "Type": "Integration",
                 "Platform": "linux-x86_64",
                 "Python_Version": "3.12",
+                "Version": "1.1.2",
             },
         ]
     )
@@ -408,16 +384,15 @@ def test_parse_sizes_json(tmp_path):
     expected_output = {
         "dep1": {
             "compressed": 123,
-            "compression": True,
-            "version": None,
-        }
+            "version": "1.1.1",
+        },
     }
     compressed_json_path = tmp_path / "compressed.json"
     compressed_json_path.write_text(compressed_data)
 
-    result = parse_sizes_json(compressed_json_path, "linux-x86_64", "3.12", True)
+    result = parse_dep_sizes_json(compressed_json_path, "linux-x86_64", "3.12", True)
 
-    assert result == expected_output
+    assert dict(sorted(result.items())) == dict(sorted(expected_output.items()))
 
 
 def test_get_dependencies_from_json():
@@ -426,8 +401,24 @@ def test_get_dependencies_from_json():
         '"dep2": {"compressed": 10, "uncompressed": 20, "version": "1.1.1"}}'
     )
     expected = [
-        {"Name": "dep1", "Version": "1.1.1", "Size_Bytes": 1, "Size": "1 B", "Type": "Dependency"},
-        {"Name": "dep2", "Version": "1.1.1", "Size_Bytes": 10, "Size": "10 B", "Type": "Dependency"},
+        {
+            "Name": "dep1",
+            "Version": "1.1.1",
+            "Size_Bytes": 1,
+            "Size": "1 B",
+            "Type": "Dependency",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.12",
+        },
+        {
+            "Name": "dep2",
+            "Version": "1.1.1",
+            "Size_Bytes": 10,
+            "Size": "10 B",
+            "Type": "Dependency",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.12",
+        },
     ]
 
     with patch('ddev.utils.fs.Path') as mock_path:
