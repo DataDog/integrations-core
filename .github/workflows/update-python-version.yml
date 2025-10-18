@@ -37,8 +37,8 @@ jobs:
     - name: Upgrade Python version
       id: update
       run: |-
-        # Run the update command, it will exit with 0 if already at latest
-        ddev meta scripts update-python-version || true
+        # Run the update command - exits 0 if already at latest, 1 on errors
+        ddev meta scripts upgrade-python-version
         
         # Check if there are any changes
         if git diff --quiet; then
