@@ -58,7 +58,7 @@ def update_python_version(app: Application):
     tracker = app.create_validation_tracker('Python version updates')
 
     # Check for new version
-    latest_version: str | None = get_latest_python_version(app, major_minor)
+    latest_version = get_latest_python_version(app, major_minor)
     if not latest_version:
         app.display_error(f"Could not find latest Python version for {major_minor}")
         app.abort()
@@ -311,10 +311,7 @@ def get_latest_python_version(app: Application, major_minor: str) -> str | None:
 def get_python_sha256_hashes(app: Application, version: str) -> dict[str, str]:
     """
     Fetch SHA256 hashes for Python release artifacts using SBOM files.
-
-    Python.org provides SBOM (Software Bill of Materials) files in SPDX JSON format
-    for each release artifact. These files contain SHA256 checksums.
-
+    
     Args:
         version: Python version string (e.g., "3.13.7")
 
@@ -358,7 +355,7 @@ def get_python_sha256_hashes(app: Application, version: str) -> dict[str, str]:
             raise RuntimeError(f'Error processing URL {url}: {e}') from e
 
     async def fetch_sbom_data(urls):
-        # Create client with explicit SSL verification
+
         async with httpx.AsyncClient(verify=True) as client:
             return await asyncio.gather(*(get_sbom_data(client, url) for url in urls))
 
