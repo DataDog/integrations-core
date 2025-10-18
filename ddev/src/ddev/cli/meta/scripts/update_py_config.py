@@ -22,7 +22,7 @@ def update_python_config(app: Application, version: str):
     """Upgrade the Python version of all test environments.
 
     \b
-    `$ ddev meta scripts upgrade-python 3.11`
+    `$ ddev meta scripts update-python-config 3.11`
     """
 
     from ddev.repo.constants import PYTHON_VERSION as old_version

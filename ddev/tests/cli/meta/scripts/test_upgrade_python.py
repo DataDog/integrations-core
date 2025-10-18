@@ -79,21 +79,21 @@ def test_update_python_version_success(fake_repo, ddev, mocker):
     """Test successful Python version update."""
     setup_python_update_files(fake_repo)
     # Mock network calls
-    mocker.patch('ddev.cli.meta.scripts.update_python.get_latest_python_version', return_value='3.13.9')
+    mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value='3.13.9')
     mocker.patch(
-        'ddev.cli.meta.scripts.update_python.get_python_sha256_hashes',
+        'ddev.cli.meta.scripts.upgrade_python.get_python_sha256_hashes',
         return_value={
             'linux_source_sha256': 'c4c066af19c98fb7835d473bebd7e23be84f6e9874d47db9e39a68ee5d0ce35c',
             'windows_amd64_sha256': '200ddff856bbff949d2cc1be42e8807c07538abd6b6966d5113a094cf628c5c5',
         },
     )
 
-    result = ddev('meta', 'scripts', 'update-python-version')
+    result = ddev('meta', 'scripts', 'upgrade-python-version')
 
     assert result.exit_code == 0, result.output
     assert 'Updating Python from 3.13.7 to 3.13.9' in result.output
     assert 'Passed: 5' in result.output
-    assert 'Python version updated from 3.13.7 to 3.13.9' in result.output
+    assert 'Python version upgraded from 3.13.7 to 3.13.9' in result.output
 
     # Verify constants.py was updated
     constants_file = fake_repo.path / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
@@ -124,9 +124,9 @@ def test_update_python_version_success(fake_repo, ddev, mocker):
 
 def test_update_python_version_already_latest(fake_repo, ddev, mocker):
     setup_python_update_files(fake_repo)
-    mocker.patch('ddev.cli.meta.scripts.update_python.get_latest_python_version', return_value='3.13.7')
+    mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value='3.13.7')
 
-    result = ddev('meta', 'scripts', 'update-python-version')
+    result = ddev('meta', 'scripts', 'upgrade-python-version')
 
     assert result.exit_code == 0, result.output
     assert 'Already at latest Python version: 3.13.7' in result.output
@@ -134,9 +134,9 @@ def test_update_python_version_already_latest(fake_repo, ddev, mocker):
 
 def test_update_python_version_no_new_version_found(fake_repo, ddev, mocker):
     setup_python_update_files(fake_repo)
-    mocker.patch('ddev.cli.meta.scripts.update_python.get_latest_python_version', return_value=None)
+    mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value=None)
 
-    result = ddev('meta', 'scripts', 'update-python-version')
+    result = ddev('meta', 'scripts', 'upgrade-python-version')
 
     assert result.exit_code == 1, result.output
     assert 'Could not find latest Python version' in result.output
@@ -144,13 +144,15 @@ def test_update_python_version_no_new_version_found(fake_repo, ddev, mocker):
 
 def test_update_python_version_invalid_hash_format(fake_repo, ddev, mocker):
     setup_python_update_files(fake_repo)
-    mocker.patch('ddev.cli.meta.scripts.update_python.get_latest_python_version', return_value='3.13.9')
+    mocker.patch('ddev.cli.meta.scripts.upgrade_python.get_latest_python_version', return_value='3.13.9')
+    # Hash validation happens inside get_python_sha256_hashes, so it raises ValueError
     mocker.patch(
-        'ddev.cli.meta.scripts.update_python.get_python_sha256_hashes',
-        return_value={'linux_source_sha256': 'not-a-valid-hash', 'windows_amd64_sha256': 'also-invalid'},
+        'ddev.cli.meta.scripts.upgrade_python.get_python_sha256_hashes',
+        side_effect=ValueError('Invalid Linux SHA256 hash format from SBOM: not-a-valid-hash'),
     )
 
-    result = ddev('meta', 'scripts', 'update-python-version')
+    result = ddev('meta', 'scripts', 'upgrade-python-version')
 
     assert result.exit_code == 1, result.output
-    assert 'Invalid Linux SHA256 hash format' in result.output or 'Invalid Windows SHA256 hash format' in result.output
+    assert 'Failed to fetch' in result.output
+    assert 'Invalid Linux SHA256 hash format' in result.output

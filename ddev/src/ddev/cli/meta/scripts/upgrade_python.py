@@ -38,9 +38,9 @@ WINDOWS_SHA_PATTERN = re.compile(
 )
 
 
-@click.command('update-python-version', short_help='Upgrade the Python version used in the repository.')
+@click.command('upgrade-python-version', short_help='Upgrade the Python version used in the repository.')
 @click.pass_obj
-def update_python_version(app: Application):
+def upgrade_python_version(app: Application):
     """Upgrade the Python version used in the repository.
 
     Automatically detects the latest Python version, fetches official SHA256 hashes,
@@ -50,23 +50,17 @@ def update_python_version(app: Application):
     - .github/workflows/resolve-build-deps.yaml (macOS)
 
     \b
-    `$ ddev meta scripts update-python-version`
+    `$ ddev meta scripts upgrade-python-version`
     """
     from ddev.repo.constants import PYTHON_VERSION as major_minor
     from ddev.repo.constants import PYTHON_VERSION_FULL as current_version
 
-    tracker = app.create_validation_tracker('Python version updates')
+    tracker = app.create_validation_tracker('Python version upgrades')
 
     # Check for new version
     latest_version = get_latest_python_version(app, major_minor)
     if not latest_version:
         app.display_error(f"Could not find latest Python version for {major_minor}")
-        app.abort()
-        return  # Unreachable but helps type checker
-
-    # Validate version string format for security (prevent injection)
-    if not validate_version_string(latest_version):
-        app.display_error(f"Invalid version format detected: {latest_version}")
         app.abort()
         return  # Unreachable but helps type checker
 
@@ -76,7 +70,7 @@ def update_python_version(app: Application):
 
     app.display_info(f"Updating Python from {current_version} to {latest_version}")
 
-    # Fetch hashes
+    # Fetch and validate hashes (validation happens inside get_python_sha256_hashes)
     try:
         new_version_hashes = get_python_sha256_hashes(app, latest_version)
     except Exception as e:
@@ -85,21 +79,10 @@ def update_python_version(app: Application):
         app.abort()
         return  # Unreachable but helps type checker
 
-    # Validate hashes
-    if not validate_sha256(new_version_hashes.get('linux_source_sha256', '')):
-        tracker.error(('SHA256 validation',), message="Invalid Linux SHA256 hash format")
-    if not validate_sha256(new_version_hashes.get('windows_amd64_sha256', '')):
-        tracker.error(('SHA256 validation',), message="Invalid Windows SHA256 hash format")
-
-    if tracker.errors:
-        tracker.display()
-        app.abort()
-        return  # Unreachable but helps type checker
-
     # Perform updates
-    update_python_version_full_constant(app, latest_version, tracker)
-    update_dockerfiles_python_version(app, latest_version, new_version_hashes, tracker)
-    update_macos_python_version(app, latest_version, tracker)
+    upgrade_python_version_full_constant(app, latest_version, tracker)
+    upgrade_dockerfiles_python_version(app, latest_version, new_version_hashes, tracker)
+    upgrade_macos_python_version(app, latest_version, tracker)
 
     # Display results
     tracker.display()
@@ -107,8 +90,9 @@ def update_python_version(app: Application):
     if tracker.errors:
         app.display_warning("Some updates failed. Please review the errors above.")
         app.abort()
+        return  # Unreachable but helps type checker
 
-    app.display_success(f"Python version updated from {current_version} to {latest_version}")
+    app.display_success(f"Python version upgraded from {current_version} to {latest_version}")
 
 
 def validate_version_string(version: str) -> bool:
@@ -129,7 +113,82 @@ def validate_sha256(hash_str: str) -> bool:
     return bool(re.match(r'^[0-9a-f]{64}$', hash_str))
 
 
-def update_dockerfiles_python_version(
+def read_file_safely(file_path, file_label: str, tracker: ValidationTracker) -> str | None:
+    """
+    Read file with error handling.
+
+    Args:
+        file_path: Path to the file
+        file_label: Label for error messages
+        tracker: Validation tracker for error reporting
+
+    Returns:
+        File content as string, or None if an error occurred
+    """
+    if not file_path.exists():
+        tracker.error((file_label,), message=f'File not found: {file_path}')
+        return None
+
+    try:
+        return file_path.read_text()
+    except Exception as e:
+        tracker.error((file_label,), message=f'Failed to read: {e}')
+        return None
+
+
+def write_file_safely(file_path, content: str, file_label: str, tracker: ValidationTracker) -> bool:
+    """
+    Write file with error handling.
+
+    Args:
+        file_path: Path to the file
+        content: Content to write
+        file_label: Label for error messages
+        tracker: Validation tracker for success/error reporting
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        file_path.write_text(content)
+        tracker.success()
+        return True
+    except Exception as e:
+        tracker.error((file_label,), message=f'Failed to write: {e}')
+        return False
+
+
+def extract_sha256_from_sbom(packages: list, platform_name: str) -> str:
+    """
+    Extract SHA256 hash from SBOM packages.
+
+    Args:
+        packages: List of packages from SBOM
+        platform_name: Platform name for error messages (e.g., "Linux", "Windows")
+
+    Returns:
+        SHA256 hash string
+
+    Raises:
+        ValueError: If package, checksum, or hash format is invalid
+    """
+    cpython_package = next((pkg for pkg in packages if pkg.get('name') == "CPython"), None)
+    if cpython_package is None:
+        raise ValueError(f"Could not find CPython package in {platform_name} SBOM")
+
+    checksums = cpython_package.get('checksums', [])
+    checksum = next((cs for cs in checksums if cs.get('algorithm') == "SHA256"), None)
+    if checksum is None:
+        raise ValueError(f"Could not find SHA256 checksum in {platform_name} SBOM")
+
+    hash_value = checksum.get('checksumValue', '')
+    if not validate_sha256(hash_value):
+        raise ValueError(f"Invalid {platform_name} SHA256 hash format from SBOM: {hash_value}")
+
+    return hash_value
+
+
+def upgrade_dockerfiles_python_version(
     app: Application, new_version: str, hashes: dict[str, str], tracker: ValidationTracker
 ):
     dockerfiles = [
@@ -146,14 +205,8 @@ def update_dockerfiles_python_version(
         return
 
     for dockerfile in dockerfiles:
-        if not dockerfile.exists():
-            tracker.error((dockerfile.name,), message=f'File not found: {dockerfile}')
-            continue
-
-        try:
-            content = dockerfile.read_text()
-        except Exception as e:
-            tracker.error((dockerfile.name,), message=f'Failed to read: {e}')
+        content = read_file_safely(dockerfile, dockerfile.name, tracker)
+        if content is None:
             continue
 
         is_windows = 'windows-x86_64' in dockerfile.parts
@@ -192,24 +245,14 @@ def update_dockerfiles_python_version(
         if apply_substitution(sha_pattern, replace_sha, 'Could not find SHA256 pattern') is None:
             continue
 
-        try:
-            dockerfile.write_text(content)
-            tracker.success()
-        except Exception as e:
-            tracker.error((dockerfile.name,), message=f'Failed to write: {e}')
+        write_file_safely(dockerfile, content, dockerfile.name, tracker)
 
 
-def update_macos_python_version(app: Application, new_version: str, tracker: ValidationTracker):
+def upgrade_macos_python_version(app: Application, new_version: str, tracker: ValidationTracker):
     macos_python_file = app.repo.path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
 
-    if not macos_python_file.exists():
-        tracker.error(('macOS workflow',), message=f'File not found: {macos_python_file}')
-        return
-
-    try:
-        content = macos_python_file.read_text()
-    except Exception as e:
-        tracker.error(('macOS workflow',), message=f'Failed to read: {e}')
+    content = read_file_safely(macos_python_file, 'macOS workflow', tracker)
+    if content is None:
         return
 
     target_line = next((line for line in content.splitlines() if 'PYTHON3_DOWNLOAD_URL' in line), None)
@@ -226,25 +269,14 @@ def update_macos_python_version(app: Application, new_version: str, tracker: Val
         return
 
     updated_content = content.replace(target_line, new_line, 1)
-
-    try:
-        macos_python_file.write_text(updated_content)
-        tracker.success()
-    except Exception as e:
-        tracker.error(('macOS workflow',), message=f'Failed to write: {e}')
+    write_file_safely(macos_python_file, updated_content, 'macOS workflow', tracker)
 
 
-def update_python_version_full_constant(app: Application, new_version: str, tracker: ValidationTracker):
+def upgrade_python_version_full_constant(app: Application, new_version: str, tracker: ValidationTracker):
     constants_file = app.repo.path / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
 
-    if not constants_file.exists():
-        tracker.error(('constants.py',), message=f'File not found: {constants_file}')
-        return
-
-    try:
-        content = constants_file.read_text()
-    except Exception as e:
-        tracker.error(('constants.py',), message=f'Failed to read: {e}')
+    content = read_file_safely(constants_file, 'constants.py', tracker)
+    if content is None:
         return
 
     prefix = 'PYTHON_VERSION_FULL = '
@@ -259,12 +291,7 @@ def update_python_version_full_constant(app: Application, new_version: str, trac
         return
 
     updated_content = content.replace(target_line, new_line, 1)
-
-    try:
-        constants_file.write_text(updated_content)
-        tracker.success()
-    except Exception as e:
-        tracker.error(('constants.py',), message=f'Failed to write: {e}')
+    write_file_safely(constants_file, updated_content, 'constants.py', tracker)
 
 
 def get_latest_python_version(app: Application, major_minor: str) -> str | None:
@@ -311,7 +338,7 @@ def get_latest_python_version(app: Application, major_minor: str) -> str | None:
 def get_python_sha256_hashes(app: Application, version: str) -> dict[str, str]:
     """
     Fetch SHA256 hashes for Python release artifacts using SBOM files.
-    
+
     Args:
         version: Python version string (e.g., "3.13.7")
 
@@ -355,40 +382,13 @@ def get_python_sha256_hashes(app: Application, version: str) -> dict[str, str]:
             raise RuntimeError(f'Error processing URL {url}: {e}') from e
 
     async def fetch_sbom_data(urls):
-
         async with httpx.AsyncClient(verify=True) as client:
             return await asyncio.gather(*(get_sbom_data(client, url) for url in urls))
 
     sbom_packages = asyncio.run(fetch_sbom_data(sbom_urls))
 
-    # Find the CPython package in the SBOM packages
-    linux_cpython_package = next((package for package in sbom_packages[0] if package.get('name') == "CPython"), None)
-    windows_cpython_package = next((package for package in sbom_packages[1] if package.get('name') == "CPython"), None)
-
-    if linux_cpython_package is None:
-        raise ValueError("Could not find CPython package in Linux SBOM")
-    if windows_cpython_package is None:
-        raise ValueError("Could not find CPython package in Windows SBOM")
-
-    # Find the SHA256 checksum in the CPython package checksums
-    linux_checksums = linux_cpython_package.get('checksums', [])
-    windows_checksums = windows_cpython_package.get('checksums', [])
-
-    linux_checksum = next((checksum for checksum in linux_checksums if checksum.get('algorithm') == "SHA256"), None)
-    windows_checksum = next((checksum for checksum in windows_checksums if checksum.get('algorithm') == "SHA256"), None)
-
-    if linux_checksum is None:
-        raise ValueError("Could not find SHA256 checksum in Linux SBOM")
-    if windows_checksum is None:
-        raise ValueError("Could not find SHA256 checksum in Windows SBOM")
-
-    # Extract hash values and validate format
-    linux_hash = linux_checksum.get('checksumValue', '')
-    windows_hash = windows_checksum.get('checksumValue', '')
-
-    if not validate_sha256(linux_hash):
-        raise ValueError(f"Invalid Linux SHA256 hash format from SBOM: {linux_hash}")
-    if not validate_sha256(windows_hash):
-        raise ValueError(f"Invalid Windows SHA256 hash format from SBOM: {windows_hash}")
+    # Extract SHA256 hashes from SBOM packages
+    linux_hash = extract_sha256_from_sbom(sbom_packages[0], 'Linux')
+    windows_hash = extract_sha256_from_sbom(sbom_packages[1], 'Windows')
 
     return {'linux_source_sha256': linux_hash, 'windows_amd64_sha256': windows_hash}
