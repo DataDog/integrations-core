@@ -12,7 +12,7 @@ import mock
 import pytest
 import requests
 
-from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
+from datadog_checks.base.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
