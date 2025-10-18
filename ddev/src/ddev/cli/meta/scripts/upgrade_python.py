@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING
 import click
 import httpx
 import orjson
-import requests
 from packaging.version import Version
 
 if TYPE_CHECKING:
@@ -110,7 +109,7 @@ def validate_version_string(version: str) -> bool:
 
 def validate_sha256(hash_str: str) -> bool:
     """Validate SHA256 hash format (64 hex characters)."""
-    return bool(re.match(r'^[0-9a-f]{64}$', hash_str))
+    return bool(re.match(r'^[0-9A-Fa-f]{64}$', hash_str))
 
 
 def read_file_safely(file_path, file_label: str, tracker: ValidationTracker) -> str | None:
@@ -306,9 +305,9 @@ def get_latest_python_version(app: Application, major_minor: str) -> str | None:
     """
     try:
         # Explicitly verify SSL/TLS certificate
-        response = requests.get(PYTHON_FTP_URL, timeout=30, verify=True)
+        response = httpx.get(PYTHON_FTP_URL, timeout=30, verify=True)
         response.raise_for_status()
-    except requests.RequestException as e:
+    except httpx.RequestException as e:
         app.display_error(f"Error fetching Python versions: {e}")
         return None
 
