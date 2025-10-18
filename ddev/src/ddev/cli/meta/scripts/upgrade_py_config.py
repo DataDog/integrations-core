@@ -19,15 +19,15 @@ if TYPE_CHECKING:
 @click.argument('version')
 @click.pass_obj
 def update_python_config(app: Application, version: str):
-    """Update Python version references in config files across all integrations.
+    """Upgrade the Python version of all test environments.
 
     \b
-    `$ ddev meta scripts update-python-config 3.11`
+    `$ ddev meta scripts upgrade-python 3.11`
     """
 
     from ddev.repo.constants import PYTHON_VERSION as old_version
 
-    tracker = app.create_validation_tracker('Python config updates')
+    tracker = app.create_validation_tracker('Python upgrades')
 
     for target in integrations(app):
         update_hatch_file(app, target.path, version, old_version, tracker)
