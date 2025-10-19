@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Overview",
+    "title": "iboss - Logs Overview",
     "description": "This dashboard provides insights into logged activities, alerts, and system actions generated based on network traffic, policy enforcement, user behavior, and threat detection.",
     "widgets": [
         {
@@ -44,6 +44,27 @@
             }
         },
         {
+            "id": 3902943305384297,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using iboss logs forwarded via a [Datadog Agent](https://docs.datadoghq.com/agent).\n- Please follow the **Installation** and **Configuration** steps [here](/integrations/iboss) to enable log collection.\n\n",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
             "id": 7267362965047160,
             "definition": {
                 "title": "Events Overview",
@@ -67,7 +88,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -135,7 +156,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -189,7 +210,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -259,7 +280,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss -@categoryName:\"-\" $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss -@categoryName:\"-\" $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -330,7 +351,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss -@logSubType:(\"\" OR \"-\") $device_name $event_type $action $user_name"
+                                                "query": "source:iboss -@logSubType:(\"\" OR \"-\") $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -398,7 +419,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss -@action:(\"\" OR \"-\") $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss -@action:(\"\" OR \"-\") $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -475,7 +496,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss -@action:(\"\" OR \"-\") $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss -@action:(\"\" OR \"-\") $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -531,7 +552,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss $device_name $event_type $action $user_name"
+                                                "query": "source:iboss $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -592,7 +613,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss -@computerName:(\"\" OR \"-\") $device_name $event_type $action $user_name"
+                                                "query": "source:iboss -@computerName:(\"\" OR \"-\") $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -662,7 +683,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss -@action:(\"\" OR \"-\") $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss -@action:(\"\" OR \"-\") $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -783,7 +804,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -851,7 +872,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:WEB_LOG $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -910,7 +931,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -976,7 +997,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:DLP $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1036,7 +1057,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AUDIT $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AUDIT $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1094,7 +1115,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:AGENT_REGISTRATION $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1151,7 +1172,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:ZTNA_PEER_REGISTRATION $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:ZTNA_PEER_REGISTRATION $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1208,7 +1229,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss service:iboss @evt.name:ZTNA_ROUTED_PRIVATE_ACCESS $device_name $event_type $action $user_name"
+                                                "query": "source:iboss service:iboss @evt.name:ZTNA_ROUTED_PRIVATE_ACCESS $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1260,7 +1281,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss -@directionName:(\"\" OR \"-\") $device_name $event_type $action $user_name"
+                                                "query": "source:iboss -@directionName:(\"\" OR \"-\") $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1329,7 +1350,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss -@ztPolicyName:(\"\" OR \"-\") $device_name $event_type $action $user_name"
+                                                "query": "source:iboss -@ztPolicyName:(\"\" OR \"-\") $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1398,7 +1419,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss -@http.url_details.scheme:(\"\" OR \"-\") $device_name $event_type $action $user_name"
+                                                "query": "source:iboss -@http.url_details.scheme:(\"\" OR \"-\") $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1467,7 +1488,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss -@http.method:(\"\" OR \"-\") $device_name $event_type $action $user_name"
+                                                "query": "source:iboss -@http.method:(\"\" OR \"-\") $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1536,7 +1557,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss $device_name $event_type $action $user_name"
+                                                "query": "source:iboss $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1606,7 +1627,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:iboss $device_name $event_type $action $user_name"
+                                                "query": "source:iboss $device_name $event_type $action $user $host $location"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1673,7 +1694,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:iboss service:iboss $device_name $event_type $action $user_name",
+                                        "query_string": "source:iboss service:iboss $device_name $event_type $action $user $host $location",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1734,7 +1755,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 5,
                 "width": 12,
                 "height": 46
             }
@@ -1758,7 +1779,7 @@
                             "hide_zero_counts": true,
                             "show_status": true,
                             "last_triggered_format": "relative",
-                            "query": "tag:(integration:iboss)",
+                            "query": "tag:(integration:iboss) $location",
                             "sort": "status,asc",
                             "count": 50,
                             "start": 0,
@@ -1777,7 +1798,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 49,
+                "y": 51,
                 "width": 12,
                 "height": 5
             }
@@ -1847,7 +1868,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:iboss status:critical"
+                                                "query": "source:iboss status:critical $location"
                                             }
                                         }
                                     ],
@@ -1899,7 +1920,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:iboss status:high"
+                                                "query": "source:iboss status:high $location"
                                             }
                                         }
                                     ],
@@ -1953,7 +1974,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:iboss status:critical"
+                                                "query": "source:iboss status:critical $location"
                                             }
                                         }
                                     ],
@@ -2019,7 +2040,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:iboss status:medium"
+                                                "query": "source:iboss status:medium $location"
                                             }
                                         }
                                     ],
@@ -2071,7 +2092,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:iboss status:low"
+                                                "query": "source:iboss status:low $location"
                                             }
                                         }
                                     ],
@@ -2123,7 +2144,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:iboss status:info"
+                                                "query": "source:iboss status:info $location"
                                             }
                                         }
                                     ],
@@ -2177,7 +2198,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:iboss status:high"
+                                                "query": "source:iboss status:high $location"
                                             }
                                         }
                                     ],
@@ -2245,7 +2266,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:iboss status:medium"
+                                                "query": "source:iboss status:medium $location"
                                             }
                                         }
                                     ],
@@ -2281,13 +2302,19 @@
             },
             "layout": {
                 "x": 0,
-                "y": 54,
+                "y": 56,
                 "width": 12,
                 "height": 10
             }
         }
     ],
     "template_variables": [
+        {
+            "name": "host",
+            "prefix": "@hostname",
+            "available_values": [],
+            "default": "*"
+        },
         {
             "name": "device_name",
             "prefix": "@computerName",
@@ -2307,8 +2334,14 @@
             "default": "*"
         },
         {
-            "name": "user_name",
+            "name": "user",
             "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "location",
+            "prefix": "@location",
             "available_values": [],
             "default": "*"
         }

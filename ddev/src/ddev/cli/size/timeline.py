@@ -25,11 +25,10 @@ from .utils.common_funcs import (
     compress,
     convert_to_human_readable_size,
     extract_version_from_about_py,
-    get_gitignore_files,
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
-    is_valid_integration,
+    is_valid_integration_file,
     print_table,
     save_csv,
     save_json,
@@ -454,10 +453,6 @@ def get_files(
         )
         return file_data
 
-    ignored_files = {"datadog_checks_dev", "datadog_checks_tests_helper"}
-    git_ignore = get_gitignore_files(repo_path)
-    included_folder = "datadog_checks" + os.sep
-
     total_size = 0
     version = ""
 
@@ -466,7 +461,7 @@ def get_files(
             file_path = os.path.join(root, file)
             relative_path = os.path.relpath(file_path, repo_path)
 
-            if not is_valid_integration(relative_path, included_folder, ignored_files, git_ignore):
+            if not is_valid_integration_file(relative_path, repo_path):
                 continue
 
             if file == "__about__.py" and "datadog_checks" in relative_path:

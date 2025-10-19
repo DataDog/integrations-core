@@ -1271,3 +1271,21 @@ class TestRunJob:
             # Verify the batch exists and contains multiple events
             assert batch_key in original_payload, f"Missing '{batch_key}' array in payload"
             assert len(original_payload[batch_key]) > 1, "Expected multiple events in the batch"
+
+
+@pytest.mark.unit
+def test_collect_xe_config(instance_docker):
+    instance_docker['collect_xe'] = {"query_completions": {"enabled": True}, "query_errors": {"enabled": True}}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    assert check._config.xe_collection_config == {
+        "query_completions": {"enabled": True},
+        "query_errors": {"enabled": True},
+    }
+
+    instance_docker.pop('collect_xe')
+    instance_docker['xe_collection'] = {"query_completions": {"enabled": True}, "query_errors": {"enabled": True}}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    assert check._config.xe_collection_config == {
+        "query_completions": {"enabled": True},
+        "query_errors": {"enabled": True},
+    }

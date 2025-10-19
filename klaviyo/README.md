@@ -6,6 +6,8 @@
 
 Integrate Klaviyo with Datadog to gain insights into marketing campaign communication and track eCommerce performance based on Klaviyo events.
 
+**Minimum Agent version:** 7.68.1
+
 ## Setup
 
 Follow the instructions below to configure this integration for Klaviyo Marketing and eCommerce events.
@@ -15,8 +17,6 @@ Follow the instructions below to configure this integration for Klaviyo Marketin
 #### Install Datadog Integration in Klaviyo
 Within your Klaviyo account, first add the Datadog integration. The integration allows Datadog
 to see Klaviyo events and metrics via the Klaviyo API.
-
-TODO: Insert screenshot of Datadog Integration Tile within Klaviyo
 
 1. Log in to your [Klaviyo account][2].
 2. In the left-side panel, navigate to **Integrations**.

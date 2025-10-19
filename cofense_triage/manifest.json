@@ -1,0 +1,55 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "babb887c-e7a0-4948-9e76-fa17cf3d78c0",
+  "app_id": "cofense-triage",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Cofense Triage events.",
+    "title": "Cofense Triage",
+    "media": [
+      {
+        "caption": "Cofense Triage - Insights",
+        "image_url": "images/cofense_triage_insights_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cofense Triage - Insights",
+        "image_url": "images/cofense_triage_insights_2.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Cloud",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 58608671,
+      "source_type_name": "Cofense Triage",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Cofense Triage - Insights": "assets/dashboards/cofense_triage_insights.json"
+    },
+    "logs": {
+      "source": "cofense-triage"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

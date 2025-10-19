@@ -42,7 +42,7 @@ platforms = ["linux", "windows"]
 
 [overrides.ci.sqlserver]
 platforms = ["windows", "linux"]
-runners = { windows = ["windows-2025"] }
+runners = { windows = ["windows-2022"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
@@ -53,6 +53,8 @@ exclude = true
 [overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
 aerospike = ['Apache-2.0']
+# https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/identity/azure-identity/LICENSE
+azure-identity = ['MIT']
 # https://github.com/pyca/cryptography/blob/main/LICENSE
 cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
 # https://github.com/confluentinc/confluent-kafka-python/blob/master/LICENSE
@@ -72,8 +74,6 @@ mmh3 = ['CC0-1.0']
 paramiko = ['LGPL-2.1-only']
 # https://github.com/psycopg/psycopg/blob/master/LICENSE.txt
 psycopg = ['LGPL-3.0-only']
-# https://github.com/Legrandin/pycryptodome/blob/master/LICENSE.rst
-pycryptodomex = ['Unlicense', 'BSD-2-Clause']
 # https://github.com/mongodb/mongo-python-driver/blob/master/LICENSE
 pymongo = ['Apache-2.0']
 # https://github.com/requests/requests-kerberos/pull/123
@@ -104,7 +104,6 @@ lxml = 'https://github.com/lxml/lxml'
 packaging = 'https://github.com/pypa/packaging'
 paramiko = 'https://github.com/paramiko/paramiko'
 protobuf = 'https://github.com/protocolbuffers/protobuf'
-pycryptodomex = 'https://github.com/Legrandin/pycryptodome'
 redis = 'https://github.com/redis/redis-py'
 requests = 'https://github.com/psf/requests'
 requests-toolbelt = 'https://github.com/requests/toolbelt'
@@ -131,6 +130,9 @@ exclude = [
     'http_check',
     'kubelet',
     'kubevirt',
+    'kubevirt_api',
+    'kubevirt_handler',
+    'kubevirt_controller',
     'kubernetes_state',
     'network',
     'ntp',
@@ -150,7 +152,6 @@ unsorted = [
 [overrides.dep.updates]
 exclude = [
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
-    'pysmi', # pysnmp dependent on pysmi version 1.2.1
     'pysnmp',  # Breaking snmp tests
     'aerospike',  # v8+ breaks agent build.
     # https://github.com/DataDog/integrations-core/pull/16080

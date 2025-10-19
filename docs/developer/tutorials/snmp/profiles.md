@@ -2,6 +2,11 @@
 
 SNMP profiles are our way of providing out-of-the-box monitoring for certain makes and models of network devices.
 
+!!! warning
+    This page describes the manual workflow for building SNMP profiles manually. The recommended way to create and manage profiles is now through the **SNMP Profile Manager**, which provides a guided, GUI-based experience.
+
+    See the updated guide: [Getting Started with Device Profiles](https://docs.datadoghq.com/network_monitoring/devices/guide/device_profiles/?tab=devicescanrecommended).
+
 This tutorial will walk you through the steps of building a basic SNMP profile that collects OID metrics from HP iLO4 devices.
 
 Feel free to read the [Introduction to SNMP](./introduction.md) if you need a refresher on SNMP concepts such as OIDs and MIBs.

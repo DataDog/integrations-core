@@ -10,6 +10,8 @@ This integration provides the following benefits:
 3. **Trend identification**: Allows businesses to spot trends in customer interactions, aiding proactive engagement.
 4. **Informed decision-making**: Provides insights that drive strategic decisions for growth and improvement.
 
+**Minimum Agent version:** 7.58.1
+
 ## Setup
 
 1. Log into [Vonage](https://www.vonage.com/log-in/).
@@ -31,7 +33,7 @@ Configure the Datadog endpoint to forward Vonage logs to Datadog.
 |----------|----------|
 | API key | API Key of the Vonage account. |
 | API secret | API Secret of the Vonage account. |
-| Include Message | Include boy of the messages in logs. (True or False) |
+| Include Message | Include body of the messages in logs. (True or False) |
 
 
 

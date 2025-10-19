@@ -1,1 +1,0 @@
-kafka_consumer check can retrieve messages from Kafka and log them.

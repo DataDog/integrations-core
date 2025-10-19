@@ -2,6 +2,29 @@
 
 <!-- towncrier release notes start -->
 
+## 12.0.0 / 2025-10-02
+
+***Changed***:
+
+* Remove pycryptodomex dependency and unpin indirect dependencies. ([#21378](https://github.com/DataDog/integrations-core/pull/21378))
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 11.0.0 / 2025-09-05 / Agent 7.71.0
+
+***Changed***:
+
+* Add correct units and/or scale factor for UCD profile memory metrics ([#20818](https://github.com/DataDog/integrations-core/pull/20818))
+
+## 10.1.1 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
 ## 10.1.0 / 2025-06-12 / Agent 7.68.0
 
 ***Added***:

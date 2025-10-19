@@ -1,0 +1,8 @@
+provides:
+  - id: openai-usage-metrics
+    always_on: true
+  - id: openai-cloud-cost-data
+    always_on: false
+  - id: openai-llm-completions
+    always_on: false
+    granular: true

@@ -5,6 +5,8 @@
 
 The Authorize.Net integration collects settled transaction logs and unsettled transaction metrics, and forwards them to Datadog for comprehensive analysis.
 
+**Minimum Agent version:** 7.60.0
+
 ## Setup
 
 ### Generate Login ID and Transaction Key in Authorize.Net

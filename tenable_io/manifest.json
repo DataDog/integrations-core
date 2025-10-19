@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "18788ece-f752-4584-a4e9-6652eaad80b5",
   "app_id": "tenable-io",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -2,6 +2,46 @@
 
 <!-- towncrier release notes start -->
 
+## 10.5.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 10.4.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 10.3.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Collect index stats metric `mongodb.collection.indexes.accesses.opsps` on replica set secondary nodes. ([#20819](https://github.com/DataDog/integrations-core/pull/20819))
+
+***Fixed***:
+
+* Fix incorrect UTC timestamp parsing for system.profile slow queries when the agent runs in non-UTC timezones. ([#20834](https://github.com/DataDog/integrations-core/pull/20834))
+
+## 10.2.1 / 2025-07-21 / Agent 7.69.0
+
+***Fixed***:
+
+* Add deprecated `schemas` option to `config.yaml.example`. This config option is deprecated in Agent 7.69.0 and will be removed in a future release. ([#20783](https://github.com/DataDog/integrations-core/pull/20783))
+
+## 10.2.0 / 2025-07-10
+
+***Added***:
+
+* Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
+* Add new `collect_schemas` configuration to replace deprecated `schemas` while maintaining backward compatibility. ([#20603](https://github.com/DataDog/integrations-core/pull/20603))
+
+***Fixed***:
+
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
 ## 10.1.1 / 2025-06-26 / Agent 7.68.0
 
 ***Fixed***:

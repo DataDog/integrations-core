@@ -1,0 +1,67 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "8db87454-e15d-4f8b-bf70-a8229a2b6eba",
+  "app_id": "keeper",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Keeper reporting events.",
+    "title": "Keeper",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Keeper - Overview",
+        "image_url": "images/keeper_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Keeper - User Activity",
+        "image_url": "images/keeper_user_activity.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Keeper - Security and Risk Events",
+        "image_url": "images/keeper_security_risk_events.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Keeper - Extended Modules Overview",
+        "image_url": "images/keeper_extended_modules_overview.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 50135425,
+      "source_type_name": "Keeper",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Keeper - Overview": "assets/dashboards/keeper_overview.json",
+      "Keeper - User Activity": "assets/dashboards/keeper_user_activity.json",
+      "Keeper - Security and Risk Events": "assets/dashboards/keeper_security_risk_events.json",
+      "Keeper - Extended Modules Overview": "assets/dashboards/keeper_extended_modules_overview.json"
+    },
+    "logs": {
+      "source": "keeper"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

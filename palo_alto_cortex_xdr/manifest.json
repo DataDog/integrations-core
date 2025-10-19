@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "156afdc8-d8e9-4544-92fd-d8da87278671",
   "app_id": "palo-alto-cortex-xdr",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

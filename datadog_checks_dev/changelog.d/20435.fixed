@@ -1,1 +1,0 @@
-Use non-dot-prefixed JUnit XML path to avoid ddtrace import errors

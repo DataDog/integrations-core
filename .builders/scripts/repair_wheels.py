@@ -16,9 +16,6 @@ from zipfile import ZipFile
 import urllib3
 from utils import extract_metadata, normalize_project_name
 
-# Packages for which we're skipping the openssl-3 build check
-OPENSSL_PACKAGE_BYPASS = ["psycopg"]
-
 
 @cache
 def get_wheel_hashes(project) -> dict[str, str]:
@@ -102,16 +99,9 @@ class WheelName(NamedTuple):
 
 def check_unacceptable_files(
     wheel: Path,
-    bypass_prefixes: list[str],
     invalid_file_patterns: list[str],
 ):
     """Check if a wheel contains any unacceptable files and exit if found."""
-    if any(wheel.name.startswith(pkg_prefix) for pkg_prefix in bypass_prefixes):
-        print(
-            f'Warning: Bypassing unacceptable file check for {wheel.name}'
-        )
-        return
-
     unacceptable_files = find_patterns_in_wheel(wheel, invalid_file_patterns)
     if unacceptable_files:
         print(
@@ -156,7 +146,6 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
 
             check_unacceptable_files(
                 wheel,
-                bypass_prefixes=OPENSSL_PACKAGE_BYPASS,
                 invalid_file_patterns=external_invalid_file_patterns,
             )
             shutil.move(wheel, external_dir)
@@ -202,7 +191,6 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
 
             check_unacceptable_files(
                 wheel,
-                bypass_prefixes=OPENSSL_PACKAGE_BYPASS,
                 invalid_file_patterns=external_invalid_file_patterns,
             )
             shutil.move(wheel, external_dir)

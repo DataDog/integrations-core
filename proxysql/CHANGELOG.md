@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 7.4.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 7.3.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 7.2.0 / 2025-07-10 / Agent 7.69.0
+
+***Added***:
+
+* Add new `proxysql.all_backends.count` metric. ([#20582](https://github.com/DataDog/integrations-core/pull/20582))
+
 ## 7.1.0 / 2025-01-16 / Agent 7.63.0
 
 ***Added***:

@@ -29,5 +29,7 @@ services:
       - MARIADB_MASTER_PORT_NUMBER=3306
     ports:
       - "${MYSQL_SLAVE_PORT}:3306"
+    volumes:
+      - ${MYSQL_CONF_PATH}:/opt/bitnami/mariadb/conf/my_custom.cnf:ro
     depends_on:
       - "mysql-master"

@@ -71,6 +71,7 @@ METRICS = {
     'apiserver_storage_list_returned_objects_total': 'storage_list_returned_objects_total',
     'apiserver_flowcontrol_current_inqueue_requests': 'flowcontrol_current_inqueue_requests',
     'apiserver_flowcontrol_dispatched_requests_total': 'flowcontrol_dispatched_requests_total',
+    'apiserver_flowcontrol_request_wait_duration_seconds': 'flowcontrol_request_wait_duration_seconds',
     # For Kubernetes >= 1.26
     # https://github.com/kubernetes/kubernetes/pull/112690
     'kubernetes_feature_enabled': 'kubernetes_feature_enabled',
@@ -78,12 +79,13 @@ METRICS = {
     'apiserver_flowcontrol_request_concurrency_limit': 'flowcontrol_request_concurrency_limit',
     'apiserver_flowcontrol_current_executing_requests': 'flowcontrol_current_executing_requests',
     'apiserver_flowcontrol_rejected_requests_total': 'flowcontrol_rejected_requests_total',
+    'apiserver_flowcontrol_nominal_limit_seats': 'flowcontrol_nominal_limit_seats',
     'apiserver_storage_db_total_size_in_bytes': 'etcd.db.total_size',
     # For Kubernetes >= 1.28
     'apiserver_storage_size_bytes': 'etcd.db.total_size',
-    'apiserver_flowcontrol_nominal_limit_seats': 'flowcontrol_request_concurrency_limit',
     'etcd_requests_total': 'etcd_requests_total',
     'etcd_request_errors_total': 'etcd_request_errors_total',
+    'apiserver_flowcontrol_current_executing_seats': 'flowcontrol_current_executing_seats',
 }
 
 

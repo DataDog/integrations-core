@@ -1,0 +1,2 @@
+Fix AWS RDS IAM authentication token expiration causing connection failures after token expires.
+

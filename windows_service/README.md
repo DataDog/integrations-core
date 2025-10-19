@@ -4,6 +4,8 @@
 
 This check monitors the state of any Windows Service and submits a service check to Datadog.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

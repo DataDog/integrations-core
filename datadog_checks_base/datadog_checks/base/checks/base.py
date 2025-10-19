@@ -11,19 +11,10 @@ import os
 import re
 from collections import deque
 from os.path import basename
-from typing import (  # noqa: F401
+from typing import (
     TYPE_CHECKING,
     Any,
-    AnyStr,
-    Callable,
-    Deque,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
+    Deque,  # noqa: F401
 )
 
 import lazy_loader
@@ -32,15 +23,6 @@ from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
-from datadog_checks.base.types import (
-    AgentConfigType,
-    Event,
-    ExternalTagType,
-    InitConfigType,
-    InstanceType,
-    ProxySettings,
-    ServiceCheckStatus,
-)
 from datadog_checks.base.utils.agent.utils import should_profile_memory
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
@@ -303,10 +285,16 @@ class AgentCheck(object):
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque()  # type: Deque[Callable[[], None]]
 
-        self.check_initializations.append(self.load_configuration_models)
+        self.check_initializations.extend(
+            [
+                self.load_configuration_models,
+                self.__initialize_persistent_cache_key_prefix,
+            ]
+        )
 
         self.__formatted_tags = None
         self.__logs_enabled = None
+        self.__persistent_cache_key_prefix: str = ""
 
         if os.environ.get("GOFIPS", "0") == "1":
             enable_fips()
@@ -499,6 +487,18 @@ class AgentCheck(object):
         # type: () -> bool
         self._log_deprecation('in_developer_mode')
         return False
+
+    def persistent_cache_id(self) -> str:
+        """
+        Returns the ID that identifies this check instance in the Agent persistent cache.
+
+        Overriding this method modifies the default behavior of the AgentCheck and can
+        be used to customize when the persistent cache is invalidated. The default behavior
+        defines the persistent cache ID as the digest of the full check configuration.
+
+        Some per-check isolation is still applied to avoid different checks with the same ID to share the same keys.
+        """
+        return self.check_id.split(":")[-1]
 
     def log_typos_in_options(self, user_config, models_config, level):
         # See Performance Optimizations in this package's README.md.
@@ -1018,13 +1018,15 @@ class AgentCheck(object):
             attributes['timestamp'] = int(timestamp * 1000)
 
         datadog_agent.send_log(json.encode(attributes), self.check_id)
+
         if cursor is not None:
-            self.write_persistent_cache('log_cursor_{}'.format(stream), json.encode(cursor))
+            self.write_persistent_cache(f'log_cursor_{stream}', json.encode(cursor))
 
     def get_log_cursor(self, stream='default'):
         # type: (str) -> dict[str, Any] | None
         """Returns the most recent log cursor from disk."""
-        data = self.read_persistent_cache('log_cursor_{}'.format(stream))
+        data = self.read_persistent_cache(f'log_cursor_{stream}')
+
         return json.decode(data) if data else None
 
     def _log_deprecation(self, deprecation_key, *args):
@@ -1091,9 +1093,12 @@ class AgentCheck(object):
 
         return entrypoint
 
-    def _persistent_cache_id(self, key):
-        # type: (str) -> str
-        return '{}_{}'.format(self.check_id, key)
+    def __initialize_persistent_cache_key_prefix(self):
+        if self.__persistent_cache_key_prefix:
+            return
+
+        namespace = ':'.join(self.check_id.split(':')[:-1])
+        self.__persistent_cache_key_prefix = f'{namespace}:{self.persistent_cache_id()}_'
 
     def read_persistent_cache(self, key):
         # type: (str) -> str
@@ -1103,9 +1108,9 @@ class AgentCheck(object):
             key (str):
                 the key to retrieve
         """
-        return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
+        return datadog_agent.read_persistent_cache(f"{self.__persistent_cache_key_prefix}{key}")
 
-    def write_persistent_cache(self, key, value):
+    def write_persistent_cache(self, key: str, value: str):
         # type: (str, str) -> None
         """Stores `value` in a persistent cache for this check instance.
         The cache is located in a path where the agent is guaranteed to have read & write permissions. Namely in
@@ -1119,7 +1124,7 @@ class AgentCheck(object):
             value (str):
                 the value to store
         """
-        datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
+        datadog_agent.write_persistent_cache(f"{self.__persistent_cache_key_prefix}{key}", value)
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None
@@ -1291,13 +1296,7 @@ class AgentCheck(object):
 
                 run_with_isolation(self, aggregator, datadog_agent)
             else:
-                while self.check_initializations:
-                    initialization = self.check_initializations.popleft()
-                    try:
-                        initialization()
-                    except Exception:
-                        self.check_initializations.appendleft(initialization)
-                        raise
+                self.run_check_initializations()
 
                 instance = copy.deepcopy(self.instances[0])
 
@@ -1306,7 +1305,7 @@ class AgentCheck(object):
 
                     enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
                 elif self.should_profile_memory():
-                    # self.init_config.get('profile_memory') could be `/tmp/datadog-agent-memory-profiler*`
+                    # The 'profile_memory' key in self.init_config could be `/tmp/datadog-agent-memory-profiler*`
                     # that is generated by Datadog Agent.
                     # If we use `--m-dir` for `agent check` command, a hidden flag, it should be same as a given value.
                     namespaces = [self.init_config.get('profile_memory')]
@@ -1336,6 +1335,15 @@ class AgentCheck(object):
                 self.metric_limiter.reset()
 
         return error_report
+
+    def run_check_initializations(self):
+        while self.check_initializations:
+            initialization = self.check_initializations.popleft()
+            try:
+                initialization()
+            except Exception:
+                self.check_initializations.appendleft(initialization)
+                raise
 
     def event(self, event):
         # type: (Event) -> None

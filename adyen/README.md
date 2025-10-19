@@ -6,6 +6,8 @@
 
 The Adyen integration collects transaction, dispute, and payout data using Adyen's webhook capability and ingests it into Datadog for comprehensive analysis.
 
+**Minimum Agent version:** 7.58.0
+
 ## Setup
 
 Follow the instructions below to configure this integration for your Adyen account.
@@ -59,7 +61,15 @@ The Adyen integration does not include any service checks.
 
 For further assistance, contact [Datadog Support][3].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor and optimize payment processing with Datadog's Adyen integration][5]
+
+
 [1]: https://www.adyen.com/
 [2]: https://docs.adyen.com/development-resources/webhooks/
 [3]: https://docs.datadoghq.com/help/
 [4]: /integrations/adyen
+[5]: https://www.datadoghq.com/blog/monitor-adyen-payments/

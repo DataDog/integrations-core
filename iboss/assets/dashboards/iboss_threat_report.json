@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Threat Report",
+    "title": "iboss - Threat Metrics Report",
     "description": "This dashboards offers insights into threat counts, affected assets and users, threat types, and geographical sources and destinations.\n",
     "widgets": [
         {
@@ -44,6 +44,27 @@
             }
         },
         {
+            "id": 2463616480369180,
+            "definition": {
+                "type": "note",
+                "content": "**Note**:\n- This dashboard is populated using metrics. Please follow the Configuration steps [here](/integrations/iboss) to enable metrics collection. Ensure the `Collect threat metrics` option is enabled to collect these metrics.\n- All threat metrics are collected once per day, once the complete daily iboss report is available. Please ensure to set the dashboard time range to at least `Past 1 Day` to view the data.",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
             "id": 880749371009748,
             "definition": {
                 "title": "Threats Overview",
@@ -66,7 +87,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.total_threat_count{*}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.total_threat_count{$reporter_node}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -126,7 +147,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.total_threat_count{*}.rollup(sum, 300)"
+                                            "query": "sum:iboss.threat.total_threat_count{$reporter_node}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -162,7 +183,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.total_prevented_threat_count{*}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.total_prevented_threat_count{$reporter_node}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -222,7 +243,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.total_prevented_threat_count{*}.rollup(sum, 300)"
+                                            "query": "sum:iboss.threat.total_prevented_threat_count{$reporter_node}.rollup(sum, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -256,7 +277,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.threat.types.threat_count{*} by {threat_stat_type}.rollup(sum, 300)",
+                                            "query": "avg:iboss.threat.types.threat_count{$reporter_node} by {threat_stat_type}.rollup(sum, 300)",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -296,7 +317,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 5,
                 "width": 12,
                 "height": 11
             }
@@ -337,7 +358,6 @@
                             "title": "Threats by Assets",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -345,13 +365,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.asset.threat_count{*} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.asset.threat_count{$reporter_node} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.threat.asset.prevented_threat_count{*} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.asset.prevented_threat_count{$reporter_node} by {asset_name,asset_type,asset_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -431,7 +451,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.threat.total_assets_with_threats{*}.rollup(avg, 300)"
+                                            "query": "avg:iboss.threat.total_assets_with_threats{$reporter_node}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -486,13 +506,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.user.threat_count{*} by {user_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.user.threat_count{$reporter_node} by {user_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.threat.user.prevented_threat_count{*} by {user_id}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.user.prevented_threat_count{$reporter_node} by {user_id}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -572,7 +592,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:iboss.threat.total_users_with_threats{*}.rollup(avg, 300)"
+                                            "query": "avg:iboss.threat.total_users_with_threats{$reporter_node}.rollup(avg, 300)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -597,7 +617,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 14,
+                "y": 16,
                 "width": 12,
                 "height": 7,
                 "is_column_break": true
@@ -646,13 +666,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.source_country.threat_count{*} by {source_country}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.source_country.threat_count{$reporter_node} by {source_country}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.threat.source_country.prevented_threat_count{*} by {source_country}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.source_country.prevented_threat_count{$reporter_node} by {source_country}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -717,13 +737,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.source_ip.threat_count{*} by {source_ip}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.source_ip.threat_count{$reporter_node} by {source_ip}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.threat.source_ip.prevented_threat_count{*} by {source_ip}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.source_ip.prevented_threat_count{$reporter_node} by {source_ip}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -809,13 +829,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.destination_country.threat_count{*} by {destination_country}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.destination_country.threat_count{$reporter_node} by {destination_country}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.threat.destination_country.prevented_threat_count{*} by {destination_country}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.destination_country.prevented_threat_count{$reporter_node} by {destination_country}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -880,13 +900,13 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.threat.destination_ip.threat_count{*} by {destination_ip}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.destination_ip.threat_count{$reporter_node} by {destination_ip}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.threat.destination_ip.prevented_threat_count{*} by {destination_ip}.rollup(sum, 300)",
+                                            "query": "sum:iboss.threat.destination_ip.prevented_threat_count{$reporter_node} by {destination_ip}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -942,13 +962,20 @@
             },
             "layout": {
                 "x": 0,
-                "y": 21,
+                "y": 23,
                 "width": 12,
                 "height": 7
             }
         }
     ],
-    "template_variables": [],
+    "template_variables": [
+        {
+            "name": "reporter_node",
+            "prefix": "reporting_node_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
     "layout_type": "ordered",
     "notify_list": [],
     "reflow_type": "fixed"

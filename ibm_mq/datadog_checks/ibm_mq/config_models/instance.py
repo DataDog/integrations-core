@@ -37,6 +37,7 @@ class InstanceConfig(BaseModel):
     )
     auto_discover_channels: Optional[bool] = None
     auto_discover_queues: Optional[bool] = None
+    auto_discover_queues_via_names: Optional[bool] = None
     channel: str = Field(..., min_length=1)
     channel_status_mapping: Optional[MappingProxyType[str, Any]] = None
     channels: Optional[tuple[str, ...]] = None

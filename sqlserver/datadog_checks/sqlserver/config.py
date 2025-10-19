@@ -55,9 +55,10 @@ class SQLServerConfig:
         self.procedure_metrics_config: dict = instance.get('procedure_metrics', {}) or {}
         self.settings_config: dict = instance.get('collect_settings', {}) or {}
         self.activity_config: dict = instance.get('query_activity', {}) or {}
-        self.schema_config: dict = instance.get('schemas_collection', {}) or {}
-        self.deadlocks_config: dict = instance.get('deadlocks_collection', {}) or {}
-        self.xe_collection_config: dict = instance.get('xe_collection', {}) or {}
+        # Backward compatibility: check new names first, then fall back to old names
+        self.schema_config: dict = instance.get('collect_schemas', instance.get('schemas_collection', {})) or {}
+        self.deadlocks_config: dict = instance.get('collect_deadlocks', instance.get('deadlocks_collection', {})) or {}
+        self.xe_collection_config: dict = instance.get('collect_xe', instance.get('xe_collection', {})) or {}
         self.cloud_metadata: dict = {}
         aws: dict = instance.get('aws', {}) or {}
         gcp: dict = instance.get('gcp', {}) or {}
@@ -102,6 +103,9 @@ class SQLServerConfig:
                     'keep_boolean': is_affirmative(obfuscator_options_config.get('keep_boolean', False)),
                     'keep_positional_parameter': is_affirmative(
                         obfuscator_options_config.get('keep_positional_parameter', False)
+                    ),
+                    'replace_bind_parameter': is_affirmative(
+                        obfuscator_options_config.get('replace_bind_parameter', False)
                     ),
                     'keep_trailing_semicolon': is_affirmative(
                         obfuscator_options_config.get('keep_trailing_semicolon', False)

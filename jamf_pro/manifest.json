@@ -1,0 +1,77 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "02ca0a87-f9e7-46e3-989d-9ac8b3654ac4",
+  "app_id": "jamf-pro",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Jamf Pro events.",
+    "title": "Jamf Pro",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Jamf Pro - Computer Insights",
+        "image_url": "images/jamf_pro_computer_insights_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Jamf Pro - Computer Insights",
+        "image_url": "images/jamf_pro_computer_insights_2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Jamf Pro - Mobile Insights",
+        "image_url": "images/jamf_pro_mobile_insights_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Jamf Pro - Mobile Insights",
+        "image_url": "images/jamf_pro_mobile_insights_2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Jamf Pro - System, Server & Miscellaneous Events",
+        "image_url": "images/jamf_pro_system_server_and_miscellaneous_events_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Jamf Pro - System, Server & Miscellaneous Events",
+        "image_url": "images/jamf_pro_system_server_and_miscellaneous_events_2.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 52026787,
+      "source_type_name": "Jamf Pro",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Jamf Pro - Computer Insights": "assets/dashboards/jamf_pro_computer_insights.json",
+      "Jamf Pro - Mobile Insights": "assets/dashboards/jamf_pro_mobile_insights.json",
+      "Jamf Pro - System, Server & Miscellaneous Events": "assets/dashboards/jamf_pro_system_server_and_miscellaneous_events.json"
+    },
+    "logs": {
+      "source": "jamf-pro"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

@@ -13,8 +13,13 @@ ORDER BY `percentile` ASC
 LIMIT 1"""
 
 SQL_QUERY_TABLE_ROWS_STATS = """\
-SELECT table_schema, table_name, rows_read, rows_changed
-FROM information_schema.table_statistics"""
+SELECT
+    OBJECT_SCHEMA as table_schema,
+    OBJECT_NAME as table_name,
+    COUNT_READ as rows_read,
+    COUNT_WRITE as rows_changed
+FROM performance_schema.table_io_waits_summary_by_table
+WHERE OBJECT_SCHEMA NOT IN ('mysql', 'performance_schema', 'information_schema')"""
 
 SQL_QUERY_SCHEMA_SIZE = """\
 SELECT table_schema, IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
@@ -51,15 +56,6 @@ SQL_INNODB_ENGINES = """\
 SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
-
-SQL_BINLOG_ENABLED = """\
-SELECT @@log_bin AS binlog_enabled"""
-
-SQL_SERVER_UUID = """\
-SELECT @@server_uuid"""
-
-SQL_SERVER_ID_AWS_AURORA = """\
-SHOW VARIABLES LIKE 'aurora_server_id'"""
 
 SQL_REPLICATION_ROLE_AWS_AURORA = """\
 SELECT IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_role

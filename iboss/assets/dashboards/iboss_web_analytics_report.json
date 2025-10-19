@@ -1,5 +1,5 @@
 {
-    "title": "iboss - Web Analytics Report",
+    "title": "iboss - Web Analytics Metrics Report",
     "description": "This dashboard provides a comprehensive overview of web activity, enabling organizations to monitor user behavior, detect policy violations, and optimize web usage.\n",
     "widgets": [
         {
@@ -44,9 +44,30 @@
             }
         },
         {
+            "id": 2419969021038015,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using metrics. Please follow the Configuration steps [here](/integrations/iboss) to enable metrics collection. Ensure the `Collect web metrics` option is enabled to collect these metrics.\n- All web metrics are collected once per day, once the complete daily iboss report is available. Please ensure to set the dashboard time range to at least `Past 1 Day` to view the data.\n- Filters:\n  - `reporter_node` applies to all widgets\n  - `domain` applies to widgets in `Domains` group\n  - `search_term` applies to widgets in `Search Trends` group\n  - `category` applies to widgets in `Categories` group\n  - `user` applies to widgets in `Users` group",
+                "background_color": "yellow",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
             "id": 7765380578702187,
             "definition": {
-                "title": "Overview",
+                "title": "Domains",
                 "background_color": "vivid_green",
                 "show_title": true,
                 "type": "group",
@@ -65,7 +86,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.domain.total_hit_count{*} by {domain}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.domain.total_hit_count{$domain,$reporter_node} by {domain}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -114,7 +135,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.domain.total_block_count{*} by {domain}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.domain.total_block_count{$domain,$reporter_node} by {domain}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -170,7 +191,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.domain.total_malware_count{*} by {domain}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.domain.total_malware_count{$domain,$reporter_node} by {domain}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -226,25 +247,25 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.domain.total_hit_count{*} by {domain}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.domain.total_hit_count{$domain,$reporter_node} by {domain}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.web.domain.total_block_count{*} by {domain}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.domain.total_block_count{$domain,$reporter_node} by {domain}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.web.domain.total_malware_count{*} by {domain}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.domain.total_malware_count{$domain,$reporter_node} by {domain}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:iboss.web.domain.total_sandbox_count{*} by {domain}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.domain.total_sandbox_count{$domain,$reporter_node} by {domain}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -324,9 +345,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 6,
                 "width": 12,
-                "height": 1
+                "height": 9
             }
         },
         {
@@ -351,7 +372,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.search_trends.trending_search_terms.hits{*} by {search_term}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.search_trends.trending_search_terms.hits{$search_term,$reporter_node} by {search_term}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -400,7 +421,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.search_trends.suspicious.hits{*} by {search_term}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.search_trends.suspicious.hits{$search_term,$reporter_node} by {search_term}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -456,7 +477,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.search_trends.liability.hits{*} by {search_term}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.search_trends.liability.hits{$search_term,$reporter_node} by {search_term}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -512,7 +533,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.search_trends.filter_avoidance.hits{*} by {search_term}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.search_trends.filter_avoidance.hits{$search_term,$reporter_node} by {search_term}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -560,7 +581,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 4,
+                "y": 15,
                 "width": 12,
                 "height": 9
             }
@@ -587,7 +608,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.categories.hits{*} by {category}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.categories.hits{$category,$reporter_node} by {category}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -636,7 +657,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.categories.blocks{*} by {category}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.categories.blocks{$category,$reporter_node} by {category}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -683,9 +704,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 13,
+                "y": 24,
                 "width": 12,
-                "height": 1
+                "height": 5
             }
         },
         {
@@ -710,7 +731,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.user.total_hit_count{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.user.total_hit_count{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -766,7 +787,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.user.total_block_count{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.user.total_block_count{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -822,7 +843,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.user.total_malware_count{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.user.total_malware_count{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -878,7 +899,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.user.usetime{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.user.usetime{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -933,25 +954,25 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:iboss.web.user.total_hit_count{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.user.total_hit_count{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:iboss.web.user.total_block_count{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.user.total_block_count{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "sum:iboss.web.user.total_malware_count{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.user.total_malware_count{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:iboss.web.user.usetime{*} by {user_name}.rollup(sum, 300)",
+                                            "query": "sum:iboss.web.user.usetime{$user,$reporter_node} by {user_name}.rollup(sum, 300)",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -1037,13 +1058,44 @@
             },
             "layout": {
                 "x": 0,
-                "y": 14,
+                "y": 29,
                 "width": 12,
-                "height": 1
+                "height": 9
             }
         }
     ],
-    "template_variables": [],
+    "template_variables": [
+        {
+            "name": "reporter_node",
+            "prefix": "reporting_node_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "domain",
+            "prefix": "domain",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "search_term",
+            "prefix": "search_term",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "category",
+            "prefix": "category",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "user",
+            "prefix": "user_name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
     "layout_type": "ordered",
     "notify_list": [],
     "reflow_type": "fixed"

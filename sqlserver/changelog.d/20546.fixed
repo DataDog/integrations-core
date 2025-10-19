@@ -1,1 +1,0 @@
-Fixes "Column 'sys.foreign_keys.object_id' is invalid in the select list ..." error with th FOREIGN_KEY_QUERY_PRE_2017 query

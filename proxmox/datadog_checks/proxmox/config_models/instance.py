@@ -48,6 +48,17 @@ class Proxy(BaseModel):
     no_proxy: Optional[tuple[str, ...]] = None
 
 
+class ResourceFilter(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    patterns: Optional[tuple[str, ...]] = None
+    property: Optional[str] = None
+    resource: Optional[str] = None
+    type: Optional[str] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -60,6 +71,8 @@ class InstanceConfig(BaseModel):
     aws_host: Optional[str] = None
     aws_region: Optional[str] = None
     aws_service: Optional[str] = None
+    collect_tasks: Optional[bool] = None
+    collected_task_types: Optional[tuple[str, ...]] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
@@ -82,6 +95,7 @@ class InstanceConfig(BaseModel):
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
+    resource_filters: Optional[tuple[ResourceFilter, ...]] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None

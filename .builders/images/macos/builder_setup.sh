@@ -23,8 +23,8 @@ cp -R /opt/mqm "${DD_PREFIX_PATH}"
 
 # openssl
 DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
-VERSION="3.4.1" \
-SHA256="002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3" \
+VERSION="3.5.4" \
+SHA256="967311f84955316969bdb1d8d4b983718ef42338639c621ec4c34fddef355e99" \
 RELATIVE_PATH="openssl-{{version}}" \
 CONFIGURE_SCRIPT="./config" \
   install-from-source \
@@ -41,9 +41,9 @@ RELATIVE_PATH="zlib-{{version}}" \
   install-from-source
 
 # libxml & libxslt for lxml
-DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
-VERSION="2.12.6" \
-SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
+DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.14/libxml2-{{version}}.tar.xz" \
+VERSION="2.14.5" \
+SHA256="03d006f3537616833c16c53addcdc32a0eb20e55443cba4038307e3fa7d8d44b" \
 RELATIVE_PATH="libxml2-{{version}}" \
   install-from-source \
     --without-iconv \
@@ -58,8 +58,8 @@ RELATIVE_PATH="libxml2-{{version}}" \
     --disable-static
 
 DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
-VERSION="1.1.39" \
-SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
+VERSION="1.1.43" \
+SHA256="5a3d6b383ca5afc235b171118e90f5ff6aa27e9fea3303065231a6d403f0183a" \
 RELATIVE_PATH="libxslt-{{version}}" \
   install-from-source \
     --with-libxml-prefix="${DD_PREFIX_PATH}" \
@@ -71,8 +71,8 @@ RELATIVE_PATH="libxslt-{{version}}" \
 
 # curl
 DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
-VERSION="8.14.0" \
-SHA256="5eba3ec2d898919a4b34cc89ace0068d9d09420b8643f265aebac59f8d126203" \
+VERSION="8.16.0" \
+SHA256="a21e20476e39eca5a4fc5cfb00acf84bbc1f5d8443ec3853ad14c26b3c85b970" \
 RELATIVE_PATH="curl-{{version}}" \
   install-from-source \
     --disable-manual \
@@ -93,6 +93,15 @@ RELATIVE_PATH="curl-{{version}}" \
     --with-ssl="${DD_PREFIX_PATH}"
 # Remove the binary installed so that we consistenly use the same original `curl` binary
 rm "${DD_PREFIX_PATH}/bin/curl"
+
+# libpq and pg_config as needed by psycopg
+DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
+VERSION="16.9" \
+SHA256="07c00fb824df0a0c295f249f44691b86e3266753b380c96f633c3311e10bd005" \
+RELATIVE_PATH="postgresql-{{version}}" \
+  install-from-source --without-readline --with-openssl --without-icu
+# Add paths to pg_config and to the library
+echo PATH="${DD_PREFIX_PATH}/bin:${PATH:-}" >> "$DD_ENV_FILE"
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 DOWNLOAD_URL="https://github.com/LMDB/lmdb/archive/LMDB_{{version}}.tar.gz" \

@@ -42,12 +42,13 @@ def test_check_version():
 
 
 def test_persistent_cache(datadog_agent):
-    check = AgentCheck()
-    check.check_id = 'test'
+    check = AgentCheck(init_config={}, instances=[{}])
+    check.check_id = 'test:123'
+    check.run_check_initializations()
 
     check.write_persistent_cache('foo', 'bar')
 
-    assert datadog_agent.read_persistent_cache('test_foo') == 'bar'
+    assert datadog_agent.read_persistent_cache('test:123_foo') == 'bar'
     assert check.read_persistent_cache('foo') == 'bar'
 
 
@@ -557,6 +558,45 @@ class TestLogSubmission:
             ],
         )
         assert check.get_log_cursor() == {'data': '2'}
+
+    def custom_persistent_cache_id_check(self) -> AgentCheck:
+        class TestCheck(AgentCheck):
+            def persistent_cache_id(self) -> str:
+                return "always_the_same"
+
+        return TestCheck(name="test", init_config={}, instances=[{}])
+
+    def test_cursor_with_custom_cache_invalidation_strategy_after_restart(self):
+        check = self.custom_persistent_cache_id_check()
+        check.check_id = 'test:bar:123'
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+
+        assert check.get_log_cursor() == {'data': '1'}
+
+        new_check = self.custom_persistent_cache_id_check()
+        new_check.check_id = 'test:bar:123456'
+        assert new_check.get_log_cursor() == {'data': '1'}
+
+        check = self.custom_persistent_cache_id_check()
+        check.check_id = 'test:bar:123'
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+
+        assert check.get_log_cursor() == {'data': '1'}
+
+        new_check = self.custom_persistent_cache_id_check()
+        new_check.check_id = 'test:bar:123456'
+        assert new_check.get_log_cursor() == {'data': '1'}
+
+    def test_cursor_invalidated_for_different_persistent_check_id_part(self):
+        check = self.custom_persistent_cache_id_check()
+        check.check_id = 'test:bar:123'
+        check.send_log({'message': 'foo'}, cursor={'data': '1'})
+
+        assert check.get_log_cursor() == {'data': '1'}
+
+        new_check = self.custom_persistent_cache_id_check()
+        new_check.check_id = 'test:bar:123456'
+        assert new_check.get_log_cursor() == {'data': '1'}
 
     def test_no_cursor(self, datadog_agent):
         check = AgentCheck('check_name', {}, [{}])
@@ -1312,14 +1352,11 @@ def test_env_var_logic_preset():
 @pytest.mark.parametrize(
     "should_profile_value, expected_calls",
     [
-        (True, 1),
-        (False, 0),
+        pytest.param(True, 1, id="enabled"),
+        pytest.param(False, 0, id="disabled"),
     ],
 )
-def test_profile_memory(should_profile_value, expected_calls):
-    """
-    Test that profile_memory is called when should_profile_memory is True
-    """
+def test_profile_memory_when_enabled(should_profile_value, expected_calls):
     check = AgentCheck('test', {}, [{}])
     check.should_profile_memory = mock.MagicMock(return_value=should_profile_value)
     check.profile_memory = mock.MagicMock()

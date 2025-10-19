@@ -8,6 +8,8 @@ This integration ingests the following logs:
 
 This integration provides enrichment and visualization for above mentioned event types. It helps to visualize detailed insights into security trends, threats, and policy violations through the out-of-the-box dashboards. Also, This integration provides out of the box detection rules.
 
+**Minimum Agent version:** 7.57.2
+
 ## Setup
 
 ### Generate API Credentials in Trellix Endpoint Security

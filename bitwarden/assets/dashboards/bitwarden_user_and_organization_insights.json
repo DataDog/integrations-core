@@ -25,7 +25,7 @@
             "id": 7049054880430209,
             "definition": {
                 "type": "note",
-                "content": "**[Bitwarden](https://bitwarden.com/)** password manager generates, stores, and secures important digital assets in an end-to-end encrypted vault. Users can access their data from anywhere, on any device (desktop, laptop, mobile devices) with secure cloud syncing or self-hosted deployment.\n\nThis dashboard provides visibility into activities related to the organization and its users.\n\nFor more information, see the [Bitwarden Integration Documentation](https://docs.datadoghq.comintegrations/bitwarden/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
+                "content": "**[Bitwarden](https://bitwarden.com/)** password manager generates, stores, and secures important digital assets in an end-to-end encrypted vault. Users can access their data from anywhere, on any device (desktop, laptop, mobile devices) with secure cloud syncing or self-hosted deployment.\n\nThis dashboard provides visibility into activities related to the organization and its users.\n\nFor more information, see the [Bitwarden Integration Documentation](https://docs.datadoghq.com/integrations/bitwarden/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations. ",
                 "background_color": "vivid_blue",
                 "font_size": "14",
                 "text_align": "left",
