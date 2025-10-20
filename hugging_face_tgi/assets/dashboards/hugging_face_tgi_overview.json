@@ -101,12 +101,8 @@
               "type": "check_status",
               "check": "hugging_face_tgi.openmetrics.health",
               "grouping": "cluster",
-              "group_by": [
-                "host"
-              ],
-              "tags": [
-                "$host"
-              ]
+              "group_by": ["host"],
+              "tags": ["$host"]
             },
             "layout": {
               "x": 0,
@@ -422,13 +418,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -499,14 +489,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {},
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -599,13 +582,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -685,13 +662,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -736,13 +707,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -833,13 +798,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -890,13 +849,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1048,7 +1001,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 18,
+        "y": 0,
         "width": 12,
         "height": 6,
         "is_column_break": true
@@ -1092,13 +1045,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1114,9 +1061,7 @@
                       "search": {
                         "query": "service:text-generation-inference OR source:hugging_face_tgi"
                       },
-                      "indexes": [
-                        "*"
-                      ],
+                      "indexes": ["*"],
                       "group_by": [
                         {
                           "facet": "status",
@@ -1205,9 +1150,260 @@
       },
       "layout": {
         "x": 0,
-        "y": 24,
+        "y": 6,
         "width": 12,
         "height": 6
+      }
+    },
+    {
+      "id": 2258222563095315,
+      "definition": {
+        "title": "LLM Observability ",
+        "background_color": "vivid_yellow",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 467063193958253,
+            "definition": {
+              "type": "note",
+              "content": "[Datadog LLM Observability](https://docs.datadoghq.com/llm_observability/quickstart/?tab=python) enables you to experiment, troubleshoot, monitor, and evaluate LLM agents or applications. Get real-time visibility into inputs and outputs, errors, latency, token usage, and more, along with in-depth quality and security checks at every stage, including data retrieval, tool calls, and agent interactions.\n\nLLM Observability SDK can [automatically trace](https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation?tab=python) your LLM operations. Datadog's LLM Observability views integrate with Hugging Face TGI metrics to provide visibility into your workflows.\n\nFor setup instructions and auto-instrumentation, check out the [LLM Observability Quickstart Guide](https://docs.datadoghq.com/llm_observability/quickstart/?tab=python).\n\nTo explore model-level usage, token attribution, cost analysis, and request tracing across teams and providers, visit the [LLM Observability dashboard](https://app.datadoghq.com/dash/integration/llm_operational_insights).",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 8256861655602834,
+            "definition": {
+              "title": "Total LLM Requests",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "llm_observability",
+                      "name": "query1",
+                      "indexes": ["*"],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "@event_type:span @meta.model_provider:* @meta.span.kind:llm"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {},
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 7853879441273475,
+            "definition": {
+              "title": "LLM Call Response Time (p95)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "percentile",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "p95:ml_obs.span.duration{span_kind:llm}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 3452479763987419,
+            "definition": {
+              "title": "LLM Call Response Time (p50)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "percentile",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "p50:ml_obs.span.duration{span_kind:llm}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 2,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 8174429076143416,
+            "definition": {
+              "title": "Model Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "llm_observability",
+                      "group_by": [
+                        {
+                          "facet": "@meta.model_provider",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        },
+                        {
+                          "facet": "@meta.model_name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": ["*"],
+                      "name": "query2",
+                      "search": {
+                        "query": "@event_type:span @meta.model_provider:* @meta.span.kind:llm"
+                      }
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "desc",
+                        "type": "formula"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "hide_total": false,
+              "legend": {
+                "type": "table"
+              },
+              "custom_links": [
+                {
+                  "label": "View related spans in LLM Observability",
+                  "link": "/llm/traces?query=@meta.model_name%3A{{@meta.model_name.value}}%20@event_type%3Aspan%20@parent_id%3A*%20@{{$ml_app}}%20{{$version}}&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 11
       }
     }
   ],
@@ -1221,5 +1417,6 @@
   ],
   "layout_type": "ordered",
   "notify_list": [],
-  "reflow_type": "fixed"
+  "reflow_type": "fixed",
+  "pause_auto_refresh": false
 }
