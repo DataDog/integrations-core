@@ -38,7 +38,7 @@ The Zscaler Private Access check is included in the [Datadog Agent][1] package. 
 
 2. Add this configuration block to your `zscaler_private_access.d/conf.yaml` file to start collecting your logs.
 
-   See the sample [zscaler_private_access.d/conf.yaml][7] for available configuration options.
+   See the sample [zscaler_private_access.d/conf.yaml][6] for available configuration options.
 
    ```yaml
    logs:
@@ -221,5 +221,4 @@ For further assistance, contact [Datadog support][4].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://docs.datadoghq.com/help/
 [5]: https://www.zscaler.com/products-and-solutions/zscaler-private-access
-[6]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
-[7]: https://github.com/DataDog/integrations-core/blob/master/zscaler_private_access/datadog_checks/zscaler_private_access/data/conf.yaml.example
+[6]: https://github.com/DataDog/integrations-core/blob/master/zscaler_private_access/datadog_checks/zscaler_private_access/data/conf.yaml.example
