@@ -48,6 +48,7 @@ class SchemaCollector(ABC):
         self._check = check
         self._log = check.log
         self._config = check._config.collect_schemas
+        self._row_chunk_size = 10000
 
         self._reset()
 
@@ -73,15 +74,23 @@ class SchemaCollector(ABC):
                 if not database_name:
                     self._check.log("database has no name %v", database)
                     continue
+                start = time.time()
                 with self._get_cursor(database_name) as cursor:
+                    end = time.time()
+                    self._log.info("Time to get cursor (%s): %s", database_name, int((end - start)*1000))
+                    # data = self._get_all(cursor)
                     next = self._get_next(cursor)
+                    start = time.time()
                     while next:
+                    # for i, next in enumerate(data):
                         self._queued_rows.append(self._map_row(database, next))
                         self._total_rows_count += 1
                         next = self._get_next(cursor)
                         is_last_payload = database is databases[-1] and next is None
+                        # is_last_payload = i == len(data) - 1
                         self.maybe_flush(is_last_payload)
-
+                    end = time.time()
+                    self._log.info("Time to process rows (%s): %s", database_name, int((end - start)*1000))
         except Exception as e:
             status = "error"
             self._log.error("Error collecting schema metadata: %s", e)
@@ -97,6 +106,13 @@ class SchemaCollector(ABC):
             self._check.gauge(
                 "dd.postgres.schema.tables_count",
                 self._total_rows_count,
+                tags=self._check.tags + ["status:" + status],
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+            self._check.gauge(
+                "dd.postgres.schema.payloads_count",
+                self._collection_payloads_count,
                 tags=self._check.tags + ["status:" + status],
                 hostname=self._check.reported_hostname,
                 raw=True,
@@ -119,7 +135,7 @@ class SchemaCollector(ABC):
         }
 
     def maybe_flush(self, is_last_payload):
-        if len(self._queued_rows) > 10 or is_last_payload:
+        if len(self._queued_rows) > self._row_chunk_size or is_last_payload:
             event = self.base_event.copy()
             event['timestamp'] = int(time.time() * 1000)
             event["metadata"] = self._queued_rows
@@ -140,6 +156,10 @@ class SchemaCollector(ABC):
 
     @abstractmethod
     def _get_next(self, cursor):
+        pass
+
+    @abstractmethod
+    def _get_all(self, cursor):
         pass
 
     @abstractmethod
@@ -307,6 +327,7 @@ class PostgresSchemaCollector(SchemaCollector):
     def __init__(self, check: PostgreSql):
         super().__init__(check)
         self._check = check
+        self._config = check._config.collect_schemas
 
     @property
     def base_event(self):
@@ -372,8 +393,8 @@ class PostgresSchemaCollector(SchemaCollector):
                     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
                     else ""
                 )
+                limit = int(self._config.max_tables or 1_000_000)
 
-                limit = self._config.max_tables or 1_000_000
                 query = f"""
                     WITH
                     schemas AS(
@@ -381,6 +402,13 @@ class PostgresSchemaCollector(SchemaCollector):
                     ),
                     tables AS (
                         {tables_query}
+                    ),
+                    schema_tables AS (
+                        SELECT schemas.schema_id, schemas.schema_name,
+                        tables.table_id, tables.table_name
+                        FROM schemas
+                        LEFT JOIN tables ON schemas.schema_id = tables.schema_id
+                        LIMIT {limit}
                     ),
                     columns AS (
                         {columns_query}
@@ -393,6 +421,7 @@ class PostgresSchemaCollector(SchemaCollector):
                     )
                     {partitions_ctes}
 
+                    SELECT * FROM (
                     SELECT schemas.schema_id, schemas.schema_name,
                         tables.table_id, tables.table_name,
                         array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
@@ -407,7 +436,7 @@ class PostgresSchemaCollector(SchemaCollector):
                         LEFT JOIN constraints ON tables.table_id = constraints.table_id
                         {partition_joins}
                     GROUP BY schemas.schema_id, schemas.schema_name, tables.table_id, tables.table_name
-                    LIMIT {limit}
+                    ) t
                     ;
                 """
                 # print(query)
@@ -439,6 +468,9 @@ class PostgresSchemaCollector(SchemaCollector):
 
     def _get_next(self, cursor):
         return cursor.fetchone()
+
+    def _get_all(self, cursor):
+        return cursor.fetchall()
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
