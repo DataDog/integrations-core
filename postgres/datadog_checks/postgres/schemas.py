@@ -361,7 +361,7 @@ class PostgresSchemaCollector(SchemaCollector):
             with conn.cursor(row_factory=dict_row) as cursor:
                 schemas_query = self._get_schemas_query()
                 tables_query = self._get_tables_query()
-                columns_query = self._get_columns_query()
+                columns_query = COLUMNS_QUERY
                 indexes_query = PG_INDEXES_QUERY
                 constraints_query = PG_CONSTRAINTS_QUERY
                 partitions_ctes = (
@@ -467,10 +467,6 @@ class PostgresSchemaCollector(SchemaCollector):
             query += f" AND ({' OR '.join(f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables)})"
         return query
 
-    def _get_columns_query(self):
-        query = COLUMNS_QUERY
-        query += f" limit {int(self._config.max_columns)}"
-        return query
 
     def _get_next(self, cursor):
         return cursor.fetchone()
