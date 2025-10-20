@@ -24,15 +24,7 @@ Datadog uses its built-in log pipelines to parse and enrich these logs, facilita
 
 ### Installation
 
-For Agent version >= 7.73 the Zscaler Private Access check is included in the [Datadog Agent][1] package. No additional installation is needed on your server. 
-
-If you’re running an Agent version earlier than 7.73, follow the steps below to install the integration manually.
-
-Run the following Agent installation command in your terminal. Then, complete the configuration steps. For more information, see the [Integration Management][6] documentation.
-
-```shell
-sudo -u dd-agent -- datadog-agent integration install datadog-zscaler_private_access
-```
+The Zscaler Private Access check is included in the [Datadog Agent][1] package. No additional installation is needed on your server. 
 
 ### Configuration
 
