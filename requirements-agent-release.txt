@@ -1,7 +1,7 @@
 # DO NOT PASS THIS TO PIP DIRECTLY
 # THIS FILE IS AUTO-GENERATED, DO NOT EDIT BY HAND
 --no-index
-datadog-active-directory==4.4.0; sys_platform == 'win32'
+datadog-active-directory==4.4.1; sys_platform == 'win32'
 datadog-activemq-xml==5.2.0
 datadog-activemq==5.1.0
 datadog-aerospike==5.1.0; sys_platform == 'linux2'
@@ -31,7 +31,7 @@ datadog-ceph==4.2.0; sys_platform != 'win32'
 datadog-cert-manager==6.1.0
 datadog-checkpoint-harmony-endpoint==1.0.0
 datadog-checkpoint-quantum-firewall==1.1.0
-datadog-checks-base==37.21.0
+datadog-checks-base==37.21.1
 datadog-checks-dependency-provider==3.1.0
 datadog-checks-downloader==8.1.0
 datadog-cilium==6.1.0
@@ -50,7 +50,7 @@ datadog-coredns==6.1.0; sys_platform == 'linux2'
 datadog-couch==9.1.0
 datadog-couchbase==6.1.0
 datadog-crio==5.1.0
-datadog-datadog-cluster-agent==6.1.0
+datadog-datadog-cluster-agent==6.2.0
 datadog-datadog-csi-driver==1.0.0; sys_platform != 'win32'
 datadog-dcgm==4.1.0
 datadog-delinea-privilege-manager==1.1.0
@@ -149,7 +149,7 @@ datadog-microsoft-dns==1.1.0; sys_platform == 'win32'
 datadog-microsoft-sysmon==1.1.0; sys_platform == 'win32'
 datadog-milvus==2.1.0
 datadog-mongo==10.5.0
-datadog-mysql==15.9.1
+datadog-mysql==15.9.2
 datadog-nagios==3.1.0
 datadog-network==5.4.0
 datadog-nfsstat==3.2.0; sys_platform == 'linux2'
@@ -168,11 +168,11 @@ datadog-ossec-security==2.1.0
 datadog-palo-alto-panorama==1.1.0
 datadog-pan-firewall==3.1.0
 datadog-pdh-check==4.4.0; sys_platform == 'win32'
-datadog-pgbouncer==8.6.0; sys_platform != 'win32'
+datadog-pgbouncer==8.6.1; sys_platform != 'win32'
 datadog-php-fpm==6.1.0
 datadog-ping-federate==2.1.0
 datadog-postfix==3.1.0; sys_platform != 'win32'
-datadog-postgres==23.1.1
+datadog-postgres==23.1.2
 datadog-powerdns-recursor==5.1.0
 datadog-presto==3.2.0
 datadog-process==5.2.0

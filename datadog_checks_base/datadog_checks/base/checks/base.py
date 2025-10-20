@@ -1094,6 +1094,9 @@ class AgentCheck(object):
         return entrypoint
 
     def __initialize_persistent_cache_key_prefix(self):
+        if self.__persistent_cache_key_prefix:
+            return
+
         namespace = ':'.join(self.check_id.split(':')[:-1])
         self.__persistent_cache_key_prefix = f'{namespace}:{self.persistent_cache_id()}_'
 

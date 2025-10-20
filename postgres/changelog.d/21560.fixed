@@ -1,1 +1,0 @@
-Fixes a collision issue when token based authentication is configured for multiple Postgres instances

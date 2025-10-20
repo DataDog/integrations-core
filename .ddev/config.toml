@@ -53,9 +53,10 @@ exclude = true
 [overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
 aerospike = ['Apache-2.0']
+# https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/identity/azure-identity/LICENSE
+azure-identity = ['MIT']
 # https://github.com/pyca/cryptography/blob/main/LICENSE
 cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
-# https://github.com/confluentinc/confluent-kafka-python/blob/master/LICENSE
 # https://github.com/rthalley/dnspython/blob/master/LICENSE
 dnspython = ['ISC']
 # https://github.com/scientific-python/lazy-loader/blob/main/LICENSE.md
@@ -92,6 +93,8 @@ simplejson = ['MIT']
 supervisor = ['BSD-3-Clause-Modification']
 # https://github.com/prometheus/client_python/issues/1110
 prometheus-client = ['Apache-2.0']
+# https://github.com/GrahamDumpleton/wrapt/blob/develop/LICENSE
+wrapt = ['BSD-3-Clause']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'
@@ -152,6 +155,7 @@ exclude = [
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
     'pysnmp',  # Breaking snmp tests
     'aerospike',  # v8+ breaks agent build.
+    'confluent-kafka',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
     'psutil',

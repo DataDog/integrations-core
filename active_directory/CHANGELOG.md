@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.4.1 / 2025-10-10
+
+***Fixed***:
+
+* Fix AD metric types and metadata.csv ([#21610](https://github.com/DataDog/integrations-core/pull/21610))
+
 ## 4.4.0 / 2025-10-02
 
 ***Added***:

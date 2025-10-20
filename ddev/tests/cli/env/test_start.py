@@ -371,6 +371,48 @@ def test_env_vars(ddev, helpers, data_dir, write_result_file, mocker):
     )
 
 
+def test_env_vars_apm_enabled_from_metadata(ddev, helpers, data_dir, write_result_file, mocker):
+    metadata = {'env_vars': {'DD_APM_ENABLED': 'true', 'DD_LOGS_ENABLED': 'true'}}
+    config = {}
+    mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': metadata, 'config': config}))
+    start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+
+    result = ddev('env', 'start', integration, environment)
+
+    assert result.exit_code == 0, result.output
+    assert result.output == helpers.dedent(
+        f"""
+        ─────────────────────────────── Starting: py3.12 ───────────────────────────────
+
+        Stop environment -> ddev env stop {integration} {environment}
+        Execute tests -> ddev env test {integration} {environment}
+        Check status -> ddev env agent {integration} {environment} status
+        Trigger run -> ddev env agent {integration} {environment} check
+        Reload config -> ddev env reload {integration} {environment}
+        Manage config -> ddev env config
+        Config file -> {env_data.config_file}
+        """
+    )
+
+    assert env_data.read_config() == {'instances': [config]}
+    assert env_data.read_metadata() == metadata
+
+    start.assert_called_once_with(
+        agent_build='datadog/agent-dev:master',
+        local_packages={},
+        env_vars={
+            'DD_DD_URL': 'https://app.datadoghq.com',
+            'DD_SITE': 'datadoghq.com',
+            'DD_APM_ENABLED': 'true',
+            'DD_LOGS_ENABLED': 'true',
+        },
+    )
+
+
 def test_env_vars_override_config(ddev, helpers, data_dir, write_result_file, mocker):
     metadata = {'env_vars': {'FOO': 'BAZ', 'BAZ': 'BAR'}}
     config = {}
