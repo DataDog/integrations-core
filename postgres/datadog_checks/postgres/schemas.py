@@ -169,6 +169,7 @@ class SchemaCollector(ABC):
         """
         return {
             **database,
+            "id": str(database["id"]), #Case id into string as expected by backend
         }
 
 
