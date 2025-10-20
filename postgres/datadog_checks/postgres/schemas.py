@@ -89,7 +89,7 @@ class SchemaCollector(ABC):
         finally:
             self._check.histogram(
                 "dd.postgres.schema.time",
-                (time.time() - self._collection_started_at) * 1000,
+                int(time.time() * 1000) - self._collection_started_at,
                 tags=self._check.tags + ["status:" + status],
                 hostname=self._check.reported_hostname,
                 raw=True,
