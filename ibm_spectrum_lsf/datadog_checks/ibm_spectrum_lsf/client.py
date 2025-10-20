@@ -35,3 +35,8 @@ class LSFClient:
                 '"HOST_NAME:50 type:30 model:30 cpuf: ncpus: maxmem: maxswp: server: nprocs: ncores: nthreads: maxtmp:"',  # noqa: E501
             ]
         )
+
+    def lsload(self):
+        return self._run_command(
+            ['lsload', '-o', '"HOST_NAME: status: r15s: r1m: r15m: ut: pg: io: ls: it: tmp: swp: mem:"']
+        )

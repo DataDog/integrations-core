@@ -34,4 +34,19 @@ LHOST_METRICS = [
     "ibm_spectrum_lsf.host.num_procs",
     "ibm_spectrum_lsf.host.num_threads",
 ]
-ALL_METRICS = LSID_METRICS + CLUSTER_METRICS + BHOST_METRICS + LHOST_METRICS
+
+LSLOAD_METRICS = [
+    "ibm_spectrum_lsf.load.cpu.run_queue_length.15m",
+    "ibm_spectrum_lsf.load.cpu.run_queue_length.15s",
+    "ibm_spectrum_lsf.load.cpu.run_queue_length.1m",
+    "ibm_spectrum_lsf.load.cpu.utilization",
+    "ibm_spectrum_lsf.load.disk.io",
+    "ibm_spectrum_lsf.load.idle_time",
+    "ibm_spectrum_lsf.load.login_users",
+    "ibm_spectrum_lsf.load.mem.available_ram",
+    "ibm_spectrum_lsf.load.mem.available_swap",
+    "ibm_spectrum_lsf.load.mem.free",
+    "ibm_spectrum_lsf.load.mem.paging_rate",
+    "ibm_spectrum_lsf.load.status",
+]
+ALL_METRICS = LSID_METRICS + CLUSTER_METRICS + BHOST_METRICS + LHOST_METRICS + LSLOAD_METRICS

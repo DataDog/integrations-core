@@ -5,7 +5,7 @@
 from datadog_checks.base import AgentCheck
 
 from .client import LSFClient
-from .common import BHOSTS, LSCLUSTERS, LSHOSTS
+from .common import BHOSTS, LSCLUSTERS, LSHOSTS, LSLOAD
 from .config_models import ConfigMixin
 
 
@@ -78,6 +78,13 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         """  # noqa: E501
         self.collect_metrics_from_command(self.client.lshosts, LSHOSTS)
 
+    def collect_lsload(self):
+        """
+        HOST_NAME               status  r15s   r1m  r15m   ut    pg    io  ls    it   tmp   swp   mem
+        ip-11-21-111-198.ec2.internal     ok   0.1   0.0   0.0   0%   0.0     1   1     4   71G    0M
+        """
+        self.collect_metrics_from_command(self.client.lsload, LSLOAD)
+
     def check(self, _):
         _, err, exit_code = self.client.lsid()
         if exit_code == 0:
@@ -91,3 +98,4 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         self.collect_clusters()
         self.collect_bhosts()
         self.collect_lshosts()
+        self.collect_lsload()
