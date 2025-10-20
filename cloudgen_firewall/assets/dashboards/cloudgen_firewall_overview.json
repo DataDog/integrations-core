@@ -475,6 +475,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -493,7 +494,17 @@
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [],
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -507,7 +518,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "line"
+                                    "display_type": "bars"
                                 }
                             ],
                             "yaxis": {
@@ -552,8 +563,9 @@
                     {
                         "id": 7248918566915027,
                         "definition": {
-                            "title": "Total Operative Errors",
-                            "type": "query_value",
+                            "title": "Operative Errors",
+                            "time": {},
+                            "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
@@ -578,27 +590,22 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 1,
-                                            "palette": "black_on_light_red"
-                                        }
-                                    ]
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "red",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
+                            ]
                         },
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 2,
-                            "height": 2
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
@@ -662,10 +669,10 @@
                             }
                         },
                         "layout": {
-                            "x": 2,
+                            "x": 4,
                             "y": 0,
-                            "width": 5,
-                            "height": 4
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
@@ -729,62 +736,10 @@
                             }
                         },
                         "layout": {
-                            "x": 7,
+                            "x": 8,
                             "y": 0,
-                            "width": 5,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5860944842455604,
-                        "definition": {
-                            "title": "Total Operation Events",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:operative"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 1,
-                                            "palette": "black_on_light_green"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 2,
-                            "height": 2
+                            "width": 4,
+                            "height": 3
                         }
                     }
                 ]
@@ -793,7 +748,7 @@
                 "x": 0,
                 "y": 11,
                 "width": 12,
-                "height": 5
+                "height": 4
             }
         },
         {
@@ -806,62 +761,6 @@
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
-                    {
-                        "id": 3345876365772557,
-                        "definition": {
-                            "title": "Events Over Time",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:eventS"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "datadog16",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 5,
-                            "height": 3
-                        }
-                    },
                     {
                         "id": 3148364425491970,
                         "definition": {
@@ -923,17 +822,27 @@
                             }
                         },
                         "layout": {
-                            "x": 5,
+                            "x": 0,
                             "y": 0,
-                            "width": 4,
+                            "width": 7,
                             "height": 3
                         }
                     },
                     {
-                        "id": 763670483485156,
+                        "id": 3345876365772557,
                         "definition": {
-                            "title": "Total Event EventS",
-                            "type": "query_value",
+                            "title": "EventS Errors ",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
@@ -946,7 +855,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:eventS"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Event @sub_component:eventS status:error"
                                             },
                                             "indexes": [
                                                 "*"
@@ -958,26 +867,21 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 1,
-                                            "palette": "black_on_light_green"
-                                        }
-                                    ]
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "red",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
+                            ]
                         },
                         "layout": {
-                            "x": 9,
+                            "x": 7,
                             "y": 0,
-                            "width": 3,
+                            "width": 5,
                             "height": 3
                         }
                     }
@@ -985,7 +889,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 15,
                 "width": 12,
                 "height": 4,
                 "is_column_break": true
@@ -1238,6 +1142,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1265,7 +1170,7 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "semantic",
+                                        "palette": "dog_classic",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1284,7 +1189,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 20,
+                "y": 19,
                 "width": 12,
                 "height": 8
             }
@@ -1306,7 +1211,7 @@
                             "content": "\t\nDisplays log files concerning general firewall configuration changes, ruleset updates, including operation details and time settings.",
                             "background_color": "blue",
                             "font_size": "14",
-                            "text_align": "left",
+                            "text_align": "center",
                             "vertical_align": "center",
                             "show_tick": false,
                             "tick_pos": "50%",
@@ -1387,58 +1292,6 @@
                         }
                     },
                     {
-                        "id": 227506363117013,
-                        "definition": {
-                            "title": "Total Firewall Events",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall -@sub_component:*"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 1,
-                                            "palette": "white_on_yellow"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 1,
-                            "width": 2,
-                            "height": 3
-                        }
-                    },
-                    {
                         "id": 2839039159809741,
                         "definition": {
                             "title": "Top Firewall Events from Blocked Hosts",
@@ -1502,77 +1355,8 @@
                             }
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 4,
                             "y": 1,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 2519500284838090,
-                        "definition": {
-                            "title": "Top Reasons for Firewall Events",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @cloudgen_firewall.process:AdminAction"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@message",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
                             "width": 4,
                             "height": 3
                         }
@@ -1580,7 +1364,7 @@
                     {
                         "id": 3760107754514437,
                         "definition": {
-                            "title": "Firewall Event Over Time",
+                            "title": "Firewall Events Over Time",
                             "show_legend": false,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -1590,6 +1374,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1603,12 +1388,22 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall -@sub_component:*"
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [],
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -1626,77 +1421,9 @@
                             ]
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 4,
-                            "width": 3,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 729145479310000,
-                        "definition": {
-                            "title": "Firewall Events by Status",
-                            "time": {},
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall -@sub_component:*"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@level",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 7,
-                            "y": 4,
-                            "width": 5,
+                            "x": 8,
+                            "y": 1,
+                            "width": 4,
                             "height": 3
                         }
                     }
@@ -1704,9 +1431,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 28,
+                "y": 27,
                 "width": 12,
-                "height": 8
+                "height": 5
             }
         },
         {
@@ -1869,7 +1596,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 36,
+                "y": 32,
                 "width": 12,
                 "height": 5
             }
@@ -2167,7 +1894,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 41,
+                "y": 37,
                 "width": 12,
                 "height": 7
             }
@@ -2284,6 +2011,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2302,7 +2030,17 @@
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [],
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -2330,7 +2068,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 48,
+                "y": 44,
                 "width": 12,
                 "height": 5
             }
@@ -2582,7 +2320,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 53,
+                "y": 49,
                 "width": 12,
                 "height": 5
             }
@@ -2765,6 +2503,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -2783,7 +2522,17 @@
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [],
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -2879,7 +2628,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 58,
+                "y": 54,
                 "width": 12,
                 "height": 8
             }
@@ -2913,58 +2662,6 @@
                             "y": 0,
                             "width": 12,
                             "height": 1
-                        }
-                    },
-                    {
-                        "id": 3372873491728999,
-                        "definition": {
-                            "title": "Total Firewall IPSDownload Events",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 1,
-                                            "palette": "white_on_yellow"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 1,
-                            "width": 3,
-                            "height": 2
                         }
                     },
                     {
@@ -3031,10 +2728,78 @@
                             }
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 0,
                             "y": 1,
                             "width": 4,
-                            "height": 4
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4512676345804530,
+                        "definition": {
+                            "title": "Firewall IPSDownload Events Over Time",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@level",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
@@ -3101,86 +2866,19 @@
                             }
                         },
                         "layout": {
-                            "x": 7,
+                            "x": 8,
                             "y": 1,
-                            "width": 5,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4512676345804530,
-                        "definition": {
-                            "title": "Firewall IPSDownload Status Types",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:Activity"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@level",
-                                                    "limit": 1000,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 1000,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 3,
-                            "height": 2
+                            "width": 4,
+                            "height": 3
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 66,
+                "y": 62,
                 "width": 12,
-                "height": 6
+                "height": 5
             }
         },
         {
@@ -3194,10 +2892,20 @@
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 3976386608332500,
+                        "id": 7472893736897233,
                         "definition": {
-                            "title": "Total Firewall Audit Events",
-                            "type": "query_value",
+                            "title": "Firewall Audit Events Over Time",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
@@ -3215,33 +2923,37 @@
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [],
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 1,
-                                            "palette": "white_on_yellow"
-                                        }
-                                    ]
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "semantic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
+                            ]
                         },
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 3,
+                            "width": 4,
                             "height": 3
                         }
                     },
@@ -3316,7 +3028,7 @@
                             }
                         },
                         "layout": {
-                            "x": 3,
+                            "x": 4,
                             "y": 0,
                             "width": 4,
                             "height": 3
@@ -3386,132 +3098,9 @@
                             }
                         },
                         "layout": {
-                            "x": 7,
+                            "x": 8,
                             "y": 0,
-                            "width": 5,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 7472893736897233,
-                        "definition": {
-                            "title": "Firewall Audit Events Over Time",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:audit"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "semantic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 2912576288095269,
-                        "definition": {
-                            "title": "Firewall Audit Events by Status",
-                            "time": {},
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:audit"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@level",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "style": {
-                                        "palette": "datadog16"
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 3,
-                            "width": 6,
+                            "width": 4,
                             "height": 3
                         }
                     }
@@ -3519,9 +3108,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 72,
+                "y": 67,
                 "width": 12,
-                "height": 7
+                "height": 4
             }
         },
         {
@@ -3617,6 +3206,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -3635,7 +3225,17 @@
                                             "indexes": [
                                                 "*"
                                             ],
-                                            "group_by": [],
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    }
+                                                }
+                                            ],
                                             "compute": {
                                                 "aggregation": "count"
                                             },
@@ -3663,7 +3263,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 79,
+                "y": 71,
                 "width": 12,
                 "height": 4
             }
@@ -3769,58 +3369,6 @@
                         }
                     },
                     {
-                        "id": 2491413427561260,
-                        "definition": {
-                            "title": "Total Firewall Threat Events",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:threat"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 1,
-                                            "palette": "white_on_yellow"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 1,
-                            "width": 2,
-                            "height": 3
-                        }
-                    },
-                    {
                         "id": 8722083567534972,
                         "definition": {
                             "title": "Firewall Threats by Status",
@@ -3878,13 +3426,69 @@
                             ],
                             "type": "sunburst",
                             "legend": {
-                                "type": "automatic"
+                                "type": "table"
                             }
                         },
                         "layout": {
-                            "x": 8,
+                            "x": 6,
                             "y": 1,
-                            "width": 4,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7685707344015996,
+                        "definition": {
+                            "title": "Firewall Threat Events Over Time",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:threat"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "semantic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
                             "height": 3
                         }
                     },
@@ -3952,61 +3556,6 @@
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 6,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 7685707344015996,
-                        "definition": {
-                            "title": "Firewall Threat Events Over Time",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:Firewall @sub_component:threat"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "semantic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
                             "x": 6,
                             "y": 4,
                             "width": 6,
@@ -4017,7 +3566,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 83,
+                "y": 75,
                 "width": 12,
                 "height": 8
             }
@@ -4035,8 +3584,9 @@
                     {
                         "id": 5012620654019807,
                         "definition": {
-                            "title": "Total System MgmAccess Events",
-                            "type": "query_value",
+                            "title": "System MgmAccess Events Over Time",
+                            "time": {},
+                            "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
@@ -4061,14 +3611,16 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
                                 }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area"
-                            }
+                            ]
                         },
                         "layout": {
                             "x": 0,
@@ -4229,7 +3781,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 91,
+                "y": 83,
                 "width": 12,
                 "height": 4
             }
@@ -4401,7 +3953,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 95,
+                "y": 87,
                 "width": 12,
                 "height": 5
             }
@@ -4483,7 +4035,7 @@
                             "x": 0,
                             "y": 0,
                             "width": 4,
-                            "height": 4
+                            "height": 3
                         }
                     },
                     {
@@ -4551,17 +4103,16 @@
                         "layout": {
                             "x": 4,
                             "y": 0,
-                            "width": 5,
-                            "height": 4
+                            "width": 4,
+                            "height": 3
                         }
                     },
                     {
-                        "id": 950986585591521,
+                        "id": 3465838902735431,
                         "definition": {
-                            "title": "Total SSH Config Events",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
+                            "title": "SSH Config Events Over Time",
+                            "time": {},
+                            "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
@@ -4569,43 +4120,6 @@
                                             "formula": "query1"
                                         }
                                     ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:barracuda_cloudgen_logs @cloudgen_firewall.component:SSH @sub_component:config"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 9,
-                            "y": 0,
-                            "width": 3,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 3465838902735431,
-                        "definition": {
-                            "title": "SSH Config Events by Type",
-                            "time": {},
-                            "requests": [
-                                {
                                     "queries": [
                                         {
                                             "name": "query1",
@@ -4634,46 +4148,31 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
+                                    "response_format": "timeseries",
                                     "style": {
-                                        "palette": "datadog16"
+                                        "palette": "datadog16",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
                                     },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
+                                    "display_type": "bars"
                                 }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "automatic"
-                            }
+                            ]
                         },
                         "layout": {
-                            "x": 9,
-                            "y": 2,
-                            "width": 3,
-                            "height": 2
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 100,
+                "y": 92,
                 "width": 12,
-                "height": 5
+                "height": 4
             }
         }
     ],
