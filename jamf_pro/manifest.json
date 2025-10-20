@@ -52,7 +52,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 52026787,
       "source_type_name": "Jamf Pro",
       "events": {
