@@ -32,3 +32,5 @@ ibm_spectrum_lsf.server.slots_per_user,gauge,,,,,0,ibm_spectrum_lsf,lsf slots us
 ibm_spectrum_lsf.server.status,gauge,,,,,0,ibm_spectrum_lsf,lsf server status,,
 ibm_spectrum_lsf.server.suspended,gauge,,,,,0,ibm_spectrum_lsf,lsf sus,,
 ibm_spectrum_lsf.server.user_suspended,gauge,,,,,0,ibm_spectrum_lsf,lsf user sus,,
+ibm_spectrum_lsf.slots.backfill.available,gauge,,,,,0,ibm_spectrum_lsf,lsf slots avail,,
+ibm_spectrum_lsf.slots.runtime_limit,gauge,,,,,0,ibm_spectrum_lsf,lsf slots limit,,

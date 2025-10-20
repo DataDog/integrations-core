@@ -20,6 +20,13 @@ def transform_float(val):
         return float(val)
 
 
+def transform_runtime(val):
+    if val == "UNLIMITED":
+        return -1
+    else:
+        return transform_float(val)
+
+
 LSCLUSTERS = {
     'name': 'lsclusters',
     'prefix': 'cluster',
@@ -111,5 +118,15 @@ LSLOAD = {
         {'name': 'mem.free', 'id': 10, 'transform': transform_float},
         {'name': 'mem.available_swap', 'id': 11, 'transform': transform_float},
         {'name': 'mem.available_ram', 'id': 12, 'transform': transform_float},
+    ],
+}
+
+BSLOTS = {
+    'name': 'bslots',
+    'prefix': 'slots',
+    'expected_columns': 2,
+    'metrics': [
+        {'name': 'backfill.available', 'id': 0, 'transform': transform_float},
+        {'name': 'runtime_limit', 'id': 1, 'transform': transform_runtime},
     ],
 }

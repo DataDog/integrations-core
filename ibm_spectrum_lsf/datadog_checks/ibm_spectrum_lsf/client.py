@@ -40,3 +40,6 @@ class LSFClient:
         return self._run_command(
             ['lsload', '-o', '"HOST_NAME: status: r15s: r1m: r15m: ut: pg: io: ls: it: tmp: swp: mem:"']
         )
+
+    def bslots(self):
+        return self._run_command(['bslots'])

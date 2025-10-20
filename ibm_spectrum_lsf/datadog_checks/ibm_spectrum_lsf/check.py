@@ -5,7 +5,7 @@
 from datadog_checks.base import AgentCheck
 
 from .client import LSFClient
-from .common import BHOSTS, LSCLUSTERS, LSHOSTS, LSLOAD
+from .common import BHOSTS, BSLOTS, LSCLUSTERS, LSHOSTS, LSLOAD
 from .config_models import ConfigMixin
 
 
@@ -54,7 +54,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
 
         for line in output_lines:
             line_data = line.split()
-            tags = self.process_tags(mapping.get('tags'), line_data)
+            tags = self.process_tags(mapping.get('tags', []), line_data)
             self.submit_metrics(mapping.get('prefix'), mapping.get('metrics'), line_data, tags)
 
     def collect_clusters(self):
@@ -85,6 +85,13 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         """
         self.collect_metrics_from_command(self.client.lsload, LSLOAD)
 
+    def collect_bslots(self):
+        """
+        SLOTS          RUNTIME
+        2              UNLIMITED
+        """
+        self.collect_metrics_from_command(self.client.bslots, BSLOTS)
+
     def check(self, _):
         _, err, exit_code = self.client.lsid()
         if exit_code == 0:
@@ -99,3 +106,4 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         self.collect_bhosts()
         self.collect_lshosts()
         self.collect_lsload()
+        self.collect_bslots()

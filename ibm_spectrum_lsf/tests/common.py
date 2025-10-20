@@ -49,4 +49,6 @@ LSLOAD_METRICS = [
     "ibm_spectrum_lsf.load.mem.paging_rate",
     "ibm_spectrum_lsf.load.status",
 ]
-ALL_METRICS = LSID_METRICS + CLUSTER_METRICS + BHOST_METRICS + LHOST_METRICS + LSLOAD_METRICS
+
+BSLOTS_METRICS = ["ibm_spectrum_lsf.slots.backfill.available", "ibm_spectrum_lsf.slots.runtime_limit"]
+ALL_METRICS = LSID_METRICS + CLUSTER_METRICS + BHOST_METRICS + BSLOTS_METRICS + LHOST_METRICS + LSLOAD_METRICS
