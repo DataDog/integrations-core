@@ -7,6 +7,7 @@ import re
 import pywintypes
 import win32service
 import winerror
+
 from datadog_checks.base import AgentCheck
 
 SERVICE_PATTERN_FLAGS = re.IGNORECASE
