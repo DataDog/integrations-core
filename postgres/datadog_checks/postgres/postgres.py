@@ -5,6 +5,7 @@ import contextlib
 import copy
 import functools
 import os
+import traceback
 from string import Template
 from time import time
 
@@ -30,7 +31,7 @@ from datadog_checks.postgres.connection_pool import (
     TokenProvider,
 )
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
-from datadog_checks.postgres.health import PostgresHealth
+from datadog_checks.postgres.health import PostgresHealth, PostgresHealthEvent
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 from datadog_checks.postgres.relationsmanager import (
@@ -1124,6 +1125,20 @@ class PostgreSql(AgentCheck):
                 hostname=self.reported_hostname,
                 raw=True,
             )
+
+            if not isinstance(e, DatabaseHealthCheckError):
+                # Submit health events for unknown errors
+                trace = traceback.extract_tb()
+                exc = trace.pop()
+                self.health.submit_health_event(
+                    PostgresHealthEvent.UNKNOWN_ERROR,
+                    HealthStatus.ERROR,
+                    file=exc.filename,
+                    line=exc.lineno,
+                    function=exc.name,
+                    exception_type=type(e).__name__,
+                )
+
             raise e
         else:
             self.service_check(
