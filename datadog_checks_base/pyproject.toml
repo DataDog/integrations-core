@@ -37,7 +37,7 @@ deps = [
     "binary==1.0.2",
     "cachetools==6.2.0",
     "cryptography==45.0.6",
-    "ddtrace==3.12.5",
+    "ddtrace @ file:///home/bits/ddtrace-3.17.0.dev73+g11a526fe2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
     "jellyfish==1.2.0",
     "lazy-loader==0.4",
     "prometheus-client==0.22.1",
@@ -74,6 +74,9 @@ kube = [
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.version]
 path = "datadog_checks/base/__about__.py"
