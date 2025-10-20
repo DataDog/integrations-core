@@ -16,9 +16,6 @@ from zipfile import ZipFile
 import urllib3
 from utils import extract_metadata, normalize_project_name
 
-# Packages for which we're skipping the openssl-3 build check
-OPENSSL_PACKAGE_BYPASS = ["psycopg"]
-
 
 @cache
 def get_wheel_hashes(project) -> dict[str, str]:
@@ -102,16 +99,9 @@ class WheelName(NamedTuple):
 
 def check_unacceptable_files(
     wheel: Path,
-    bypass_prefixes: list[str],
     invalid_file_patterns: list[str],
 ):
     """Check if a wheel contains any unacceptable files and exit if found."""
-    if any(wheel.name.startswith(pkg_prefix) for pkg_prefix in bypass_prefixes):
-        print(
-            f'Warning: Bypassing unacceptable file check for {wheel.name}'
-        )
-        return
-
     unacceptable_files = find_patterns_in_wheel(wheel, invalid_file_patterns)
     if unacceptable_files:
         print(
@@ -156,7 +146,6 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
 
             check_unacceptable_files(
                 wheel,
-                bypass_prefixes=OPENSSL_PACKAGE_BYPASS,
                 invalid_file_patterns=external_invalid_file_patterns,
             )
             shutil.move(wheel, external_dir)
@@ -202,7 +191,6 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
 
             check_unacceptable_files(
                 wheel,
-                bypass_prefixes=OPENSSL_PACKAGE_BYPASS,
                 invalid_file_patterns=external_invalid_file_patterns,
             )
             shutil.move(wheel, external_dir)
@@ -264,6 +252,8 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
     def copy_filt_func(libname):
         return not any(excl.search(libname) for excl in exclusions)
 
+    min_macos_version = Version(os.environ["MACOSX_DEPLOYMENT_TARGET"])
+
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
         if not wheel_was_built(wheel):
@@ -275,7 +265,7 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
         # Platform independent wheels: move and rename to make platform specific
         wheel_name = WheelName.parse(wheel.name)
         if wheel_name.platform_tag == 'any':
-            dest = str(wheel_name._replace(platform_tag='macosx_10_12_universal2'))
+            dest = str(wheel_name._replace(platform_tag=f'macosx_{min_macos_version.major}_{min_macos_version.minor}_universal2'))
             shutil.move(wheel, Path(built_dir) / dest)
             continue
 
@@ -287,7 +277,7 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
             os.path.join(built_dir, dest),
             copy_filt_func=copy_filt_func,
             # require_archs=[single_arch],  TODO(regis): address multi-arch confluent_kafka/cimpl.cpython-312-darwin.so
-            require_target_macos_version=Version(os.environ["MACOSX_DEPLOYMENT_TARGET"]),
+            require_target_macos_version=min_macos_version,
         )
         print(f'Repaired wheel to {dest}')
         if copied_libs:

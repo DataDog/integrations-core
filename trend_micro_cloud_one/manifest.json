@@ -1,0 +1,101 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "06b13f44-cba3-48f1-8c73-338f22b9ad18",
+  "app_id": "trend-micro-cloud-one",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Trend Micro Cloud One platform data.",
+    "title": "Trend Micro Cloud One",
+    "media": [
+      {
+        "caption": "Trend Micro Cloud One - Workload Security Insights",
+        "image_url": "images/trend_micro_cloud_one_workload_security_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Trend Micro Cloud One - Anti-Malware Events",
+        "image_url": "images/trend_micro_cloud_one_anti_malware_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Trend Micro Cloud One - Application Control and Device Control Events",
+        "image_url": "images/trend_micro_cloud_one_application_control_and_device_control_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Trend Micro Cloud One - Firewall Events",
+        "image_url": "images/trend_micro_cloud_one_firewall_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Trend Micro Cloud One - Integrity Monitoring Events",
+        "image_url": "images/trend_micro_cloud_one_integrity_monitoring_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Trend Micro Cloud One - Log Inspection and Web Reputation Events",
+        "image_url": "images/trend_micro_cloud_one_log_inspection_and_web_reputation_events.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Trend Micro Cloud One - Network Security Insights",
+        "image_url": "images/trend_micro_cloud_one_network_security_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Trend Micro Cloud One - File Storage Security Insights",
+        "image_url": "images/trend_micro_cloud_one_file_storage_security_insights.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration",
+      "Submitted Data Type::Logs",
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Cloud"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 55693496,
+      "source_type_name": "Trend Micro Cloud One",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Trend Micro Cloud One - Workload Security Insights": "assets/dashboards/trend_micro_cloud_one_workload_security_insights.json",
+      "Trend Micro Cloud One - System Events": "assets/dashboards/trend_micro_cloud_one_system_events.json",
+      "Trend Micro Cloud One - Anti-Malware Events": "assets/dashboards/trend_micro_cloud_one_anti-malware_events.json",
+      "Trend Micro Cloud One - Application Control and Device Control Events": "assets/dashboards/trend_micro_cloud_one_application_control_and_device_control_events.json",
+      "Trend Micro Cloud One - Firewall Events": "assets/dashboards/trend_micro_cloud_one_firewall_events.json",
+      "Trend Micro Cloud One - Integrity Monitoring Events": "assets/dashboards/trend_micro_cloud_one_integrity_monitoring_events.json",
+      "Trend Micro Cloud One - Intrusion Prevention Events": "assets/dashboards/trend_micro_cloud_one_intrusion_prevention_events.json",
+      "Trend Micro Cloud One - Log Inspection and Web Reputation Events": "assets/dashboards/trend_micro_cloud_one_log_inspection_and_web_reputation_events.json",
+      "Trend Micro Cloud One - Network Security Insights": "assets/dashboards/trend_micro_cloud_one_network_security_insights.json",
+      "Trend Micro Cloud One - File Storage Security Insights": "assets/dashboards/trend_micro_cloud_one_file_storage_security_insights.json"
+    },
+    "logs": {
+      "source": "trend-micro-cloud-one"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

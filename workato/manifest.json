@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "73f0a2e1-f02d-4ad5-8591-9554197a8a6d",
   "app_id": "workato",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

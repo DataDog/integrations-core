@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "bd010509-c47d-49ed-a9a7-d8c699c88f4c",
   "app_id": "klaviyo",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

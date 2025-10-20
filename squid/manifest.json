@@ -2,6 +2,7 @@
     "manifest_version": "2.0.0",
     "app_uuid": "de18c581-69ee-48cf-ba23-7794bfb7a4bd",
     "app_id": "squid",
+    "owner": "agent-integrations",
     "display_on_public_website": true,
     "tile": {
         "overview": "README.md#Overview",

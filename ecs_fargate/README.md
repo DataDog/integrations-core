@@ -16,7 +16,7 @@ The Datadog Agent retrieves metrics for the task definition's containers with th
 
 The Task Metadata endpoint is only available from within the task definition itself, which is why the Datadog Agent needs to be run as an additional container within each task definition to be monitored.
 
-The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the task definition.
+To enable metric collection, set the environment variable `ECS_FARGATE` to `"true"` in the Datadog container definition.
 
 ## Setup
 
@@ -229,7 +229,6 @@ Lastly, include your other application containers within the `ContainerDefinitio
 For more information on the Terraform module, see the [Datadog ECS Fargate Terraform documentation][74].
 
 <!-- xxz tab xxx -->
-
 <!-- xxz tabs xxx -->
 
 
@@ -338,7 +337,6 @@ resource "aws_ecs_service" <SERVICE_ID> {
 For more information on the Terraform ECS service module and syntax, see the [AWS Terraform ECS service documentation][70].
 
 <!-- xxz tab xxx -->
-
 <!-- xxz tabs xxx -->
 
 To provide your Datadog API key as a secret, see [Using secrets](#using-secrets).
@@ -1059,7 +1057,6 @@ module "ecs_fargate_task" {
 ```
 
 <!-- xxz tab xxx -->
-
 <!-- xxz tabs xxx -->
 
 **Note**: Use a [TaskDefinition secret][28] to avoid exposing the `apikey` in plain text.
@@ -1166,6 +1163,114 @@ The ECS Fargate check does not include any events.
 See [service_checks.json][45] for a list of service checks provided by this integration.
 
 ## Troubleshooting
+
+
+### Agent does not start on a read-only filesystem
+
+If you experience issues starting the Agent on a filesystem with the setting `"readonlyRootFilesystem": true`, follow either of the approaches below to remediate this:
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Create a custom Agent image (recommended)" xxx -->
+1. Use a Dockerfile like the example below to add the volume at the necessary path, and copy over the existing `datadog.yaml` file. The `datadog.yaml` file can have any content or be empty, but it must be present.
+
+```yaml
+FROM gcr.io/datadoghq/agent:latest
+VOLUME /etc/datadog-agent
+ADD datadog.yaml /etc/datadog-agent/datadog.yaml
+```
+
+2. Build the container image. Datadog recommends tagging it with the version and type; for example, `docker.io/example/agent:7.62.2-rofs` (**r**ead **o**nly **f**ile **s**ystem).
+3. Reference the image in your task definition, as shown in the example below.
+4. Set `"readonlyRootFilesystem": true` on the Agent container, as shown in the example below.
+
+```yaml
+    "containerDefinitions": [
+        {
+            "name": "datadog-agent",
+            "image": "docker.io/example/agent:7.62.2-rofs",
+            ...
+            "environment": [
+                {
+                    "name": "ECS_FARGATE",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_API_KEY",
+                    "value": "<API_KEY>"
+                }
+            ]
+            "readonlyRootFilesystem": true
+        },
+        {
+            "name": "example-app-container",
+            "image": "example-image",
+            ...
+        }
+    ]
+```
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Mount an empty volume on the Agent container" xxx -->
+If you cannot build a custom Agent image, you can follow the steps below to add an empty volume dynamically to the Agent. 
+
+<div class="alert alert-warning">
+This configuration deletes all the preexisting files in the <code>/etc/datadog-agent</code> folder, including:<br /> 
+- All the Autodiscovery config files (<code><INTEGRATION>/auto_conf.yaml</code>)<br /> 
+- JMX <code>metrics.yaml</code> files<br />
+- The main ECS Fargate <code>/etc/datadog-agent/conf.d/ecs_fargate.d/conf.yaml.default</code> file<br /><br /> 
+As such, you must set up the integration with Autodiscovery Docker labels on the Datadog Agent container. This requires setting the <code>ignore_autodiscovery_tag: true</code> flag in the configuration. Otherwise, metrics from the app container are double-tagged with the Agent container's tags.
+</div>
+
+1. Create an empty volume for the Agent container to use. In the example below, this is named `agent_conf`.
+2. Add this volume to the Agent's task definition.
+3. Set `"readonlyRootFilesystem": "true"` on the Agent container.
+4. Add `dockerLabels` to have the Agent start the `ecs_fargate` check manually.
+
+The example below displays this configuration:
+
+```yaml
+    "containerDefinitions": [
+        {
+            "name": "datadog-agent",
+            "image": "public.ecr.aws/datadog/agent:latest",
+            ...
+            "environment": [
+                {
+                    "name": "ECS_FARGATE",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_API_KEY",
+                    "value": "<API_KEY>"
+                }
+            ],
+            "mountPoints": [
+                {
+                    "sourceVolume": "agent_conf",
+                    "containerPath": "/etc/datadog-agent",
+                    "readOnly": false
+                }
+            ],
+            "readonlyRootFilesystem": true,
+            "dockerLabels": {
+                "com.datadoghq.ad.checks": "{\"ecs_fargate\":{\"ignore_autodiscovery_tags\":true,\"instances\":[{}]}}"
+            }
+        },
+        {
+            "name": "example-app-container",
+            "image": "example-image",
+            ...
+        }
+    ],
+    "volumes": [
+        {
+            "name": "agent_conf",
+            "host": {}
+        }
+    ]
+```
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 Need help? Contact [Datadog support][18].
 

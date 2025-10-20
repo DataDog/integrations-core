@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "95ee2e88-d2ee-45f8-a4d6-2cb9eced79ee",
   "app_id": "incident-io",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

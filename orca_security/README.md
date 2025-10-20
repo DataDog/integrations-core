@@ -9,6 +9,8 @@ This integration ingests the following log:
 
 The Orca Security integration seamlessly ingests alert logs data using the built-in integration of Orca with Datadog. Before ingestion of the data, it normalizes and enriches the logs, ensures a consistent data format, and enhances information content for downstream processing and analysis. The integration provides insights into alert logs through the out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.59.1
+
 ## Setup
 
 ### Configuration

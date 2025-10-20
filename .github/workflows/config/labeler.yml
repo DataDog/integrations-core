@@ -45,6 +45,8 @@ integration/airbyte:
 - airbyte/**/*
 integration/airflow:
 - airflow/**/*
+integration/amazon_app_mesh:
+- amazon_app_mesh/**/*
 integration/amazon_eks:
 - amazon_eks/**/*
 integration/amazon_eks_blueprints:
@@ -157,6 +159,8 @@ integration/cloudera:
 - cloudera/**/*
 integration/cockroachdb:
 - cockroachdb/**/*
+integration/cofense_triage:
+- cofense_triage/**/*
 integration/confluent_platform:
 - confluent_platform/**/*
 integration/consul:
@@ -181,6 +185,8 @@ integration/cri:
 - cri/**/*
 integration/crio:
 - crio/**/*
+integration/crowdstrike_fdr:
+- crowdstrike_fdr/**/*
 integration/databricks:
 - databricks/**/*
 integration/datadog_checks_tests_helper:
@@ -283,6 +289,8 @@ integration/haproxy:
 - haproxy/**/*
 integration/harbor:
 - harbor/**/*
+integration/have_i_been_pwned:
+- have_i_been_pwned/**/*
 integration/hazelcast:
 - hazelcast/**/*
 integration/hdfs_datanode:
@@ -441,6 +449,8 @@ integration/mesos_slave:
 - mesos_slave/**/*
 integration/metabase:
 - metabase/**/*
+integration/microsoft_copilot:
+- microsoft_copilot/**/*
 integration/microsoft_dns:
 - microsoft_dns/**/*
 integration/microsoft_sysmon:
@@ -475,6 +485,8 @@ integration/nvidia_nim:
 - nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
+integration/obsidian_security:
+- obsidian_security/**/*
 integration/octopus_deploy:
 - octopus_deploy/**/*
 integration/oke:
@@ -553,6 +565,8 @@ integration/proxysql:
 - proxysql/**/*
 integration/pulsar:
 - pulsar/**/*
+integration/push_security:
+- push_security/**/*
 integration/quarkus:
 - quarkus/**/*
 integration/rabbitmq:
@@ -645,6 +659,8 @@ integration/supabase:
 - supabase/**/*
 integration/supervisord:
 - supervisord/**/*
+integration/supply_chain_firewall:
+- supply_chain_firewall/**/*
 integration/suricata:
 - suricata/**/*
 integration/symantec_endpoint_protection:
@@ -697,6 +713,8 @@ integration/traffic_server:
 - traffic_server/**/*
 integration/trellix_endpoint_security:
 - trellix_endpoint_security/**/*
+integration/trend_micro_cloud_one:
+- trend_micro_cloud_one/**/*
 integration/trend_micro_email_security:
 - trend_micro_email_security/**/*
 integration/trend_micro_vision_one_endpoint_security:
@@ -759,8 +777,16 @@ integration/zeek:
 - zeek/**/*
 integration/zero_networks:
 - zero_networks/**/*
+integration/zerofox_cloud_platform:
+- zerofox_cloud_platform/**/*
 integration/zk:
 - zk/**/*
+integration/barracuda_secure_edge:
+- barracuda_secure_edge/**/*
+integration/cloudgen_firewall:
+- cloudgen_firewall/**/*
+integration/zscaler_private_access:
+- zscaler_private_access/**/*
 qa/skip-qa:
 - '**/__about__.py'
 - requirements-agent-release.txt

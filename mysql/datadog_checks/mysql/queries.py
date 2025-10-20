@@ -57,15 +57,6 @@ SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
 
-SQL_BINLOG_ENABLED = """\
-SELECT @@log_bin AS binlog_enabled"""
-
-SQL_SERVER_UUID = """\
-SELECT @@server_uuid"""
-
-SQL_SERVER_ID_AWS_AURORA = """\
-SHOW VARIABLES LIKE 'aurora_server_id'"""
-
 SQL_REPLICATION_ROLE_AWS_AURORA = """\
 SELECT IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_role
 FROM information_schema.replica_host_status

@@ -32,6 +32,7 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ]
 
     # --- TEST METRICS ---
@@ -176,6 +177,7 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
         'version': 'A04-08/12/2018',
         'tags': [
             'device_id:default:' + ip_address,
+            'agent_host:' + common.get_agent_hostname(),
             'device_ip:' + ip_address,
             'device_namespace:default',
             'snmp_device:' + ip_address,

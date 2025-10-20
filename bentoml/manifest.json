@@ -35,12 +35,17 @@
         "prefix": "bentoml.",
         "check": "bentoml.service.request.count",
         "metadata_path": "metadata.csv"
-      }
+      },
+      "process_signatures": [
+        "bentoml"
+      ]
     },
     "dashboards": {
-      "BentoML Placeholder": "assets/dashboards/placeholder.json"
+      "BentoML Overview": "assets/dashboards/bentoml_overview.json"
     },
-    "monitors": {},
+    "monitors": {
+      "BentoML Liveness Monitor": "assets/monitors/bentoml_liveness_monitor.json"
+    },
     "saved_views": {}
   },
   "author": {

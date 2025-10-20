@@ -10,6 +10,8 @@ Integrate LastPass with Datadog to gain insights into reporting event logs throu
 normalized and enriched before ingestion. Pre-built dashboard visualizations provide immediate insights into LastPass
 reporting events, while out-of-the-box detection rules enhance detection and response capabilities.
 
+**Minimum Agent version:** 7.56.0
+
 ## Setup
 
 ### Generate API credentials in LastPass

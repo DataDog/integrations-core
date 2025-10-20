@@ -5,6 +5,8 @@
 
 The Okta Workflows integration collects Okta workflow event logs and sends them to Datadog for comprehensive analysis.
 
+**Minimum Agent version:** 7.61.0
+
 ## Setup
 
 ### Generate API Credentials in Okta Workflows

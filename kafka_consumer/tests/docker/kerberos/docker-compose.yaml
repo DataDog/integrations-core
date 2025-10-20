@@ -44,7 +44,7 @@ services:
         -Dzookeeper.requireClientAuthScheme=sasl
 
   broker:
-    image: confluentinc/cp-server:7.3.0
+    image: confluentinc/cp-server:${CONFLUENT_VERSION}
     hostname: broker.kerberos-demo.local
     container_name: broker
     ports:
@@ -86,7 +86,7 @@ services:
       retries: 10
 
   broker2:
-    image: confluentinc/cp-server:7.3.0
+    image: confluentinc/cp-server:${CONFLUENT_VERSION}
     hostname: broker2.kerberos-demo.local
     container_name: broker2
     ports:

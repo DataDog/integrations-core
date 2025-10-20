@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "fbf81df6-a556-4ee7-9c50-764bf129b0ec",
   "app_id": "adyen",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

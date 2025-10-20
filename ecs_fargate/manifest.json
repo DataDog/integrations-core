@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4c298061-c7d2-4ce6-ab3e-5378039de65a",
   "app_id": "aws-fargate",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

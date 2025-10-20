@@ -4,6 +4,8 @@
 
 This check monitors [Ambari][1] through the Datadog Agent.
 
+**Minimum Agent version:** 6.12.0
+
 ## Setup
 
 ### Installation

@@ -104,6 +104,9 @@ class SQLServerConfig:
                     'keep_positional_parameter': is_affirmative(
                         obfuscator_options_config.get('keep_positional_parameter', False)
                     ),
+                    'replace_bind_parameter': is_affirmative(
+                        obfuscator_options_config.get('replace_bind_parameter', False)
+                    ),
                     'keep_trailing_semicolon': is_affirmative(
                         obfuscator_options_config.get('keep_trailing_semicolon', False)
                     ),

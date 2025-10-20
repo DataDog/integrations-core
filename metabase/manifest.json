@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "9ff6b01e-693b-4619-9bf1-677c0dc5244f",
   "app_id": "metabase",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7546b270-2efe-4a59-8f94-3447df2db801",
   "app_id": "oom-kill",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
