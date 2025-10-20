@@ -862,6 +862,8 @@ def send_metrics_to_dd(
     n_integrations: dict[tuple[str, str], int] = {}
     n_dependencies: dict[tuple[str, str], int] = {}
 
+    sizes: dict[str, dict[str, int]] = {}
+
     for item in modules:
         metrics.append(
             {
@@ -884,6 +886,15 @@ def send_metrics_to_dd(
                 ],
             }
         )
+
+        # Creating variables for debugging
+        if item['Platform'] not in sizes:
+            sizes[item['Platform']] = {}
+        if item['Python_Version'] not in sizes[item['Platform']]:
+            sizes[item['Platform']][item['Python_Version']] = 0
+
+        sizes[item['Platform']][item['Python_Version']] += item['Size_Bytes']
+
         key_count = (item['Platform'], item['Python_Version'])
         if key_count not in n_integrations:
             n_integrations[key_count] = 0
@@ -928,8 +939,29 @@ def send_metrics_to_dd(
         api_host=f"https://api.{config_file_info['site']}",
     )
 
+    # Format the sizes dictionary into a human-readable summary
+    summary_lines = []
+    for platform, py_versions in sizes.items():
+        for py_version, size_bytes in py_versions.items():
+            summary_lines.append(
+                f"Platform: {platform}, Python: {py_version}, Size: "
+                f"{convert_to_human_readable_size(size_bytes)} ({size_bytes} bytes)"
+            )
+    summary = "\n".join(summary_lines)
+
+    total_metrics = len(metrics) + len(n_integrations_metrics) + len(n_dependencies_metrics)
+    app.display(f"Sending {total_metrics} metrics to Datadog...")
+
+    app.display("\nMetric summary:")
+    app.display(summary)
+
+    app.display_debug(f"Sending Metrics: {metrics}")
     api.Metric.send(metrics=metrics)
+
+    app.display_debug(f"Sending N integrations metrics: {n_integrations_metrics}")
     api.Metric.send(metrics=n_integrations_metrics)
+
+    app.display_debug(f"Sending N dependencies metrics: {n_dependencies_metrics}")
     api.Metric.send(metrics=n_dependencies_metrics)
 
 
@@ -962,31 +994,44 @@ def get_last_dependency_sizes_artifact(
     So in each commit, there is an artifact with the sizes of the wheels that were built to get the actual
     size of that commit.
     '''
-    dep_sizes_json = get_dep_sizes_json(commit, platform, py_version)
+    size_type = 'compressed' if compressed else 'uncompressed'
+    app.display(f"Retrieving dependency sizes for {commit} ({platform}, py{py_version}, {size_type})")
+
+    dep_sizes_json = get_dep_sizes_json(app, commit, platform, py_version)
     if not dep_sizes_json:
-        dep_sizes_json = get_previous_dep_sizes(
-            app.repo.git.merge_base(commit, "origin/master"), platform, py_version, compressed
-        )
+        app.display_debug("No dependency sizes in current commit, searching ancestors")
+        base_commit = app.repo.git.merge_base(commit, "origin/master")
+        if base_commit != commit:
+            app.display_debug(f"Found base commit: {base_commit}")
+            previous_commit = base_commit
+        else:
+            app.display_debug("No base commit found, using previous commit")
+            previous_commit = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
+
+        app.display(f"\n -> Searching for dependency sizes in previous commit: {previous_commit}")
+
+        dep_sizes_json = get_previous_dep_sizes(app, previous_commit, platform, py_version, compressed)
     return Path(dep_sizes_json) if dep_sizes_json else None
 
 
 @cache
-def get_dep_sizes_json(current_commit: str, platform: str, py_version: str) -> Path | None:
+def get_dep_sizes_json(app: Application, current_commit: str, platform: str, py_version: str) -> Path | None:
     '''
     Gets the dependency sizes json for a given commit and platform when dependencies were resolved.
     '''
-    print(f"Getting dependency sizes json for commit: {current_commit}, platform: {platform}")
-    run_id = get_run_id(current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
+    app.display(f"\n -> Checking if dependency sizes were resolved in commit: {current_commit}")
+
+    run_id = get_run_id(app, current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
     if run_id:
-        dep_sizes_json = get_current_sizes_json(run_id, platform, py_version)
+        dep_sizes_json = get_current_sizes_json(app, run_id, platform, py_version)
         return dep_sizes_json
     else:
         return None
 
 
 @cache
-def get_run_id(commit: str, workflow: str) -> str | None:
-    print(f"Getting run id for commit: {commit}, workflow: {workflow}")
+def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
+    app.display_debug(f"Fetching workflow run ID for {commit} ({os.path.basename(workflow)})")
 
     result = subprocess.run(
         [
@@ -1008,21 +1053,21 @@ def get_run_id(commit: str, workflow: str) -> str | None:
 
     run_id = result.stdout.strip() if result.stdout else None
     if run_id:
-        print(f"Run id: {run_id}")
+        app.display_debug(f"Workflow run ID: {run_id}")
     else:
-        print(f"No run id found for commit: {commit}, workflow: {workflow}")
+        app.display_warning(f"No workflow run found for {commit} ({os.path.basename(workflow)})")
 
     return run_id
 
 
 @cache
-def get_current_sizes_json(run_id: str, platform: str, py_version: str) -> Path | None:
+def get_current_sizes_json(app: Application, run_id: str, platform: str, py_version: str) -> Path | None:
     '''
     Downloads the dependency sizes json for a given run id and platform when dependencies were resolved.
     '''
-    print(f"Getting current sizes json for run_id={run_id}, platform={platform}")
+    app.display(f"Retrieving dependency sizes artifact (run={run_id}, platform={platform})")
     with tempfile.TemporaryDirectory() as tmpdir:
-        print(f"Downloading artifacts to {tmpdir}")
+        app.display_debug(f"Downloading artifacts to {tmpdir}...")
         try:
             subprocess.run(
                 [
@@ -1040,29 +1085,29 @@ def get_current_sizes_json(run_id: str, platform: str, py_version: str) -> Path 
                 text=True,
             )
         except subprocess.CalledProcessError as e:
-            if e.stderr and "no artifact matches any of the names or patterns provided" in e.stderr:
-                print(f"No artifact found for run_id={run_id}, platform={platform}")
+            if e.stderr and "no valid artifacts found" in e.stderr:
+                app.display_warning(f"No resolved dependencies found for platform {platform} (run {run_id})")
             else:
-                print(f"Failed to download current sizes json: {e}")
+                app.display_error(f"Failed to download dependency sizes (run={run_id}, platform={platform}): {e}")
+                app.display_warning(e.stderr)
 
-            print("Comparing to merge base commit")
             return None
 
-        print(f"Downloaded artifacts to {tmpdir}")
+        app.display_debug("Artifact extraction complete")
         sizes_file = Path(tmpdir) / platform / 'py3' / 'sizes.json'
 
         if not sizes_file.is_file():
-            print(f"Sizes artifact not found at {sizes_file}")
+            app.display_warning(f"Dependency sizes artifact missing: {sizes_file.name}")
             return None
 
-        print(f"Found sizes artifact at {sizes_file}")
+        app.display_debug(f"Found dependency sizes: {sizes_file.name}")
         dest_path = sizes_file.rename(f"{platform}_{py_version}.json")
         return dest_path
 
 
 @cache
-def get_artifact(run_id: str, artifact_name: str, target_dir: str | None = None) -> Path | None:
-    print(f"Downloading artifact: {artifact_name} from run_id={run_id}")
+def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: str | None = None) -> Path | None:
+    app.display(f"Downloading artifact '{artifact_name}' (run {run_id})...")
     try:
         cmd = [
             'gh',
@@ -1075,36 +1120,34 @@ def get_artifact(run_id: str, artifact_name: str, target_dir: str | None = None)
         if target_dir:
             cmd.extend(['--dir', target_dir])
 
-        subprocess.run(cmd, check=True, text=True)
+        subprocess.run(cmd, check=True, text=True, capture_output=True)
     except subprocess.CalledProcessError as e:
-        print(f"Failed to download artifact: {artifact_name} from run_id={run_id}: {e}")
+        app.display_warning(f"Failed to download artifact '{artifact_name}' (run {run_id}): {e}")
+        app.display_warning(e.stderr)
         return None
 
     artifact_path = Path(target_dir) / artifact_name if target_dir else Path(artifact_name)
-    print(f"Artifact downloaded to: {artifact_path}")
+    app.display_debug(f"Saved to {artifact_path}")
     return artifact_path
 
 
 @cache
-def get_previous_dep_sizes(base_commit: str, platform: str, py_version: str, compressed: bool) -> Path | None:
+def get_previous_dep_sizes(
+    app: Application, base_commit: str, platform: str, py_version: str, compressed: bool
+) -> Path | None:
     '''
     Gets the dependency sizes for a given commit when dependencies were not resolved.
     '''
     with tempfile.TemporaryDirectory() as tmpdir:
-        print(f"Getting previous dependency sizes json for {base_commit=}")
-
-        if (run_id := get_run_id(base_commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
+        if (run_id := get_run_id(app, base_commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
             return None
-
-        print(f"Previous run_id: {run_id}")
 
         artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'
-        sizes_json = get_artifact(run_id, artifact_name, tmpdir)
+        sizes_json = get_artifact(app, run_id, artifact_name, tmpdir)
 
         if not sizes_json:
+            app.display_error(f"No dependency sizes found for {platform} py{py_version} in commit {base_commit}\n")
             return None
-
-        print(f"Sizes json: {sizes_json}")
 
         sizes = parse_sizes_json(sizes_json, platform, py_version, compressed)
 

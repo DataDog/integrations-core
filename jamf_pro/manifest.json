@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "02ca0a87-f9e7-46e3-989d-9ac8b3654ac4",
   "app_id": "jamf-pro",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

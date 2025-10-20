@@ -655,6 +655,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /crowdstrike_fdr/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
 /crowdstrike_fdr/assets/logs/                                        @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/databricks/                                                         @DataDog/saas-integrations
+/databricks/*.md                                                     @DataDog/saas-integrations @DataDog/documentation
+/databricks/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
+/databricks/metadata.csv                                             @DataDog/saas-integrations @DataDog/documentation
+
 /trend_micro_cloud_one/                                              @DataDog/saas-integrations
 /trend_micro_cloud_one/*.md                                          @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_cloud_one/manifest.json                                 @DataDog/saas-integrations @DataDog/documentation
@@ -680,10 +685,20 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cofense_triage/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
 /cofense_triage/assets/logs/                                        @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/zscaler_private_access/                                             @DataDog/agent-integrations
+/zscaler_private_access/*.md                                         @DataDog/agent-integrations @DataDog/documentation
+/zscaler_private_access/manifest.json                                @DataDog/agent-integrations @DataDog/documentation
+/zscaler_private_access/assets/logs/                                 @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+
 /push_security/                                                      @DataDog/saas-integrations
 /push_security/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /push_security/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /push_security/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/obsidian_security/                                                  @DataDog/saas-integrations
+/obsidian_security/*.md                                              @DataDog/saas-integrations @DataDog/documentation
+/obsidian_security/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
+/obsidian_security/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations

@@ -178,6 +178,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
         }
     )
 
+    # Backfill old key to new key
+    if instance.get('obfuscator_options', {}).get('quantize_sql_tables'):
+        args['obfuscator_options']['replace_digits'] = True
+
     validation_result = ValidationResult()
 
     # Generate and validate tags

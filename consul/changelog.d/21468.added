@@ -1,1 +1,0 @@
-Adds `agent_hostname` when nodenames are used as host tag for `consul.net.node.latency.*` metrics.

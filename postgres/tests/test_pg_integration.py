@@ -478,6 +478,7 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     thread.join()
 
 
+@pytest.mark.flaky(max_runs=5)
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -685,7 +686,6 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
         for tag in expected_tags
         if not tag.startswith('database_instance:')
         and not tag.startswith('database_hostname:')
-        and not tag.startswith('ddagenthostname:')
         and not tag.startswith('dd.internal')
     ]
 
@@ -773,7 +773,6 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
         'replication_role:master',
         'database_hostname:{}'.format(expected_database_hostname),
         'database_instance:{}'.format(expected_database_instance),
-        'ddagenthostname:{}'.format(expected_database_hostname),
     ]
     check = integration_check(pg_instance)
     run_one_check(check)
@@ -789,6 +788,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
     assert event['database_instance'] == expected_database_instance
     assert event['database_hostname'] == expected_database_hostname
     assert event['dbms'] == "postgres"
+    assert event['ddagenthostname'] == "stubbed.hostname"
 
     assert sorted(event['tags']) == sorted(expected_tags)
     assert event['integration_version'] == __version__

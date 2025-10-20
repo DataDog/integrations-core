@@ -20,7 +20,7 @@
         "media_type": "image",
         "caption": "Barracuda SecureEdge Overview Dark Mode",
         "image_url": "images/secure_edge_overview_dark.png"
-      }      
+      }
     ],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -35,7 +35,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": true,
+      "auto_install": false,
       "source_type_id": 48860633,
       "source_type_name": "barracuda_secure_edge",
       "configuration": {

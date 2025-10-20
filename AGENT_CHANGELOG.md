@@ -1,3 +1,13 @@
+## Datadog Agent version [7.71.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7712)
+
+* Datadog Cluster Agent [6.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_cluster_agent/CHANGELOG.md)
+
+## Datadog Agent version [7.71.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7711)
+
+* MySQL [15.8.1](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Postgres [23.0.2](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* SQL Server [22.9.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+
 ## Datadog Agent version [7.71.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7710)
 
 * Active Directory [4.3.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)

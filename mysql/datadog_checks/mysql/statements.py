@@ -78,6 +78,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             shutdown_callback=self._close_db_conn,
         )
         self._check = check
+        self._collect_prepared_statements = None
         self._metric_collection_interval = collection_interval
         self._connection_args_provider = connection_args_provider
         self._uses_managed_auth = uses_managed_auth
@@ -156,7 +157,6 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             'timestamp': time.time() * 1000,
             'mysql_version': self._check.version.version + '+' + self._check.version.build,
             'mysql_flavor': self._check.version.flavor,
-            "ddagenthostname": self._check.agent_hostname,
             'ddagentversion': datadog_agent.get_version(),
             'min_collection_interval': self._metric_collection_interval,
             'tags': tags,
@@ -215,9 +215,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         only_query_recent_statements = self._config.statement_metrics_config.get('only_query_recent_statements', False)
         # Since `performance_schema.prepared_statements_instances` doesn't have a last_seen column,
         # we only collect prepared statements if we're not querying recent statements
-        collect_prepared_statements = not only_query_recent_statements and self._config.statement_metrics_config.get(
-            'collect_prepared_statements', True
-        )
+        collect_prepared_statements = not only_query_recent_statements and self.collect_prepared_statements
 
         condition = (
             "WHERE `last_seen` >= %s"
@@ -366,3 +364,18 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                 },
                 "mysql": {"schema": row["schema_name"]},
             }
+
+    @property
+    def collect_prepared_statements(self):
+        if self._collect_prepared_statements is None:
+            # prepared_statements_instances table was added to MariaDB 10.5.2
+            if self._check.is_mariadb and self._check.version.version_compatible((10, 5, 2)) is False:
+                self._collect_prepared_statements = False
+            # prepared_statements_instances table was added to MySQL 5.7.4
+            elif self._check.version.version_compatible((5, 7, 4)) is False:
+                self._collect_prepared_statements = False
+            else:
+                self._collect_prepared_statements = self._config.statement_metrics_config.get(
+                    'collect_prepared_statements', True
+                )
+        return self._collect_prepared_statements
