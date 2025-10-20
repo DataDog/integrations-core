@@ -1,0 +1,61 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "a7473074-e628-47fd-b0a6-95e5b5d0ec9a",
+  "app_id": "crest-data-systems-microsoft-scom",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect and visualize SCOM alerts, events, discoveries, and data from groups, servers, agents, and agentless systems.",
+    "title": "Microsoft SCOM",
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Category::Log Collection",
+      "Category::Cloud",
+      "Submitted Data Type::Logs",
+      "Category::Marketplace",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 52755531,
+      "source_type_name": "crest_data_systems_microsoft_scom",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "crest_data_systems_microsoft_scom.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "monitors": {}
+  },
+  "pricing": [
+    {
+      "billing_type": "flat_fee",
+      "unit_price": 495.0,
+      "product_id": "microsoft-scom",
+      "short_description": "Per Microsoft SCOM instance per month.",
+      "includes_assets": true
+    }
+  ],
+  "legal_terms": {
+    "eula": "assets/EULA.pdf"
+  },
+  "author": {
+    "name": "Crest Data",
+    "homepage": "https://www.crestdata.ai",
+    "vendor_id": "crest-data-systems",
+    "sales_email": "datadog-sales@crestdata.ai",
+    "support_email": "datadog.integrations@crestdata.ai"
+  }
+}

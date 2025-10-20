@@ -1,0 +1,33 @@
+name: crest_data_systems_microsoft_scom
+files:
+- name: crest_data_systems_microsoft_scom.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: logs
+    required: true
+    example:
+      - type: integration
+        source: crest-data-systems-microsoft-scom
+  - template: instances
+    options:
+    - name: collect_data
+      required: false
+      description: "Provide the entities to fetch. Please specify the exact values as mentioned in the default list."
+      value:
+        type: array
+        items:
+          type: string
+        example: [alerts, events, task_results, discovery, agents, agentless_managed_computers, management_servers, groups]
+        display_default: [alerts, events, task_results, discovery, agents, agentless_managed_computers, management_servers, groups]
+    - template: instances/default
+      overrides:
+        min_collection_interval.required: true
+        min_collection_interval.value.example: 3600
+        min_collection_interval.value.minimum: 1800
+        min_collection_interval.value.maximum: 64800
+        service.hidden: true
+        tags.hidden: true
+        metric_patterns.hidden: true
+        empty_default_hostname.hidden: true

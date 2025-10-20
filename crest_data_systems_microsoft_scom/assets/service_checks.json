@@ -1,0 +1,14 @@
+[
+    {
+        "agent_version": "7.71.0",
+        "integration": "crest_data_systems_microsoft_scom",
+        "groups": [],
+        "check": "crest_data_systems_microsoft_scom.status",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Microsoft SCOM Status",
+        "description": "Returns `CRITICAL` if configurations are invalid or authentication fails. Returns `OK` otherwise."
+    }
+]

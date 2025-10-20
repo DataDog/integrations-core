@@ -1,0 +1,62 @@
+[build-system]
+requires = [
+    "hatchling>=0.13.0",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-crest-data-systems-microsoft-scom"
+description = "The crest_data_systems_microsoft_scom check"
+readme = "README.md"
+license = "BSD-3-Clause"
+requires-python = ">=3.12"
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "crest_data_systems_microsoft_scom",
+]
+authors = [
+    { name = "Crest Data", email = "datadog.integrations@crestdata.ai" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Private :: Do Not Upload",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "datadog-checks-base>=37.20.0",
+]
+dynamic = [
+    "version",
+]
+
+[project.optional-dependencies]
+deps = [
+    "datadog-api-client>=2.16.0",
+]
+
+[project.urls]
+Source = "https://github.com/DataDog/marketplace"
+
+[tool.hatch.version]
+path = "datadog_checks/crest_data_systems_microsoft_scom/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/manifest.json",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/crest_data_systems_microsoft_scom",
+]
+dev-mode-dirs = [
+    ".",
+]
