@@ -72,7 +72,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -93,7 +92,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -113,7 +111,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -133,7 +130,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -153,7 +149,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -173,7 +168,25 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j7429f41:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: crest_data_systems_microsoft_scom
+      target: crest_data_systems_microsoft_scom
+      platform: windows
+      runner: '["windows-2022"]'
+      repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -193,7 +206,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -213,7 +225,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -233,7 +244,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -253,7 +263,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -273,7 +282,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -293,7 +301,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -313,7 +320,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -333,7 +339,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -353,7 +358,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -373,7 +377,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -393,7 +396,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -413,7 +415,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -433,7 +434,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -453,7 +453,6 @@ jobs:
       platform: windows
       runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
-      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"

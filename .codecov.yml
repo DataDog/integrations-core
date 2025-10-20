@@ -770,6 +770,10 @@ coverage:
         target: 75
         flags:
         - checkpoint_harmony_endpoint
+      crest_data_systems_microsoft_scom:
+        target: 75
+        flags:
+        - crest_data_systems_microsoft_scom
       datadog_csi_driver:
         target: 75
         flags:
@@ -1001,6 +1005,11 @@ flags:
     paths:
     - couchbase/datadog_checks/couchbase
     - couchbase/tests
+  crest_data_systems_microsoft_scom:
+    carryforward: true
+    paths:
+    - crest_data_systems_microsoft_scom/datadog_checks/crest_data_systems_microsoft_scom
+    - crest_data_systems_microsoft_scom/tests
   crio:
     carryforward: true
     paths:
