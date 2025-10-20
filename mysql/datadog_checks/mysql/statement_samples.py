@@ -111,6 +111,7 @@ EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
         AND event_name like 'statement/%%'
         AND digest_text is NOT NULL
         AND digest_text NOT LIKE 'EXPLAIN %%'
+        AND errors = 0
         ORDER BY timer_wait DESC
 """,
 ).strip()
