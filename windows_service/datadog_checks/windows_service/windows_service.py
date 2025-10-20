@@ -15,7 +15,7 @@ SERVICE_PATTERN_FLAGS = re.IGNORECASE
 SERVICE_CONFIG_TRIGGER_INFO = 8
 
 
-def QueryServiceConfig2W(*args):
+def QueryServiceConfig2W(*args):  # TRIGGER CI
     """
     ctypes wrapper for info types not supported by pywin32
     """

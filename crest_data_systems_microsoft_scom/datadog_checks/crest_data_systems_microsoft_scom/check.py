@@ -8,6 +8,8 @@ class CrestDataSystemsMicrosoftScomLogCrawlerCheck(AgentCheck):
     # This will be the prefix of every metric the integration sends
     __NAMESPACE__ = "crest_data_systems_microsoft_scom_log_crawler_check"
 
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances):
         """
         Initialize the CrestDataSystemsMicrosoftScomLogCrawlerCheck class.
