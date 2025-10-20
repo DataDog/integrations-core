@@ -13,7 +13,7 @@ INVALID_INSTANCE = {
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    yield INSTANCE, {'docker_platform': 'windows'}
 
 
 @pytest.fixture
