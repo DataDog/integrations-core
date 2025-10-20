@@ -7,7 +7,6 @@ import re
 import pywintypes
 import win32service
 import winerror
-
 from datadog_checks.base import AgentCheck
 
 SERVICE_PATTERN_FLAGS = re.IGNORECASE
@@ -223,6 +222,15 @@ class WindowsService(AgentCheck):
         # PAUSED
         7: AgentCheck.WARNING,
     }
+    STATE_TO_STRING = {
+        1: "stopped",
+        2: "start_pending",
+        3: "stop_pending",
+        4: "running",
+        5: "continue_pending",
+        6: "pause_pending",
+        7: "paused",
+    }
 
     def check(self, instance):
         services = instance.get('services', [])
@@ -281,8 +289,9 @@ class WindowsService(AgentCheck):
 
             state = service_status[1]
             status = self.STATE_TO_STATUS.get(state, self.UNKNOWN)
+            state_string = self.STATE_TO_STRING.get(state, "unknown")
 
-            tags = ['windows_service:{}'.format(short_name)]
+            tags = ['windows_service:{}'.format(short_name), 'state:{}'.format(state_string)]
             tags.extend(custom_tags)
 
             if instance.get('collect_display_name_as_tag', False):
@@ -309,7 +318,7 @@ class WindowsService(AgentCheck):
                 # if a name doesn't match anything (wrong name or no permission to access the service), report UNKNOWN
                 status = self.UNKNOWN
 
-                tags = ['windows_service:{}'.format(service)]
+                tags = ['windows_service:{}'.format(service), 'state:{}'.format("unknown")]
 
                 tags.extend(custom_tags)
 
