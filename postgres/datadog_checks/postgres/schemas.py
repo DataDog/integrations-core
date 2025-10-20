@@ -361,7 +361,7 @@ class PostgresSchemaCollector(SchemaCollector):
             with conn.cursor(row_factory=dict_row) as cursor:
                 schemas_query = self._get_schemas_query()
                 tables_query = self._get_tables_query()
-                columns_query = COLUMNS_QUERY
+                columns_query = self._get_columns_query()
                 indexes_query = PG_INDEXES_QUERY
                 constraints_query = PG_CONSTRAINTS_QUERY
                 partitions_ctes = (
@@ -409,6 +409,7 @@ class PostgresSchemaCollector(SchemaCollector):
                         tables.table_id, tables.table_name
                         FROM schemas
                         LEFT JOIN tables ON schemas.schema_id = tables.schema_id
+                        ORDER BY schemas.schema_name, tables.table_name
                         LIMIT {limit}
                     ),
                     columns AS (
@@ -423,24 +424,23 @@ class PostgresSchemaCollector(SchemaCollector):
                     {partitions_ctes}
 
                     SELECT * FROM (
-                    SELECT schemas.schema_id, schemas.schema_name,
-                        tables.table_id, tables.table_name,
+                    SELECT schema_tables.schema_id, schema_tables.schema_name,
+                        schema_tables.table_id, schema_tables.table_name,
                         array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
                         array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
                         array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
                           as foreign_keys
                         {parition_selects}
-                    FROM schemas
-                        LEFT JOIN tables ON schemas.schema_id = tables.schema_id
-                        LEFT JOIN columns ON tables.table_id = columns.table_id
-                        LEFT JOIN indexes ON tables.table_id = indexes.table_id
-                        LEFT JOIN constraints ON tables.table_id = constraints.table_id
+                    FROM schema_tables
+                        LEFT JOIN columns ON schema_tables.table_id = columns.table_id
+                        LEFT JOIN indexes ON schema_tables.table_id = indexes.table_id
+                        LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
                         {partition_joins}
-                    GROUP BY schemas.schema_id, schemas.schema_name, tables.table_id, tables.table_name
+                    GROUP BY schema_tables.schema_id, schema_tables.schema_name, schema_tables.table_id, schema_tables.table_name
                     ) t
                     ;
                 """
-                # print(query)
+                print(query)
                 cursor.execute(query)
                 yield cursor
 
@@ -465,6 +465,11 @@ class PostgresSchemaCollector(SchemaCollector):
             query += " AND c.relname !~ '{}'".format(exclude_regex)
         if self._config.include_tables:
             query += f" AND ({' OR '.join(f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables)})"
+        return query
+
+    def _get_columns_query(self):
+        query = COLUMNS_QUERY
+        query += f" limit {int(self._config.max_columns)}"
         return query
 
     def _get_next(self, cursor):
