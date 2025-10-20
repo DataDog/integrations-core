@@ -22,4 +22,16 @@ BHOST_METRICS = [
     "ibm_spectrum_lsf.server.suspended",
     "ibm_spectrum_lsf.server.user_suspended",
 ]
-ALL_METRICS = LSID_METRICS + CLUSTER_METRICS + BHOST_METRICS
+
+LHOST_METRICS = [
+    "ibm_spectrum_lsf.host.cpu_factor",
+    "ibm_spectrum_lsf.host.is_server",
+    "ibm_spectrum_lsf.host.max_mem",
+    "ibm_spectrum_lsf.host.max_swap",
+    "ibm_spectrum_lsf.host.max_temp",
+    "ibm_spectrum_lsf.host.num_cores",
+    "ibm_spectrum_lsf.host.num_cpus",
+    "ibm_spectrum_lsf.host.num_procs",
+    "ibm_spectrum_lsf.host.num_threads",
+]
+ALL_METRICS = LSID_METRICS + CLUSTER_METRICS + BHOST_METRICS + LHOST_METRICS

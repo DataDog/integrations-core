@@ -32,6 +32,6 @@ class LSFClient:
             [
                 'lshosts',
                 '-o',
-                '"HOST_NAME:50 type:30  model:30  cpuf: ncpus: maxmem: maxswp: server: RESOURCES: rexpri: nprocs: ncores: nthreads: maxtmp:"',  # noqa: E501
+                '"HOST_NAME:50 type:30 model:30 cpuf: ncpus: maxmem: maxswp: server: nprocs: ncores: nthreads: maxtmp:"',  # noqa: E501
             ]
         )

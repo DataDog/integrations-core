@@ -5,7 +5,7 @@
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_spectrum_lsf import IbmSpectrumLsfCheck
 
-from .common import ALL_METRICS, BHOST_METRICS, LSID_METRICS
+from .common import ALL_METRICS, CLUSTER_METRICS
 from .conftest import get_mock_output
 
 
@@ -38,7 +38,7 @@ def test_lscluster_error(mock_client, dd_run_check, aggregator, instance):
     mock_client.lsclusters.side_effect = lambda *args, **kwargs: (None, "Can't connect", 1)
     dd_run_check(check)
 
-    for metric in LSID_METRICS + BHOST_METRICS:
+    for metric in set(ALL_METRICS) - set(CLUSTER_METRICS):
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
@@ -51,7 +51,7 @@ def test_lscluster_wrong_column_num(mock_client, dd_run_check, aggregator, insta
     mock_client.lsclusters.side_effect = lambda *args, **kwargs: get_mock_output('lsclusters_err')
     dd_run_check(check)
 
-    for metric in LSID_METRICS + BHOST_METRICS:
+    for metric in set(ALL_METRICS) - set(CLUSTER_METRICS):
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()

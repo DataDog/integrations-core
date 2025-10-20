@@ -5,7 +5,7 @@
 from datadog_checks.base import AgentCheck
 
 from .client import LSFClient
-from .common import BHOSTS, LSCLUSTERS
+from .common import BHOSTS, LSCLUSTERS, LSHOSTS
 from .config_models import ConfigMixin
 
 
@@ -30,15 +30,14 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
 
         return tags
 
-    def submit_metrics(self, metric_mapping, line_data, tags):
+    def submit_metrics(self, prefix, metric_mapping, line_data, tags):
         for metric in metric_mapping:
             val = line_data[metric['id']]
-            transformer = metric.get("transform")
-            if transformer:
-                val = transformer(val)
+            transformer = metric['transform']
+            val = transformer(val)
 
             name = metric['name']
-            self.gauge(name, val, tags=self.tags + tags)
+            self.gauge(f"{prefix}.{name}", val, tags=self.tags + tags)
 
     def collect_metrics_from_command(self, client_func, mapping):
         output, err, exit_code = client_func()
@@ -56,7 +55,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         for line in output_lines:
             line_data = line.split()
             tags = self.process_tags(mapping.get('tags'), line_data)
-            self.submit_metrics(mapping.get('metrics'), line_data, tags)
+            self.submit_metrics(mapping.get('prefix'), mapping.get('metrics'), line_data, tags)
 
     def collect_clusters(self):
         """
@@ -72,6 +71,13 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         """
         self.collect_metrics_from_command(self.client.bhosts, BHOSTS)
 
+    def collect_lshosts(self):
+        """
+        HOST_NAME                     type    model     cpuf     ncpus    maxmem     maxswp     server  nprocs   ncores   nthreads maxtmp
+        ip-11-21-111-198.ec2.internal X86_64  Intel_E5  12.50    4        16030M         -      Yes     1        4        1        81886M
+        """  # noqa: E501
+        self.collect_metrics_from_command(self.client.lshosts, LSHOSTS)
+
     def check(self, _):
         _, err, exit_code = self.client.lsid()
         if exit_code == 0:
@@ -84,3 +90,4 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         self.client.start_monitoring(self.config.min_collection_interval)
         self.collect_clusters()
         self.collect_bhosts()
+        self.collect_lshosts()
