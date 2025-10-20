@@ -543,6 +543,54 @@ def test_statement_samples_collect(
     mysql_check._statement_samples._close_db_conn()
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
+def test_statement_samples_exclude_error_queries(
+    aggregator,
+    dd_run_check,
+    dbm_instance,
+    bob_conn,
+    datadog_agent,
+):
+    """
+    Test that queries with execution errors are not collected for statement samples.
+    The events_statements_current query filters out queries with errors=1, so we should
+    not collect explain plans for queries that have execution errors.
+    """
+    dbm_instance['query_samples']['collection_interval'] = CLOSE_TO_ZERO_INTERVAL
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    dd_run_check(mysql_check)
+    aggregator.reset()
+    mysql_check._statement_samples._init_caches()
+
+    # we deliberately want to keep the connection open for the duration of the test to ensure
+    # the query remains in the events_statements_current and events_statements_history tables
+    # it would be cleared out upon connection close otherwise
+    with closing(bob_conn.cursor()) as cursor:
+        # Try to execute a query with a syntax error (will fail but will be recorded in performance_schema)
+        try:
+            error_query = "select foo bar"
+            cursor.execute(error_query)
+        except Exception:
+            # Expected to fail, but it will be recorded in performance_schema with errors=1
+            pass
+
+        # Run the check to collect statement samples while connection is still open
+        mysql_check.check(dbm_instance)
+
+    events = aggregator.get_event_platform_events("dbm-samples")
+
+    # The error query should NOT be collected
+    error_matching = [e for e in events if 'foo bar' in e['db']['statement'].lower()]
+    assert len(error_matching) == 0, "should not have collected event for query with execution error"
+
+    # Clean up the connection
+    mysql_check._statement_samples._close_db_conn()
+
+
 @pytest.mark.parametrize(
     "statement,schema,expected_warnings",
     [
