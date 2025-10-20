@@ -31,7 +31,7 @@ from datadog_checks.postgres.features import Feature, FeatureKey, FeatureNames
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
 
-
+import time
 class ValidationResult:
     """
     A simple class to represent the result of a validation.
@@ -46,6 +46,7 @@ class ValidationResult:
         self.features: list[Feature] = []
         self.errors: list[ConfigurationError] = []
         self.warnings: list[str] = []
+        self.created_at: int = int(time.time() * 1000)
 
     def add_feature(self, feature: FeatureKey, enabled=True, description: Optional[str] = None):
         """

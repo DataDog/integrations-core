@@ -148,6 +148,7 @@ class PostgreSql(AgentCheck):
                 else HealthStatus.OK,
                 errors=[str(error) for error in validation_result.errors],
                 warnings=validation_result.warnings,
+                validated_at=validation_result.created_at,
                 config=sanitize(self._config),
                 instance=sanitize(self.instance),
                 features=validation_result.features,
