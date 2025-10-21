@@ -395,7 +395,10 @@ class DBMAsyncJob(object):
                     raw=True,
                 )
             if not self._cancel_event.is_set() and self._check.health:
-                self._check.health.submit_error_health_event(e, job_name=self._job_name)
+                try:
+                    self._check.health.submit_error_health_event(e, job_name=self._job_name)
+                except Exception as e:
+                    self._log.exception("[%s] Failed to submit error health event", self._job_tags_str, e)
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
             if self._shutdown_callback:
