@@ -394,10 +394,8 @@ class DBMAsyncJob(object):
                     tags=self._job_tags + ["error:crash-{}".format(type(e))],
                     raw=True,
                 )
-            if self._check.health:
-                self._check.health.submit_error_health_event(
-                    e, tags=self._job_tags, is_cancel_event=self._cancel_event.is_set()
-                )
+            if not self._cancel_event.is_set() and self._check.health:
+                self._check.health.submit_error_health_event(e, job_name=self._job_name)
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
             if self._shutdown_callback:

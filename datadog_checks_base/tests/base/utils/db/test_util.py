@@ -131,7 +131,7 @@ def test_dbm_async_job_unknown_error(aggregator):
     exception = UnexpectedExceptionForTests()
     job = JobForTesting(check, exception=exception)
     try:
-        job.run_job_loop([])
+        job.run_job_loop(["hello:there"])
         job._job_loop_future.result(timeout=10)
         job.cancel()
     except:
