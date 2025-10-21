@@ -34,10 +34,6 @@ class DatabaseCheck(AgentCheck):
         raise NotImplementedError("dbms_version is not implemented for this check")
 
     @property
-    def agent_version(self) -> str:
-        raise NotImplementedError("agent_version is not implemented for this check")
-
-    @property
     def tags(self) -> list[str]:
         raise NotImplementedError("tags is not implemented for this check")
 

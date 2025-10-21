@@ -8,6 +8,11 @@ import pytest
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 
+try:
+    import datadog_agent # type: ignore
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 
 class TestDatabaseCheck(DatabaseCheck):
     __test__ = False
@@ -67,11 +72,29 @@ class TestSchemaCollector(SchemaCollector):
         return None
 
     def _map_row(self, database: str, cursor_row: dict):
-        return {**database}
+        return {**database, "tables": [cursor_row]}
+
+    @property
+    def kind(self):
+        return "test_databases"
 
 
 @pytest.mark.unit
-def test_schema_collector():
+def test_schema_collector(aggregator):
     check = TestDatabaseCheck()
     collector = TestSchemaCollector(check, SchemaCollectorConfig())
     collector.collect_schemas()
+
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    assert len(events) == 1
+    event = events[0]
+    assert event['kind'] == collector.kind
+    assert event['host'] == check.reported_hostname
+    assert event['database_instance'] == check.database_identifier
+    assert event['agent_version'] == datadog_agent.get_version()
+    assert event['collection_interval'] == collector._config.collection_interval
+    assert event['dbms_version'] == check.dbms_version
+    assert event['tags'] == check.tags
+    assert event['cloud_metadata'] == check.cloud_metadata
+    assert event['metadata'][0]['name'] == 'test_database'
+    assert event['metadata'][0]['tables'][0]['table_name'] == 'test_table'

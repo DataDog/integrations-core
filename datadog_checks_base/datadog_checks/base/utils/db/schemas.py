@@ -132,6 +132,7 @@ class SchemaCollector(ABC):
         return {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
+            "kind": self.kind,
             "agent_version": datadog_agent.get_version(),
             "collection_interval": self._config.collection_interval,
             "dbms_version": str(self._check.dbms_version),
@@ -155,7 +156,15 @@ class SchemaCollector(ABC):
 
             self._queued_rows = []
 
+    @property
     @abstractmethod
+    def kind(self) -> str:
+        """
+        Returns the kind property of the schema metadata event.
+        Subclasses should override this property to return the kind of schema being collected.
+        """
+        raise NotImplementedError("Subclasses must implement kind")
+
     def _get_databases(self) -> list[DatabaseInfo]:
         """
         Returns a list of database dictionaries.
