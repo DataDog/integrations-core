@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.postgres.version_utils import VersionUtils
 
+
 class DatabaseInfo(TypedDict):
     description: str
     name: str
@@ -312,7 +313,7 @@ class PostgresSchemaCollector(SchemaCollector):
         for exclude_regex in self._config.exclude_schemas:
             query += " AND nspname !~ '{}'".format(exclude_regex)
         if self._config.include_schemas:
-            query += f" AND ({' OR '.join(f"nspname ~ '{include_regex}'" for include_regex in self._config.include_schemas)})"            
+            query += f" AND ({' OR '.join(f"nspname ~ '{include_regex}'" for include_regex in self._config.include_schemas)})"
         if self._check._config.ignore_schemas_owned_by:
             query += " AND nspowner :: regrole :: text not IN ({})".format(
                 ", ".join(f"'{owner}'" for owner in self._check._config.ignore_schemas_owned_by)
@@ -329,7 +330,6 @@ class PostgresSchemaCollector(SchemaCollector):
         if self._config.include_tables:
             query += f" AND ({' OR '.join(f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables)})"
         return query
-
 
     def _get_next(self, cursor):
         return cursor.fetchone()

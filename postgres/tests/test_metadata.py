@@ -448,7 +448,6 @@ def test_collect_schemas_max_tables(integration_check, dbm_instance, aggregator)
         assert len(database_metadata[0]['schemas'][0]['tables']) <= 1
 
 
-
 def test_collect_schemas_multiple_payloads(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
     dbm_instance['relations'] = []
