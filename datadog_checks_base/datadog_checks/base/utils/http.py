@@ -11,7 +11,8 @@ import warnings
 from collections import ChainMap
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
-from urllib.parse import quote, urlparse, urlunparse
+from dataclasses import dataclass
+from urllib.parse import ParseResult, quote, urlparse, urlunparse
 
 import lazy_loader
 import requests
@@ -195,6 +196,20 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
         host_params, _ = super().build_connection_pool_key_attributes(request, verify, cert)
         return host_params, {"ssl_context": self.ssl_context}
+
+
+@dataclass
+class _Url:
+    string: str
+    parse: ParseResult
+
+    def update(self, **parse_result_kwargs):
+        parse = self.parse._replace(**parse_result_kwargs)
+        return self.__class__(string=urlunparse(parse), parse=parse)
+
+    @classmethod
+    def from_string(cls, raw):
+        return cls(raw, urlparse(raw))
 
 
 class ResponseWrapper(ObjectProxy):
@@ -459,7 +474,9 @@ class RequestsWrapper(object):
         if self.log_requests:
             self.logger.debug('Sending %s request to %s', method.upper(), url)
 
-        if self.no_proxy_uris and should_bypass_proxy(url, self.no_proxy_uris):
+        url = _Url.from_string(url)
+
+        if self.no_proxy_uris and _should_bypass_proxy(url, self.no_proxy_uris):
             options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
 
         persist = options.pop('persist', None)
@@ -468,26 +485,26 @@ class RequestsWrapper(object):
 
         new_options = ChainMap(options, self.options)
 
-        if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
-            self.logger.debug('An unverified HTTPS request is being made to %s', url)
+        if url.parse.scheme == 'https' and not self.ignore_tls_warning and not new_options['verify']:
+            self.logger.debug('An unverified HTTPS request is being made to %s', url.string)
 
         extra_headers = options.pop('extra_headers', None)
         if extra_headers is not None:
             new_options['headers'] = new_options['headers'].copy()
             new_options['headers'].update(extra_headers)
 
-        if is_uds_url(url):
+        if url.parse.scheme == UDS_SCHEME:
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
 
-        self.handle_auth_token(method=method, url=url, default_options=self.options)
+        self.handle_auth_token(method=method, url=url.string, default_options=self.options)
 
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
 
             session = self.session if persist else self._create_session()
-            if url.startswith('https'):
+            if url.parse.scheme == 'https':
                 self._mount_https_adapter(session, ChainMap(get_tls_config_from_options(new_options), self.tls_config))
             request_method = getattr(session, method)
 
@@ -506,20 +523,19 @@ class RequestsWrapper(object):
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
-            response = request_method(url, **new_options)
+            response = request_method(url.string, **new_options)
         except SSLError as e:
             # fetch the intermediate certs
-            parsed_url = urlparse(url)
-            hostname = parsed_url.hostname
-            port = parsed_url.port
+            hostname = url.parse.hostname
+            port = url.parse.port
             certs = self.fetch_intermediate_certs(hostname, port)
             if not certs:
                 raise e
             session = self.session if persist else self._create_session()
-            if parsed_url.scheme == "https":
+            if url.parse.scheme == "https":
                 self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
             request_method = getattr(session, method)
-            response = request_method(url, **new_options)
+            response = request_method(url.string, **new_options)
         return response
 
     def fetch_intermediate_certs(self, hostname, port=443):
@@ -698,18 +714,17 @@ def handle_kerberos_cache(cache_file_path):
         os.environ['KRB5CCNAME'] = old_cache_path
 
 
-def should_bypass_proxy(url, no_proxy_uris):
-    # Accepts a URL and a list of no_proxy URIs
+def _should_bypass_proxy(url, no_proxy_uris):
+    # Accepts a _Url instance and a list of no_proxy URIs
     # Returns True if URL should bypass the proxy.
-    parsed_uri_parts = urlparse(url)
-    parsed_uri = parsed_uri_parts.hostname
+    parsed_uri = url.parse.hostname
 
     if '*' in no_proxy_uris:
         # A single * character is supported, which matches all hosts, and effectively disables the proxy.
         # See: https://curl.haxx.se/libcurl/c/CURLOPT_NOPROXY.html
         return True
 
-    if parsed_uri_parts.scheme == "unix":
+    if url.parse.scheme == "unix":
         # Unix domain sockets semantically do not make sense to proxy
         return True
 
@@ -1053,12 +1068,6 @@ AUTH_TOKEN_READERS = {
 AUTH_TOKEN_WRITERS = {'header': AuthTokenHeaderWriter}
 
 
-def is_uds_url(url):
-    # type: (str) -> bool
-    parsed = urlparse(url)
-    return parsed.scheme == UDS_SCHEME
-
-
 def quote_uds_url(url):
     # type: (str) -> str
     """
@@ -1066,20 +1075,16 @@ def quote_uds_url(url):
 
     For user experience purposes, since `requests-unixsocket` only accepts the latter form.
     """
-    parsed = urlparse(url)
-
     # When passing an UDS path URL, `netloc` is empty and `path` contains everything that's after '://'.
     # We want to extract the socket path from the URL path, and percent-encode it, and set it as the `netloc`.
     # For now we assume that UDS paths end in '.sock'. This is by far the most common convention.
-    uds_path_head, has_dot_sock, path = parsed.path.partition('.sock')
+    uds_path_head, has_dot_sock, path = url.parse.path.partition('.sock')
     if not has_dot_sock:
         return url
 
     uds_path = '{}.sock'.format(uds_path_head)
     netloc = quote(uds_path, safe='')
-    parsed = parsed._replace(netloc=netloc, path=path)
-
-    return urlunparse(parsed)
+    return url.update(netloc=netloc, path=path)
 
 
 def _parse_expires_in(token_expiration):
