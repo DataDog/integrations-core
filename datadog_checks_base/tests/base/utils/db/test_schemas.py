@@ -9,13 +9,14 @@ from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 
 try:
-    import datadog_agent # type: ignore
+    import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 
 class TestDatabaseCheck(DatabaseCheck):
     __test__ = False
+
     def __init__(self):
         super().__init__()
         self._reported_hostname = "test_hostname"
@@ -52,6 +53,7 @@ class TestDatabaseCheck(DatabaseCheck):
 
 class TestSchemaCollector(SchemaCollector):
     __test__ = False
+
     def __init__(self, check: DatabaseCheck, config: SchemaCollectorConfig):
         super().__init__(check, config)
         self._row_index = 0
