@@ -21,7 +21,8 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.db.health import DEFAULT_COOLDOWN as DEFAULT_HEALTH_COOLDOWN, HealthEvent, HealthStatus
+from datadog_checks.base.utils.db.health import DEFAULT_COOLDOWN as DEFAULT_HEALTH_COOLDOWN
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled

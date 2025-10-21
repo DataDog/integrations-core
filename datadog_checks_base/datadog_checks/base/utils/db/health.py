@@ -42,9 +42,13 @@ class HealthStatus(Enum):
     WARNING = 'warning'
     ERROR = 'error'
 
-DEFAULT_COOLDOWN = 60*5
+
+DEFAULT_COOLDOWN = 60 * 5
+
+
 def ttl(_key, value, now):
     return now + value
+
 
 class Health:
     def __init__(self, check: DatabaseCheck):
@@ -57,7 +61,16 @@ class Health:
         self.check = check
         self._ttl_cache = TLRUCache(maxsize=1000, ttu=ttl)
 
-    def submit_health_event(self, name: HealthEvent, status: HealthStatus, tags: list[str] = None, cooldown: bool = False, cooldown_time: int = DEFAULT_COOLDOWN, cooldown_keys: list[str] = None, **kwargs):
+    def submit_health_event(
+        self,
+        name: HealthEvent,
+        status: HealthStatus,
+        tags: list[str] = None,
+        cooldown: bool = False,
+        cooldown_time: int = DEFAULT_COOLDOWN,
+        cooldown_keys: list[str] = None,
+        **kwargs,
+    ):
         """
         Submit a health event to the aggregator.
 
@@ -68,7 +81,8 @@ class Health:
         :param tags: list of str
             Tags to associate with the health event.
         :param cooldown: int
-            The cooldown period in seconds to prevent the events with the same name and status from being submitted again.
+            The cooldown period in seconds to prevent the events with the same name and status
+            from being submitted again.
         :param cooldown_keys: list of str
             Additional kwargs keys to include in the cooldown key.
         :param kwargs: Additional keyword arguments to include in the event under `data`.

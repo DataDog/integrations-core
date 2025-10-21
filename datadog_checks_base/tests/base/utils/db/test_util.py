@@ -124,12 +124,10 @@ def test_ratelimiting_ttl_cache():
         assert cache.acquire(i), "cache should be empty again so these keys should go in OK"
 
 
-
-
 def test_dbm_async_job_missed_collection_interval(aggregator):
     check = AgentCheck()
     health = Health(check)
-    check.health = health    
+    check.health = health
     job = JobForTesting(check, min_collection_interval=1, job_execution_time=3)
     job.run_job_loop([])
     # Sleep longer than the target collection interval
