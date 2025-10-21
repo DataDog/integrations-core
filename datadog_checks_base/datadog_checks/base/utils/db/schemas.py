@@ -19,7 +19,6 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-
 class DatabaseInfo(TypedDict):
     name: str
 
@@ -36,7 +35,6 @@ class DatabaseObject(TypedDict):
 class SchemaCollectorConfig:
     def __init__(self):
         self.collection_interval = 3600
-        self.enabled = False
         self.payload_chunk_size = 10_000
 
 
