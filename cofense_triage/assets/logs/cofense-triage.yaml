@@ -1,0 +1,59 @@
+id: cofense-triage
+metric_id: cofense-triage
+backend_only: false
+facets:
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+pipeline:
+  type: pipeline
+  name: Cofense Triage
+  enabled: true
+  filter:
+    query: source:cofense-triage
+  processors:
+    - type: date-remapper
+      name: Define `attributes.updated_at` as the official date of the log
+      enabled: true
+      sources:
+        - attributes.updated_at
+    - type: pipeline
+      name: Reports
+      enabled: true
+      filter:
+        query: service:reports
+      processors:
+        - type: attribute-remapper
+          name: Map `attributes.from_address` to `usr.email`
+          enabled: true
+          sources:
+            - attributes.from_address
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: category-processor
+          name: Category for `@attributes.risk_score` to `status`
+          enabled: true
+          categories:
+            - filter:
+                query: "@attributes.risk_score:>=80"
+              name: alert
+            - name: critical
+              filter:
+                query: "@attributes.risk_score:(>=41 <80)"
+            - name: warning
+              filter:
+                query: "@attributes.risk_score:(>=21 <40)"
+            - name: info
+              filter:
+                query: "@attributes.risk_score:<=20"
+          target: status
+        - type: status-remapper
+          name: Define `status` as the official status of the log
+          enabled: true
+          sources:
+            - status
