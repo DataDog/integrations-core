@@ -22,6 +22,7 @@ def mock_client():
     client.lshosts.side_effect = lambda: get_mock_output('lshosts')
     client.lsload.side_effect = lambda: get_mock_output('lsload')
     client.bslots.side_effect = lambda: get_mock_output('bslots')
+    client.bqueues.side_effect = lambda: get_mock_output('bqueues')
 
     yield client
 

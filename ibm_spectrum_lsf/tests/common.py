@@ -51,4 +51,20 @@ LSLOAD_METRICS = [
 ]
 
 BSLOTS_METRICS = ["ibm_spectrum_lsf.slots.backfill.available", "ibm_spectrum_lsf.slots.runtime_limit"]
-ALL_METRICS = LSID_METRICS + CLUSTER_METRICS + BHOST_METRICS + BSLOTS_METRICS + LHOST_METRICS + LSLOAD_METRICS
+
+BQUEUES_METRICS = [
+    "ibm_spectrum_lsf.queue.is_active",
+    "ibm_spectrum_lsf.queue.is_open",
+    "ibm_spectrum_lsf.queue.max_jobs",
+    "ibm_spectrum_lsf.queue.max_jobs_per_host",
+    "ibm_spectrum_lsf.queue.max_jobs_per_processor",
+    "ibm_spectrum_lsf.queue.max_jobs_per_user",
+    "ibm_spectrum_lsf.queue.num_job_slots",
+    "ibm_spectrum_lsf.queue.pending",
+    "ibm_spectrum_lsf.queue.priority",
+    "ibm_spectrum_lsf.queue.running",
+    "ibm_spectrum_lsf.queue.suspended",
+]
+ALL_METRICS = (
+    LSID_METRICS + CLUSTER_METRICS + BHOST_METRICS + BSLOTS_METRICS + LHOST_METRICS + LSLOAD_METRICS + BQUEUES_METRICS
+)

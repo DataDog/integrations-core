@@ -27,6 +27,16 @@ def transform_runtime(val):
         return transform_float(val)
 
 
+def transform_active(val):
+    _, active = val.split(":")
+    return active.lower() == "Active"
+
+
+def transform_open(val):
+    is_open, _ = val.split(":")
+    return is_open.lower() == "Open"
+
+
 LSCLUSTERS = {
     'name': 'lsclusters',
     'prefix': 'cluster',
@@ -128,5 +138,30 @@ BSLOTS = {
     'metrics': [
         {'name': 'backfill.available', 'id': 0, 'transform': transform_float},
         {'name': 'runtime_limit', 'id': 1, 'transform': transform_runtime},
+    ],
+}
+
+BQUEUES = {
+    'name': 'bqueues',
+    'prefix': 'queue',
+    'expected_columns': 11,
+    'tags': [
+        {
+            'name': 'queue_name',
+            'id': 0,
+        }
+    ],
+    'metrics': [
+        {'name': 'priority', 'id': 1, 'transform': transform_float},
+        {'name': 'is_open', 'id': 2, 'transform': transform_open},
+        {'name': 'is_active', 'id': 2, 'transform': transform_active},
+        {'name': 'max_jobs', 'id': 3, 'transform': transform_float},
+        {'name': 'max_jobs_per_user', 'id': 4, 'transform': transform_float},
+        {'name': 'max_jobs_per_processor', 'id': 5, 'transform': transform_float},
+        {'name': 'max_jobs_per_host', 'id': 6, 'transform': transform_float},
+        {'name': 'num_job_slots', 'id': 7, 'transform': transform_float},
+        {'name': 'pending', 'id': 8, 'transform': transform_float},
+        {'name': 'running', 'id': 9, 'transform': transform_float},
+        {'name': 'suspended', 'id': 10, 'transform': transform_float},
     ],
 }

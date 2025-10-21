@@ -5,7 +5,7 @@
 from datadog_checks.base import AgentCheck
 
 from .client import LSFClient
-from .common import BHOSTS, BSLOTS, LSCLUSTERS, LSHOSTS, LSLOAD
+from .common import BHOSTS, BQUEUES, BSLOTS, LSCLUSTERS, LSHOSTS, LSLOAD
 from .config_models import ConfigMixin
 
 
@@ -92,6 +92,20 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         """
         self.collect_metrics_from_command(self.client.bslots, BSLOTS)
 
+    def collect_bqueues(self):
+        """
+        QUEUE_NAME      PRIO STATUS          MAX JL/U JL/P JL/H NJOBS  PEND   RUN  SUSP
+        admin            50  Open:Active       -    -    -    -     0     0     0     0
+        owners           43  Open:Active       -    -    -    -     0     0     0     0
+        priority         43  Open:Active       -    -    -    -     0     0     0     0
+        night            40  Open:Active       -    -    -    -     0     0     0     0
+        short            35  Open:Active       -    -    -    -     0     0     0     0
+        normal           30  Open:Active       -    -    -    -     0     0     0     0
+        interactive      30  Open:Active       -    -    -    -     0     0     0     0
+        idle             20  Open:Active       -    -    -    -     0     0     0     0
+        """
+        self.collect_metrics_from_command(self.client.bqueues, BQUEUES)
+
     def check(self, _):
         _, err, exit_code = self.client.lsid()
         if exit_code == 0:
@@ -107,3 +121,4 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         self.collect_lshosts()
         self.collect_lsload()
         self.collect_bslots()
+        self.collect_bqueues()
