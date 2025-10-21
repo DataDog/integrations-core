@@ -40,6 +40,7 @@ def cache_id(check: AgentCheck) -> str:
 
 
 class TestCheck(AgentCheck):
+    __test__ = False
     def check(self, instance):
         pass
 

@@ -1,160 +1,77 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from contextlib import contextmanager
+
 import pytest
 
-from datadog_checks.postgres.schemas import PostgresSchemaCollector
-
-from .common import POSTGRES_VERSION
-
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+from datadog_checks.base.checks.db import DatabaseCheck
+from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 
 
-@pytest.fixture
-def dbm_instance(pg_instance):
-    pg_instance['dbm'] = True
-    pg_instance['min_collection_interval'] = 0.1
-    pg_instance['query_samples'] = {'enabled': False}
-    pg_instance['query_activity'] = {'enabled': False}
-    pg_instance['query_metrics'] = {'enabled': False}
-    pg_instance['collect_resources'] = {'enabled': False, 'run_sync': True}
-    pg_instance['collect_settings'] = {'enabled': False, 'run_sync': True}
-    pg_instance['collect_schemas'] = {'enabled': True, 'run_sync': True}
-    return pg_instance
+class TestDatabaseCheck(DatabaseCheck):
+    __test__ = False
+    def __init__(self):
+        super().__init__()
+        self._reported_hostname = "test_hostname"
+        self._database_identifier = "test_database_identifier"
+        self._dbms_version = "test_dbms_version"
+        self._agent_version = "test_agent_version"
+        self._tags = ["test_tag"]
+        self._cloud_metadata = {"test_cloud_metadata": "test_cloud_metadata"}
+
+    @property
+    def reported_hostname(self):
+        return self._reported_hostname
+
+    @property
+    def database_identifier(self):
+        return self._database_identifier
+
+    @property
+    def dbms_version(self):
+        return self._dbms_version
+
+    @property
+    def agent_version(self):
+        return self._agent_version
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
 
 
-def test_get_databases(dbm_instance, integration_check):
-    check = integration_check(dbm_instance)
-    collector = PostgresSchemaCollector(check)
+class TestSchemaCollector(SchemaCollector):
+    __test__ = False
+    def __init__(self, check: DatabaseCheck, config: SchemaCollectorConfig):
+        super().__init__(check, config)
+        self._row_index = 0
+        self._rows = [{'table_name': 'test_table'}]
 
-    databases = collector._get_databases()
-    datbase_names = [database['name'] for database in databases]
-    assert 'postgres' in datbase_names
-    assert 'dogs' in datbase_names
-    assert 'dogs_3' in datbase_names
-    assert 'nope' not in datbase_names
+    def _get_databases(self):
+        return [{'name': 'test_database'}]
 
+    @contextmanager
+    def _get_cursor(self, database: str):
+        yield {}
 
-def test_databases_filters(dbm_instance, integration_check):
-    dbm_instance['collect_schemas']['exclude_databases'] = ['^dogs$', 'dogs_[345]']
-    check = integration_check(dbm_instance)
-    collector = PostgresSchemaCollector(check)
+    def _get_next(self, _cursor):
+        if self._row_index < len(self._rows):
+            row = self._rows[self._row_index]
+            self._row_index += 1
+            return row
+        return None
 
-    databases = collector._get_databases()
-    datbase_names = [database['name'] for database in databases]
-    assert 'postgres' in datbase_names
-    assert 'dogs' not in datbase_names
-    assert 'dogs_3' not in datbase_names
-    assert 'dogs_9' in datbase_names
-    assert 'nope' not in datbase_names
-
-
-def test_get_cursor(dbm_instance, integration_check):
-    check = integration_check(dbm_instance)
-    check.version = POSTGRES_VERSION
-    collector = PostgresSchemaCollector(check)
-
-    with collector._get_cursor('datadog_test') as cursor:
-        assert cursor is not None
-        schemas = []
-        for row in cursor:
-            schemas.append(row['schema_name'])
-
-        assert set(schemas) == {'datadog', 'hstore', 'public', 'public2', 'rdsadmin_test'}
+    def _map_row(self, database: str, cursor_row: dict):
+        return {**database}
 
 
-def test_schemas_filters(dbm_instance, integration_check):
-    dbm_instance['collect_schemas']['exclude_schemas'] = ['public', 'rdsadmin_test']
-    check = integration_check(dbm_instance)
-    check.version = POSTGRES_VERSION
-    collector = PostgresSchemaCollector(check)
-
-    with collector._get_cursor('datadog_test') as cursor:
-        assert cursor is not None
-        schemas = []
-        for row in cursor:
-            schemas.append(row['schema_name'])
-
-        assert set(schemas) == {'datadog', 'hstore'}
-
-
-def test_tables(dbm_instance, integration_check):
-    check = integration_check(dbm_instance)
-    check.version = POSTGRES_VERSION
-    collector = PostgresSchemaCollector(check)
-
-    with collector._get_cursor('datadog_test') as cursor:
-        assert cursor is not None
-        tables = []
-        for row in cursor:
-            if row['table_name']:
-                tables.append(row['table_name'])
-
-    assert set(tables) == {
-        'persons',
-        'personsdup1',
-        'personsdup2',
-        'personsdup3',
-        'personsdup4',
-        'personsdup5',
-        'personsdup6',
-        'personsdup7',
-        'personsdup8',
-        'personsdup9',
-        'personsdup10',
-        'personsdup11',
-        'personsdup12',
-        'personsdup13',
-        'persons_indexed',
-        'pgtable',
-        'pg_newtable',
-        'cities',
-        'rds_admin_misc',
-        'sample_foreign_d73a8c',
-    }
-
-
-def test_columns(dbm_instance, integration_check):
-    check = integration_check(dbm_instance)
-    check.version = POSTGRES_VERSION
-    collector = PostgresSchemaCollector(check)
-
-    with collector._get_cursor('datadog_test') as cursor:
-        assert cursor is not None
-        # Assert that at least one row has columns
-        assert any(row['columns'] for row in cursor)
-        for row in cursor:
-            if row['columns']:
-                for column in row['columns']:
-                    assert column['name'] is not None
-                    assert column['data_type'] is not None
-            if row['table_name'] == 'cities':
-                assert row['columns']
-                assert row['columns'][0]['name']
-
-
-def test_indexes(dbm_instance, integration_check):
-    check = integration_check(dbm_instance)
-    check.version = POSTGRES_VERSION
-    collector = PostgresSchemaCollector(check)
-
-    with collector._get_cursor('datadog_test') as cursor:
-        assert cursor is not None
-        # Assert that at least one row has indexes
-        assert any(row['indexes'] for row in cursor)
-        for row in cursor:
-            if row['indexes']:
-                for index in row['indexes']:
-                    assert index['name'] is not None
-                    assert index['definition'] is not None
-            if row['table_name'] == 'cities':
-                assert row['indexes']
-                assert row['indexes'][0]['name']
-
-
-def test_collect_schemas(dbm_instance, integration_check):
-    check = integration_check(dbm_instance)
-    check.version = POSTGRES_VERSION
-    collector = PostgresSchemaCollector(check)
-
+@pytest.mark.unit
+def test_schema_collector():
+    check = TestDatabaseCheck()
+    collector = TestSchemaCollector(check, SchemaCollectorConfig())
     collector.collect_schemas()
