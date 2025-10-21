@@ -5,24 +5,15 @@
 from __future__ import annotations
 
 import contextlib
-import time
-from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, TypedDict
 
-import orjson as json
 from psycopg.rows import dict_row
 
 if TYPE_CHECKING:
-    from datadog_checks.base import AgentCheck
     from datadog_checks.postgres import PostgreSql
 
+from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.postgres.version_utils import VersionUtils
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 
 class DatabaseInfo(TypedDict):
     description: str
@@ -41,136 +32,6 @@ class DatabaseObject(TypedDict):
     id: str
     encoding: str
     owner: str
-
-
-class SchemaCollector(ABC):
-    def __init__(self, check: AgentCheck):
-        self._check = check
-        self._log = check.log
-        self._config = check._config.collect_schemas
-        self._row_chunk_size = 10000
-
-        self._reset()
-
-    def _reset(self):
-        self._collection_started_at = None
-        self._collection_payloads_count = 0
-        self._queued_rows = []
-        self._total_rows_count = 0
-
-    def collect_schemas(self) -> bool:
-        """
-        Collects and submits all applicable schema metadata to the agent.
-        Returns False if the previous collection was still in progress.
-        """
-        if self._collection_started_at is not None:
-            return False
-        status = "success"
-        try:
-            self._collection_started_at = int(time.time() * 1000)
-            databases = self._get_databases()
-            for database in databases:
-                database_name = database['name']
-                if not database_name:
-                    self._check.log("database has no name %v", database)
-                    continue
-                start = time.time()
-                with self._get_cursor(database_name) as cursor:
-                    end = time.time()
-                    self._log.info("Time to get cursor (%s): %s", database_name, int((end - start)*1000))
-                    # data = self._get_all(cursor)
-                    next = self._get_next(cursor)
-                    start = time.time()
-                    while next:
-                    # for i, next in enumerate(data):
-                        self._queued_rows.append(self._map_row(database, next))
-                        self._total_rows_count += 1
-                        next = self._get_next(cursor)
-                        is_last_payload = database is databases[-1] and next is None
-                        # is_last_payload = i == len(data) - 1
-                        self.maybe_flush(is_last_payload)
-                    end = time.time()
-                    self._log.info("Time to process rows (%s): %s", database_name, int((end - start)*1000))
-        except Exception as e:
-            status = "error"
-            self._log.error("Error collecting schema metadata: %s", e)
-            raise e
-        finally:
-            self._check.histogram(
-                "dd.postgres.schema.time",
-                int(time.time() * 1000) - self._collection_started_at,
-                tags=self._check.tags + ["status:" + status],
-                hostname=self._check.reported_hostname,
-                raw=True,
-            )
-            self._check.gauge(
-                "dd.postgres.schema.tables_count",
-                self._total_rows_count,
-                tags=self._check.tags + ["status:" + status],
-                hostname=self._check.reported_hostname,
-                raw=True,
-            )
-            self._check.gauge(
-                "dd.postgres.schema.payloads_count",
-                self._collection_payloads_count,
-                tags=self._check.tags + ["status:" + status],
-                hostname=self._check.reported_hostname,
-                raw=True,
-            )
-
-            self._reset()
-        return True
-
-    @property
-    def base_event(self):
-        return {
-            "host": self._check.reported_hostname,
-            "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
-            "collection_interval": self._config.collection_interval,
-            "dbms_version": str(self._check.version),
-            "tags": self._check.tags,
-            "cloud_metadata": self._check.cloud_metadata,
-            "collection_started_at": self._collection_started_at,
-        }
-
-    def maybe_flush(self, is_last_payload):
-        if len(self._queued_rows) > self._row_chunk_size or is_last_payload:
-            event = self.base_event.copy()
-            event['timestamp'] = int(time.time() * 1000)
-            event["metadata"] = self._queued_rows
-            self._collection_payloads_count += 1
-            if is_last_payload:
-                event["collection_payloads_count"] = self._collection_payloads_count
-            self._check.database_monitoring_metadata(json.dumps(event))
-
-            self._queued_rows = []
-
-    @abstractmethod
-    def _get_databases(self) -> list[DatabaseInfo]:
-        pass
-
-    @abstractmethod
-    def _get_cursor(self, database):
-        pass
-
-    @abstractmethod
-    def _get_next(self, cursor):
-        pass
-
-    @abstractmethod
-    def _get_all(self, cursor):
-        pass
-
-    @abstractmethod
-    def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
-        """
-        Maps a cursor row to a dict that matches the schema expected by DBM.
-        """
-        return {
-            **database,
-            "id": str(database["id"]), #Case id into string as expected by backend
-        }
 
 
 PG_TABLES_QUERY_V10_PLUS = """
@@ -325,10 +186,12 @@ FROM   pg_catalog.pg_database db
 
 
 class PostgresSchemaCollector(SchemaCollector):
+    _check: PostgreSql
+
     def __init__(self, check: PostgreSql):
-        super().__init__(check)
-        self._check = check
-        self._config = check._config.collect_schemas
+        config = SchemaCollectorConfig()
+        config.collection_interval = check._config.collect_schemas.collection_interval
+        super().__init__(check, config)
 
     @property
     def base_event(self):
