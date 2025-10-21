@@ -6,8 +6,6 @@
 
 Integrate BlazeMeter with Datadog to gain insights into performance and functional test results metrics data.
 
-**Minimum Agent version:** 7.68.2
-
 ## Setup
 
 ### Generate API Key Id and API Key Secret in BlazeMeter
