@@ -9,6 +9,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+from cachetools import TLRUCache
+
 from datadog_checks.base.utils.serialization import json
 
 if TYPE_CHECKING:
@@ -40,6 +42,9 @@ class HealthStatus(Enum):
     WARNING = 'warning'
     ERROR = 'error'
 
+DEFAULT_COOLDOWN = 60*5
+def ttl(_key, value, now):
+    return now + value
 
 class Health:
     def __init__(self, check: DatabaseCheck):
@@ -50,8 +55,9 @@ class Health:
             The check instance that will be used to submit health events.
         """
         self.check = check
+        self._ttl_cache = TLRUCache(maxsize=1000, ttu=ttl)
 
-    def submit_health_event(self, name: HealthEvent, status: HealthStatus, tags: list[str] = None, **kwargs):
+    def submit_health_event(self, name: HealthEvent, status: HealthStatus, tags: list[str] = None, cooldown: bool = False, cooldown_time: int = DEFAULT_COOLDOWN, cooldown_keys: list[str] = None, **kwargs):
         """
         Submit a health event to the aggregator.
 
@@ -61,15 +67,27 @@ class Health:
             The health status to submit.
         :param tags: list of str
             Tags to associate with the health event.
+        :param cooldown: int
+            The cooldown period in seconds to prevent the events with the same name and status from being submitted again.
+        :param cooldown_keys: list of str
+            Additional kwargs keys to include in the cooldown key.
         :param kwargs: Additional keyword arguments to include in the event under `data`.
         """
+        category = self.check.__NAMESPACE__ or self.check.__class__.__name__.lower()
+        if cooldown:
+            cooldown_key = "|".join([category, name.value, status.value])
+            if cooldown_keys:
+                cooldown_key = "|".join([cooldown_key, "|".join([f"{k}={kwargs[k]}" for k in cooldown_keys])])
+            if self._ttl_cache.get(cooldown_key, None):
+                return
+            self._ttl_cache[cooldown_key] = cooldown_time
         self.check.event_platform_event(
             json.dumps(
                 {
                     'timestamp': time.time() * 1000,
                     'version': 1,
                     'check_id': self.check.check_id,
-                    'category': self.check.__NAMESPACE__ or self.check.__class__.__name__.lower(),
+                    'category': category,
                     'name': name,
                     'status': status,
                     'tags': tags or [],

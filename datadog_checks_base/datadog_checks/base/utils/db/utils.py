@@ -348,19 +348,20 @@ class DBMAsyncJob(object):
         elif self._job_loop_future is None or not self._job_loop_future.running():
             self._job_loop_future = DBMAsyncJob.executor.submit(self._job_loop)
         else:
-            if time.time() - self._rate_limiter.last_event > self._min_collection_interval:
+            if self._last_run_start and time.time() - self._last_run_start > self._min_collection_interval:
                 if self._check.health and self._enable_missed_collection_event:
                     # Missed a collection interval, submit a health event
                     self._check.health.submit_health_event(
                         name=HealthEvent.MISSED_COLLECTION,
                         status=HealthStatus.WARNING,
                         tags=self._job_tags,
+                        cooldown=True,
+                        cooldown_time=self._min_collection_interval,
+                        cooldown_keys=['dbms', 'job_name'],
                         dbms=self._dbms,
                         job_name=self._job_name,
-                        collection_interval=self._min_collection_interval,
-                        last_check_run=self._last_check_run,
-                        last_job_loop_time=self._rate_limiter.last_event,
-                        elapsed_time=(time.time() - self._rate_limiter.last_event) * 1000,
+                        last_run_start=self._last_run_start,
+                        elapsed_time=(time.time() - self._last_run_start) * 1000,
                     )
                 self._log.warning("[%s] Missed collection interval", self._job_name)
 
@@ -432,6 +433,7 @@ class DBMAsyncJob(object):
 
     def _run_job_rate_limited(self):
         try:
+            self._last_run_start = time.time()
             self._run_job_traced()
         except:
             raise
