@@ -186,7 +186,7 @@ class GlusterfsCheck(AgentCheck):
 
     def parse_healinfo_stats(self, healinfo, volume_tags):
         for info in healinfo:
-            if info['status'] != 'Connected':
+            if info['status'].lower() != 'connected':
                 continue
 
             brick_name = info['name'].split(":")
