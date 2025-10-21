@@ -305,7 +305,6 @@ class JobForTesting(DBMAsyncJob):
         self._check.count("dbm.async_job_test.run_job", 1)
         self.count_executed += 1
         if self._exception:
-            print("raising exception", self._exception)
             raise self._exception
         time.sleep(self._job_execution_time)
 
