@@ -299,6 +299,10 @@ class DBMAsyncJob(object):
         # for example if they set the collection interval intentionally low
         # to effectively run the job in a loop
         enable_missed_collection_event=True,
+        # List of features depenedent on the job running
+        # Default to [None] so that if no features are specified there will 
+        # still be health events submitted for the job
+        features=[None],
     ):
         self._check = check
         self._config_host = config_host
@@ -321,7 +325,7 @@ class DBMAsyncJob(object):
         self._expected_db_exceptions = expected_db_exceptions
         self._job_name = job_name
         self._enable_missed_collection_event = enable_missed_collection_event
-
+        self._features = features
     def cancel(self):
         """
         Send a signal to cancel the job loop asynchronously.
@@ -353,19 +357,21 @@ class DBMAsyncJob(object):
                 # Assume a collection interval of less than 1 second is an attempt to run the job in a loop
                 if self._last_run_start and time.time() - self._last_run_start > self._min_collection_interval:
                     if self._check.health and self._enable_missed_collection_event:
-                        # Missed a collection interval, submit a health event
-                        self._check.health.submit_health_event(
-                            name=HealthEvent.MISSED_COLLECTION,
-                            status=HealthStatus.WARNING,
-                            tags=self._job_tags,
-                            cooldown=True,
-                            cooldown_time=min(DEFAULT_HEALTH_COOLDOWN, self._min_collection_interval),
-                            cooldown_keys=['dbms', 'job_name'],
-                            dbms=self._dbms,
-                            job_name=self._job_name,
-                            last_run_start=self._last_run_start,
-                            elapsed_time=(time.time() - self._last_run_start) * 1000,
-                        )
+                        # Missed a collection interval, submit a health event for each feature that depends on this job
+                        for feature in self._features:
+                            self._check.health.submit_health_event(
+                                name=HealthEvent.MISSED_COLLECTION,
+                                status=HealthStatus.WARNING,
+                                tags=self._job_tags,
+                                cooldown=True,
+                                cooldown_time=min(DEFAULT_HEALTH_COOLDOWN, self._min_collection_interval),
+                                cooldown_keys=['dbms', 'job_name'],
+                                dbms=self._dbms,
+                                job_name=self._job_name,
+                                last_run_start=self._last_run_start,
+                                elapsed_time=(time.time() - self._last_run_start) * 1000,
+                                feature=feature,
+                            )
                     self._log.warning("[%s] Missed collection interval", self._job_name)
 
             self._log.debug("Job loop already running. job=%s", self._job_name)
