@@ -276,7 +276,7 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
             str(wheel),
             os.path.join(built_dir, dest),
             copy_filt_func=copy_filt_func,
-            # require_archs=[single_arch],  TODO(regis): address multi-arch confluent_kafka/cimpl.cpython-312-darwin.so
+            require_archs=[single_arch],
             require_target_macos_version=min_macos_version,
         )
         print(f'Repaired wheel to {dest}')
