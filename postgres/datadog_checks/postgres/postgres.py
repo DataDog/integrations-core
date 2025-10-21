@@ -1099,7 +1099,7 @@ class PostgreSql(AgentCheck):
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._emit_running_metric()
-            
+
             if not self._config.only_custom_queries:
                 self._collect_stats(tags)
                 if self._config.dbm:
