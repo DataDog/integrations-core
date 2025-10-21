@@ -79,9 +79,9 @@ def upgrade_python_version(app: Application):
         return  # Unreachable but helps type checker
 
     # Perform updates
-    upgrade_python_version_full_constant(app, latest_version, tracker)
     upgrade_dockerfiles_python_version(app, latest_version, new_version_hashes, tracker)
     upgrade_macos_python_version(app, latest_version, tracker)
+    upgrade_python_version_full_constant(app, latest_version, tracker)
 
     # Display results
     tracker.display()
@@ -204,8 +204,8 @@ def upgrade_dockerfiles_python_version(
         return
 
     for dockerfile in dockerfiles:
-        content = read_file_safely(dockerfile, dockerfile.name, tracker)
-        if content is None:
+        dockerfile_content = read_file_safely(dockerfile, dockerfile.name, tracker)
+        if dockerfile_content is None:
             continue
 
         is_windows = 'windows-x86_64' in dockerfile.parts
@@ -228,33 +228,33 @@ def upgrade_dockerfiles_python_version(
             return old_match.replace(old_hash, _target_sha)
 
         # Helper to apply pattern substitution with error tracking
-        def apply_substitution(pattern: re.Pattern, replace_func, error_msg: str, _dockerfile=dockerfile) -> str | None:
-            nonlocal content
-            content, count = pattern.subn(replace_func, content, count=1)
+        def apply_substitution(pattern: re.Pattern, replace_func, error_msg: str, _dockerfile=dockerfile) -> bool:
+            nonlocal dockerfile_content
+            dockerfile_content, count = pattern.subn(replace_func, dockerfile_content, count=1)
             if count == 0:
                 tracker.error((_dockerfile.name,), message=error_msg)
-                return None
-            return content
+                return False
+            return True
 
         # Apply version update
-        if apply_substitution(version_pattern, replace_version, 'Could not find Python version pattern') is None:
+        if not apply_substitution(version_pattern, replace_version, 'Could not find Python version pattern'):
             continue
 
         # Apply SHA256 update
-        if apply_substitution(sha_pattern, replace_sha, 'Could not find SHA256 pattern') is None:
+        if not apply_substitution(sha_pattern, replace_sha, 'Could not find SHA256 pattern'):
             continue
 
-        write_file_safely(dockerfile, content, dockerfile.name, tracker)
+        write_file_safely(dockerfile, dockerfile_content, dockerfile.name, tracker)
 
 
 def upgrade_macos_python_version(app: Application, new_version: str, tracker: ValidationTracker):
     macos_python_file = app.repo.path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
 
-    content = read_file_safely(macos_python_file, 'macOS workflow', tracker)
-    if content is None:
+    macos_content = read_file_safely(macos_python_file, 'macOS workflow', tracker)
+    if macos_content is None:
         return
 
-    target_line = next((line for line in content.splitlines() if 'PYTHON3_DOWNLOAD_URL' in line), None)
+    target_line = next((line for line in macos_content.splitlines() if 'PYTHON3_DOWNLOAD_URL' in line), None)
 
     if target_line is None:
         tracker.error(('macOS workflow',), message='Could not find PYTHON3_DOWNLOAD_URL')
@@ -265,21 +265,22 @@ def upgrade_macos_python_version(app: Application, new_version: str, tracker: Va
     new_line = f'{indent}PYTHON3_DOWNLOAD_URL: "{new_url}"'
 
     if target_line == new_line:
+        app.display_info(f"Python version in macOS workflow is already at {new_version}")
         return
 
-    updated_content = content.replace(target_line, new_line, 1)
+    updated_content = macos_content.replace(target_line, new_line, 1)
     write_file_safely(macos_python_file, updated_content, 'macOS workflow', tracker)
 
 
 def upgrade_python_version_full_constant(app: Application, new_version: str, tracker: ValidationTracker):
     constants_file = app.repo.path / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
 
-    content = read_file_safely(constants_file, 'constants.py', tracker)
-    if content is None:
+    constants_content = read_file_safely(constants_file, 'constants.py', tracker)
+    if constants_content is None:
         return
 
     prefix = 'PYTHON_VERSION_FULL = '
-    target_line = next((line for line in content.splitlines() if line.startswith(prefix)), None)
+    target_line = next((line for line in constants_content.splitlines() if line.startswith(prefix)), None)
 
     if target_line is None:
         tracker.error(('constants.py',), message='Could not find PYTHON_VERSION_FULL constant')
@@ -287,9 +288,10 @@ def upgrade_python_version_full_constant(app: Application, new_version: str, tra
 
     new_line = f"{prefix}'{new_version}'"
     if target_line == new_line:
+        app.display_info(f"Python version in constants.py is already at {new_version}")
         return
 
-    updated_content = content.replace(target_line, new_line, 1)
+    updated_content = constants_content.replace(target_line, new_line, 1)
     write_file_safely(constants_file, updated_content, 'constants.py', tracker)
 
 
