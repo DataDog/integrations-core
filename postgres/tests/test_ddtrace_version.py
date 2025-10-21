@@ -16,7 +16,8 @@ def test_ddtrace_version():
         # Assert the expected version contains MAJOR.MINOR (3.17)
         # Since this is a dev version, we only check for the major.minor portion
         expected_major_minor = "3.17"
-        assert expected_major_minor in version, f"Expected ddtrace version to contain {expected_major_minor}, got {version}"
+        assert expected_major_minor in version, (
+            f"Expected ddtrace version to contain {expected_major_minor}, got {version}"
+        )
     except ImportError:
         pytest.fail("ddtrace is not installed")
-
