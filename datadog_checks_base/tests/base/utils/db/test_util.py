@@ -143,7 +143,6 @@ def test_dbm_async_job_missed_collection_interval(aggregator):
     # The cooldown should prevent the event from being submitted again
     assert len(events) == 1
     health_event = events[0]
-    print(health_event)
     assert health_event['name'] == HealthEvent.MISSED_COLLECTION.value
     assert health_event['status'] == HealthStatus.WARNING.value
     assert health_event['data']['job_name'] == 'test-job'
