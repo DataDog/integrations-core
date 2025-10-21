@@ -25,6 +25,7 @@
     ],
     "classifier_tags": [
       "Category::Metrics",
+      "Category::Cloud",
       "Submitted Data Type::Metrics",
       "Offering::Integration"
     ]
