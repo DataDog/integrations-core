@@ -161,5 +161,14 @@ def test_only_custom_queries(aggregator, pg_instance, dd_run_check, integration_
     postgres_check = integration_check(pg_instance)
     dd_run_check(postgres_check)
     tags = _get_expected_tags(postgres_check, pg_instance, with_db=True)
-    aggregator.assert_metric('custom.num', value=1, tags=tags + ['query:custom'])
+
+    for tag in ('a', 'b', 'c'):
+        value = ord(tag)
+        custom_tags = [f'customtag:{tag}']
+        custom_tags.extend(tags)
+
+        aggregator.assert_metric('custom.num', value=value, tags=custom_tags + ['query:custom'])
+    
+    running_tags = _get_expected_tags(postgres_check, pg_instance)
+    aggregator.assert_metric('postgresql.running', count=1, value=1, tags=running_tags)
     aggregator.assert_all_metrics_covered()
