@@ -147,6 +147,63 @@ jobs:
 
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+    - name: Read integration cache config
+      id: integration-cache
+      run: |
+        CACHE_FILE="${{ inputs.target }}/.github-cache.yml"
+        
+        if [ ! -f "$CACHE_FILE" ]; then
+          echo "has-cache=false" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        echo "has-cache=true" >> $GITHUB_OUTPUT
+        
+        # Extract paths and prefix with integration directory
+        # Example: tests/docker/file.tgz -> hudi/tests/docker/file.tgz
+        paths=$(yq -r '.[] | "${{ inputs.target }}/\(.path)"' "$CACHE_FILE")
+        echo "paths<<EOF" >> $GITHUB_OUTPUT
+        echo "$paths" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+        # Generate cache key from URLs
+        # Hash URLs to keep key under 512 char limit.
+        urls=$(yq -r '[.[].url] | join("|")' "$CACHE_FILE")
+        key_hash=$(echo -n "$urls" | shasum -a 256 | cut -d' ' -f1)
+        echo "key=integration-${{ inputs.target }}-$key_hash" >> $GITHUB_OUTPUT
+
+    - name: Restore integration cache
+      if: steps.integration-cache.outputs.has-cache == 'true'
+      id: cache-restore
+      uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      with:
+        path: ${{ steps.integration-cache.outputs.paths }}
+        key: ${{ steps.integration-cache.outputs.key }}
+
+    - name: Download cached files
+      if: steps.integration-cache.outputs.has-cache == 'true' && steps.cache-restore.outputs.cache-hit != 'true'
+      run: |
+        CACHE_FILE="${{ inputs.target }}/.github-cache.yml"
+        
+        # Extract path and URL from each entry as tab-separated values
+        entries=$(yq -r '.[] | [.path, .url] | @tsv' "$CACHE_FILE")
+        
+        echo "$entries" | while IFS=$'\t' read -r rel_path download_url; do
+          full_path="${{ inputs.target }}/$rel_path"
+          
+          if [ ! -f "$full_path" ]; then
+            echo "Downloading $download_url..."
+            curl -fsSL --create-dirs -o "$full_path" "$download_url"
+          fi
+        done
+
+    - name: Save integration cache
+      if: steps.integration-cache.outputs.has-cache == 'true' && steps.cache-restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      with:
+        path: ${{ steps.integration-cache.outputs.paths }}
+        key: ${{ steps.integration-cache.outputs.key }}
+
     - name: Set up Python 2.7
       if: inputs.test-py2
       run: |
