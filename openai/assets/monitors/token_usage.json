@@ -26,7 +26,7 @@
         "critical_recovery": 0
       }
     },
-    "query": "avg(last_12h):anomalies(sum:openai.api.usage.n_context{*}.as_count() + sum:openai.api.usage.n_generated{*}.as_count(), 'basic', 2, direction='both', interval=120, alert_window='last_30m', count_default_zero='true', seasonality='hourly') >= 1",
+    "query": "avg(last_12h):anomalies(sum:openai.completions.input_tokens{*}.as_count() + sum:openai.completions.output_tokens{*}.as_count(), 'basic', 2, direction='both', interval=120, alert_window='last_30m', count_default_zero='true', seasonality='hourly') >= 1",
     "tags": [
       "integration:openai"
     ],

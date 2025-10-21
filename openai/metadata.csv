@@ -1,7 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-openai.api.usage.n_context_tokens_total,gauge,,token,,(Deprecated) Total number of context tokens used (all-time),0,openai,n context tokens total,,
-openai.api.usage.n_generated_tokens_total,gauge,,token,,(Deprecated) Total number of generated response tokens (all-time),0,openai,n generated tokens total,,
-openai.api.usage.n_requests,count,,request,,(Deprecated) Total number of requests,0,openai,n requests,,
 openai.audio_speeches.characters,count,,,,Number of characters generated for text-to-speech,0,openai,audio speech chars,,
 openai.audio_speeches.num_model_requests,count,,request,,Number of text-to-speech model requests,0,openai,audio speech requests,,
 openai.audio_transcriptions.num_model_requests,count,,request,,Number of audio transcription model requests,0,openai,audio transcription requests,,
