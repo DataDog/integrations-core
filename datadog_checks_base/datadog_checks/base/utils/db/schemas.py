@@ -15,9 +15,10 @@ if TYPE_CHECKING:
     from datadog_checks.base.checks.db import DatabaseCheck
 
 try:
-    import datadog_agent # type: ignore
+    import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
+
 
 class DatabaseInfo(TypedDict):
     name: str
