@@ -20,7 +20,7 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-from .metrics import BRICK_STATS, CLUSTER_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
+from .metrics import BRICK_STATS, CLUSTER_STATS, HEAL_INFO_STATS, PARSE_METRICS, VOL_SUBVOL_STATS, VOLUME_STATS
 
 GLUSTER_VERSION = 'glfs_version'
 CLUSTER_STATUS = 'cluster_status'
@@ -156,6 +156,9 @@ class GlusterfsCheck(AgentCheck):
             if 'subvols' in volume:
                 self.parse_subvols_stats(volume.get('subvols', []), volume_tags)
 
+            if 'healinfo' in volume:
+                self.parse_healinfo_stats(volume.get('healinfo', []), volume_tags)
+
             self.submit_service_check(self.VOLUME_SC, volume.get('health'), volume_tags)
 
     def parse_subvols_stats(self, subvols, volume_tags):
@@ -180,6 +183,21 @@ class GlusterfsCheck(AgentCheck):
                 ]
                 tags.extend(subvol_tags)
                 self.submit_metrics(brick, 'brick', BRICK_STATS, tags)
+
+    def parse_healinfo_stats(self, healinfo, volume_tags):
+        for info in healinfo:
+            if info['status'].lower() != 'connected':
+                continue
+
+            brick_name = info['name'].split(":")
+            brick_server = brick_name[0]
+            brick_export = brick_name[1]
+            tags = [
+                'brick_server:{}'.format(brick_server),
+                'brick_export:{}'.format(brick_export),
+            ]
+            tags.extend(volume_tags)
+            self.submit_metrics(info, 'heal_info', HEAL_INFO_STATS, tags)
 
     def submit_metrics(self, payload, prefix, metric_mapping, tags):
         """

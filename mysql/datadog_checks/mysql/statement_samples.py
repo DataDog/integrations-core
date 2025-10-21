@@ -168,6 +168,9 @@ class DBExplainErrorCode(Enum):
     # database error i.e connection error
     database_error = 'database_error'
 
+    # failed to collect explain plan because the function is missing or invalid permissions
+    failed_function = 'failed_function'
+
     # this could be the result of a missing EXPLAIN function
     invalid_schema = 'invalid_schema'
 
@@ -301,10 +304,11 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
         except pymysql.err.DatabaseError as e:
             if len(e.args) != 2:
                 raise
+            error_msg = f"{e.args[0]}: {e.args[1]}" if len(e.args) >= 2 else str(e)
             error_state = ExplainState(
                 strategy=None,
                 error_code=DBExplainErrorCode.use_schema_error,
-                error_message=str(type(e)),
+                error_message=error_msg,
             )
             if e.args[0] in PYMYSQL_NON_RETRYABLE_ERRORS:
                 self._collection_strategy_cache[explain_state_cache_key] = error_state
@@ -729,9 +733,15 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
             except pymysql.err.DatabaseError as e:
                 if len(e.args) != 2:
                     raise
-                error_state = ExplainState(
-                    strategy=strategy, error_code=DBExplainErrorCode.database_error, error_message=str(type(e))
+                mysql_error_code = e.args[0] if len(e.args) > 0 else None
+                error_msg = f"{e.args[0]}: {e.args[1]}" if len(e.args) >= 2 else str(e)
+                error_code = (
+                    DBExplainErrorCode.failed_function
+                    if mysql_error_code
+                    in (pymysql.constants.ER.TABLEACCESS_DENIED_ERROR, pymysql.constants.ER.PROCACCESS_DENIED_ERROR)
+                    else DBExplainErrorCode.database_error
                 )
+                error_state = ExplainState(strategy=strategy, error_code=error_code, error_message=error_msg)
                 error_states.append(error_state)
                 self._log.debug(
                     'Failed to collect execution plan. error=%s, strategy=%s, schema=%s, statement="%s"',

@@ -1,0 +1,1 @@
+Changed Server and Sync Gateway versions to reflect current EOL status. This adds 45 new Sync Gateway metrics covering cache usage, replication errors/throttling, compaction and resync activity, REST API traffic, replication bandwidth, resource utilization, and fatal error signals — giving operators clearer visibility into performance, reliability, and system health.
