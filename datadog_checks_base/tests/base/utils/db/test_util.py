@@ -13,7 +13,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
-from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
+from datadog_checks.base.utils.db.health import Health, HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     ConstantRateLimiter,
     DBMAsyncJob,
@@ -123,37 +123,35 @@ def test_ratelimiting_ttl_cache():
     for i in range(5, 10):
         assert cache.acquire(i), "cache should be empty again so these keys should go in OK"
 
-class HealthCapture():
-    def __init__(self):
-        self.events = []
 
-    def submit_health_event(self, name, status, **kwargs):
-        self.events.append((name, status, kwargs))
-
-def test_dbm_async_job_unknown_error():
+def test_dbm_async_job_unknown_error(aggregator):
     check = AgentCheck()
-    check.health = HealthCapture()
-    exception = DBExceptionForTests()
+    health = Health(check)
+    check.health = health
+    exception = UnexpectedExceptionForTests()
     job = JobForTesting(check, exception=exception)
     try:
         job.run_job_loop([])
-        job.cancel()
         job._job_loop_future.result(timeout=10)
+        job.cancel()
     except:
-        raise
+        pass
     finally:
-        assert len(check.health.events) == 1
-        health_event = check.health.events[0]
-        assert health_event[0] == HealthEvent.UNKNOWN_ERROR
-        assert health_event[1] == HealthStatus.ERROR
-        assert health_event[2]['file'] == 'test_util.py'
-        assert health_event[2]['line'] is not None
-        assert health_event[2]['function'] == 'test_dbm_async_job_unknown_error'
-        assert health_event[2]['exception_type'] == 'DBExceptionForTests'
+        events = aggregator.get_event_platform_events("dbm-health")
+        assert len(events) == 1
+        health_event = events[0]
+        assert health_event['name'] == HealthEvent.UNKNOWN_ERROR.value
+        assert health_event['status'] == HealthStatus.ERROR.value
+        assert health_event['data']['file'].endswith('test_util.py')
+        assert health_event['data']['line'] is not None
+        assert health_event['data']['function'] == 'run_job'
+        assert health_event['data']['exception_type'] == 'UnexpectedExceptionForTests'
 
-class DBExceptionForTests(BaseException):
+class DBExceptionForTests(Exception):
     pass
 
+class UnexpectedExceptionForTests(Exception):
+    pass
 
 @pytest.mark.parametrize(
     "obfuscator_return_value,expected_value",

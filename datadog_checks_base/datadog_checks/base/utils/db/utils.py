@@ -369,7 +369,6 @@ class DBMAsyncJob(object):
                 else:
                     self._run_job_rate_limited()
         except Exception as e:
-            print("exception in job loop", e)
             if self._cancel_event.is_set():
                 # canceling can cause exceptions if the connection is closed the middle of the check run
                 # in this case we still want to report it as a cancellation instead of a crash
@@ -397,18 +396,19 @@ class DBMAsyncJob(object):
                     tags=self._job_tags + ["error:crash-{}".format(type(e))],
                     raw=True,
                 )
-                if self._check.health:
-                    trace = traceback.extract_tb(e.__traceback__)
-                    exc = trace.pop()
-                    if exc:
-                        self._check.health.submit_health_event(
-                            name=HealthEvent.UNKNOWN_ERROR,
-                            status=HealthStatus.ERROR,
-                            file=exc.filename,
-                            line=exc.lineno,
-                            function=exc.name,
-                            exception_type=type(e).__name__,
-                        )
+            if self._check.health:
+                trace = traceback.extract_tb(e.__traceback__)
+                exc = trace.pop()
+                if exc:
+                    self._check.health.submit_health_event(
+                        name=HealthEvent.UNKNOWN_ERROR,
+                        status=HealthStatus.ERROR,
+                        is_cancel_event=self._cancel_event.is_set(),
+                        file=exc.filename,
+                        line=exc.lineno,
+                        function=exc.name,
+                        exception_type=type(e).__name__,
+                    )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
             if self._shutdown_callback:
@@ -425,10 +425,8 @@ class DBMAsyncJob(object):
 
     def _run_job_rate_limited(self):
         try:
-            print("running job rate limited")
             self._run_job_traced()
         except:
-            print("exception in job rate limited")
             raise
         finally:
             if not self._cancel_event.is_set():
