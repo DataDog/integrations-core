@@ -19,6 +19,7 @@ except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 
+import traceback
 from enum import Enum
 
 
@@ -29,6 +30,7 @@ class HealthEvent(Enum):
 
     INITIALIZATION = 'initialization'
     UNKNOWN_ERROR = 'unknown_error'
+
 
 class HealthStatus(Enum):
     """
@@ -79,3 +81,18 @@ class Health:
             ),
             "dbm-health",
         )
+
+    def submit_error_health_event(self, exception: Exception, tags: list[str] = None, **kwargs):
+        trace = traceback.extract_tb(exception.__traceback__)
+        exc = trace.pop()
+        if exc:
+            self.submit_health_event(
+                name=HealthEvent.UNKNOWN_ERROR,
+                status=HealthStatus.ERROR,
+                tags=tags,
+                file=exc.filename,
+                line=exc.lineno,
+                function=exc.name,
+                exception_type=type(exception).__name__,
+                **kwargs,
+            )

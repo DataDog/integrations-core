@@ -13,7 +13,6 @@ import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from enum import Enum, auto
 from ipaddress import IPv4Address
-import traceback
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # noqa: F401
 
 from cachetools import TTLCache
@@ -22,7 +21,6 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
@@ -397,18 +395,9 @@ class DBMAsyncJob(object):
                     raw=True,
                 )
             if self._check.health:
-                trace = traceback.extract_tb(e.__traceback__)
-                exc = trace.pop()
-                if exc:
-                    self._check.health.submit_health_event(
-                        name=HealthEvent.UNKNOWN_ERROR,
-                        status=HealthStatus.ERROR,
-                        is_cancel_event=self._cancel_event.is_set(),
-                        file=exc.filename,
-                        line=exc.lineno,
-                        function=exc.name,
-                        exception_type=type(e).__name__,
-                    )
+                self._check.health.submit_error_health_event(
+                    e, tags=self._job_tags, is_cancel_event=self._cancel_event.is_set()
+                )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
             if self._shutdown_callback:

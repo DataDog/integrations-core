@@ -147,11 +147,14 @@ def test_dbm_async_job_unknown_error(aggregator):
         assert health_event['data']['function'] == 'run_job'
         assert health_event['data']['exception_type'] == 'UnexpectedExceptionForTests'
 
+
 class DBExceptionForTests(Exception):
     pass
 
+
 class UnexpectedExceptionForTests(Exception):
     pass
+
 
 @pytest.mark.parametrize(
     "obfuscator_return_value,expected_value",
