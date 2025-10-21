@@ -208,29 +208,22 @@ class WindowsService(AgentCheck):
     SERVICE_CHECK_NAME = 'windows_service.state'
     # https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_status_process
     STATE_TO_STATUS = {
-        # STOPPED
-        1: AgentCheck.CRITICAL,
-        # START_PENDING
-        2: AgentCheck.WARNING,
-        # STOP_PENDING
-        3: AgentCheck.WARNING,
-        # RUNNING
-        4: AgentCheck.OK,
-        # CONTINUE_PENDING
-        5: AgentCheck.WARNING,
-        # PAUSE_PENDING
-        6: AgentCheck.WARNING,
-        # PAUSED
-        7: AgentCheck.WARNING,
+        win32service.SERVICE_STOPPED: AgentCheck.CRITICAL,
+        win32service.SERVICE_START_PENDING: AgentCheck.WARNING,
+        win32service.SERVICE_STOP_PENDING: AgentCheck.WARNING,
+        win32service.SERVICE_RUNNING: AgentCheck.OK,
+        win32service.SERVICE_CONTINUE_PENDING: AgentCheck.WARNING,
+        win32service.SERVICE_PAUSE_PENDING: AgentCheck.WARNING,
+        win32service.SERVICE_PAUSED: AgentCheck.WARNING,
     }
     STATE_TO_STRING = {
-        1: "stopped",
-        2: "start_pending",
-        3: "stop_pending",
-        4: "running",
-        5: "continue_pending",
-        6: "pause_pending",
-        7: "paused",
+        win32service.SERVICE_STOPPED: "stopped",
+        win32service.SERVICE_START_PENDING: "start_pending",
+        win32service.SERVICE_STOP_PENDING: "stop_pending",
+        win32service.SERVICE_RUNNING: "running",
+        win32service.SERVICE_CONTINUE_PENDING: "continue_pending",
+        win32service.SERVICE_PAUSE_PENDING: "pause_pending",
+        win32service.SERVICE_PAUSED: "paused",
     }
 
     def check(self, instance):
@@ -292,7 +285,7 @@ class WindowsService(AgentCheck):
             status = self.STATE_TO_STATUS.get(state, self.UNKNOWN)
             state_string = self.STATE_TO_STRING.get(state, "unknown")
 
-            tags = ['windows_service:{}'.format(short_name), 'state:{}'.format(state_string)]
+            tags = ['windows_service:{}'.format(short_name), 'windows_service_state:{}'.format(state_string)]
             tags.extend(custom_tags)
 
             if instance.get('collect_display_name_as_tag', False):
@@ -319,7 +312,7 @@ class WindowsService(AgentCheck):
                 # if a name doesn't match anything (wrong name or no permission to access the service), report UNKNOWN
                 status = self.UNKNOWN
 
-                tags = ['windows_service:{}'.format(service), 'state:{}'.format("unknown")]
+                tags = ['windows_service:{}'.format(service), 'windows_service_state:{}'.format("unknown")]
 
                 tags.extend(custom_tags)
 
