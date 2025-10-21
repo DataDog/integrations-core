@@ -19,7 +19,6 @@ class PostgresHealthEvent(Enum):
     """
 
     EXPLAIN_PLAN_ERROR = 'explain_plan_error'
-    UNKNOWN_ERROR = 'unknown_error'
 
 
 class PostgresHealth(Health):

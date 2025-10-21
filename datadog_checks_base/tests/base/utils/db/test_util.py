@@ -13,6 +13,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     ConstantRateLimiter,
     DBMAsyncJob,
@@ -122,6 +123,33 @@ def test_ratelimiting_ttl_cache():
     for i in range(5, 10):
         assert cache.acquire(i), "cache should be empty again so these keys should go in OK"
 
+class HealthCapture():
+    def __init__(self):
+        self.events = []
+
+    def submit_health_event(self, name, status, **kwargs):
+        self.events.append((name, status, kwargs))
+
+def test_dbm_async_job_unknown_error():
+    check = AgentCheck()
+    check.health = HealthCapture()
+    exception = DBExceptionForTests()
+    job = JobForTesting(check, exception=exception)
+    try:
+        job.run_job_loop([])
+        job.cancel()
+        job._job_loop_future.result(timeout=10)
+    except:
+        raise
+    finally:
+        assert len(check.health.events) == 1
+        health_event = check.health.events[0]
+        assert health_event[0] == HealthEvent.UNKNOWN_ERROR
+        assert health_event[1] == HealthStatus.ERROR
+        assert health_event[2]['file'] == 'test_util.py'
+        assert health_event[2]['line'] is not None
+        assert health_event[2]['function'] == 'test_dbm_async_job_unknown_error'
+        assert health_event[2]['exception_type'] == 'DBExceptionForTests'
 
 class DBExceptionForTests(BaseException):
     pass
@@ -250,6 +278,7 @@ class JobForTesting(DBMAsyncJob):
         min_collection_interval=15,
         job_execution_time=0,
         max_sleep_chunk_s=5,
+        exception=None,
     ):
         super(JobForTesting, self).__init__(
             check,
@@ -266,6 +295,7 @@ class JobForTesting(DBMAsyncJob):
         )
         self._job_execution_time = job_execution_time
         self.count_executed = 0
+        self._exception = exception
 
     def test_shutdown(self):
         self._check.count("dbm.async_job_test.shutdown", 1)
@@ -273,6 +303,9 @@ class JobForTesting(DBMAsyncJob):
     def run_job(self):
         self._check.count("dbm.async_job_test.run_job", 1)
         self.count_executed += 1
+        if self._exception:
+            print("raising exception", self._exception)
+            raise self._exception
         time.sleep(self._job_execution_time)
 
 

@@ -28,7 +28,7 @@ class HealthEvent(Enum):
     """
 
     INITIALIZATION = 'initialization'
-
+    UNKNOWN_ERROR = 'unknown_error'
 
 class HealthStatus(Enum):
     """
