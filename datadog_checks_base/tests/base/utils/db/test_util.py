@@ -130,10 +130,10 @@ def test_dbm_async_job_missed_collection_interval(aggregator):
     check = AgentCheck()
     health = Health(check)
     check.health = health    
-    job = JobForTesting(check, min_collection_interval=0.5, job_execution_time=2)
+    job = JobForTesting(check, min_collection_interval=1, job_execution_time=3)
     job.run_job_loop([])
     # Sleep longer than the target collection interval
-    time.sleep(0.7)
+    time.sleep(1.5)
     # Simulate the check calling run_job_loop on its run
     job.run_job_loop([])
     # One more run to check the cooldown
@@ -150,8 +150,8 @@ def test_dbm_async_job_missed_collection_interval(aggregator):
     assert health_event['status'] == HealthStatus.WARNING.value
     assert health_event['data']['job_name'] == 'test-job'
     # This might be flakey, we can adjust the timing if needed
-    assert health_event['data']['elapsed_time'] > 500
-    assert health_event['data']['elapsed_time'] < 1000
+    assert health_event['data']['elapsed_time'] > 1500
+    assert health_event['data']['elapsed_time'] < 2000
 
 
 class DBExceptionForTests(BaseException):
