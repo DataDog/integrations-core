@@ -300,9 +300,9 @@ class DBMAsyncJob(object):
         # to effectively run the job in a loop
         enable_missed_collection_event=True,
         # List of features depenedent on the job running
-        # Default to [None] so that if no features are specified there will 
+        # Defaults to [None] during init so that if no features are specified there will
         # still be health events submitted for the job
-        features=[None],
+        features=None,
     ):
         self._check = check
         self._config_host = config_host
@@ -325,7 +325,8 @@ class DBMAsyncJob(object):
         self._expected_db_exceptions = expected_db_exceptions
         self._job_name = job_name
         self._enable_missed_collection_event = enable_missed_collection_event
-        self._features = features
+        self._features = features or [None]
+
     def cancel(self):
         """
         Send a signal to cancel the job loop asynchronously.
