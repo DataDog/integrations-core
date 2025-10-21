@@ -28,6 +28,7 @@ class HealthEvent(Enum):
     """
 
     INITIALIZATION = 'initialization'
+    MISSED_COLLECTION = 'missed_collection'
 
 
 class HealthStatus(Enum):

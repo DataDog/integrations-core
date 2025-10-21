@@ -21,6 +21,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
@@ -293,6 +294,10 @@ class DBMAsyncJob(object):
         expected_db_exceptions=(),
         shutdown_callback=None,
         job_name=None,
+        # Some users may want to disable the missed collection event,
+        # for example if they set the collection interval intentionally low
+        # to effectively run the job in a loop
+        enable_missed_collection_event=True,
     ):
         self._check = check
         self._config_host = config_host
@@ -314,6 +319,7 @@ class DBMAsyncJob(object):
         self._enabled = enabled
         self._expected_db_exceptions = expected_db_exceptions
         self._job_name = job_name
+        self._enable_missed_collection_event = enable_missed_collection_event
 
     def cancel(self):
         """
@@ -342,6 +348,22 @@ class DBMAsyncJob(object):
         elif self._job_loop_future is None or not self._job_loop_future.running():
             self._job_loop_future = DBMAsyncJob.executor.submit(self._job_loop)
         else:
+            if time.time() - self._rate_limiter.last_event > self._min_collection_interval:
+                if self._check.health and self._enable_missed_collection_event:
+                    # Missed a collection interval, submit a health event
+                    self._check.health.submit_health_event(
+                        name=HealthEvent.MISSED_COLLECTION,
+                        status=HealthStatus.WARNING,
+                        tags=self._job_tags,
+                        dbms=self._dbms,
+                        job_name=self._job_name,
+                        collection_interval=self._min_collection_interval,
+                        last_check_run=self._last_check_run,
+                        last_job_loop_time=self._rate_limiter.last_event,
+                        elapsed_time=(time.time() - self._rate_limiter.last_event) * 1000,
+                    )
+                self._log.warning("[%s] Missed collection interval", self._job_name)
+
             self._log.debug("Job loop already running. job=%s", self._job_name)
 
     def _job_loop(self):

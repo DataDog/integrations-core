@@ -13,6 +13,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     ConstantRateLimiter,
     DBMAsyncJob,
@@ -121,6 +122,30 @@ def test_ratelimiting_ttl_cache():
 
     for i in range(5, 10):
         assert cache.acquire(i), "cache should be empty again so these keys should go in OK"
+
+
+class HealthCapture:
+    def __init__(self):
+        self.events = []
+
+    def submit_health_event(self, name, status, **kwargs):
+        self.events.append((name, status, kwargs))
+
+
+def test_dbm_async_job_missed_collection_interval():
+    check = AgentCheck()
+    check.health = HealthCapture()
+    job = JobForTesting(check, min_collection_interval=0.1, job_execution_time=1)
+    job.run_job_loop([])
+    time.sleep(0.2)
+    # Simulate the check calling run_job_loop on its run
+    job.run_job_loop([])
+    job.cancel()
+    assert len(check.health.events) == 1
+    health_event = check.health.events[0]
+    assert health_event[0] == HealthEvent.MISSED_COLLECTION
+    assert health_event[1] == HealthStatus.WARNING
+    assert health_event[2]['job_name'] == 'test-job'
 
 
 class DBExceptionForTests(BaseException):
