@@ -252,9 +252,19 @@ def test__perform_custom_queries(check, mocker):
     log_mock.error.assert_not_called()  # No error logged
 
 
-def test_custom_query_search_scope(check, mocker):
-    """Test that search_scope parameter is properly used in custom queries"""
-    # Test with explicit search_scope
+@pytest.mark.parametrize(
+    "search_scope_str,expected_scope",
+    [
+        ("base", ldap3.BASE),
+        ("level", ldap3.LEVEL),
+        ("subtree", ldap3.SUBTREE),
+        ("BASE", ldap3.BASE),
+        ("LEVEL", ldap3.LEVEL),
+        ("SUBTREE", ldap3.SUBTREE),
+    ]
+)
+def test_custom_query_search_scope_valid(check, mocker, search_scope_str, expected_scope):
+    """Test that valid search_scope parameters are properly converted"""
     instance = {
         "url": "url",
         "custom_queries": [
@@ -262,7 +272,7 @@ def test_custom_query_search_scope(check, mocker):
                 "name": "test_query",
                 "search_base": "ou=users,dc=example,dc=com",
                 "search_filter": "(objectClass=person)",
-                "search_scope": "level",
+                "search_scope": search_scope_str,
             }
         ],
     }
@@ -276,10 +286,67 @@ def test_custom_query_search_scope(check, mocker):
     _, _, _, _, queries, tags = check._get_instance_params(instance)
     check._perform_custom_queries(conn_mock, queries, tags, instance)
 
-    # Verify search_scope is passed correctly
     conn_mock.search.assert_called_once_with(
-        "ou=users,dc=example,dc=com", "(objectClass=person)", search_scope=ldap3.LEVEL, attributes=None
+        "ou=users,dc=example,dc=com", "(objectClass=person)", search_scope=expected_scope, attributes=None
     )
+
+
+def test_custom_query_search_scope_default(check, mocker):
+    """Test that missing search_scope defaults to SUBTREE"""
+    instance = {
+        "url": "url",
+        "custom_queries": [
+            {
+                "name": "test_query",
+                "search_base": "ou=users,dc=example,dc=com",
+                "search_filter": "(objectClass=person)",
+                # No search_scope specified
+            }
+        ],
+    }
+
+    log_mock = mocker.MagicMock()
+    check.log = log_mock
+    conn_mock = mocker.MagicMock()
+    conn_mock.rebind.return_value = True
+    conn_mock.entries = []
+
+    _, _, _, _, queries, tags = check._get_instance_params(instance)
+    check._perform_custom_queries(conn_mock, queries, tags, instance)
+
+    conn_mock.search.assert_called_once_with(
+        "ou=users,dc=example,dc=com", "(objectClass=person)", search_scope=ldap3.SUBTREE, attributes=None
+    )
+
+
+def test_custom_query_search_scope_invalid(check, mocker):
+    """Test that invalid search_scope logs error and skips the query"""
+    instance = {
+        "url": "url",
+        "custom_queries": [
+            {
+                "name": "test_query",
+                "search_base": "ou=users,dc=example,dc=com",
+                "search_filter": "(objectClass=person)",
+                "search_scope": "invalid_scope",
+            }
+        ],
+    }
+
+    log_mock = mocker.MagicMock()
+    check.log = log_mock
+    conn_mock = mocker.MagicMock()
+    conn_mock.rebind.return_value = True
+    conn_mock.entries = []
+
+    _, _, _, _, queries, tags = check._get_instance_params(instance)
+    check._perform_custom_queries(conn_mock, queries, tags, instance)
+
+    log_mock.error.assert_called_once_with(
+        "`search_scope` field needs to be one of 'base', 'level' or 'subtree'. Value provided: '%s'", "invalid_scope"
+    )
+    # Verify that search was NOT called due to invalid scope
+    conn_mock.search.assert_not_called()
 
 
 def test__extract_common_name(check):
