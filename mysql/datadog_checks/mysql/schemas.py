@@ -1,0 +1,315 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+from __future__ import annotations
+
+import contextlib
+from contextlib import closing
+from typing import TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+    from datadog_checks.mysql import MySql
+
+from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
+from datadog_checks.mysql.cursor import CommenterDictCursor
+
+# from datadog_checks.postgres.version_utils import VersionUtils
+
+
+SQL_DATABASES = """
+SELECT schema_name as `name`,
+       default_character_set_name as `default_character_set_name`,
+       default_collation_name as `default_collation_name`
+       FROM information_schema.SCHEMATA
+       WHERE schema_name not in ('sys', 'mysql', 'performance_schema', 'information_schema')"""
+
+SQL_TABLES = """\
+SELECT table_name as `name`,
+       engine as `engine`,
+       row_format as `row_format`,
+       create_time as `create_time`,
+       table_schema as `schema_name`
+       FROM information_schema.TABLES
+       WHERE TABLE_TYPE="BASE TABLE"
+"""
+
+SQL_COLUMNS = """\
+SELECT table_name as `table_name`,
+       table_schema as `schema_name`,
+       column_name as `name`,
+       column_type as `column_type`,
+       column_default as `default`,
+       is_nullable as `nullable`,
+       ordinal_position as `ordinal_position`,
+       column_key as `column_key`,
+       extra as `extra`
+FROM INFORMATION_SCHEMA.COLUMNS
+"""
+
+SQL_INDEXES = """\
+SELECT
+    table_name as `table_name`,
+    table_schema as `schema_name`,
+    index_name as `name`,
+    collation as `collation`,
+    cardinality as `cardinality`,
+    index_type as `index_type`,
+    seq_in_index as `seq_in_index`,
+    column_name as `column_name`,
+    sub_part as `sub_part`,
+    packed as `packed`,
+    nullable as `nullable`,
+    non_unique as `non_unique`,
+    NULL as `expression`
+FROM INFORMATION_SCHEMA.STATISTICS
+"""
+
+SQL_INDEXES_8_0_13 = """\
+SELECT
+    table_name as `table_name`,
+    table_schema as `schema_name`,
+    index_name as `name`,
+    collation as `collation`,
+    cardinality as `cardinality`,
+    index_type as `index_type`,
+    seq_in_index as `seq_in_index`,
+    column_name as `column_name`,
+    sub_part as `sub_part`,
+    packed as `packed`,
+    nullable as `nullable`,
+    non_unique as `non_unique`,
+    expression as `expression`
+FROM INFORMATION_SCHEMA.STATISTICS
+"""
+
+SQL_FOREIGN_KEYS = """\
+SELECT
+    kcu.constraint_schema as constraint_schema,
+    kcu.constraint_name as name,
+    kcu.table_name as table_name,
+    kcu.table_schema as schema_name,
+    group_concat(kcu.column_name order by kcu.ordinal_position asc) as column_names,
+    kcu.referenced_table_schema as referenced_table_schema,
+    kcu.referenced_table_name as referenced_table_name,
+    group_concat(kcu.referenced_column_name) as referenced_column_names,
+    rc.update_rule as update_action,
+    rc.delete_rule as delete_action
+FROM
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+LEFT JOIN
+    INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
+    ON kcu.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
+    AND kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
+WHERE
+    kcu.referenced_table_name is not null
+GROUP BY
+    kcu.constraint_schema,
+    kcu.constraint_name,
+    kcu.table_name,
+    kcu.referenced_table_schema,
+    kcu.referenced_table_name,
+    rc.update_rule,
+    rc.delete_rule
+"""
+
+SQL_PARTITION = """\
+SELECT
+    table_name as `table_name`,
+    table_schema as `schema_name`,
+    partition_name as `name`,
+    subpartition_name as `subpartition_name`,
+    partition_ordinal_position as `partition_ordinal_position`,
+    subpartition_ordinal_position as `subpartition_ordinal_position`,
+    partition_method as `partition_method`,
+    subpartition_method as `subpartition_method`,
+    partition_expression as `partition_expression`,
+    subpartition_expression as `subpartition_expression`,
+    partition_description as `partition_description`,
+    table_rows as `table_rows`,
+    data_length as `data_length`
+FROM INFORMATION_SCHEMA.PARTITIONS
+WHERE
+    partition_name IS NOT NULL
+"""
+
+
+class DatabaseInfo(TypedDict):
+    description: str
+    name: str
+    id: str
+    encoding: str
+    owner: str
+
+
+# The schema collector sends lists of DatabaseObjects to the agent
+# The format is for backwards compatibility with the current backend
+class DatabaseObject(TypedDict):
+    # Splat of database info
+    description: str
+    name: str
+    id: str
+    encoding: str
+    owner: str
+
+
+class TableObject(TypedDict):
+    id: str
+    name: str
+    columns: list
+    indexes: list
+    foreign_keys: list
+
+
+class MySqlDatabaseObject(DatabaseObject):
+    schemas: list[TableObject]
+
+
+class MySqlSchemaCollector(SchemaCollector):
+    _check: MySql
+
+    def __init__(self, check: MySql):
+        config = SchemaCollectorConfig()
+        # config.collection_interval = check._config.collect_schemas.collection_interval
+        # config.max_tables = check._config.collect_schemas.max_tables
+        # config.exclude_databases =  check._config.collect_schemas.exclude_databases
+        # config.include_databases =  check._config.collect_schemas.include_databases
+        # config.exclude_schemas =  check._config.collect_schemas.exclude_schemas
+        # config.include_schemas =  check._config.collect_schemas.include_schemas
+        # config.exclude_tables =  check._config.collect_schemas.exclude_tables
+        # config.include_tables =  check._config.collect_schemas.include_tables
+        # config.max_columns =  check._config.collect_schemas.max_columns
+        super().__init__(check, config)
+
+    @property
+    def kind(self):
+        return "mysql_databases"
+
+    def _get_databases(self):
+        # MySQL can query all schemas at once so we return a stub
+        # and then fetch all databases with their tables in the _get_cursor method
+        return [{'name': 'mysql'}]
+
+    @contextlib.contextmanager
+    def _get_cursor(self, database_name):
+        with closing(self._check._mysql_metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
+            schemas_query = SQL_DATABASES
+            tables_query = SQL_TABLES
+            columns_query = SQL_COLUMNS
+            indexes_query = SQL_INDEXES
+            constraints_query = SQL_FOREIGN_KEYS
+            # partition_ctes = (
+            #     f"""
+            #     ,
+            #     partition_keys AS (
+            #         {PARTITION_KEY_QUERY}
+            #     ),
+            #     num_partitions AS (
+            #         {NUM_PARTITIONS_QUERY}
+            #     )
+            # """
+            #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+            #     else ""
+            # )
+            # partition_joins = (
+            #     """
+            #     LEFT JOIN partition_keys ON tables.table_id = partition_keys.table_id
+            #     LEFT JOIN num_partitions ON tables.table_id = num_partitions.table_id
+            # """
+            #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+            #     else ""
+            # )
+            # parition_selects = (
+            #     """
+            # ,
+            #     partition_keys.partition_key,
+            #     num_partitions.num_partitions
+            # """
+            #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+            #     else ""
+            # )
+            partition_ctes = ""
+            partition_joins = ""
+            partition_selects = ""
+            # limit = int(self._config.max_tables or 1_000_000)
+            limit = 1_000_000
+
+            query = f"""
+                WITH
+                schemas AS (
+                    {schemas_query}
+                ),
+                tables AS (
+                    {tables_query}
+                ),
+                schema_tables AS (
+                    SELECT schemas.schema_name, schemas.default_character_set_name, schemas.default_collation_name,
+                    tables.table_name, tables.engine, tables.row_format, tables.create_time
+                    FROM schemas
+                    LEFT JOIN tables ON schemas.schema_name = tables.schema_name
+                    ORDER BY tables.table_name
+                    LIMIT {limit}
+                ),
+                columns AS (
+                    {columns_query}
+                ),
+                indexes AS (
+                    {indexes_query}
+                ),
+                constraints AS (
+                    {constraints_query}
+                )
+                {partition_ctes}
+                SELECT * FROM (
+                SELECT schema_tables.schema_id, schema_tables.schema_name,
+                    schema_tables.table_id, schema_tables.table_name,
+                    array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
+                    array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
+                    array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
+                        as foreign_keys
+                    {partition_selects}
+                FROM schema_tables
+                    LEFT JOIN columns ON schema_tables.table_id = columns.table_id
+                    LEFT JOIN indexes ON schema_tables.table_id = indexes.table_id
+                    LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
+                    {partition_joins}
+                GROUP BY schema_tables.schema_name, schema_tables.table_name
+                ) t
+                ;
+            """
+            print(query)
+            cursor.execute("SET SESSION MAX_EXECUTION_TIME=60000;")
+            cursor.execute(query)
+            yield cursor
+
+    def _get_next(self, cursor):
+        return cursor.fetchone()
+
+    def _get_all(self, cursor):
+        return cursor.fetchall()
+
+    def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
+        # We intentionally dont call super because MySQL has no logical databases
+        object = {
+            'name': cursor_row.get("schema_name"),
+            'default_character_set_name': cursor_row.get("default_character_set_name"),
+            'default_collation_name': cursor_row.get("default_collation_name"),
+        }
+        # Map the cursor row to the expected schema, and strip out None values
+        object["tables"] = [
+            {
+                k: v
+                for k, v in {
+                    "name": cursor_row.get("table_name"),
+                    # The query can create duplicates of the joined tables
+                    "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values()),
+                    "indexes": list({v and v['name']: v for v in cursor_row.get("indexes") or []}.values()),
+                    "foreign_keys": list({v and v['name']: v for v in cursor_row.get("foreign_keys") or []}.values()),
+                    # "toast_table": cursor_row.get("toast_table"),
+                    # "num_partitions": cursor_row.get("num_partitions"),
+                    # "partition_key": cursor_row.get("partition_key"),
+                }.items()
+                if v is not None
+            }
+        ]
+        return object
