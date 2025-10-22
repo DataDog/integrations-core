@@ -1,5 +1,5 @@
 {
-    "title": "Barracuda Secure Edge Overview",
+    "title": "Barracuda SecureEdge Overview",
     "description": "SecureEdge dashboard provides a visual summary of firewall activity, security events, user access, and system health to help monitor and analyze network security in real time.",
     "widgets": [
         {
