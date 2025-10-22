@@ -29,7 +29,7 @@ mypy_path = "../.stubs"
 # Exclude generated files
 # TODO Remove when we drop python 2
 exclude = '.*/config_models/.*\.py$'
-python_version = 3.13
+python_version = "3.13"
 
 [tool.ruff]
 exclude = [
