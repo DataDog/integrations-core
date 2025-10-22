@@ -1,16 +1,14 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pprint
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List
 
-import mock
 import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
-from .common import POSTGRES_LOCALE, POSTGRES_VERSION
+from .common import POSTGRES_VERSION
 from .utils import run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
