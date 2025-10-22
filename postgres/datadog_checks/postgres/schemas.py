@@ -192,15 +192,19 @@ class PostgresSchemaCollector(SchemaCollector):
     def __init__(self, check: PostgreSql):
         config = SchemaCollectorConfig()
         config.collection_interval = check._config.collect_schemas.collection_interval
+        config.max_tables = check._config.collect_schemas.max_tables
+        config.exclude_databases =  check._config.collect_schemas.exclude_databases
+        config.include_databases =  check._config.collect_schemas.include_databases
+        config.exclude_schemas =  check._config.collect_schemas.exclude_schemas
+        config.include_schemas =  check._config.collect_schemas.include_schemas
+        config.exclude_tables =  check._config.collect_schemas.exclude_tables
+        config.include_tables =  check._config.collect_schemas.include_tables
+        config.max_columns =  check._config.collect_schemas.max_columns
         super().__init__(check, config)
 
     @property
-    def base_event(self):
-        return {
-            **super().base_event,
-            "dbms": "postgres",
-            "kind": "pg_databases",
-        }
+    def kind(self):
+        return "pg_databases"
 
     def _get_databases(self):
         with self._check._get_main_db() as conn:
@@ -212,9 +216,10 @@ class PostgresSchemaCollector(SchemaCollector):
                     query += f" AND ({' OR '.join(f"datname ~ '{include_regex}'" for include_regex in self._config.include_databases)})"
 
                 # Autodiscovery trumps exclude and include
-                autodiscovery_databases = self._check.autodiscovery.get_items()
-                if autodiscovery_databases:
-                    query += " AND datname IN ({})".format(", ".join(f"'{db}'" for db in autodiscovery_databases))
+                if self._check.autodiscovery:
+                    autodiscovery_databases = self._check.autodiscovery.get_items()
+                    if autodiscovery_databases:
+                        query += " AND datname IN ({})".format(", ".join(f"'{db}'" for db in autodiscovery_databases))
 
                 cursor.execute(query)
                 return cursor.fetchall()
@@ -304,7 +309,8 @@ class PostgresSchemaCollector(SchemaCollector):
                     ) t
                     ;
                 """
-                print(query)
+                # print(query)
+                cursor.execute("SET statement_timeout = '60s';")
                 cursor.execute(query)
                 yield cursor
 
