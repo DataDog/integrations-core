@@ -1,5 +1,5 @@
 {
-    "title": "Barracuda SecureEdge Overview",
+    "title": "Barracuda Secure Edge Overview",
     "description": "SecureEdge dashboard provides a visual summary of firewall activity, security events, user access, and system health to help monitor and analyze network security in real time.",
     "widgets": [
         {
@@ -834,6 +834,7 @@
                             "title": "Top 10 Blocked IPs",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -842,7 +843,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:barracuda_secure_edge log_component:firewall @secure_edge.firewall.rule:* @secure_edge.firewall.operation:Block"
+                                                "query": "source:barracuda_secure_edge log_component:firewall @secure_edge.firewall.rule:* @secure_edge.firewall.status:Block"
                                             },
                                             "indexes": [
                                                 "*"
@@ -981,6 +982,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1002,13 +1004,14 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@secure_edge.firewall.action",
+                                                    "facet": "@secure_edge.firewall.status",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    }
+                                                    },
+                                                    "should_exclude_missing": true
                                                 }
                                             ],
                                             "compute": {

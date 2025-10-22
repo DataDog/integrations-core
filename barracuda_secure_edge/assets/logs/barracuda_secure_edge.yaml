@@ -115,7 +115,7 @@ pipeline:
               secure_edge.firewall.user,secure_edge.firewall.prot,secure_edge.firewall.application,secure_edge.firewall.target,secure_edge.firewall.content,secure_edge.firewall.uricat","|")}
             matchRules: >
               trafficBlocked
-              %{regex("(Block|Allow)"):secure_edge.firewall.operation}:\s+%{parsedTraffic}
+              %{regex("(Block|Allow)"):secure_edge.firewall.status}:\s+%{parsedTraffic}
         - type: grok-parser
           name: Box Firewall
           enabled: true
