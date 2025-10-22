@@ -175,7 +175,7 @@ class PostgresDatabaseObject(DatabaseObject):
 
 
 DATABASE_INFORMATION_QUERY = """
-SELECT db.oid                        AS id,
+SELECT db.oid::text                  AS id,
        datname                       AS NAME,
        pg_encoding_to_char(encoding) AS encoding,
        rolname                       AS owner,
@@ -233,39 +233,36 @@ class PostgresSchemaCollector(SchemaCollector):
             with conn.cursor(row_factory=dict_row) as cursor:
                 schemas_query = self._get_schemas_query()
                 tables_query = self._get_tables_query()
-                columns_query = COLUMNS_QUERY
-                indexes_query = PG_INDEXES_QUERY
-                constraints_query = PG_CONSTRAINTS_QUERY
-                partitions_ctes = (
-                    f"""
-                    ,
-                    partition_keys AS (
-                        {PARTITION_KEY_QUERY}
-                    ),
-                    num_partitions AS (
-                        {NUM_PARTITIONS_QUERY}
-                    )
-                """
-                    if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
-                    else ""
-                )
-                partition_joins = (
-                    """
-                    LEFT JOIN partition_keys ON tables.table_id = partition_keys.table_id
-                    LEFT JOIN num_partitions ON tables.table_id = num_partitions.table_id
-                """
-                    if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
-                    else ""
-                )
-                partition_selects = (
-                    """
-                ,
-                    partition_keys.partition_key,
-                    num_partitions.num_partitions
-                """
-                    if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
-                    else ""
-                )
+                # partitions_ctes = (
+                #     f"""
+                #     ,
+                #     partition_keys AS (
+                #         {PARTITION_KEY_QUERY}
+                #     ),
+                #     num_partitions AS (
+                #         {NUM_PARTITIONS_QUERY}
+                #     )
+                # """
+                #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+                #     else ""
+                # )
+                # partition_joins = (
+                #     """
+                #     LEFT JOIN partition_keys ON tables.table_id = partition_keys.table_id
+                #     LEFT JOIN num_partitions ON tables.table_id = num_partitions.table_id
+                # """
+                #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+                #     else ""
+                # )
+                # partition_selects = (
+                #     """
+                # ,
+                #     partition_keys.partition_key,
+                #     num_partitions.num_partitions
+                # """
+                #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
+                #     else ""
+                # )
                 limit = int(self._config.max_tables or 1_000_000)
 
                 query = f"""
@@ -286,7 +283,7 @@ class PostgresSchemaCollector(SchemaCollector):
                     )
 
                     SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
-                        schema_tables.table_id, schema_tables.table_name                        
+                        schema_tables.table_id, schema_tables.table_name
                     FROM schema_tables
                     ;
                 """
