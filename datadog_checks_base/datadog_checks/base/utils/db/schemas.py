@@ -37,6 +37,13 @@ class SchemaCollectorConfig:
     def __init__(self):
         self.collection_interval = 3600
         self.payload_chunk_size = 10_000
+        self.max_tables = 300
+        self.include_databases = None
+        self.exclude_databases = None
+        self.include_schemas = None
+        self.exclude_schemas = None
+        self.include_tables = None
+        self.exclude_tables = None
 
 
 class SchemaCollector(ABC):
@@ -134,6 +141,7 @@ class SchemaCollector(ABC):
             "kind": self.kind,
             "agent_version": datadog_agent.get_version(),
             "collection_interval": self._config.collection_interval,
+            "dbms": self._dbms,
             "dbms_version": str(self._check.dbms_version),
             "tags": self._check.tags,
             "cloud_metadata": self._check.cloud_metadata,

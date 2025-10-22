@@ -90,6 +90,7 @@ FROM   pg_attribute
                  AND adnum = attnum
 WHERE  attnum > 0
        AND NOT attisdropped
+       AND attrelid = {table_id}
 """
 
 
@@ -114,6 +115,7 @@ JOIN
     pg_class c
 ON
     c.oid = ix.indexrelid
+    WHERE ix.indrelid = {table_id}
 """
 
 
@@ -123,6 +125,7 @@ SELECT conname                   AS name,
        conrelid AS table_id
 FROM   pg_constraint
 WHERE  contype = 'f'
+       AND conrelid = {table_id}
 """
 
 
@@ -192,15 +195,18 @@ class PostgresSchemaCollector(SchemaCollector):
     def __init__(self, check: PostgreSql):
         config = SchemaCollectorConfig()
         config.collection_interval = check._config.collect_schemas.collection_interval
+        config.max_tables = check._config.collect_schemas.max_tables
+        config.exclude_databases = check._config.collect_schemas.exclude_databases
+        config.include_databases = check._config.collect_schemas.include_databases
+        config.exclude_schemas = check._config.collect_schemas.exclude_schemas
+        config.include_schemas = check._config.collect_schemas.include_schemas
+        config.exclude_tables = check._config.collect_schemas.exclude_tables
+        config.include_tables = check._config.collect_schemas.include_tables
         super().__init__(check, config)
 
     @property
-    def base_event(self):
-        return {
-            **super().base_event,
-            "dbms": "postgres",
-            "kind": "pg_databases",
-        }
+    def kind(self):
+        return "pg_databases"
 
     def _get_databases(self):
         with self._check._get_main_db() as conn:
@@ -214,7 +220,7 @@ class PostgresSchemaCollector(SchemaCollector):
                     })"
 
                 # Autodiscovery trumps exclude and include
-                autodiscovery_databases = self._check.autodiscovery.get_items()
+                autodiscovery_databases = self._check.autodiscovery.get_items() if self._check.autodiscovery else []
                 if autodiscovery_databases:
                     query += " AND datname IN ({})".format(", ".join(f"'{db}'" for db in autodiscovery_databases))
 
@@ -251,7 +257,7 @@ class PostgresSchemaCollector(SchemaCollector):
                     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
                     else ""
                 )
-                parition_selects = (
+                partition_selects = (
                     """
                 ,
                     partition_keys.partition_key,
@@ -271,43 +277,20 @@ class PostgresSchemaCollector(SchemaCollector):
                         {tables_query}
                     ),
                     schema_tables AS (
-                        SELECT schemas.schema_id, schemas.schema_name,
+                        SELECT schemas.schema_id, schemas.schema_name, schemas.schema_owner,
                         tables.table_id, tables.table_name
                         FROM schemas
                         LEFT JOIN tables ON schemas.schema_id = tables.schema_id
                         ORDER BY schemas.schema_name, tables.table_name
                         LIMIT {limit}
-                    ),
-                    columns AS (
-                        {columns_query}
-                    ),
-                    indexes AS (
-                        {indexes_query}
-                    ),
-                    constraints AS (
-                        {constraints_query}
                     )
-                    {partitions_ctes}
 
-                    SELECT * FROM (
-                    SELECT schema_tables.schema_id, schema_tables.schema_name,
-                        schema_tables.table_id, schema_tables.table_name,
-                        array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
-                        array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
-                        array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
-                          as foreign_keys
-                        {parition_selects}
+                    SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
+                        schema_tables.table_id, schema_tables.table_name                        
                     FROM schema_tables
-                        LEFT JOIN columns ON schema_tables.table_id = columns.table_id
-                        LEFT JOIN indexes ON schema_tables.table_id = indexes.table_id
-                        LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
-                        {partition_joins}
-                    GROUP BY schema_tables.schema_id, schema_tables.schema_name,
-                             schema_tables.table_id, schema_tables.table_name
-                    ) t
                     ;
                 """
-                print(query)
+                # print(query)
                 cursor.execute(query)
                 yield cursor
 
@@ -346,6 +329,21 @@ class PostgresSchemaCollector(SchemaCollector):
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
+        columns = None
+        indexes = None
+        constraints = None
+        # print(cursor_row)
+        if cursor_row.get("table_id"):
+            # Fetch columns, indexes, and constraints for each table
+            with self._check.db_pool.get_connection(database["name"]) as conn:
+                with conn.cursor(row_factory=dict_row) as cursor:
+                    cursor.execute(COLUMNS_QUERY.format(table_id=cursor_row["table_id"]))
+                    columns = cursor.fetchall()
+                    cursor.execute(PG_INDEXES_QUERY.format(table_id=cursor_row["table_id"]))
+                    indexes = cursor.fetchall()
+                    cursor.execute(PG_CONSTRAINTS_QUERY.format(table_id=cursor_row["table_id"]))
+                    constraints = cursor.fetchall()
+        # Fetch partition information for each table
         # Map the cursor row to the expected schema, and strip out None values
         object["schemas"] = [
             {
@@ -362,14 +360,12 @@ class PostgresSchemaCollector(SchemaCollector):
                                 "name": cursor_row.get("table_name"),
                                 "owner": cursor_row.get("owner"),
                                 # The query can create duplicates of the joined tables
-                                "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values()),
-                                "indexes": list({v and v['name']: v for v in cursor_row.get("indexes") or []}.values()),
-                                "foreign_keys": list(
-                                    {v and v['name']: v for v in cursor_row.get("foreign_keys") or []}.values()
-                                ),
-                                "toast_table": cursor_row.get("toast_table"),
-                                "num_partitions": cursor_row.get("num_partitions"),
-                                "partition_key": cursor_row.get("partition_key"),
+                                "columns": columns,
+                                "indexes": indexes,
+                                "foreign_keys": constraints,
+                                # "toast_table": cursor_row.get("toast_table"),
+                                # "num_partitions": cursor_row.get("num_partitions"),
+                                # "partition_key": cursor_row.get("partition_key"),
                             }.items()
                             if v is not None
                         }
