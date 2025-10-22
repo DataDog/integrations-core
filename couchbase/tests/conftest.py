@@ -4,6 +4,7 @@
 
 import os
 import subprocess
+import time
 from copy import deepcopy
 
 import pytest
@@ -18,6 +19,9 @@ from .common import (
     BUCKET_NAME,
     CB_CONTAINER_NAME,
     COUCHBASE_MAJOR_VERSION,
+    COUCHBASE_MINOR_VERSION,
+    COUCHBASE_SYNCGW_MAJOR_VERSION,
+    COUCHBASE_SYNCGW_MINOR_VERSION,
     DEFAULT_INSTANCE,
     HERE,
     INDEX_STATS_URL,
@@ -69,12 +73,16 @@ def dd_environment():
         WaitFor(couchbase_setup),
         WaitFor(node_stats),
         WaitFor(bucket_stats),
+        WaitFor(load_sample_bucket),
+        WaitFor(create_syncgw_database),
     ]
-    if COUCHBASE_MAJOR_VERSION >= 7:
-        conditions.append(WaitFor(load_sample_bucket))
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-        env_vars={'CB_CONTAINER_NAME': CB_CONTAINER_NAME},
+        env_vars={
+            'CB_CONTAINER_NAME': CB_CONTAINER_NAME,
+            'CB_USERNAME': USER,
+            'CB_PASSWORD': PASSWORD,
+        },
         conditions=conditions,
         sleep=15,
     ):
@@ -183,26 +191,79 @@ def load_sample_bucket():
     # Resources used:
     # https://docs.couchbase.com/server/current/manage/manage-settings/install-sample-buckets.html
 
-    bucket_loader_args = [
-        'docker',
-        'exec',
-        CB_CONTAINER_NAME,
-        'cbdocloader',
-        '-c',
-        'localhost:{}'.format(PORT),
-        '-u',
-        USER,
-        '-p',
-        PASSWORD,
-        '-d',
-        '/opt/couchbase/samples/gamesim-sample.zip',
-        '-b',
-        'cb_bucket',
-        '-m',
-        '256',
-    ]
-    with open(os.devnull, 'w') as FNULL:
-        subprocess.check_call(bucket_loader_args, stdout=FNULL)
+    r = requests.post(
+        '{}/sampleBuckets/install'.format(URL),
+        auth=(USER, PASSWORD),
+        json=["gamesim-sample"],
+    )
+    if r.status_code == 400:
+        if "Sample bucket gamesim-sample is already loaded" in r.text:
+            return True
+        return False
+
+    r.raise_for_status()
+    result = r.json()
+
+    if COUCHBASE_MAJOR_VERSION == 7 and COUCHBASE_MINOR_VERSION > 6:
+        # Couchbase versions > 7.6 return an empty list on completion.
+        return len(result) == 0
+
+    # Couchbase version 7.6 returns a task ID that we have to check for
+    # completion.
+    task_id = None
+    for task in result["tasks"]:
+        if task["sample"] == "gamesim-sample":
+            task_id = task["taskId"]
+
+    while True:
+        # Loop until the task ID is gone, meaning the task is done.
+        task_is_done = False
+
+        r = requests.get(
+            '{}/pools/default/tasks'.format(URL),
+            auth=(USER, PASSWORD),
+        )
+        r.raise_for_status()
+        result = r.json()
+
+        for task in result:
+            if task.get("task_id", "") == task_id:
+                task_is_done = True
+
+        if task_is_done:
+            break
+
+        time.sleep(1)
+
+    return True
+
+
+def create_syncgw_database():
+    """
+    Create sample database
+    """
+
+    # Resources used:
+    # https://docs.couchbase.com/sync-gateway/current/configuration/configuration-schema-database.html
+
+    payload = {
+        "bucket": "gamesim-sample",
+        "num_index_replicas": 0,
+    }
+
+    # The payload format is different between Sync Gateway versions: The
+    # num_index_replicas field was deprecated in favor of index.num_replicas in
+    # version 3.3.0.
+    if COUCHBASE_SYNCGW_MAJOR_VERSION == 3 and COUCHBASE_SYNCGW_MINOR_VERSION >= 3:
+        payload["index"] = {"num_replicas": payload["num_index_replicas"]}
+        del payload["num_index_replicas"]
+
+    r = requests.put(
+        '{}/sync_gateway/'.format(SG_URL),
+        auth=(USER, PASSWORD),
+        json=payload,
+    )
+    r.raise_for_status()
 
 
 def node_stats():

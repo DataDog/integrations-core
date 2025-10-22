@@ -4,8 +4,6 @@
 
 This check monitors [freshservice][1].
 
-**Minimum Agent version:** 7.57.1
-
 ## Setup
 
 ### Installation

@@ -242,6 +242,26 @@ QUERY_USER_CONNECTIONS = {
     ],
 }
 
+QUERY_ERRORS_RAISED = {
+    'name': 'performance_schema.events_errors_summary_global_by_error',
+    'query': """
+        SELECT
+            SUM_ERROR_RAISED as errors_raised,
+            ERROR_NUMBER as error_number,
+            ERROR_NAME as error_name
+        FROM performance_schema.events_errors_summary_global_by_error
+        WHERE
+            SUM_ERROR_RAISED > 0
+            AND ERROR_NUMBER IS NOT NULL
+            AND ERROR_NAME IS NOT NULL
+    """.strip(),
+    'columns': [
+        {'name': 'mysql.performance.errors_raised', 'type': 'monotonic_count'},
+        {'name': 'error_number', 'type': 'tag'},
+        {'name': 'error_name', 'type': 'tag'},
+    ],
+}
+
 
 def show_replica_status_query(version, is_mariadb, channel=''):
     if version.version_compatible((10, 5, 1)) or not is_mariadb and version.version_compatible((8, 0, 22)):
