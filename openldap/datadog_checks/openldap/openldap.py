@@ -161,7 +161,7 @@ class OpenLDAP(AgentCheck):
                 self.log.error("`search_filter` field is required for custom query #%s", name)
                 continue
             attrs = query.get("attributes")
-            search_scope_str = query.get("search_scope", "subtree").lower()
+            search_scope_str = query.get("search_scope", self.DEFAULT_SEARCH_SCOPE).lower()
             search_scope = self.SEARCH_SCOPE_MAPPING.get(search_scope_str)
 
             if search_scope is None:
