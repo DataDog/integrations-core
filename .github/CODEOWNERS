@@ -123,6 +123,7 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /snmp/*.md                                                         @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/                                                           @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/*.md                                                       @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
+/network_config_management/                                        @Datadog/network-device-monitoring
 /network_path/                                                     @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations
 /network_path/*.md                                                 @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
 /versa/                                                            @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
