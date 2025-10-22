@@ -13,7 +13,6 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
-from datadog_checks.base.utils.db import health
 from datadog_checks.base.utils.db.health import Health, HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     ConstantRateLimiter,
@@ -127,8 +126,11 @@ def test_ratelimiting_ttl_cache():
 
 class DBExceptionForTests(Exception):
     pass
+
+
 class UnexpectedExceptionForTests(Exception):
     pass
+
 
 @pytest.mark.parametrize("exception_expected", [True, False])
 @pytest.mark.parametrize("enable_health", [True, False])
@@ -157,7 +159,6 @@ def test_dbm_async_job_unknown_error(aggregator, exception_expected, enable_heal
             assert health_event['data']['exception_type'] == type(exception).__name__
         else:
             assert len(events) == 0
-
 
 
 @pytest.mark.parametrize(
