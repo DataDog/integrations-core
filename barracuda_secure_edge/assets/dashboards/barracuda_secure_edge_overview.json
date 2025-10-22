@@ -2791,7 +2791,7 @@
                     {
                         "id": 8052680927896964,
                         "definition": {
-                            "title": "Unique Events By Severity",
+                            "title": "Unique Events By Event Name",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -2823,7 +2823,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@secure_edge.system.severity",
+                                                    "facet": "@secure_edge.system.event_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "cardinality",
