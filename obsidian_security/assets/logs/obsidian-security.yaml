@@ -1,0 +1,292 @@
+id: obsidian-security
+metric_id: obsidian-security
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Web Access
+    name: Status Code
+    path: http.status_code
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - description: ""
+    facetType: range
+    groups:
+      - Obsidian Security
+    name: Latency
+    path: obsidian_security.latencySeconds
+    source: log
+    type: integer
+    unit:
+      family: time
+      name: second
+  - description: ""
+    facetType: range
+    groups:
+      - Obsidian Security
+    name: Run Frequency
+    path: obsidian_security.runFrequencySeconds
+    source: log
+    type: integer
+    unit:
+      family: time
+      name: second
+pipeline:
+  type: pipeline
+  name: Obsidian Security
+  enabled: true
+  filter:
+    query: source:obsidian-security
+  processors:
+    - type: date-remapper
+      name: Define `timestamp`, `obsidian_security_alert.generatedDatetime`,
+        `obsidian_security_event.datetime` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+        - obsidian_security_alert.generatedDatetime
+        - obsidian_security_event.datetime
+    - type: pipeline
+      name: Audit Logs
+      enabled: true
+      filter:
+        query: service:audit-logs
+      processors:
+        - type: attribute-remapper
+          name: Map `source.client_ip` to `network.client.ip`
+          enabled: true
+          sources:
+            - source.client_ip
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event.outcome` to `evt.outcome`
+          enabled: true
+          sources:
+            - event.outcome
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `event.action` to `evt.name`
+          enabled: true
+          sources:
+            - event.action
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `target.http_code` to `http.status_code`
+          enabled: true
+          sources:
+            - target.http_code
+          sourceType: attribute
+          target: http.status_code
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - name: Lookup for `evt.outcome` to `status`
+          enabled: true
+          source: evt.outcome
+          target: status
+          lookupTable: |-
+            Success,Ok
+            Failure,Warning
+          defaultLookup: Info
+          type: lookup-processor
+    - type: pipeline
+      name: Standard Attribute Remapping for Audit Logs
+      enabled: true
+      filter:
+        query: service:audit-logs @identity.type:user
+      processors:
+        - type: attribute-remapper
+          name: Map `identity.username` to `usr.name`
+          enabled: true
+          sources:
+            - identity.username
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `identity.id` to `usr.id`
+          enabled: true
+          sources:
+            - identity.id
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Events
+      enabled: true
+      filter:
+        query: service:events
+      processors:
+        - type: attribute-remapper
+          name: Map `obsidian_security_event.ipAddress.raw` to `network.client.ip`
+          enabled: true
+          sources:
+            - obsidian_security_event.ipAddress.raw
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `obsidian_security_event.obsidianEventName.type` to `evt.name`
+          enabled: true
+          sources:
+            - obsidian_security_event.obsidianEventName.type
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - name: Lookup for `obsidian_security_event.status` to `status`
+          enabled: true
+          source: obsidian_security_event.status
+          target: status
+          lookupTable: |-
+            SUCCESS,Ok
+            FAIL,Warning
+            MALICIOUS,Critical
+            OTHER,Info
+            UNKNOWN,Info
+            ERROR,Error
+            NO_STATUS,Info
+            PARTIAL_SUCCESS,Ok
+          defaultLookup: Info
+          type: lookup-processor
+    - type: pipeline
+      name: Alerts
+      enabled: true
+      filter:
+        query: service:alerts
+      processors:
+        - name: Lookup for `obsidian_security_alert.severity` to `status`
+          enabled: true
+          source: obsidian_security_alert.severity
+          target: status
+          lookupTable: |-
+            CRITICAL,Alert
+            HIGH,Critical
+            MEDIUM,Warning
+            LOW,Notice
+            INFO,Info
+          defaultLookup: Info
+          type: lookup-processor
+        - type: attribute-remapper
+          name: Map `obsidian_security_alert.alertExtraData.ipAddress` to
+            `network.client.ip`
+          enabled: true
+          sources:
+            - obsidian_security_alert.alertExtraData.ipAddress
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `obsidian_security_alert.intelligenceCatalogReference.latencySeconds`
+            to `obsidian_security.latencySeconds`
+          enabled: true
+          sources:
+            - obsidian_security_alert.intelligenceCatalogReference.latencySeconds
+          sourceType: attribute
+          target: obsidian_security.latencySeconds
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map
+            `obsidian_security_alert.intelligenceCatalogReference.runFrequencySeconds`
+            to `obsidian_security.runFrequencySeconds`
+          enabled: true
+          sources:
+            - obsidian_security_alert.intelligenceCatalogReference.runFrequencySeconds
+          sourceType: attribute
+          target: obsidian_security.runFrequencySeconds
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status
+    - type: geo-ip-parser
+      name: GeoIP Parser for `network.client.ip`
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
