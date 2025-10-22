@@ -172,7 +172,7 @@ class PostgresDatabaseObject(DatabaseObject):
 
 
 DATABASE_INFORMATION_QUERY = """
-SELECT db.oid                        AS id,
+SELECT db.oid::text                  AS id,
        datname                       AS NAME,
        pg_encoding_to_char(encoding) AS encoding,
        rolname                       AS owner,
