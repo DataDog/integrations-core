@@ -82,7 +82,7 @@ class Health:
             "dbm-health",
         )
 
-    def submit_error_health_event(self, exception: Exception, **kwargs):
+    def submit_exception_health_event(self, exception: Exception, **kwargs):
         trace = traceback.extract_tb(exception.__traceback__)
         exc = trace.pop()
         if exc:

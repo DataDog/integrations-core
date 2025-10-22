@@ -13,6 +13,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
+from datadog_checks.base.utils.db import health
 from datadog_checks.base.utils.db.health import Health, HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
     ConstantRateLimiter,
@@ -124,36 +125,39 @@ def test_ratelimiting_ttl_cache():
         assert cache.acquire(i), "cache should be empty again so these keys should go in OK"
 
 
-def test_dbm_async_job_unknown_error(aggregator):
+class DBExceptionForTests(Exception):
+    pass
+class UnexpectedExceptionForTests(Exception):
+    pass
+
+@pytest.mark.parametrize("exception_expected", [True, False])
+@pytest.mark.parametrize("enable_health", [True, False])
+def test_dbm_async_job_unknown_error(aggregator, exception_expected, enable_health):
     check = AgentCheck()
-    health = Health(check)
-    check.health = health
-    exception = UnexpectedExceptionForTests()
+    if enable_health:
+        check.health = Health(check)
+    exception = DBExceptionForTests() if exception_expected else UnexpectedExceptionForTests()
     job = JobForTesting(check, exception=exception)
     try:
         job.run_job_loop(["hello:there"])
         job._job_loop_future.result(timeout=10)
         job.cancel()
-    except:
-        pass
+    except Exception as e:
+        assert isinstance(e, type(exception))
     finally:
         events = aggregator.get_event_platform_events("dbm-health")
-        assert len(events) == 1
-        health_event = events[0]
-        assert health_event['name'] == HealthEvent.UNKNOWN_ERROR.value
-        assert health_event['status'] == HealthStatus.ERROR.value
-        assert health_event['data']['file'].endswith('test_util.py')
-        assert health_event['data']['line'] is not None
-        assert health_event['data']['function'] == 'run_job'
-        assert health_event['data']['exception_type'] == 'UnexpectedExceptionForTests'
+        if enable_health and not exception_expected:
+            assert len(events) == 1
+            health_event = events[0]
+            assert health_event['name'] == HealthEvent.UNKNOWN_ERROR.value
+            assert health_event['status'] == HealthStatus.ERROR.value
+            assert health_event['data']['file'].endswith('test_util.py')
+            assert health_event['data']['line'] is not None
+            assert health_event['data']['function'] == 'run_job'
+            assert health_event['data']['exception_type'] == type(exception).__name__
+        else:
+            assert len(events) == 0
 
-
-class DBExceptionForTests(Exception):
-    pass
-
-
-class UnexpectedExceptionForTests(Exception):
-    pass
 
 
 @pytest.mark.parametrize(
