@@ -128,6 +128,7 @@ class PostgreSql(AgentCheck):
 
         config, validation_result = build_config(self)
         self._config = config
+        self._validation_result = validation_result
         # Log validation errors and warnings
         for error in validation_result.errors:
             self.log.error(error)
@@ -137,24 +138,7 @@ class PostgreSql(AgentCheck):
         self.tags = list(self._config.tags)
         self.add_core_tags()
 
-        try:
-            # Handle the config validation result after we've set tags so those tags are included in the health event
-            self.health.submit_health_event(
-                name=HealthEvent.INITIALIZATION,
-                status=HealthStatus.ERROR
-                if not validation_result.valid
-                else HealthStatus.WARNING
-                if validation_result.warnings
-                else HealthStatus.OK,
-                errors=[str(error) for error in validation_result.errors],
-                warnings=validation_result.warnings,
-                validated_at=validation_result.created_at,
-                config=sanitize(self._config),
-                instance=sanitize(self.instance),
-                features=validation_result.features,
-            )
-        except Exception as e:
-            self.log.error("Error submitting health event for initialization: %s", e)
+
 
         # Abort initializing the check if the config is invalid
         if validation_result.valid is False:
@@ -199,6 +183,27 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+
+    def _submit_initialization_health_event(self):
+        try:
+            # Handle the config validation result after we've set tags so those tags are included in the health event
+            # TODO: Use the submission debouncer to only send this every 6 hours
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.ERROR
+                if not self._validation_result.valid
+                else HealthStatus.WARNING
+                if self._validation_result.warnings
+                else HealthStatus.OK,
+                errors=[str(error) for error in self._validation_result.errors],
+                warnings=self._validation_result.warnings,
+                initialized_at=self._validation_result.created_at,
+                config=sanitize(self._config),
+                instance=sanitize(self.instance),
+                features=self._validation_result.features,
+            )
+        except Exception as e:
+            self.log.error("Error submitting health event for initialization: %s", e)
 
     def _build_autodiscovery(self):
         if not self._config.database_autodiscovery.enabled:
@@ -1065,6 +1070,9 @@ class PostgreSql(AgentCheck):
         }
 
     def check(self, _):
+        # Resend the initialization event. The submitter will debounce it
+        self._submit_initialization_health_event()
+
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         tags_to_add = []
