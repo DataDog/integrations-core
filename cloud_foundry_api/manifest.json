@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a0c8e3e8-f3de-4405-88d3-0856e6c0948f",
   "app_id": "cloud-foundry-api",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

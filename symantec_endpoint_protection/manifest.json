@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "e334ac09-0038-408b-8666-cba88c3217e6",
   "app_id": "symantec-endpoint-protection",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
