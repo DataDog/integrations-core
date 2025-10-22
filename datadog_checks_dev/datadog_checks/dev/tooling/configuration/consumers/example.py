@@ -113,11 +113,11 @@ def write_option(option, writer, indent='', start_list=False):
     option_name = option['name']
 
     invalid_option_field = [field for field in option if field not in ALLOWED_OPTION_FIELDS]
-    
+
     if invalid_option_field:
         writer.new_error(
             f"Option name '{option_name}' has invalid option-level field: {invalid_option_field}. "
-            f"Option fields must be one of: {sorted(ALLOWED_OPTION_FIELDS)}"
+            f"Option fields must be one of the following: {sorted(ALLOWED_OPTION_FIELDS)}"
         )
 
     if 'value' in option:
@@ -138,7 +138,7 @@ def write_option(option, writer, indent='', start_list=False):
         if invalid_value_field:
             writer.new_error(
                 f"Option name '{option_name}' has invalid value-level field: {invalid_value_field}. "
-                f"Value fields must be one of: {sorted(ALLOWED_VALUE_FIELDS)}"
+                f"Value fields must be one of the following: {sorted(ALLOWED_VALUE_FIELDS)}"
             )
 
         example = value.get('example')
