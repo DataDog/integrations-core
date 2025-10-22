@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from typing import TYPE_CHECKING
 
@@ -16,6 +17,7 @@ from ddev.utils.fs import Path
 if TYPE_CHECKING:
     from ddev.cli.size.utils.common_funcs import (
         CLIParameters,
+        DependencyEntry,
         FileDataEntry,
     )
 
@@ -82,17 +84,42 @@ def status(
         versions = list(py_version or valid_versions)
         combinations = [(p, v) for p in platforms for v in versions]
 
-        commits = [commit] if commit else None
+        commits = None
+        dependencies_resolved = False
+        dependency_sizes_list: dict[str, DependencyEntry] = {}
+
+        if dependency_sizes:
+            dependency_sizes_list = json.loads(dependency_sizes.read_text())
+
+        if commit:
+            from ddev.cli.size.utils.common_funcs import (
+                RESOLVE_BUILD_DEPS_WORKFLOW,
+                artifact_exists,
+                get_previous_sizes,
+            )
+
+            commits = [commit]
+
+            if not artifact_exists(app, commit, "target-" + platforms[0], RESOLVE_BUILD_DEPS_WORKFLOW):
+                app.display("\n -> Searching for dependency sizes in previous commit")
+                previous_sizes = get_previous_sizes(app, commit, compressed)
+            else:
+                dependencies_resolved = True
 
         for plat, ver in combinations:
-            if commit:
-                from ddev.cli.size.utils.common_funcs import get_last_dependency_sizes_artifact
+            if commit and dependencies_resolved:
+                from ddev.cli.size.utils.common_funcs import get_dep_sizes
 
-                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat, ver, compressed)
-                if not dependency_sizes:
-                    app.display_error(
-                        "Could not find dependency sizes in the artifacts: falling back to local lockfiles"
-                    )
+                app.display("-> Dependencies were resolved in this commit, using the artifact")
+                dependency_sizes_list = get_dep_sizes(app, commit, plat, ver)
+
+            elif commit and not dependencies_resolved and previous_sizes:
+                from ddev.cli.size.utils.common_funcs import parse_dep_sizes
+
+                dependency_sizes_list = parse_dep_sizes(previous_sizes, plat, ver, compressed)
+
+            if commit and not dependency_sizes_list:
+                app.display_error("Could not find dependency sizes in the artifacts: falling back to local lockfiles")
 
             parameters: CLIParameters = {
                 "app": app,
@@ -105,7 +132,7 @@ def status(
             status_modules = status_mode(
                 repo_path,
                 parameters,
-                dependency_sizes,
+                dependency_sizes_list,
             )
             modules_plat_ver.extend(status_modules)
             if to_dd_org or to_dd_key:
@@ -169,7 +196,7 @@ def validate_parameters(
 def status_mode(
     repo_path: Path,
     params: CLIParameters,
-    dependency_sizes: Path | None,
+    dependency_sizes: dict[str, DependencyEntry] | None,
 ) -> list[FileDataEntry]:
     from ddev.cli.size.utils.common_funcs import (
         get_dependencies,
@@ -179,11 +206,11 @@ def status_mode(
 
     with params["app"].status("Calculating sizes..."):
         if dependency_sizes:
-            from ddev.cli.size.utils.common_funcs import get_dependencies_from_json
+            from ddev.cli.size.utils.common_funcs import get_dependencies_from_artifact
 
             modules = get_files(
                 repo_path, params["compressed"], params["py_version"], params["platform"]
-            ) + get_dependencies_from_json(
+            ) + get_dependencies_from_artifact(
                 dependency_sizes, params["platform"], params["py_version"], params["compressed"]
             )
 

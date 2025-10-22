@@ -15,7 +15,7 @@ from datetime import date
 from enum import StrEnum
 from functools import cache
 from types import TracebackType
-from typing import TYPE_CHECKING, Optional, Type, TypedDict, overload
+from typing import TYPE_CHECKING, Optional, Type, TypedDict
 
 import requests
 import squarify
@@ -408,22 +408,22 @@ def get_dependencies_sizes(
     return file_data
 
 
-def get_dependencies_from_json(
-    dependency_sizes: Path, platform: str, py_version: str, compressed: bool
+def get_dependencies_from_artifact(
+    dependency_sizes: dict[str, DependencyEntry], platform: str, py_version: str, compressed: bool
 ) -> list[FileDataEntry]:
-    data = json.loads(dependency_sizes.read_text())
-    size_key = "compressed" if compressed else "uncompressed"
     return [
         {
             "Name": name,
-            "Version": sizes.get("version", ""),
-            "Size_Bytes": int(sizes.get(size_key, 0)),
-            "Size": convert_to_human_readable_size(sizes.get(size_key, 0)),
+            "Version": entry.get("version", ""),
+            "Size_Bytes": int(entry.get("compressed", 0) if compressed else entry.get("uncompressed", 0)),
+            "Size": convert_to_human_readable_size(
+                entry.get("compressed", 0) if compressed else entry.get("uncompressed", 0)
+            ),
             "Type": "Dependency",
             "Platform": platform,
             "Python_Version": py_version,
         }
-        for name, sizes in data.items()
+        for name, entry in dependency_sizes.items()
     ]
 
 
@@ -1206,6 +1206,7 @@ def send_metrics_to_dd(
     print("Metrics sent to Datadog")
 
 
+@cache
 def get_commit_data(commit: str | None = "") -> tuple[int, str, list[str], list[str]]:
     '''
     Get the commit data for a given commit. If no commit is provided, get the last commit data.
@@ -1230,29 +1231,28 @@ def get_commit_data(commit: str | None = "") -> tuple[int, str, list[str], list[
     return int(timestamp), message, tickets, prs
 
 
-@cache
-def get_last_dependency_sizes_artifact(
-    app: Application, commit: str, platform: str, py_version: str, compressed: bool
-) -> Path | None:
-    '''
-    Lockfiles of dependencies are not updated in the same commit as the dependencies are updated.
-    So in each commit, there is an artifact with the sizes of the wheels that were built to get the actual
-    size of that commit.
-    '''
-    size_type = 'compressed' if compressed else 'uncompressed'
-    app.display(f"Retrieving dependency sizes for {commit} ({platform}, py{py_version}, {size_type})")
+def get_previous_sizes(app: Application, commit: str, compressed: bool) -> list[FileDataEntry]:
+    previous_commit = get_previous_commit(app, commit)
+    if not previous_commit:
+        return []
+    app.display(f"previous commit: {previous_commit}")
+    return get_status_sizes_from_commit(app, previous_commit, compressed)
 
-    dep_sizes_json = get_dep_sizes_json(app, commit, platform, py_version)
-    if not dep_sizes_json:
-        app.display_debug("No dependency sizes in current commit, searching ancestors")
-        previous_commit = get_previous_commit(app, commit)
-        app.display(f"\n -> Searching for dependency sizes in previous commit: {previous_commit}")
-        if not previous_commit:
-            return None
-        dep_sizes_json = get_status_sizes_from_commit(
-            app, previous_commit, platform, py_version, compressed, file=True, only_dependencies=True
-        )
-    return Path(dep_sizes_json) if dep_sizes_json else None
+
+def artifact_exists(app: Application, commit: str, artifact_name: str, workflow: str) -> bool:
+    run_id = get_run_id(app, commit, workflow)
+    if not run_id:
+        return False
+    result = subprocess.run(
+        [
+            'gh',
+            'api',
+            f'repos/DataDog/integrations-core/actions/runs/{run_id}/artifacts',
+            '--jq',
+            f'.artifacts[] | select(.name == "{artifact_name}")',
+        ]
+    )
+    return result.stdout is not None
 
 
 @cache
@@ -1273,19 +1273,16 @@ def get_previous_commit(app: Application, commit: str) -> str | None:
         return None
 
 
-@cache
-def get_dep_sizes_json(app: Application, current_commit: str, platform: str, py_version: str) -> Path | None:
+def get_dep_sizes(app: Application, current_commit: str, platform: str, py_version: str) -> dict[str, DependencyEntry]:
     '''
     Gets the dependency sizes json for a given commit and platform when dependencies were resolved.
     '''
-    app.display(f"\n -> Checking if dependency sizes were resolved in commit: {current_commit}")
-
     run_id = get_run_id(app, current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
     if run_id:
         dep_sizes_json = get_current_sizes_json(app, run_id, platform, py_version)
-        return dep_sizes_json
+        return json.loads(dep_sizes_json.read_text()) if dep_sizes_json else {}
     else:
-        return None
+        return {}
 
 
 @cache
@@ -1319,7 +1316,6 @@ def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
     return run_id
 
 
-@cache
 def get_current_sizes_json(app: Application, run_id: str, platform: str, py_version: str) -> Path | None:
     '''
     Downloads the dependency sizes json for a given run id and platform when dependencies were resolved.
@@ -1345,7 +1341,7 @@ def get_current_sizes_json(app: Application, run_id: str, platform: str, py_vers
             )
         except subprocess.CalledProcessError as e:
             if e.stderr and "no valid artifacts found" in e.stderr:
-                app.display_warning(f"No resolved dependencies found for platform {platform} (run {run_id})")
+                app.display_error(f"No resolved dependencies found for platform {platform} (run {run_id})")
             else:
                 app.display_error(f"Failed to download dependency sizes (run={run_id}, platform={platform}): {e}")
                 app.display_warning(e.stderr)
@@ -1390,52 +1386,12 @@ def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: 
     return artifact_path
 
 
-@overload
-def get_status_sizes_from_commit(
-    app: Application,
-    commit: str,
-    platform: str,
-    py_version: str,
-    compressed: bool,
-    file: Literal[True],
-    only_dependencies: bool,
-) -> Path | None: ...
-
-
-@overload
-def get_status_sizes_from_commit(
-    app: Application,
-    commit: str,
-    platform: str,
-    py_version: str,
-    compressed: bool,
-    file: Literal[False],
-    only_dependencies: Literal[False],
-) -> list[FileDataEntry]: ...
-
-
-@overload
-def get_status_sizes_from_commit(
-    app: Application,
-    commit: str,
-    platform: str,
-    py_version: str,
-    compressed: bool,
-    file: Literal[False],
-    only_dependencies: Literal[True],
-) -> dict[str, DependencyEntry]: ...
-
-
 @cache
 def get_status_sizes_from_commit(
     app: Application,
     commit: str,
-    platform: str,
-    py_version: str,
     compressed: bool,
-    file: bool = False,
-    only_dependencies: bool = False,
-) -> list[FileDataEntry] | dict[str, DependencyEntry] | Path | None:
+) -> list[FileDataEntry]:
     '''
     Gets the sizes json for a given commit from the measure disk usage workflow.
     '''
@@ -1447,24 +1403,11 @@ def get_status_sizes_from_commit(
         sizes_json = get_artifact(app, run_id, artifact_name, tmpdir)
 
         if not sizes_json:
-            app.display_error(f"No dependency sizes found for {platform} py{py_version} in commit {commit}\n")
+            app.display_error(f"No dependency sizes found in commit {commit}\n")
             return []
 
-        sizes: list[FileDataEntry] | dict[str, DependencyEntry]
-        if only_dependencies:
-            sizes = parse_dep_sizes_json(sizes_json, platform, py_version, compressed)
-        else:
-            sizes = filter_sizes_json(sizes_json, platform, py_version)
-
-        if file and sizes:
-            target_path = f"{platform}_{py_version}.json"
-            with open(target_path, "w") as f:
-                json.dump(sizes, f, indent=2)
-            return Path(target_path)
-        elif file and not sizes:
-            return None
-        else:
-            return sizes
+        sizes_list: list[FileDataEntry] = list(json.loads(sizes_json.read_text()))
+        return sizes_list
 
 
 def filter_sizes_json(sizes_json: Path, platform: str, py_version: str) -> list[FileDataEntry]:
@@ -1475,9 +1418,8 @@ def filter_sizes_json(sizes_json: Path, platform: str, py_version: str) -> list[
     return [size for size in sizes_list if size["Platform"] == platform and size["Python_Version"] == py_version]
 
 
-@cache
-def parse_dep_sizes_json(
-    sizes_json_path: Path,
+def parse_dep_sizes(
+    sizes_list: list[FileDataEntry],
     platform: str,
     py_version: str,
     compressed: bool,
@@ -1485,7 +1427,6 @@ def parse_dep_sizes_json(
     '''
     Parses the dependency sizes json for a given platform and python version.
     '''
-    sizes_list = list(json.loads(sizes_json_path.read_text()))
     sizes: dict[str, DependencyEntry] = {}
     for dep in sizes_list:
         if (

@@ -11,7 +11,7 @@ from ddev.cli.size.utils.common_funcs import (
     compress,
     convert_to_human_readable_size,
     extract_version_from_about_py,
-    get_dependencies_from_json,
+    get_dependencies_from_artifact,
     get_dependencies_list,
     get_dependencies_sizes,
     get_files,
@@ -20,7 +20,7 @@ from ddev.cli.size.utils.common_funcs import (
     get_valid_versions,
     is_correct_dependency,
     is_valid_integration_file,
-    parse_dep_sizes_json,
+    parse_dep_sizes,
     save_csv,
     save_json,
     save_markdown,
@@ -357,29 +357,27 @@ def test_extract_version_from_about_py(file_content: str, expected_version: str)
     assert version == expected_version
 
 
-def test_parse_dep_sizes_json(tmp_path: Path):
-    compressed_data = json.dumps(
-        [
-            {
-                "Name": "dep1",
-                "Size_Bytes": 123,
-                "Size": "2 B",
-                "Type": "Dependency",
-                "Platform": "linux-x86_64",
-                "Python_Version": "3.12",
-                "Version": "1.1.1",
-            },
-            {
-                "Name": "module1",
-                "Size_Bytes": 123,
-                "Size": "2 B",
-                "Type": "Integration",
-                "Platform": "linux-x86_64",
-                "Python_Version": "3.12",
-                "Version": "1.1.2",
-            },
-        ]
-    )
+def test_parse_dep_sizes():
+    sizes_list = [
+        {
+            "Name": "dep1",
+            "Size_Bytes": 123,
+            "Size": "2 B",
+            "Type": "Dependency",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.12",
+            "Version": "1.1.1",
+        },
+        {
+            "Name": "module1",
+            "Size_Bytes": 123,
+            "Size": "2 B",
+            "Type": "Integration",
+            "Platform": "linux-x86_64",
+            "Python_Version": "3.12",
+            "Version": "1.1.2",
+        },
+    ]
 
     expected_output = {
         "dep1": {
@@ -387,19 +385,17 @@ def test_parse_dep_sizes_json(tmp_path: Path):
             "version": "1.1.1",
         },
     }
-    compressed_json_path = tmp_path / "compressed.json"
-    compressed_json_path.write_text(compressed_data)
 
-    result = parse_dep_sizes_json(compressed_json_path, "linux-x86_64", "3.12", True)
+    result = parse_dep_sizes(sizes_list, "linux-x86_64", "3.12", True)
 
     assert dict(sorted(result.items())) == dict(sorted(expected_output.items()))
 
 
-def test_get_dependencies_from_json():
-    dep_size_dict = (
-        '{"dep1": {"compressed": 1, "uncompressed": 2, "version": "1.1.1"},\n'
-        '"dep2": {"compressed": 10, "uncompressed": 20, "version": "1.1.1"}}'
-    )
+def test_get_dependencies_from_artifact():
+    dep_size_dict = {
+        "dep1": {"compressed": 1, "uncompressed": 2, "version": "1.1.1"},
+        "dep2": {"compressed": 10, "uncompressed": 20, "version": "1.1.1"},
+    }
     expected = [
         {
             "Name": "dep1",
@@ -421,7 +417,5 @@ def test_get_dependencies_from_json():
         },
     ]
 
-    with patch('ddev.utils.fs.Path') as mock_path:
-        mock_path.read_text.return_value = dep_size_dict
-        result = get_dependencies_from_json(mock_path, "linux-x86_64", "3.12", True)
+    result = get_dependencies_from_artifact(dep_size_dict, "linux-x86_64", "3.12", True)
     assert result == expected

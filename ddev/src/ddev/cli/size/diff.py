@@ -116,8 +116,20 @@ def diff(
                 baseline = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
 
             app.display(f"Comparing to commit: {baseline}")
+
         if use_artifacts:
             from .utils.common_funcs import get_status_sizes_from_commit
+
+            try:
+                baseline_sizes = get_status_sizes_from_commit(app, baseline, compressed)
+                commit_sizes = get_status_sizes_from_commit(app, commit, compressed)
+            except Exception as e:
+                app.abort(str(e))
+
+            if not baseline_sizes:
+                app.abort(f"Failed to get sizes for {baseline=}")
+            if not commit_sizes:
+                app.abort(f"Failed to get sizes for {commit=}")
 
             for plat, ver in combinations:
                 parameters_artifacts: CLIParameters = {
@@ -128,21 +140,6 @@ def diff(
                     "format": format,
                     "show_gui": show_gui,
                 }
-
-                try:
-                    baseline_sizes = get_status_sizes_from_commit(
-                        app, baseline, plat, ver, compressed, file=False, only_dependencies=False
-                    )
-                    commit_sizes = get_status_sizes_from_commit(
-                        app, commit, plat, ver, compressed, file=False, only_dependencies=False
-                    )
-                except Exception as e:
-                    app.abort(str(e))
-
-                if not baseline_sizes:
-                    app.abort(f"Failed to get sizes for {baseline=}")
-                if not commit_sizes:
-                    app.abort(f"Failed to get sizes for {commit=}")
 
                 diff_modules, total_diff[(plat, ver)], old_size[(plat, ver)], new_size[(plat, ver)] = calculate_diff(
                     baseline_sizes, commit_sizes, plat, ver
