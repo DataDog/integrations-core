@@ -29,6 +29,7 @@ from datadog_checks.vsphere.constants import (
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_METRICS_INTERVAL_ID,
     UNLIMITED_HIST_METRICS_PER_QUERY,
+    INFRA_MODE_METRIC,
 )
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import (
@@ -452,6 +453,11 @@ class VSphereCheck(AgentCheck):
                         tags.extend([t for t in mor_tags if t.split(":", 1)[0] in self._config.excluded_host_tags])
 
                 tags.extend(self._config.base_tags)
+
+                if metric_name == INFRA_MODE_METRIC:
+                    infra_mode = datadog_agent.get_config('infrastructure_mode')
+                    if infra_mode != 'full':
+                        tags.append('infra_mode:{}'.format(infra_mode))
 
                 value = valid_values[-1]
                 if metric_name in PERCENT_METRICS:
