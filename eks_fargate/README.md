@@ -885,9 +885,11 @@ spec:
 
 ### Collecting logs from EKS on Fargate natively with the Agent
 
+**Minimum Agent version:** 7.71.0
+
 Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubelet and ship them to Datadog.
 
-1. The most convenient way to enable native kubelet logging is through the Cluster Agent's Admission Controller sidecar injection feature. When configured, all subsequent injected Agent containers automatically have kubelet logging enabled. This requires Cluster Agent `7.68.0` or above. This feature can also be configured manually in your Application's manifest.
+1. The most convenient way to enable native kubelet logging is through the Cluster Agent's Admission Controller sidecar injection feature. When configured, all subsequent injected Agent containers automatically have kubelet logging enabled. This feature can also be configured manually in your Application's manifest.
 
   <!-- xxx tabs xxx -->
   <!-- xxx tab "Admission Controller - Datadog Operator" xxx -->
