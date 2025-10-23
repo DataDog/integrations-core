@@ -8,25 +8,42 @@ files:
       - template: instances
         options:
           - name: pc_ip
-            description: The IP address or FQDN of the Prism Central.
-            display_priority: 4
+            description: |
+              The IP address or FQDN of the Prism Central.
+              This is required to connect to your Nutanix Prism Central instance.
+            required: true
+            display_priority: 5
             value:
               type: string
+              example: prism-central.example.com
           - name: pc_port
-            description: The port of the Prism Central.
-            display_priority: 3
+            description: |
+              The port of the Prism Central API.
+              Default is 9440 for HTTPS.
+            display_priority: 4
             value:
               type: integer
               example: 9440
-          - name: pc_api_key
-            description: The API key to authenticate with.
+          - name: pc_username
+            description: |
+              The username to authenticate with Prism Central.
+            required: true
+            display_priority: 3
             value:
               type: string
-              required: false
-          - template: instances/http
-            overrides:
-              username.description: The username to authenticate with.
-              username.display_priority: 2
-              password.description: The password to authenticate with.
-              password.display_priority: 2
+          - name: pc_password
+            description: |
+              The password to authenticate with Prism Central.
+            required: true
+            display_priority: 2
+            value:
+              type: string
+          - name: pc_verify
+            description: |
+              Whether to verify SSL certificates when connecting to Prism Central.
+              Set to false to disable SSL certificate verification (not recommended for production).
+            display_priority: 1
+            value:
+              type: boolean
+              example: false
           - template: instances/default
