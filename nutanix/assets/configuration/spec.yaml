@@ -38,12 +38,5 @@ files:
             display_priority: 2
             value:
               type: string
-          - name: pc_verify
-            description: |
-              Whether to verify SSL certificates when connecting to Prism Central.
-              Set to false to disable SSL certificate verification (not recommended for production).
-            display_priority: 1
-            value:
-              type: boolean
-              example: false
+          - template: instances/http
           - template: instances/default
