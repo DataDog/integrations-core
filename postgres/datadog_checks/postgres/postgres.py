@@ -195,12 +195,14 @@ class PostgreSql(AgentCheck):
                 else HealthStatus.WARNING
                 if self._validation_result.warnings
                 else HealthStatus.OK,
-                errors=[str(error) for error in self._validation_result.errors],
-                warnings=self._validation_result.warnings,
-                initialized_at=self._validation_result.created_at,
-                config=sanitize(self._config),
-                instance=sanitize(self.instance),
-                features=self._validation_result.features,
+                data={
+                    "errors":[str(error) for error in self._validation_result.errors],
+                    "warnings":self._validation_result.warnings,
+                    "initialized_at":self._validation_result.created_at,
+                    "config":sanitize(self._config),
+                    "instance":sanitize(self.instance),
+                    "features":self._validation_result.features,
+                }
             )
         except Exception as e:
             self.log.error("Error submitting health event for initialization: %s", e)
