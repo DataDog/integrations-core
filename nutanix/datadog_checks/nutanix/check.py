@@ -17,8 +17,15 @@ class NutanixCheck(AgentCheck):
 
         self.pc_ip = self.instance.get("pc_ip")
         self.pc_port = self.instance.get("pc_port", 9440)
-        self.pc_username = self.instance.get("pc_username")
-        self.pc_password = self.instance.get("pc_password")
+
+        # Map pc_username/pc_password to standard username/password for HTTP auth
+        pc_username = self.instance.get("pc_username")
+        pc_password = self.instance.get("pc_password")
+
+        if pc_username and "username" not in self.instance:
+            self.instance["username"] = pc_username
+        if pc_password and "password" not in self.instance:
+            self.instance["password"] = pc_password
 
         # Build the base URL for Prism Central
         self.base_url = f"{self.pc_ip}:{self.pc_port}"
@@ -64,6 +71,12 @@ class NutanixCheck(AgentCheck):
                 return
 
             for cluster in clusters:
+                # Skip Prism CentraL self cluster
+                cluster_function = cluster.get("config", {}).get("clusterFunction", [])
+                if len(cluster_function) == 1 and cluster_function[0] == "PRISM_CENTRAL":
+                    self.log.debug("detected prism central cluster, skipping cluster.")
+                    return
+
                 self._process_cluster(cluster)
                 self._process_nodes(cluster)
 
