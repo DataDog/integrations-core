@@ -11,6 +11,7 @@ from string import Template
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import (
@@ -116,7 +117,7 @@ if adodbapi is None and pyodbc is None:
 set_default_driver_conf()
 
 
-class SQLServer(AgentCheck):
+class SQLServer(DatabaseCheck):
     __NAMESPACE__ = "sqlserver"
 
     HA_SUPPORTED = True
@@ -315,6 +316,10 @@ class SQLServer(AgentCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
+
+    @property
+    def tags(self):
+        return self.tag_manager.get_tags()
 
     @property
     def database_identifier(self):
