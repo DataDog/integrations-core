@@ -1,0 +1,36 @@
+id: "bentoml"
+tests:
+ -
+  sample: "2025-10-07T23:10:10.287722 [INFO] [entry_service:Summarization:1] 127.0.0.1:50870 (scheme=http,method=POST,path=/summarize,type=application/json,length=227) (status=200,type=text/plain; charset=utf-8,length=407) 5890.581ms (trace=ab27d3de318c77adc1a75e34786fb557,span=29583fecc118996f,sampled=0,service.name=Summarization)"
+  result:
+    custom:
+      timestamp: 1761162581000
+      level: "INFO"
+      request:
+        path: "/summarize"
+        scheme: "http"
+        method: "POST"
+        length: 227
+        type: "application/json"
+        latency_ms: 5890.581
+      tracing:
+        trace: "ab27d3de318c77adc1a75e34786fb557"
+        service:
+          name: "Summarization"
+        sampled: 0
+        span: "29583fecc118996f"
+      service:
+        instance: 1
+        name: "Summarization"
+      response:
+        code: "200"
+        length: 407
+        type: "text/plain; charset=utf-8"
+      component_name: "entry_service"
+      client:
+        port: 50870
+        ip: "127.0.0.1"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1761162581000
