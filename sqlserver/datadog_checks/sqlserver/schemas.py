@@ -8,7 +8,7 @@ import contextlib
 from typing import TYPE_CHECKING, TypedDict
 
 import orjson as json
-from sqlserver.datadog_checks.sqlserver.utils import execute_query
+from datadog_checks.sqlserver.utils import execute_query
 
 if TYPE_CHECKING:
     from datadog_checks.sqlserver import SQLServer
@@ -93,8 +93,6 @@ SELECT
         FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS column_names
 FROM
     sys.indexes i
-WHERE
-    i.object_id IN ({})
 GROUP BY
     i.object_id,
     i.name,
@@ -147,8 +145,6 @@ SELECT
     FK.update_referential_action_desc AS update_action
 FROM
     sys.foreign_keys AS FK
-WHERE
-    FK.parent_object_id IN ({})
 GROUP BY
     FK.name,
     FK.object_id,
