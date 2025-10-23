@@ -1,16 +1,14 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pprint
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List
 
-import mock
 import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
-from .common import POSTGRES_LOCALE, POSTGRES_VERSION
+from .common import POSTGRES_VERSION
 from .utils import run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
@@ -212,116 +210,116 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
 
 def test_collect_schemas_filters(integration_check, dbm_instance, aggregator):
     test_cases = [
-        # [
-        #     {'include_databases': ['.*'], 'include_schemas': ['public'], 'include_tables': ['.*']},
-        #     [
-        #         "persons",
-        #         "personsdup1",
-        #         "personsdup2",
-        #         "personsdup3",
-        #         "personsdup4",
-        #         "personsdup5",
-        #         "personsdup6",
-        #         "personsdup7",
-        #         "personsdup8",
-        #         "personsdup9",
-        #         "personsdup10",
-        #         "personsdup11",
-        #         "personsdup12",
-        #         "pgtable",
-        #         "pg_newtable",
-        #         "cities",
-        #     ],
-        #     [],
-        # ],
-        # [
-        #     {'exclude_tables': ['person.*']},
-        #     [
-        #         "pgtable",
-        #         "pg_newtable",
-        #         "cities",
-        #     ],
-        #     [
-        #         "persons",
-        #         "personsdup1",
-        #         "personsdup2",
-        #         "personsdup3",
-        #         "personsdup4",
-        #         "personsdup5",
-        #         "personsdup6",
-        #         "personsdup7",
-        #         "personsdup8",
-        #         "personsdup9",
-        #         "personsdup10",
-        #         "personsdup11",
-        #         "personsdup12",
-        #     ],
-        # ],
-        # [
-        #     {'include_tables': ['person.*'], 'exclude_tables': ['person.*']},
-        #     [],
-        #     [
-        #         "persons",
-        #         "personsdup1",
-        #         "personsdup2",
-        #         "personsdup3",
-        #         "personsdup4",
-        #         "personsdup5",
-        #         "personsdup6",
-        #         "personsdup7",
-        #         "personsdup8",
-        #         "personsdup9",
-        #         "personsdup10",
-        #         "personsdup11",
-        #         "personsdup12",
-        #     ],
-        # ],
-        # [
-        #     {'include_tables': ['person.*', "cities"]},
-        #     [
-        #         "persons",
-        #         "personsdup1",
-        #         "personsdup2",
-        #         "personsdup3",
-        #         "personsdup4",
-        #         "personsdup5",
-        #         "personsdup6",
-        #         "personsdup7",
-        #         "personsdup8",
-        #         "personsdup9",
-        #         "personsdup10",
-        #         "personsdup11",
-        #         "personsdup12",
-        #         "cities",
-        #     ],
-        #     [
-        #         "pgtable",
-        #         "pg_newtable",
-        #     ],
-        # ],
-        # [
-        #     {'exclude_tables': ['person.*', "cities"]},
-        #     [
-        #         "pgtable",
-        #         "pg_newtable",
-        #     ],
-        #     [
-        #         "persons",
-        #         "personsdup1",
-        #         "personsdup2",
-        #         "personsdup3",
-        #         "personsdup4",
-        #         "personsdup5",
-        #         "personsdup6",
-        #         "personsdup7",
-        #         "personsdup8",
-        #         "personsdup9",
-        #         "personsdup10",
-        #         "personsdup11",
-        #         "personsdup12",
-        #         "cities",
-        #     ],
-        # ],
+        [
+            {'include_databases': ['.*'], 'include_schemas': ['public'], 'include_tables': ['.*']},
+            [
+                "persons",
+                "personsdup1",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup10",
+                "personsdup11",
+                "personsdup12",
+                "pgtable",
+                "pg_newtable",
+                "cities",
+            ],
+            [],
+        ],
+        [
+            {'exclude_tables': ['person.*']},
+            [
+                "pgtable",
+                "pg_newtable",
+                "cities",
+            ],
+            [
+                "persons",
+                "personsdup1",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup10",
+                "personsdup11",
+                "personsdup12",
+            ],
+        ],
+        [
+            {'include_tables': ['person.*'], 'exclude_tables': ['person.*']},
+            [],
+            [
+                "persons",
+                "personsdup1",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup10",
+                "personsdup11",
+                "personsdup12",
+            ],
+        ],
+        [
+            {'include_tables': ['person.*', "cities"]},
+            [
+                "persons",
+                "personsdup1",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup10",
+                "personsdup11",
+                "personsdup12",
+                "cities",
+            ],
+            [
+                "pgtable",
+                "pg_newtable",
+            ],
+        ],
+        [
+            {'exclude_tables': ['person.*', "cities"]},
+            [
+                "pgtable",
+                "pg_newtable",
+            ],
+            [
+                "persons",
+                "personsdup1",
+                "personsdup2",
+                "personsdup3",
+                "personsdup4",
+                "personsdup5",
+                "personsdup6",
+                "personsdup7",
+                "personsdup8",
+                "personsdup9",
+                "personsdup10",
+                "personsdup11",
+                "personsdup12",
+                "cities",
+            ],
+        ],
         [
             {'include_tables': ['person.*1', "cities"], 'exclude_tables': ['person.*2', "pg.*"]},
             [

@@ -193,13 +193,13 @@ class PostgresSchemaCollector(SchemaCollector):
         config = SchemaCollectorConfig()
         config.collection_interval = check._config.collect_schemas.collection_interval
         config.max_tables = check._config.collect_schemas.max_tables
-        config.exclude_databases =  check._config.collect_schemas.exclude_databases
-        config.include_databases =  check._config.collect_schemas.include_databases
-        config.exclude_schemas =  check._config.collect_schemas.exclude_schemas
-        config.include_schemas =  check._config.collect_schemas.include_schemas
-        config.exclude_tables =  check._config.collect_schemas.exclude_tables
-        config.include_tables =  check._config.collect_schemas.include_tables
-        config.max_columns =  check._config.collect_schemas.max_columns
+        config.exclude_databases = check._config.collect_schemas.exclude_databases
+        config.include_databases = check._config.collect_schemas.include_databases
+        config.exclude_schemas = check._config.collect_schemas.exclude_schemas
+        config.include_schemas = check._config.collect_schemas.include_schemas
+        config.exclude_tables = check._config.collect_schemas.exclude_tables
+        config.include_tables = check._config.collect_schemas.include_tables
+        config.max_columns = check._config.collect_schemas.max_columns
         super().__init__(check, config)
 
     @property
@@ -213,7 +213,9 @@ class PostgresSchemaCollector(SchemaCollector):
                 for exclude_regex in self._config.exclude_databases:
                     query += " AND datname !~ '{}'".format(exclude_regex)
                 if self._config.include_databases:
-                    query += f" AND ({' OR '.join(f"datname ~ '{include_regex}'" for include_regex in self._config.include_databases)})"
+                    query += f" AND ({
+                        ' OR '.join(f"datname ~ '{include_regex}'" for include_regex in self._config.include_databases)
+                    })"
 
                 # Autodiscovery trumps exclude and include
                 if self._check.autodiscovery:
@@ -292,7 +294,6 @@ class PostgresSchemaCollector(SchemaCollector):
                     )
                     {partitions_ctes}
 
-                    SELECT * FROM (
                     SELECT schema_tables.schema_id, schema_tables.schema_name,
                         schema_tables.table_id, schema_tables.table_name,
                         array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
@@ -305,8 +306,8 @@ class PostgresSchemaCollector(SchemaCollector):
                         LEFT JOIN indexes ON schema_tables.table_id = indexes.table_id
                         LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
                         {partition_joins}
-                    GROUP BY schema_tables.schema_id, schema_tables.schema_name, schema_tables.table_id, schema_tables.table_name
-                    ) t
+                    GROUP BY schema_tables.schema_id, schema_tables.schema_name
+                        schema_tables.table_id, schema_tables.table_name
                     ;
                 """
                 # print(query)
@@ -319,7 +320,9 @@ class PostgresSchemaCollector(SchemaCollector):
         for exclude_regex in self._config.exclude_schemas:
             query += " AND nspname !~ '{}'".format(exclude_regex)
         if self._config.include_schemas:
-            query += f" AND ({' OR '.join(f"nspname ~ '{include_regex}'" for include_regex in self._config.include_schemas)})"
+            query += f" AND ({
+                ' OR '.join(f"nspname ~ '{include_regex}'" for include_regex in self._config.include_schemas)
+            })"
         if self._check._config.ignore_schemas_owned_by:
             query += " AND nspowner :: regrole :: text not IN ({})".format(
                 ", ".join(f"'{owner}'" for owner in self._check._config.ignore_schemas_owned_by)
@@ -334,7 +337,9 @@ class PostgresSchemaCollector(SchemaCollector):
         for exclude_regex in self._config.exclude_tables:
             query += " AND c.relname !~ '{}'".format(exclude_regex)
         if self._config.include_tables:
-            query += f" AND ({' OR '.join(f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables)})"
+            query += f" AND ({
+                ' OR '.join(f"c.relname ~ '{include_regex}'" for include_regex in self._config.include_tables)
+            })"
         return query
 
     def _get_next(self, cursor):

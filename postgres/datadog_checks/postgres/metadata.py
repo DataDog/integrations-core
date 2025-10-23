@@ -6,7 +6,6 @@ from __future__ import annotations
 import json
 import re
 import time
-from typing import Dict, List, Union
 
 import psycopg
 from psycopg.rows import dict_row
@@ -14,7 +13,7 @@ from psycopg.rows import dict_row
 from .schemas import PostgresSchemaCollector
 
 try:
-    import datadog_agent
+    import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
@@ -28,7 +27,6 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
 from .util import payload_pg_version
-from .version_utils import VersionUtils
 
 # PG_EXTENSION_INFO_QUERY is used to collect extension names and versions from
 # the pg_extension table. Schema names and roles are retrieved from their re-
@@ -72,147 +70,6 @@ PG_EXTENSION_LOADER_QUERY = {
     'hstore': "SELECT 'a=>1'::hstore;",
 }
 
-DATABASE_INFORMATION_QUERY = """
-SELECT db.oid                        AS id,
-       datname                       AS NAME,
-       pg_encoding_to_char(encoding) AS encoding,
-       rolname                       AS owner,
-       description
-FROM   pg_catalog.pg_database db
-       LEFT JOIN pg_catalog.pg_description dc
-              ON dc.objoid = db.oid
-       JOIN pg_roles a
-         ON datdba = a.oid
-WHERE  datname LIKE '{dbname}';
-"""
-
-PG_TABLES_QUERY_V10_PLUS = """
-SELECT c.oid                 AS id,
-       c.relname             AS name,
-       c.relhasindex         AS has_indexes,
-       c.relowner :: regrole AS owner,
-       ( CASE
-           WHEN c.relkind = 'p' THEN TRUE
-           ELSE FALSE
-         END )               AS has_partitions,
-       t.relname             AS toast_table
-FROM   pg_class c
-       left join pg_class t
-              ON c.reltoastrelid = t.oid
-WHERE  c.relkind IN ( 'r', 'p', 'f' )
-       AND c.relispartition != 't'
-       AND c.relnamespace = {schema_oid}
-       {filter};
-"""
-
-PG_TABLES_QUERY_V9 = """
-SELECT c.oid                 AS id,
-       c.relname             AS name,
-       c.relhasindex         AS has_indexes,
-       c.relowner :: regrole AS owner,
-       t.relname             AS toast_table
-FROM   pg_class c
-       left join pg_class t
-              ON c.reltoastrelid = t.oid
-WHERE  c.relkind IN ( 'r', 'f' )
-       AND c.relnamespace = {schema_oid}
-       {filter};
-"""
-
-
-SCHEMA_QUERY = """
-SELECT nsp.oid                 AS id,
-       nspname             AS name,
-       nspowner :: regrole AS owner
-FROM   pg_namespace nsp
-       LEFT JOIN pg_roles r on nsp.nspowner = r.oid
-WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
-       AND nspname NOT LIKE 'pg_toast%'
-       AND nspname NOT LIKE 'pg_temp_%'{};
-"""
-
-PG_INDEXES_QUERY = """
-SELECT
-    c.relname AS name,
-    ix.indrelid AS table_id,
-    pg_get_indexdef(c.oid) AS definition,
-    ix.indisunique AS is_unique,
-    ix.indisexclusion AS is_exclusion,
-    ix.indimmediate AS is_immediate,
-    ix.indisclustered AS is_clustered,
-    ix.indisvalid AS is_valid,
-    ix.indcheckxmin AS is_checkxmin,
-    ix.indisready AS is_ready,
-    ix.indislive AS is_live,
-    ix.indisreplident AS is_replident,
-    ix.indpred IS NOT NULL AS is_partial
-FROM
-    pg_index ix
-JOIN
-    pg_class c
-ON
-    c.oid = ix.indexrelid
-WHERE
-    ix.indrelid IN ({table_ids});
-"""
-
-PG_CHECK_FOR_FOREIGN_KEY = """
-SELECT count(conname)
-FROM   pg_constraint
-WHERE  contype = 'f'
-       AND conrelid = {oid};
-"""
-
-PG_CONSTRAINTS_QUERY = """
-SELECT conname                   AS name,
-       pg_get_constraintdef(oid) AS definition,
-       conrelid AS id
-FROM   pg_constraint
-WHERE  contype = 'f'
-       AND conrelid IN ({table_ids});
-"""
-
-COLUMNS_QUERY = """
-SELECT attname                          AS name,
-       Format_type(atttypid, atttypmod) AS data_type,
-       NOT attnotnull                   AS nullable,
-       pg_get_expr(adbin, adrelid)      AS default,
-       attrelid AS id
-FROM   pg_attribute
-       LEFT JOIN pg_attrdef ad
-              ON adrelid = attrelid
-                 AND adnum = attnum
-WHERE  attrelid IN ({table_ids})
-       AND attnum > 0
-       AND NOT attisdropped;
-"""
-
-PARTITION_KEY_QUERY = """
-SELECT relname,
-       pg_get_partkeydef(oid) AS partition_key
-FROM   pg_class
-WHERE  oid in ({table_ids});
-"""
-
-NUM_PARTITIONS_QUERY = """
-SELECT count(inhrelid :: regclass) AS num_partitions, inhparent as id
-FROM   pg_inherits
-WHERE  inhparent IN ({table_ids})
-GROUP BY inhparent;
-"""
-
-PARTITION_ACTIVITY_QUERY = """
-SELECT pi.inhparent :: regclass         AS parent_table_name,
-       SUM(COALESCE(psu.seq_scan, 0) + COALESCE(psu.idx_scan, 0)) AS total_activity
-FROM   pg_catalog.pg_stat_user_tables psu
-       join pg_class pc
-         ON psu.relname = pc.relname
-       join pg_inherits pi
-         ON pi.inhrelid = pc.oid
-WHERE  pi.inhparent = {parent_oid}
-GROUP  BY pi.inhparent;
-"""
-
 
 def agent_check_getter(self):
     return self._check
@@ -231,9 +88,6 @@ class PostgresMetadata(DBMAsyncJob):
         # Extensions currently doesn't have a separate collection interval option
         self.pg_extensions_collection_interval = self.pg_settings_collection_interval
         self.schemas_collection_interval = config.collect_schemas.collection_interval
-
-        # We want to be able to iterate this as a dict with string interpolation
-        self._collect_schemas_config = config.collect_schemas.model_dump()
 
         # by default, send resources every 10 minutes
         self.collection_interval = min(
@@ -259,7 +113,6 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_extensions_enabled = self._collect_pg_settings_enabled
         self._collect_schemas_enabled = config.collect_schemas.enabled
         self._schema_collector = PostgresSchemaCollector(check) if config.collect_schemas.enabled else None
-        self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
         self._compiled_patterns_cache = {}
         self._extensions_cached = None
@@ -355,350 +208,18 @@ class PostgresMetadata(DBMAsyncJob):
             }
             self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
-        if not self._collect_schemas_enabled:
-            self._log.debug("Skipping schema collection because it is disabled")
-            return
-        if self._is_schemas_collection_in_progress:
-            self._log.debug("Skipping schema collection because it is in progress")
-            return
-        if time.time() - self._last_schemas_query_time < self.schemas_collection_interval:
-            self._log.debug("Skipping schema collection because it was recently collected")
-            return
-
-        self._collect_postgres_schemas()
+        if (
+            self._collect_extensions_enabled
+            and time.time() - self._last_schemas_query_time < self.schemas_collection_interval
+        ):
+            self._collect_postgres_schemas()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_schemas(self):
-        success = self._schema_collector.collect_schemas()
-        if not success:
+        started = self._schema_collector.collect_schemas()
+        if not started:
             # TODO: Emit health event for over-long collection
             self._log.warning("Previous schema collection still in progress, skipping this collection")
-
-    def _should_collect_metadata(self, name, metadata_type):
-        # We get the config as a dict so we can use string interpolation
-        # to iterate over object types
-        excludes = self._collect_schemas_config.get("exclude_{metadata_type}s".format(metadata_type=metadata_type), [])
-        for re_str in excludes:
-            regex = self._get_compiled_pattern(re_str)
-            if regex.search(name):
-                self._log.debug(
-                    "Excluding {metadata_type} {name} from metadata collection because of {re_str}".format(
-                        metadata_type=metadata_type, name=name, re_str=re_str
-                    )
-                )
-                return False
-
-        includes = self._collect_schemas_config.get("include_{metadata_type}s".format(metadata_type=metadata_type), [])
-        if len(includes) == 0:
-            return True
-        for re_str in includes:
-            regex = self._get_compiled_pattern(re_str)
-            if regex.search(name):
-                self._log.debug(
-                    "Including {metadata_type} {name} in metadata collection because of {re_str}".format(
-                        metadata_type=metadata_type, name=name, re_str=re_str
-                    )
-                )
-                return True
-        return False
-
-    def _flush_schema(self, base_event, database, schema, tables):
-        event = {
-            **base_event,
-            "metadata": [{**database, "schemas": [{**schema, "tables": tables}]}],
-            "timestamp": time.time() * 1000,
-        }
-        json_event = json.dumps(event, default=default_json_event_encoding)
-        self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
-        self._check.database_monitoring_metadata(json_event)
-
-    def _payload_pg_version(self):
-        version = self._check.version
-        if not version:
-            return ""
-        return "v{major}.{minor}.{patch}".format(major=version.major, minor=version.minor, patch=version.patch)
-
-    def _collect_schema_info(self):
-        databases = []
-        if self._check.autodiscovery:
-            databases = self._check.autodiscovery.get_items()
-        else:
-            databases.append(self._config.dbname)
-
-        metadata = []
-        for database in databases:
-            metadata.append(self._collect_metadata_for_database(database))
-
-        self._last_schemas_query_time = time.time()
-        return metadata
-
-    def _query_database_information(self, cursor: psycopg.Cursor, dbname: str) -> Dict[str, Union[str, int]]:
-        """
-        Collect database info. Returns
-            description: str
-            name: str
-            id: str
-            encoding: str
-            owner: str
-        """
-        if self._cancel_event.is_set():
-            raise Exception("Job loop cancelled. Aborting query.")
-        cursor.execute(DATABASE_INFORMATION_QUERY.format(dbname=dbname))
-        row = cursor.fetchone()
-        return row
-
-    def _query_schema_information(self, cursor: psycopg.Cursor, dbname: str) -> Dict[str, str]:
-        """
-        Collect user schemas. Returns
-            id: str
-            name: str
-            owner: str
-        """
-        schema_query_ = SCHEMA_QUERY
-
-        if len(self._config.ignore_schemas_owned_by) > 0:
-            schema_query_ = schema_query_.format(
-                " AND "
-                + " AND ".join("r.rolname not ilike '{}'".format(db) for db in self._config.ignore_schemas_owned_by)
-            )
-        else:
-            schema_query_ = schema_query_.format("")
-
-        if self._cancel_event.is_set():
-            raise Exception("Job loop cancelled. Aborting query.")
-        cursor.execute(schema_query_)
-        rows = cursor.fetchall()
-        schemas = []
-        for row in rows:
-            schemas.append({"id": str(row["id"]), "name": row["name"], "owner": row["owner"]})
-
-        self._log.debug("Schemas found for database '{database}': [{schemas}]".format(database=dbname, schemas=rows))
-        return schemas
-
-    def _get_table_info(self, cursor: psycopg.Cursor, dbname, schema_id):
-        """
-        Tables will be sorted by the number of total accesses (index_rel_scans + seq_scans) and truncated to
-        the max_tables limit.
-
-        If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
-        """
-        filter = self._get_tables_filter()
-        if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
-            cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
-        else:
-            cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
-
-        rows = cursor.fetchall()
-        table_info = [dict(row) for row in rows]
-
-        limit = self._config.collect_schemas.max_tables
-
-        if len(table_info) <= limit:
-            return table_info
-
-        self._log.debug(
-            "{table_count} tables found but max_tables is set to {max_tables}."
-            "{missing_count} tables will be missing from this collection".format(
-                table_count=len(table_info), max_tables=limit, missing_count=len(table_info) - limit
-            )
-        )
-
-        if not self._config.relations:
-            self._check.log.warning(
-                "Number of tables exceeds limit of %d set by max_tables but "
-                "relation metrics are not configured for %s."
-                "Please configure relation metrics for all tables to sort by most active."
-                "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                "selfhosted/?tab=postgres15#monitoring-relation-metrics-for-multiple-databases "
-                "for details on how to enable relation metrics.",
-                limit,
-                dbname,
-            )
-            return table_info[:limit]
-
-        return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
-
-    def _get_tables_filter(self):
-        includes = self._config.collect_schemas.include_tables
-        excludes = self._config.collect_schemas.exclude_tables
-        if len(includes) == 0 and len(excludes) == 0:
-            return ""
-
-        sql = ""
-        if len(includes) > 0:
-            sql += " AND ("
-            sql += " OR ".join("c.relname ~ '{r}'".format(r=r.replace("'", "''")) for r in includes)
-            sql += ")"
-
-        if len(excludes) > 0:
-            sql += " AND NOT ("
-            sql += " OR ".join("c.relname ~ '{r}'".format(r=r.replace("'", "''")) for r in excludes)
-            sql += ")"
-
-        return sql
-
-    def _sort_and_limit_table_info(
-        self, cursor: psycopg.Cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
-    ) -> List[Dict[str, Union[str, bool]]]:
-        def sort_tables(info):
-            cache = self._check.metrics_cache.table_activity_metrics
-            # partition master tables won't get any metrics reported on them,
-            # so we have to grab the total partition activity
-            # note: partitions don't exist in V9, so we have to check this first
-            if (
-                VersionUtils.transform_version(str(self._check.version))["version.major"] == "9"
-                or not info["has_partitions"]
-            ):
-                # if we don't have metrics in our cache for this table, return 0
-                table_data = cache.get(dbname, {}).get(
-                    info["name"],
-                    {"index_scans": 0, "seq_scans": 0},
-                )
-                return table_data.get("index_scans", 0) + table_data.get("seq_scans", 0)
-            else:
-                # get activity
-                if self._cancel_event.is_set():
-                    raise Exception("Job loop cancelled. Aborting query.")
-                cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
-                row = cursor.fetchone()
-                return row.get("total_activity", 0) if row is not None else 0
-
-        # if relation metrics are enabled, sorted based on last activity information
-        table_info = sorted(table_info, key=sort_tables, reverse=True)
-        return table_info[:limit]
-
-    def _query_tables_for_schema(
-        self, cursor: psycopg.Cursor, schema_id: str, dbname: str
-    ) -> List[Dict[str, Union[str, Dict]]]:
-        """
-        Collect list of tables for a schema. Returns a list of dictionaries
-        with key/values:
-            "id": str
-            "name": str
-            "owner": str
-            "has_indexes: bool
-            "has_partitions: bool
-            "toast_table": str (if associated toast table exists)
-            "num_partitions": int (if has partitions)
-
-        """
-        tables_info = self._get_table_info(cursor, dbname, schema_id)
-        table_payloads = []
-        for table in tables_info:
-            this_payload = {}
-            this_payload.update({"id": str(table["id"])})
-            this_payload.update({"name": table["name"]})
-            this_payload.update({"owner": table["owner"]})
-            this_payload.update({"has_indexes": table["has_indexes"]})
-            this_payload.update({"has_partitions": table.get("has_partitions", False)})
-            if table["toast_table"] is not None:
-                this_payload.update({"toast_table": table["toast_table"]})
-
-            table_payloads.append(this_payload)
-
-        return table_payloads
-
-    def _query_table_information(
-        self, cursor: psycopg.Cursor, dbname: str, table_info: List[Dict[str, Union[str, bool]]]
-    ) -> List[Dict[str, Union[str, Dict]]]:
-        """
-        Collect table information . Returns a dictionary
-        with key/values:
-            "id": str
-            "name": str
-            "owner": str
-            "foreign_keys": dict (if has foreign keys)
-                name: str
-                definition: str
-            "indexes": dict (if has indexes)
-                name: str
-                definition: str
-                is_unique: bool
-                is_exclusion: bool
-                is_immediate: bool
-                is_clustered: bool
-                is_valid: bool
-                is_checkxmin: bool
-                is_ready: bool
-                is_live: bool
-                is_replident: bool
-                is_partial: bool
-            "columns": dict
-                name: str
-                data_type: str
-                default: str
-                nullable: bool
-            "toast_table": str (if associated toast table exists)
-            "partition_key": str (if has partitions)
-            "num_partitions": int (if has partitions)
-        """
-        tables = {t.get("name"): {**t, "num_partitions": 0} for t in table_info}
-        table_name_lookup = {t.get("id"): t.get("name") for t in table_info}
-        table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
-
-        # Get indexes
-        if self._cancel_event.is_set():
-            raise Exception("Job loop cancelled. Aborting query.")
-        cursor.execute(PG_INDEXES_QUERY.format(table_ids=table_ids))
-
-        rows = cursor.fetchall()
-        for row in rows:
-            # Partition indexes in some versions of Postgres have appended digits for each partition
-            table_name = table_name_lookup.get(str(row.get("table_id")))
-            while tables.get(table_name) is None and len(table_name) > 1 and table_name[-1].isdigit():
-                table_name = table_name[0:-1]
-            if tables.get(table_name) is not None:
-                tables.get(table_name)["indexes"] = tables.get(table_name).get("indexes", []) + [dict(row)]
-
-        # Get partitions
-        if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
-            cursor.execute(PARTITION_KEY_QUERY.format(table_ids=table_ids))
-            rows = cursor.fetchall()
-            for row in rows:
-                tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
-
-            cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
-            rows = cursor.fetchall()
-            for row in rows:
-                table_name = table_name_lookup.get(str(row.get("id")))
-                tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
-
-        # Get foreign keys
-        cursor.execute(PG_CONSTRAINTS_QUERY.format(table_ids=table_ids))
-        rows = cursor.fetchall()
-        for row in rows:
-            table_name = table_name_lookup.get(str(row.get("id")))
-            tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [dict(row)]
-
-        # Get columns
-        cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
-        rows = cursor.fetchall()
-        for row in rows:
-            table_name = table_name_lookup.get(str(row.get("id")))
-            tables.get(table_name)["columns"] = tables.get(table_name).get("columns", []) + [dict(row)]
-
-        return tables.values()
-
-    def _collect_metadata_for_database(self, dbname):
-        metadata = {}
-        with self.db_pool.get_connection(dbname) as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
-                database_info = self._query_database_information(cursor, dbname)
-                metadata.update(
-                    {
-                        "description": database_info["description"],
-                        "name": database_info["name"],
-                        "id": str(database_info["id"]),
-                        "encoding": database_info["encoding"],
-                        "owner": database_info["owner"],
-                        "schemas": [],
-                    }
-                )
-                schema_info = self._query_schema_information(cursor, dbname)
-                for schema in schema_info:
-                    metadata["schemas"].append(schema)
-
-        return metadata
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
