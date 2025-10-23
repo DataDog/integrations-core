@@ -159,6 +159,9 @@ class OpenMetricsScraper:
                 if values is True:
                     self.exclude_metrics_by_labels[label] = return_true
                 elif isinstance(values, list):
+                    if len(values) == 1 and values[0] is True:
+                        self.exclude_metrics_by_labels[label] = return_true
+                        continue
                     for i, value in enumerate(values, 1):
                         if not isinstance(value, str):
                             raise ConfigurationError(
