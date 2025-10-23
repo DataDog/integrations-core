@@ -21,7 +21,6 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.db.health import DEFAULT_COOLDOWN as DEFAULT_HEALTH_COOLDOWN
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
@@ -354,25 +353,29 @@ class DBMAsyncJob(object):
         elif self._job_loop_future is None or not self._job_loop_future.running():
             self._job_loop_future = DBMAsyncJob.executor.submit(self._job_loop)
         else:
-            if self._min_collection_interval >= 1:
+            if (
+                hasattr(self._check, 'health')
+                and self._enable_missed_collection_event
+                and self._min_collection_interval >= 1
+            ):
                 # Assume a collection interval of less than 1 second is an attempt to run the job in a loop
                 if self._last_run_start and time.time() - self._last_run_start > self._min_collection_interval:
-                    if self._check.health and self._enable_missed_collection_event:
-                        # Missed a collection interval, submit a health event for each feature that depends on this job
-                        for feature in self._features:
-                            self._check.health.submit_health_event(
-                                name=HealthEvent.MISSED_COLLECTION,
-                                status=HealthStatus.WARNING,
-                                tags=self._job_tags,
-                                cooldown=True,
-                                cooldown_time=min(DEFAULT_HEALTH_COOLDOWN, self._min_collection_interval),
-                                cooldown_keys=['dbms', 'job_name'],
-                                dbms=self._dbms,
-                                job_name=self._job_name,
-                                last_run_start=self._last_run_start,
-                                elapsed_time=(time.time() - self._last_run_start) * 1000,
-                                feature=feature,
-                            )
+                    # Missed a collection interval, submit a health event for each feature that depends on this job
+                    for feature in self._features:
+                        self._check.health.submit_health_event(
+                            name=HealthEvent.MISSED_COLLECTION,
+                            status=HealthStatus.WARNING,
+                            tags=self._job_tags,
+                            # Use a cooldown to avoid spamming if the job is missing the collection interval
+                            # in a flappy manner
+                            cooldown=True,
+                            cooldown_keys=['dbms', 'job_name'],
+                            dbms=self._dbms,
+                            job_name=self._job_name,
+                            last_run_start=self._last_run_start,
+                            elapsed_time=(time.time() - self._last_run_start) * 1000,
+                            feature=feature,
+                        )
                     self._log.warning("[%s] Missed collection interval", self._job_name)
 
             self._log.debug("Job loop already running. job=%s", self._job_name)
