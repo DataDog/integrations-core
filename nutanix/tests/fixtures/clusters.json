@@ -6,7 +6,7 @@
       },
       "$objectType": "clustermgmt.v4.config.Cluster",
       "extId": "0006411c-0286-bc71-9f02-191e334d457b",
-      "vmCount": 4,
+      "vmCount": 2,
       "backupEligibilityScore": 1,
       "name": "datadoghq.com-Default-Org-dkhrzg",
       "nodes": {
@@ -104,6 +104,10 @@
             "$objectType": "clustermgmt.v4.config.PublicKey",
             "name": "71877eae-8fc1-4aae-8d20-70196dfb2f8d",
             "key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCv4TadyuFYidVeVMKar0y7hZQfCgQqmApXBgQI4c+kSOF+DKn4hw3nznR6mP+wiimxGRXuuIJ89WUW5+4ip5t+DUw82juE35EaPJyeHVMRQMrBiOaOEqEcEiYviTOWMHDnzoJl6AwE7D3z2Z4w2514mbcIrxfl/c/l+z0jsSuQd9mkU75nrbFrEttGNw/7qqXZPwTFiEDa6nuP4ubvzxGE00anN0VMseYMvHWnvLvWGei1mKJksmiH7vXFrWBBHHGYhmxOHYewed8mHhyytoT7AxwDkW7619LmeWWrxWg4XD89Ovw9zLUj/skKANcUTvYXg+9HJJwUg2ONzAaXMGAB9cZyY5fIkJp8uGXd+JuRCfkBBoTwpIS1uAjOsUCjZJ9P9j8AvBCOo8AQG36YbjveE6HIgp8GlHyGeMD2wWLM5dicxr6A+s66DtEoOc6xPgUAdQpKJkYWL8jwevhs2DA3rGcKSQzaKTGdCj2HpXMk2smBRyN9V/ZLjGDcZWmP028= nutanix@ntnx-i-0e356d0d9f45aca82-a-cvm"
+          },
+          {
+            "name": "noueman_khalikine",
+            "key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVK/uGO5XN9+xHS2R5z/MMVEbZi6WCg1oC+KABm4ipgBWT8rsrhUchgjo4P1TWb10m40KRJyoRtqizIVh/Lxibjh/AnZl59/Zz8N+W6XujmFNcAnmE4+Y3Rl56u+ZkJjbIGZp7XTuCQj8lHrL7sPbZBuSNAYxCVF+/MjxaM4W69jv9aQYyA+uL7gBmLS18ZttCikY0OzXdGzXhfvorHnN9nO/K7pJF77NlAyMDXzPbJIhiLFFoJjDzT7FkL6hkrBAZDNn7lQD+VR1KPXPHBZDxMuMzq3xjmiC4VP/mHjn6eoxCGKK0hystJBdPeOO2n4zA1hxSPeevDO4YxXXMsF9z noueman-khalikine\n"
           }
         ],
         "redundancyFactor": 1,
