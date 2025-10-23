@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
@@ -148,10 +147,6 @@ class NutanixCheck(AgentCheck):
         tenant_id = cluster.get("tenantId")
         if tenant_id:
             cluster_tags.append(f"ntnx_tenant_id:{tenant_id}")
-
-        upgrade_status = cluster.get("upgradeStatus")
-        if upgrade_status:
-            cluster_tags.append(f"ntnx_upgrade_status:{upgrade_status.lower()}")
 
         cluster_profile_ext_id = cluster.get("clusterProfileExtId")
         if cluster_profile_ext_id:
