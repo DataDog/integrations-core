@@ -1,0 +1,28 @@
+{
+  "data": {
+    "error": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.error.AppMessage",
+        "message": "Failed to perform the operation as the API call does not support this entity. Error - Host list api is not supported on PC cluster uuid: b6d83094-9404-48de-9c74-ca6bddc3a01d.",
+        "severity": "ERROR",
+        "code": "CLU-10008",
+        "locale": "en_US",
+        "errorGroup": "CLUSTERMGMT_SERVICE_NOT_SUPPORTED_ENTITY_ERROR",
+        "argumentsMap": {
+          "reason": "Host list api is not supported on PC cluster uuid: b6d83094-9404-48de-9c74-ca6bddc3a01d"
+        }
+      }
+    ],
+    "$reserved": {
+      "$fv": "v4.r1"
+    },
+    "$objectType": "clustermgmt.v4.error.ErrorResponse"
+  },
+  "$reserved": {
+    "$fv": "v4.r1"
+  },
+  "$objectType": "clustermgmt.v4.config.ListHostsByClusterIdApiResponse"
+}

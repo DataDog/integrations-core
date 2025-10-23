@@ -41,7 +41,7 @@ def instance_log_requests():
 
 
 def instance_min_collection_interval():
-    return 15
+    return 60
 
 
 def instance_pc_port():
