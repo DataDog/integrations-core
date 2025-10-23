@@ -68,7 +68,7 @@ class Health:
         tags: list[str] = None,
         cooldown: bool = False,
         cooldown_time: int = DEFAULT_COOLDOWN,
-        cooldown_keys: list[str] = None,
+        cooldown_values: list[str] = None,
         **kwargs,
     ):
         """
@@ -83,15 +83,15 @@ class Health:
         :param cooldown: int
             The cooldown period in seconds to prevent the events with the same name and status
             from being submitted again.
-        :param cooldown_keys: list of str
-            Additional kwargs keys to include in the cooldown key.
+        :param cooldown_values: list of str
+            Additional values to include in the cooldown key.
         :param kwargs: Additional keyword arguments to include in the event under `data`.
         """
         category = self.check.__NAMESPACE__ or self.check.__class__.__name__.lower()
         if cooldown:
             cooldown_key = "|".join([category, name.value, status.value])
-            if cooldown_keys:
-                cooldown_key = "|".join([cooldown_key, "|".join([f"{k}={kwargs[k]}" for k in cooldown_keys])])
+            if cooldown_values:
+                cooldown_key = "|".join([cooldown_key, "|".join([f"{v}" for v in cooldown_values])])
             if self._ttl_cache.get(cooldown_key, None):
                 return
             self._ttl_cache[cooldown_key] = cooldown_time

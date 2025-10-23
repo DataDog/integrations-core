@@ -369,7 +369,7 @@ class DBMAsyncJob(object):
                             # Use a cooldown to avoid spamming if the job is missing the collection interval
                             # in a flappy manner
                             cooldown=True,
-                            cooldown_keys=['dbms', 'job_name'],
+                            cooldown_values=[self._dbms, self._job_name],
                             dbms=self._dbms,
                             job_name=self._job_name,
                             last_run_start=self._last_run_start,
