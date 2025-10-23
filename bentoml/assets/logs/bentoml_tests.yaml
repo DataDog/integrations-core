@@ -25,7 +25,8 @@ tests:
       response:
         code: "200"
         length: 407
-        type: "text/plain; charset=utf-8"
+        type: "text/plain;"
+        charset: "utf-8"
       component_name: "entry_service"
       client:
         port: 50870
