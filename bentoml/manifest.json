@@ -16,7 +16,9 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
       "Offering::Integration",
+      "Category::Log Collection",
       "Category::AI/ML"
     ]
   },
