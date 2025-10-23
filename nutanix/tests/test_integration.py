@@ -20,5 +20,4 @@ def test_cluster_metrics_collection(dd_run_check, aggregator, aws_instance):
     check = NutanixCheck('nutanix', {}, [aws_instance])
     dd_run_check(check)
 
-    # Health should be up
     aggregator.assert_metric("nutanix.health.up", value=1)

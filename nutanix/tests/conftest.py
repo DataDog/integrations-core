@@ -1,26 +1,54 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+import os
+
 import pytest
 
+from datadog_checks.dev import get_here
+
+HERE = get_here()
+
+
+def load_fixture(filename):
+    """Load a JSON fixture file and return its content as a dictionary."""
+    fixture_path = os.path.join(HERE, 'fixtures', filename)
+    with open(fixture_path, 'r') as f:
+        return json.load(f)
+
+
 # Test instance configurations
-MOCK_INSTANCE = {
+INSTANCE = {
     "pc_ip": "10.0.0.197",
     "pc_port": 9440,
     "pc_username": "admin",
     "pc_password": "secret",
-    "pc_verify": False,
+    "tls_verify": False,
+}
+
+AWS_INSTANCE = {
+    "pc_ip": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com",
+    "pc_port": 9440,
+    "pc_username": "dd_agent_viewer",
+    "pc_password": "DummyP4ssw0rd!",
+    "tls_verify": False,
 }
 
 
+@pytest.fixture(scope="session")
+def dd_environment():
+    yield AWS_INSTANCE.copy()
+
+
 @pytest.fixture
-def instance():
-    return {}
+def aws_instance():
+    return AWS_INSTANCE.copy()
 
 
 @pytest.fixture
 def mock_instance():
-    return MOCK_INSTANCE.copy()
+    return INSTANCE.copy()
 
 
 @pytest.fixture
@@ -34,8 +62,14 @@ def mock_http_get(mocker):
         if '/console' in url:
             return mock_resp
 
-        # Default response for unmapped URLs
-        mock_resp.json = mocker.Mock(return_value={"data": []})
+        if '/api/clustermgmt/v4.0/config/clusters' in url:
+            clusters_data = load_fixture("clusters.json")
+            mock_resp.json = mocker.Mock(return_value=clusters_data)
+            return mock_resp
+
+        # Default response for unmapped URLs - return HTTP error
+        mock_resp.status_code = 404
+        mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
         return mock_resp
 
     return mocker.patch('requests.Session.get', side_effect=mock_response)
