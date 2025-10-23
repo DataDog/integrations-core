@@ -228,4 +228,4 @@ VSAN_EVENT_PREFIX = 'vsan'
 
 HOSTNAME_CASE_OPTIONS = ['default', 'lower', 'upper']
 
-INFRA_MODE_METRIC = 'vsphere.cpu.usage.avg'
+INFRA_MODE_METRIC = 'cpu.usage.avg'
