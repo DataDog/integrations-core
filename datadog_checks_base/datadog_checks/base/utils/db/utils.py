@@ -324,7 +324,9 @@ class DBMAsyncJob(object):
         self._expected_db_exceptions = expected_db_exceptions
         self._job_name = job_name
         self._enable_missed_collection_event = enable_missed_collection_event
-        self._features = features or [None]
+        self._features = features
+        if self._features is None:
+            self._features = [None]
 
     def cancel(self):
         """
