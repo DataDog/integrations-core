@@ -1,0 +1,472 @@
+id: forescout
+metric_id: forescout
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination City Name
+    path: network.destination.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Code
+    path: network.destination.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Continent Name
+    path: network.destination.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country ISO Code
+    path: network.destination.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Country Name
+    path: network.destination.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision ISO Code
+    path: network.destination.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Destination Subdivision Name
+    path: network.destination.geoip.subdivision.name
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+pipeline:
+  type: pipeline
+  name: Forescout
+  enabled: true
+  filter:
+    query: source:forescout
+  processors:
+    - type: grok-parser
+      name: Parse forescout logs
+      enabled: true
+      source: message
+      samples:
+        - '<165>Sep 2 11:44:01 ddsfs forescout-syslog[2895]: NAC Policy Log: Source:
+          10.50.15.114, Rule: Policy "Primary Classification" , Match:
+          "Windows:Match", Category: Classifier, Details: Host evaluation
+          changed from "CounterACT Devices:Pending" to "Windows:Match" due to
+          condition . Reason: Property update: Operating System "Windows"
+          learned (first time), Function "Workstation" learned (first time),
+          Vendor and Model "VMware" learned (first time). Duration: less than a
+          second'
+        - "<165>Sep 23 17:53:27 ddsfs forescout-syslog[2992]: Log: Login success by
+          admin@10.50.13.83. Details: User admin logged in from 10.50.13.83.
+          Severity: 6"
+      grok:
+        supportRules: >-
+          _parse_header <%{integer}>(%{date("MMM  d
+          HH:mm:ss")|:timestamp}|%{date("MMM d HH:mm:ss")|:timestamp})
+          %{notSpace:appliance} %{regex(".*(?=\\[)"):identifier}\[%{integer}\]:
+
+          _parse_additional_details %{data:additional_details}
+        matchRules: >-
+          common_rule %{_parse_header} %{regex("NAC Policy Log|Log|Port
+          bite|Scan event|Manual event|Block Event|Mail Anomaly Sender|Mail
+          Anomaly Server|Mail Anomaly Amount|Mail Anomaly Attachment|Mail
+          Anomaly Recipient|Mail Infection Attempt|System statistics|Application
+          status"):event_type_identifier}(.|:) %{_parse_additional_details}
+
+          common_rule1 %{_parse_header} %{_parse_additional_details}
+    - type: date-remapper
+      name: Define `timestamp` as the official time of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: category-processor
+      name: Categorize events by event identifier
+      enabled: true
+      categories:
+        - filter:
+            query: '@event_type_identifier:"Port bite"'
+          name: bite-events
+        - filter:
+            query: '@event_type_identifier:"Scan event"'
+          name: scan-events
+        - filter:
+            query: '@event_type_identifier:"Manual event"'
+          name: lockdown-events
+        - filter:
+            query: "@event_type_identifier:Log"
+          name: system-log-events
+        - filter:
+            query: '@event_type_identifier:"System statistics"'
+          name: system-status-messages
+        - filter:
+            query: '@event_type_identifier:"Application status"'
+          name: packet-engine-status-messages
+        - filter:
+            query: "@additional_details:Uptime*"
+          name: system-uptime-events
+        - filter:
+            query: "@additional_details:User*"
+          name: user-operations
+        - filter:
+            query: "@event_type_identifier:Mail*"
+          name: email-worm-events
+        - filter:
+            query: '@event_type_identifier:"NAC Policy Log"'
+          name: nac-policy-events
+        - filter:
+            query: '@event_type_identifier:"Block Event"'
+          name: block-events
+      target: evt.name
+    - type: category-processor
+      name: Categorize service by `evt.name`
+      enabled: true
+      categories:
+        - filter:
+            query: "@evt.name:(bite-events OR scan-events OR lockdown-events OR block-events
+              OR email-worm-events)"
+          name: threat-protection
+        - filter:
+            query: "@evt.name:(system-uptime-events OR system-log-events OR
+              system-status-messages OR packet-engine-status-messages)"
+          name: system-logs
+        - filter:
+            query: "@evt.name:user-operations"
+          name: user-operations
+        - filter:
+            query: "@evt.name:nac-policy-events"
+          name: nac-events
+      target: service
+    - type: service-remapper
+      name: Define `service` as the official service of the log
+      enabled: true
+      sources:
+        - service
+    - type: pipeline
+      name: Process NAC Events
+      enabled: true
+      filter:
+        query: service:nac-events
+      processors:
+        - type: grok-parser
+          name: Parse NAC Policy logs
+          enabled: true
+          source: additional_details
+          samples:
+            - "Source: 10.10.10.10, Rule: Manual, Details: Action completed  -
+              Send Send Message to Syslog: Message to Syslog : test action,
+              Message Identity : Forescout, Syslog Server Address : 20.20.20.20,
+              Syslog Server Port : default value, Syslog Server Protocol :
+              default value, Syslog Facility : default value, Syslog Severity :
+              default value, Use TLS : false, Soft-fail OCSP requests : false;
+              Schedule: Action runs every 1 second, starting immediately."
+            - 'Source: 10.10.10.10, Rule: Policy "Primary Classification" ,
+              Match: "Windows:Match", Category: Classifier, Details: Host
+              evaluation changed from "CounterACT Devices:Pending" to
+              "Windows:Match" due to condition . Reason: Property update:
+              Operating System "Windows" learned (first time), Function
+              "Workstation" learned (first time), Vendor and Model "VMware"
+              learned (first time). Duration: less than a second'
+            - 'Source: 10.10.10.10, Rule: Policy "Windows SecureConnector
+              Update" , Match: "Windows SecureConnector Update:Unmatched",
+              Category: N/A, Details: Host evaluation changed from "Windows
+              SecureConnector Update:Pending" to "Windows SecureConnector
+              Update:Unmatched" due to condition . Reason: Property update:
+              Windows Manageable SecureConnector "No" learned (first time).
+              Duration: less than a second'
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_nac_policy_match_unmatch Source: %{ip:network.client.ip},
+              Rule: %{regex(".*(?= , Match:)"):rule_name} , Match:
+              "%{regex("[^\"]*"):match}", Category: %{regex("[^\"]*"):category},
+              Details: %{data:details}
+
+
+              rule_nac_policy Source: %{ip:network.client.ip}, Rule: %{regex(".*(?=, Details:)"):rule_name}, Details: %{data:details}
+        - type: message-remapper
+          name: Define `additional_details` as the official message of the log
+          enabled: true
+          sources:
+            - additional_details
+    - type: pipeline
+      name: Process Threat Protection Events
+      enabled: true
+      filter:
+        query: service:threat-protection
+      processors:
+        - type: grok-parser
+          name: Parse Threat Protection logs
+          enabled: true
+          source: additional_details
+          samples:
+            - "Source: 10.10.10.10. Destination: 10.10.10.11:8080"
+            - "Source: 10.10.1.123. Details:
+              mail_from=sender@from.com,mail_to=recipient@to.com,mail_subject=C\
+              heck out this report"
+            - "Source: 10.10.1.123."
+            - "Host: 10.10.2.123, Target: 10.20.3.234, Time: 1469975529,
+              Service: 23/TCP, Is Virtual Firewall blocking rule: false, Reason:
+              Port block"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_port_bite_events Source: %{ip:network.client.ip}.
+              Destination:
+              %{ip:network.destination.ip}:%{integer:network.destination.port}
+
+              rule_scan_and_lockdown_events Source: %{ip:network.client.ip}(.)?
+
+              rule_block_events Host: %{ip:network.client.ip}, Target: %{ip:network.destination.ip}, Time: %{number:epoch_time}, Service: %{integer:network.destination.port}/%{word:protocol}, Is Virtual Firewall blocking rule: %{boolean:virtual_firewall_blocking_rule}, Reason: %{data:reason}
+
+              rule_email_worm_events Source: %{ip:network.client.ip}. Details:%{data::keyvalue("=")}
+        - type: attribute-remapper
+          name: Map `mail_from` to `usr.email`
+          enabled: true
+          sources:
+            - mail_from
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: "Process System Logs and Events "
+      enabled: true
+      filter:
+        query: service:system-logs
+      processors:
+        - type: grok-parser
+          name: Parse System Log and Events
+          enabled: true
+          source: additional_details
+          samples:
+            - "CounterACT Appliance is running;Connected clients: none.;EM
+              connection status: N/A (standalone appliance);Assigned hosts:
+              146;Engine status: Ready ;Installed Plugins: Wireless, FireEye HX,
+              Web API, Visibility Content Plugin, NBT Scanner, Security Policy
+              Templates, Centralized Network Controller, Advanced Compliance,
+              IOC Scanner, VMware NSX, Cloud Uploader, Technical Support, Switch
+              Content, External Classifier, Data Publisher, Advanced Tools, DNS
+              Enforce, Azure, IoT Posture Assessment Engine, CEF, Device Profile
+              Library, Connect, Device Classification Engine, Data Exchange
+              (DEX), NIC Vendor DB, Admin API, Web Client, RADIUS, Windows
+              Applications, Flow Analyzer, Linux, Switch, pxGrid, Network
+              Controller, Passive Sensor, OS X, Microsoft SCCM/ECM, DPI, Cloud
+              Classification Gateway, Flow Collector, DNS Query Extension, IoT
+              Posture Assessment Library, HPS Inspection Engine, DHCP
+              Classifier, Windows Vulnerability DB, Active Probing Plugin,
+              Network Controller Content, Rogue Device, HPS Agent Manager, VPN,
+              FireEye NX, Dashboards, AWS, Data Receiver, Forescout
+              Infrastructure Update Pack, Reports, Packet Engine, VMware
+              vSphere, Device Data Publisher, Syslog, User Directory, Hardware
+              Inventory, Cloud Data Exchange, DNS Client;;"
+            - "Login success by admin@10.10.10.10. Details: User admin logged in
+              from 10.10.10.10. Severity: 6"
+            - "Login failed abhi@10.10.10.10. Details: User abhi failed to login
+              from 10.10.10.10. Severity: 4"
+            - "Logout by admin@10.10.10.10. Details: User admin@10.10.10.10
+              logged out. Severity: 6"
+            - "CPU usage: 17%, Available memory : 12237100 KB, Used memory:
+              23337288 KB, Available swap: 16777208 KB, Used swap: 11467492 KB"
+          grok:
+            supportRules: ""
+            matchRules: >-
+              rule_license_alert %{regex("License alert"):activity_type}.
+              Details: %{regex(".*(?=. Severity)"):details}. Severity:
+              %{integer:severity}
+
+
+              rule_login_success_and_failed %{regex("Login|Logout"):activity_type}( by)?( %{regex("success|failed"):evt.outcome})? %{regex("(.*)(?=@)"):usr.name}@%{ip:network.client.ip}. Details: %{regex(".*(?=. Severity)"):details}. Severity: %{integer:severity}
+
+
+              rule_system_statistics CPU usage: %{number:cpu_usage}%, Available memory : %{number:available_memory} KB, Used memory: %{number:used_memory} KB, Available swap: %{number:available_swap} KB, Used swap: %{number:used_swap} KB
+
+
+              rule_application_status %{regex("[^;]+"):application_status};Connected clients: (%{regex("(.*)(?=@)"):usr.name}@%{notSpace:hostname}|none.);(Recovery EM: %{ip:recovery_em};)?(EM connection status: %{regex("[^;]+"):em_connection_status};)?(Assigned hosts: %{number:assigned_hosts};)?(Engine status: %{regex("[^;]+"):engine_status} ;)?Installed Plugins: %{data:installed_plugins:array("",", ")};;
+
+
+              rule_system_logs %{data}Severity: %{integer:severity}
+        - type: message-remapper
+          name: Define `additional_details` as the official message of the log
+          enabled: true
+          sources:
+            - additional_details
+    - type: pipeline
+      name: Process User Operations Events
+      enabled: true
+      filter:
+        query: service:user-operations
+      processors:
+        - type: grok-parser
+          name: Parse User Operations Logs
+          enabled: true
+          source: additional_details
+          samples:
+            - "User admin session 4723885926247600395 changed License
+              Management. Details: Failed to update license file on CounterACT
+              Appliance 10.10.10.10. <EOL> Error:<EOL> The file format is
+              invalid. The file is not a valid license file."
+            - "User admin session 4723885926247600395 changed License
+              Management. Details: Failed to upload license file on Enterprise
+              Manager : The file format is invalid. The file is not a valid
+              license file."
+            - "User admin session 935304488040107520 changed License Management.
+              Details: License file has been activated successfully on
+              CounterACT Appliance 10.10.10.10. <EOL> <EOL> Successful
+              activation details:<EOL> ForeScout eyeSight license - Type: NFR,
+              Capacity: 100, Status: Valid. Start date: 10 Sep 2025, Expiration
+              date: 10 Sep 2028"
+            - "User admin session 7737223649048649975 changed License
+              Management. Details: Failed to remove Connect Module license from
+              CounterACT Appliance 10.10.10.10. <EOL> Error:<EOL> Before you can
+              remove the license, first uninstall the module in Options >
+              Modules."
+            - "User admin session 0 changed Segment Configuration. Details:
+              Edited the following Segment Datadog-test :<EOL>   <EOL>  Added
+              the following Ranges:<EOL>   172.17.0.0-172.17.1.255"
+          grok:
+            supportRules: >-
+              _parse_header User %{regex("(.*)(?= session )"):usr.name} session
+              %{notSpace:session_id} changed %{regex("License Management|Segment
+              Configuration"):target}.
+
+              _parse_error \<EOL\>%{_space}Error:\<EOL\>%{_space}%{data:error}
+
+              _space \s+
+            matchRules: >-
+              rule_license_activation_successful %{_parse_header} Details:
+              License file has been %{regex("deactivated|activated"):action}
+              %{regex("successfully"):evt.outcome} on %{data:entity_name}
+              %{ip:network.client.ip}.%{data:additional_license_details}
+
+
+              rule_license_activation_failed %{_parse_header} Details: %{regex("Failed"):evt.outcome} to %{regex("activate|update"):action} license file on %{data:entity_name} %{ip:network.client.ip}. %{_parse_error}
+
+
+              rule_remove_license_failed %{_parse_header} Details: %{regex("Failed"):evt.outcome} to %{regex("remove"):action} %{notSpace:module_name} Module license from %{data:entity_name} %{ip:network.client.ip}. %{_parse_error}
+
+
+              rule_upload_license_failed %{_parse_header} Details: %{regex("Failed"):evt.outcome} to %{regex("upload"):action} license file on %{data:entity_name} : %{data:error}
+
+
+              rule_segment_configuration %{_parse_header} Details: Edited the following Segment %{notSpace:segment_name}%{_space}:\<EOL\>%{_space}\<EOL\>%{_space}Added the following Ranges:\<EOL\>%{_space}%{notSpace:ip_range}
+        - type: message-remapper
+          name: Define `additional_details` as the official message of the log
+          enabled: true
+          sources:
+            - additional_details
+    - name: Lookup on `evt.outcome`
+      enabled: true
+      source: evt.outcome
+      target: evt.outcome
+      lookupTable: |-
+        successfully,success
+        Failed,failed
+      type: lookup-processor
+    - name: Lookup on `action`
+      enabled: true
+      source: action
+      target: action
+      lookupTable: |-
+        activated,activate
+        deactivated,deactivate
+      type: lookup-processor
+    - type: category-processor
+      name: Categorize the `severity`
+      enabled: true
+      categories:
+        - filter:
+            query: "@severity:0"
+          name: Emergency
+        - filter:
+            query: "@severity:1"
+          name: Alert
+        - filter:
+            query: "@severity:2"
+          name: Critical
+        - filter:
+            query: "@severity:3"
+          name: Error
+        - filter:
+            query: "@severity:4"
+          name: Warning
+        - filter:
+            query: "@severity:5"
+          name: Notice
+        - filter:
+            query: "@severity:6"
+          name: Informational
+        - filter:
+            query: "@severity:7"
+          name: Debug
+      target: status
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status
+    - type: geo-ip-parser
+      name: Extract geolocation information from source
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
+    - type: geo-ip-parser
+      name: Extract geolocation information from destination
+      enabled: true
+      sources:
+        - network.destination.ip
+      target: network.destination.geoip
+      ip_processing_behavior: do-nothing

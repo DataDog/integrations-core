@@ -1,0 +1,95 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "bcaf5c4c-cffc-4b33-866c-d5025f29c4b0",
+  "app_id": "forescout",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Forescout logs",
+    "title": "Forescout",
+    "media": [
+      {
+        "caption": "Forescout Overview",
+        "image_url": "images/forescout_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout Threat Protection",
+        "image_url": "images/forescout_threat_protection_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout Threat Protection",
+        "image_url": "images/forescout_threat_protection_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout Threat Protection",
+        "image_url": "images/forescout_threat_protection_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout NAC Policy Logs",
+        "image_url": "images/forescout_nac_policy_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout System Logs and Events",
+        "image_url": "images/forescout_system_logs_and_events_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout System Logs and Events",
+        "image_url": "images/forescout_system_logs_and_events_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Forescout User Operations",
+        "image_url": "images/forescout_user_operations.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Security",
+      "Category::Network",
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 59839914,
+      "source_type_name": "Forescout",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Forescout - Logs Overview": "assets/dashboards/forescout_overview.json",
+      "Forescout - Threat Protection": "assets/dashboards/forescout_threat_protection.json",
+      "Forescout - NAC Policy Logs": "assets/dashboards/forescout_nac_policy_logs.json",
+      "Forescout - System Logs and Events": "assets/dashboards/forescout_system_logs_and_events.json",
+      "Forescout - User Operations": "assets/dashboards/forescout_user_operations.json"
+    },
+    "logs": {
+      "source": "forescout"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
