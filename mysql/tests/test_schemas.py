@@ -53,7 +53,7 @@ def test_get_cursor(dbm_instance, integration_check):
         for row in cursor:
             schemas.append(row['schema_name'])
 
-        assert set(schemas) == {'datadog', 'hstore', 'public', 'public2'}
+        assert set(schemas) == {'datadog_test_schemas', 'datadog', 'datadog_test_schemas_second', 'testdb'}
 
 
 def test_tables(dbm_instance, integration_check):
@@ -67,27 +67,7 @@ def test_tables(dbm_instance, integration_check):
             if row['table_name']:
                 tables.append(row['table_name'])
 
-    assert set(tables) == {
-        'persons',
-        'personsdup1',
-        'personsdup2',
-        'personsdup3',
-        'personsdup4',
-        'personsdup5',
-        'personsdup6',
-        'personsdup7',
-        'personsdup8',
-        'personsdup9',
-        'personsdup10',
-        'personsdup11',
-        'personsdup12',
-        'personsdup13',
-        'persons_indexed',
-        'pgtable',
-        'pg_newtable',
-        'cities',
-        'sample_foreign_d73a8c',
-    }
+    assert set(tables) =={'cities', 'RestaurantReviews', 'cities_partitioned', 'users', 'Restaurants', 'ϑings', 'landmarks', 'ts'} 
 
 
 # def test_columns(dbm_instance, integration_check):
