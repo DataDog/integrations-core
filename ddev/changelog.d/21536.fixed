@@ -1,0 +1,1 @@
+Fixed retrieval of previous dependency size calculations so they can be used in CI runs on pushes to master.

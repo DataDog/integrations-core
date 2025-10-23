@@ -12,6 +12,8 @@ The integration provides comprehensive monitoring of your TGI servers by collect
 
 This enables teams to optimize LLM inference performance, track resource utilization, troubleshoot bottlenecks, and ensure reliable model serving at scale.
 
+**Minimum Agent version:** 7.70.1
+
 ## Setup
 
 Follow these instructions to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
@@ -35,6 +37,39 @@ No additional installation is needed on your server.
    ```
 
 3. [Restart the Agent][5].
+
+#### Logs
+
+The Hugging Face TGI integration can collect logs from the server container and forward them to Datadog. The TGI server container needs to be started with the environment variable `NO_COLOR=1` and the option `--json-output` for the logs output to be correctly parsed by Datadog. After setting these variables, the server must be restarted to enable log ingestion.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit the logs configuration block in your `hugging_face_tgi.d/conf.yaml` file. Here's an example:
+
+   ```yaml
+   logs:
+     - type: docker
+       source: hugging_face_tgi
+       service: text-generation-inference
+       auto_multi_line_detection: true
+   ```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][13].
+
+Then, set Log Integrations as pod annotations. This can also be configured with a file, a configmap, or a key-value store. For more information, see the configuration section of [Kubernetes Log Collection][14].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
@@ -66,6 +101,21 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 In containerized environments, ensure that the Agent has network access to the TGI metrics endpoint specified in `hugging_face_tgi.d/conf.yaml`.
 
+If you wish to ingest non JSON TGI logs, use the following logs configuration:
+
+```yaml
+   logs:
+     - type: docker
+       source: hugging_face_tgi
+       service: text-generation-inference
+       auto_multi_line_detection: true
+       log_processing_rules:
+         - type: mask_sequences
+           name: strip_ansi
+           pattern: "\\x1B\\[[0-9;]*m"
+           replace_placeholder: ""
+```
+
 Need help? Contact [Datadog support][9].
 
 
@@ -80,3 +130,5 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://huggingface.co/docs/text-generation-inference/en/basic_tutorials/monitoring
 [11]: https://docs.datadoghq.com/agent/configuration/agent-configuration-files/#agent-configuration-directory
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
+[14]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration

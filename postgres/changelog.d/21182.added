@@ -1,1 +1,0 @@
-Add gauge postgresql.locks.idle_in_transaction_age to measure age (s) of idle-in-transaction sessions holding exclusive relation locks; tags: pid, db, session_user, app, client_hostname, lock_mode, relation, relation_owner; limit 100 rows.

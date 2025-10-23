@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c6033e2f-8b3d-4b82-8d35-7c61ce7d0908",
   "app_id": "sonarqube",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

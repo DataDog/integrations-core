@@ -4,6 +4,8 @@
 
 This check monitors the state of any Windows Service and submits a service check to Datadog.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -82,6 +84,8 @@ The check automatically tags the Windows service name to each service check in t
 Beginning with Agent version 7.40, the check can add a `windows_service_startup_type:<STARTUP_TYPE>` tag to each service check to indicate the startup type of the service. Set the `windows_service_startup_type_tag` option to include this tag with each service check.
 
 Beginning with Agent version 7.55, the check can add a `display_name:<DISPLAY_NAME>` tag to each service check to indicate the display name of the service. Set the `collect_display_name_as_tag` option to `true` to include this tag with each service check.
+
+Beginning with Agent version 7.73, the check automatically adds a `windows_service_state:<STATE>` tag to each service check to indicate the state of the service.
 
 ### Validation
 

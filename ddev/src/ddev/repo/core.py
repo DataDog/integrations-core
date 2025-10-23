@@ -80,7 +80,7 @@ class IntegrationRegistry:
             return self.__cache[name]
 
         path = self.repo.path / name
-        if not path.is_dir():
+        if not (path.is_dir() and not self.repo.git.is_worktree(path)):
             raise OSError(f'Integration does not exist: {Path(self.repo.path.name, name)}')
 
         integration = Integration(path, self.repo.path, self.repo.config)
@@ -176,7 +176,12 @@ class IntegrationRegistry:
             return
 
         for path in sorted(self.repo.path.iterdir()):
+            # Ignore any subdirectory that is a worktree
+            if self.repo.git.is_worktree(path):
+                continue
+
             integration = self.__get_from_path(path)
+
             if selected and integration.name not in selected:
                 continue
 

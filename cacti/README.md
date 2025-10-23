@@ -7,6 +7,8 @@ Get metrics from Cacti in real time to:
 - Visualize and monitor Cacti states.
 - Be notified about Cacti failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

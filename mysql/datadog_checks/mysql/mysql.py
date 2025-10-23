@@ -63,6 +63,7 @@ from .innodb_metrics import InnoDBMetrics
 from .metadata import MySQLMetadata
 from .queries import (
     QUERY_DEADLOCKS,
+    QUERY_ERRORS_RAISED,
     QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
@@ -138,10 +139,23 @@ class MySql(AgentCheck):
         self.innodb_stats = InnoDBMetrics()
         self.check_initializations.append(self._config.configuration_checks)
         self._warnings_by_code = {}
-        self._statement_metrics = MySQLStatementMetrics(self, self._config, self._get_connection_args())
-        self._statement_samples = MySQLStatementSamples(self, self._config, self._get_connection_args())
-        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args())
-        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args())
+
+        # Determine if using AWS managed authentication
+        self._uses_aws_managed_auth = (
+            'aws' in self.cloud_metadata
+            and 'managed_authentication' in self.cloud_metadata.get('aws', {})
+            and self.cloud_metadata['aws']['managed_authentication'].get('enabled', False)
+        )
+
+        # Pass function reference and managed auth flag to async jobs
+        self._statement_metrics = MySQLStatementMetrics(
+            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
+        )
+        self._statement_samples = MySQLStatementSamples(
+            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
+        )
+        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -232,8 +246,6 @@ class MySql(AgentCheck):
         """
         self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
-        if self.agent_hostname:
-            self.tag_manager.set_tag("ddagenthostname", self.agent_hostname, replace=True)
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
@@ -427,6 +439,8 @@ class MySql(AgentCheck):
 
         if self.global_variables.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
+            if not self.is_mariadb and self.version.version_compatible((8, 0, 0)) and self._config.dbm_enabled:
+                queries.extend([QUERY_ERRORS_RAISED])
         if self._index_metrics.include_index_metrics:
             queries.extend(self._index_metrics.queries)
         self._runtime_queries_cached = self._new_query_executor(queries)
@@ -474,20 +488,18 @@ class MySql(AgentCheck):
             return connection_args
 
         connection_args.update({'user': self._config.user, 'passwd': self._config.password})
-        if 'aws' in self.cloud_metadata and 'managed_authentication' in self.cloud_metadata['aws']:
-            # if we are running on AWS, check if IAM auth is enabled
+        if self._uses_aws_managed_auth:
+            # Generate AWS IAM auth token
             aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
-            if aws_managed_authentication['enabled']:
-                # if IAM auth is enabled, region must be set. Validation is done in the config
-                region = self.cloud_metadata['aws']['region']
-                password = aws.generate_rds_iam_token(
-                    host=self._config.host,
-                    username=self._config.user,
-                    port=self._config.port,
-                    region=region,
-                    role_arn=aws_managed_authentication.get('role_arn'),
-                )
-                connection_args.update({'user': self._config.user, 'passwd': password})
+            region = self.cloud_metadata['aws']['region']
+            password = aws.generate_rds_iam_token(
+                host=self._config.host,
+                username=self._config.user,
+                port=self._config.port,
+                region=region,
+                role_arn=aws_managed_authentication.get('role_arn'),
+            )
+            connection_args.update({'user': self._config.user, 'passwd': password})
         if self._config.mysql_sock != '':
             self.service_check_tags = self._service_check_tags(self._config.mysql_sock)
             connection_args.update({'unix_socket': self._config.mysql_sock})
@@ -542,9 +554,7 @@ class MySql(AgentCheck):
             # Use cached global variables instead of making a separate query
             results.update(self.global_variables.all_variables)
 
-        if not is_affirmative(
-            self._config.options.get('disable_innodb_metrics', False)
-        ) and self._check_innodb_engine_enabled(db):
+        if self._check_innodb_engine_enabled(db):
             # Innodb metrics are not available for Aurora reader instances
             if self.global_variables.is_aurora and self._replication_role == "reader":
                 self.log.debug("Skipping innodb metrics collection for reader instance")
@@ -1083,6 +1093,12 @@ class MySql(AgentCheck):
         # table. Later is chosen because that involves no string parsing.
         if self._is_innodb_engine_enabled_cached is not None:
             return self._is_innodb_engine_enabled_cached
+
+        if self._config.disable_innodb_metrics:
+            self.log.debug("disable_innodb_metrics config is set, disabling innodb metric collection")
+            self._is_innodb_engine_enabled_cached = False
+            return self._is_innodb_engine_enabled_cached
+
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_INNODB_ENGINES)
@@ -1346,6 +1362,7 @@ class MySql(AgentCheck):
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
+                "ddagenthostname": self.agent_hostname,
                 "dbms": "mysql",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,

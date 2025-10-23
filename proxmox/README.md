@@ -4,6 +4,8 @@
 
 This check monitors [Proxmox][1] through the Datadog Agent. Proxmox is an open-source server management platform. It supports running both VMs and containers. The Proxmox integration collects data about your Proxmox cluster including the status and performance of nodes, VMs, containers, and more.
 
+**Minimum Agent version:** 7.69.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.

@@ -4,6 +4,8 @@
 
 This check monitors [Harbor][1] through the Datadog Agent.
 
+**Minimum Agent version:** 6.13.0
+
 ## Setup
 
 ### Installation
