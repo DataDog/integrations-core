@@ -62,6 +62,22 @@ def mock_http_get(mocker):
         if '/console' in url:
             return mock_resp
 
+        if "/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b" in url:
+            cluster_stats = load_fixture("cluster_stats_0006411c-0286-bc71-9f02-191e334d457b.json")
+            mock_resp.json = mocker.Mock(return_value=cluster_stats)
+            return mock_resp
+
+        if '/api/clustermgmt/v4.0/config/clusters/b6d83094-9404-48de-9c74-ca6bddc3a01d/hosts' in url:
+            clusters_data = load_fixture("hosts_b6d83094-9404-48de-9c74-ca6bddc3a01d.json")
+            mock_resp.json = mocker.Mock(return_value=clusters_data)
+            mock_resp.status_code = 400
+            return mock_resp
+
+        if '/api/clustermgmt/v4.0/config/clusters/0006411c-0286-bc71-9f02-191e334d457b/hosts' in url:
+            clusters_data = load_fixture("hosts_0006411c-0286-bc71-9f02-191e334d457b.json")
+            mock_resp.json = mocker.Mock(return_value=clusters_data)
+            return mock_resp
+
         if '/api/clustermgmt/v4.0/config/clusters' in url:
             clusters_data = load_fixture("clusters.json")
             mock_resp.json = mocker.Mock(return_value=clusters_data)
