@@ -69,7 +69,7 @@ class Health:
         cooldown: bool = False,
         cooldown_time: int = DEFAULT_COOLDOWN,
         cooldown_values: list[str] = None,
-        **kwargs,
+        data: dict = None,
     ):
         """
         Submit a health event to the aggregator.
@@ -85,7 +85,7 @@ class Health:
             from being submitted again.
         :param cooldown_values: list of str
             Additional values to include in the cooldown key.
-        :param kwargs: Additional keyword arguments to include in the event under `data`.
+        :param data: A dictionary to be submitted as `data`. Must be JSON serializable.
         """
         category = self.check.__NAMESPACE__ or self.check.__class__.__name__.lower()
         if cooldown:
@@ -107,7 +107,7 @@ class Health:
                     'tags': tags or [],
                     'ddagentversion': datadog_agent.get_version(),
                     'ddagenthostname': datadog_agent.get_hostname(),
-                    'data': {**kwargs},
+                    'data': data,
                 }
             ),
             "dbm-health",

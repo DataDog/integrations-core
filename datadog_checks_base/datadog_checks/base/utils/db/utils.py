@@ -370,11 +370,13 @@ class DBMAsyncJob(object):
                             # in a flappy manner
                             cooldown=True,
                             cooldown_values=[self._dbms, self._job_name],
-                            dbms=self._dbms,
-                            job_name=self._job_name,
-                            last_run_start=self._last_run_start,
-                            elapsed_time=(time.time() - self._last_run_start) * 1000,
-                            feature=feature,
+                            data={
+                                "dbms": self._dbms,
+                                "job_name": self._job_name,
+                                "last_run_start": self._last_run_start,
+                                "elapsed_time": (time.time() - self._last_run_start) * 1000,
+                                "feature": feature,
+                            },
                         )
                     self._log.warning("[%s] Missed collection interval", self._job_name)
 
