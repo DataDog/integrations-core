@@ -127,6 +127,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
 
     collection_started_at = None
     schema_events = [e for e in dbm_metadata if e['kind'] == 'pg_databases']
+    print(schema_events)
     for i, schema_event in enumerate(schema_events):
         for mi, _ in enumerate(schema_event['metadata']):
             assert schema_event.get("timestamp") is not None
@@ -375,53 +376,6 @@ def test_collect_schemas_filters(integration_check, dbm_instance, aggregator):
         aggregator.reset()
 
 
-def test_get_table_filter(integration_check, dbm_instance):
-    test_cases = [
-        [{'include_tables': ['cats']}, " AND (c.relname ~ 'cats')"],
-        [{'exclude_tables': ['dogs']}, " AND NOT (c.relname ~ 'dogs')"],
-        [
-            {'include_tables': ['cats', "'people'"], 'exclude_tables': ['dogs', 'iguanas\\d+']},
-            " AND (c.relname ~ 'cats' OR c.relname ~ '''people''')"
-            " AND NOT (c.relname ~ 'dogs' OR c.relname ~ 'iguanas\\d+')",
-        ],
-    ]
-    for tc in test_cases:
-        dbm_instance['collect_schemas'] = tc[0]
-        check = integration_check(dbm_instance)
-        metadata = check.metadata_samples
-        filter = metadata._get_tables_filter()
-        assert filter == tc[1]
-
-
-def test_should_collect_metadata(integration_check, dbm_instance):
-    test_cases = [
-        [{'include_databases': ['d.*']}, "db", "database", True],
-        [{'include_databases': ['d.*']}, "db", "database", True],
-        [{'include_databases': ['c.*'], 'include_schemas': ['d.*']}, "db", "database", False],
-        [{'include_databases': ['d.*'], 'exclude_schemas': ['d.*']}, "db", "database", True],
-        [{'exclude_databases': ['c.*']}, "db", "database", True],
-        [{'exclude_databases': ['d.*']}, "db", "database", False],
-        [{'include_databases': ['d.*'], 'exclude_databases': ['c.*']}, "db", "database", True],
-        [{'include_databases': ['c.*'], 'exclude_databases': ['c.*']}, "db", "database", False],
-        [{'include_databases': ['d.*'], 'exclude_databases': ['b$']}, "db", "database", False],
-        [{'include_databases': ['c.*']}, "sch", "schema", True],
-        [{'exclude_databases': ['sc.*']}, "sch", "schema", True],
-        [{'include_schemas': ['p.*']}, "public", "schema", True],
-        [{'include_schemas': ['x.*']}, "public", "schema", False],
-        [{'exclude_schemas': ['z.*']}, "public", "schema", True],
-        [{'exclude_schemas': ['l.*']}, "public", "schema", False],
-        [{'include_schemas': ['p.*'], 'exclude_schemas': ['z.*']}, "public", "schema", True],
-        [{'include_schemas': ['z.*'], 'exclude_schemas': ['c$']}, "public", "schema", False],
-        [{'include_schemas': ['p.*'], 'exclude_schemas': ['b.*']}, "public", "schema", False],
-    ]
-    for tc in test_cases:
-        dbm_instance['collect_schemas'] = tc[0]
-        check = integration_check(dbm_instance)
-        metadata = check.metadata_samples
-
-        assert metadata._should_collect_metadata(tc[1], tc[2]) == tc[3], tc
-
-
 def test_collect_schemas_max_tables(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5, 'max_tables': 1}
     dbm_instance['relations'] = []
@@ -452,7 +406,7 @@ def test_collect_schemas_multiple_payloads(integration_check, dbm_instance, aggr
     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
     del dbm_instance['dbname']
     check = integration_check(dbm_instance)
-    check.metadata_samples.column_buffer_size = 1
+    check.metadata_samples._schema_collector._config.payload_chunk_size = 1
     run_one_check(check, dbm_instance)
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")

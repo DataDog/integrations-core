@@ -209,8 +209,8 @@ class PostgresMetadata(DBMAsyncJob):
             self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
         if (
-            self._collect_extensions_enabled
-            and time.time() - self._last_schemas_query_time < self.schemas_collection_interval
+            self._collect_schemas_enabled
+            and time.time() - self._last_schemas_query_time > self.schemas_collection_interval
         ):
             self._collect_postgres_schemas()
 

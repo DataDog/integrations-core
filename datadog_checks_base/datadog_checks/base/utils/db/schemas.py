@@ -38,6 +38,7 @@ class SchemaCollectorConfig:
         self.collection_interval = 3600
         self.payload_chunk_size = 10_000
         self.max_tables = 300
+        self.max_columns = 50
         self.include_databases = None
         self.exclude_databases = None
         self.include_schemas = None

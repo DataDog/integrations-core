@@ -294,8 +294,8 @@ class PostgresSchemaCollector(SchemaCollector):
                     )
                     {partitions_ctes}
 
-                    SELECT schema_tables.schema_id, schema_tables.schema_name,
-                        schema_tables.table_id, schema_tables.table_name,
+                    SELECT schema_tables.schema_id, schema_tables.schema_name, 
+                    schema_tables.table_id, schema_tables.table_name,
                         array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
                         array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
                         array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
@@ -306,11 +306,11 @@ class PostgresSchemaCollector(SchemaCollector):
                         LEFT JOIN indexes ON schema_tables.table_id = indexes.table_id
                         LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
                         {partition_joins}
-                    GROUP BY schema_tables.schema_id, schema_tables.schema_name
+                    GROUP BY schema_tables.schema_id, schema_tables.schema_name,
                         schema_tables.table_id, schema_tables.table_name
                     ;
                 """
-                # print(query)
+                print(query)
                 cursor.execute("SET statement_timeout = '60s';")
                 cursor.execute(query)
                 yield cursor
@@ -366,7 +366,7 @@ class PostgresSchemaCollector(SchemaCollector):
                                 "name": cursor_row.get("table_name"),
                                 "owner": cursor_row.get("owner"),
                                 # The query can create duplicates of the joined tables
-                                "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values()),
+                                "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values())[:self._config.max_columns],
                                 "indexes": list({v and v['name']: v for v in cursor_row.get("indexes") or []}.values()),
                                 "foreign_keys": list(
                                     {v and v['name']: v for v in cursor_row.get("foreign_keys") or []}.values()
