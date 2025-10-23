@@ -24,12 +24,12 @@ from datadog_checks.vsphere.constants import (
     DEFAULT_MAX_QUERY_METRICS,
     HISTORICAL,
     HOST_RESOURCES,
+    INFRA_MODE_METRIC,
     MAX_QUERY_METRICS_OPTION,
     PROPERTY_COUNT_METRICS,
     PROPERTY_METRICS_BY_RESOURCE_TYPE,
     REALTIME_METRICS_INTERVAL_ID,
     UNLIMITED_HIST_METRICS_PER_QUERY,
-    INFRA_MODE_METRIC,
 )
 from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import (
