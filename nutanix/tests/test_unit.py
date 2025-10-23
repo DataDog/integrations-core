@@ -37,7 +37,6 @@ def test_cluster_metrics(dd_run_check, aggregator, mock_instance, mock_http_get)
     expected_tags = [
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
         'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
-        'ntnx_upgrade_status:succeeded',
         'prism_central:10.0.0.197',
     ]
 
@@ -54,7 +53,6 @@ def test_cluster_stats_metrics(dd_run_check, aggregator, mock_instance, mock_htt
     expected_tags = [
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
         'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
-        'ntnx_upgrade_status:succeeded',
         'prism_central:10.0.0.197',
     ]
 
@@ -74,7 +72,6 @@ def test_node_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
         'ntnx_hypervisor_name:AHV 10.0.1.4',
         'ntnx_hypervisor_type:AHV',
         'ntnx_node_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
-        'ntnx_upgrade_status:succeeded',
         'prism_central:10.0.0.197',
     ]
 
