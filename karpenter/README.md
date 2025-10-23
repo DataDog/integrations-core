@@ -4,6 +4,8 @@
 
 This check monitors [Karpenter][1] through the Datadog Agent. For more information, see [Karpenter monitoring][10].
 
+**Minimum Agent version:** 7.50.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running in your Kubernetes environment. For more information about configuration in containerized environments, see the [Autodiscovery Integration Templates][3] for guidance.

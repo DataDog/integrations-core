@@ -468,7 +468,7 @@ def test_check_local(aggregator, dd_run_check, init_config, instance_docker):
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
-        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
+        "sqlserver_servername:{}".format(sqlserver_check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
     expected_tags = check_tags + [
         'sqlserver_host:{}'.format(sqlserver_check.resolved_hostname),
@@ -864,21 +864,6 @@ def test_fetch_throws(instance_docker):
     ):
         with pytest.raises(StopIteration):
             schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
-
-
-def test_submit_is_called_if_too_many_columns(instance_docker):
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    schemas = Schemas(check, check._config)
-    with (
-        mock.patch('time.time', side_effect=[0, 0]),
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value={"id": 1}),
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value=[1, 2]),
-        mock.patch('datadog_checks.sqlserver.schemas.SubmitData.submit') as mocked_submit,
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables_data', return_value=(1000_000, {"id": 1})),
-    ):
-        with pytest.raises(StopIteration):
-            schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
-            mocked_submit.called_once()
 
 
 def test_exception_handling_by_do_for_dbs(instance_docker):

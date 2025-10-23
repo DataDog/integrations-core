@@ -1,0 +1,32 @@
+name: Weekly latest product version tests - Windows
+# This is a temporary fix to avoid hitting the max 256 jobs per workflow limit
+# We will remove this once we have a better solution
+
+on:
+  schedule:
+  # Weekly on Sunday night (America/New_York)
+  - cron: "0 5 * * 1"
+
+jobs:
+  test:
+    uses: ./.github/workflows/test-all-windows.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+      context: "weekly-latest"
+    secrets: inherit
+    permissions:
+      # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+      id-token: write
+      # needed for compute-matrix in test-target.yml
+      contents: read
+
+  submit-traces:
+    needs:
+    - test
+    if: success() || failure()
+
+    uses: ./.github/workflows/submit-traces.yml
+    secrets: inherit

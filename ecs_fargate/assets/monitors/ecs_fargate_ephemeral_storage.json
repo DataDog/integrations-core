@@ -1,0 +1,26 @@
+{
+    "version": 2,
+    "created_at": "2025-08-08",
+    "last_updated_at": "2025-08-08",
+    "title": "ECS Fargate ephemeral storage utilization exceeds threshold",
+    "description": "Ephemeral storage utilization represents the percentage of temporary storage space consumed by an ECS Fargate task relative to its allocated limit. This monitor tracks when storage utilization exceeds the threshold to prevent storage exhaustion that could lead to task failures and data loss.",
+    "definition": {
+        "name": "[ECS Fargate] Ephemeral storage utilization is high for task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}})",
+        "type": "query alert",
+        "query": "avg(last_15m):sum:ecs.fargate.ephemeral_storage.utilized{*} by {ecs_cluster,task_arn,ecs_service} / sum:ecs.fargate.ephemeral_storage.reserved{*} by {ecs_cluster,task_arn,ecs_service} * 100 > 80",
+        "message": "{{#is_warning}}\nAWS ECS Fargate task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}}) is approaching ephemeral storage utilization threshold\n\nCurrent Usage: {{value}}%\n{{/is_warning}}\n\n{{#is_alert}}\nAWS ECS Fargate task {{task_arn.name}} in service {{ecs_service.name}} (cluster {{ecs_cluster.name}}) has exceeded ephemeral storage utilization threshold\n\nCurrent Usage: {{value}}%\n{{/is_alert}}\n\nTo investigate further, view the affected task in the [ECS Explorer](/orchestration/explorer/ecsTask?inspect={{task_arn.name}})",
+        "tags": ["integration:ecs_fargate"],
+        "options": {
+            "thresholds": {
+                "critical": 80
+            },
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "new_group_delay": 300
+        }
+    },
+    "tags": [
+        "integration:aws-fargate"
+    ]
+}

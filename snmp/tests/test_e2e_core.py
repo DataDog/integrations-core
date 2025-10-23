@@ -92,6 +92,7 @@ def test_e2e_user_profiles(dd_agent_check):
         "snmp_device:{}".format(device_ip),
         "device_ip:{}".format(device_ip),
         "device_id:default:{}".format(device_ip),
+        'agent_host:' + common.get_agent_hostname(),
     ]
 
     aggregator.assert_metric('snmp.upsAdvBatteryNumOfBattPacks', metric_type=aggregator.GAUGE, tags=tags, count=2)
@@ -122,6 +123,7 @@ def test_e2e_user_profiles(dd_agent_check):
             'device_namespace:default',
             "device_id:default:" + device_ip,
             "device_ip:" + device_ip,
+            'agent_host:' + common.get_agent_hostname(),
             'firmware_version:2.0.3-test',
             'model:APC Smart-UPS 600',
             'serial_num:test_serial',
@@ -157,6 +159,7 @@ def test_e2e_user_profiles_that_extend_profile_with_same_name(dd_agent_check):
         "snmp_device:{}".format(device_ip),
         "device_ip:{}".format(device_ip),
         "device_id:default:{}".format(device_ip),
+        'agent_host:' + common.get_agent_hostname(),
     ]
 
     aggregator.assert_metric('snmp.panSessionUtilization', metric_type=aggregator.GAUGE, tags=tags, count=2)
@@ -179,6 +182,7 @@ def test_e2e_user_profiles_that_extend_profile_with_same_name(dd_agent_check):
             'device_namespace:default',
             "device_id:default:" + device_ip,
             "device_ip:" + device_ip,
+            'agent_host:' + common.get_agent_hostname(),
             'snmp_device:' + device_ip,
             'snmp_profile:palo-alto',
         ],
@@ -210,6 +214,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
         "snmp_device:{}".format(device_ip),
         "device_ip:{}".format(device_ip),
         "device_id:default:{}".format(device_ip),
+        'agent_host:' + common.get_agent_hostname(),
     ]
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
@@ -264,6 +269,7 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
         "snmp_device:{}".format(device_ip),
         "device_ip:{}".format(device_ip),
         "device_id:default:{}".format(device_ip),
+        'agent_host:' + common.get_agent_hostname(),
     ]
 
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
@@ -312,6 +318,7 @@ def test_e2e_core_discovery(dd_agent_check):
         'snmp_device:' + ip_address,
         "device_ip:" + ip_address,
         "device_id:default:" + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ]
 
     tags_with_loader = tags + ['loader:core']
@@ -400,6 +407,7 @@ def test_e2e_regex_match(dd_agent_check):
             'device_ip:' + device_ip,
             'device_id:default:' + device_ip,
             'device_namespace:default',
+            'agent_host:' + common.get_agent_hostname(),
         ],
     )
 
@@ -426,6 +434,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
         'snmp_device:' + ip_address,
         "device_ip:" + ip_address,
         "device_id:default:" + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ]
 
     common.assert_common_metrics(aggregator, tags=common_tags, is_e2e=True, loader='core')
@@ -513,6 +522,7 @@ def test_e2e_core_cisco_csr(dd_agent_check):
         "snmp_device:{}".format(device_ip),
         "device_ip:{}".format(device_ip),
         "device_id:default:{}".format(device_ip),
+        'agent_host:' + common.get_agent_hostname(),
     ]
 
     common.assert_common_metrics(aggregator, global_tags, is_e2e=True, loader='core')
@@ -552,6 +562,7 @@ def test_e2e_cisco_nexus(dd_agent_check):
         "snmp_device:{}".format(device_ip),
         "device_ip:{}".format(device_ip),
         "device_id:default:{}".format(device_ip),
+        'agent_host:' + common.get_agent_hostname(),
         'snmp_host:Nexus-eu1.companyname.managed',
         'device_hostname:Nexus-eu1.companyname.managed',
     ]
@@ -766,6 +777,7 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
         'snmp_device:' + ip_address,
         "device_ip:" + ip_address,
         "device_id:default:" + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ]
     common.assert_common_metrics(aggregator, tags, is_e2e=True, loader='core')
 

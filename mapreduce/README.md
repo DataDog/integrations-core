@@ -9,6 +9,8 @@ Get metrics from mapreduce service in real time to:
 - Visualize and monitor mapreduce states
 - Be notified about mapreduce failovers and events.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

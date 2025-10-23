@@ -33,19 +33,19 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py3"
         type: string
       agent-image-py2:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py2"
         type: string
       agent-image-windows:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py3-win-servercore"
         type: string
       agent-image-windows-py2:
         required: false
-        default: ""
+        default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
       pytest-args:
         description: "Arguments to pass to pytest"
@@ -56,6 +56,10 @@ on:
         required: false
         default: false
         type: boolean
+      context:
+        required: false
+        default: "standard"
+        type: string
 
 jobs:
   jd316aba:
@@ -66,26 +70,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-    if: ${{ inputs.skip-ddev-tests == false }}
-  j6712d43:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: ddev on Windows
-      target: ddev
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -106,6 +91,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -125,6 +111,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -144,25 +131,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  jd66e148:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: Active Directory
-      target: active_directory
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -182,6 +151,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -201,6 +171,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -220,6 +191,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -239,6 +211,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -258,6 +231,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -277,6 +251,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -296,6 +271,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -315,6 +291,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -334,6 +311,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -353,6 +331,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -372,6 +351,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -391,25 +371,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j8c9f9aa:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: ASP.NET
-      target: aspdotnet
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -429,6 +391,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -448,6 +411,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -467,6 +431,27 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j5a8a3b3:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: BentoML
+      target: bentoml
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -486,6 +471,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -505,6 +491,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -524,6 +511,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -543,6 +531,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -562,6 +551,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -581,6 +571,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -600,6 +591,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -619,6 +611,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -638,6 +631,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -657,6 +651,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -676,6 +671,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -695,6 +691,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -714,6 +711,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -733,6 +731,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -752,6 +751,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -771,6 +771,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -790,6 +791,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -809,6 +811,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -828,6 +831,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -847,6 +851,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -866,6 +871,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -885,6 +891,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -904,6 +911,27 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j58cf93c:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: datadog_csi_driver
+      target: datadog_csi_driver
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -923,6 +951,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -942,6 +971,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -961,6 +991,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -980,25 +1011,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  jc6b16d4:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: .NET CLR
-      target: dotnetclr
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1018,6 +1031,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1037,6 +1051,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1056,6 +1071,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1075,6 +1091,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1094,6 +1111,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1113,6 +1131,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1132,6 +1151,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1151,25 +1171,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j284dfb9:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: Exchange Server
-      target: exchange_server
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1189,6 +1191,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1208,6 +1211,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1227,6 +1231,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1246,6 +1251,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1265,6 +1271,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1284,6 +1291,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1303,6 +1311,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1322,6 +1331,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1341,6 +1351,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1360,6 +1371,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1379,6 +1391,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1398,6 +1411,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1417,6 +1431,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1436,6 +1451,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1455,6 +1471,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1474,6 +1491,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1493,6 +1511,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1512,6 +1531,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1531,6 +1551,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1550,6 +1571,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1569,6 +1591,27 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  jc3781e1:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Hugging Face TGI
+      target: hugging_face_tgi
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1588,6 +1631,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1607,6 +1651,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1626,6 +1671,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1645,6 +1691,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1664,6 +1711,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1683,25 +1731,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j9267198:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: IIS
-      target: iis
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1721,6 +1751,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1740,6 +1771,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1759,6 +1791,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1778,6 +1811,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1797,6 +1831,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1816,6 +1851,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1835,6 +1871,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1854,6 +1891,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1873,6 +1911,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1892,6 +1931,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1911,6 +1951,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1930,6 +1971,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1949,6 +1991,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1968,6 +2011,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -1987,6 +2031,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2006,6 +2051,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2025,6 +2071,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2044,6 +2091,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2063,6 +2111,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2082,6 +2131,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2101,6 +2151,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2120,6 +2171,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2139,6 +2191,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2158,6 +2211,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2177,6 +2231,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2196,6 +2251,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2215,6 +2271,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2234,6 +2291,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2253,6 +2311,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2272,6 +2331,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2291,6 +2351,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2310,6 +2371,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2329,6 +2391,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2348,6 +2411,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2367,6 +2431,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2386,6 +2451,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2405,6 +2471,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2424,6 +2491,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2443,6 +2511,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2462,6 +2531,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2477,27 +2547,27 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.12-4.4-standalone
-        - py3.12-4.4-shard
-        - py3.12-4.4-auth
-        - py3.12-4.4-tls
-        - py3.12-5.0-standalone
-        - py3.12-5.0-shard
-        - py3.12-5.0-auth
-        - py3.12-5.0-tls
-        - py3.12-6.0-standalone
-        - py3.12-6.0-shard
-        - py3.12-6.0-auth
-        - py3.12-6.0-tls
-        - py3.12-7.0-standalone
-        - py3.12-7.0-shard
-        - py3.12-7.0-auth
-        - py3.12-7.0-tls
-        - py3.12-8.0-standalone
-        - py3.12-8.0-shard
-        - py3.12-8.0-auth
-        - py3.12-8.0-tls
-        - py3.12-8.0-standalone-newyork
+        - py3.13-4.4-standalone
+        - py3.13-4.4-shard
+        - py3.13-4.4-auth
+        - py3.13-4.4-tls
+        - py3.13-5.0-standalone
+        - py3.13-5.0-shard
+        - py3.13-5.0-auth
+        - py3.13-5.0-tls
+        - py3.13-6.0-standalone
+        - py3.13-6.0-shard
+        - py3.13-6.0-auth
+        - py3.13-6.0-tls
+        - py3.13-7.0-standalone
+        - py3.13-7.0-shard
+        - py3.13-7.0-auth
+        - py3.13-7.0-tls
+        - py3.13-8.0-standalone
+        - py3.13-8.0-shard
+        - py3.13-8.0-auth
+        - py3.13-8.0-tls
+        - py3.13-8.0-standalone-newyork
       fail-fast: false
   j211906c:
     uses: ./.github/workflows/test-target.yml
@@ -2507,6 +2577,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2522,16 +2593,16 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.12-5.7
-        - py3.12-8.0.36
-        - py3.12-8.4.0
-        - py3.12-8.0-group
-        - py3.12-mariadb-10.5
-        - py3.12-mariadb-10.6
-        - py3.12-mariadb-10.11
-        - py3.12-mariadb-11.4
-        - py3.12-percona-8.0.42
-        - py3.12-percona-8.4
+        - py3.13-5.7
+        - py3.13-8.0.36
+        - py3.13-8.4.0
+        - py3.13-8.0-group
+        - py3.13-mariadb-10.5
+        - py3.13-mariadb-10.6
+        - py3.13-mariadb-10.11
+        - py3.13-mariadb-11.4
+        - py3.13-percona-8.0.42
+        - py3.13-percona-8.4
       fail-fast: false
   j5df646e:
     uses: ./.github/workflows/test-target.yml
@@ -2541,6 +2612,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2560,6 +2632,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2579,6 +2652,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2598,6 +2672,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2617,6 +2692,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2636,6 +2712,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2655,6 +2732,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2674,6 +2752,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2693,6 +2772,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2712,6 +2792,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2731,6 +2812,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2750,25 +2832,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j4dff42c:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: PDH
-      target: pdh_check
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2788,6 +2852,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2807,6 +2872,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2826,6 +2892,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2845,6 +2912,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2860,23 +2928,23 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.12-9.6-UTF8
-        - py3.12-10.0-UTF8
-        - py3.12-11.0-UTF8
-        - py3.12-12.17-UTF8
-        - py3.12-13.0-UTF8
-        - py3.12-14.0-UTF8
-        - py3.12-15.0-UTF8
-        - py3.12-16.0-UTF8
-        - py3.12-17.0-UTF8
-        - py3.12-10.0-C
-        - py3.12-11.0-C
-        - py3.12-12.17-C
-        - py3.12-13.0-C
-        - py3.12-14.0-C
-        - py3.12-15.0-C
-        - py3.12-16.0-C
-        - py3.12-17.0-C
+        - py3.13-9.6-UTF8
+        - py3.13-10.0-UTF8
+        - py3.13-11.0-UTF8
+        - py3.13-12.17-UTF8
+        - py3.13-13.0-UTF8
+        - py3.13-14.0-UTF8
+        - py3.13-15.0-UTF8
+        - py3.13-16.0-UTF8
+        - py3.13-17.0-UTF8
+        - py3.13-10.0-C
+        - py3.13-11.0-C
+        - py3.13-12.17-C
+        - py3.13-13.0-C
+        - py3.13-14.0-C
+        - py3.13-15.0-C
+        - py3.13-16.0-C
+        - py3.13-17.0-C
       fail-fast: false
   j8e38a40:
     uses: ./.github/workflows/test-target.yml
@@ -2886,6 +2954,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2905,6 +2974,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2924,6 +2994,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2943,6 +3014,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2962,6 +3034,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -2981,6 +3054,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3000,6 +3074,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3019,6 +3094,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3038,6 +3114,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3057,6 +3134,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3076,6 +3154,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3095,6 +3174,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3114,6 +3194,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3133,6 +3214,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3152,6 +3234,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3171,6 +3254,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3190,6 +3274,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3209,6 +3294,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3228,6 +3314,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3247,6 +3334,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3266,6 +3354,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3285,6 +3374,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3304,6 +3394,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3323,6 +3414,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3342,6 +3434,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3361,25 +3454,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j31a95c8:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: SQL Server on Windows
-      target: sqlserver
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3399,6 +3474,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3414,16 +3490,16 @@ jobs:
     strategy:
       matrix:
         target-env:
-        - py3.12-linux-FreeTDS-2019-single
-        - py3.12-linux-FreeTDS-2019-ha
-        - py3.12-linux-FreeTDS-2022-single
-        - py3.12-linux-FreeTDS-2022-ha
-        - py3.12-linux-odbc-2019-single
-        - py3.12-linux-odbc-2019-ha
-        - py3.12-linux-odbc-2022-single
-        - py3.12-linux-odbc-2022-ha
-        - py3.12-linux-2022-newyork
-        - py3.12-linux-2022-tokyo
+        - py3.13-linux-FreeTDS-2019-single
+        - py3.13-linux-FreeTDS-2019-ha
+        - py3.13-linux-FreeTDS-2022-single
+        - py3.13-linux-FreeTDS-2022-ha
+        - py3.13-linux-odbc-2019-single
+        - py3.13-linux-odbc-2019-ha
+        - py3.13-linux-odbc-2022-single
+        - py3.13-linux-odbc-2022-ha
+        - py3.13-linux-2022-newyork
+        - py3.13-linux-2022-tokyo
       fail-fast: false
   jaf4b616:
     uses: ./.github/workflows/test-target.yml
@@ -3433,6 +3509,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3452,6 +3529,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3471,6 +3549,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3490,6 +3569,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3509,6 +3589,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3528,6 +3609,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3547,6 +3629,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3566,6 +3649,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3585,6 +3669,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3604,6 +3689,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3623,6 +3709,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3642,6 +3729,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3661,6 +3749,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3680,6 +3769,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3699,6 +3789,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3718,6 +3809,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3737,6 +3829,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3756,6 +3849,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3775,6 +3869,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3794,6 +3889,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3813,6 +3909,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3832,6 +3929,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3851,6 +3949,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3870,6 +3969,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3889,6 +3989,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3908,6 +4009,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3927,6 +4029,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3946,6 +4049,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3965,6 +4069,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -3984,6 +4089,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4003,82 +4109,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j70c9219:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: Windows Event Log
-      target: win32_event_log
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  jc1fb93c:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: Windows performance counters
-      target: windows_performance_counters
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j9798a89:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: Windows Service
-      target: windows_service
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
-      python-version: "${{ inputs.python-version }}"
-      latest: ${{ inputs.latest }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      minimum-base-package: ${{ inputs.minimum-base-package }}
-      pytest-args: ${{ inputs.pytest-args }}
-    secrets: inherit
-  j25cdd56:
-    uses: ./.github/workflows/test-target.yml
-    with:
-      job-name: WMI
-      target: wmi_check
-      platform: windows
-      runner: '["windows-2022"]'
-      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4098,6 +4129,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"
@@ -4117,6 +4149,7 @@ jobs:
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
       python-version: "${{ inputs.python-version }}"
       latest: ${{ inputs.latest }}
       agent-image: "${{ inputs.agent-image }}"

@@ -1,0 +1,20 @@
+name: Hugging Face TGI
+files:
+- name: hugging_face_tgi.yaml
+  options:
+    - template: init_config
+      options:
+        - template: init_config/openmetrics
+    - template: instances
+      options:
+        - template: instances/openmetrics
+          overrides:
+            openmetrics_endpoint.value.example: http://localhost:80/metrics
+            openmetrics_endpoint.description: |
+              Endpoint exposing Hugging Face TGI's Prometheus metrics. For more information, refer to
+              https://huggingface.co/docs/text-generation-inference/en/basic_tutorials/monitoring 
+    - template: logs
+      example:
+      - type: docker
+        source: hugging_face_tgi
+        service: <SERVICE>

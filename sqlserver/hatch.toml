@@ -2,7 +2,7 @@
 base-package-features = ["deps", "db", "json"]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 os = ["linux"]
 driver = ["FreeTDS", "odbc"]
 version = ["2019", "2022"]
@@ -10,7 +10,7 @@ setup = ["single", "ha"]
 
 # test the compatibility of sqlserver running on non-utc timezone
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 os = ["linux"]
 version = ["2022"]
 tz = ["newyork", "tokyo"]
@@ -20,7 +20,7 @@ tz = ["newyork", "tokyo"]
 # time out. until we're able to modify and parallelize the work we'll limit the per-driver tests to only a single
 # sqlserver version
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 os = ["windows"]
 driver = ["SQLOLEDB", "MSOLEDBSQL", "odbc"]
 version = ["2019", "2022"]

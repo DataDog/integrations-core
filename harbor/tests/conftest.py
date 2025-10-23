@@ -45,12 +45,12 @@ from .common import (
 @pytest.fixture(scope='session')
 def dd_environment(e2e_instance):
     compose_file = get_docker_compose_file()
-    expected_log = "http server Running on" if HARBOR_VERSION < [1, 10, 0] else "API server is serving at"
+    expected_log = "http server Running on"
     conditions = [
-        CheckDockerLogs(compose_file, expected_log, wait=3),
+        CheckDockerLogs(compose_file, expected_log, wait=3, service='core'),
         WaitFor(create_simple_user, wait=5),
     ]
-    with docker_run(compose_file, conditions=conditions, attempts=5):
+    with docker_run(compose_file, conditions=conditions, attempts=5, waith_for_health=True):
         yield e2e_instance
 
 

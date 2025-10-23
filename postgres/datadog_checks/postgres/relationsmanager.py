@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Union  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.postgres.config_models.instance import Relations
 
 ALL_SCHEMAS = object()
 RELATION_NAME = 'relation_name'
@@ -29,16 +30,7 @@ RELKIND = 'relkind'
 
 # The view pg_locks provides access to information about the locks held by active processes within the database server.
 LOCK_METRICS = {
-    'descriptors': [
-        ('mode', 'lock_mode'),
-        ('locktype', 'lock_type'),
-        ('nspname', 'schema'),
-        ('datname', 'db'),
-        ('relname', 'table'),
-        ('granted', 'granted'),
-        ('fastpath', 'fastpath'),
-    ],
-    'metrics': {'lock_count': ('locks', AgentCheck.gauge)},
+    'name': 'pg_locks',
     'query': """
 SELECT mode,
        locktype,
@@ -47,17 +39,25 @@ SELECT mode,
        pc.relname,
        granted,
        fastpath,
-       count(*) AS {metrics_columns}
+       count(*)
   FROM pg_locks l
-  JOIN pg_database pd ON (l.database = pd.oid)
-  JOIN pg_class pc ON (l.relation = pc.oid)
+  LEFT JOIN pg_database pd ON (l.database = pd.oid)
+  LEFT JOIN pg_class pc ON (l.relation = pc.oid)
   LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
- WHERE {relations}
+ WHERE (pc IS NULL OR ({relations} AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'))
    AND l.mode IS NOT NULL
-   AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
- GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted, fastpath""",
-    'relation': True,
-    'name': 'lock_metrics',
+ GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted, fastpath
+""",
+    'columns': [
+        {'name': 'lock_mode', 'type': 'tag'},
+        {'name': 'lock_type', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag_not_null'},
+        {'name': 'db', 'type': 'tag_not_null'},
+        {'name': 'table', 'type': 'tag_not_null'},
+        {'name': 'granted', 'type': 'tag'},
+        {'name': 'fastpath', 'type': 'tag'},
+        {'name': 'locks', 'type': 'gauge'},
+    ],
 }
 
 
@@ -67,7 +67,7 @@ IDX_METRICS = {
     'query': """
 SELECT
   current_database(),
-  schemaname,
+  nspname,
   relname,
   indexrelname,
   is_valid,
@@ -78,7 +78,7 @@ SELECT
   idx_blks_hit,
   index_size
 FROM (SELECT
-      N.nspname AS schemaname,
+      N.nspname AS nspname,
       C.relname AS relname,
       I.relname AS indexrelname,
       X.indisvalid::text AS is_valid,
@@ -137,8 +137,12 @@ QUERY_PG_CLASS_SIZE = {
     'name': 'pg_class_size',
     'query': """
 SELECT current_database(),
-       s.schemaname, s.table, s.partition_of,
-       s.relpages, s.reltuples, s.relallvisible,
+       s.nspname,
+       s.table,
+       s.partition_of,
+       s.relpages,
+       s.reltuples,
+       s.relallvisible,
        s.relation_size + s.toast_size,
        s.relation_size,
        s.index_size,
@@ -146,7 +150,7 @@ SELECT current_database(),
        s.relation_size + s.index_size + s.toast_size
 FROM
     (SELECT
-      N.nspname as schemaname,
+      N.nspname as nspname,
       relname as table,
       I.inhparent::regclass AS partition_of,
       C.relpages, C.reltuples, C.relallvisible,
@@ -414,8 +418,8 @@ INDEX_BLOAT = {
     'name': 'index_bloat_metrics',
 }
 
-RELATION_METRICS = [LOCK_METRICS, STATIO_METRICS]
-DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS]
+RELATION_METRICS = [STATIO_METRICS]
+DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS, LOCK_METRICS]
 
 
 class RelationsManager(object):
@@ -442,13 +446,13 @@ class RelationsManager(object):
                 # Stub filter to allow for appending
                 relation_filter.append("( 1=1")
 
-            if ALL_SCHEMAS not in r[SCHEMAS]:
-                schema_filter = ','.join("'{}'".format(s) for s in r[SCHEMAS])
+            if ALL_SCHEMAS not in r.get(SCHEMAS, []):
+                schema_filter = ','.join("'{}'".format(s) for s in r.get(SCHEMAS, []))
                 relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
 
             # TODO: explicitly declare `relkind` compatiblity in the query rather than implicitly checking query text
             if r.get(RELKIND) and 'FROM pg_locks' in query:
-                relkind_filter = ','.join("'{}'".format(s) for s in r[RELKIND])
+                relkind_filter = ','.join("'{}'".format(s) for s in r.get(RELKIND, []))
                 relation_filter.append('AND relkind = ANY(array[{}])'.format(relkind_filter))
 
             relation_filter.append(')')
@@ -465,40 +469,44 @@ class RelationsManager(object):
     def validate_relations_config(yamlconfig):
         # type: (List[Union[str, Dict]]) -> None
         for element in yamlconfig:
+            if isinstance(element, Relations):
+                element = element.model_dump()
             if isinstance(element, dict):
-                if not (RELATION_NAME in element or RELATION_REGEX in element):
+                if not (element.get(RELATION_NAME) or element.get(RELATION_REGEX)):
                     raise ConfigurationError(
                         "Parameter '%s' or '%s' is required for relation element %s",
                         RELATION_NAME,
                         RELATION_REGEX,
                         element,
                     )
-                if RELATION_NAME in element and RELATION_REGEX in element:
+                if element.get(RELATION_NAME) and element.get(RELATION_REGEX):
                     raise ConfigurationError(
                         "Expecting only of parameters '%s', '%s' for relation element %s",
                         RELATION_NAME,
                         RELATION_REGEX,
                         element,
                     )
-                if not isinstance(element.get(SCHEMAS, []), list):
-                    raise ConfigurationError("Expected '%s' to be a list for %s", SCHEMAS, element)
-                if not isinstance(element.get(RELKIND, []), list):
-                    raise ConfigurationError("Expected '%s' to be a list for %s", RELKIND, element)
+                if element.get(SCHEMAS) and not isinstance(element.get(SCHEMAS), (list, tuple)):
+                    raise ConfigurationError("Expected '%s' to be a list or tuple for %s", SCHEMAS, element)
+                if element.get(RELKIND) and not isinstance(element.get(RELKIND), (list, tuple)):
+                    raise ConfigurationError("Expected '%s' to be a list or tuple for %s", RELKIND, element)
             elif not isinstance(element, str):
                 raise ConfigurationError('Unhandled relations config type: %s', element)
 
     @staticmethod
-    def _build_relations_config(yamlconfig):
-        # type:  (List[Union[str, Dict]]) -> List[Dict[str, Any]]
+    def _build_relations_config(yamlconfig: list[str | Relations]) -> List[Dict[str, Any]]:
         """Builds a list from relations configuration while maintaining compatibility"""
         relations = []
         for element in yamlconfig:
             config = {}
+            if isinstance(element, Relations):
+                element = element.model_dump()
+
             if isinstance(element, str):
                 config = {RELATION_NAME: element, SCHEMAS: [ALL_SCHEMAS]}
             elif isinstance(element, dict):
                 config = element.copy()
-                if len(config.get(SCHEMAS, [])) == 0:
+                if len(config.get(SCHEMAS) or []) == 0:
                     config[SCHEMAS] = [ALL_SCHEMAS]
             relations.append(config)
         return relations

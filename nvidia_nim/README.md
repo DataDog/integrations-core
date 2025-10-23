@@ -4,6 +4,8 @@
 
 This check monitors [NVIDIA NIM][1] through the Datadog Agent. 
 
+**Minimum Agent version:** 7.61.0
+
 ## Setup
 
 <div class="alert alert-warning">

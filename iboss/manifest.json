@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7916a8a2-b94d-439f-a8f6-2e2dd447e046",
   "app_id": "iboss",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

@@ -1,0 +1,34 @@
+{
+	"version": 2,
+	"created_at": "2025-09-16",
+	"last_updated_at": "2025-09-16",
+	"title": "High request latency",
+	"description": "This monitor tracks the average request duration for Hugging Face TGI. High latency can indicate performance bottlenecks such as model inference issues, resource contention, or inefficient batch processing.",
+	"definition": {
+		"name": "[Hugging Face TGI] High request latency",
+		"type": "query alert",
+		"query": "sum(last_5m):avg:hugging_face_tgi.request.duration.sum{*}.as_count() / avg:hugging_face_tgi.request.duration.count{*}.as_count() > 10",
+		"message": "Hugging Face TGI request latency is high (>10s average).\n\nThis could indicate:\n* Model inference bottlenecks\n* Resource contention (CPU/GPU/memory)\n* Inefficient batch processing\n* Queue buildup\n\n{{#is_alert}}\nAverage latency: {{value}}s\n{{/is_alert}}\n\nCheck:\n1. TGI server resource utilization\n2. Queue size and batch processing metrics\n3. Model performance and configuration",
+		"tags": [
+			"integration:hugging-face-tgi"
+		],
+		"options": {
+			"thresholds": {
+				"critical": 10,
+				"warning": 5
+			},
+			"notify_audit": false,
+			"require_full_window": false,
+			"renotify_interval": 60,
+			"include_tags": true,
+			"evaluation_delay": 300,
+			"escalation_message": "",
+			"on_missing_data": "show_and_notify_no_data",
+			"new_host_delay": 300
+		},
+		"priority": 2
+	},
+	"tags": [
+		"integration:hugging-face-tgi"
+	]
+}

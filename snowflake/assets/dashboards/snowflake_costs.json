@@ -1,1 +1,1033 @@
-{"title":"Snowflake Cloud Cost Management Overview","description":"This Datadog dashboard provides a comprehensive view of Snowflake costs, categorized by key cost drivers, including **compute, storage, and individual queries**. \n\nCosts are broken down using **out-of-the-box tags** —such as warehouse metering, cloud services, and automatic clustering—along with **custom object and query tags** for deeper insights. \n\nThe dashboard provides visibility into **total costs**, **compute and storage specific charges**, and granular visibility into **query-level costs**. \n\nClone this dashboard to add widgets or include your unique object tags as template variables for easier filtering.\n\n**Additional Reading**\n\n[How to monitor Snowflake performance with Datadog](https://www.datadoghq.com/blog/monitor-snowflake-with-datadog/)","widgets":[{"id":2637454781591900,"definition":{"title":"Overview","background_color":"vivid_purple","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":8943950014269260,"definition":{"title":"Total Snowflake Costs","title_size":"16","title_align":"left","time":{"hide_incomplete_cost_data":true},"type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"cloud_cost","name":"query1","query":"sum:all.cost{providername:Snowflake,$organization_name,$account_name,$warehouse_name}","aggregator":"sum"}],"formulas":[{"formula":"query1"}]}],"autoscale":true,"precision":2,"timeseries_background":{"type":"area","yaxis":{"include_zero":true}}},"layout":{"x":0,"y":0,"width":4,"height":2}},{"id":1194199681091600,"definition":{"title":"Costs Over Time","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value","sum"],"time":{"hide_incomplete_cost_data":true},"type":"timeseries","requests":[{"formulas":[{"alias":"Cost","formula":"query1"}],"queries":[{"data_source":"cloud_cost","name":"query1","query":"sum:all.cost{providername:Snowflake,$organization_name,$account_name,$warehouse_name} by {servicename}.rollup(sum, 86400)"}],"response_format":"timeseries","style":{"palette":"dog_classic","order_by":"values","line_type":"solid","line_width":"normal"},"display_type":"bars"}]},"layout":{"x":4,"y":0,"width":8,"height":4}},{"id":7006044937777830,"definition":{"type":"note","content":"This dashboard is populated with data from [Cloud Cost Management](/cost/overview/summary).\n\nSnowflake bills on two main components: **Compute** (billed in Snowflake Credits, is based on warehouse size and active runtime) and **Storage** (billed by terabyte). \n\n- The `servicename` tag is the main categorization of your Snowflake bill and includes all costs across **Compute** and **Storage**\n  - Further granularity into compute costs are also provided, for example: `servicename`:`WAREHOUSE_METERING_QUERY_ATTRIBUTION` allows you to attribute compute costs to individual queries.\n\n  \n- The full list of Snowflake CCM tags are available [here](https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=snowflake#data-collected).","background_color":"white","font_size":"14","text_align":"left","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":2,"width":4,"height":2}},{"id":4755269317628080,"definition":{"time":{"hide_incomplete_cost_data":true},"title":"Total Costs by Service Type","type":"treemap","requests":[{"queries":[{"data_source":"cloud_cost","name":"query1","query":"sum:all.cost{providername:Snowflake,$organization_name,$account_name,$warehouse_name} by {servicename}","aggregator":"sum"}],"response_format":"scalar","style":{"palette":"datadog16"},"formulas":[{"formula":"query1"}]}]},"layout":{"x":0,"y":4,"width":6,"height":4}},{"id":71362777882730,"definition":{"title":"Costs Changes by Servicename (Weekly)","title_size":"16","title_align":"left","time":{"hide_incomplete_cost_data":true},"type":"change","requests":[{"increase_good":false,"order_by":"change","change_type":"absolute","order_dir":"desc","response_format":"scalar","formulas":[{"formula":"week_before(query1)"},{"formula":"query1"}],"queries":[{"data_source":"cloud_cost","name":"query1","query":"sum:all.cost{providername:Snowflake,$organization_name,$account_name,$warehouse_name} by {servicename}","aggregator":"sum"}]}]},"layout":{"x":6,"y":4,"width":6,"height":4}},{"id":5690768677678076,"definition":{"type":"note","content":"- CCM for Snowflake automatically ingests all object tags created in Snowflake.\n  - [Object tags](https://docs.snowflake.com/en/user-guide/object-tagging) may be used for identifying organization specific information such as department, team, or project.  \n  - *Clone this dashboard to add your unique object tags as template variables for easier filtering.*\n  \n-  Additionally, you also can configure the collection of [Query Tags](https://docs.snowflake.com/en/sql-reference/parameters#query-tag) in the Snowflake Integration tile.\n   - Query tags track metadata on individual queries and can be associated to occurrences such as ETL or dbt jobs.\n   ","background_color":"purple","font_size":"14","text_align":"left","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":8,"width":12,"height":2}}]},"layout":{"x":0,"y":0,"width":12,"height":11}},{"id":3040893583748874,"definition":{"title":"Query Costs","background_color":"vivid_purple","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":9003564104182742,"definition":{"title":"Top Query Costs by User","title_size":"16","title_align":"left","time":{"hide_incomplete_cost_data":true},"type":"query_table","requests":[{"queries":[{"data_source":"cloud_cost","name":"query2","query":"sum:all.cost{providername:Snowflake,servicename:WAREHOUSE_METERING_QUERY_ATTRIBUTION,$organization_name,$account_name,$warehouse_name} by {user_name}","aggregator":"sum"}],"response_format":"scalar","sort":{"count":500,"order_by":[{"type":"formula","index":0,"order":"desc"}]},"formulas":[{"cell_display_mode":"bar","alias":"Cost","formula":"query2"}]}],"has_search_bar":"auto"},"layout":{"x":0,"y":0,"width":12,"height":3}},{"id":7862432605415222,"definition":{"type":"note","content":"**Query Optimization Tips**:\n\nSnowflake groups queries with the same structure together in the QUERY_PARAMETERIZED_HASH tag. Use this tag to identify and optimize inefficient or high-cost query patterns. \n\nIf a query costs less than $0.01 to execute, its hash value is recorded as \"hashes_below_threshold_for_the_day\". If this appears under a specific user, it indicates that the user has executed a high volume of short queries.\n","background_color":"white","font_size":"14","text_align":"left","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":3,"width":12,"height":2}},{"id":3828121639489686,"definition":{"type":"note","content":"To see detailed information for a single query (such as duration, SQL text, or any errors) from Snowflake [Query History Logs](https://docs.datadoghq.com/integrations/snowflake_web/#logs),  click on any query and select \"View Related Logs\".","background_color":"vivid_purple","font_size":"14","text_align":"left","vertical_align":"center","show_tick":true,"tick_pos":"50%","tick_edge":"right","has_padding":true},"layout":{"x":0,"y":5,"width":3,"height":3}},{"id":7794291952534380,"definition":{"title":"Most Expensive Queries","title_size":"16","title_align":"left","time":{"hide_incomplete_cost_data":true},"type":"query_table","requests":[{"queries":[{"data_source":"cloud_cost","name":"query2","query":"sum:all.cost{providername:Snowflake,servicename:WAREHOUSE_METERING_QUERY_ATTRIBUTION} by {query.parameterized_hash,user_name}","aggregator":"sum"}],"response_format":"scalar","sort":{"count":500,"order_by":[{"type":"formula","index":0,"order":"desc"}]},"formulas":[{"cell_display_mode":"bar","alias":"Cost","formula":"query2"}]}],"has_search_bar":"never","custom_links":[{"override_label":"containers","is_hidden":true},{"override_label":"hosts","is_hidden":true},{"override_label":"logs","link":"https://app.datadoghq.com/logs?query=source%3Asnowflake%20snowflake.table%3Aquery_history%20query.parameterized_hash%3A{{query.parameterized_hash.value}}&agg_m=count&agg_m_source=base&agg_q=@query.parameterized_hash&agg_q_source=base&agg_t=count&clustering_pattern_field_path=message&fromUser=false&messageDisplay=inline&panelStorageType=hot&panelType=logs&refresh_mode=sliding&screenId=c9v-p47-sd9&screenName=snowflake-cloud-cost-management-overview&storage=hot&stream_sort=time,desc&top_n=1000&top_o=top&viz=stream&x_missing=true&live=true","is_hidden":false},{"override_label":"profiles","is_hidden":true}]},"layout":{"x":3,"y":5,"width":9,"height":3}}]},"layout":{"x":0,"y":11,"width":12,"height":9}},{"id":7220859667923594,"definition":{"title":"Compute Costs","background_color":"vivid_purple","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":1754503740617898,"definition":{"title":"Total Compute Cost","title_size":"16","title_align":"left","time":{"hide_incomplete_cost_data":true},"type":"query_value","requests":[{"formulas":[{"formula":"query1"}],"queries":[{"data_source":"cloud_cost","name":"query1","query":"sum:all.cost{providername:Snowflake AND (servicename:WAREHOUSE_METERING_QUERY_ATTRIBUTION OR servicename:WAREHOUSE_METERING_IDLE_OR_LESS_100MS OR servicename:AI_SERVICES OR servicename:AUTOMATIC_CLUSTERING OR servicename:CLOUD_SERVICES OR servicename:QUERY_ACCELERATION OR servicename:MATERIALIZED_VIEW OR servicename:HYBRID_TABLE_REQUESTS) AND $organization_name AND $account_name AND $warehouse_name}","aggregator":"sum"}],"response_format":"scalar"}],"autoscale":true,"precision":2,"timeseries_background":{"type":"area"}},"layout":{"x":0,"y":0,"width":4,"height":3}},{"id":6651080657569080,"definition":{"title":"Total Compute Cost","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"horizontal","legend_columns":["avg","min","max","value","sum"],"time":{"hide_incomplete_cost_data":true},"type":"timeseries","requests":[{"formulas":[{"formula":"query1"}],"queries":[{"data_source":"cloud_cost","name":"query1","query":"sum:all.cost{providername:Snowflake AND (servicename:WAREHOUSE_METERING_QUERY_ATTRIBUTION OR servicename:WAREHOUSE_METERING_IDLE_OR_LESS_100MS OR servicename:AI_SERVICES OR servicename:AUTOMATIC_CLUSTERING OR servicename:CLOUD_SERVICES OR servicename:QUERY_ACCELERATION OR servicename:MATERIALIZED_VIEW OR servicename:HYBRID_TABLE_REQUESTS) AND $organization_name AND $account_name AND $warehouse_name} by {servicename}.rollup(sum, 86400)"}],"response_format":"timeseries","style":{"palette":"dog_classic","order_by":"values","line_type":"solid","line_width":"normal"},"display_type":"bars"}]},"layout":{"x":4,"y":0,"width":8,"height":3}},{"id":5951624146164516,"definition":{"title":"Most Expensive Warehouses","title_size":"16","title_align":"left","time":{"hide_incomplete_cost_data":true},"type":"query_table","requests":[{"queries":[{"data_source":"cloud_cost","name":"query1","query":"sum:all.cost{providername:Snowflake AND (servicename:WAREHOUSE_METERING_IDLE_OR_LESS_100MS OR servicename:WAREHOUSE_METERING) AND $warehouse_name} by {warehouse_name,warehouse_size}","aggregator":"sum"}],"response_format":"scalar","sort":{"count":10,"order_by":[{"type":"formula","index":0,"order":"desc"}]},"formulas":[{"cell_display_mode":"bar","alias":"Cost","formula":"query1"}]}],"has_search_bar":"auto"},"layout":{"x":0,"y":3,"width":6,"height":3}},{"id":809513148901320,"definition":{"title":"Daily Warehouse Compute Cost Changes","title_size":"16","title_align":"left","time":{"hide_incomplete_cost_data":true},"type":"change","requests":[{"increase_good":false,"order_by":"change","change_type":"absolute","order_dir":"desc","response_format":"scalar","formulas":[{"formula":"day_before(query1)"},{"formula":"query1","alias":"Cost"}],"queries":[{"data_source":"cloud_cost","name":"query1","query":"sum:all.cost{providername:Snowflake AND (servicename:WAREHOUSE_METERING_IDLE_OR_LESS_100MS OR servicename:WAREHOUSE_METERING) AND $warehouse_name} by {warehouse_name}","aggregator":"sum"}],"sort":{"count":10,"order_by":[{"type":"formula","index":0,"order":"desc"}]}}]},"layout":{"x":6,"y":3,"width":6,"height":3}},{"id":3270248262663112,"definition":{"type":"note","content":"To optimize your Snowflake usage, focus on minimizing warehouse idle time and monitoring queries that run in under 100 ms. You can track this using `WAREHOUSE_METERING_IDLE_OR_LESS_100MS`.\n- If a significant portion of costs comes from queries under 100 ms, consider directing those workloads to a smaller warehouse to reduce expenses.\n- If idle costs are high, adjust your workload scheduling or modify the auto-suspend time to ensure the warehouse isn't running unnecessarily.\n\n\n\n\n\n","background_color":"white","font_size":"14","text_align":"left","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":6,"width":4,"height":3}},{"id":4642670437237358,"definition":{"title":"Idle and <100 ms Query Cost by Warehouse and Size","title_size":"16","title_align":"left","time":{"hide_incomplete_cost_data":true},"type":"query_table","requests":[{"queries":[{"data_source":"cloud_cost","name":"query1","query":"sum:all.cost{providername:Snowflake AND (servicename:WAREHOUSE_METERING_IDLE_OR_LESS_100MS) AND $warehouse_name} by {warehouse_name,warehouse_size}","aggregator":"sum"}],"response_format":"scalar","sort":{"count":50,"order_by":[{"type":"formula","index":0,"order":"desc"}]},"formulas":[{"cell_display_mode":"bar","alias":"Cost","formula":"query1"}]}],"has_search_bar":"auto"},"layout":{"x":4,"y":6,"width":8,"height":3}}]},"layout":{"x":0,"y":20,"width":12,"height":10,"is_column_break":true}},{"id":4511705579868518,"definition":{"title":"Storage Costs","background_color":"vivid_purple","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":1782416168887410,"definition":{"title":"Total Storage Costs","title_size":"16","title_align":"left","time":{"hide_incomplete_cost_data":true},"type":"query_value","requests":[{"formulas":[{"formula":"query2"}],"queries":[{"data_source":"cloud_cost","name":"query2","query":"sum:all.cost{providername:Snowflake,servicename:STORAGE,$organization_name,$account_name,$warehouse_name}","aggregator":"sum"}],"response_format":"scalar"}],"autoscale":true,"precision":2,"timeseries_background":{"type":"area"}},"layout":{"x":0,"y":0,"width":4,"height":1}},{"id":807979309349822,"definition":{"title":"Total Storage Costs","title_size":"16","title_align":"left","show_legend":false,"time":{"hide_incomplete_cost_data":true},"type":"timeseries","requests":[{"formulas":[{"alias":"Storage Cost","formula":"query2"}],"queries":[{"data_source":"cloud_cost","name":"query2","query":"sum:all.cost{providername:Snowflake,servicename:STORAGE,$organization_name,$account_name,$warehouse_name}.rollup(sum, 86400)"}],"response_format":"timeseries","style":{"palette":"dog_classic","order_by":"values","line_type":"solid","line_width":"normal"},"display_type":"bars"}]},"layout":{"x":4,"y":0,"width":8,"height":3}},{"id":2034795344056172,"definition":{"type":"note","content":"To optimize your storage, look into: \n- Reducing Time Travel retention if historical data isn’t needed.\n- Minimizing cloned table modifications to avoid unnecessary storage.\n- Archiving old data to cheaper external storage (e.g., AWS S3).\n- Using efficient file formats (e.g., Parquet) to reduce storage overhead.\n\n","background_color":"white","font_size":"14","text_align":"left","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":1,"width":4,"height":2}}]},"layout":{"x":0,"y":30,"width":12,"height":4}}],"template_variables":[{"name":"organization_name","prefix":"organization_name","available_values":[],"default":"*"},{"name":"account_name","prefix":"account_name","available_values":[],"default":"*"},{"name":"warehouse_name","prefix":"warehouse_name","available_values":[],"default":"*"}],"layout_type":"ordered","notify_list":[],"reflow_type":"fixed"}
+{
+  "title": "Snowflake Cloud Cost Management Overview",
+  "description": "This Datadog dashboard provides a comprehensive view of Snowflake costs, categorized by key cost drivers, including **compute, storage, and individual queries**. \n\nCosts are broken down using **out-of-the-box tags** —such as warehouse metering, cloud services, and automatic clustering—along with **custom object and query tags** for deeper insights. \n\nThe dashboard provides visibility into **total costs**, **compute and storage specific charges**, and granular visibility into **query-level costs**. \n\nClone this dashboard to add widgets or include your unique object tags as template variables for easier filtering.\n\n**Additional Reading**\n\n[How to monitor Snowflake performance with Datadog](https://www.datadoghq.com/blog/monitor-snowflake-with-datadog/)",
+  "widgets": [
+    {
+      "id": 7388209259199913,
+      "definition": {
+        "title": "Total Snowflake Spend",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:all.cost{providername:Snowflake,$organization_name,$account_name,$warehouse_name}",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 4883642661596770,
+      "definition": {
+        "title": "Total Spend (past 30d)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "query": "sum:all.cost{providername:Snowflake,$warehouse_name,$account_name,$organization_name}",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 3104378751977011,
+      "definition": {
+        "title": "Total Spend (30d prior)",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "timeshift(query1, -2592000)"
+              }
+            ],
+            "queries": [
+              {
+                "query": "sum:all.cost{providername:Snowflake,$warehouse_name,$account_name,$organization_name}",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar"
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 2332900140646726,
+      "definition": {
+        "title": "MoM change",
+        "title_size": "16",
+        "title_align": "left",
+        "time": {
+          "type": "live",
+          "unit": "month",
+          "value": 1,
+          "hide_incomplete_cost_data": true
+        },
+        "type": "query_value",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "percent"
+                  }
+                },
+                "formula": "(query1 - timeshift(query2, -2592000)) / timeshift(query2, -2592000) * 100"
+              }
+            ],
+            "queries": [
+              {
+                "query": "sum:all.cost{providername:Snowflake,$warehouse_name,$account_name,$organization_name}",
+                "data_source": "cloud_cost",
+                "name": "query1",
+                "aggregator": "sum"
+              },
+              {
+                "query": "sum:all.cost{providername:Snowflake,$warehouse_name,$account_name,$organization_name}",
+                "data_source": "cloud_cost",
+                "name": "query2",
+                "aggregator": "sum"
+              }
+            ],
+            "response_format": "scalar",
+            "conditional_formats": [
+              {
+                "comparator": "<",
+                "value": 1,
+                "palette": "black_on_light_green"
+              },
+              {
+                "comparator": "<",
+                "value": 10,
+                "palette": "black_on_light_yellow"
+              },
+              {
+                "comparator": "<",
+                "value": 100,
+                "palette": "black_on_light_red"
+              },
+              {
+                "comparator": ">=",
+                "value": 100,
+                "palette": "white_on_red"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area",
+          "yaxis": {
+            "include_zero": true
+          }
+        }
+      },
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    },
+    {
+      "id": 7301983152878516,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5139626842659425,
+            "definition": {
+              "type": "note",
+              "content": "Snowflake bills on two main components: **Compute** (billed in Snowflake Credits, is based on warehouse size and active runtime) and **Storage** (billed by terabyte). \n\nThe `servicename` tag is the main categorization of your Snowflake bill and includes all costs across **Compute** and **Storage**\n\nFurther granularity into compute costs are also provided, for example: `servicename`:`WAREHOUSE_METERING_QUERY_ATTRIBUTION` allows you to attribute compute costs to individual queries.\n\n  \nThe full list of Snowflake CCM tags are available [here](https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=snowflake#data-collected).",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 5801682480578706,
+            "definition": {
+              "title": "Costs Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Cost",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Snowflake,$organization_name,$account_name,$warehouse_name} by {servicename}.rollup(sum, 86400)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 4
+            }
+          },
+          {
+            "id": 3102693694241468,
+            "definition": {
+              "type": "note",
+              "content": "- CCM for Snowflake automatically ingests all object tags created in Snowflake.\n  - [Object tags](https://docs.snowflake.com/en/user-guide/object-tagging) may be used for identifying organization specific information such as department, team, or project.  \n  - *Clone this dashboard to add your unique object tags as template variables for easier filtering.*\n  \n-  Additionally, you also can configure the collection of [Query Tags](https://docs.snowflake.com/en/sql-reference/parameters#query-tag) in the Snowflake Integration tile.\n   - Query tags track metadata on individual queries and can be associated to occurrences such as ETL or dbt jobs.\n   ",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 3,
+              "height": 4
+            }
+          },
+          {
+            "id": 8539838916606235,
+            "definition": {
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "title": "Total Costs by Servicename",
+              "type": "treemap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Snowflake,$organization_name,$account_name,$warehouse_name} by {servicename}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 4,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 261546763796746,
+            "definition": {
+              "title": "Costs Changes by Servicename (Weekly)",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "change",
+              "requests": [
+                {
+                  "increase_good": false,
+                  "order_by": "change",
+                  "change_type": "absolute",
+                  "order_dir": "desc",
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "calendar_shift(query1, '-1w', 'UTC')"
+                    },
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Snowflake,$organization_name,$account_name,$warehouse_name} by {servicename}",
+                      "aggregator": "sum"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 7,
+              "y": 4,
+              "width": 5,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 12,
+        "height": 9
+      }
+    },
+    {
+      "id": 3040893583748874,
+      "definition": {
+        "title": "Query Costs",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7862432605415222,
+            "definition": {
+              "type": "note",
+              "content": "**Query Optimization Tips**:\n\nSnowflake groups queries with the same structure together in the QUERY_PARAMETERIZED_HASH tag. Use this tag to identify and optimize inefficient or high-cost query patterns. \n\nIf a query costs less than $0.01 to execute, its hash value is recorded as \"hashes_below_threshold_for_the_day\". If this appears under a specific user, it indicates that the user has executed a high volume of short queries.\n",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 9003564104182742,
+            "definition": {
+              "title": "Top Query Costs by User",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:all.cost{providername:Snowflake,servicename:WAREHOUSE_METERING_QUERY_ATTRIBUTION,$organization_name,$account_name,$warehouse_name} by {user_name}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Cost",
+                      "formula": "query2"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 3828121639489686,
+            "definition": {
+              "type": "note",
+              "content": "To see detailed information for a single query (such as duration, SQL text, or any errors) from Snowflake [Query History Logs](https://docs.datadoghq.com/integrations/snowflake_web/#logs),  click on any query and select \"View Related Logs\".",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 7794291952534380,
+            "definition": {
+              "title": "Most Expensive Queries",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:all.cost{providername:Snowflake,servicename:WAREHOUSE_METERING_QUERY_ATTRIBUTION,$warehouse_name,$account_name,$organization_name} by {query.parameterized_hash,user_name}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 500,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Cost",
+                      "formula": "query2"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "never",
+              "custom_links": [
+                {
+                  "override_label": "containers",
+                  "is_hidden": true
+                },
+                {
+                  "override_label": "hosts",
+                  "is_hidden": true
+                },
+                {
+                  "override_label": "logs",
+                  "link": "https://app.datadoghq.com/logs?query=source%3Asnowflake%20snowflake.table%3Aquery_history%20query.parameterized_hash%3A{{query.parameterized_hash.value}}&agg_m=count&agg_m_source=base&agg_q=@query.parameterized_hash&agg_q_source=base&agg_t=count&clustering_pattern_field_path=message&fromUser=false&messageDisplay=inline&panelStorageType=hot&panelType=logs&refresh_mode=sliding&screenId=c9v-p47-sd9&screenName=snowflake-cloud-cost-management-overview&storage=hot&stream_sort=time,desc&top_n=1000&top_o=top&viz=stream&x_missing=true&live=true",
+                  "is_hidden": false
+                },
+                {
+                  "override_label": "profiles",
+                  "is_hidden": true
+                }
+              ]
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 9,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "id": 7220859667923594,
+      "definition": {
+        "title": "Compute Costs",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1754503740617898,
+            "definition": {
+              "title": "Total Compute Cost",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Snowflake AND (servicename:WAREHOUSE_METERING_QUERY_ATTRIBUTION OR servicename:WAREHOUSE_METERING_IDLE_OR_LESS_100MS OR servicename:AI_SERVICES OR servicename:AUTOMATIC_CLUSTERING OR servicename:CLOUD_SERVICES OR servicename:QUERY_ACCELERATION OR servicename:MATERIALIZED_VIEW OR servicename:HYBRID_TABLE_REQUESTS) AND $organization_name AND $account_name AND $warehouse_name}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 6651080657569080,
+            "definition": {
+              "title": "Total Compute Cost",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Snowflake AND (servicename:WAREHOUSE_METERING_QUERY_ATTRIBUTION OR servicename:WAREHOUSE_METERING_IDLE_OR_LESS_100MS OR servicename:AI_SERVICES OR servicename:AUTOMATIC_CLUSTERING OR servicename:CLOUD_SERVICES OR servicename:QUERY_ACCELERATION OR servicename:MATERIALIZED_VIEW OR servicename:HYBRID_TABLE_REQUESTS) AND $organization_name AND $account_name AND $warehouse_name} by {servicename}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 8,
+              "height": 3
+            }
+          },
+          {
+            "id": 5951624146164516,
+            "definition": {
+              "title": "Most Expensive Warehouses",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Snowflake AND (servicename:WAREHOUSE_METERING_IDLE_OR_LESS_100MS OR servicename:WAREHOUSE_METERING) AND $warehouse_name AND $account_name AND $organization_name} by {warehouse_name,warehouse_size}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Cost",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 809513148901320,
+            "definition": {
+              "title": "Daily Warehouse Compute Cost Changes",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "change",
+              "requests": [
+                {
+                  "increase_good": false,
+                  "order_by": "change",
+                  "change_type": "absolute",
+                  "order_dir": "desc",
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "calendar_shift(query1, '-1d', 'UTC')"
+                    },
+                    {
+                      "formula": "query1",
+                      "alias": "Cost"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Snowflake AND (servicename:WAREHOUSE_METERING_IDLE_OR_LESS_100MS OR servicename:WAREHOUSE_METERING) AND $warehouse_name AND $account_name AND $organization_name} by {warehouse_name}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3270248262663112,
+            "definition": {
+              "type": "note",
+              "content": "To optimize your Snowflake usage, focus on minimizing warehouse idle time and monitoring queries that run in under 100 ms. You can track this using `WAREHOUSE_METERING_IDLE_OR_LESS_100MS`.\n- If a significant portion of costs comes from queries under 100 ms, consider directing those workloads to a smaller warehouse to reduce expenses.\n- If idle costs are high, adjust your workload scheduling or modify the auto-suspend time to ensure the warehouse isn't running unnecessarily.\n\n\n\n\n\n",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 4642670437237358,
+            "definition": {
+              "title": "Idle and <100 ms Query Cost by Warehouse and Size",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Snowflake,servicename:WAREHOUSE_METERING_IDLE_OR_LESS_100MS,$organization_name,$account_name,$warehouse_name} by {warehouse_name,warehouse_size}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 50,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "alias": "Cost",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 4,
+              "y": 6,
+              "width": 8,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 18,
+        "width": 12,
+        "height": 10,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 4511705579868518,
+      "definition": {
+        "title": "Storage Costs",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1782416168887410,
+            "definition": {
+              "title": "Total Storage Costs",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:all.cost{providername:Snowflake,servicename:STORAGE,$organization_name,$account_name,$warehouse_name}",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 807979309349822,
+            "definition": {
+              "title": "Total Storage Costs",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Storage Cost",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query2",
+                      "query": "sum:all.cost{providername:Snowflake,servicename:STORAGE,$organization_name,$account_name,$warehouse_name}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 8,
+              "height": 5
+            }
+          },
+          {
+            "id": 2034795344056172,
+            "definition": {
+              "type": "note",
+              "content": "To optimize your storage, look into: \n- reducing Time Travel retention if historical data isn’t needed\n- minimizing cloned table modifications to avoid unnecessary storage\n- archiving old data to cheaper external storage (e.g., AWS S3)\n- using efficient file formats (e.g., Parquet) to reduce storage overhead\n\n",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 28,
+        "width": 12,
+        "height": 6
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "organization_name",
+      "prefix": "organization_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "account_name",
+      "prefix": "account_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "warehouse_name",
+      "prefix": "warehouse_name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

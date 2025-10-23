@@ -21,6 +21,8 @@ If you have a mixed cluster of traditional EKS nodes and Fargate pods, you can m
 
 **Note**: Cloud Network Monitoring (CNM) is not supported for EKS Fargate.
 
+**Minimum Agent version:** 7.18.0
+
 ## Setup
 
 ### Prerequisites
@@ -228,7 +230,7 @@ The following is output from a sample Redis deployment's pod where the Admission
 
 The sidecar uses the image repository and tags set in `datadog-agent.yaml`.
   
-{{< highlight yaml "hl_lines=15-37" >}}
+```yaml
 metadata:
   labels:
     app: redis
@@ -266,7 +268,7 @@ spec:
       requests:
         cpu: 200m
         memory: 256Mi
-{{< /highlight >}}
+```
 
 ##### Custom configuration with sidecar profiles and custom selectors - Datadog Operator
 
@@ -311,7 +313,7 @@ Apply this configuration and wait for the Cluster Agent to reach a running state
 
 The following is output from a Redis deployment's pod where the Admission Controller injected an Agent sidecar based on the pod label `app: redis` instead of the label `agent.datadoghq.com/sidecar: fargate`:
 
-{{< highlight yaml "hl_lines=29-38" >}}
+```yaml
 metadata: 
   labels:
     app: redis
@@ -350,7 +352,7 @@ spec:
       limits:
         cpu: "800m"
         memory: "512Mi"
-{{< /highlight >}}
+```
 
 The environment variables and resource settings are automatically applied based on the new Fargate profile configured in the `DatadogAgent`.
 
@@ -400,7 +402,7 @@ The following is output from a sample Redis Deployment's pod where the Admission
 
 The sidecar uses the image repository and tags set in `datadog-values.yaml`.
 
-{{< highlight yaml "hl_lines=15-37" >}}
+```yaml
 metadata:
   labels:
     app: redis
@@ -438,7 +440,7 @@ spec:
       requests:
         cpu: 200m
         memory: 256Mi
- {{< /highlight >}}
+```
 
 ##### Custom configuration with sidecar profiles and custom selectors - Helm
 
@@ -481,7 +483,7 @@ Apply this configuration and wait for the Cluster Agent to reach a running state
 
 The following is output from a Redis deployment's pod where the Admission Controller injected an Agent sidecar based on the pod label `app: redis` instead of the label `agent.datadoghq.com/sidecar: fargate`:
 
-{{< highlight yaml "hl_lines=29-37" >}}
+```yaml
 metadata:
   labels:
     app: redis
@@ -520,7 +522,7 @@ spec:
       limits:
         cpu: "800m"
         memory: "512Mi"
-{{< /highlight >}}
+```
 
 The environment variables and resource settings are automatically applied based on the new Fargate profile configured in the Helm configuration.
 
@@ -883,12 +885,14 @@ spec:
 
 ### Collecting logs from EKS on Fargate natively with the Agent
 
+**Minimum Agent version:** 7.71.0
+
 Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubelet and ship them to Datadog.
 
 1. The most convenient way to enable native kubelet logging is through the Cluster Agent's Admission Controller sidecar injection feature. When configured, all subsequent injected Agent containers automatically have kubelet logging enabled. This feature can also be configured manually in your Application's manifest.
 
   <!-- xxx tabs xxx -->
-  <!-- xxx tab "Enable Logging - Datdog Operator" xxx -->
+  <!-- xxx tab "Admission Controller - Datadog Operator" xxx -->
 
   Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`, so newly injected Agent containers will have kubelet logging enabled.
 
@@ -899,7 +903,12 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
     name: datadog
     namespace: datadog
   spec:
-    overrides:
+    features:
+      admissionController:
+        agentSidecarInjection:
+          enabled: true
+          provider: fargate
+    override:
       clusterAgent:
         env:
           - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
@@ -907,19 +916,23 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
   ```
 
   <!-- xxz tab xxx -->
-  <!-- xxx tab "Enable Logging - Helm" xxx -->
+  <!-- xxx tab "Admission Controller - Helm" xxx -->
 
   Set the `DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED` Cluster Agent environment variable to `true`, so newly injected Agent containers will have kubelet logging enabled.
 
   ```yaml
   clusterAgent:
+    admissionController:
+      agentSidecarInjection:
+        enabled: true
+        provider: fargate
     env:
       - name: DD_ADMISSION_CONTROLLER_AGENT_SIDECAR_KUBELET_API_LOGGING_ENABLED
         value: true
   ```
 
   <!-- xxz tab xxx -->
-  <!-- xxx tab "Enable Logging - Manual" xxx -->
+  <!-- xxx tab "Manual" xxx -->
 
   To enable Agent logging manually, you must:
   1. Attach an [emptyDir][29] volume to your pod and mount it inside the Agent container. This prevents duplicate logs should the Agent container restart.
@@ -940,7 +953,10 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
           - name: agent-option
             emptyDir: {}
         containers:
-          #(...)
+          # Your original container
+          - name: "<CONTAINER_NAME>"
+            image: "<CONTAINER_IMAGE>"
+
           # Running the Agent as a sidecar
           - name: datadog-agent
             image: gcr.io/datadoghq/agent:7
@@ -969,10 +985,10 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
   <!-- xxz tab xxx -->
   <!-- xxz tabs xxx -->
 
-2. You can configure the injected Agents to automatically collect logs for all containers by enabling `CONTAINER_COLLECT_ALL`. Alternatively, logs can be filtered through the standard Kubernetes [Autodiscovery annotations](https://docs.datadoghq.com/containers/kubernetes/log/?tab=helm#autodiscovery-annotations).
+2. You can configure the Agent sidecar to automatically collect logs for all of the containers in its pod by enabling `DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL`. Alternatively, the log integration can be setup per container with the standard Kubernetes [Autodiscovery annotations][30].
 
   <!-- xxx tabs xxx -->
-  <!-- xxx tab "Configure Logging - Datdog Operator" xxx -->
+  <!-- xxx tab "Admission Controller - Datadog Operator" xxx -->
 
   ```yaml
   #(...)
@@ -990,7 +1006,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
   ```
 
   <!-- xxz tab xxx -->
-  <!-- xxx tab "Configure Logging - Helm" xxx -->
+  <!-- xxx tab "Admission Controller - Helm" xxx -->
 
   ```yaml
   clusterAgent:
@@ -1005,7 +1021,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
   ```
 
   <!-- xxz tab xxx -->
-  <!-- xxx tab "Configure Logging - Manual" xxx -->
+  <!-- xxx tab "Manual" xxx -->
 
   ```yaml
     apiVersion: apps/v1
@@ -1028,7 +1044,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
                 - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
                   value: "true"
               #(...)
-    ```
+  ```
 
   <!-- xxz tab xxx -->
   <!-- xxz tabs xxx -->
@@ -1039,22 +1055,22 @@ Monitor EKS Fargate logs by using [Fluent Bit][14] to route EKS logs to CloudWat
 
 1. To configure Fluent Bit to send logs to CloudWatch, create a Kubernetes ConfigMap that specifies CloudWatch Logs as its output. The ConfigMap specifies the log group, region, prefix string, and whether to automatically create the log group.
 
-   ```yaml
-    kind: ConfigMap
-    apiVersion: v1
-    metadata:
-      name: aws-logging
-      namespace: aws-observability
-    data:
-      output.conf: |
-        [OUTPUT]
-            Name cloudwatch_logs
-            Match   *
-            region us-east-1
-            log_group_name awslogs-https
-            log_stream_prefix awslogs-firelens-example
-            auto_create_group true
-   ```
+  ```yaml
+  kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: aws-logging
+    namespace: aws-observability
+  data:
+    output.conf: |
+      [OUTPUT]
+          Name cloudwatch_logs
+          Match   *
+          region us-east-1
+          log_group_name awslogs-https
+          log_stream_prefix awslogs-firelens-example
+          auto_create_group true
+  ```
 2. Use the [Datadog Forwarder][15] to collect logs from CloudWatch and send them to Datadog.
 
 ## Trace collection
@@ -1259,3 +1275,4 @@ Additional helpful documentation, links, and articles:
 [27]: https://helm.sh/docs/intro/install/
 [28]: https://docs.datadoghq.com/tracing/trace_collection/proxy_setup/apigateway
 [29]: https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
+[30]: https://docs.datadoghq.com/containers/kubernetes/log/?tab=helm#autodiscovery-annotations

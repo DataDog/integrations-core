@@ -684,6 +684,16 @@ instances:
     #
     # rabbitmq_api_url: http://localhost:15672/api/
 
+    ## @param rabbitmq_user - string - optional - default: guest
+    ## The username to use for the RabbitMQ Management Plugin
+    #
+    # rabbitmq_user: guest
+
+    ## @param rabbitmq_pass - string - optional - default: guest
+    ## The password to use for the RabbitMQ Management Plugin
+    #
+    # rabbitmq_pass: guest
+
     ## @param tag_families - boolean - optional - default: false
     ## To tag queue "families" based off of regex matching.
     #

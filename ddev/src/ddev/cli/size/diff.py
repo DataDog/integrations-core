@@ -204,13 +204,13 @@ def get_repo_info(
         repo = gitRepo.repo_dir
         task = progress.add_task("[cyan]Calculating sizes for the first commit...", total=None)
         gitRepo.checkout_commit(first_commit)
-        files_b = get_files(repo, compressed)
+        files_b = get_files(repo, compressed, version)
         dependencies_b = get_dependencies(repo, platform, version, compressed)
         progress.remove_task(task)
 
         task = progress.add_task("[cyan]Calculating sizes for the second commit...", total=None)
         gitRepo.checkout_commit(second_commit)
-        files_a = get_files(repo, compressed)
+        files_a = get_files(repo, compressed, version)
         dependencies_a = get_dependencies(repo, platform, version, compressed)
         progress.remove_task(task)
 

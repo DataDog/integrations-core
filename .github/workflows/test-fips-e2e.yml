@@ -33,7 +33,7 @@ jobs:
 
     env:
       FORCE_COLOR: "1"
-      PYTHON_VERSION: "3.12"
+      PYTHON_VERSION: "3.13"
       # Test results for later processing
       TEST_RESULTS_BASE_DIR: "test-results"
       # Tracing to monitor our test suite
@@ -46,6 +46,8 @@ jobs:
       TRACE_CAPTURE_LOG: "trace-captures/output.log"
 
     permissions:
+       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
+       id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
 
@@ -149,3 +151,12 @@ jobs:
         name: "test-results-${{ inputs.target || 'tls' }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
+    - name: Upload coverage data
+      if: >
+        !github.event.repository.private &&
+        always()
+      uses: codecov/codecov-action@15559ed290fa727036809b67ab0f646ffa6c5158
+      with:
+        use_oidc: true
+        files: "${{ inputs.target || 'tls' }}/coverage.xml"
+        flags: "${{ inputs.target || 'tls' }}"

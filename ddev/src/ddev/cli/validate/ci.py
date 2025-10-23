@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import click
 
@@ -62,14 +62,18 @@ def ci(app: Application, sync: bool):
         else 'DataDog/integrations-core/.github/workflows/test-target.yml@master'
     )
     jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
+    windows_jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all-windows.yml'
     original_jobs_workflow = jobs_workflow_path.read_text() if jobs_workflow_path.is_file() else ''
+    original_windows_jobs_workflow = (
+        windows_jobs_workflow_path.read_text() if windows_jobs_workflow_path.is_file() else ''
+    )
     ddev_jobs_id = ('jd316aba', 'j6712d43')
 
     job_matrix = construct_job_matrix(app.repo.path, get_all_targets(app.repo.path))
 
     # Reduce the target-envs to single jobs with the same name
     # We do this to keep the job list from exceeding Github's maximum file size limit
-    job_dict = {}
+    job_dict: dict[str, dict[str, Any]] = {}
     for job in job_matrix:
         # Remove anything inside parentheses from job names and trim trailing space
         target_name = re.sub(r'\s*\(.*?\)', '', job['name']).rstrip()
@@ -81,15 +85,22 @@ def ci(app: Application, sync: bool):
             job_dict[target_name]['target-env'].append(job['target-env'])
     job_matrix = list(job_dict.values())
 
-    jobs = {}
+    jobs: dict[str, dict[str, Any]] = {}
+    windows_jobs: dict[str, dict[str, Any]] = {}
     for data in job_matrix:
+        jobs_to_update = jobs
+
+        if 'windows' in data['platform']:
+            jobs_to_update = windows_jobs
+
         python_restriction = data.get('python-support', '')
-        config = {
+        config: dict[str, Any] = {
             'job-name': data['name'],
             'target': data['target'],
             'platform': data['platform'],
             'runner': json.dumps(data['runner'], separators=(',', ':')),
             'repo': '${{ inputs.repo }}',
+            'context': '${{ inputs.context }}',
             # Options
             'python-version': '${{ inputs.python-version }}',
             'latest': '${{ inputs.latest }}',
@@ -142,12 +153,13 @@ def ci(app: Application, sync: bool):
             }
         if job_id in ddev_jobs_id:
             job_config['if'] = '${{ inputs.skip-ddev-tests == false }}'
-        jobs[job_id] = job_config
+        jobs_to_update[job_id] = job_config
 
         if data['target'] == 'ddev':
-            jobs[job_id]['if'] = '${{ inputs.skip-ddev-tests == false }}'
+            jobs_to_update[job_id]['if'] = '${{ inputs.skip-ddev-tests == false }}'
 
     jobs_component = yaml.safe_dump({'jobs': jobs}, default_flow_style=False, sort_keys=False)
+    windows_jobs_component = yaml.safe_dump({'jobs': windows_jobs}, default_flow_style=False, sort_keys=False)
 
     # Enforce proper string types
     for field in (
@@ -161,14 +173,29 @@ def ci(app: Application, sync: bool):
         'skip-ddev-tests',
     ):
         jobs_component = jobs_component.replace(f'${{{{ inputs.{field} }}}}', f'"${{{{ inputs.{field} }}}}"')
+        windows_jobs_component = windows_jobs_component.replace(
+            f'${{{{ inputs.{field} }}}}', f'"${{{{ inputs.{field} }}}}"'
+        )
 
     manual_component = original_jobs_workflow.split('jobs:')[0].strip()
+    windows_manual_component = original_windows_jobs_workflow.split('jobs:')[0].strip()
     expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'
+    expected_windows_jobs_workflow = f'{windows_manual_component}\n\n{windows_jobs_component}'
     target_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
+    windows_target_path = app.repo.path / '.github' / 'workflows' / 'test-all-windows.yml'
 
-    if original_jobs_workflow != expected_jobs_workflow:
+    # Check if either workflow needs updating
+    workflows_need_sync = (
+        original_jobs_workflow != expected_jobs_workflow
+        or original_windows_jobs_workflow != expected_windows_jobs_workflow
+    )
+
+    if workflows_need_sync:
         if sync:
-            target_path.write_text(expected_jobs_workflow)
+            if original_jobs_workflow != expected_jobs_workflow:
+                target_path.write_text(expected_jobs_workflow)
+            if original_windows_jobs_workflow != expected_windows_jobs_workflow:
+                windows_target_path.write_text(expected_windows_jobs_workflow)
         else:
             app.abort('CI configuration is not in sync, try again with the `--sync` flag')
 

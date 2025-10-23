@@ -1,1 +1,0 @@
-Add new collect_* configuration options (collect_schemas, collect_deadlocks, collect_xe) to replace deprecated *_collection options while maintaining backward compatibility.

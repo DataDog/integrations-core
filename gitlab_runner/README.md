@@ -9,6 +9,8 @@ Integration that allows to:
 
 For more information about the GitLab Runner and its integration with Prometheus, see the [GitLab Runner documentation][1].
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.

@@ -2,7 +2,81 @@
 
 <!-- towncrier release notes start -->
 
-## 22.16.0 / 2025-07-29
+## 23.1.2 / 2025-10-07
+
+***Fixed***:
+
+* Backfill old keys in options passed from Postgres integration to SQL obfuscator ([#21557](https://github.com/DataDog/integrations-core/pull/21557))
+* Fixes a collision issue when token based authentication is configured for multiple Postgres instances ([#21560](https://github.com/DataDog/integrations-core/pull/21560))
+
+## 23.1.1 / 2025-10-03
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 23.1.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add gauge postgresql.locks.idle_in_transaction_age to measure age (s) of idle-in-transaction sessions holding exclusive relation locks; tags: pid, db, session_user, app, client_hostname, lock_mode, relation, relation_owner; limit 100 rows. ([#21182](https://github.com/DataDog/integrations-core/pull/21182))
+* Add agent health event for Postgres config validation ([#21347](https://github.com/DataDog/integrations-core/pull/21347))
+* Refactor Postgres configuration with fixes and clarifications on default values ([#21347](https://github.com/DataDog/integrations-core/pull/21347))
+* PG: Handle locks without relations like transactionid or virtualxid locks ([#21393](https://github.com/DataDog/integrations-core/pull/21393))
+* Add tombstone fields for Postgres schema collection ([#21431](https://github.com/DataDog/integrations-core/pull/21431))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+***Fixed***:
+
+* Compile and reuse regex patterns ([#21317](https://github.com/DataDog/integrations-core/pull/21317))
+* Fixed support for refreshing IAM authentication and Azure Managed Identity tokens ([#21503](https://github.com/DataDog/integrations-core/pull/21503))
+
+## 23.0.2 / 2025-10-03 / Agent 7.71.1
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 23.0.1 / 2025-09-24 / Agent 7.71.0
+
+***Fixed***:
+
+* Updated to build psycopg from source to fix a problem with FIPS compatibility ([#21074](https://github.com/DataDog/integrations-core/pull/21074))
+
+## 23.0.0 / 2025-09-05
+
+***Changed***:
+
+* Bump minimum datadog_checks_base to 37.18.0 ([#21238](https://github.com/DataDog/integrations-core/pull/21238))
+
+***Added***:
+
+* Update core tags with agent host name for DB integrations(postgres, mysql, sqlserver) ([#20991](https://github.com/DataDog/integrations-core/pull/20991))
+* Enable collect_settings by default for DBM enabled integrations ([#21172](https://github.com/DataDog/integrations-core/pull/21172))
+* Add Postgres Health class for submitting Postgres health events ([#21193](https://github.com/DataDog/integrations-core/pull/21193))
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 22.18.0 / 2025-09-04 / Agent 7.70.1
+
+***Added***:
+
+* Upgrade to psycopg3 ([#21173](https://github.com/DataDog/integrations-core/pull/21173))
+
+## 22.17.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* PG: Add valid tag to index metrics ([#20731](https://github.com/DataDog/integrations-core/pull/20731))
+* PG: Add per index blocks hit and blocks read ([#20767](https://github.com/DataDog/integrations-core/pull/20767))
+
+***Fixed***:
+
+* Fixed a bug where the AWS configuration was overwritten for the Postgres integration ([#20774](https://github.com/DataDog/integrations-core/pull/20774))
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+* Avoid sending empty Postgres extensions and settings payloads ([#20939](https://github.com/DataDog/integrations-core/pull/20939))
+
+## 22.16.0 / 2025-07-29 / Agent 7.69.0
 
 ***Added***:
 
@@ -21,7 +95,7 @@
 
 * PG: Add recovery prefetch metrics ([#20464](https://github.com/DataDog/integrations-core/pull/20464))
 * Update dependencies ([#20561](https://github.com/DataDog/integrations-core/pull/20561))
-* PG: Add wait events counts from `pg_stat_activity` ([#20588](https://github.com/DataDog/integrations-core/pull/20588))
+* PG: Add wait events counts from pg_stat_activity ([#20588](https://github.com/DataDog/integrations-core/pull/20588))
 * Upgrade psycopg to version 3 for Postgres integration ([#20617](https://github.com/DataDog/integrations-core/pull/20617))
 
 ***Fixed***:

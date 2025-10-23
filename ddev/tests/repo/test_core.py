@@ -49,19 +49,37 @@ class TestIntegrationsIteration:
         pytest.param("iter", lambda path: (path / 'manifest.json').is_file(), id="only integrations"),
         pytest.param(
             "iter_all",
-            lambda path: (path / 'manifest.json').is_file() or (path / 'pyproject.toml').is_file(),
+            lambda path: ((path / 'manifest.json').is_file() or (path / 'pyproject.toml').is_file())
+            # Is not a worktree
+            and not (path / ".git").is_file(),
             id="all valid",
         ),
-        pytest.param("iter_packages", lambda path: (path / 'pyproject.toml').is_file(), id="packages"),
+        pytest.param(
+            "iter_packages",
+            lambda path: (path / 'pyproject.toml').is_file()
+            # Is not a worktree
+            and not (path / ".git").is_file(),
+            id="packages",
+        ),
         pytest.param(
             "iter_tiles",
-            lambda path: (path / 'manifest.json').is_file() and not (path / 'pyproject.toml').is_file(),
+            lambda path: ((path / 'manifest.json').is_file() and not (path / 'pyproject.toml').is_file())
+            # Is not a worktree
+            and not (path / ".git").is_file(),
             id="tiles",
         ),
-        pytest.param("iter_testable", lambda path: (path / 'hatch.toml').is_file()),
+        pytest.param(
+            "iter_testable",
+            lambda path: (path / 'hatch.toml').is_file()
+            # Is not a worktree
+            and not (path / ".git").is_file(),
+            id="testable",
+        ),
         pytest.param(
             "iter_shippable",
-            lambda path: (path / 'pyproject.toml').is_file() and path.name not in NOT_SHIPPABLE,
+            lambda path: ((path / 'pyproject.toml').is_file() and path.name not in NOT_SHIPPABLE)
+            # Is not a worktree
+            and not (path / ".git").is_file(),
             id="shippable",
         ),
         pytest.param(
@@ -69,12 +87,16 @@ class TestIntegrationsIteration:
             lambda path: (
                 package_root := path / 'datadog_checks' / path.name.replace('-', '_') / '__init__.py'
             ).is_file()
-            and package_root.read_text().count('import ') > 1,
+            and package_root.read_text().count('import ') > 1
+            # Is not a worktree
+            and not (path / ".git").is_file(),
             id="agent checks",
         ),
         pytest.param(
             "iter_jmx_checks",
-            lambda path: (path / 'datadog_checks' / path.name.replace('-', '_') / 'data' / 'metrics.yaml').is_file(),
+            lambda path: ((path / 'datadog_checks' / path.name.replace('-', '_') / 'data' / 'metrics.yaml').is_file())
+            # Is not a worktree
+            and not (path / ".git").is_file(),
             id="jmx checks",
         ),
     ]
