@@ -140,7 +140,7 @@ def diff(
             if format:
                 from .utils.common_funcs import SizeMode, export_format
 
-                export_format(app, format, filtered_diffs, SizeMode.DIFF, platform, py_version, compressed)
+                export_format(app, format, filtered_diffs, SizeMode.DIFF, compressed)
 
             if quality_gate_threshold:
                 from ddev.cli.size.utils.export_quality_gates import (

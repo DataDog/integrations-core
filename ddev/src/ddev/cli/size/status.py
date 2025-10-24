@@ -141,7 +141,7 @@ def status(
         if format:
             from ddev.cli.size.utils.common_funcs import SizeMode, export_format
 
-            export_format(app, format, sizes_plat_ver, SizeMode.STATUS, platform, py_version, compressed)
+            export_format(app, format, sizes_plat_ver, SizeMode.STATUS, compressed)
 
     except Exception:
         import traceback

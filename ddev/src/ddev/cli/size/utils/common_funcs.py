@@ -440,16 +440,10 @@ def export_format(
     format: list[str],
     modules: Sizes,
     mode: SizeMode,
-    platform: str | None,
-    py_version: str | None,
     compressed: bool,
 ) -> None:
     size_type = "compressed" if compressed else "uncompressed"
     name = f"{mode.value}_{size_type}"
-    if platform:
-        name += f"_{platform}"
-    if py_version:
-        name += f"_{py_version}"
     for output_format in format:
         if output_format == "csv":
             csv_filename = f"{name}.csv"
