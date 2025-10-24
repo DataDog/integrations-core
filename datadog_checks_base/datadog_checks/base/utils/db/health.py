@@ -16,12 +16,10 @@ from datadog_checks.base.utils.serialization import json
 if TYPE_CHECKING:
     from datadog_checks.base import DatabaseCheck
 try:
-    import datadog_agent # type: ignore
+    import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 import threading
-
-
 from enum import Enum
 
 
@@ -91,10 +89,10 @@ class Health:
         """
         category = self.check.__NAMESPACE__ or self.check.__class__.__name__.lower()
         if cooldown:
+            cooldown_key = "|".join([category, name.value, status.value])
+            if cooldown_values:
+                cooldown_key = "|".join([cooldown_key, "|".join([f"{v}" for v in cooldown_values])])
             with self._cache_lock:
-                cooldown_key = "|".join([category, name.value, status.value])
-                if cooldown_values:
-                    cooldown_key = "|".join([cooldown_key, "|".join([f"{v}" for v in cooldown_values])])
                 if self._ttl_cache.get(cooldown_key, None):
                     return
                 self._ttl_cache[cooldown_key] = cooldown_time
