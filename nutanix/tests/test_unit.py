@@ -77,6 +77,7 @@ def test_node_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
 
     aggregator.assert_metric("nutanix.node.count", value=1, tags=expected_tags)
 
+
 def test_node_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
