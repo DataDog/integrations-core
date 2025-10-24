@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "2163f7af-7c30-4583-ab15-892d980227e9",
   "app_id": "bentoml",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

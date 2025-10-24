@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "70d34855-e504-4716-be0a-cc9d7d82e5ab",
   "app_id": "winkmem",
+  "owner": "windows-products",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

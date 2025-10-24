@@ -142,6 +142,13 @@ TILE_LINKS = """\
 [3]: https://docs.datadoghq.com/help/
 """
 
+EVENT_TILE_LINKS = """\
+[1]: **LINK_TO_INTEGRATION_SITE**
+[2]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: https://docs.datadoghq.com/help/
+[4]: https://github.com/DataDog/{repository}/blob/master/{name}/assets/service_checks.json
+"""
+
 integration_type_links = {
     'check': CHECK_LINKS,
     'check_only': CHECK_ONLY_LINKS,
@@ -150,6 +157,7 @@ integration_type_links = {
     'snmp_tile': SNMP_TILE_LINKS,
     'tile': TILE_LINKS,
     'metrics_crawler': TILE_LINKS,
+    'event': EVENT_TILE_LINKS,
 }
 
 # If a file changes in a PR with any of these file extensions,
