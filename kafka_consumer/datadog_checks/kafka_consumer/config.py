@@ -82,6 +82,13 @@ class KafkaConfig:
 
         # Data Streams live messages
         self.live_messages_configs = instance.get('live_messages_configs', [])
+        
+        # Cluster metadata collection options
+        self._collect_broker_metadata = is_affirmative(instance.get('collect_broker_metadata', False))
+        self._collect_topic_metadata = is_affirmative(instance.get('collect_topic_metadata', False))
+        self._collect_consumer_group_metadata = is_affirmative(instance.get('collect_consumer_group_metadata', False))
+        self._collect_schema_registry = is_affirmative(instance.get('collect_schema_registry', False))
+        self._schema_registry_url = instance.get('schema_registry_url')
 
     def validate_config(self):
         if not self._kafka_connect_str:

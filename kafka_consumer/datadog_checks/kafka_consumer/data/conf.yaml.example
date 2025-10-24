@@ -280,6 +280,58 @@ instances:
     #
     # service: <SERVICE>
 
+    ## @param collect_broker_metadata - boolean - optional - default: false
+    ## Collect broker configuration and metadata including:
+    ## - Number of brokers in the cluster
+    ## - Broker configurations (advertised.listeners, auto.create.topics.enable, log retention settings, etc.)
+    ##
+    ## This will emit additional metrics with the "kafka.broker.*" prefix.
+    #
+    # collect_broker_metadata: false
+
+    ## @param collect_topic_metadata - boolean - optional - default: false
+    ## Collect detailed topic and partition metadata including:
+    ## - Number of topics
+    ## - Partitions per topic
+    ## - Beginning and end offsets per partition
+    ## - Partition size (message count)
+    ## - Replication information (leader, replicas, ISRs)
+    ## - Under-replicated and offline partitions
+    ##
+    ## This will emit additional metrics with the "kafka.topic.*" and "kafka.partition.*" prefixes.
+    #
+    # collect_topic_metadata: false
+
+    ## @param collect_consumer_group_metadata - boolean - optional - default: false
+    ## Collect detailed consumer group metadata including:
+    ## - Consumer group members and their details (member_id, client_id, host)
+    ## - Consumer group state
+    ## - Topics consumed by each group
+    ##
+    ## This will emit additional metrics with the "kafka.consumer_group.*" prefix and events
+    ## with detailed consumer group information.
+    #
+    # collect_consumer_group_metadata: false
+
+    ## @param collect_schema_registry - boolean - optional - default: false
+    ## Collect schema registry information including:
+    ## - Number of schemas (subjects)
+    ## - Schema versions
+    ## - Latest schema details
+    ##
+    ## Requires `schema_registry_url` to be set.
+    ## This will emit additional metrics with the "kafka.schema_registry.*" prefix.
+    #
+    # collect_schema_registry: false
+
+    ## @param schema_registry_url - string - optional
+    ## URL of the Kafka Schema Registry to collect schema information from.
+    ## Required if `collect_schema_registry` is enabled.
+    ##
+    ## Example: http://localhost:8081
+    #
+    # schema_registry_url: <SCHEMA_REGISTRY_URL>
+
     ## @param min_collection_interval - number - optional - default: 15
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
