@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.nutanix.metrics import METRICS_MAP
+from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS
 
 
 class NutanixCheck(AgentCheck):
@@ -115,7 +115,7 @@ class NutanixCheck(AgentCheck):
             self.log.debug("No cluster stats returned for cluster %s", cluster_id)
             return
 
-        for key, metric_name in METRICS_MAP.items():
+        for key, metric_name in CLUSTER_STATS_METRICS.items():
             entries = stats.get(key, [])
             for entry in entries:
                 value = entry.get("value")
@@ -129,8 +129,23 @@ class NutanixCheck(AgentCheck):
 
         nodes = self._get_nodes_by_cluster(cluster_id)
         for node in nodes:
+            node_id = node.get("extId")
             node_tags = cluster_tags + self._extract_node_tags(node)
             self.gauge("node.count", 1, tags=node_tags)
+
+            stats = self._get_node_stats(cluster_id, node_id)
+            if not stats:
+                self.log.debug("No host stats returned for node %s", node_id)
+                continue
+
+            for key, metric_name in HOST_STATS_METRICS.items():
+                entries = stats.get(key, [])
+                for entry in entries:
+                    value = entry.get("value")
+                    if value is not None:
+                        self.gauge(metric_name, value, tags=node_tags)
+
+
 
     def _extract_node_tags(self, node):
         """Extract tags from a node object."""
@@ -210,6 +225,21 @@ class NutanixCheck(AgentCheck):
         }
 
         return self._get_request_data(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}", params=params)
+
+    def _get_node_stats(self, cluster_id: str, host_id: str):
+        """
+        Fetch time-series stats for a specific host/node.
+        """
+        start_time, end_time = self._calculate_stats_time_window()
+
+        params = {
+            "$startTime": start_time,
+            "$endTime": end_time,
+            "$statsType": "AVG",
+            "$samplingInterval": self.STATS_SAMPLING_INTERVAL,
+        }
+
+        return self._get_request_data(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}", params=params)
 
     def _calculate_stats_time_window(self):
         """
