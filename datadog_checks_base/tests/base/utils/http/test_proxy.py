@@ -14,7 +14,7 @@ from datadog_checks.dev import EnvVars
 pytestmark = [pytest.mark.unit]
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module")
 def mock_requests_get():
     with mock.patch.object(Session, 'get', autospec=True) as mock_get:
         response = Response()
