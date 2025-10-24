@@ -5,7 +5,6 @@ import os
 
 import ldap3
 import pytest
-
 from datadog_checks.base.utils.platform import Platform
 
 from .common import _check
