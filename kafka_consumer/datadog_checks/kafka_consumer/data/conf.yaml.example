@@ -280,40 +280,6 @@ instances:
     #
     # service: <SERVICE>
 
-    ## @param enable_cluster_monitoring - boolean - optional - default: false
-    ## (PREVIEW) Enable comprehensive Kafka cluster monitoring.
-    ##
-    ## When enabled, this collects:
-    ## - Broker metadata and configurations
-    ## - Topic and partition details (sizes, offsets, replication info)
-    ## - Consumer group state and membership
-    ## - Schema registry information (if schema_registry_url is provided)
-    ##
-    ## This emits additional metrics with prefixes:
-    ## - kafka.broker.*
-    ## - kafka.topic.*
-    ## - kafka.partition.*
-    ## - kafka.consumer_group.*
-    ## - kafka.schema_registry.* (if schema registry is configured)
-    ##
-    ## Configuration and schema events are cached and only re-emitted every 10 minutes
-    ## unless changes are detected, reducing event volume.
-    ##
-    ## All metrics and events are tagged with kafka_cluster_id for easy filtering.
-    ##
-    ## WARNING: This feature is in preview and may increase Agent resource consumption
-    ## on large clusters with many topics and consumer groups.
-    #
-    # enable_cluster_monitoring: false
-
-    ## @param schema_registry_url - string - optional
-    ## URL of the Kafka Schema Registry to collect schema information from.
-    ## If provided when enable_cluster_monitoring is true, schema information will be collected.
-    ##
-    ## Example: http://localhost:8081
-    #
-    # schema_registry_url: <SCHEMA_REGISTRY_URL>
-
     ## @param min_collection_interval - number - optional - default: 15
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
@@ -342,3 +308,15 @@ instances:
     ## Collects consumer lag metric in seconds. It may result in additional billing charges.
     #
     # data_streams_enabled: false
+
+    ## @param enable_cluster_monitoring - boolean - optional - default: false
+    ## (PREVIEW) Enable cluster monitoring to collect broker, topic, partition, consumer group,
+    ## and schema registry metadata. Events are cached and tagged with kafka_cluster_id.
+    ## May increase resource consumption on large clusters.
+    #
+    # enable_cluster_monitoring: false
+
+    ## @param schema_registry_url - string - optional - default: http://localhost:8081
+    ## Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
+    #
+    # schema_registry_url: http://localhost:8081

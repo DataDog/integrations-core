@@ -8,6 +8,10 @@ import hashlib
 import json
 import time
 
+import requests
+from confluent_kafka import TopicPartition
+from confluent_kafka.admin import ConfigResource, ResourceType
+
 
 class ClusterMetadataCollector:
     """Collects Kafka cluster metadata (brokers, topics, consumer groups, schemas)."""
@@ -97,8 +101,6 @@ class ClusterMetadataCollector:
 
     def _collect_broker_metadata(self):
         try:
-            from confluent_kafka.admin import ConfigResource, ResourceType
-
             self.log.info("Collecting broker metadata")
 
             # Get cluster metadata to get cluster_id
@@ -219,9 +221,6 @@ class ClusterMetadataCollector:
 
     def _collect_topic_metadata(self):
         try:
-            from confluent_kafka import TopicPartition
-            from confluent_kafka.admin import ConfigResource, ResourceType
-
             self.log.info("Collecting topic metadata")
 
             # Get all topics
@@ -515,8 +514,6 @@ class ClusterMetadataCollector:
             return
 
         try:
-            import requests
-
             self.log.info("Collecting schema registry information from %s", self.config._schema_registry_url)
 
             # Get cluster_id
