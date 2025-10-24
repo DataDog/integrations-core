@@ -128,7 +128,7 @@ class InstanceConfig(BaseModel):
     enable_health_service_check: Optional[bool] = None
     exclude_labels: Optional[tuple[str, ...]] = None
     exclude_metrics: Optional[tuple[str, ...]] = None
-    exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
+    exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[bool, ...], tuple[str, ...]]]] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetrics]]], ...]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
