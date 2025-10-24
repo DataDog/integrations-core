@@ -32,3 +32,31 @@ CLUSTER_STATS_METRICS_OPTIONAL = [
     "nutanix.recycle.bin.usage_bytes",
     "nutanix.snapshot.capacity_bytes",
 ]
+
+HOST_STATS_METRICS_REQUIRED = [
+    "nutanix.host.aggregate_hypervisor.memory.usage_ppm",
+    "nutanix.host.controller.avg.io.latency.usecs",
+    "nutanix.host.controller.avg.read.io.latency.usecs",
+    "nutanix.host.controller.avg.write.io.latency.usecs",
+    "nutanix.host.controller.num.iops",
+    "nutanix.host.controller.num.read.iops",
+    "nutanix.host.controller.num.write.iops",
+    "nutanix.host.controller.read.io.bandwidth.kbps",
+    "nutanix.host.controller.write.io.bandwidth.kbps",
+    "nutanix.host.cpu.capacity_hz",
+    "nutanix.host.free.physical.storage_bytes",
+    "nutanix.host.health.check_score",
+    "nutanix.host.hypervisor.cpu.usage_ppm",
+    "nutanix.host.io.bandwidth.kbps",
+    "nutanix.host.logical.storage.usage_bytes",
+    "nutanix.host.memory.capacity_bytes",
+    "nutanix.host.storage.capacity_bytes",
+    "nutanix.host.storage.usage_bytes",
+]
+
+HOST_STATS_METRICS_OPTIONAL = [
+    "nutanix.host.cpu.usage_hz",
+    "nutanix.host.overall.memory.usage_bytes",
+    "nutanix.host.overall.memory.usage_ppm",
+    "nutanix.host.power.consumption.instant_watt",
+]

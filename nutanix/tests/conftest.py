@@ -61,6 +61,11 @@ def mock_http_get(mocker):
         # Health check endpoint
         if '/console' in url:
             return mock_resp
+        
+        if "/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b/hosts/71877eae-8fc1-4aae-8d20-70196dfb2f8d" in url:
+            host_stats = load_fixture("host_stats_0006411c-0286-bc71-9f02-191e334d457b_71877eae-8fc1-4aae-8d20-70196dfb2f8d.json")
+            mock_resp.json = mocker.Mock(return_value=host_stats)
+            return mock_resp
 
         if "/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b" in url:
             cluster_stats = load_fixture("cluster_stats_0006411c-0286-bc71-9f02-191e334d457b.json")

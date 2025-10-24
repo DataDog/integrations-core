@@ -3,8 +3,8 @@
     "$reserved": {
       "$fv": "v4.r1"
     },
-    "$objectType": "clustermgmt.v4.stats.ClusterStats",
-    "extId": "0006411c-0286-bc71-9f02-191e334d457b",
+    "$objectType": "clustermgmt.v4.stats.HostStats",
+    "extId": "71877eae-8fc1-4aae-8d20-70196dfb2f8d",
     "controllerAvgIoLatencyUsecs": [
       {
         "$reserved": {
@@ -12,7 +12,7 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 280
+        "value": 290
       }
     ],
     "controllerAvgReadIoLatencyUsecs": [
@@ -22,7 +22,7 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 0
+        "value": 370
       }
     ],
     "controllerAvgWriteIoLatencyUsecs": [
@@ -32,7 +32,7 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 280
+        "value": 290
       }
     ],
     "controllerNumIops": [
@@ -42,7 +42,7 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 207
+        "value": 187
       }
     ],
     "hypervisorCpuUsagePpm": [
@@ -52,7 +52,7 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 103529
+        "value": 112031
       }
     ],
     "aggregateHypervisorMemoryUsagePpm": [
@@ -82,7 +82,7 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 207
+        "value": 187
       }
     ],
     "ioBandwidthKbps": [
@@ -92,7 +92,7 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 2217
+        "value": 1864
       }
     ],
     "controllerReadIoBandwidthKbps": [
@@ -112,7 +112,7 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 2217
+        "value": 1864
       }
     ],
     "storageUsageBytes": [
@@ -122,7 +122,7 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 67547742208
+        "value": 67787012327
       }
     ],
     "storageCapacityBytes": [
@@ -142,17 +142,27 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 1357120742892
+        "value": 1356881472773
       }
     ],
-    "logicalStorageUsageBytes": [
+    "memoryCapacityBytes": [
       {
         "$reserved": {
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 77713899520
+        "timestamp": "2025-10-16T14:26:44.221483Z",
+        "value": 404835270656
+      }
+    ],
+    "cpuCapacityHz": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2025-10-16T14:26:44.221483Z",
+        "value": 81600000000
       }
     ],
     "healthCheckScore": [
@@ -162,14 +172,24 @@
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
         "timestamp": "2025-10-24T08:42:00Z",
-        "value": 100
+        "value": 98
+      }
+    ],
+    "logicalStorageUsageBytes": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "clustermgmt.v4.stats.TimeValuePair",
+        "timestamp": "2025-10-24T08:42:00Z",
+        "value": 77713883136
       }
     ]
   },
   "$reserved": {
     "$fv": "v4.r1"
   },
-  "$objectType": "clustermgmt.v4.stats.ClusterStatsApiResponse",
+  "$objectType": "clustermgmt.v4.stats.HostStatsApiResponse",
   "metadata": {
     "flags": [
       {
@@ -207,12 +227,12 @@
           "$fv": "v1.r0"
         },
         "$objectType": "common.v1.response.ApiLink",
-        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b",
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b/hosts/71877eae-8fc1-4aae-8d20-70196dfb2f8d",
         "rel": "self"
       },
       {
-        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters/0006411c-0286-bc71-9f02-191e334d457b",
-        "rel": "cluster"
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/clustermgmt/v4.0/config/clusters/0006411c-0286-bc71-9f02-191e334d457b/hosts/71877eae-8fc1-4aae-8d20-70196dfb2f8d",
+        "rel": "host"
       }
     ]
   }
