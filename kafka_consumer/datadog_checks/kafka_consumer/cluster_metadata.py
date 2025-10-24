@@ -8,7 +8,6 @@ import hashlib
 import json
 import time
 
-import requests
 from confluent_kafka import TopicPartition
 from confluent_kafka.admin import ConfigResource, ResourceType
 
@@ -521,7 +520,7 @@ class ClusterMetadataCollector:
             cluster_id = metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
 
             # Get all subjects (schemas)
-            response = requests.get(f"{self.config._schema_registry_url}/subjects", timeout=10)
+            response = self.check.http.get(f"{self.config._schema_registry_url}/subjects")
             response.raise_for_status()
 
             subjects = response.json()
@@ -537,8 +536,8 @@ class ClusterMetadataCollector:
 
                 try:
                     # Get versions for this subject
-                    versions_response = requests.get(
-                        f"{self.config._schema_registry_url}/subjects/{subject}/versions", timeout=10
+                    versions_response = self.check.http.get(
+                        f"{self.config._schema_registry_url}/subjects/{subject}/versions"
                     )
                     versions_response.raise_for_status()
                     versions = versions_response.json()
@@ -547,8 +546,8 @@ class ClusterMetadataCollector:
                     self.check.gauge('schema_registry.versions', len(versions), tags=subject_tags)
 
                     # Get latest version details
-                    latest_response = requests.get(
-                        f"{self.config._schema_registry_url}/subjects/{subject}/versions/latest", timeout=10
+                    latest_response = self.check.http.get(
+                        f"{self.config._schema_registry_url}/subjects/{subject}/versions/latest"
                     )
                     latest_response.raise_for_status()
                     latest_schema = latest_response.json()

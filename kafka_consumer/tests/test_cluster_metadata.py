@@ -279,39 +279,40 @@ def test_collect_schema_registry_info(collector, mock_kafka_client):
     collector.config._collect_schema_registry = True
     collector.config._schema_registry_url = 'http://localhost:8081'
 
-    with mock.patch('datadog_checks.kafka_consumer.cluster_metadata.requests') as mock_requests:
-        # Mock subjects list
-        subjects_response = mock.MagicMock()
-        subjects_response.json.return_value = ['test-topic-value', 'test-topic-key']
+    # Mock subjects list
+    subjects_response = mock.MagicMock()
+    subjects_response.json.return_value = ['test-topic-value', 'test-topic-key']
 
-        # Mock versions
-        versions_response = mock.MagicMock()
-        versions_response.json.return_value = [1, 2]
+    # Mock versions
+    versions_response = mock.MagicMock()
+    versions_response.json.return_value = [1, 2]
 
-        # Mock latest schema
-        latest_response = mock.MagicMock()
-        latest_response.json.return_value = {
-            'id': 1,
-            'version': 2,
-            'schema': '{"type": "record", "name": "Test"}',
-            'schemaType': 'AVRO',
-        }
+    # Mock latest schema
+    latest_response = mock.MagicMock()
+    latest_response.json.return_value = {
+        'id': 1,
+        'version': 2,
+        'schema': '{"type": "record", "name": "Test"}',
+        'schemaType': 'AVRO',
+    }
 
-        mock_requests.get.side_effect = [
+    collector.check.http.get = mock.MagicMock(
+        side_effect=[
             subjects_response,
             versions_response,
             latest_response,
             versions_response,
             latest_response,
         ]
+    )
 
-        collector._collect_schema_registry_info()
+    collector._collect_schema_registry_info()
 
-        # Verify schema count metric was called
-        collector.check.gauge.assert_any_call('schema_registry.subjects', 2, tags=mock.ANY)
+    # Verify schema count metric was called
+    collector.check.gauge.assert_any_call('schema_registry.subjects', 2, tags=mock.ANY)
 
-        # Verify schema events were emitted (only if cache allows)
-        assert mock_requests.get.call_count >= 3
+    # Verify HTTP requests were made
+    assert collector.check.http.get.call_count >= 3
 
 
 def test_config_enables_all_collection(cluster_config):
