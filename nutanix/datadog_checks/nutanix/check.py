@@ -336,6 +336,7 @@ class NutanixCheck(AgentCheck):
             "$endTime": end_time,
             "$statType": "AVG",
             "$samplingInterval": self.STATS_SAMPLING_INTERVAL,
+            "$select": "*",
         }
 
         return self._get_request_data(f"api/vmm/v4.0/ahv/stats/vms/{vm_id}", params=params).get("stats", [])
