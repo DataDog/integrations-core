@@ -106,7 +106,7 @@ def diff(
         combinations = [(p, v) for p in platforms for v in versions]
 
         if not baseline:
-            from .utils.common_funcs import get_previous_commit
+            from ddev.cli.size.utils.gha_artifacts import get_previous_commit
 
             baseline = get_previous_commit(app, commit)
             if not baseline:
@@ -143,7 +143,10 @@ def diff(
                 export_format(app, format, filtered_diffs, SizeMode.DIFF, platform, py_version, compressed)
 
             if quality_gate_threshold:
-                from .utils.common_funcs import save_quality_gate_html, save_quality_gate_html_table
+                from ddev.cli.size.utils.export_quality_gates import (
+                    save_quality_gate_html,
+                    save_quality_gate_html_table,
+                )
 
                 save_quality_gate_html(
                     app,
@@ -216,7 +219,7 @@ def validate_parameters(
 def get_diff_from_artifacts(
     app: Application, baseline: str, commit: str, params: CLIParameters
 ) -> tuple[Sizes, TotalsDict, TotalsDict, bool]:
-    from .utils.common_funcs import get_status_sizes_from_commit
+    from ddev.cli.size.utils.gha_artifacts import get_status_sizes_from_commit
 
     artifacts_sizes = Sizes([])
     passes_quality_gate = True

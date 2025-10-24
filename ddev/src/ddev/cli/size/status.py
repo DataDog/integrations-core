@@ -88,7 +88,7 @@ def status(
         previous_sizes = None
 
         if commit:
-            from ddev.cli.size.utils.common_funcs import (
+            from ddev.cli.size.utils.gha_artifacts import (
                 RESOLVE_BUILD_DEPS_WORKFLOW,
                 artifact_exists,
                 get_previous_sizes,
@@ -103,7 +103,7 @@ def status(
 
         for plat, ver in combinations:
             if commit and dependencies_resolved:
-                from ddev.cli.size.utils.common_funcs import get_dep_sizes
+                from ddev.cli.size.utils.gha_artifacts import get_dep_sizes
 
                 app.display("-> Dependencies were resolved in this commit, using the artifact")
                 dependency_sizes = get_dep_sizes(app, commit, plat, ver, compressed)

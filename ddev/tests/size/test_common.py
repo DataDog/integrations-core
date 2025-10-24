@@ -9,7 +9,6 @@ from ddev.cli.size.utils.common_funcs import (
     check_python_version,
     compress,
     extract_version_from_about_py,
-    get_dependencies_from_artifact,
     get_dependencies_list,
     get_dependencies_sizes,
     get_files,
@@ -19,6 +18,7 @@ from ddev.cli.size.utils.common_funcs import (
     is_correct_dependency,
     is_valid_integration_file,
 )
+from ddev.cli.size.utils.gha_artifacts import get_dependencies_from_artifact
 from ddev.cli.size.utils.size_model import Size, Sizes
 from ddev.utils.fs import Path
 
