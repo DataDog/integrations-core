@@ -37,7 +37,7 @@ class PostgresHealth(Health):
         self,
         name: HealthEvent | PostgresHealthEvent,
         status: HealthStatus,
-        data: dict = {},
+        data: dict,
     ):
         """
         Submit a health event to the aggregator.
@@ -54,8 +54,8 @@ class PostgresHealth(Health):
             # If we have an error parsing the config we may not have tags yet
             tags=self.check.tags if hasattr(self.check, 'tags') else [],
             data={
-                "database_instance":self.check.database_identifier,
-                "ddagenthostname":self.check.agent_hostname,
-                **data,
-            }
+                "database_instance": self.check.database_identifier,
+                "ddagenthostname": self.check.agent_hostname,
+                **(data or {}),
+            },
         )

@@ -23,6 +23,8 @@ from datadog_checks.postgres.relationsmanager import RelationsManager
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
+import time
+
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
@@ -31,7 +33,7 @@ from datadog_checks.postgres.features import Feature, FeatureKey, FeatureNames
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
 
-import time
+
 class ValidationResult:
     """
     A simple class to represent the result of a validation.
