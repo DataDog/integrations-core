@@ -17,11 +17,12 @@ files:
     - template: instances/http
     - template: instances/default
       overrides:
+        disable_generic_tags.display_priority: 2
         disable_generic_tags.hidden: False
         disable_generic_tags.enabled: True
         disable_generic_tags.description: |
-            Generic tags such as `host` will be replaced by `apache_host` to avoid
-            getting mixed with other integration tags.
+            Generic tags such as `host` will be replaced by `apache_host` to prevent
+            mixing them with tags from other integrations. We recommend setting this to true to avoid confusion.
   - template: logs
     example:
     - type: file
