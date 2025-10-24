@@ -13,13 +13,16 @@ import redis
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.common import round_value
 
-DEFAULT_MAX_SLOW_ENTRIES = 128
-MAX_SLOW_ENTRIES_KEY = "slowlog-max-len"
-
-REPL_KEY = 'master_link_status'
-LINK_DOWN_KEY = 'master_link_down_since_seconds'
-
-DEFAULT_CLIENT_NAME = "unknown"
+from .constants import (
+    CONFIG_GAUGE_KEYS,
+    DEFAULT_CLIENT_NAME,
+    DEFAULT_MAX_SLOW_ENTRIES,
+    GAUGE_KEYS,
+    LINK_DOWN_KEY,
+    MAX_SLOW_ENTRIES_KEY,
+    RATE_KEYS,
+    REPL_KEY,
+)
 
 
 class Redis(AgentCheck):
@@ -28,103 +31,6 @@ class Redis(AgentCheck):
     subkeys = ['keys', 'expires']
 
     SOURCE_TYPE_NAME = 'redis'
-
-    CONFIG_GAUGE_KEYS = {
-        'maxclients': 'redis.net.maxclients',
-    }
-
-    GAUGE_KEYS = {
-        # Server
-        'io_threads_active': 'redis.server.io_threads_active',
-        # Active defrag metrics
-        'active_defrag_running': 'redis.active_defrag.running',
-        'active_defrag_hits': 'redis.active_defrag.hits',
-        'active_defrag_misses': 'redis.active_defrag.misses',
-        'active_defrag_key_hits': 'redis.active_defrag.key_hits',
-        'active_defrag_key_misses': 'redis.active_defrag.key_misses',
-        # Append-only metrics
-        'aof_last_rewrite_time_sec': 'redis.aof.last_rewrite_time',
-        'aof_rewrite_in_progress': 'redis.aof.rewrite',
-        'aof_current_size': 'redis.aof.size',
-        'aof_buffer_length': 'redis.aof.buffer_length',
-        'loading_total_bytes': 'redis.aof.loading_total_bytes',
-        'loading_loaded_bytes': 'redis.aof.loading_loaded_bytes',
-        'loading_loaded_perc': 'redis.aof.loading_loaded_perc',
-        'loading_eta_seconds': 'redis.aof.loading_eta_seconds',
-        # Network
-        'connected_clients': 'redis.net.clients',
-        'connected_slaves': 'redis.net.slaves',
-        'rejected_connections': 'redis.net.rejected',
-        # clients
-        'blocked_clients': 'redis.clients.blocked',
-        'client_biggest_input_buf': 'redis.clients.biggest_input_buf',
-        'client_longest_output_list': 'redis.clients.longest_output_list',
-        'client_recent_max_input_buffer': 'redis.clients.recent_max_input_buffer',
-        'client_recent_max_output_buffer': 'redis.clients.recent_max_output_buffer',
-        # Keys
-        'evicted_keys': 'redis.keys.evicted',
-        'expired_keys': 'redis.keys.expired',
-        # stats
-        'latest_fork_usec': 'redis.perf.latest_fork_usec',
-        'bytes_received_per_sec': 'redis.bytes_received_per_sec',
-        'bytes_sent_per_sec': 'redis.bytes_sent_per_sec',
-        # Note: 'bytes_received_per_sec' and 'bytes_sent_per_sec' are only
-        # available on Azure Redis
-        'instantaneous_input_kbps': 'redis.net.instantaneous_input',
-        'instantaneous_output_kbps': 'redis.net.instantaneous_output',
-        'total_connections_received': 'redis.net.total_connections_received',
-        # pubsub
-        'pubsub_channels': 'redis.pubsub.channels',
-        'pubsub_patterns': 'redis.pubsub.patterns',
-        # rdb
-        'rdb_bgsave_in_progress': 'redis.rdb.bgsave',
-        'rdb_changes_since_last_save': 'redis.rdb.changes_since_last',
-        'rdb_last_bgsave_time_sec': 'redis.rdb.last_bgsave_time',
-        # memory
-        'mem_fragmentation_bytes': 'redis.mem.fragmentation',
-        'mem_fragmentation_ratio': 'redis.mem.fragmentation_ratio',
-        'mem_total_replication_buffers': 'redis.mem.total_replication_buffers',
-        'mem_clients_slaves': 'redis.mem.clients_slaves',
-        'mem_clients_normal': 'redis.mem.clients_normal',
-        'used_memory': 'redis.mem.used',
-        'used_memory_lua': 'redis.mem.lua',
-        'used_memory_peak': 'redis.mem.peak',
-        'used_memory_rss': 'redis.mem.rss',
-        'used_memory_startup': 'redis.mem.startup',
-        'used_memory_overhead': 'redis.mem.overhead',
-        'used_memory_dataset': 'redis.mem.dataset',
-        'used_memory_vm_eval': 'redis.mem.vm_eval',
-        'used_memory_vm_functions': 'redis.mem.vm_functions',
-        'used_memory_vm_total': 'redis.mem.vm_total',
-        'used_memory_functions': 'redis.mem.functions',
-        'used_memory_scripts_eval': 'redis.mem.scripts_eval',
-        'used_memory_scripts': 'redis.mem.scripts',
-        'maxmemory': 'redis.mem.maxmemory',
-        # replication
-        'master_last_io_seconds_ago': 'redis.replication.last_io_seconds_ago',
-        'master_sync_in_progress': 'redis.replication.sync',
-        'master_sync_left_bytes': 'redis.replication.sync_left_bytes',
-        'repl_backlog_histlen': 'redis.replication.backlog_histlen',
-        'master_repl_offset': 'redis.replication.master_repl_offset',
-        'slave_repl_offset': 'redis.replication.slave_repl_offset',
-        'total_net_repl_input_bytes': 'redis.replication.input_total_bytes',
-        'total_net_repl_output_bytes': 'redis.replication.output_total_bytes',
-    }
-
-    RATE_KEYS = {
-        # cpu
-        'used_cpu_sys': 'redis.cpu.sys',
-        'used_cpu_sys_children': 'redis.cpu.sys_children',
-        'used_cpu_user': 'redis.cpu.user',
-        'used_cpu_user_children': 'redis.cpu.user_children',
-        'used_cpu_sys_main_thread': 'redis.cpu.sys_main_thread',
-        'used_cpu_user_main_thread': 'redis.cpu.user_main_thread',
-        # stats
-        'keyspace_hits': 'redis.stats.keyspace_hits',
-        'keyspace_misses': 'redis.stats.keyspace_misses',
-        'io_threaded_reads_processed': 'redis.stats.io_threaded_reads_processed',
-        'io_threaded_writes_processed': 'redis.stats.io_threaded_writes_processed',
-    }
 
     def __init__(self, name, init_config, instances):
         super(Redis, self).__init__(name, init_config, instances)
@@ -216,7 +122,13 @@ class Redis(AgentCheck):
             # reduce the chance of connection time affecting our latency measurements
             conn.ping()
 
-            info, info_latency_ms = _call_and_time(conn.info)
+            try:
+                info, info_latency_ms = _call_and_time(
+                    conn.info, section='all'
+                )  # not available on older versions of Redis
+            except redis.ResponseError as e:
+                self.log.debug('`INFO all` command failed, falling back to `INFO`: %s', e)
+                info, info_latency_ms = _call_and_time(conn.info)
             _, ping_latency_ms = _call_and_time(conn.ping)
 
             self._collect_metadata(info)
@@ -269,14 +181,9 @@ class Redis(AgentCheck):
                     self.gauge(metric, val, tags=db_tags)
 
         # Save a subset of db-wide statistics
-        for info_name in info:
-            if info_name in self.GAUGE_KEYS:
-                self.gauge(self.GAUGE_KEYS[info_name], info[info_name], tags=tags)
-            elif info_name in self.RATE_KEYS:
-                self.rate(self.RATE_KEYS[info_name], info[info_name], tags=tags)
-
+        self._check_info_fields(info, tags)
         for config_key, value in config.items():
-            metric_name = self.CONFIG_GAUGE_KEYS.get(config_key)
+            metric_name = CONFIG_GAUGE_KEYS.get(config_key)
             if metric_name is not None:
                 self.gauge(metric_name, value, tags=tags)
 
@@ -291,10 +198,6 @@ class Redis(AgentCheck):
                 # client_list is disabled on some environments
                 self.log.debug("Unable to collect client metrics: CLIENT disabled in some managed Redis.")
 
-        self._check_total_commands_processed(info, tags)
-        if 'instantaneous_ops_per_sec' in info:
-            self.gauge('redis.net.instantaneous_ops_per_sec', info['instantaneous_ops_per_sec'], tags=tags)
-
         # Check some key lengths if asked
         self._check_key_lengths(conn, list(tags))
 
@@ -303,13 +206,14 @@ class Redis(AgentCheck):
         if self.instance.get("command_stats", False):
             self._check_command_stats(conn, tags)
 
-    def _check_total_commands_processed(self, info, tags):
-        # Avoid corner case error by ensuring availability in info before collecting
-        if 'total_commands_processed' in info:
-            # Save the number of commands.
-            self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)
-        else:
-            self.log.debug("total_commands_processed not found in info, skipping. Info: %s", info)
+    def _check_info_fields(self, info, tags):
+        for info_name in info:
+            if info_name in GAUGE_KEYS:
+                self.gauge(GAUGE_KEYS[info_name], info[info_name], tags=tags)
+            elif info_name in RATE_KEYS:
+                self.rate(RATE_KEYS[info_name], info[info_name], tags=tags)
+            else:
+                self.log.debug('Not collecting INFO field %s', info_name)
 
     def _check_key_lengths(self, conn, tags):
         """
@@ -571,8 +475,8 @@ class Redis(AgentCheck):
             self.set_metadata('version', info['redis_version'])
 
 
-def _call_and_time(func):
+def _call_and_time(func, *args, **kwargs):
     start_time = time.perf_counter()
-    rv = func()
+    rv = func(*args, **kwargs)
     end_time = time.perf_counter()
     return rv, round_value((end_time - start_time) * 1000, 2)
