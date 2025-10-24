@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - master
+    - taegyunkim/fix-test-hang
     paths:
       # List of files/paths that should trigger the run. The intention is to avoid running all tests if the commit only includes changes on assets or README
     - '*/datadog_checks/**'
