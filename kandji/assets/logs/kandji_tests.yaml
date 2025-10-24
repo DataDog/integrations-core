@@ -1,0 +1,642 @@
+id: "kandji"
+tests:
+  -
+   sample: |-
+    {
+      "occurred_at" : "2025-09-23T09:01:37.420577Z",
+      "target_component" : "user",
+      "actor_type" : "user",
+      "target_type" : "admin",
+      "action" : "update",
+      "new_state" : {
+        "role" : "admin",
+        "last_name" : "Carter",
+        "first_name" : "John",
+        "email" : "john.carter@crestdata.ai"
+      },
+      "target_id" : "4b3b6c16-2728-4037-8d4a-342538cad637",
+      "id" : "01K5TWX6CQ07HFHKSMYQYRDKAB",
+      "actor_id" : "aa2ec25a-a125-45b5-9489-b9cd66d2d60f"
+    }
+   service: "audit"
+   result:
+    custom:
+      action: "update"
+      actor_id: "aa2ec25a-a125-45b5-9489-b9cd66d2d60f"
+      actor_type: "user"
+      id: "01K5TWX6CQ07HFHKSMYQYRDKAB"
+      new_state:
+        first_name: "John"
+        last_name: "Carter"
+        role: "admin"
+      occurred_at: "2025-09-23T09:01:37.420577Z"
+      target_component: "user"
+      target_id: "4b3b6c16-2728-4037-8d4a-342538cad637"
+      target_type: "admin"
+      usr:
+        email: "john.carter@crestdata.ai"
+        name: "John Carter"
+    message: |-
+      {
+        "occurred_at" : "2025-09-23T09:01:37.420577Z",
+        "target_component" : "user",
+        "actor_type" : "user",
+        "target_type" : "admin",
+        "action" : "update",
+        "new_state" : {
+          "role" : "admin",
+          "last_name" : "Carter",
+          "first_name" : "John",
+          "email" : "john.carter@crestdata.ai"
+        },
+        "target_id" : "4b3b6c16-2728-4037-8d4a-342538cad637",
+        "id" : "01K5TWX6CQ07HFHKSMYQYRDKAB",
+        "actor_id" : "aa2ec25a-a125-45b5-9489-b9cd66d2d60f"
+      }
+    service: "audit"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1758618097420
+  -
+   sample: |-
+    {
+      "occurred_at" : "2025-09-23T07:16:07.444310Z",
+      "target_component" : "file",
+      "metadata" : {
+        "library_item_id" : "d239708c-d890-48de-b5f5-f5b5ecc555ca",
+        "classification_source" : "Kandji",
+        "local_host_name" : "ITs-MacBook-Air-2",
+        "threat_family_name" : "SpyDok",
+        "file_status" : "Detected",
+        "initial_detection_date" : "2025-09-23T07:16:07.444310+00:00",
+        "action_taken" : "No Action",
+        "threat_status" : "Not Quarantined",
+        "threat_id" : "4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB",
+        "threat_description" : "SpyDok is spyware designed to stealthily collect sensitive information such as login credentials, browsing history, and other personal data. It operates by monitoring user activity, exfiltrating stolen data to remote servers controlled by attackers, and maintaining persistence to evade detection.",
+        "classification" : "Malware",
+        "device" : {
+          "name" : "IT’s MacBook Air",
+          "model" : "MacBook Air",
+          "serial_number" : "C02XPHAYJK12",
+          "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+        }
+      },
+      "actor_type" : "kandji",
+      "target_type" : "file_detection",
+      "action" : "detect",
+      "new_state" : {
+        "process" : {
+          "name" : "AppStore",
+          "pid" : 14047
+        },
+        "file" : {
+          "inode" : "558412",
+          "path" : "/Users/Shared/AppStore.app/Contents/MacOS/AppStore",
+          "extension" : "",
+          "name" : "AppStore",
+          "directory" : "/Users/Shared/AppStore.app/Contents/MacOS",
+          "device" : "16777222",
+          "hash" : {
+            "sha256" : "4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB"
+          }
+        },
+        "@timestamp" : "2025-09-23T07:16:07.444310+00:00",
+        "ecs" : {
+          "version" : "8.17"
+        },
+        "host" : {
+          "os" : {
+            "name" : "Sonoma",
+            "family" : "sonoma",
+            "version" : "14.7.6",
+            "platform" : "sonoma"
+          },
+          "name" : "ITs-MacBook-Air-2.local",
+          "id" : "3a867771-949f-4065-9bc2-e79634af48b9",
+          "mac" : [ "38:f9:d3:1c:9c:bb", "F0:18:98:B6:75:AE", "38:f9:d3:1c:9c:bb" ]
+        },
+        "event" : {
+          "kind" : "event",
+          "created" : "2025-09-23T07:16:07.444310+00:00",
+          "action" : "threat-detected",
+          "type" : [ "indicator" ],
+          "category" : [ "file", "threat", "malware" ],
+          "outcome" : "success"
+        },
+        "user" : {
+          "name" : "it",
+          "id" : "501"
+        }
+      },
+      "target_id" : "3a867771-949f-4065-9bc2-e79634af48b9.16777220.558457",
+      "id" : "01K5TPW1DEFFM2SYK7HYJ5TPAB",
+      "actor_id" : "EDR"
+    }
+   service: "audit"
+   result:
+    custom:
+      action: "detect"
+      actor_id: "EDR"
+      actor_type: "kandji"
+      device_name: "IT’s MacBook Air"
+      evt:
+        outcome: "success"
+      file_name: "AppStore"
+      id: "01K5TPW1DEFFM2SYK7HYJ5TPAB"
+      metadata:
+        action_taken: "No Action"
+        classification: "Malware"
+        classification_source: "Kandji"
+        device:
+          id: "3a867771-949f-4065-9bc2-e79634af48b1"
+          model: "MacBook Air"
+          name: "IT’s MacBook Air"
+          serial_number: "C02XPHAYJK12"
+        file_status: "Detected"
+        initial_detection_date: "2025-09-23T07:16:07.444310+00:00"
+        library_item_id: "d239708c-d890-48de-b5f5-f5b5ecc555ca"
+        local_host_name: "ITs-MacBook-Air-2"
+        threat_description: "SpyDok is spyware designed to stealthily collect sensitive information such as login credentials, browsing history, and other personal data. It operates by monitoring user activity, exfiltrating stolen data to remote servers controlled by attackers, and maintaining persistence to evade detection."
+        threat_family_name: "SpyDok"
+        threat_id: "4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB"
+        threat_status: "Not Quarantined"
+      new_state:
+        '@timestamp': "2025-09-23T07:16:07.444310+00:00"
+        ecs:
+          version: "8.17"
+        event:
+          action: "threat-detected"
+          category:
+           - "file"
+           - "threat"
+           - "malware"
+          created: "2025-09-23T07:16:07.444310+00:00"
+          kind: "event"
+          type:
+           - "indicator"
+        file:
+          device: "16777222"
+          directory: "/Users/Shared/AppStore.app/Contents/MacOS"
+          extension: ""
+          hash:
+            sha256: "4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB"
+          inode: "558412"
+          name: "AppStore"
+          path: "/Users/Shared/AppStore.app/Contents/MacOS/AppStore"
+        host:
+          id: "3a867771-949f-4065-9bc2-e79634af48b9"
+          mac:
+           - "38:f9:d3:1c:9c:bb"
+           - "F0:18:98:B6:75:AE"
+           - "38:f9:d3:1c:9c:bb"
+          name: "ITs-MacBook-Air-2.local"
+          os:
+            family: "sonoma"
+            name: "Sonoma"
+            platform: "sonoma"
+            version: "14.7.6"
+        process:
+          name: "AppStore"
+          pid: 14047
+      occurred_at: "2025-09-23T07:16:07.444310Z"
+      target_component: "file"
+      target_id: "3a867771-949f-4065-9bc2-e79634af48b9.16777220.558457"
+      target_type: "file_detection"
+      usr:
+        id: "501"
+        name: "it"
+    message: |-
+      {
+        "occurred_at" : "2025-09-23T07:16:07.444310Z",
+        "target_component" : "file",
+        "metadata" : {
+          "library_item_id" : "d239708c-d890-48de-b5f5-f5b5ecc555ca",
+          "classification_source" : "Kandji",
+          "local_host_name" : "ITs-MacBook-Air-2",
+          "threat_family_name" : "SpyDok",
+          "file_status" : "Detected",
+          "initial_detection_date" : "2025-09-23T07:16:07.444310+00:00",
+          "action_taken" : "No Action",
+          "threat_status" : "Not Quarantined",
+          "threat_id" : "4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB",
+          "threat_description" : "SpyDok is spyware designed to stealthily collect sensitive information such as login credentials, browsing history, and other personal data. It operates by monitoring user activity, exfiltrating stolen data to remote servers controlled by attackers, and maintaining persistence to evade detection.",
+          "classification" : "Malware",
+          "device" : {
+            "name" : "IT’s MacBook Air",
+            "model" : "MacBook Air",
+            "serial_number" : "C02XPHAYJK12",
+            "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+          }
+        },
+        "actor_type" : "kandji",
+        "target_type" : "file_detection",
+        "action" : "detect",
+        "new_state" : {
+          "process" : {
+            "name" : "AppStore",
+            "pid" : 14047
+          },
+          "file" : {
+            "inode" : "558412",
+            "path" : "/Users/Shared/AppStore.app/Contents/MacOS/AppStore",
+            "extension" : "",
+            "name" : "AppStore",
+            "directory" : "/Users/Shared/AppStore.app/Contents/MacOS",
+            "device" : "16777222",
+            "hash" : {
+              "sha256" : "4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB"
+            }
+          },
+          "@timestamp" : "2025-09-23T07:16:07.444310+00:00",
+          "ecs" : {
+            "version" : "8.17"
+          },
+          "host" : {
+            "os" : {
+              "name" : "Sonoma",
+              "family" : "sonoma",
+              "version" : "14.7.6",
+              "platform" : "sonoma"
+            },
+            "name" : "ITs-MacBook-Air-2.local",
+            "id" : "3a867771-949f-4065-9bc2-e79634af48b9",
+            "mac" : [ "38:f9:d3:1c:9c:bb", "F0:18:98:B6:75:AE", "38:f9:d3:1c:9c:bb" ]
+          },
+          "event" : {
+            "kind" : "event",
+            "created" : "2025-09-23T07:16:07.444310+00:00",
+            "action" : "threat-detected",
+            "type" : [ "indicator" ],
+            "category" : [ "file", "threat", "malware" ],
+            "outcome" : "success"
+          },
+          "user" : {
+            "name" : "it",
+            "id" : "501"
+          }
+        },
+        "target_id" : "3a867771-949f-4065-9bc2-e79634af48b9.16777220.558457",
+        "id" : "01K5TPW1DEFFM2SYK7HYJ5TPAB",
+        "actor_id" : "EDR"
+      }
+    service: "audit"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1758611767444
+  -
+   sample: |-
+    {
+      "occurred_at" : "2025-09-10T13:05:53.181373Z",
+      "target_component" : "enrollment",
+      "actor_type" : "kandji",
+      "target_type" : "device",
+      "action" : "create",
+      "new_state" : {
+        "blueprint" : {
+          "name" : "iOS test",
+          "id" : "9d618261-86dd-4a4f-89bc-147f052878fc"
+        },
+        "enrollment_type" : "MDM",
+        "device" : {
+          "name" : "No name",
+          "id" : "3fce591e-393c-49cc-91f2-f3eb608404d7"
+        }
+      },
+      "target_id" : "3fce591e-393c-49cc-91f2-f3eb608404dp",
+      "id" : "01K4SVQ3MR2BSPB21TWNWJAJA2",
+      "actor_id" : "kandji"
+    }
+   service: "audit"
+   result:
+    custom:
+      action: "create"
+      actor_id: "kandji"
+      actor_type: "kandji"
+      blueprint_name: "iOS test"
+      device_name: "No name"
+      id: "01K4SVQ3MR2BSPB21TWNWJAJA2"
+      new_state:
+        blueprint:
+          id: "9d618261-86dd-4a4f-89bc-147f052878fc"
+          name: "iOS test"
+        device:
+          id: "3fce591e-393c-49cc-91f2-f3eb608404d7"
+          name: "No name"
+        enrollment_type: "MDM"
+      occurred_at: "2025-09-10T13:05:53.181373Z"
+      target_component: "enrollment"
+      target_id: "3fce591e-393c-49cc-91f2-f3eb608404dp"
+      target_type: "device"
+    message: |-
+      {
+        "occurred_at" : "2025-09-10T13:05:53.181373Z",
+        "target_component" : "enrollment",
+        "actor_type" : "kandji",
+        "target_type" : "device",
+        "action" : "create",
+        "new_state" : {
+          "blueprint" : {
+            "name" : "iOS test",
+            "id" : "9d618261-86dd-4a4f-89bc-147f052878fc"
+          },
+          "enrollment_type" : "MDM",
+          "device" : {
+            "name" : "No name",
+            "id" : "3fce591e-393c-49cc-91f2-f3eb608404d7"
+          }
+        },
+        "target_id" : "3fce591e-393c-49cc-91f2-f3eb608404dp",
+        "id" : "01K4SVQ3MR2BSPB21TWNWJAJA2",
+        "actor_id" : "kandji"
+      }
+    service: "audit"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757509553181
+  -
+   sample: |-
+    {
+      "occurred_at" : "2025-09-09T07:47:49.172851Z",
+      "actor_type" : "kandji",
+      "target_type" : "vulnerability",
+      "action" : "detect",
+      "new_state" : {
+        "file" : {
+          "path" : "/Applications/Safari.app",
+          "name" : "Safari"
+        },
+        "@timestamp" : "2025-09-09T07:47:48.228189Z",
+        "ecs" : {
+          "version" : "1.6.0"
+        },
+        "host" : {
+          "os" : {
+            "name" : "macOS",
+            "version" : "Sonoma",
+            "platform" : "darwin"
+          },
+          "name" : "IT’s MacBook Air",
+          "id" : "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab",
+          "mac" : [ "f0:18:98:ad:89:bc", "F0:18:98:A5:3C:A7", "f0:18:98:ad:89:bc" ]
+        },
+        "vulnerability" : {
+          "severity" : "Medium",
+          "score" : {
+            "exploitability" : 8.6E-4,
+            "base" : 6.5
+          },
+          "scanner" : {
+            "vendor" : "Kandji"
+          },
+          "description" : "A cross-origin issue existed with \"iframe\" elements. This was addressed with improved tracking of security origins. This issue is fixed in Safari 18, visionOS 2, watchOS 11, macOS Sequoia 15, iOS 18 and iPadOS 18, tvOS 18. A malicious website may exfiltrate data cross-origin.",
+          "id" : "CVE-2024-44187",
+          "enumeration" : "CVE"
+        },
+        "event" : {
+          "kind" : "alert",
+          "action" : "vulnerability_detect",
+          "id" : "e7268916397088438050fdd671054aab",
+          "type" : [ "info" ],
+          "category" : [ "vulnerability" ]
+        },
+        "device" : {
+          "id" : "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab"
+        }
+      },
+      "target_id" : "e7268916397088438050fdd671054aab",
+      "id" : "01K4PQ40BTQPZVS52FJXD0GFB3",
+      "actor_id" : "VULNERABILITY_MANAGEMENT"
+    }
+   service: "audit"
+   result:
+    custom:
+      action: "detect"
+      actor_id: "VULNERABILITY_MANAGEMENT"
+      actor_type: "kandji"
+      cve_id: "CVE-2024-44187"
+      detection_severity: "warning"
+      device_name: "IT’s MacBook Air"
+      file_name: "Safari"
+      id: "01K4PQ40BTQPZVS52FJXD0GFB3"
+      new_state:
+        '@timestamp': "2025-09-09T07:47:48.228189Z"
+        device:
+          id: "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab"
+        ecs:
+          version: "1.6.0"
+        event:
+          action: "vulnerability_detect"
+          category:
+           - "vulnerability"
+          id: "e7268916397088438050fdd671054aab"
+          kind: "alert"
+          type:
+           - "info"
+        file:
+          name: "Safari"
+          path: "/Applications/Safari.app"
+        host:
+          id: "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab"
+          mac:
+           - "f0:18:98:ad:89:bc"
+           - "F0:18:98:A5:3C:A7"
+           - "f0:18:98:ad:89:bc"
+          name: "IT’s MacBook Air"
+          os:
+            name: "macOS"
+            platform: "darwin"
+            version: "Sonoma"
+        vulnerability:
+          description: "A cross-origin issue existed with \"iframe\" elements. This was addressed with improved tracking of security origins. This issue is fixed in Safari 18, visionOS 2, watchOS 11, macOS Sequoia 15, iOS 18 and iPadOS 18, tvOS 18. A malicious website may exfiltrate data cross-origin."
+          enumeration: "CVE"
+          id: "CVE-2024-44187"
+          scanner:
+            vendor: "Kandji"
+          score:
+            base: 6.5
+            exploitability: 8.6E-4
+          severity: "Medium"
+      occurred_at: "2025-09-09T07:47:49.172851Z"
+      target_id: "e7268916397088438050fdd671054aab"
+      target_type: "vulnerability"
+    message: |-
+      {
+        "occurred_at" : "2025-09-09T07:47:49.172851Z",
+        "actor_type" : "kandji",
+        "target_type" : "vulnerability",
+        "action" : "detect",
+        "new_state" : {
+          "file" : {
+            "path" : "/Applications/Safari.app",
+            "name" : "Safari"
+          },
+          "@timestamp" : "2025-09-09T07:47:48.228189Z",
+          "ecs" : {
+            "version" : "1.6.0"
+          },
+          "host" : {
+            "os" : {
+              "name" : "macOS",
+              "version" : "Sonoma",
+              "platform" : "darwin"
+            },
+            "name" : "IT’s MacBook Air",
+            "id" : "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab",
+            "mac" : [ "f0:18:98:ad:89:bc", "F0:18:98:A5:3C:A7", "f0:18:98:ad:89:bc" ]
+          },
+          "vulnerability" : {
+            "severity" : "Medium",
+            "score" : {
+              "exploitability" : 8.6E-4,
+              "base" : 6.5
+            },
+            "scanner" : {
+              "vendor" : "Kandji"
+            },
+            "description" : "A cross-origin issue existed with \"iframe\" elements. This was addressed with improved tracking of security origins. This issue is fixed in Safari 18, visionOS 2, watchOS 11, macOS Sequoia 15, iOS 18 and iPadOS 18, tvOS 18. A malicious website may exfiltrate data cross-origin.",
+            "id" : "CVE-2024-44187",
+            "enumeration" : "CVE"
+          },
+          "event" : {
+            "kind" : "alert",
+            "action" : "vulnerability_detect",
+            "id" : "e7268916397088438050fdd671054aab",
+            "type" : [ "info" ],
+            "category" : [ "vulnerability" ]
+          },
+          "device" : {
+            "id" : "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab"
+          }
+        },
+        "target_id" : "e7268916397088438050fdd671054aab",
+        "id" : "01K4PQ40BTQPZVS52FJXD0GFB3",
+        "actor_id" : "VULNERABILITY_MANAGEMENT"
+      }
+    service: "audit"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757404069172
+  -
+   sample: |-
+    {
+      "occurred_at" : "2025-09-09T06:23:43.383914Z",
+      "target_component" : "library_items",
+      "actor_type" : "user",
+      "target_type" : "blueprint",
+      "action" : "update",
+      "new_state" : {
+        "name" : "DDS-Test",
+        "library_items_scoped" : [ {
+          "name" : "Liftoff-test",
+          "id" : "e6f2f3bf-56ef-4f2f-9613-fc362f29adab"
+        } ],
+        "library_items_added" : [ {
+          "name" : "Bloxone",
+          "id" : "00722363-0b8b-4fdb-9806-5cf49dd4c4eb"
+        } ]
+      },
+      "target_id" : "41b6cc51-7905-436a-9e33-b1468ceeb08a",
+      "id" : "01K4PJA0E0EQEC7QRXTH6WAJ12",
+      "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef"
+    }
+   service: "audit"
+   result:
+    custom:
+      action: "update"
+      actor_id: "ffc0f98d-5429-4e7a-8d26-9dd015a974ef"
+      actor_type: "user"
+      blueprint_name: "DDS-Test"
+      id: "01K4PJA0E0EQEC7QRXTH6WAJ12"
+      new_state:
+        library_items_added:
+         -
+          name: "Bloxone"
+          id: "00722363-0b8b-4fdb-9806-5cf49dd4c4eb"
+        library_items_scoped:
+         -
+          name: "Liftoff-test"
+          id: "e6f2f3bf-56ef-4f2f-9613-fc362f29adab"
+        name: "DDS-Test"
+      occurred_at: "2025-09-09T06:23:43.383914Z"
+      target_component: "library_items"
+      target_id: "41b6cc51-7905-436a-9e33-b1468ceeb08a"
+      target_type: "blueprint"
+    message: |-
+      {
+        "occurred_at" : "2025-09-09T06:23:43.383914Z",
+        "target_component" : "library_items",
+        "actor_type" : "user",
+        "target_type" : "blueprint",
+        "action" : "update",
+        "new_state" : {
+          "name" : "DDS-Test",
+          "library_items_scoped" : [ {
+            "name" : "Liftoff-test",
+            "id" : "e6f2f3bf-56ef-4f2f-9613-fc362f29adab"
+          } ],
+          "library_items_added" : [ {
+            "name" : "Bloxone",
+            "id" : "00722363-0b8b-4fdb-9806-5cf49dd4c4eb"
+          } ]
+        },
+        "target_id" : "41b6cc51-7905-436a-9e33-b1468ceeb08a",
+        "id" : "01K4PJA0E0EQEC7QRXTH6WAJ12",
+        "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef"
+      }
+    service: "audit"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1757399023383
+  -
+   sample: |-
+    {
+      "severity" : "High",
+      "cvss_score" : 8.8,
+      "device_id" : "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab",
+      "device_model" : "MacBook Air (Retina, 13-inch, 2018)",
+      "detection_datetime" : "2025-09-24T18:57:34.914031Z",
+      "description" : "Integer overflow in V8 in Google Chrome prior to 140.0.7339.207 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page. (Chromium security severity: High)",
+      "device_serial_number" : "C02XMF5VJK7A",
+      "blueprint_name" : "Blueprint-Test",
+      "version" : "140.0.7339.81",
+      "blueprint_id" : "41b6cc51-7905-436a-9e33-b1468ceeb08d",
+      "path" : "/Applications/Google Chrome.app",
+      "device_name" : "IT’s MacBook Air",
+      "cve_modified_at" : "2025-09-25T15:55:41.970000",
+      "cve_id" : "CVE-2025-10892",
+      "cve_published_at" : "2025-09-24T17:15:39.940000",
+      "bundle_id" : "com.google.Chrome",
+      "name" : "Google Chrome",
+      "device_os_version" : "14.7.8",
+      "cve_link" : "https://nvd.nist.gov/vuln/detail/CVE-2025-10892"
+    }
+   service: "detection"
+   result:
+    custom:
+      blueprint_id: "41b6cc51-7905-436a-9e33-b1468ceeb08d"
+      blueprint_name: "Blueprint-Test"
+      bundle_id: "com.google.Chrome"
+      cve_id: "CVE-2025-10892"
+      cve_link: "https://nvd.nist.gov/vuln/detail/CVE-2025-10892"
+      cve_modified_at: "2025-09-25T15:55:41.970000"
+      cve_published_at: "2025-09-24T17:15:39.940000"
+      cvss_score: 8.8
+      detection_datetime: "2025-09-24T18:57:34.914031Z"
+      detection_severity: "warning"
+      device_id: "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab"
+      device_model: "MacBook Air (Retina, 13-inch, 2018)"
+      device_name: "IT’s MacBook Air"
+      device_os_version: "14.7.8"
+      device_serial_number: "C02XMF5VJK7A"
+      file_name: "Google Chrome"
+      name: "Google Chrome"
+      path: "/Applications/Google Chrome.app"
+      severity: "High"
+      version: "140.0.7339.81"
+    message: "Integer overflow in V8 in Google Chrome prior to 140.0.7339.207 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page. (Chromium security severity: High)"
+    service: "detection"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1758740254914
