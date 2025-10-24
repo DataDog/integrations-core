@@ -287,7 +287,7 @@ class NutanixCheck(AgentCheck):
         params = {
             "$startTime": start_time,
             "$endTime": end_time,
-            "$statsType": "AVG",
+            "$statType": "AVG",
             "$samplingInterval": self.STATS_SAMPLING_INTERVAL,
         }
 
@@ -302,7 +302,7 @@ class NutanixCheck(AgentCheck):
         params = {
             "$startTime": start_time,
             "$endTime": end_time,
-            "$statsType": "AVG",
+            "$statType": "AVG",
             "$samplingInterval": self.STATS_SAMPLING_INTERVAL,
         }
 
