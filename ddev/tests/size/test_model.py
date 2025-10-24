@@ -335,14 +335,7 @@ def test_diff_with_changes(example_sizes: Sizes):
 
     unchanged = diff.filter(delta_type="Unchanged")
     untouched_names = {s.name for s in unchanged.root}
-    assert "core" in untouched_names
-    assert "netutils" in untouched_names
-    assert "requests" in untouched_names
-    assert "pywin32" in untouched_names
-    assert "cryptography" in untouched_names
-    assert "setuptools" not in untouched_names
-    assert "pip" not in untouched_names
-    assert "http" not in untouched_names
+    assert sorted(untouched_names) == ["core", "cryptography", "mymodule", "netutils", "pywin32", "requests"]
 
     modified = diff.filter(delta_type="Modified")
     new = diff.filter(delta_type="New")
@@ -350,6 +343,7 @@ def test_diff_with_changes(example_sizes: Sizes):
     assert len(modified) == 1
     assert len(new) == 1
     assert len(removed) == 1
+    assert len(unchanged) == 7
 
 
 def test_add(example_sizes: Sizes):

@@ -238,7 +238,9 @@ def get_diff_from_artifacts(
         app.abort(f"Failed to get sizes for {commit=}")
 
     for plat, ver in params["combinations"]:
-        diff_sizes = commit_sizes.diff(baseline_sizes)
+        diff_sizes = commit_sizes.filter(platform=plat, python_version=ver).diff(
+            baseline_sizes.filter(platform=plat, python_version=ver)
+        )
 
         params["platform"] = plat
         params["py_version"] = ver
