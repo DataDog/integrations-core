@@ -77,7 +77,7 @@ files:
       value:
         type: boolean
         example: false
-      default: false
+        display_default: false
     - name: database_identifier
       description: |
         Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
@@ -107,7 +107,6 @@ files:
             - instance_name: The resolved instance name of the instance.
             - full_server_name: The resolved full server name of the instance i.e. the value returned by `@@SERVERNAME`.
             In addition, you can use any key from the `tags` section of the configuration.
-          default: "$resolved_hostname"
     - name: database_autodiscovery
       description: |
         Auto-discover and monitor databases. Supported for the metrics check.

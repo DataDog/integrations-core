@@ -90,7 +90,7 @@ files:
     - template: instances/default
       overrides:
         empty_default_hostname.display_priority: 1
-        empty_default_hostname.default: true
+        empty_default_hostname.value.display_default: true
         empty_default_hostname.value.example: true
         empty_default_hostname.description: |
           The Proxmox integration is a check where metrics are usually unrelated to the host on which the Agent
