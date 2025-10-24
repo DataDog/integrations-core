@@ -62,13 +62,14 @@ def artifact_exists(app: Application, commit: str, artifact_name: str, workflow:
 @cache
 def get_previous_commit(app: Application, commit: str) -> str:
     try:
-        base_commit = app.repo.git.merge_base(commit, "origin/master")
-        if base_commit != commit:
-            app.display_debug(f"Found base commit: {base_commit}")
-            return base_commit
+        commits = app.repo.git.log(["hash:%H"], n=2, source=commit)
+        app.display(f"Commits: {commits}")
+        if commits[0]["hash"] != commit:
+            app.display_debug(f"Found last commit on master: {commits[0]['hash']}")
+            return commits[0]["hash"]
         else:
-            app.display_debug("No base commit found, using previous commit")
-            return app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
+            app.display_debug("Currently in master, using previous commit")
+            return commits[1]["hash"]
     except Exception as e:
         if e and "Not a valid commit name" in str(e):
             app.display_error("No previous commit found")

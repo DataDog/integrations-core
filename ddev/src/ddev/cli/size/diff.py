@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from ddev.cli.size.utils.size_model import TotalsDict
 
 
-MINIMUM_DATE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
+MINIMUM_DATE = datetime(2024, 9, 17).date()
 FULL_LENGTH_COMMIT = 40
 
 
