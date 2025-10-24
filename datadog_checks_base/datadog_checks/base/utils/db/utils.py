@@ -359,9 +359,11 @@ class DBMAsyncJob(object):
                 hasattr(self._check, 'health')
                 and self._enable_missed_collection_event
                 and self._min_collection_interval >= 1
+                and self._last_run_start
             ):
                 # Assume a collection interval of less than 1 second is an attempt to run the job in a loop
-                if self._last_run_start and time.time() - self._last_run_start > self._min_collection_interval:
+                elapsed_time = time.time() - self._last_run_start
+                if elapsed_time > self._min_collection_interval:
                     # Missed a collection interval, submit a health event for each feature that depends on this job
                     for feature in self._features:
                         self._check.health.submit_health_event(
@@ -380,7 +382,9 @@ class DBMAsyncJob(object):
                                 "feature": feature,
                             },
                         )
-                    self._log.warning("[%s] Missed collection interval", self._job_name)
+                    self._check.count(
+                        "dd.{}.async_job.missed_collection".format(self._dbms), 1, tags=self._job_tags, raw=True
+                    )
 
             self._log.debug("Job loop already running. job=%s", self._job_name)
 
