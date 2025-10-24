@@ -64,6 +64,7 @@ def test_node_metrics(dd_run_check, aggregator, aws_instance):
 
     aggregator.assert_metric("nutanix.node.count", value=1, tags=expected_tags)
 
+
 def test_node_stats_metrics(dd_run_check, aggregator, aws_instance):
     check = NutanixCheck('nutanix', {}, [aws_instance])
     dd_run_check(check)

@@ -145,8 +145,6 @@ class NutanixCheck(AgentCheck):
                     if value is not None:
                         self.gauge(metric_name, value, tags=node_tags)
 
-
-
     def _extract_node_tags(self, node):
         """Extract tags from a node object."""
         tags = []
@@ -239,7 +237,9 @@ class NutanixCheck(AgentCheck):
             "$samplingInterval": self.STATS_SAMPLING_INTERVAL,
         }
 
-        return self._get_request_data(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}", params=params)
+        return self._get_request_data(
+            f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}", params=params
+        )
 
     def _calculate_stats_time_window(self):
         """
