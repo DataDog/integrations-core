@@ -310,7 +310,7 @@ class PostgresSchemaCollector(SchemaCollector):
                         schema_tables.table_id, schema_tables.table_name
                     ;
                 """
-                print(query)
+                # print(query)
                 cursor.execute("SET statement_timeout = '60s';")
                 cursor.execute(query)
                 yield cursor
