@@ -93,6 +93,11 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=clusters_data)
             return mock_resp
 
+        if 'api/vmm/v4.0/ahv/config/vms' in url:
+            clusters_data = load_fixture("vms.json")
+            mock_resp.json = mocker.Mock(return_value=clusters_data)
+            return mock_resp
+
         # Default response for unmapped URLs - return HTTP error
         mock_resp.status_code = 404
         mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
