@@ -51,7 +51,7 @@ platform.windows.env-vars = [
 matrix.os.platforms = [
   { value = "windows", if = ["windows"] },
   { value = "linux", if = ["linux"] },
-  { value = "macos", if = ["linux"] },
+  { value = "linux", if = ["macos"] },
 ]
 matrix.setup.env-vars = [
   { key = "COMPOSE_FOLDER", value = "compose-ha", if = ["ha"] },
@@ -59,10 +59,10 @@ matrix.setup.env-vars = [
 matrix.version.env-vars = [
   { key = "SQLSERVER_MAJOR_VERSION" },
   { key = "SQLSERVER_ENGINE_EDITION" },
-  { key = "SQLSERVER_IMAGE_TAG", value = "2017-CU31-GDR2-ubuntu-18.04", if = ["2017"], platform = ["linux"] },
-  { key = "SQLSERVER_IMAGE_TAG", value = "2019-CU28-GDR1-ubuntu-20.04", if = ["2019"], platform = ["linux"] },
-  { key = "SQLSERVER_IMAGE_TAG", value = "2022-CU12-GDR1-ubuntu-20.04", if = ["2022"], platform = ["linux"] },
-  { key = "SQLSERVER_BASE_IMAGE", value = "datadog/docker-library:sqlserver_{matrix:version}", platform = ["windows"] },
+  { key = "SQLSERVER_IMAGE_TAG", value = "2017-CU31-GDR2-ubuntu-18.04", if = ["2017"], os = ["linux"] },
+  { key = "SQLSERVER_IMAGE_TAG", value = "2019-CU28-GDR1-ubuntu-20.04", if = ["2019"], os = ["linux"] },
+  { key = "SQLSERVER_IMAGE_TAG", value = "2022-CU12-GDR1-ubuntu-20.04", if = ["2022"], os = ["linux"] },
+  { key = "SQLSERVER_BASE_IMAGE", value = "datadog/docker-library:sqlserver_{matrix:version}", os = ["windows"] },
 ]
 matrix.driver.env-vars = [
   { key = "WINDOWS_SQLSERVER_DRIVER", platform = ["windows"] },
