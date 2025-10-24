@@ -1772,6 +1772,7 @@ def test_multi_instances_w_nested_options():
         """
     )
 
+
 def test_invalid_option_level_fields():
     consumer = get_example_consumer(
         """
@@ -1793,10 +1794,11 @@ def test_invalid_option_level_fields():
 
     files = consumer.render()
     _, errors = files['test.yaml.example']
-    
+
     assert "invalid_option_field" in errors[0]
     assert "another_bad_option_field" in errors[0]
     assert "option-level" in errors[0].lower()
+
 
 def test_valid_option_level_fields():
     consumer = get_example_consumer(
@@ -1827,7 +1829,7 @@ def test_valid_option_level_fields():
 
     files = consumer.render()
     _, errors = files['test.yaml.example']
-    
+
     assert not errors
 
 
@@ -1852,7 +1854,7 @@ def test_invalid_value_level_fields():
 
     files = consumer.render()
     _, errors = files['test.yaml.example']
-    
+
     assert "invalid_value_field" in errors[0]
     assert "another_bad_value_field" in errors[0]
     assert "value-level" in errors[0].lower()
@@ -1905,5 +1907,5 @@ def test_option_level_example_field():
 
     files = consumer.render()
     _, errors = files['test.yaml.example']
-    
+
     assert not errors
