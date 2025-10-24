@@ -11,8 +11,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 290
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 282
       }
     ],
     "controllerAvgReadIoLatencyUsecs": [
@@ -21,8 +21,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 370
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 372
       }
     ],
     "controllerAvgWriteIoLatencyUsecs": [
@@ -31,8 +31,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 290
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 282
       }
     ],
     "controllerNumIops": [
@@ -41,8 +41,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 187
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 159
       }
     ],
     "hypervisorCpuUsagePpm": [
@@ -51,8 +51,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 112031
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 106489
       }
     ],
     "aggregateHypervisorMemoryUsagePpm": [
@@ -61,7 +61,7 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
+        "timestamp": "2025-10-24T20:22:00Z",
         "value": 260408
       }
     ],
@@ -71,7 +71,7 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
+        "timestamp": "2025-10-24T20:22:00Z",
         "value": 0
       }
     ],
@@ -81,8 +81,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 187
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 159
       }
     ],
     "ioBandwidthKbps": [
@@ -91,8 +91,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 1864
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 1704
       }
     ],
     "controllerReadIoBandwidthKbps": [
@@ -101,7 +101,7 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
+        "timestamp": "2025-10-24T20:22:00Z",
         "value": 0
       }
     ],
@@ -111,8 +111,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 1864
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 1704
       }
     ],
     "storageUsageBytes": [
@@ -121,8 +121,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 67787012327
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 68652137351
       }
     ],
     "storageCapacityBytes": [
@@ -131,7 +131,7 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
+        "timestamp": "2025-10-24T20:22:00Z",
         "value": 1424668485100
       }
     ],
@@ -141,8 +141,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 1356881472773
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 1356016347749
       }
     ],
     "memoryCapacityBytes": [
@@ -171,7 +171,7 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
+        "timestamp": "2025-10-24T20:22:00Z",
         "value": 98
       }
     ],
@@ -181,8 +181,8 @@
           "$fv": "v4.r1"
         },
         "$objectType": "clustermgmt.v4.stats.TimeValuePair",
-        "timestamp": "2025-10-24T08:42:00Z",
-        "value": 77713883136
+        "timestamp": "2025-10-24T20:22:00Z",
+        "value": 78732132352
       }
     ]
   },

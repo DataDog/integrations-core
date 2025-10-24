@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS
+from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS, VM_STATS_METRICS
 
 
 class NutanixCheck(AgentCheck):
@@ -111,9 +111,11 @@ class NutanixCheck(AgentCheck):
 
     def _process_vm(self, vm):
         """Process and report metrics for a single vm."""
+        vm_id = vm.get("extId", "unknown")
         vm_tags = self.base_tags + self._extract_vm_tags(vm)
 
         self._report_vm_basic_metrics(vm, vm_tags)
+        self._report_vm_stats(vm_id, vm_tags)
 
     def _report_vm_basic_metrics(self, vm, vm_tags):
         """Report basic vm metrics (counts)."""
@@ -143,6 +145,19 @@ class NutanixCheck(AgentCheck):
                 value = entry.get("value")
                 if value is not None:
                     self.gauge(metric_name, value, tags=cluster_tags)
+
+    def _report_vm_stats(self, vm_id, vm_tags):
+        """Report time-series stats for a vm."""
+        stats = self._get_vm_stats(vm_id)
+        if not stats:
+            self.log.debug("No vm stats returned for vm %s", vm_id)
+            return
+
+        for key, metric_name in VM_STATS_METRICS.items():
+            for s in stats:
+                value = s.get(key)
+                if value is not None:
+                    self.gauge(metric_name, value, tags=vm_tags)
 
     def _process_hosts(self, cluster):
         """Process and report metrics for all hosts in a cluster."""
@@ -259,7 +274,7 @@ class NutanixCheck(AgentCheck):
         response = self.http.get(url, params=params)
         response.raise_for_status()
         data = response.json()
-        return data.get("data", [])
+        return data.get("data", {})
 
     def _get_clusters(self):
         """Fetch all clusters from Prism Central."""
@@ -295,7 +310,7 @@ class NutanixCheck(AgentCheck):
 
     def _get_host_stats(self, cluster_id: str, host_id: str):
         """
-        Fetch time-series stats for a specific host/host.
+        Fetch time-series stats for a specific host.
         """
         start_time, end_time = self._calculate_stats_time_window()
 
@@ -309,6 +324,21 @@ class NutanixCheck(AgentCheck):
         return self._get_request_data(
             f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}", params=params
         )
+
+    def _get_vm_stats(self, vm_id: str):
+        """
+        Fetch time-series stats for a specific vm.
+        """
+        start_time, end_time = self._calculate_stats_time_window()
+
+        params = {
+            "$startTime": start_time,
+            "$endTime": end_time,
+            "$statType": "AVG",
+            "$samplingInterval": self.STATS_SAMPLING_INTERVAL,
+        }
+
+        return self._get_request_data(f"api/vmm/v4.0/ahv/stats/vms/{vm_id}", params=params).get("stats", [])
 
     def _calculate_stats_time_window(self):
         """

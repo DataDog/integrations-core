@@ -1,0 +1,137 @@
+{
+  "data": {
+    "$reserved": {
+      "$fv": "v4.r1"
+    },
+    "$objectType": "vmm.v4.ahv.stats.VmStats",
+    "extId": "f3272103-ea1e-4a90-8318-899636993ed6",
+    "stats": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "vmm.v4.ahv.stats.VmStatsTuple",
+        "timestamp": "2025-10-16T08:32:53.102835Z",
+        "cluster": "0006411c-0286-bc71-9f02-191e334d457b",
+        "hypervisorType": "kKvm"
+      },
+      {
+        "timestamp": "2025-10-16T08:33:04.971699Z",
+        "memoryReservedBytes": 30064771072
+      },
+      {
+        "timestamp": "2025-10-24T20:22:00Z",
+        "controllerAvgIoLatencyMicros": 282,
+        "controllerAvgReadIoLatencyMicros": 372,
+        "controllerAvgReadIoSizeKb": 4,
+        "controllerAvgWriteIoLatencyMicros": 282,
+        "controllerAvgWriteIoSizeKb": 10,
+        "controllerIoBandwidthKbps": 1704,
+        "controllerNumIo": 4772,
+        "controllerNumIops": 159,
+        "controllerNumReadIo": 1,
+        "controllerNumReadIops": 0,
+        "controllerNumWriteIo": 4771,
+        "controllerNumWriteIops": 159,
+        "controllerOplogDrainDestHddBytes": 0,
+        "controllerOplogDrainDestSsdBytes": 19550208,
+        "controllerReadIoBandwidthKbps": 0,
+        "controllerReadIoPpm": 209,
+        "controllerReadSourceEstoreHddLocalBytes": 0,
+        "controllerReadSourceEstoreSsdLocalBytes": 2293760,
+        "controllerReadSourceEstoreHddRemoteBytes": 0,
+        "controllerReadSourceEstoreSsdRemoteBytes": 0,
+        "controllerReadSourceOplogBytes": 0,
+        "controllerStorageTierSsdUsageBytes": 137319388672,
+        "controllerTimespanMicros": 30000000,
+        "controllerTotalIoSizeKb": 51144,
+        "controllerTotalIoTimeMicros": 1349727,
+        "controllerTotalReadIoSizeKb": 4,
+        "controllerTotalReadIoTimeMicros": 372,
+        "controllerTotalTransformedUsageBytes": 0,
+        "controllerUserBytes": 50189430272,
+        "controllerWriteDestEstoreSsdBytes": 0,
+        "controllerWriteDestEstoreHddBytes": 0,
+        "controllerWriteIoBandwidthKbps": 1704,
+        "controllerWriteIoPpm": 999790,
+        "controllerWss120SecondUnionMb": 418,
+        "controllerWss120SecondReadMb": 8,
+        "controllerWss120SecondWriteMb": 415,
+        "controllerWss3600SecondUnionMb": 3973,
+        "controllerWss3600SecondReadMb": 464,
+        "controllerWss3600SecondWriteMb": 3717,
+        "guestMemoryUsagePpm": 948644,
+        "hypervisorAvgIoLatencyMicros": 0,
+        "hypervisorCpuReadyTimePpm": 11,
+        "hypervisorCpuUsagePpm": 201140,
+        "hypervisorIoBandwidthKbps": 0,
+        "hypervisorMemoryUsagePpm": 1000000,
+        "hypervisorNumIo": 0,
+        "hypervisorNumIops": 0,
+        "hypervisorNumReadIops": 0,
+        "hypervisorNumReadIo": 0,
+        "hypervisorNumReceivedBytes": 133661,
+        "hypervisorNumReceivePacketsDropped": 0,
+        "hypervisorNumTransmittedBytes": 1163951,
+        "hypervisorNumTransmitPacketsDropped": 0,
+        "hypervisorNumWriteIo": 0,
+        "hypervisorNumWriteIops": 0,
+        "hypervisorReadIoBandwidthKbps": 0,
+        "hypervisorTimespanMicros": 29911994,
+        "hypervisorTotalIoSizeKb": 0,
+        "hypervisorTotalIoTimeMicros": 0,
+        "hypervisorTotalReadIoSizeKb": 0,
+        "hypervisorWriteIoBandwidthKbps": 0,
+        "memoryUsagePpm": 590746,
+        "numVcpusUsedPpm": 1206840
+      }
+    ]
+  },
+  "$reserved": {
+    "$fv": "v4.r1"
+  },
+  "$objectType": "vmm.v4.ahv.stats.GetVmStatsApiResponse",
+  "metadata": {
+    "flags": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "hasError",
+        "value": false
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isPaginated",
+        "value": false
+      },
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.config.Flag",
+        "name": "isTruncated",
+        "value": false
+      }
+    ],
+    "$reserved": {
+      "$fv": "v1.r0"
+    },
+    "$objectType": "common.v1.response.ApiResponseMetadata",
+    "links": [
+      {
+        "$reserved": {
+          "$fv": "v1.r0"
+        },
+        "$objectType": "common.v1.response.ApiLink",
+        "href": "https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com:9440/api/vmm/v4.0/ahv/stats/vms/f3272103-ea1e-4a90-8318-899636993ed6?$select=*&$statType=AVG&$startTime=2025-10-24T20:21:38Z&$endTime=2025-10-24T20:23:38Z&$samplingInterval=30",
+        "rel": "self"
+      }
+    ],
+    "totalAvailableResults": 1
+  }
+}
