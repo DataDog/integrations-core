@@ -129,7 +129,7 @@ files:
       display_priority: 1
       description: |
         Whether to stop submitting the `service` tag, which has been renamed to `consul_service`, and to disable 
-        the associated deprecation warning. Datadog recommends setting this to `true` to avoid confusion.
+        the associated deprecation warning. Datadog recommends setting this to `true`.
       value:
         type: boolean
         display_default: false
