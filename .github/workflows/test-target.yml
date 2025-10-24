@@ -145,6 +145,10 @@ jobs:
         # Enable disk performance counters
         diskperf -y
 
+    - name: Install yq on Windows
+      if: runner.os == 'Windows'
+      run: choco install yq -y
+
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
     - name: Read integration cache config
