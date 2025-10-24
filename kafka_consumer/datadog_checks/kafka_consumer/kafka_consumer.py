@@ -36,7 +36,7 @@ class KafkaCheck(AgentCheck):
         self.client = KafkaClient(self.config, self.log)
         self.topic_partition_cache = {}
         self.check_initializations.insert(0, self.config.validate_config)
-        
+
         # Initialize cluster metadata collector
         self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
 
@@ -110,7 +110,7 @@ class KafkaCheck(AgentCheck):
             cluster_id,
         )
         self.data_streams_live_message(highwater_offsets or {}, cluster_id)
-        
+
         # Collect cluster metadata if enabled
         if (
             self.config._collect_broker_metadata
@@ -121,8 +121,8 @@ class KafkaCheck(AgentCheck):
             try:
                 self.metadata_collector.collect_all_metadata()
             except Exception as e:
-                self.log.error(f"Error collecting cluster metadata: {e}")
-        
+                self.log.error("Error collecting cluster metadata: %s", e)
+
         if self.config._close_admin_client:
             self.client.close_admin_client()
 

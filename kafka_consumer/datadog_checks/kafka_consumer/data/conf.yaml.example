@@ -280,53 +280,35 @@ instances:
     #
     # service: <SERVICE>
 
-    ## @param collect_broker_metadata - boolean - optional - default: false
-    ## Collect broker configuration and metadata including:
-    ## - Number of brokers in the cluster
-    ## - Broker configurations (advertised.listeners, auto.create.topics.enable, log retention settings, etc.)
+    ## @param enable_cluster_monitoring - boolean - optional - default: false
+    ## (PREVIEW) Enable comprehensive Kafka cluster monitoring.
     ##
-    ## This will emit additional metrics with the "kafka.broker.*" prefix.
-    #
-    # collect_broker_metadata: false
-
-    ## @param collect_topic_metadata - boolean - optional - default: false
-    ## Collect detailed topic and partition metadata including:
-    ## - Number of topics
-    ## - Partitions per topic
-    ## - Beginning and end offsets per partition
-    ## - Partition size (message count)
-    ## - Replication information (leader, replicas, ISRs)
-    ## - Under-replicated and offline partitions
+    ## When enabled, this collects:
+    ## - Broker metadata and configurations
+    ## - Topic and partition details (sizes, offsets, replication info)
+    ## - Consumer group state and membership
+    ## - Schema registry information (if schema_registry_url is provided)
     ##
-    ## This will emit additional metrics with the "kafka.topic.*" and "kafka.partition.*" prefixes.
-    #
-    # collect_topic_metadata: false
-
-    ## @param collect_consumer_group_metadata - boolean - optional - default: false
-    ## Collect detailed consumer group metadata including:
-    ## - Consumer group members and their details (member_id, client_id, host)
-    ## - Consumer group state
-    ## - Topics consumed by each group
+    ## This emits additional metrics with prefixes:
+    ## - kafka.broker.*
+    ## - kafka.topic.*
+    ## - kafka.partition.*
+    ## - kafka.consumer_group.*
+    ## - kafka.schema_registry.* (if schema registry is configured)
     ##
-    ## This will emit additional metrics with the "kafka.consumer_group.*" prefix and events
-    ## with detailed consumer group information.
-    #
-    # collect_consumer_group_metadata: false
-
-    ## @param collect_schema_registry - boolean - optional - default: false
-    ## Collect schema registry information including:
-    ## - Number of schemas (subjects)
-    ## - Schema versions
-    ## - Latest schema details
+    ## Configuration and schema events are cached and only re-emitted every 10 minutes
+    ## unless changes are detected, reducing event volume.
     ##
-    ## Requires `schema_registry_url` to be set.
-    ## This will emit additional metrics with the "kafka.schema_registry.*" prefix.
+    ## All metrics and events are tagged with kafka_cluster_id for easy filtering.
+    ##
+    ## WARNING: This feature is in preview and may increase Agent resource consumption
+    ## on large clusters with many topics and consumer groups.
     #
-    # collect_schema_registry: false
+    # enable_cluster_monitoring: false
 
     ## @param schema_registry_url - string - optional
     ## URL of the Kafka Schema Registry to collect schema information from.
-    ## Required if `collect_schema_registry` is enabled.
+    ## If provided when enable_cluster_monitoring is true, schema information will be collected.
     ##
     ## Example: http://localhost:8081
     #
