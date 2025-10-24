@@ -60,7 +60,7 @@ jobs:
       run: |
         cmd="ddev -v size status \
         --commit ${{ needs.define-current-commit.outputs.commit }} \
-        --format json"
+        --format json --python ${{ env.PYTHON_VERSION }}"
 
         if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then # TODO: change to ${{ github.event.workflow_run.event }} ${{ github.event.workflow_run.head_branch }}
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
@@ -128,7 +128,7 @@ jobs:
     - name: Calculate diff
       id: ddev_size_diff
       run: |
-        cmd="ddev size diff ${{needs.define-current-commit.outputs.commit}} --format json --use-artifacts"
+        cmd="ddev size diff ${{needs.define-current-commit.outputs.commit}} --format json --use-artifacts --python ${{ env.PYTHON_VERSION }}"
         # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
         #   cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         # fi
