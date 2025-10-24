@@ -199,7 +199,7 @@ class PostgresSchemaCollector(SchemaCollector):
         config.include_schemas = check._config.collect_schemas.include_schemas
         config.exclude_tables = check._config.collect_schemas.exclude_tables
         config.include_tables = check._config.collect_schemas.include_tables
-        config.max_columns = check._config.collect_schemas.max_columns
+        config.max_columns = int(check._config.collect_schemas.max_columns)
         super().__init__(check, config)
 
     @property
