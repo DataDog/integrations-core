@@ -152,12 +152,13 @@ files:
         The `tag_queries`  parameter lets you specify a list of queries, to tag metrics with a target class property.
         Each item in the list is a set of :
 
-        `[<LINK_SOURCE_PROPERTY>, <TARGET_CLASS>, <LINK_TARGET_CLASS_PROPERTY>, <TARGET_PROPERTY>]`
+        `[<LINK_SOURCE_PROPERTY>, <TARGET_CLASS>, <LINK_TARGET_CLASS_PROPERTY>, <TARGET_PROPERTY>, <TAG_ALIAS>]`
 
           * `<LINK_SOURCE_PROPERTY>` contains the link value
           * `<TARGET_CLASS>` is the class to link to
           * `<LINK_TARGET_CLASS_PROPERTY>` is the target class property to link to
           * `<TARGET_PROPERTY>` contains the value to tag with
+          * `<TAG_ALIAS>` is the alias to use for the tag. If this is not provided, the target property will be used.
 
         It translates to a WMI query:
 

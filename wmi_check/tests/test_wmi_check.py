@@ -76,3 +76,42 @@ def test_tag_by_is_correctly_requested(mock_proc_sampler, aggregator, check):
     c.check(instance)
     get_running_wmi_sampler = c._get_running_wmi_sampler
     assert get_running_wmi_sampler.call_args.kwargs['tag_by'] == 'Name'
+
+def test_tag_queries_with_alias(mock_sampler_with_tag_queries, aggregator, check):
+    """Test that tag_queries with an alias use the alias as the tag name instead of the property name"""
+    import copy
+
+    instance = copy.deepcopy(common.INSTANCE)
+    # Add tag_queries: [source_property, target_class, link_property, target_property, alias]
+    instance['tag_queries'] = [
+        ['IDProcess', 'Win32_Process', 'Handle', 'Name', 'process_name']
+    ]
+
+    c = check(instance)
+    c.check(instance)
+
+    # Verify metrics are tagged with the alias 'process_name' instead of 'name'
+    for metric in common.INSTANCE_METRICS:
+        aggregator.assert_metric(metric, tags=['process_name:chrome.exe'], count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_tag_queries_without_alias(mock_sampler_with_tag_queries, aggregator, check):
+    """Test that tag_queries without an alias default to using the target property name"""
+    import copy
+
+    instance = copy.deepcopy(common.INSTANCE)
+    # Add tag_queries without alias (only 4 elements)
+    instance['tag_queries'] = [
+        ['IDProcess', 'Win32_Process', 'Handle', 'Name']
+    ]
+
+    c = check(instance)
+    c.check(instance)
+
+    # Verify metrics are tagged with 'name' (the property name, lowercased)
+    for metric in common.INSTANCE_METRICS:
+        aggregator.assert_metric(metric, tags=['name:chrome.exe'], count=1)
+
+    aggregator.assert_all_metrics_covered()
