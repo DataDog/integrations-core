@@ -147,9 +147,7 @@ jobs:
 
     - name: Install integration cache tools
       if: runner.os == 'Windows'
-      run: |
-        choco install yq -y
-        choco install gnuwin32-coreutils.install -y
+      run: choco install yq -y
 
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -175,7 +173,7 @@ jobs:
         # Generate cache key from URLs
         # Hash URLs to keep key under 512 char limit.
         urls=$(yq -r '[.[].url] | join("|")' "$CACHE_FILE")
-        key_hash=$(echo -n "$urls" | shasum -a 256 | cut -d' ' -f1)
+        key_hash=$(echo -n "$urls" | openssl dgst -sha256 | cut -d' ' -f2)
         echo "key=integration-${{ inputs.target }}-$key_hash" >> $GITHUB_OUTPUT
 
     - name: Restore integration cache
