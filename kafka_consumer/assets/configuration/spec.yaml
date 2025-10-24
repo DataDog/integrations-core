@@ -16,7 +16,7 @@ files:
       value:
         type: integer
         example: 5
-      display_default: 5
+        display_default: 5
     - template: init_config/default
   - template: instances
     options:
@@ -147,10 +147,10 @@ files:
           Protocol used to communicate with brokers.
           Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
           Default: PLAINTEXT.
-        display_default: PLAINTEXT
         value:
           type: string
           example: PLAINTEXT
+          display_default: PLAINTEXT
       - name: sasl_mechanism
         description: |
           String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL.
@@ -237,4 +237,4 @@ files:
         value:
           type: boolean
           example: false
-        display_default: false
+          display_default: false
