@@ -36,7 +36,7 @@ files:
         example: <PROXYSQL_ADMIN_PASSWORD>
     - template: instances/tls
       overrides:
-        tls_verify.display_default: false
+        tls_verify.value.display_default: false
         tls_verify.value.example: false
         tls_cert.hidden: true
         tls_private_key.hidden: true
