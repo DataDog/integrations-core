@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from ddev.cli.size.diff import validate_parameters
+from ddev.cli.size.utils.size_model import Size, Sizes
 
 
 def to_native_path(path: str) -> str:
@@ -27,35 +28,39 @@ def mock_size_diff_dependencies():
         py_version = args[2]
         platform = args[3]
         if get_compressed_files_side_effect.counter % 2 == 1:
-            return [
-                {
-                    "Name": "path1.py",
-                    "Version": "1.1.1",
-                    "Size_Bytes": 1000,
-                    "Type": "Integration",
-                    "Platform": platform,
-                    "Python_Version": py_version,
-                }
-            ]  # before
+            return Sizes(
+                [
+                    Size(
+                        name="path1.py",
+                        version="1.1.1",
+                        size_bytes=1000,
+                        type="Integration",
+                        platform=platform,
+                        python_version=py_version,
+                    ),
+                ]
+            )  # before
         else:
-            return [
-                {
-                    "Name": "path1.py",
-                    "Version": "1.1.2",
-                    "Size_Bytes": 1200,
-                    "Type": "Integration",
-                    "Platform": platform,
-                    "Python_Version": py_version,
-                },
-                {
-                    "Name": "path2.py",
-                    "Version": "1.1.1",
-                    "Size_Bytes": 500,
-                    "Type": "Integration",
-                    "Platform": platform,
-                    "Python_Version": py_version,
-                },
-            ]  # after
+            return Sizes(
+                [
+                    Size(
+                        name="path1.py",
+                        version="1.1.2",
+                        size_bytes=1200,
+                        type="Integration",
+                        platform=platform,
+                        python_version=py_version,
+                    ),
+                    Size(
+                        name="path2.py",
+                        version="1.1.1",
+                        size_bytes=500,
+                        type="Integration",
+                        platform=platform,
+                        python_version=py_version,
+                    ),
+                ]
+            )  # after
 
     get_compressed_files_side_effect.counter = 0
 
@@ -64,35 +69,39 @@ def mock_size_diff_dependencies():
         platform = args[1]
         py_version = args[2]
         if get_compressed_dependencies_side_effect.counter % 2 == 1:
-            return [
-                {
-                    "Name": "dep1",
-                    "Version": "1.0.0",
-                    "Size_Bytes": 2000,
-                    "Type": "Dependency",
-                    "Platform": platform,
-                    "Python_Version": py_version,
-                }
-            ]  # before
+            return Sizes(
+                [
+                    Size(
+                        name="dep1",
+                        version="1.0.0",
+                        size_bytes=2000,
+                        type="Dependency",
+                        platform=platform,
+                        python_version=py_version,
+                    ),
+                ]
+            )  # before
         else:
-            return [
-                {
-                    "Name": "dep1",
-                    "Version": "1.1.0",
-                    "Size_Bytes": 2500,
-                    "Type": "Dependency",
-                    "Platform": platform,
-                    "Python_Version": py_version,
-                },
-                {
-                    "Name": "dep2",
-                    "Version": "1.0.0",
-                    "Size_Bytes": 1000,
-                    "Type": "Dependency",
-                    "Platform": platform,
-                    "Python_Version": py_version,
-                },
-            ]  # after
+            return Sizes(
+                [
+                    Size(
+                        name="dep1",
+                        version="1.1.0",
+                        size_bytes=2500,
+                        type="Dependency",
+                        platform=platform,
+                        python_version=py_version,
+                    ),
+                    Size(
+                        name="dep2",
+                        version="1.0.0",
+                        size_bytes=1000,
+                        type="Dependency",
+                        platform=platform,
+                        python_version=py_version,
+                    ),
+                ]
+            )  # after
 
     get_compressed_dependencies_side_effect.counter = 0
 
@@ -105,7 +114,7 @@ def mock_size_diff_dependencies():
             "ddev.cli.size.utils.common_funcs.get_valid_versions",
             return_value=({"3.12"}),
         ),
-        patch("ddev.cli.size.diff.GitRepo", return_value=mock_git_repo),
+        patch("ddev.cli.size.utils.common_funcs.GitRepo", return_value=mock_git_repo),
         patch("ddev.cli.size.utils.common_funcs.tempfile.mkdtemp", return_value="fake_repo"),
         patch("ddev.cli.size.utils.common_funcs.get_files", side_effect=get_compressed_files_side_effect),
         patch("ddev.cli.size.utils.common_funcs.get_dependencies", side_effect=get_compressed_dependencies_side_effect),
@@ -125,49 +134,59 @@ def mock_size_diff_no_diff_dependencies():
     def get_files_side_effect(*args, **kwargs):
         py_version = args[2]
         platform = args[3]
-        return [
-            {
-                "Name": "path1.py",
-                "Version": "1.0.0",
-                "Size_Bytes": 1000,
-                "Type": "Integration",
-                "Platform": platform,
-                "Python_Version": py_version,
-            },
-            {
-                "Name": "path2.py",
-                "Version": "1.0.0",
-                "Size_Bytes": 500,
-                "Type": "Integration",
-                "Platform": platform,
-                "Python_Version": py_version,
-            },
-        ]
+
+        sizes = Sizes(
+            [
+                Size(
+                    name="path1.py",
+                    version="1.0.0",
+                    size_bytes=1000,
+                    type="Integration",
+                    platform=platform,
+                    python_version=py_version,
+                ),
+                Size(
+                    name="path2.py",
+                    version="1.0.0",
+                    size_bytes=500,
+                    type="Integration",
+                    platform=platform,
+                    python_version=py_version,
+                ),
+            ]
+        )
+
+        return sizes
 
     def get_dependencies_side_effect(*args, **kwargs):
         platform = args[1]
         py_version = args[2]
-        return [
-            {
-                "Name": "dep1.whl",
-                "Version": "2.0.0",
-                "Size_Bytes": 2000,
-                "Type": "Dependency",
-                "Platform": platform,
-                "Python_Version": py_version,
-            },
-            {
-                "Name": "dep2.whl",
-                "Version": "2.0.0",
-                "Size_Bytes": 1000,
-                "Type": "Dependency",
-                "Platform": platform,
-                "Python_Version": py_version,
-            },
-        ]
+
+        sizes = Sizes(
+            [
+                Size(
+                    name="dep1.whl",
+                    version="2.0.0",
+                    size_bytes=2000,
+                    type="Dependency",
+                    platform=platform,
+                    python_version=py_version,
+                ),
+                Size(
+                    name="dep2.whl",
+                    version="2.0.0",
+                    size_bytes=1000,
+                    type="Dependency",
+                    platform=platform,
+                    python_version=py_version,
+                ),
+            ]
+        )
+
+        return sizes
 
     with (
-        patch("ddev.cli.size.diff.GitRepo", return_value=fake_repo),
+        patch("ddev.cli.size.utils.common_funcs.GitRepo", return_value=fake_repo),
         patch(
             "ddev.cli.size.utils.common_funcs.get_valid_platforms",
             return_value=({"linux-x86_64", "macos-x86_64", "linux-aarch64", "macos-aarch64", "windows-x86_64"}),

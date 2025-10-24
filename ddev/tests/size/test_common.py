@@ -1,5 +1,4 @@
 import io
-import json
 import os
 import zipfile
 from unittest.mock import MagicMock, mock_open, patch
@@ -9,7 +8,6 @@ import pytest
 from ddev.cli.size.utils.common_funcs import (
     check_python_version,
     compress,
-    convert_to_human_readable_size,
     extract_version_from_about_py,
     get_dependencies_from_artifact,
     get_dependencies_list,
@@ -20,11 +18,8 @@ from ddev.cli.size.utils.common_funcs import (
     get_valid_versions,
     is_correct_dependency,
     is_valid_integration_file,
-    parse_dep_sizes,
-    save_csv,
-    save_json,
-    save_markdown,
 )
+from ddev.cli.size.utils.size_model import Size, Sizes
 from ddev.utils.fs import Path
 
 
@@ -95,19 +90,6 @@ def test_is_correct_dependency(platform: str, version: str, dependency_file_name
 
 
 @pytest.mark.parametrize(
-    "size_bytes, expected_string",
-    [
-        pytest.param(500, "500 B", id="Bytes"),
-        pytest.param(1024, "1.0 KiB", id="KiB"),
-        pytest.param(1048576, "1.0 MiB", id="MiB"),
-        pytest.param(1073741824, "1.0 GiB", id="GiB"),
-    ],
-)
-def test_convert_to_human_readable_size(size_bytes, expected_string):
-    assert convert_to_human_readable_size(size_bytes) == expected_string
-
-
-@pytest.mark.parametrize(
     "file_path, expected",
     [
         pytest.param("datadog_checks/example.py", True, id="valid"),
@@ -122,11 +104,11 @@ def test_is_valid_integration_file(file_path, expected):
         assert is_valid_integration_file(to_native_path(file_path), repo_path) is expected
 
 
-def test_get_dependencies_list():
+def test_get_dependencies_list(tmp_path: Path):
     file_content = "dependency1 @ https://example.com/dependency1/dependency1-1.1.1-.whl\ndependency2 @ https://example.com/dependency2/dependency2-1.1.1-.whl"
-    mock_open_obj = mock_open(read_data=file_content)
-    with patch("builtins.open", mock_open_obj):
-        deps, urls, versions = get_dependencies_list("fake_path")
+    file_path = tmp_path / "dependencies.txt"
+    file_path.write_text(file_content)
+    deps, urls, versions = get_dependencies_list(file_path)
     assert deps == ["dependency1", "dependency2"]
     assert urls == [
         "https://example.com/dependency1/dependency1-1.1.1-.whl",
@@ -158,17 +140,18 @@ def test_get_dependencies_sizes():
             "3.12",
         )
 
-    assert file_data == [
-        {
-            "Name": "dependency1",
-            "Version": "1.1.1",
-            "Size_Bytes": 11,
-            "Size": convert_to_human_readable_size(11),
-            "Type": "Dependency",
-            "Platform": "linux-x86_64",
-            "Python_Version": "3.12",
-        }
-    ]
+    assert file_data == Sizes(
+        [
+            Size(
+                name="dependency1",
+                version="1.1.1",
+                size_bytes=11,
+                type="Dependency",
+                platform="linux-x86_64",
+                python_version="3.12",
+            )
+        ]
+    )
 
 
 def test_get_files_grouped_and_with_versions():
@@ -207,26 +190,26 @@ def test_get_files_grouped_and_with_versions():
     ):
         result = get_files(repo_path, compressed=False, py_version="3.12", platform="linux-x86_64")
 
-    expected = [
-        {
-            "Name": "integration1",
-            "Version": "1.2.3",
-            "Size_Bytes": 3000,
-            "Size": "2.93 KB",
-            "Type": "Integration",
-            "Platform": "linux-x86_64",
-            "Python_Version": "3.12",
-        },
-        {
-            "Name": "integration2",
-            "Version": "1.2.3",
-            "Size_Bytes": 3000,
-            "Size": "2.93 KB",
-            "Type": "Integration",
-            "Platform": "linux-x86_64",
-            "Python_Version": "3.12",
-        },
-    ]
+    expected = Sizes(
+        [
+            Size(
+                name="integration1",
+                version="1.2.3",
+                size_bytes=3000,
+                type="Integration",
+                platform="linux-x86_64",
+                python_version="3.12",
+            ),
+            Size(
+                name="integration2",
+                version="1.2.3",
+                size_bytes=3000,
+                type="Integration",
+                platform="linux-x86_64",
+                python_version="3.12",
+            ),
+        ]
+    )
 
     assert result == expected
 
@@ -271,78 +254,6 @@ def test_compress():
     assert compressed_size < original_size
 
 
-def test_save_csv():
-    mock_file = mock_open()
-    mock_app = MagicMock()
-
-    modules = [
-        {"Name": "module1", "Size_Bytes": 123, "Size": "2 B"},
-        {"Name": "module,with,comma", "Size_Bytes": 456, "Size": "2 B"},
-    ]
-
-    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
-        save_csv(mock_app, modules, "output.csv")
-
-    mock_file.assert_called_once_with("output.csv", "w", encoding="utf-8")
-    handle = mock_file()
-
-    expected_writes = ["Name,Size_Bytes\n", "module1,123\n", '"module,with,comma",456\n']
-
-    assert handle.write.call_args_list == [((line,),) for line in expected_writes]
-
-
-def test_save_json():
-    mock_app = MagicMock()
-    mock_file = mock_open()
-
-    modules = [
-        {"name": "mod1", "size": "100"},
-        {"name": "mod2", "size": "200"},
-        {"name": "mod3", "size": "300"},
-    ]
-
-    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
-        save_json(mock_app, "output.json", modules)
-
-    mock_file.assert_called_once_with("output.json", "w", encoding="utf-8")
-    handle = mock_file()
-
-    expected_json = json.dumps(modules, indent=2)
-
-    written_content = "".join(call.args[0] for call in handle.write.call_args_list)
-    assert written_content == expected_json
-
-    mock_app.display.assert_called_once_with("JSON file saved to output.json")
-
-
-def test_save_markdown():
-    mock_app = MagicMock()
-    mock_file = mock_open()
-
-    modules = [
-        {"Name": "module1", "Size_Bytes": 123, "Size": "2 B", "Type": "Integration", "Platform": "linux-x86_64"},
-        {"Name": "module2", "Size_Bytes": 456, "Size": "4 B", "Type": "Dependency", "Platform": "linux-x86_64"},
-    ]
-
-    with patch("ddev.cli.size.utils.common_funcs.open", mock_file):
-        save_markdown(mock_app, "Status", modules, "output.md")
-
-    mock_file.assert_called_once_with("output.md", "a", encoding="utf-8")
-    handle = mock_file()
-
-    expected_writes = (
-        "# Status\n\n"
-        "## Platform: linux-x86_64\n\n"
-        "| Name | Size | Type | Platform |\n"
-        "| --- | --- | --- | --- |\n"
-        "| module1 | 2 B | Integration | linux-x86_64 |\n"
-        "| module2 | 4 B | Dependency | linux-x86_64 |\n"
-    )
-
-    written_content = "".join(call.args[0] for call in handle.write.call_args_list)
-    assert written_content == expected_writes
-
-
 @pytest.mark.parametrize(
     "file_content, expected_version",
     [
@@ -357,65 +268,31 @@ def test_extract_version_from_about_py(file_content: str, expected_version: str)
     assert version == expected_version
 
 
-def test_parse_dep_sizes():
-    sizes_list = [
-        {
-            "Name": "dep1",
-            "Size_Bytes": 123,
-            "Size": "2 B",
-            "Type": "Dependency",
-            "Platform": "linux-x86_64",
-            "Python_Version": "3.12",
-            "Version": "1.1.1",
-        },
-        {
-            "Name": "module1",
-            "Size_Bytes": 123,
-            "Size": "2 B",
-            "Type": "Integration",
-            "Platform": "linux-x86_64",
-            "Python_Version": "3.12",
-            "Version": "1.1.2",
-        },
-    ]
-
-    expected_output = {
-        "dep1": {
-            "compressed": 123,
-            "version": "1.1.1",
-        },
-    }
-
-    result = parse_dep_sizes(sizes_list, "linux-x86_64", "3.12", True)
-
-    assert dict(sorted(result.items())) == dict(sorted(expected_output.items()))
-
-
 def test_get_dependencies_from_artifact():
     dep_size_dict = {
         "dep1": {"compressed": 1, "uncompressed": 2, "version": "1.1.1"},
         "dep2": {"compressed": 10, "uncompressed": 20, "version": "1.1.1"},
     }
-    expected = [
-        {
-            "Name": "dep1",
-            "Version": "1.1.1",
-            "Size_Bytes": 1,
-            "Size": "1 B",
-            "Type": "Dependency",
-            "Platform": "linux-x86_64",
-            "Python_Version": "3.12",
-        },
-        {
-            "Name": "dep2",
-            "Version": "1.1.1",
-            "Size_Bytes": 10,
-            "Size": "10 B",
-            "Type": "Dependency",
-            "Platform": "linux-x86_64",
-            "Python_Version": "3.12",
-        },
-    ]
+    expected = Sizes(
+        [
+            Size(
+                name="dep1",
+                version="1.1.1",
+                size_bytes=1,
+                type="Dependency",
+                platform="linux-x86_64",
+                python_version="3.12",
+            ),
+            Size(
+                name="dep2",
+                version="1.1.1",
+                size_bytes=10,
+                type="Dependency",
+                platform="linux-x86_64",
+                python_version="3.12",
+            ),
+        ]
+    )
 
     result = get_dependencies_from_artifact(dep_size_dict, "linux-x86_64", "3.12", True)
     assert result == expected

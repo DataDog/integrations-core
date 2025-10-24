@@ -4,21 +4,23 @@
 from __future__ import annotations
 
 import os
+from collections import defaultdict
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 import click
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_funcs import GitRepo
 from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.size.utils.size_model import Sizes
 from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
-    from ddev.cli.size.utils.common_funcs import CLIParameters, FileDataEntry
+    from ddev.cli.size.utils.common_funcs import CLIParameters, GitRepo
+    from ddev.cli.size.utils.size_model import TotalsDict
+
 
 MINIMUM_DATE = datetime.strptime("Sep 17 2024", "%b %d %Y").date()
-MINIMUM_LENGTH_COMMIT = 7
 FULL_LENGTH_COMMIT = 40
 
 
@@ -32,7 +34,7 @@ FULL_LENGTH_COMMIT = 40
 @click.option(
     "--python", "py_version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed"
 )
-@click.option("--use-artifacts", is_flag=True, help="Fetch sizes from gha artifacts instead of the repo")
+@click.option("--use-artifacts", is_flag=True, help="Fetch sizes from GitHub Actions artifacts instead of the repo")
 @click.option(
     "--quality-gate-threshold",
     type=float,
@@ -82,9 +84,7 @@ def diff(
     app: Application = ctx.obj
 
     with app.status("Calculating differences..."):
-        repo_url = app.repo.path
-        modules: list[FileDataEntry] = []
-        passes_quality_gate = True
+        diff_sizes: Sizes = Sizes([])
 
         valid_versions = get_valid_versions(app.repo.path)
         valid_platforms = get_valid_platforms(app.repo.path, valid_versions)
@@ -101,137 +101,71 @@ def diff(
             to_dd_site,
         )
 
-        platforms = list(platform or valid_platforms)
-        versions = list(py_version or valid_versions)
+        platforms = valid_platforms if platform is None else [platform]
+        versions = valid_versions if py_version is None else [py_version]
         combinations = [(p, v) for p in platforms for v in versions]
-        total_diff = {}
-        old_size = {}
-        new_size = {}
 
         if not baseline:
-            base_commit = app.repo.git.merge_base(commit, "origin/master")
-            if base_commit != commit:
-                baseline = base_commit
-            else:
-                baseline = app.repo.git.log(["hash:%H"], n=2, source=commit)[1]["hash"]
+            from .utils.common_funcs import get_previous_commit
 
+            baseline = get_previous_commit(app, commit)
+            if not baseline:
+                app.abort("No baseline commit found")
             app.display(f"Comparing to commit: {baseline}")
 
+        parameters: CLIParameters = {
+            "app": app,
+            "combinations": combinations,
+            "compressed": compressed,
+            "format": format,
+            "show_gui": show_gui,
+            "quality_gate_threshold": quality_gate_threshold,
+            "to_dd_org": to_dd_org,
+            "to_dd_key": to_dd_key,
+            "to_dd_site": to_dd_site,
+        }
+
         if use_artifacts:
-            from .utils.common_funcs import get_status_sizes_from_commit
-
-            try:
-                baseline_sizes = get_status_sizes_from_commit(app, baseline, compressed)
-                commit_sizes = get_status_sizes_from_commit(app, commit, compressed)
-            except Exception as e:
-                app.abort(str(e))
-
-            if not baseline_sizes:
-                app.abort(f"Failed to get sizes for {baseline=}")
-            if not commit_sizes:
-                app.abort(f"Failed to get sizes for {commit=}")
-
-            for plat, ver in combinations:
-                parameters_artifacts: CLIParameters = {
-                    "app": app,
-                    "platform": plat,
-                    "py_version": ver,
-                    "compressed": compressed,
-                    "format": format,
-                    "show_gui": show_gui,
-                }
-
-                diff_modules, total_diff[(plat, ver)], old_size[(plat, ver)], new_size[(plat, ver)] = calculate_diff(
-                    baseline_sizes, commit_sizes, plat, ver
-                )
-                output_diff(parameters_artifacts, diff_modules)
-                modules.extend(diff_modules)
-                if quality_gate_threshold:
-                    passes_quality_gate = check_quality_gate(
-                        app, total_diff[(plat, ver)], old_size[(plat, ver)], quality_gate_threshold, plat, ver
-                    )
-                if to_dd_org or to_dd_key:
-                    from .utils.common_funcs import SizeMode, send_metrics_to_dd
-
-                    send_metrics_to_dd(app, diff_modules, to_dd_org, to_dd_key, to_dd_site, compressed, SizeMode.DIFF)
-
+            diff_sizes, baseline_total_size, commit_total_size, passes_quality_gate = get_diff_from_artifacts(
+                app, baseline, commit, parameters
+            )
         else:
-            with GitRepo(repo_url) as gitRepo:
-                try:
-                    date_str, _, _ = gitRepo.get_commit_metadata(baseline)
-                    date = datetime.strptime(date_str, "%b %d %Y").date()
-                    if date < MINIMUM_DATE:
-                        raise ValueError(f"First commit must be after {MINIMUM_DATE.strftime('%b %d %Y')} ")
-
-                    for plat, ver in combinations:
-                        parameters_repo: CLIParameters = {
-                            "app": app,
-                            "platform": plat,
-                            "py_version": ver,
-                            "compressed": compressed,
-                            "format": format,
-                            "show_gui": show_gui,
-                        }
-                        (
-                            diff_modules,
-                            total_diff,
-                            old_size,
-                            new_size,
-                        ) = get_diff(
-                            gitRepo,
-                            baseline,
-                            commit,
-                            total_diff,
-                            old_size,
-                            new_size,
-                            parameters_repo,
-                        )
-                        output_diff(parameters_repo, diff_modules)
-                        modules.extend(diff_modules)
-                        if quality_gate_threshold:
-                            passes_quality_gate = check_quality_gate(
-                                app, total_diff[(plat, ver)], old_size[(plat, ver)], quality_gate_threshold, plat, ver
-                            )
-                        if to_dd_org or to_dd_key:
-                            from .utils.common_funcs import SizeMode, send_metrics_to_dd
-
-                            send_metrics_to_dd(
-                                app, diff_modules, to_dd_org, to_dd_key, to_dd_site, compressed, SizeMode.DIFF
-                            )
-
-                except Exception as e:
-                    app.abort(str(e))
+            diff_sizes, baseline_total_size, commit_total_size, passes_quality_gate = get_diff_from_repo(
+                app, baseline, commit, parameters
+            )
 
         if format or quality_gate_threshold:
-            modules = [module for module in modules if module["Size_Bytes"] != 0]
+            filtered_diffs = diff_sizes.filter_no_zero()
+
             if format:
                 from .utils.common_funcs import SizeMode, export_format
 
-                export_format(app, format, modules, SizeMode.DIFF, platform, py_version, compressed)
+                export_format(app, format, filtered_diffs, SizeMode.DIFF, platform, py_version, compressed)
+
             if quality_gate_threshold:
                 from .utils.common_funcs import save_quality_gate_html, save_quality_gate_html_table
 
                 save_quality_gate_html(
                     app,
-                    modules,
+                    filtered_diffs,
                     compressed,
                     Path("diff.html"),
                     baseline,
                     quality_gate_threshold,
-                    old_size,
-                    total_diff,
+                    baseline_total_size,
+                    filtered_diffs._total_sizes,
                     passes_quality_gate,
                 )
                 save_quality_gate_html_table(
                     app,
-                    modules,
+                    filtered_diffs,
                     compressed,
                     Path("diff_table.html"),
                     baseline,
                     quality_gate_threshold,
-                    old_size,
-                    new_size,
-                    total_diff,
+                    baseline_total_size,
+                    commit_total_size,
+                    filtered_diffs._total_sizes,
                     passes_quality_gate,
                 )
         if quality_gate_threshold and not passes_quality_gate:
@@ -279,47 +213,130 @@ def validate_parameters(
         app.abort("\n".join(errors))
 
 
-def get_diff(
-    gitRepo: GitRepo,
-    baseline: str,
-    commit: str,
-    total_diff: dict[tuple[str, str], int],
-    old_size: dict[tuple[str, str], int],
-    new_size: dict[tuple[str, str], int],
-    params: CLIParameters,
-) -> tuple[list[FileDataEntry], dict[tuple[str, str], int], dict[tuple[str, str], int], dict[tuple[str, str], int]]:
-    files_b, dependencies_b, files_a, dependencies_a = get_repo_info(
-        gitRepo, params["platform"], params["py_version"], baseline, commit, params["compressed"]
-    )
+def get_diff_from_artifacts(
+    app: Application, baseline: str, commit: str, params: CLIParameters
+) -> tuple[Sizes, TotalsDict, TotalsDict, bool]:
+    from .utils.common_funcs import get_status_sizes_from_commit
 
-    (
-        integrations,
-        integrations_total_diff,
-        integrations_old_size,
-        integrations_new_size,
-    ) = calculate_diff(files_b, files_a, params["platform"], params["py_version"])
-    (
-        dependencies,
-        dependencies_total_diff,
-        dependencies_old_size,
-        dependencies_new_size,
-    ) = calculate_diff(dependencies_b, dependencies_a, params["platform"], params["py_version"])
-    total_diff[(params["platform"], params["py_version"])] = integrations_total_diff + dependencies_total_diff
-    old_size[(params["platform"], params["py_version"])] = integrations_old_size + dependencies_old_size
-    new_size[(params["platform"], params["py_version"])] = integrations_new_size + dependencies_new_size
+    artifacts_sizes = Sizes([])
+    passes_quality_gate = True
 
-    return integrations + dependencies, total_diff, old_size, new_size
+    try:
+        baseline_sizes = get_status_sizes_from_commit(app, baseline, params["compressed"])
+        commit_sizes = get_status_sizes_from_commit(app, commit, params["compressed"])
+    except Exception:
+        import traceback
+
+        app.abort(traceback.format_exc())
+
+    if not baseline_sizes:
+        app.abort(f"Failed to get sizes for {baseline=}")
+    if not commit_sizes:
+        app.abort(f"Failed to get sizes for {commit=}")
+
+    for plat, ver in params["combinations"]:
+        diff_sizes = commit_sizes.diff(baseline_sizes)
+
+        params["platform"] = plat
+        params["py_version"] = ver
+        output_diff(params, baseline, commit, diff_sizes)
+        artifacts_sizes = artifacts_sizes + diff_sizes
+        if params["quality_gate_threshold"]:
+            passes_quality_gate = (
+                check_quality_gate(
+                    app,
+                    diff_sizes._total_sizes[plat][ver],
+                    baseline_sizes._total_sizes[plat][ver],
+                    params["quality_gate_threshold"],
+                    plat,
+                    ver,
+                )
+                and passes_quality_gate
+            )
+        if params["to_dd_org"] or params["to_dd_key"]:
+            from .utils.common_funcs import SizeMode, send_metrics_to_dd
+
+            send_metrics_to_dd(
+                app,
+                diff_sizes,
+                params["to_dd_org"],
+                params["to_dd_key"],
+                params["to_dd_site"],
+                params["compressed"],
+                SizeMode.DIFF,
+            )
+
+    return artifacts_sizes, baseline_sizes._total_sizes, commit_sizes._total_sizes, passes_quality_gate
 
 
-def output_diff(params: CLIParameters, modules: list[FileDataEntry]) -> None:
-    differences = 0
-    modules.sort(key=lambda x: abs(x["Size_Bytes"]), reverse=True)
-    for module in modules:
-        if module["Size_Bytes"] > 0:
-            module["Size"] = f"+{module['Size']}"
+def get_diff_from_repo(
+    app: Application, baseline: str, commit: str, params: CLIParameters
+) -> tuple[Sizes, TotalsDict, TotalsDict, bool]:
+    from .utils.common_funcs import GitRepo
 
-        if module["Size_Bytes"] != 0:
-            differences += 1
+    with GitRepo(app.repo.path) as gitRepo:
+        try:
+            date_str, _, _ = gitRepo.get_commit_metadata(baseline)
+            date = datetime.strptime(date_str, "%b %d %Y").date()
+            if date < MINIMUM_DATE:
+                raise ValueError(f"First commit must be after {MINIMUM_DATE.strftime('%b %d %Y')} ")
+
+            repo_sizes = Sizes([])
+            passes_quality_gate = True
+            baseline_total_size: TotalsDict = defaultdict(lambda: defaultdict(int))
+            commit_total_size: TotalsDict = defaultdict(lambda: defaultdict(int))
+
+            for plat, ver in params["combinations"]:
+                files_b, dependencies_b, files_c, dependencies_c = get_repo_info(
+                    gitRepo, plat, ver, baseline, commit, params["compressed"]
+                )
+
+                diff_sizes = files_c.diff(files_b) + dependencies_c.diff(dependencies_b)
+                baseline_total_size[plat][ver] += (
+                    files_b._total_sizes[plat][ver] + dependencies_b._total_sizes[plat][ver]
+                )
+                commit_total_size[plat][ver] += files_c._total_sizes[plat][ver] + dependencies_c._total_sizes[plat][ver]
+
+                params["platform"] = plat
+                params["py_version"] = ver
+                output_diff(params, baseline, commit, diff_sizes)
+                repo_sizes = repo_sizes + diff_sizes
+                if params["quality_gate_threshold"]:
+                    passes_quality_gate = (
+                        check_quality_gate(
+                            app,
+                            diff_sizes._total_sizes[plat][ver],
+                            baseline_total_size[plat][ver],
+                            params["quality_gate_threshold"],
+                            plat,
+                            ver,
+                        )
+                        and passes_quality_gate
+                    )
+                if params["to_dd_org"] or params["to_dd_key"]:
+                    from .utils.common_funcs import SizeMode, send_metrics_to_dd
+
+                    send_metrics_to_dd(
+                        app,
+                        diff_sizes,
+                        params["to_dd_org"],
+                        params["to_dd_key"],
+                        params["to_dd_site"],
+                        params["compressed"],
+                        SizeMode.DIFF,
+                    )
+
+        except Exception:
+            import traceback
+
+            app.abort(traceback.format_exc())
+
+    return repo_sizes, baseline_total_size, commit_total_size, passes_quality_gate
+
+
+def output_diff(params: CLIParameters, baseline: str, commit: str, sizes: Sizes) -> None:
+    differences = sizes.len_non_zero()
+    sizes.sort()
 
     if differences == 0:
         params["app"].display(
@@ -329,9 +346,11 @@ def output_diff(params: CLIParameters, modules: list[FileDataEntry]) -> None:
         return
 
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
-        from .utils.common_funcs import print_table
-
-        print_table(params["app"], "Diff", modules)
+        sizes.print_table(
+            params["app"],
+            f"Disk Usage Differences between {baseline} and {commit}"
+            f" for {params['platform']} and Python version {params['py_version']}",
+        )
 
     treemap_path = None
     if params["format"] and "png" in params["format"]:
@@ -344,7 +363,7 @@ def output_diff(params: CLIParameters, modules: list[FileDataEntry]) -> None:
 
         plot_treemap(
             params["app"],
-            modules,
+            sizes,
             f"Disk Usage Differences for {params['platform']} and Python version {params['py_version']}",
             params["show_gui"],
             SizeMode.DIFF,
@@ -359,7 +378,7 @@ def get_repo_info(
     baseline: str,
     commit: str,
     compressed: bool,
-) -> tuple[list[FileDataEntry], list[FileDataEntry], list[FileDataEntry], list[FileDataEntry]]:
+) -> tuple[Sizes, Sizes, Sizes, Sizes]:
     """
     Retrieves integration and dependency sizes for two commits in the repo.
 
@@ -386,87 +405,10 @@ def get_repo_info(
     dependencies_b = get_dependencies(repo, platform, py_version, compressed)
 
     gitRepo.checkout_commit(commit)
-    files_a = get_files(repo, compressed, py_version, platform)
-    dependencies_a = get_dependencies(repo, platform, py_version, compressed)
+    files_c = get_files(repo, compressed, py_version, platform)
+    dependencies_c = get_dependencies(repo, platform, py_version, compressed)
 
-    return files_b, dependencies_b, files_a, dependencies_a
-
-
-def calculate_diff(
-    size_baseline: list[FileDataEntry], size_commit: list[FileDataEntry], platform: str, py_version: str
-) -> tuple[list[FileDataEntry], int, int, int]:
-    """
-    Computes size differences between two sets of integrations or dependencies.
-
-    Args:
-        size_baseline: Entries from the first (earlier) commit.
-        size_commit: Entries from the second (later) commit.
-
-    Returns:
-        A list of FileDataEntry items representing only the entries with a size difference.
-        Entries include new, deleted, or changed modules, with delta size in bytes and human-readable format.
-    """
-    from .utils.common_funcs import convert_to_human_readable_size
-
-    baseline = {
-        (entry["Name"], entry["Type"], entry["Platform"], entry["Python_Version"]): entry for entry in size_baseline
-    }
-    commit = {
-        (entry["Name"], entry["Type"], entry["Platform"], entry["Python_Version"]): entry for entry in size_commit
-    }
-
-    all_names = set(baseline) | set(commit)
-    diffs: list[FileDataEntry] = []
-
-    total_diff = 0
-    old_size = 0
-    new_size = 0
-
-    for name, _type, platform, py_version in all_names:
-        old = baseline.get((name, _type, platform, py_version))
-        new = commit.get((name, _type, platform, py_version))
-        size_old = int(old["Size_Bytes"]) if old else 0
-        size_new = int(new["Size_Bytes"]) if new else 0
-        delta = size_new - size_old
-        percentage = (delta / size_old) * 100 if size_old != 0 else 0.0
-        total_diff += delta
-        old_size += size_old
-        new_size += size_new
-
-        ver_old = old["Version"] if old else ""
-        ver_new = new["Version"] if new else ""
-
-        if size_old == 0:
-            change_type = "New"
-            name_str = f"{name}"
-            version_str = ver_new
-        elif size_new == 0:
-            change_type = "Removed"
-            name_str = f"{name}"
-            version_str = ver_old
-        elif delta != 0:
-            change_type = "Modified"
-            name_str = name
-            version_str = f"{ver_old} -> {ver_new}" if ver_new != ver_old else ver_new
-        else:
-            change_type = "Unchanged"
-            name_str = name
-            version_str = ver_new
-
-        diffs.append(
-            {
-                "Name": name_str,
-                "Version": version_str,
-                "Type": _type,
-                "Platform": platform,
-                "Python_Version": py_version,
-                "Size_Bytes": delta,
-                "Size": convert_to_human_readable_size(delta),
-                "Percentage": round(percentage, 2),
-                "Delta_Type": change_type,
-            }
-        )
-    return diffs, total_diff, old_size, new_size
+    return files_b, dependencies_b, files_c, dependencies_c
 
 
 def check_quality_gate(

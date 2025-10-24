@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import json
 import os
 from typing import TYPE_CHECKING
 
@@ -12,14 +11,11 @@ import click
 
 from ddev.cli.application import Application
 from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.size.utils.size_model import Sizes
 from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
-    from ddev.cli.size.utils.common_funcs import (
-        CLIParameters,
-        DependencyEntry,
-        FileDataEntry,
-    )
+    from ddev.cli.size.utils.common_funcs import CLIParameters
 
 
 @click.command()
@@ -33,7 +29,6 @@ if TYPE_CHECKING:
 @click.option(
     "--python", "py_version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed"
 )
-@click.option("--dependency-sizes", type=click.Path(exists=True), help="Path to the dependency sizes file. If no")
 @click.option("--commit", help="Commit hash to check the dependency sizes status of.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
@@ -47,7 +42,6 @@ def status(
     to_dd_org: str | None,
     to_dd_key: str | None,
     to_dd_site: str | None,
-    dependency_sizes: Path | None,
     commit: str | None,
 ) -> None:
     """
@@ -73,23 +67,25 @@ def status(
             py_version,
             to_dd_org,
             commit,
-            dependency_sizes,
             to_dd_key,
             to_dd_site,
             app,
         )
 
-        modules_plat_ver: list[FileDataEntry] = []
-        platforms = list(platform or valid_platforms)
-        versions = list(py_version or valid_versions)
+        app.display_debug(f"Valid platforms: {valid_platforms}")
+        app.display_debug(f"Valid versions: {valid_versions}")
+
+        sizes_plat_ver: Sizes = Sizes([])
+        platforms = valid_platforms if platform is None else [platform]
+        versions = valid_versions if py_version is None else [py_version]
         combinations = [(p, v) for p in platforms for v in versions]
+
+        app.display_debug(f"Combinations to process: {combinations}")
 
         commits = None
         dependencies_resolved = False
-        dependency_sizes_list: dict[str, DependencyEntry] = {}
-
-        if dependency_sizes:
-            dependency_sizes_list = json.loads(dependency_sizes.read_text())
+        dependency_sizes: Sizes = Sizes([])
+        previous_sizes = None
 
         if commit:
             from ddev.cli.size.utils.common_funcs import (
@@ -99,8 +95,7 @@ def status(
             )
 
             commits = [commit]
-
-            if not artifact_exists(app, commit, "target-" + platforms[0], RESOLVE_BUILD_DEPS_WORKFLOW):
+            if not artifact_exists(app, commit, "target-" + next(iter(platforms)), RESOLVE_BUILD_DEPS_WORKFLOW):
                 app.display("\n -> Searching for dependency sizes in previous commit")
                 previous_sizes = get_previous_sizes(app, commit, compressed)
             else:
@@ -111,14 +106,12 @@ def status(
                 from ddev.cli.size.utils.common_funcs import get_dep_sizes
 
                 app.display("-> Dependencies were resolved in this commit, using the artifact")
-                dependency_sizes_list = get_dep_sizes(app, commit, plat, ver)
+                dependency_sizes = get_dep_sizes(app, commit, plat, ver, compressed)
 
             elif commit and not dependencies_resolved and previous_sizes:
-                from ddev.cli.size.utils.common_funcs import parse_dep_sizes
+                dependency_sizes = previous_sizes.filter(platform=plat, python_version=ver, type="Dependency")
 
-                dependency_sizes_list = parse_dep_sizes(previous_sizes, plat, ver, compressed)
-
-            if commit and not dependency_sizes_list:
+            if commit and not dependency_sizes:
                 app.display_error("Could not find dependency sizes in the artifacts: falling back to local lockfiles")
 
             parameters: CLIParameters = {
@@ -129,99 +122,55 @@ def status(
                 "format": format,
                 "show_gui": show_gui,
             }
-            status_modules = status_mode(
+            status_sizes = status_mode(
                 repo_path,
                 parameters,
-                dependency_sizes_list,
+                dependency_sizes,
             )
-            modules_plat_ver.extend(status_modules)
+
+            sizes_plat_ver = sizes_plat_ver + status_sizes
+
             if to_dd_org or to_dd_key:
                 from ddev.cli.size.utils.common_funcs import SizeMode, send_metrics_to_dd
 
                 app.display("Sending metrics to Datadog ")
                 send_metrics_to_dd(
-                    app, status_modules, to_dd_org, to_dd_key, to_dd_site, compressed, SizeMode.STATUS, commits
+                    app, status_sizes, to_dd_org, to_dd_key, to_dd_site, compressed, SizeMode.STATUS, commits
                 )
 
         if format:
             from ddev.cli.size.utils.common_funcs import SizeMode, export_format
 
-            export_format(app, format, modules_plat_ver, SizeMode.STATUS, platform, py_version, compressed)
+            export_format(app, format, sizes_plat_ver, SizeMode.STATUS, platform, py_version, compressed)
 
-    except Exception as e:
-        app.abort(str(e))
+    except Exception:
+        import traceback
 
-
-def validate_parameters(
-    valid_platforms: set[str],
-    valid_versions: set[str],
-    platform: str | None,
-    py_version: str | None,
-    to_dd_org: str | None,
-    commit: str | None,
-    dependency_sizes: Path | None,
-    to_dd_key: str | None,
-    to_dd_site: str | None,
-    app: Application,
-) -> None:
-    errors = []
-    if platform and platform not in valid_platforms:
-        errors.append(f"Invalid platform: {platform!r}")
-
-    if py_version and py_version not in valid_versions:
-        errors.append(f"Invalid version: {py_version!r}")
-
-    if commit and dependency_sizes:
-        errors.append("Pass either 'commit' or 'dependency-sizes'. Both options cannot be supplied.")
-
-    if commit and len(commit) != 40:
-        errors.append("Dependency commit must be a full length commit hash.")
-
-    if dependency_sizes and not dependency_sizes.is_file():
-        errors.append(f"Dependency sizes file does not exist: {dependency_sizes!r}")
-
-    if to_dd_site and not to_dd_key:
-        errors.append("If --to-dd-site is provided, --to-dd-key must also be provided.")
-
-    if to_dd_site and to_dd_org:
-        errors.append("If --to-dd-org is provided, --to-dd-site must not be provided.")
-
-    if to_dd_key and to_dd_org:
-        errors.append("If --to-dd-org is provided, --to-dd-key must not be provided.")
-
-    if errors:
-        app.abort("\n".join(errors))
+        app.abort(traceback.format_exc())
 
 
 def status_mode(
     repo_path: Path,
     params: CLIParameters,
-    dependency_sizes: dict[str, DependencyEntry] | None,
-) -> list[FileDataEntry]:
+    dependency_sizes: Sizes | None,
+) -> Sizes:
     from ddev.cli.size.utils.common_funcs import (
         get_dependencies,
         get_files,
-        print_table,
     )
 
     with params["app"].status("Calculating sizes..."):
-        if dependency_sizes:
-            from ddev.cli.size.utils.common_funcs import get_dependencies_from_artifact
+        sizes = get_files(repo_path, params["compressed"], params["py_version"], params["platform"]) + (
+            dependency_sizes
+            or get_dependencies(repo_path, params["platform"], params["py_version"], params["compressed"])
+        )
 
-            modules = get_files(
-                repo_path, params["compressed"], params["py_version"], params["platform"]
-            ) + get_dependencies_from_artifact(
-                dependency_sizes, params["platform"], params["py_version"], params["compressed"]
-            )
-
-        else:
-            modules = get_files(
-                repo_path, params["compressed"], params["py_version"], params["platform"]
-            ) + get_dependencies(repo_path, params["platform"], params["py_version"], params["compressed"])
-    modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
+    sizes.sort()
 
     if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
-        print_table(params["app"], "Status", modules)
+        sizes.print_table(
+            params["app"], f"Disk Usage Status for {params['platform']} and Python version {params['py_version']}"
+        )
 
     treemap_path = None
     if params["format"] and "png" in params["format"]:
@@ -234,11 +183,45 @@ def status_mode(
 
         plot_treemap(
             params["app"],
-            modules,
+            sizes,
             f"Disk Usage Status for {params['platform']} and Python version {params['py_version']}",
             params["show_gui"],
             SizeMode.STATUS,
             treemap_path,
         )
 
-    return modules
+    return sizes
+
+
+def validate_parameters(
+    valid_platforms: set[str],
+    valid_versions: set[str],
+    platform: str | None,
+    py_version: str | None,
+    to_dd_org: str | None,
+    commit: str | None,
+    to_dd_key: str | None,
+    to_dd_site: str | None,
+    app: Application,
+) -> None:
+    errors = []
+    if platform and platform not in valid_platforms:
+        errors.append(f"Invalid platform: {platform!r}")
+
+    if py_version and py_version not in valid_versions:
+        errors.append(f"Invalid version: {py_version!r}")
+
+    if commit and len(commit) != 40:
+        errors.append("Dependency commit must be a full length commit hash.")
+
+    if to_dd_site and not to_dd_key:
+        errors.append("If --to-dd-site is provided, --to-dd-key must also be provided.")
+
+    if to_dd_site and to_dd_org:
+        errors.append("If --to-dd-org is provided, --to-dd-site must not be provided.")
+
+    if to_dd_key and to_dd_org:
+        errors.append("If --to-dd-org is provided, --to-dd-key must not be provided.")
+
+    if errors:
+        app.abort("\n".join(errors))

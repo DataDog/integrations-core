@@ -22,6 +22,7 @@ import squarify
 from typing_extensions import Literal, NotRequired
 
 from ddev.cli.application import Application
+from ddev.cli.size.utils.size_model import Size, Sizes, TotalsDict, convert_to_human_readable_size
 from ddev.utils.fs import Path
 from ddev.utils.toml import load_toml_file
 
@@ -40,18 +41,6 @@ class SizeMode(StrEnum):
     DIFF = "diff"
 
 
-class FileDataEntry(TypedDict):
-    Name: str  # Integration/Dependency name
-    Version: str  # Version of the Integration/Dependency
-    Size_Bytes: int  # Size in bytes
-    Size: str  # Human-readable size
-    Type: str  # Integration/Dependency
-    Platform: str  # Target platform (e.g. linux-aarch64)
-    Python_Version: str  # Target Python version (e.g. 3.12)
-    Delta_Type: NotRequired[str]  # Change type (New, Removed, Modified)
-    Percentage: NotRequired[float]  # Percentage of the size change
-
-
 class DependencyEntry(TypedDict):
     compressed: NotRequired[int]  # Size in bytes
     uncompressed: NotRequired[int]  # Size in bytes
@@ -59,7 +48,7 @@ class DependencyEntry(TypedDict):
 
 
 class DeltaTypeGroup(TypedDict):
-    Modules: list[FileDataEntry]
+    Modules: Sizes
     Total: int
 
 
@@ -83,11 +72,16 @@ class CommitEntryPlatformWithDelta(CommitEntryWithDelta):
 
 class CLIParameters(TypedDict):
     app: Application  # Main application instance for CLI operations
-    platform: str  # Target platform for analysis (e.g. linux-aarch64)
-    py_version: str  # Target Python version for analysis
+    platform: NotRequired[str]  # Target platform for analysis (e.g. linux-aarch64)
+    py_version: NotRequired[str]  # Target Python version for analysis
     compressed: bool  # Whether to analyze compressed file sizes
     format: Optional[list[str]]  # Output format options (png, csv, markdown, json)
     show_gui: bool  # Whether to display interactive visualization
+    quality_gate_threshold: NotRequired[float | None]  # Quality gate threshold for the size difference
+    to_dd_org: NotRequired[str | None]  # Datadog organization name
+    to_dd_key: NotRequired[str | None]  # Datadog API key
+    to_dd_site: NotRequired[str | None]  # Datadog site
+    combinations: NotRequired[list[tuple[str, str]]]  # List of platform and Python version combinations to analyze
 
 
 class CLIParametersTimeline(TypedDict):
@@ -137,12 +131,7 @@ def get_valid_versions(repo_path: Path | str) -> set[str]:
     return set(versions)
 
 
-def is_correct_dependency(platform: str, version: str, name: str) -> bool:
-    # The name of the dependency file is in the format of {platform}_{version}.txt e.g. linux-aarch64_3.12.txt
-    _platform, _version = name.rsplit(".", 1)[0].rsplit("_", 1)
-    return platform == _platform and version == _version
-
-
+# Integrations sizes
 def is_valid_integration_file(
     path: str,
     repo_path: str,
@@ -203,27 +192,7 @@ def get_gitignore_files(repo_path: str | Path) -> list[str]:
         return ignored_patterns
 
 
-def convert_to_human_readable_size(size_bytes: float) -> str:
-    for unit in [" B", " KiB", " MiB", " GiB"]:
-        if abs(size_bytes) < 1024:
-            return str(round(size_bytes, 2)) + unit
-        size_bytes /= 1024
-    return str(round(size_bytes, 2)) + " TB"
-
-
-def compress(file_path: str) -> int:
-    compressor = zlib.compressobj()
-    compressed_size = 0
-    chunk_size = 8192
-    with open(file_path, "rb") as f:
-        while chunk := f.read(chunk_size):
-            compressed_chunk = compressor.compress(chunk)
-            compressed_size += len(compressed_chunk)
-        compressed_size += len(compressor.flush())
-    return compressed_size
-
-
-def get_files(repo_path: str | Path, compressed: bool, py_version: str, platform: str) -> list[FileDataEntry]:
+def get_files(repo_path: str | Path, compressed: bool, py_version: str, platform: str) -> Sizes:
     """
     Calculates integration file sizes and versions from a repository.
     Only takes into account integrations with a valid version looking at the pyproject.toml file
@@ -256,18 +225,19 @@ def get_files(repo_path: str | Path, compressed: bool, py_version: str, platform
                 version = extract_version_from_about_py(file_path)
                 integration_versions[integration_name] = version
 
-    return [
-        {
-            "Name": name,
-            "Version": integration_versions.get(name, ""),
-            "Size_Bytes": size,
-            "Size": convert_to_human_readable_size(size),
-            "Type": "Integration",
-            "Platform": platform,
-            "Python_Version": py_version,
-        }
-        for name, size in integration_sizes.items()
-    ]
+    return Sizes(
+        [
+            Size(
+                name=name,
+                version=integration_versions.get(name, ""),
+                size_bytes=size,
+                type="Integration",
+                platform=platform,
+                python_version=py_version,
+            )
+            for name, size in integration_sizes.items()
+        ]
+    )
 
 
 def check_python_version(repo_path: str, integration_name: str, py_major_version: str) -> bool:
@@ -302,64 +272,68 @@ def extract_version_from_about_py(path: str) -> str:
     return ""
 
 
-def get_dependencies(repo_path: str | Path, platform: str, py_version: str, compressed: bool) -> list[FileDataEntry]:
-    """
-    Gets the list of dependencies for a given platform and Python version and returns a FileDataEntry that includes:
-    Name, Version, Size_Bytes, Size, and Type.
-    """
-    resolved_path = os.path.join(repo_path, ".deps", "resolved")
+def compress(file_path: str) -> int:
+    compressor = zlib.compressobj()
+    compressed_size = 0
+    chunk_size = 8192
+    with open(file_path, "rb") as f:
+        while chunk := f.read(chunk_size):
+            compressed_chunk = compressor.compress(chunk)
+            compressed_size += len(compressed_chunk)
+        compressed_size += len(compressor.flush())
+    return compressed_size
 
-    for filename in os.listdir(resolved_path):
-        file_path = os.path.join(resolved_path, filename)
 
-        if os.path.isfile(file_path) and is_correct_dependency(platform, py_version, filename):
-            deps, download_urls, versions = get_dependencies_list(file_path)
+# Dependency sizes
+def is_correct_dependency(platform: str, version: str, name: str) -> bool:
+    # The name of the dependency file is in the format of {platform}_{version}.txt e.g. linux-aarch64_3.12.txt
+    _platform, _version = name.rsplit(".", 1)[0].rsplit("_", 1)
+    return platform == _platform and version == _version
+
+
+def get_dependencies(repo_path: str | Path, platform: str, py_version: str, compressed: bool) -> Sizes:
+    """
+    Gets the list of dependencies for a given platform and Python version and returns a Sizes object.
+    """
+    resolved_path = Path(repo_path) / ".deps" / "resolved"
+    for filename in resolved_path.iterdir():
+        if filename.is_file() and is_correct_dependency(platform, py_version, filename.name):
+            deps, download_urls, versions = get_dependencies_list(filename)
             return get_dependencies_sizes(deps, download_urls, versions, compressed, platform, py_version)
-    return []
+    return Sizes([])
 
 
-def get_dependencies_list(file_path: str) -> tuple[list[str], list[str], list[str]]:
+def get_dependencies_list(file_path: Path) -> tuple[list[str], list[str], list[str]]:
     """
     Parses a dependency file and extracts the dependency names, download URLs, and versions.
     """
     download_urls = []
     deps = []
     versions = []
-    with open(file_path, "r", encoding="utf-8") as file:
-        file_content = file.read()
-        pattern = re.compile(r"([\w\-\d\.]+) @ (https?://[^\s#]+)")
-        for line in file_content.splitlines():
-            match = pattern.search(line)
-            if not match:
-                raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
-            name = match.group(1)
-            url = match.group(2)
+    file_content = file_path.read_text(encoding="utf-8")
+    pattern = re.compile(r"([\w\-\d\.]+) @ (https?://[^\s#]+)")
+    for line in file_content.splitlines():
+        match = pattern.search(line)
+        if not match:
+            raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
+        name = match.group(1)
+        url = match.group(2)
 
-            deps.append(name)
-            download_urls.append(url)
-            version_match = re.search(rf"{re.escape(name)}/[^/]+?-([0-9]+(?:\.[0-9]+)*)-", url)
-            if version_match:
-                versions.append(version_match.group(1))
-            else:
-                versions.append("")
+        deps.append(name)
+        download_urls.append(url)
+        version_match = re.search(rf"{re.escape(name)}/[^/]+?-([0-9]+(?:\.[0-9]+)*)-", url)
+        if version_match:
+            versions.append(version_match.group(1))
+        else:
+            versions.append("")
 
     return deps, download_urls, versions
 
 
 def get_dependencies_sizes(
     deps: list[str], download_urls: list[str], versions: list[str], compressed: bool, platform: str, py_version: str
-) -> list[FileDataEntry]:
-    """
-    Calculates the sizes of dependencies, either compressed or uncompressed.
-
-    Args:
-        deps: List of dependency names.
-        download_urls: Corresponding download URLs for the dependencies.
-        versions: Corresponding version strings for the dependencies.
-        compressed: If True, use the Content-Length from the HTTP headers.
-                    If False, download, extract, and compute actual uncompressed size.
-    """
-    file_data: list[FileDataEntry] = []
+) -> Sizes:
+    file_data: Sizes = Sizes([])
     for dep, url, version in zip(deps, download_urls, versions, strict=False):
         with requests.get(url, stream=True) as response:
             response.raise_for_status()
@@ -394,15 +368,14 @@ def get_dependencies_sizes(
                         size += os.path.getsize(file_path)
 
         file_data.append(
-            {
-                "Name": str(dep),
-                "Version": version,
-                "Size_Bytes": int(size),
-                "Size": convert_to_human_readable_size(size),
-                "Type": "Dependency",
-                "Platform": platform,
-                "Python_Version": py_version,
-            }
+            Size(
+                name=str(dep),
+                version=version,
+                size_bytes=int(size),
+                type="Dependency",
+                platform=platform,
+                python_version=py_version,
+            )
         )
 
     return file_data
@@ -410,21 +383,20 @@ def get_dependencies_sizes(
 
 def get_dependencies_from_artifact(
     dependency_sizes: dict[str, DependencyEntry], platform: str, py_version: str, compressed: bool
-) -> list[FileDataEntry]:
-    return [
-        {
-            "Name": name,
-            "Version": entry.get("version", ""),
-            "Size_Bytes": int(entry.get("compressed", 0) if compressed else entry.get("uncompressed", 0)),
-            "Size": convert_to_human_readable_size(
-                entry.get("compressed", 0) if compressed else entry.get("uncompressed", 0)
-            ),
-            "Type": "Dependency",
-            "Platform": platform,
-            "Python_Version": py_version,
-        }
-        for name, entry in dependency_sizes.items()
-    ]
+) -> Sizes:
+    return Sizes(
+        [
+            Size(
+                name=name,
+                version=entry.get("version", ""),
+                size_bytes=int(entry.get("compressed", 0) if compressed else entry.get("uncompressed", 0)),
+                type="Dependency",
+                platform=platform,
+                python_version=py_version,
+            )
+            for name, entry in dependency_sizes.items()
+        ]
+    )
 
 
 def is_excluded_from_wheel(path: str) -> bool:
@@ -484,123 +456,15 @@ def is_excluded_from_wheel(path: str) -> bool:
     return False
 
 
-def save_json(
-    app: Application,
-    file_path: str,
-    modules: (list[FileDataEntry] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta]),
-) -> None:
-    if modules == []:
-        return
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(modules, f, default=str, indent=2)
-    app.display(f"JSON file saved to {file_path}")
-
-
-def save_csv(
-    app: Application,
-    modules: list[FileDataEntry] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
-    file_path: str,
-) -> None:
-    if modules == []:
-        return
-
-    headers = [k for k in modules[0].keys() if k not in ["Size", "Delta"]]
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(",".join(headers) + "\n")
-
-        for row in modules:
-            f.write(",".join(format(str(row.get(h, ""))) for h in headers) + "\n")
-
-    app.display(f"CSV file saved to {file_path}")
-
-
-def format(s: str) -> str:
-    """
-    Wraps the string in double quotes if it contains a comma, for safe CSV formatting.
-    """
-    return f'"{s}"' if "," in s else s
-
-
-def save_markdown(
-    app: Application,
-    title: str,
-    modules: list[FileDataEntry] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
-    file_path: str,
-) -> None:
-    if modules == []:
-        return
-
-    headers = [k for k in modules[0].keys() if "Bytes" not in k]
-
-    # Group modules by platform and version
-    grouped_modules = {(modules[0].get("Platform", ""), modules[0].get("Python_Version", "")): [modules[0]]}
-    for module in modules[1:]:
-        platform = module.get("Platform", "")
-        version = module.get("Python_Version", "")
-        key = (platform, version)
-        if key not in grouped_modules:
-            grouped_modules[key] = []
-        if any(str(value).strip() not in ("", "0", "0001-01-01") for value in module.values()):
-            grouped_modules[key].append(module)
-
-    lines = []
-    lines.append(f"# {title}")
-    lines.append("")
-
-    for (platform, version), group in grouped_modules.items():
-        if platform and version:
-            lines.append(f"## Platform: {platform}, Python Version: {version}")
-        elif platform:
-            lines.append(f"## Platform: {platform}")
-        elif version:
-            lines.append(f"## Python Version: {version}")
-        else:
-            lines.append("## Other")
-
-        lines.append("")
-        lines.append("| " + " | ".join(headers) + " |")
-        lines.append("| " + " | ".join("---" for _ in headers) + " |")
-        for row in group:
-            lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
-        lines.append("")
-
-    markdown = "\n".join(lines)
-
-    with open(file_path, "a", encoding="utf-8") as f:
-        f.write(markdown)
-    app.display(f"Markdown table saved to {file_path}")
-
-
-def print_table(
-    app: Application,
-    mode: str,
-    modules: list[FileDataEntry] | list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
-) -> None:
-    if modules == []:
-        return
-
-    columns = [col for col in modules[0].keys() if "Bytes" not in col]
-    modules_table: dict[str, dict[int, str]] = {col: {} for col in columns}
-    for i, row in enumerate(modules):
-        if row.get("Size_Bytes") == 0:
-            continue
-        for key in columns:
-            modules_table[key][i] = str(row.get(key, ""))
-
-    app.display_table(mode, modules_table)
-
-
 def save_quality_gate_html(
     app: Application,
-    modules: list[FileDataEntry],
+    modules: Sizes,
     compressed: bool,
     file_path: Path,
-    old_commit: str,
+    baseline: str,
     threshold_percentage: float,
-    old_size: dict[tuple[str, str], int],
-    total_diff: dict[tuple[str, str], int],
+    baseline_size: TotalsDict,
+    total_diff: TotalsDict,
     passes_quality_gate: bool,
 ) -> None:
     """
@@ -608,7 +472,7 @@ def save_quality_gate_html(
     it ouputs the short version.
     """
     html = str()
-    html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
+    html_headers = get_html_headers(threshold_percentage, baseline, passes_quality_gate)
 
     if not file_path.exists():
         file_path.write_text(html_headers, encoding="utf-8")
@@ -617,7 +481,7 @@ def save_quality_gate_html(
         f"<h3>{'Compressed' if compressed else 'Uncompressed'} Size Changes "
         f"{'✅' if passes_quality_gate else '❌'}</h3>"
     )
-    if modules == []:
+    if not modules:
         html = f"{type_str}\n<h4>No size differences were found</h4>\n"
 
     else:
@@ -625,15 +489,15 @@ def save_quality_gate_html(
         for (platform, py_version), delta_type_groups in groups.items():
             html_subheaders = str()
 
-            sign_total = "+" if total_diff[(platform, py_version)] > 0 else ""
-            threshold_bytes = old_size[(platform, py_version)] * threshold_percentage / 100
+            sign_total = "+" if total_diff[platform][py_version] > 0 else ""
+            threshold_bytes = baseline_size[platform][py_version] * threshold_percentage / 100
             threshold = convert_to_human_readable_size(threshold_bytes)
 
             html_subheaders += f"<details><summary><h4>&Delta; Size for {platform} and Python {py_version}:\n"
             html_subheaders += (
-                f"{sign_total}{convert_to_human_readable_size(total_diff[(platform, py_version)])} "
+                f"{sign_total}{convert_to_human_readable_size(total_diff[platform][py_version])} "
                 f"(Threshold: {threshold}) "
-                f"{'✅' if total_diff[(platform, py_version)] < threshold_bytes else '❌'}</h4></summary>\n\n"
+                f"{'✅' if total_diff[platform][py_version] < threshold_bytes else '❌'}</h4></summary>\n\n"
             )
 
             tables = str()
@@ -656,17 +520,17 @@ def save_quality_gate_html(
 
 def save_quality_gate_html_table(
     app: Application,
-    modules: list[FileDataEntry],
+    modules: Sizes,
     compressed: bool,
     file_path: Path,
-    old_commit: str,
+    baseline: str,
     threshold_percentage: float,
-    old_size: dict[tuple[str, str], int],
-    new_size: dict[tuple[str, str], int],
-    total_diff: dict[tuple[str, str], int],
+    baseline_size: TotalsDict,
+    commit_size: TotalsDict,
+    total_diff: TotalsDict,
     passes_quality_gate: bool,
 ) -> None:
-    html_headers = get_html_headers(threshold_percentage, old_commit, passes_quality_gate)
+    html_headers = get_html_headers(threshold_percentage, baseline, passes_quality_gate)
 
     if not file_path.exists():
         file_path.write_text(html_headers, encoding="utf-8")
@@ -675,18 +539,18 @@ def save_quality_gate_html_table(
         f"<h3>{'Compressed' if compressed else 'Uncompressed'} Size Changes "
         f"{'✅' if passes_quality_gate else '❌'}</h3></summary>"
     )
-    if modules == []:
+    if not modules:
         final_html = f"{type_str}\n<h4>No size differences were found</h4>"
     else:
         table_rows = []
         groups = group_modules(modules)
 
         for (platform, py_version), delta_type_groups in sorted(groups.items(), key=lambda x: (x[0][0], x[0][1])):
-            diff = total_diff.get((platform, py_version), 0)
+            diff = total_diff[platform][py_version]
             sign_total = "+" if diff > 0 else ""
             delta_compressed_size = f"{sign_total}{convert_to_human_readable_size(diff)}"
 
-            threshold_bytes = old_size.get((platform, py_version), 0) * threshold_percentage / 100
+            threshold_bytes = baseline_size[platform][py_version] * threshold_percentage / 100
             threshold_sign = "+" if threshold_bytes > 0 else ""
             threshold = f"{threshold_sign}{convert_to_human_readable_size(threshold_bytes)}"
 
@@ -698,10 +562,13 @@ def save_quality_gate_html_table(
             total_removed = f"{sign_removed}{convert_to_human_readable_size(delta_type_groups['Removed']['Total'])}"
             total_modified = f"{sign_modified}{convert_to_human_readable_size(delta_type_groups['Modified']['Total'])}"
 
-            current_size = f"{convert_to_human_readable_size(new_size[(platform, py_version)])}"
-            delta_percentage = (
-                f"{sign_total}{round(total_diff[(platform, py_version)] / old_size[(platform, py_version)] * 100, 2)}%"
+            current_size = f"{convert_to_human_readable_size(commit_size[platform][py_version])}"
+            delta_pct = (
+                total_diff[platform][py_version] / baseline_size[platform][py_version] * 100
+                if baseline_size[platform][py_version] != 0
+                else 0
             )
+            delta_percentage = f"{sign_total}{round(delta_pct, 2)}%"
 
             status = "❌" if diff >= threshold_bytes else "✅"
 
@@ -750,7 +617,7 @@ def save_quality_gate_html_table(
     app.display(f"HTML file saved to {file_path}")
 
 
-def get_html_headers(threshold_percentage: float, old_commit: str, passes_quality_gate: bool) -> str:
+def get_html_headers(threshold_percentage: float, baseline: str, passes_quality_gate: bool) -> str:
     html_headers = (
         "<h2>⛔ Size Quality Gates Not Passed</h2>"
         if not passes_quality_gate
@@ -761,7 +628,7 @@ def get_html_headers(threshold_percentage: float, old_commit: str, passes_qualit
         "These Quality Gates apply only to dependencies and integrations packaged with the Datadog Agent.\n\n"
         f"<strong>Threshold:</strong> {threshold_percentage}% per platform and Python version<br>"
         "<strong>Compared to commit:</strong> "
-        f'<a href="https://github.com/DataDog/integrations-core/commit/{old_commit}">{old_commit[:7]}</a>'
+        f'<a href="https://github.com/DataDog/integrations-core/commit/{baseline}">{baseline[:7]}</a>'
         "</p>"
     )
 
@@ -769,24 +636,24 @@ def get_html_headers(threshold_percentage: float, old_commit: str, passes_qualit
 
 
 def group_modules(
-    modules: list[FileDataEntry],
+    modules: Sizes,
 ) -> dict[tuple[str, str], dict[str, DeltaTypeGroup]]:
     groups: dict[tuple[str, str], dict[str, DeltaTypeGroup]] = {}
 
-    for m in modules:
-        platform_key = (m.get("Platform", ""), m.get("Python_Version", ""))
-        delta_type = m.get("Delta_Type", "")
+    for m in modules.root:
+        platform_key = (m.platform, m.python_version)
+        delta_type = m.delta_type
 
         if platform_key not in groups:
             groups[platform_key] = {
-                "New": {"Modules": [], "Total": 0},
-                "Removed": {"Modules": [], "Total": 0},
-                "Modified": {"Modules": [], "Total": 0},
+                "New": {"Modules": Sizes([]), "Total": 0},
+                "Removed": {"Modules": Sizes([]), "Total": 0},
+                "Modified": {"Modules": Sizes([]), "Total": 0},
             }
 
         if delta_type in groups[platform_key]:
             groups[platform_key][delta_type]["Modules"].append(m)
-            groups[platform_key][delta_type]["Total"] += m.get("Size_Bytes", 0)
+            groups[platform_key][delta_type]["Total"] += m.size_bytes
 
     return groups
 
@@ -803,10 +670,10 @@ def append_html_entry(delta_type_group: DeltaTypeGroup, type: str) -> str:
 
         html += "<th>Percentage</th></tr>\n" if type not in ["Added", "Removed"] else "</tr>\n"
 
-        for e in delta_type_group["Modules"]:
-            html += f"<tr><td>{e.get('Type', '')}</td><td>{e.get('Name', '')}</td><td>{e.get('Version', '')}</td>"
-            html += f"<td>{e.get('Size', '')}</td>"
-            html += f"<td>{e.get('Percentage', '')}%</td></tr>\n" if type not in ["Added", "Removed"] else "</tr>\n"
+        for e in delta_type_group["Modules"].root:
+            html += f"<tr><td>{e.type}</td><td>{e.name}</td><td>{e.version}</td>"
+            html += f"<td>{e.size}</td>"
+            html += f"<td>{e.percentage}%</td></tr>\n" if type not in ["Added", "Removed"] else "</tr>\n"
         html += "</table>\n"
     else:
         html += f"No {type.lower()} dependencies/integrations\n\n"
@@ -817,7 +684,7 @@ def append_html_entry(delta_type_group: DeltaTypeGroup, type: str) -> str:
 def export_format(
     app: Application,
     format: list[str],
-    modules: list[FileDataEntry],
+    modules: Sizes,
     mode: SizeMode,
     platform: str | None,
     py_version: str | None,
@@ -832,20 +699,20 @@ def export_format(
     for output_format in format:
         if output_format == "csv":
             csv_filename = f"{name}.csv"
-            save_csv(app, modules, csv_filename)
+            modules.export_to_csv(app, Path(csv_filename))
 
         elif output_format == "json":
             json_filename = f"{name}.json"
-            save_json(app, json_filename, modules)
+            modules.export_to_json(app, Path(json_filename))
 
         elif output_format == "markdown":
             markdown_filename = f"{name}.md"
-            save_markdown(app, mode.value, modules, markdown_filename)
+            modules.export_to_markdown(app, Path(markdown_filename))
 
 
 def plot_treemap(
     app: Application,
-    modules: list[FileDataEntry],
+    modules: Sizes,
     title: str,
     show: bool,
     mode: SizeMode,
@@ -853,7 +720,7 @@ def plot_treemap(
 ) -> None:
     import matplotlib.pyplot as plt
 
-    if modules == []:
+    if not modules:
         return
 
     # Initialize figure and axis
@@ -889,13 +756,13 @@ def plot_treemap(
 
 
 def plot_status_treemap(
-    modules: list[FileDataEntry] | list[FileDataEntry],
+    modules: Sizes,
 ) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
     import matplotlib.pyplot as plt
     from matplotlib.patches import Patch
 
     # Calculate the area of the rectangles
-    sizes = [mod["Size_Bytes"] for mod in modules]
+    sizes = [mod.size_bytes for mod in modules.root]
     norm_sizes = squarify.normalize_sizes(sizes, 100, 100)
     rects = squarify.squarify(norm_sizes, 0, 0, 100, 100)
 
@@ -906,11 +773,11 @@ def plot_status_treemap(
     # Assign colors based on type and normalized size
     colors = []
     max_area = max(norm_sizes) or 1
-    for mod, area in zip(modules, norm_sizes, strict=False):
+    for mod, area in zip(modules.root, norm_sizes, strict=False):
         intensity = scale_colors_treemap(area, max_area)
-        if mod["Type"] == "Integration":
+        if mod.type == "Integration":
             colors.append(cmap_int(intensity))
-        elif mod["Type"] == "Dependency":
+        elif mod.type == "Dependency":
             colors.append(cmap_dep(intensity))
         else:
             colors.append("#999999")
@@ -923,7 +790,7 @@ def plot_status_treemap(
 
 
 def plot_diff_treemap(
-    modules: list[FileDataEntry] | list[FileDataEntry],
+    modules: Sizes,
 ) -> tuple[list[dict[str, float]], list[tuple[float, float, float, float]], list[Patch]]:
     import matplotlib.pyplot as plt
     from matplotlib.patches import Patch
@@ -933,11 +800,11 @@ def plot_diff_treemap(
     cmap_neg = plt.get_cmap("Blues")
 
     # Separate in negative and positive differences
-    positives = [mod for mod in modules if mod["Size_Bytes"] > 0]
-    negatives = [mod for mod in modules if mod["Size_Bytes"] < 0]
+    positives = [mod for mod in modules.root if mod.size_bytes > 0]
+    negatives = [mod for mod in modules.root if mod.size_bytes < 0]
 
-    sizes_pos = [mod["Size_Bytes"] for mod in positives]
-    sizes_neg = [abs(mod["Size_Bytes"]) for mod in negatives]
+    sizes_pos = [mod.size_bytes for mod in positives]
+    sizes_neg = [abs(mod.size_bytes) for mod in negatives]
 
     sum_pos = sum(sizes_pos)
     sum_neg = sum(sizes_neg)
@@ -959,7 +826,7 @@ def plot_diff_treemap(
 
     # Merge layout and module lists
     rects = rects_neg + rects_pos
-    modules = negatives + positives
+    modules = Sizes(negatives + positives)
 
     # Assign colors based on type and normalized size
     colors = []
@@ -990,7 +857,7 @@ def scale_colors_treemap(area: float, max_area: float) -> float:
 def draw_treemap_rects_with_labels(
     ax: Axes,
     rects: list[dict],
-    modules: list[FileDataEntry] | list[FileDataEntry],
+    modules: Sizes,
     colors: list[tuple[float, float, float, float]],
 ) -> None:
     from matplotlib.patches import Rectangle
@@ -1004,7 +871,7 @@ def draw_treemap_rects_with_labels(
         modules: List of modules associated with each rectangle (same order).
         colors: List of colors for each module (same order).
     """
-    for rect, mod, color in zip(rects, modules, colors, strict=False):
+    for rect, mod, color in zip(rects, modules.root, colors, strict=False):
         x, y, dx, dy = rect["x"], rect["y"], rect["dx"], rect["dy"]
 
         # Draw the rectangle with a white border
@@ -1018,8 +885,8 @@ def draw_treemap_rects_with_labels(
         font_size = max(MIN_FONT_SIZE, min(MAX_FONT_SIZE, AVG_SIDE * FONT_SIZE_SCALE))
 
         # Determine the info for the labels
-        name = mod["Name"]
-        size_str = f"({mod['Size']})"
+        name = mod.name
+        size_str = f"({mod.size})"
 
         # Estimate if there's enough space for text
         CHAR_WIDTH_FACTOR = 0.1  # Width of each character relative to font size
@@ -1063,7 +930,7 @@ def draw_treemap_rects_with_labels(
 
 def send_metrics_to_dd(
     app: Application,
-    modules: list[FileDataEntry],
+    sizes: Sizes,
     org: str | None,
     key: str | None,
     site: str | None,
@@ -1099,22 +966,20 @@ def send_metrics_to_dd(
 
     gauge_type = MetricIntakeType.GAUGE
 
-    sizes: dict[str, dict[str, int]] = {}
-
-    for item in modules:
-        delta_type = item.get('Delta_Type', '')
+    for item in sizes.root:
+        delta_type = item.delta_type
         metrics.append(
             MetricSeries(
                 metric=f"{metric_name}.size_{mode.value}",
                 type=gauge_type,
-                points=[MetricPoint(timestamp=timestamp, value=item["Size_Bytes"])],
+                points=[MetricPoint(timestamp=timestamp, value=item.size_bytes)],
                 tags=[
-                    f"module_name:{item['Name']}",
-                    f"module_type:{item['Type']}",
-                    f"name_type:{item['Type']}({item['Name']})",
-                    f"python_version:{item['Python_Version']}",
-                    f"module_version:{item['Version']}",
-                    f"platform:{item['Platform']}",
+                    f"module_name:{item.name}",
+                    f"module_type:{item.type}",
+                    f"name_type:{item.type}({item.name})",
+                    f"python_version:{item.python_version}",
+                    f"module_version:{item.version}",
+                    f"platform:{item.platform}",
                     "team:agent-integrations",
                     f"compression:{size_type}",
                     f"metrics_version:{METRIC_VERSION}",
@@ -1126,14 +991,14 @@ def send_metrics_to_dd(
             )
         )
         if mode is SizeMode.STATUS:
-            key_count = (item['Platform'], item['Python_Version'])
+            key_count = (item.platform, item.python_version)
             if key_count not in n_integrations:
                 n_integrations[key_count] = 0
             if key_count not in n_dependencies:
                 n_dependencies[key_count] = 0
-            if item['Type'] == 'Integration':
+            if item.type == 'Integration':
                 n_integrations[key_count] += 1
-            elif item['Type'] == 'Dependency':
+            elif item.type == 'Dependency':
                 n_dependencies[key_count] += 1
 
     if mode is SizeMode.STATUS:
@@ -1175,7 +1040,8 @@ def send_metrics_to_dd(
 
     # Format the sizes dictionary into a human-readable summary
     summary_lines = []
-    for platform, py_versions in sizes.items():
+
+    for platform, py_versions in sizes._total_sizes.items():
         for py_version, size_bytes in py_versions.items():
             summary_lines.append(
                 f"Platform: {platform}, Python: {py_version}, Size: "
@@ -1231,10 +1097,10 @@ def get_commit_data(commit: str | None = "") -> tuple[int, str, list[str], list[
     return int(timestamp), message, tickets, prs
 
 
-def get_previous_sizes(app: Application, commit: str, compressed: bool) -> list[FileDataEntry]:
+def get_previous_sizes(app: Application, commit: str, compressed: bool) -> Sizes:
     previous_commit = get_previous_commit(app, commit)
     if not previous_commit:
-        return []
+        return Sizes([])
     app.display(f"previous commit: {previous_commit}")
     return get_status_sizes_from_commit(app, previous_commit, compressed)
 
@@ -1250,13 +1116,14 @@ def artifact_exists(app: Application, commit: str, artifact_name: str, workflow:
             f'repos/DataDog/integrations-core/actions/runs/{run_id}/artifacts',
             '--jq',
             f'.artifacts[] | select(.name == "{artifact_name}")',
-        ]
+        ],
+        capture_output=True,
     )
-    return result.stdout is not None
+    return bool(result.stdout.decode('utf-8').strip())
 
 
 @cache
-def get_previous_commit(app: Application, commit: str) -> str | None:
+def get_previous_commit(app: Application, commit: str) -> str:
     try:
         base_commit = app.repo.git.merge_base(commit, "origin/master")
         if base_commit != commit:
@@ -1270,19 +1137,21 @@ def get_previous_commit(app: Application, commit: str) -> str | None:
             app.display_error("No previous commit found")
         else:
             app.display_error(f"Failed to get previous commit: {e}")
-        return None
+        return ""
 
 
-def get_dep_sizes(app: Application, current_commit: str, platform: str, py_version: str) -> dict[str, DependencyEntry]:
-    '''
+def get_dep_sizes(app: Application, current_commit: str, platform: str, py_version: str, compressed: bool) -> Sizes:
+    """
     Gets the dependency sizes json for a given commit and platform when dependencies were resolved.
-    '''
+    """
     run_id = get_run_id(app, current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
     if run_id:
-        dep_sizes_json = get_current_sizes_json(app, run_id, platform, py_version)
-        return json.loads(dep_sizes_json.read_text()) if dep_sizes_json else {}
-    else:
-        return {}
+        dep_sizes_json_path = get_current_sizes_json(app, run_id, platform, py_version)
+        if dep_sizes_json_path:
+            dependency_sizes = json.loads(dep_sizes_json_path.read_text())
+            return get_dependencies_from_artifact(dependency_sizes, platform, py_version, compressed)
+
+    return Sizes([])
 
 
 @cache
@@ -1362,7 +1231,6 @@ def get_current_sizes_json(app: Application, run_id: str, platform: str, py_vers
 
 @cache
 def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: str | None = None) -> Path | None:
-    app.display(f"Downloading artifact '{artifact_name}' (run {run_id})...")
     try:
         cmd = [
             'gh',
@@ -1391,57 +1259,23 @@ def get_status_sizes_from_commit(
     app: Application,
     commit: str,
     compressed: bool,
-) -> list[FileDataEntry]:
+) -> Sizes:
     '''
     Gets the sizes json for a given commit from the measure disk usage workflow.
     '''
     with tempfile.TemporaryDirectory() as tmpdir:
         if (run_id := get_run_id(app, commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
-            return []
+            return Sizes([])
 
         artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'
         sizes_json = get_artifact(app, run_id, artifact_name, tmpdir)
 
         if not sizes_json:
             app.display_error(f"No dependency sizes found in commit {commit}\n")
-            return []
+            return Sizes([])
 
-        sizes_list: list[FileDataEntry] = list(json.loads(sizes_json.read_text()))
-        return sizes_list
-
-
-def filter_sizes_json(sizes_json: Path, platform: str, py_version: str) -> list[FileDataEntry]:
-    '''
-    Filters the sizes json for a given platform and python version.
-    '''
-    sizes_list: list[FileDataEntry] = list(json.loads(sizes_json.read_text()))
-    return [size for size in sizes_list if size["Platform"] == platform and size["Python_Version"] == py_version]
-
-
-def parse_dep_sizes(
-    sizes_list: list[FileDataEntry],
-    platform: str,
-    py_version: str,
-    compressed: bool,
-) -> dict[str, DependencyEntry]:
-    '''
-    Parses the dependency sizes json for a given platform and python version.
-    '''
-    sizes: dict[str, DependencyEntry] = {}
-    for dep in sizes_list:
-        if (
-            dep.get("Type") == "Dependency"
-            and dep.get("Platform") == platform
-            and dep.get("Python_Version") == py_version
-        ):
-            name = dep["Name"]
-            entry: DependencyEntry = {"version": dep.get("Version", "")}
-            if compressed:
-                entry["compressed"] = int(dep["Size_Bytes"])
-            else:
-                entry["uncompressed"] = int(dep["Size_Bytes"])
-            sizes[name] = entry
-    return sizes
+        sizes_list = list(json.loads(sizes_json.read_text()))
+        return Sizes([Size(**size) for size in sizes_list])
 
 
 class WrongDependencyFormat(Exception):
@@ -1549,3 +1383,106 @@ class GitRepo:
     ) -> None:
         if self.repo_dir and os.path.exists(self.repo_dir):
             shutil.rmtree(self.repo_dir)
+
+
+# Export format
+def save_json(
+    app: Application,
+    file_path: str,
+    modules: (list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta]),
+) -> None:
+    if modules == []:
+        return
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(modules, f, default=str, indent=2)
+    app.display(f"JSON file saved to {file_path}")
+
+
+def save_csv(
+    app: Application,
+    modules: list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
+    file_path: str,
+) -> None:
+    if modules == []:
+        return
+
+    headers = [k for k in modules[0].keys() if k not in ["Size", "Delta"]]
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(",".join(headers) + "\n")
+
+        for row in modules:
+            f.write(",".join(format(str(row.get(h, ""))) for h in headers) + "\n")
+
+    app.display(f"CSV file saved to {file_path}")
+
+
+def format(s: str) -> str:
+    """
+    Wraps the string in double quotes if it contains a comma, for safe CSV formatting.
+    """
+    return f'"{s}"' if "," in s else s
+
+
+def save_markdown(
+    app: Application,
+    title: str,
+    modules: list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
+    file_path: str,
+) -> None:
+    if modules == []:
+        return
+
+    headers = [k for k in modules[0].keys() if "Bytes" not in k]
+
+    # Group modules by platform and version
+    grouped_modules = {(modules[0].get("Platform", ""), modules[0].get("Python_Version", "")): [modules[0]]}
+    for module in modules[1:]:
+        platform = module.get("Platform", "")
+        version = module.get("Python_Version", "")
+        key = (platform, version)
+        if key not in grouped_modules:
+            grouped_modules[key] = []
+        if any(str(value).strip() not in ("", "0", "0001-01-01") for value in module.values()):
+            grouped_modules[key].append(module)
+
+    lines = []
+    lines.append(f"# {title}")
+    lines.append("")
+
+    for (platform, version), group in grouped_modules.items():
+        if platform and version:
+            lines.append(f"## Platform: {platform}, Python Version: {version}")
+
+        lines.append("")
+        lines.append("| " + " | ".join(headers) + " |")
+        lines.append("| " + " | ".join("---" for _ in headers) + " |")
+        for row in group:
+            lines.append("| " + " | ".join(str(row.get(h, "")) for h in headers) + " |")
+        lines.append("")
+
+    markdown = "\n".join(lines)
+
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(markdown)
+    app.display(f"Markdown table saved to {file_path}")
+
+
+def print_table(
+    app: Application,
+    mode: str,
+    modules: list[CommitEntryWithDelta] | list[CommitEntryPlatformWithDelta],
+) -> None:
+    if modules == []:
+        return
+
+    columns = [col for col in modules[0].keys() if "Bytes" not in col]
+    modules_table: dict[str, dict[int, str]] = {col: {} for col in columns}
+    for i, row in enumerate(modules):
+        if row.get("Size_Bytes") == 0:
+            continue
+        for key in columns:
+            modules_table[key][i] = str(row.get(key, ""))
+
+    app.display_table(mode, modules_table)

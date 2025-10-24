@@ -14,7 +14,6 @@ def common_params(func: Callable) -> Callable:
     @click.option("--compressed", is_flag=True, help="Measure compressed size")
     @click.option(
         "--format",
-        show_default=True,
         help=f"Format of the output (comma-separated values: {', '.join(VALID_FORMATS)})",
         callback=validate_format,
     )
@@ -37,7 +36,8 @@ def common_params(func: Callable) -> Callable:
 
 
 def validate_format(_, __, format: str) -> list[str]:
-    format_list = format.split(",") if format else []
+    format_list = [f.strip() for f in format.split(",")] if format else []
+
     if unsupported_formats := set(format_list) - set(VALID_FORMATS):
         raise click.BadParameter(
             f"Invalid format: {', '.join(unsupported_formats)}. Only {', '.join(VALID_FORMATS)} are supported."
