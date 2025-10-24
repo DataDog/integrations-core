@@ -2,15 +2,28 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from io import StringIO
-from datadog_checks.dev.tooling.configuration.constants import OPENAPI_SCHEMA_PROPERTIES
 
 import yaml
 
+from datadog_checks.dev.tooling.configuration.constants import OPENAPI_SCHEMA_PROPERTIES
+
 ALLOWED_OPTION_FIELDS = {
-    'name', 'description', 'required', 'hidden', 'display_priority',
-    'deprecation', 'multiple', 'multiple_instances_defined', 'metadata_tags',
-    'options', 'value', 'secret', 'enabled', 'example',
-    'template', 'overrides'
+    'name',
+    'description',
+    'required',
+    'hidden',
+    'display_priority',
+    'deprecation',
+    'multiple',
+    'multiple_instances_defined',
+    'metadata_tags',
+    'options',
+    'value',
+    'secret',
+    'enabled',
+    'example',
+    'template',
+    'overrides',
 }
 ALLOWED_VALUE_FIELDS = OPENAPI_SCHEMA_PROPERTIES | {'example', 'display_default', 'compact_example'}
 DESCRIPTION_LINE_LENGTH_LIMIT = 120
