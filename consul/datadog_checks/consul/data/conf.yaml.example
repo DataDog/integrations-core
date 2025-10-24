@@ -54,7 +54,7 @@ instances:
 
     ## @param disable_legacy_service_tag - boolean - optional - default: false
     ## Whether to stop submitting the `service` tag, which has been renamed to `consul_service`, and to disable 
-    ## the associated deprecation warning. Datadog recommends setting this to `true` to avoid confusion.
+    ## the associated deprecation warning. Datadog recommends setting this to `true`.
     #
     disable_legacy_service_tag: true
 
