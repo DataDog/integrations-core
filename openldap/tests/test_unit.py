@@ -6,7 +6,6 @@ import os
 
 import ldap3
 import pytest
-
 from datadog_checks.base.errors import CheckException
 
 from .common import HERE
@@ -315,7 +314,7 @@ def test_custom_query_search_scope_default(check, mocker):
     check._perform_custom_queries(conn_mock, queries, tags, instance)
 
     conn_mock.search.assert_called_once_with(
-        "ou=users,dc=example,dc=com", "(objectClass=person)", search_scope=DEFAULT_SEARCH_SCOPE, attributes=None
+        "ou=users,dc=example,dc=com", "(objectClass=person)", search_scope=ldap3.SUBTREE, attributes=None
     )
 
 
