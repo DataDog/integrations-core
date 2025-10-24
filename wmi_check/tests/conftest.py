@@ -4,6 +4,7 @@
 
 import pytest
 from mock import patch
+from unittest.mock import MagicMock
 
 from datadog_checks.wmi_check import WMICheck
 
@@ -73,3 +74,34 @@ def mock_disk_sampler():
 
     with patch("datadog_checks.wmi_check.WMICheck._get_running_wmi_sampler", return_value=sampler):
         yield
+
+
+@pytest.fixture
+def mock_sampler_with_tag_queries():
+    # Main sampler with IDProcess for tag queries
+    main_wmi_objects = [
+        {
+            "IOReadBytesPerSec": 20455,
+            "IDProcess": 1234,
+            "ThreadCount": 4,
+            "VirtualBytes": 3811,
+            "PercentProcessorTime": 5,
+        }
+    ]
+    main_property_names = ["ThreadCount", "IOReadBytesPerSec", "VirtualBytes", "PercentProcessorTime", "IDProcess"]
+    main_sampler = MockSampler(main_wmi_objects, main_property_names)
+    main_sampler.class_name = 'Win32_PerfFormattedData_PerfProc_Process'
+
+    # Tag query sampler for process names
+    tag_wmi_objects = [{'Name': 'chrome.exe'}]
+    tag_property_names = ['Name']
+    tag_sampler = MockSampler(tag_wmi_objects, tag_property_names)
+    tag_sampler.class_name = 'Win32_Process'
+    tag_sampler.sample()  # Populate the mock data
+
+    with patch("datadog_checks.wmi_check.WMICheck._get_running_wmi_sampler", return_value=main_sampler):
+        with patch("datadog_checks.base.checks.win.wmi.base.WMISampler") as mock_wmi_sampler:
+            # Setup context manager to return tag_sampler for tag queries
+            mock_wmi_sampler.return_value.__enter__ = MagicMock(return_value=tag_sampler)
+            mock_wmi_sampler.return_value.__exit__ = MagicMock(return_value=False)
+            yield
