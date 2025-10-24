@@ -7,7 +7,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, TypedDict
 
-import orjson as json
+from datadog_checks.base.utils.format.json import json
 
 from .utils import now_ms
 
@@ -134,6 +134,7 @@ class SchemaCollector(ABC):
             "kind": self.kind,
             "agent_version": datadog_agent.get_version(),
             "collection_interval": self._config.collection_interval,
+            "dbms": self._dbms,
             "dbms_version": str(self._check.dbms_version),
             "tags": self._check.tags,
             "cloud_metadata": self._check.cloud_metadata,
