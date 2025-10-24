@@ -76,7 +76,7 @@ files:
             value:
               type: boolean
               example: false
-            default: false
+              display_default: false
           - name: database_identifier
             description: |
               Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
@@ -101,7 +101,6 @@ files:
                   - port: The port number of the instance.
                   - mysql_sock: The socket path of the instance.
                   In addition, you can use any key from the `tags` section of the configuration.
-                default: "$resolved_hostname"
           - name: sock
             description: |
               Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).

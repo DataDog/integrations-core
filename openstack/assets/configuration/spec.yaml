@@ -26,7 +26,7 @@ files:
              Nova API version to use - this check supports `v2` and `v2.1`.
             value:
               example: v2.1
-              default_value: v2.1
+              display_default: v2.1
               type: string
           - name: hypervisor_ids
             description: |
