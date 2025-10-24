@@ -52,6 +52,12 @@ instances:
     #
   - url: http://localhost:8500
 
+    ## @param disable_legacy_service_tag - boolean - optional - default: false
+    ## Whether to stop submitting the `service` tag, which has been renamed to `consul_service`, and to disable 
+    ## the associated deprecation warning. Datadog recommends setting this to `true` to avoid confusion.
+    #
+    disable_legacy_service_tag: true
+
     ## @param use_prometheus_endpoint - boolean - optional - default: false
     ## Whether to use the Prometheus endpoint to get more metrics.
     ## The Prometheus endpoint is available for Consul versions v1.1.0 or higher.
@@ -135,12 +141,6 @@ instances:
     ## Increase the number of threads to collect consul services checks.
     #
     # threads_count: 1
-
-    ## @param disable_legacy_service_tag - boolean - optional - default: false
-    ## Whether or not to stop submitting the tag `service` that has been renamed
-    ## to `consul_service` and disable the associated deprecation warning.
-    #
-    disable_legacy_service_tag: true
 
     ## @param collect_health_checks - boolean - optional - default: false
     ## Whether to enable new service health checks from this instance. Enabling this will
