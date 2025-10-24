@@ -110,7 +110,7 @@ class Disk(AgentCheck):
         self.devices_label = {}
 
     def check(self, _):
-        """Get disk space/inode stats"""
+        """Get disk space/inode stats dummy"""
         if self._tag_by_label and Platform.is_linux():
             self.devices_label = self._get_devices_label()
 
