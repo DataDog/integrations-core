@@ -7,7 +7,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, TypedDict
 
-from datadog_checks.base.utils.format.json import json
+from datadog_checks.base.utils.serialization import json
 
 from .utils import now_ms
 
