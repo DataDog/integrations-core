@@ -165,7 +165,10 @@ class OpenLDAP(AgentCheck):
             search_scope = self.SEARCH_SCOPE_MAPPING.get(search_scope_str)
 
             if search_scope is None:
-                self.log.error("`search_scope` field needs to be one of 'base', 'level' or 'subtree'. Value provided: '%s'", search_scope_str)
+                self.log.error(
+                    "`search_scope` field needs to be one of 'base', 'level' or 'subtree'. Value provided: '%s'",
+                    search_scope_str,
+                )
                 continue
             if "username" in query:
                 username = query.get("username")

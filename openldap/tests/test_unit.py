@@ -261,7 +261,7 @@ def test__perform_custom_queries(check, mocker):
         ("BASE", ldap3.BASE),
         ("LEVEL", ldap3.LEVEL),
         ("SUBTREE", ldap3.SUBTREE),
-    ]
+    ],
 )
 def test_custom_query_search_scope_valid(check, mocker, search_scope_str, expected_scope):
     """Test that valid search_scope parameters are properly converted"""
