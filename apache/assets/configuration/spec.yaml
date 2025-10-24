@@ -10,6 +10,7 @@ files:
     options:
     - name: apache_status_url
       required: true
+      display_priority: 2
       description: Status url of your Apache server.
       value:
         example: http://localhost/server-status?auto
@@ -17,7 +18,7 @@ files:
     - template: instances/http
     - template: instances/default
       overrides:
-        disable_generic_tags.display_priority: 2
+        disable_generic_tags.display_priority: 1
         disable_generic_tags.hidden: False
         disable_generic_tags.enabled: True
         disable_generic_tags.description: |
