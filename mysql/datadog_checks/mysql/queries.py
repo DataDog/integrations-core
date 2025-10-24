@@ -254,7 +254,6 @@ QUERY_ERRORS_RAISED = {
             SUM_ERROR_RAISED > 0
             AND ERROR_NUMBER IS NOT NULL
             AND ERROR_NAME IS NOT NULL
-            AND USER != '{user}'
             AND NOT (ERROR_NAME = 'ER_NO_SYSTEM_TABLE_ACCESS' AND USER = '{user}')
         GROUP BY ERROR_NUMBER, ERROR_NAME
     """.strip(),
