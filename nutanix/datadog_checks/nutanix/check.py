@@ -76,7 +76,7 @@ class NutanixCheck(AgentCheck):
                     continue
 
                 self._process_cluster(cluster)
-                self._process_nodes(cluster)
+                self._process_hosts(cluster)
 
         except Exception as e:
             self.log.exception("Error collecting cluster metrics: %s", e)
@@ -104,7 +104,7 @@ class NutanixCheck(AgentCheck):
         inefficient_vm_count = int(cluster.get("inefficientVmCount", 0))
 
         self.gauge("cluster.count", 1, tags=cluster_tags)
-        self.gauge("cluster.node.count", nbr_nodes, tags=cluster_tags)
+        self.gauge("cluster.nbr_nodes", nbr_nodes, tags=cluster_tags)
         self.gauge("cluster.vm.count", vm_count, tags=cluster_tags)
         self.gauge("cluster.vm.inefficient_count", inefficient_vm_count, tags=cluster_tags)
 
@@ -122,20 +122,20 @@ class NutanixCheck(AgentCheck):
                 if value is not None:
                     self.gauge(metric_name, value, tags=cluster_tags)
 
-    def _process_nodes(self, cluster):
-        """Process and report metrics for all nodes in a cluster."""
+    def _process_hosts(self, cluster):
+        """Process and report metrics for all hosts in a cluster."""
         cluster_id = cluster.get("extId", "unknown")
         cluster_tags = self.base_tags + self._extract_cluster_tags(cluster)
 
-        nodes = self._get_nodes_by_cluster(cluster_id)
-        for node in nodes:
-            node_id = node.get("extId")
-            node_tags = cluster_tags + self._extract_node_tags(node)
-            self.gauge("node.count", 1, tags=node_tags)
+        hosts = self._get_hosts_by_cluster(cluster_id)
+        for host in hosts:
+            host_id = host.get("extId")
+            host_tags = cluster_tags + self._extract_host_tags(host)
+            self.gauge("host.count", 1, tags=host_tags)
 
-            stats = self._get_node_stats(cluster_id, node_id)
+            stats = self._get_host_stats(cluster_id, host_id)
             if not stats:
-                self.log.debug("No host stats returned for node %s", node_id)
+                self.log.debug("No host stats returned for host %s", host_id)
                 continue
 
             for key, metric_name in HOST_STATS_METRICS.items():
@@ -143,26 +143,26 @@ class NutanixCheck(AgentCheck):
                 for entry in entries:
                     value = entry.get("value")
                     if value is not None:
-                        self.gauge(metric_name, value, tags=node_tags)
+                        self.gauge(metric_name, value, tags=host_tags)
 
-    def _extract_node_tags(self, node):
-        """Extract tags from a node object."""
+    def _extract_host_tags(self, host):
+        """Extract tags from a host object."""
         tags = []
 
-        if tenant_id := node.get("tenantId"):
+        if tenant_id := host.get("tenantId"):
             tags.append(f"ntnx_tenant_id:{tenant_id}")
 
-        if node_id := node.get("extId"):
-            tags.append(f"ntnx_node_id:{node_id}")
+        if host_id := host.get("extId"):
+            tags.append(f"ntnx_host_id:{host_id}")
 
-        if host_name := node.get("hostName"):
+        if host_name := host.get("hostName"):
             tags.append(f"ntnx_host_name:{host_name}")
 
-        if host_type := node.get("hostType"):
+        if host_type := host.get("hostType"):
             tags.append(f"ntnx_host_type:{host_type}")
 
         # Handle nested hypervisor tags
-        hypervisor = node.get("hypervisor", {})
+        hypervisor = host.get("hypervisor", {})
         if hypervisor_name := hypervisor.get("fullName"):
             tags.append(f"ntnx_hypervisor_name:{hypervisor_name}")
         if hypervisor_type := hypervisor.get("type"):
@@ -200,8 +200,8 @@ class NutanixCheck(AgentCheck):
         """Fetch all clusters from Prism Central."""
         return self._get_request_data("api/clustermgmt/v4.0/config/clusters")
 
-    def _get_nodes_by_cluster(self, cluster_id: str):
-        """Fetch all nodes/hosts for a specific cluster."""
+    def _get_hosts_by_cluster(self, cluster_id: str):
+        """Fetch all hosts/hosts for a specific cluster."""
         return self._get_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
 
     def _get_cluster_stats(self, cluster_id: str):
@@ -224,9 +224,9 @@ class NutanixCheck(AgentCheck):
 
         return self._get_request_data(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}", params=params)
 
-    def _get_node_stats(self, cluster_id: str, host_id: str):
+    def _get_host_stats(self, cluster_id: str, host_id: str):
         """
-        Fetch time-series stats for a specific host/node.
+        Fetch time-series stats for a specific host/host.
         """
         start_time, end_time = self._calculate_stats_time_window()
 
