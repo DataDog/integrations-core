@@ -10,13 +10,12 @@ Integrate Trend Micro Cloud One with Datadog to gain insights into endpoint and 
 
 ## Setup
 
-### Log Collection Overview
-
-**Note**: To collect all log types, you must configure both log collection methods.
 
 ### Log Collection Overview
 
 The Trend Micro Cloud One integration collects logs using two methods: Agent and Event Forwarder Configuration, and File Storage Security API Configuration.
+
+**Note**: To collect all log types, you must configure both log collection methods.
 
 #### 1. [Agent and Event Forwarder Configuration][8]
 
