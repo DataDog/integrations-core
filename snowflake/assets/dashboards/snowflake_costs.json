@@ -224,7 +224,7 @@
     {
       "id": 7301983152878516,
       "definition": {
-        "title": "Overview",
+        "title": "Cost Overview",
         "background_color": "vivid_green",
         "show_title": true,
         "type": "group",
@@ -1029,5 +1029,6 @@
   ],
   "layout_type": "ordered",
   "notify_list": [],
-  "reflow_type": "fixed"
+  "reflow_type": "fixed",
+  "pause_auto_refresh": false
 }

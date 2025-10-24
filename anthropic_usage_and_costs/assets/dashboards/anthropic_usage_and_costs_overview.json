@@ -222,6 +222,230 @@
       }
     },
     {
+      "id": 4,
+      "definition": {
+        "title": "Cost Overview",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 407,
+            "definition": {
+              "type": "note",
+              "content": "**Model Cost Efficiency**: Each Claude model has different pricing tiers. Opus models are premium but offer highest quality, Sonnet provides balanced cost-performance, and Haiku is most economical. Analyze cost per task completion to determine optimal model selection for different use cases.\n\nIn Datadog, set up cost alerts and use [Cloud Cost Management](https://app.datadoghq.com/cost) to manage your costs. These tools will help you implement usage quotas to prevent unexpected expenses. Consider implementing tiered access controls where premium models require additional approval. Regular cost reviews help identify trends and anomalies before they impact budgets significantly.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "bottom"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 3
+            }
+          },
+          {
+            "id": 401,
+            "definition": {
+              "title": "Daily Costs by Model (30 Days)",
+              "show_legend": false,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$token_type,$organization_name,$model,$user_name,$email} by {model_name}.rollup(sum, daily)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 9,
+              "height": 3
+            }
+          },
+          {
+            "id": 403,
+            "definition": {
+              "title": "Cost Distribution by Workspace and Model (30 Days)",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {workspace_name,model}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 404,
+            "definition": {
+              "title": "Cost Breakdown by Token Type (30 Days)",
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {token_type,model_name,workspace_name}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "alias": "Cost ($)",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 405,
+            "definition": {
+              "time": {
+                "type": "live",
+                "unit": "month",
+                "value": 1,
+                "hide_incomplete_cost_data": true
+              },
+              "title": "Cost Visualization by Model and Workspace (30 Days)",
+              "type": "treemap",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "cloud_cost",
+                      "name": "query1",
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {model,workspace_name}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 409,
+            "definition": {
+              "type": "note",
+              "content": "**Cost Optimizations**: \nUnderstanding your primary cost drivers helps optimize spending. Input tokens typically cost less than output tokens, while cache operations offer significant savings. Monitor the distribution of costs across different token types to identify optimization opportunities.\n\nImplement prompt optimization to reduce token usage, use appropriate models for each task, leverage caching for repeated contexts, and [batching high volume requests](https://docs.anthropic.com/en/docs/build-with-claude/batch-processing). Consider implementing a routing layer that automatically selects the most cost-effective model based on task requirements.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "show_tick": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 14,
+              "width": 12,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 12,
+        "height": 17
+      }
+    },
+    {
       "id": 2,
       "definition": {
         "title": "Token Usage",
@@ -592,233 +816,9 @@
       },
       "layout": {
         "x": 0,
-        "y": 2,
+        "y": 19,
         "width": 12,
         "height": 10
-      }
-    },
-    {
-      "id": 4,
-      "definition": {
-        "title": "Cost Analysis",
-        "background_color": "vivid_green",
-        "show_title": true,
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 407,
-            "definition": {
-              "type": "note",
-              "content": "**Model Cost Efficiency**: Each Claude model has different pricing tiers. Opus models are premium but offer highest quality, Sonnet provides balanced cost-performance, and Haiku is most economical. Analyze cost per task completion to determine optimal model selection for different use cases.\n\nIn Datadog, set up cost alerts and use [Cloud Cost Management](https://app.datadoghq.com/cost) to manage your costs. These tools will help you implement usage quotas to prevent unexpected expenses. Consider implementing tiered access controls where premium models require additional approval. Regular cost reviews help identify trends and anomalies before they impact budgets significantly.",
-              "background_color": "green",
-              "font_size": "14",
-              "text_align": "left",
-              "show_tick": false,
-              "tick_pos": "50%",
-              "tick_edge": "bottom"
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 3,
-              "height": 3
-            }
-          },
-          {
-            "id": 401,
-            "definition": {
-              "title": "Daily Costs by Model (30 Days)",
-              "show_legend": false,
-              "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "time": {
-                "type": "live",
-                "unit": "month",
-                "value": 1,
-                "hide_incomplete_cost_data": true
-              },
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$token_type,$organization_name,$model,$user_name,$email} by {model_name}.rollup(sum, daily)"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ],
-              "yaxis": {
-                "include_zero": true,
-                "scale": "linear"
-              }
-            },
-            "layout": {
-              "x": 3,
-              "y": 0,
-              "width": 9,
-              "height": 3
-            }
-          },
-          {
-            "id": 403,
-            "definition": {
-              "title": "Cost Distribution by Workspace and Model (30 Days)",
-              "time": {
-                "type": "live",
-                "unit": "month",
-                "value": 1,
-                "hide_incomplete_cost_data": true
-              },
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {workspace_name,model}"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ]
-                }
-              ],
-              "type": "sunburst",
-              "legend": {
-                "type": "automatic"
-              }
-            },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 12,
-              "height": 4
-            }
-          },
-          {
-            "id": 404,
-            "definition": {
-              "title": "Cost Breakdown by Token Type (30 Days)",
-              "time": {
-                "type": "live",
-                "unit": "month",
-                "value": 1,
-                "hide_incomplete_cost_data": true
-              },
-              "type": "query_table",
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {token_type,model_name,workspace_name}"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "formulas": [
-                    {
-                      "alias": "Cost ($)",
-                      "formula": "query1"
-                    }
-                  ]
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 7,
-              "width": 12,
-              "height": 3
-            }
-          },
-          {
-            "id": 405,
-            "definition": {
-              "time": {
-                "type": "live",
-                "unit": "month",
-                "value": 1,
-                "hide_incomplete_cost_data": true
-              },
-              "title": "Cost Visualization by Model and Workspace (30 Days)",
-              "type": "treemap",
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "data_source": "cloud_cost",
-                      "name": "query1",
-                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {model,workspace_name}"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "style": {
-                    "palette": "classic"
-                  },
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ]
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 10,
-              "width": 12,
-              "height": 4
-            }
-          },
-          {
-            "id": 409,
-            "definition": {
-              "type": "note",
-              "content": "**Cost Optimizations**: \nUnderstanding your primary cost drivers helps optimize spending. Input tokens typically cost less than output tokens, while cache operations offer significant savings. Monitor the distribution of costs across different token types to identify optimization opportunities.\n\nImplement prompt optimization to reduce token usage, use appropriate models for each task, leverage caching for repeated contexts, and [batching high volume requests](https://docs.anthropic.com/en/docs/build-with-claude/batch-processing). Consider implementing a routing layer that automatically selects the most cost-effective model based on task requirements.",
-              "background_color": "green",
-              "font_size": "14",
-              "text_align": "left",
-              "show_tick": false
-            },
-            "layout": {
-              "x": 0,
-              "y": 14,
-              "width": 12,
-              "height": 2
-            }
-          }
-        ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 12,
-        "width": 12,
-        "height": 17
       }
     },
     {
@@ -1009,7 +1009,7 @@
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
-              "show_tick": true,
+              "show_tick": false,
               "tick_pos": "50%",
               "tick_edge": "bottom"
             },
@@ -2049,7 +2049,7 @@
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
-              "show_tick": true,
+              "show_tick": false,
               "tick_pos": "50%",
               "tick_edge": "bottom"
             },
@@ -2068,7 +2068,7 @@
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
-              "show_tick": true,
+              "show_tick": false,
               "tick_pos": "50%",
               "tick_edge": "bottom"
             },
@@ -2276,5 +2276,6 @@
   ],
   "layout_type": "ordered",
   "notify_list": [],
-  "reflow_type": "fixed"
+  "reflow_type": "fixed",
+  "pause_auto_refresh": false
 }
