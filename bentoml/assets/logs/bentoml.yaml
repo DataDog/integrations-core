@@ -48,8 +48,3 @@ pipeline:
       enabled: true
       sources:
         - level
-    - type: message-remapper
-      name: Define `msg` as the official message of the log
-      enabled: true
-      sources:
-        - 
