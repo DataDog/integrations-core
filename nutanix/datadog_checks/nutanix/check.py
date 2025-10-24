@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS
 
 
@@ -43,6 +43,7 @@ class NutanixCheck(AgentCheck):
             return
 
         self._collect_cluster_metrics()
+        self._collect_vm_metrics()
 
     def _check_health(self):
         try:
@@ -81,6 +82,20 @@ class NutanixCheck(AgentCheck):
         except Exception as e:
             self.log.exception("Error collecting cluster metrics: %s", e)
 
+    def _collect_vm_metrics(self):
+        """Collect metrics from all Nutanix vms."""
+        try:
+            vms = self._get_vms()
+            if not vms:
+                self.log.warning("No vms found")
+                return
+
+            for vm in vms:
+                self._process_vm(vm)
+
+        except Exception as e:
+            self.log.exception("Error collecting cluster metrics: %s", e)
+
     def _is_prism_central_cluster(self, cluster):
         """Check if cluster is a Prism Central cluster (should be skipped)."""
         cluster_function = cluster.get("config", {}).get("clusterFunction", [])
@@ -91,11 +106,18 @@ class NutanixCheck(AgentCheck):
         cluster_id = cluster.get("extId", "unknown")
         cluster_tags = self.base_tags + self._extract_cluster_tags(cluster)
 
-        # Report basic cluster metrics
         self._report_cluster_basic_metrics(cluster, cluster_tags)
-
-        # Report time-series stats
         self._report_cluster_stats(cluster_id, cluster_tags)
+
+    def _process_vm(self, vm):
+        """Process and report metrics for a single vm."""
+        vm_tags = self.base_tags + self._extract_vm_tags(vm)
+
+        self._report_vm_basic_metrics(vm, vm_tags)
+
+    def _report_vm_basic_metrics(self, vm, vm_tags):
+        """Report basic vm metrics (counts)."""
+        self.gauge("vm.count", 1, tags=vm_tags)
 
     def _report_cluster_basic_metrics(self, cluster, cluster_tags):
         """Report basic cluster metrics (counts)."""
@@ -188,6 +210,49 @@ class NutanixCheck(AgentCheck):
 
         return tags
 
+    def _extract_vm_tags(self, vm):
+        """Extract tags from a VM object."""
+        vm_tags = []
+        vm_id = vm.get("extId")
+        if vm_id:
+            vm_tags.append(f"ntnx_vm_id:{vm_id}")
+
+        vm_name = vm.get("name")
+        if vm_name:
+            vm_tags.append(f"ntnx_vm_name:{vm_name}")
+
+        vm_generation_uuid = vm.get("generationUuid")
+        if vm_generation_uuid:
+            vm_tags.append(f"ntnx_generation_uuid:{vm_generation_uuid}")
+
+        categories = vm.get("categories")
+        if categories:
+            for c in categories:
+                category_id = c.get("extId")
+                vm_tags.append(f"ntnx_category_id:{category_id}")
+
+        owner_id = vm.get("ownershipInfo", {}).get("owner", {}).get("extId")
+        if owner_id:
+            vm_tags.append(f"ntnx_owner_id:{owner_id}")
+
+        host_id = vm.get("host", {}).get("extId")
+        if host_id:
+            vm_tags.append(f"ntnx_host_id:{host_id}")
+
+        cluster_id = vm.get("cluster", {}).get("extId")
+        if cluster_id:
+            vm_tags.append(f"ntnx_cluster_id:{cluster_id}")
+
+        availability_zone_id = vm.get("availabilityZone", {}).get("extId")
+        if availability_zone_id:
+            vm_tags.append(f"ntnx_availability_zone_id:{availability_zone_id}")
+
+        is_agent_vm = is_affirmative(vm.get("isAgentVm"))
+        if is_agent_vm:
+            vm_tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
+
+        return vm_tags
+
     def _get_request_data(self, endpoint, params=None):
         """Make an API request to Prism Central and return the data field."""
         url = f"{self.base_url}/{endpoint}"
@@ -199,6 +264,10 @@ class NutanixCheck(AgentCheck):
     def _get_clusters(self):
         """Fetch all clusters from Prism Central."""
         return self._get_request_data("api/clustermgmt/v4.0/config/clusters")
+
+    def _get_vms(self):
+        """Fetch all clusters from Prism Central."""
+        return self._get_request_data("api/vmm/v4.0/ahv/config/vms")
 
     def _get_hosts_by_cluster(self, cluster_id: str):
         """Fetch all hosts/hosts for a specific cluster."""
