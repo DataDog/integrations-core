@@ -1796,7 +1796,7 @@ def test_invalid_option_level_fields():
     
     assert "invalid_option_field" in errors[0]
     assert "another_bad_option_field" in errors[0]
-    assert "option level" in errors[0].lower()
+    assert "option-level" in errors[0].lower()
 
 def test_valid_option_level_fields():
     consumer = get_example_consumer(
@@ -1855,7 +1855,7 @@ def test_invalid_value_level_fields():
     
     assert "invalid_value_field" in errors[0]
     assert "another_bad_value_field" in errors[0]
-    assert "value level" in errors[0].lower()
+    assert "value-level" in errors[0].lower()
 
 
 def test_valid_value_level_fields():
