@@ -134,7 +134,7 @@ def test_proxy_env_vars_override_skip_fail(mock_requests_get: mock.MagicMock, ur
     http = RequestsWrapper(instance, init_config)
 
     with EnvVars({env_var: 'http://1.2.3.4:567'}):
-        http.get('http://www.google.com', timeout=1, proxies=None)
+        http.get(url, timeout=1, proxies=None)
         actual_proxies = mock_requests_get.call_args[1]['proxies']
 
         # Even with skip true, we ignore it to call get with the proxies supplied to the get method
