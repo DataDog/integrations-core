@@ -10,16 +10,47 @@ Integrate Trend Micro Cloud One with Datadog to gain insights into endpoint and 
 
 ## Setup
 
+
 ### Log Collection Overview
+
+The Trend Micro Cloud One integration collects logs using two methods: Agent and Event Forwarder Configuration, and File Storage Security API Configuration.
 
 **Note**: To collect all log types, you must configure both log collection methods.
 
-The following table shows the log collection methods, the logs collected, and the dashboards populated for each method.
+#### 1. [Agent and Event Forwarder Configuration][8]
 
-| Log Collection Method | Logs Collected | Dashboards Populated |
-|-----------------------------------------|---------------------------------------------------------------------------|------------------------------|
-| [Agent and Event Forwarder Configuration][8] | **Workload Security**  <br>- System Events  <br>- Anti-Malware Events  <br>- Application Control Events  <br>- Firewall Events  <br>- Integrity Monitoring Events  <br>- Intrusion Prevention Events  <br>- Log Inspection Events  <br>- Device Control Events  <br><br>**Network Security**  <br>- Reputation Events  <br>- IPS Events | - Trend Micro Cloud One - Workload Security Insights  <br>- Trend Micro Cloud One - System Events  <br>- Trend Micro Cloud One - Anti-Malware Events  <br>- Trend Micro Cloud One - Application Control and Device Control Events  <br>- Trend Micro Cloud One - Firewall Events  <br>- Trend Micro Cloud One - Integrity Monitoring Log Events  <br>- Trend Micro Cloud One - Intrusion Prevention Events  <br>- Trend Micro Cloud One - Log Inspection and Web Reputation Events  <br>- Trend Micro Cloud One - Network Security Insights |
-| [File Storage Security API Configuration][9] | - File Storage Security Events | - Trend Micro Cloud One - File Storage Security Insights |
+This log collection method collects the following log types:
+- **Workload Security**:  
+  - System Events  
+  - Anti-Malware Events  
+  - Application Control Events  
+  - Firewall Events  
+  - Integrity Monitoring Events  
+  - Intrusion Prevention Events  
+  - Log Inspection Events  
+  - Device Control Events  
+- **Network Security**:  
+  - Reputation Events  
+  - IPS Events  
+
+It populates the following dashboards:
+- Trend Micro Cloud One - Workload Security Insights  
+- Trend Micro Cloud One - System Events  
+- Trend Micro Cloud One - Anti-Malware Events  
+- Trend Micro Cloud One - Application Control and Device Control Events  
+- Trend Micro Cloud One - Firewall Events  
+- Trend Micro Cloud One - Integrity Monitoring Log Events  
+- Trend Micro Cloud One - Intrusion Prevention Events  
+- Trend Micro Cloud One - Log Inspection and Web Reputation Events  
+- Trend Micro Cloud One - Network Security Insights  
+
+#### 2. [File Storage Security API Configuration][9]
+
+This log collection method collects the following log types:
+- File Storage Security Events
+
+It populates the following dashboards:
+- Trend Micro Cloud One - File Storage Security Insights
 
 ### Agent and Event Forwarder Configuration
 ****

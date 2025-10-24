@@ -39,15 +39,6 @@ class ExtraMetrics(BaseModel):
     type: Optional[str] = None
 
 
-class IgnoreMetricsByLabels(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    target_label_key: Optional[str] = None
-    target_label_value_list: Optional[tuple[str, ...]] = None
-
-
 class TargetMetric(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -138,7 +129,7 @@ class InstanceConfig(BaseModel):
     hostname_label: Optional[str] = None
     ignore_connection_errors: Optional[bool] = None
     ignore_metrics: Optional[tuple[str, ...]] = None
-    ignore_metrics_by_labels: Optional[IgnoreMetricsByLabels] = None
+    ignore_metrics_by_labels: Optional[MappingProxyType[str, tuple[str, ...]]] = None
     ignore_tags: Optional[tuple[str, ...]] = None
     include_labels: Optional[tuple[str, ...]] = None
     kerberos_auth: Optional[str] = None
