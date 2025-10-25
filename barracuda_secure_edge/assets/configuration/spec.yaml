@@ -3,10 +3,124 @@ files:
 - name: barracuda_secure_edge.yaml
   options:
   - template: logs
+    required: true
+    description: "Logs configuration specifying the log sources the integration collects"
     example:
     - type: file
       path: /var/phion/logs/box_Auth_access.log
-      service: auth
+      service: <SERVICE>
       source: barracuda_secure_edge
       tags:
         - log_component:auth
+
+    - type: file
+      path: /var/phion/logs/box_Event_eventS.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:system
+
+    - type: file
+      path: /var/phion/logs/box_Event_operative.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:system
+
+    - type: file
+      path: /var/phion/logs/box_Config_admin.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:admin
+
+    - type: file
+      path: /var/phion/logs/box_Config_changes.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:admin
+
+    - type: file
+      path: /var/phion/logs/box_Config_sync.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:admin
+
+    - type: file
+      path: /var/phion/logs/box_Control_admin.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:admin
+
+    - type: file
+      path: /var/phion/logs/box_Control_AuthService.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:admin
+
+    - type: file
+      path: /var/phion/logs/box_Firewall.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:firewall
+
+    - type: file
+      path: /var/phion/logs/box_Firewall_Activity.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:firewall
+
+    - type: file
+      path: /var/phion/logs/box_Network_dhcp.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:dhcp
+
+    - type: file
+      path: /var/phion/logs/box_Network_activation.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:network
+
+    - type: file
+      path: /var/phion/logs/box_System_mgmaccess.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:access
+
+    - type: file
+      path: /var/phion/logs/box_SSH_sshd.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:ssh
+
+    - type: file
+      path: /var/phion/logs/box_SSH_config.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:ssh
+
+    - type: file
+      path: /var/phion/logs/srv_CSC_VPN.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:vpn
+
+    - type: file
+      path: /var/phion/logs/srv_CSC_VPN_sslvpn.log
+      service: <SERVICE>
+      source: barracuda_secure_edge
+      tags:
+        - log_component:vpn
