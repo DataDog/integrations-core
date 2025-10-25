@@ -15,6 +15,7 @@ from google.protobuf.message import DecodeError, EncodeError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
+from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
 
@@ -35,6 +36,9 @@ class KafkaCheck(AgentCheck):
         self.client = KafkaClient(self.config, self.log)
         self.topic_partition_cache = {}
         self.check_initializations.insert(0, self.config.validate_config)
+
+        # Initialize cluster metadata collector
+        self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -106,6 +110,19 @@ class KafkaCheck(AgentCheck):
             cluster_id,
         )
         self.data_streams_live_message(highwater_offsets or {}, cluster_id)
+
+        # Collect cluster metadata if enabled
+        if (
+            self.config._collect_broker_metadata
+            or self.config._collect_topic_metadata
+            or self.config._collect_consumer_group_metadata
+            or self.config._collect_schema_registry
+        ):
+            try:
+                self.metadata_collector.collect_all_metadata()
+            except Exception as e:
+                self.log.error("Error collecting cluster metadata: %s", e)
+
         if self.config._close_admin_client:
             self.client.close_admin_client()
 

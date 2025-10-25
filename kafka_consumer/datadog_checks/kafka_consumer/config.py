@@ -83,6 +83,18 @@ class KafkaConfig:
         # Data Streams live messages
         self.live_messages_configs = instance.get('live_messages_configs', [])
 
+        # Cluster metadata collection (single flag to enable all cluster monitoring)
+        enable_cluster_monitoring = is_affirmative(instance.get('enable_cluster_monitoring', False))
+
+        # If cluster monitoring is enabled, collect all metadata
+        self._collect_broker_metadata = enable_cluster_monitoring
+        self._collect_topic_metadata = enable_cluster_monitoring
+        self._collect_consumer_group_metadata = enable_cluster_monitoring
+
+        # Schema registry: auto-enable if URL is provided
+        self._schema_registry_url = instance.get('schema_registry_url')
+        self._collect_schema_registry = enable_cluster_monitoring and self._schema_registry_url is not None
+
     def validate_config(self):
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')

@@ -53,6 +53,7 @@ class InstanceConfig(BaseModel):
     data_streams_enabled: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    enable_cluster_monitoring: Optional[bool] = None
     kafka_client_api_version: Optional[str] = None
     kafka_connect_str: Union[str, tuple[str, ...]]
     metric_patterns: Optional[MetricPatterns] = None
@@ -67,6 +68,7 @@ class InstanceConfig(BaseModel):
     sasl_oauth_token_provider: Optional[SaslOauthTokenProvider] = None
     sasl_plain_password: Optional[str] = None
     sasl_plain_username: Optional[str] = None
+    schema_registry_url: Optional[str] = None
     security_protocol: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

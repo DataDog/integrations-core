@@ -1,0 +1,22 @@
+init_config:
+
+instances:
+  - kafka_connect_str: localhost:9092
+    
+    # Monitor all consumer groups
+    monitor_unlisted_consumer_groups: true
+    
+    # Enable cluster metadata collection
+    collect_broker_metadata: true
+    collect_topic_metadata: true
+    collect_consumer_group_metadata: true
+    collect_schema_registry: true
+    
+    schema_registry_url: http://localhost:8081
+    
+    tags:
+      - env:test
+      - kafka_cluster:test-cluster
+    
+    min_collection_interval: 30
+
