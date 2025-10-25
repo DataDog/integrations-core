@@ -319,6 +319,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /incident_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
 /incident_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/kandji/                                                             @DataDog/saas-integrations
+/kandji/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/kandji/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/kandji/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /keeper/                                                             @DataDog/saas-integrations
 /keeper/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
 /keeper/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
