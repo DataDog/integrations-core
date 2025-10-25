@@ -23,6 +23,8 @@ from datadog_checks.postgres.relationsmanager import RelationsManager
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
+import time
+
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
@@ -46,6 +48,7 @@ class ValidationResult:
         self.features: list[Feature] = []
         self.errors: list[ConfigurationError] = []
         self.warnings: list[str] = []
+        self.created_at: int = int(time.time() * 1000)
 
     def add_feature(self, feature: FeatureKey, enabled=True, description: Optional[str] = None):
         """
