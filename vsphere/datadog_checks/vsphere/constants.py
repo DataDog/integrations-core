@@ -227,3 +227,5 @@ VSAN_EVENT_IDS = [
 VSAN_EVENT_PREFIX = 'vsan'
 
 HOSTNAME_CASE_OPTIONS = ['default', 'lower', 'upper']
+
+INFRA_MODE_METRIC = 'cpu.usage.avg'
