@@ -124,7 +124,6 @@ def test_ratelimiting_ttl_cache():
         assert cache.acquire(i), "cache should be empty again so these keys should go in OK"
 
 
-class DBExceptionForTests(Exception):
 def test_dbm_async_job_missed_collection_interval(aggregator):
     check = AgentCheck()
     health = Health(check)
@@ -152,7 +151,7 @@ def test_dbm_async_job_missed_collection_interval(aggregator):
     assert health_event['data']['elapsed_time'] < 2000
 
 
-class DBExceptionForTests(BaseException):
+class DBExceptionForTests(Exception):
     pass
 
 
