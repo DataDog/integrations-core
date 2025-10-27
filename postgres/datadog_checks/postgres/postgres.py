@@ -193,6 +193,7 @@ class PostgreSql(AgentCheck):
                 else HealthStatus.WARNING
                 if self._validation_result.warnings
                 else HealthStatus.OK,
+                cooldown_time=60 * 60 * 6,  # 6 hours
                 data={
                     "errors": [str(error) for error in self._validation_result.errors],
                     "warnings": self._validation_result.warnings,

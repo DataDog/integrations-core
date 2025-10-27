@@ -38,6 +38,7 @@ class PostgresHealth(Health):
         name: HealthEvent | PostgresHealthEvent,
         status: HealthStatus,
         data: dict,
+        **kwargs,
     ):
         """
         Submit a health event to the aggregator.
@@ -58,4 +59,5 @@ class PostgresHealth(Health):
                 "ddagenthostname": self.check.agent_hostname,
                 **(data or {}),
             },
+            **kwargs,
         )
