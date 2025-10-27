@@ -70,8 +70,7 @@ class Health:
         name: HealthEvent,
         status: HealthStatus,
         tags: list[str] = None,
-        cooldown: bool = False,
-        cooldown_time: int = DEFAULT_COOLDOWN,
+        cooldown_time: int = None,
         cooldown_values: list[str] = None,
         data: dict = None,
     ):
@@ -84,15 +83,15 @@ class Health:
             The health status to submit.
         :param tags: list of str
             Tags to associate with the health event.
-        :param cooldown: int
+        :param cooldown_time: int
             The cooldown period in seconds to prevent the events with the same name and status
-            from being submitted again.
+            from being submitted again. If None there is be no cooldown.
         :param cooldown_values: list of str
             Additional values to include in the cooldown key.
         :param data: A dictionary to be submitted as `data`. Must be JSON serializable.
         """
         category = self.check.__NAMESPACE__ or self.check.__class__.__name__.lower()
-        if cooldown:
+        if cooldown_time:
             cooldown_key = "|".join([category, name.value, status.value])
             if cooldown_values:
                 cooldown_key = "|".join([cooldown_key, "|".join([f"{v}" for v in cooldown_values])])
