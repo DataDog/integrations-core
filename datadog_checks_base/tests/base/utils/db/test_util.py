@@ -151,8 +151,41 @@ def test_dbm_async_job_missed_collection_interval(aggregator):
     assert health_event['data']['elapsed_time'] < 2000
 
 
-class DBExceptionForTests(BaseException):
+class DBExceptionForTests(Exception):
     pass
+
+
+class UnexpectedExceptionForTests(Exception):
+    pass
+
+
+@pytest.mark.parametrize("exception_expected", [True, False])
+@pytest.mark.parametrize("enable_health", [True, False])
+def test_dbm_async_job_unknown_error(aggregator, exception_expected, enable_health):
+    check = AgentCheck()
+    if enable_health:
+        check.health = Health(check)
+    exception = DBExceptionForTests() if exception_expected else UnexpectedExceptionForTests()
+    job = JobForTesting(check, exception=exception)
+    try:
+        job.run_job_loop(["hello:there"])
+        job._job_loop_future.result(timeout=10)
+        job.cancel()
+    except Exception as e:
+        assert isinstance(e, type(exception))
+    finally:
+        events = aggregator.get_event_platform_events("dbm-health")
+        if enable_health and not exception_expected:
+            assert len(events) == 1
+            health_event = events[0]
+            assert health_event['name'] == HealthEvent.UNKNOWN_ERROR.value
+            assert health_event['status'] == HealthStatus.ERROR.value
+            assert health_event['data']['file'].endswith('test_util.py')
+            assert health_event['data']['line'] is not None
+            assert health_event['data']['function'] == 'run_job'
+            assert health_event['data']['exception_type'] == type(exception).__name__
+        else:
+            assert len(events) == 0
 
 
 @pytest.mark.parametrize(
@@ -278,6 +311,7 @@ class JobForTesting(DBMAsyncJob):
         min_collection_interval=15,
         job_execution_time=0,
         max_sleep_chunk_s=5,
+        exception=None,
     ):
         super(JobForTesting, self).__init__(
             check,
@@ -294,6 +328,7 @@ class JobForTesting(DBMAsyncJob):
         )
         self._job_execution_time = job_execution_time
         self.count_executed = 0
+        self._exception = exception
 
     def test_shutdown(self):
         self._check.count("dbm.async_job_test.shutdown", 1)
@@ -301,6 +336,8 @@ class JobForTesting(DBMAsyncJob):
     def run_job(self):
         self._check.count("dbm.async_job_test.run_job", 1)
         self.count_executed += 1
+        if self._exception:
+            raise self._exception
         time.sleep(self._job_execution_time)
 
 

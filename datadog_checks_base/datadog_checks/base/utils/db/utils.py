@@ -21,7 +21,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
+from datadog_checks.base.utils.db.health import DEFAULT_COOLDOWN, HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
@@ -372,7 +372,7 @@ class DBMAsyncJob(object):
                             tags=self._job_tags,
                             # Use a cooldown to avoid spamming if the job is missing the collection interval
                             # in a flappy manner
-                            cooldown=True,
+                            cooldown_time=DEFAULT_COOLDOWN,
                             cooldown_values=[self._dbms, self._job_name],
                             data={
                                 "dbms": self._dbms,
@@ -438,6 +438,14 @@ class DBMAsyncJob(object):
                     tags=self._job_tags + ["error:crash-{}".format(type(e))],
                     raw=True,
                 )
+
+                if hasattr(self._check, 'health'):
+                    try:
+                        self._check.health.submit_exception_health_event(e, data={"job_name": self._job_name})
+                    except Exception as health_error:
+                        self._log.exception(
+                            "[%s] Failed to submit error health event", self._job_tags_str, health_error
+                        )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
             if self._shutdown_callback:
