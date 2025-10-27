@@ -9,7 +9,7 @@ def main():
     explodes it into a list of jobs.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('matrix', type=str, required=True)
+    parser.add_argument('matrix', type=str)
 
     try:
         input_data = parser.parse_args()
