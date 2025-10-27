@@ -23,6 +23,7 @@ EXPECTED_METRICS = [
     "glusterfs.cluster.nodes.count",
     "glusterfs.cluster.volumes.count",
     "glusterfs.cluster.volumes.started",
+    "glusterfs.heal_info.entries.count",
     "glusterfs.subvol.disperse",
     "glusterfs.subvol.disperse_redundancy",
     "glusterfs.subvol.replica",
