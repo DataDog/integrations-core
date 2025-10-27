@@ -26,6 +26,7 @@ class MySQLConfig(object):
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
+        self.disable_innodb_metrics = is_affirmative(self.options.get('disable_innodb_metrics', False))
         self.replication_channel = self.options.get('replication_channel')
         if self.replication_channel:
             self.tags.append("channel:{0}".format(self.replication_channel))

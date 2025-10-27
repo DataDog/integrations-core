@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 37.21.1 / 2025-10-09
+
+***Fixed***:
+
+* Fix helper method `config_set_persistent_cache_id` to ensure that the persistent cache id generated is stable between agent restarts. ([#21577](https://github.com/DataDog/integrations-core/pull/21577))
+
+## 37.21.0 / 2025-09-30
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add DatabaseCheck base class for database integrations ([#21202](https://github.com/DataDog/integrations-core/pull/21202))
+* Add tag normalization support to TagManager with optional tag_normalizer parameter and normalize flags for set_tag/set_tags_from_list/delete_tag methods. ([#21474](https://github.com/DataDog/integrations-core/pull/21474))
+
+## 37.20.0 / 2025-09-17 / Agent 7.71.0
+
+***Added***:
+
+* Add support for customizable cache keys to be used by the agent persistent cache. This allows integrations developers to define when the cache will be invalidated for each integration. ([#21316](https://github.com/DataDog/integrations-core/pull/21316))
+* Upgrade ddtrace to 3.12.5 ([#21360](https://github.com/DataDog/integrations-core/pull/21360))
+
 ## 37.19.0 / 2025-09-05
 
 ***Added***:

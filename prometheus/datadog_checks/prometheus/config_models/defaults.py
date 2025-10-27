@@ -8,12 +8,24 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_disable_generic_tags():
+    return False
+
+
+def instance_empty_default_hostname():
+    return False
+
+
 def instance_health_service_check():
     return True
 
 
 def instance_max_returned_metrics():
     return 2000
+
+
+def instance_min_collection_interval():
+    return 15
 
 
 def instance_prometheus_timeout():

@@ -85,8 +85,10 @@ instances:
     #
     # exclude_hostname: false
 
-    ## Controls how the database is identified. The default value is the resolved hostname for the instance,
-    ## which respects the `reported_hostname` option.
+    ## Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+    ## billable instance.
+    ##
+    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
     ##
     ## This value will be used as-is for the display name of the instance but will be normalized
     ## when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
@@ -645,6 +647,11 @@ instances:
         ## Set to `true` to keep positional parameters (e.g. `$1`) in your obfuscated SQL statements.
         #
         # keep_positional_parameter: false
+
+        ## @param replace_bind_parameter - boolean - optional - default: false
+        ## Set to `true` to replace bind parameters (e.g. `@p1`) with `?` in your obfuscated SQL statements.
+        #
+        # replace_bind_parameter: false
 
         ## @param keep_trailing_semicolon - boolean - optional - default: false
         ## Set to `true` to keep trailing semicolons in your normalized SQL statements.

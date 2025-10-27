@@ -125,6 +125,7 @@ To collect metrics, you can either use an existing user with **Full Administrato
 ### Installation
 
 **Note**: These steps are only required for collecting logs.
+**Minimum Agent version:** 7.69.0
 
 To install the iboss integration, run the following Agent installation command in your terminal, then complete the configuration steps below. For more information, see the [Integration Management][4] documentation.
 

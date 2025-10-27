@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.1.0 / 2025-10-02
+
+***Added***:
+
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
 ## 2.0.1 / 2025-08-07 / Agent 7.70.0
 
 ***Fixed***:
