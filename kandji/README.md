@@ -1,13 +1,13 @@
 ## Overview
 
-[Kandji][1] is an Apple device management and security platform that helps organizations automate deployment, enforce compliance, secure macOS, and iOS devices.
+[Kandji][1] is an Apple device management and security platform that helps organizations automate deployment, enforce compliance, and secure macOS and iOS devices.
 
 This integration ingests the following logs:
 - **Audit**: Provides information about security events, device lifecycle changes, and admin/user actions.
 - **Threats**: Provides information about detected threats, including classification, status, affected devices, associated files, processes, and blueprints.
 - **Detections**: Lists detected findings, their severity, affected devices and applications, and associated blueprints.
 
-Integrate Kandji with Datadog to gain insights into audit, threats and detections logs using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating easy search and detailed insights. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
+Integrate Kandji with Datadog to gain insights into audit, and threats and detections logs using pre-built dashboard visualizations. Datadog uses its built-in log pipelines to parse and enrich these logs, facilitating search and detailed insights. Additionally, the integration can be used for Cloud SIEM detection rules for enhanced monitoring and security.
 
 ## Setup
 
@@ -43,7 +43,7 @@ Integrate Kandji with Datadog to gain insights into audit, threats and detection
 
 ### Logs
 
-Kandji collects and forwards audit, threat and detection logs to Datadog.
+Kandji collects and forwards audit, and threat and detection logs to Datadog.
 
 ### Metrics
 
