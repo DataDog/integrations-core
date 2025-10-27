@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 37.22.0 / 2025-10-27
+
+***Added***:
+
+* Added error health event for DBM async jobs ([#21703](https://github.com/DataDog/integrations-core/pull/21703))
+* Add health event for missed DBM async job executions ([#21719](https://github.com/DataDog/integrations-core/pull/21719))
+
+***Fixed***:
+
+* Update CA certificate loading logic to not load certificates when `tls_verify` is false ([#21607](https://github.com/DataDog/integrations-core/pull/21607))
+* Add `certifi` fallback for missing default CA certificates ([#21609](https://github.com/DataDog/integrations-core/pull/21609))
+
 ## 37.21.1 / 2025-10-09
 
 ***Fixed***:
