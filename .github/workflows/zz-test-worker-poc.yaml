@@ -40,16 +40,16 @@ jobs:
   run_work:
     needs: setup
     runs-on: ubuntu-latest
-    name: ${{ matrix.job_key }} (${{ matrix.value2 }})
+    name: ${{ matrix.name }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.setup.outputs.work_matrix) }}
+      matrix:
+        include: ${{ fromJSON(needs.setup.outputs.work_matrix) }}
 
     steps:
       - name: Run Generic Task
         run: |
-          echo "Running generic logic for job: ${{ matrix.job_key }}"
-          echo "Job Key: ${{ matrix.job_key }}"
-          echo "Value 1: ${{ matrix.value1 }}"
-          echo "Value 2: ${{ matrix.value2 }}"
-          echo "Value 3: ${{ matrix.value3 }}"
+          echo "Running generic logic for job: ${{ matrix.name }}"
+          echo "Platform: ${{ matrix.platform }}"
+          echo "Runner: ${{ matrix.runner }}"
+          echo "Target: ${{ matrix.target }}"
