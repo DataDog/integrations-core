@@ -47,7 +47,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 27052339,
       "source_type_name": "Adyen",
       "events": {
