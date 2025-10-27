@@ -161,18 +161,59 @@
       }
     },
     {
+      "id": 47,
+      "definition": {
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "avg:kafka.cluster.controller_id{$kafka_cluster_id}",
+            "aggregator": "last"
+          }
+        ],
+        "title": "Controller Broker ID",
+        "title_size": "16",
+        "title_align": "left",
+        "precision": 0,
+        "autoscale": true
+      },
+      "layout": {
+        "x": 6,
+        "y": 5,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
       "id": 7,
       "definition": {
         "type": "timeseries",
         "requests": [
           {
-            "q": "avg:kafka.broker.config.log_retention_bytes{$kafka_cluster_id} by {broker_id}",
-            "display_type": "line",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:kafka.broker.config.log_retention_bytes{$kafka_cluster_id} by {broker_id}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "byte"
+                  }
+                }
+              }
+            ],
             "style": {
               "palette": "dog_classic",
               "line_type": "solid",
               "line_width": "normal"
-            }
+            },
+            "display_type": "line"
           }
         ],
         "title": "Broker Log Retention (Bytes)",
@@ -182,8 +223,64 @@
         "legend_size": "0"
       },
       "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 42,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:kafka.broker.leader_count{$kafka_cluster_id} by {broker_id}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "title": "Leader Partitions per Broker",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 43,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:kafka.broker.partition_count{$kafka_cluster_id} by {broker_id}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "title": "Total Partitions per Broker (including replicas)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
         "x": 6,
-        "y": 5,
+        "y": 8,
         "width": 6,
         "height": 3
       }
@@ -202,7 +299,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 8,
+        "y": 11,
         "width": 12,
         "height": 1
       }
@@ -229,7 +326,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 9,
+        "y": 12,
         "width": 4,
         "height": 3
       }
@@ -257,7 +354,7 @@
       },
       "layout": {
         "x": 4,
-        "y": 9,
+        "y": 12,
         "width": 4,
         "height": 3
       }
@@ -280,7 +377,7 @@
       },
       "layout": {
         "x": 8,
-        "y": 9,
+        "y": 12,
         "width": 4,
         "height": 3
       }
@@ -308,8 +405,36 @@
       },
       "layout": {
         "x": 0,
-        "y": 12,
-        "width": 12,
+        "y": 15,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 41,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:kafka.topic.message_rate{$kafka_cluster_id,$topic} by {topic}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "title": "Message Production Rate (msg/sec)",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 6,
+        "y": 15,
+        "width": 6,
         "height": 3
       }
     },
@@ -327,7 +452,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 15,
+        "y": 18,
         "width": 12,
         "height": 1
       }
@@ -354,7 +479,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 16,
+        "y": 19,
         "width": 6,
         "height": 3
       }
@@ -381,7 +506,7 @@
       },
       "layout": {
         "x": 6,
-        "y": 16,
+        "y": 19,
         "width": 6,
         "height": 3
       }
@@ -408,7 +533,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 19,
+        "y": 22,
         "width": 6,
         "height": 3
       }
@@ -442,8 +567,8 @@
         "autoscale": true
       },
       "layout": {
-        "x": 6,
-        "y": 19,
+        "x": 0,
+        "y": 25,
         "width": 3,
         "height": 3
       }
@@ -477,8 +602,8 @@
         "autoscale": true
       },
       "layout": {
-        "x": 9,
-        "y": 19,
+        "x": 3,
+        "y": 25,
         "width": 3,
         "height": 3
       }
@@ -504,8 +629,8 @@
         "show_legend": false
       },
       "layout": {
-        "x": 0,
-        "y": 22,
+        "x": 6,
+        "y": 25,
         "width": 6,
         "height": 3
       }
@@ -531,8 +656,8 @@
         "show_legend": false
       },
       "layout": {
-        "x": 6,
-        "y": 22,
+        "x": 0,
+        "y": 28,
         "width": 6,
         "height": 3
       }
@@ -551,7 +676,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 25,
+        "y": 31,
         "width": 12,
         "height": 1
       }
@@ -578,7 +703,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 26,
+        "y": 32,
         "width": 4,
         "height": 3
       }
@@ -606,8 +731,36 @@
       },
       "layout": {
         "x": 4,
-        "y": 26,
+        "y": 32,
         "width": 4,
+        "height": 3
+      }
+    },
+    {
+      "id": 48,
+      "definition": {
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "avg:kafka.consumer_group.member.partitions{$kafka_cluster_id,$consumer_group} by {consumer_group,client_id}",
+            "display_type": "line",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            }
+          }
+        ],
+        "title": "Partitions per Consumer Group Member",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_size": "0"
+      },
+      "layout": {
+        "x": 4,
+        "y": 35,
+        "width": 8,
         "height": 3
       }
     },
@@ -637,36 +790,58 @@
         }
       },
       "layout": {
-        "x": 8,
-        "y": 26,
+        "x": 0,
+        "y": 38,
         "width": 4,
         "height": 3
       }
     },
     {
-      "id": 25,
+      "id": 44,
       "definition": {
         "type": "timeseries",
         "requests": [
           {
-            "q": "avg:kafka.consumer_offset{$kafka_cluster_id,$topic,$consumer_group} by {consumer_group,topic,partition}",
-            "display_type": "line",
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:kafka.estimated_consumer_lag{$kafka_cluster_id,$consumer_group,$topic} by {consumer_group,topic}"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1",
+                "number_format": {
+                  "unit": {
+                    "type": "canonical_unit",
+                    "unit_name": "second"
+                  }
+                }
+              }
+            ],
             "style": {
-              "palette": "cool",
+              "palette": "warm",
               "line_type": "solid",
-              "line_width": "thin"
-            }
+              "line_width": "normal"
+            },
+            "display_type": "line"
           }
         ],
-        "title": "Consumer Group Offsets",
+        "title": "Consumer Lag (seconds)",
         "title_size": "16",
         "title_align": "left",
-        "show_legend": false
+        "show_legend": true,
+        "legend_size": "0",
+        "yaxis": {
+          "include_zero": true
+        }
       },
       "layout": {
-        "x": 0,
-        "y": 29,
-        "width": 6,
+        "x": 4,
+        "y": 38,
+        "width": 8,
         "height": 3
       }
     },
@@ -677,7 +852,7 @@
         "requests": [
           {
             "q": "avg:kafka.consumer_lag{$kafka_cluster_id,$topic,$consumer_group} by {consumer_group,topic,partition}",
-            "display_type": "area",
+            "display_type": "line",
             "style": {
               "palette": "warm",
               "line_type": "solid",
@@ -691,8 +866,8 @@
         "show_legend": false
       },
       "layout": {
-        "x": 6,
-        "y": 29,
+        "x": 0,
+        "y": 41,
         "width": 6,
         "height": 3
       }
@@ -726,40 +901,13 @@
             ]
           }
         ],
-        "title": "Top 10 Consumer Groups by Lag",
+        "title": "Top 10 Consumer Groups by Lag (Messages)",
         "title_size": "16",
         "title_align": "left"
       },
       "layout": {
-        "x": 0,
-        "y": 32,
-        "width": 6,
-        "height": 3
-      }
-    },
-    {
-      "id": 28,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kafka.broker_offset{$kafka_cluster_id,$topic} by {topic,partition}",
-            "display_type": "line",
-            "style": {
-              "palette": "purple",
-              "line_type": "solid",
-              "line_width": "thin"
-            }
-          }
-        ],
-        "title": "Broker Offsets (High Watermark)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false
-      },
-      "layout": {
         "x": 6,
-        "y": 32,
+        "y": 41,
         "width": 6,
         "height": 3
       }
@@ -778,7 +926,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 35,
+        "y": 44,
         "width": 12,
         "height": 1
       }
@@ -801,7 +949,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 36,
+        "y": 45,
         "width": 4,
         "height": 2
       }
@@ -828,7 +976,7 @@
       },
       "layout": {
         "x": 4,
-        "y": 36,
+        "y": 45,
         "width": 4,
         "height": 2
       }
@@ -856,142 +1004,8 @@
       },
       "layout": {
         "x": 8,
-        "y": 36,
+        "y": 45,
         "width": 4,
-        "height": 2
-      }
-    },
-    {
-      "id": 33,
-      "definition": {
-        "type": "note",
-        "content": "## Advanced Metrics",
-        "background_color": "gray",
-        "font_size": "14",
-        "text_align": "left",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left"
-      },
-      "layout": {
-        "x": 0,
-        "y": 38,
-        "width": 12,
-        "height": 1
-      }
-    },
-    {
-      "id": 41,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kafka.topic.message_rate{$kafka_cluster_id,$topic} by {topic}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "title": "Message Production Rate (msg/sec)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 0,
-        "y": 39,
-        "width": 6,
-        "height": 2
-      }
-    },
-    {
-      "id": 42,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kafka.broker.leader_count{$kafka_cluster_id} by {broker_id}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "title": "Leader Partitions per Broker",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 6,
-        "y": 39,
-        "width": 6,
-        "height": 2
-      }
-    },
-    {
-      "id": 43,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kafka.broker.partition_count{$kafka_cluster_id} by {broker_id}",
-            "display_type": "line",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "title": "Total Partitions per Broker (including replicas)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0"
-      },
-      "layout": {
-        "x": 0,
-        "y": 41,
-        "width": 6,
-        "height": 2
-      }
-    },
-    {
-      "id": 44,
-      "definition": {
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "avg:kafka.estimated_consumer_lag_seconds{$kafka_cluster_id,$consumer_group,$topic} by {consumer_group,topic}",
-            "display_type": "line",
-            "style": {
-              "palette": "warm",
-              "line_type": "solid",
-              "line_width": "normal"
-            }
-          }
-        ],
-        "title": "Consumer Lag (seconds)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0",
-        "yaxis": {
-          "include_zero": true
-        }
-      },
-      "layout": {
-        "x": 6,
-        "y": 41,
-        "width": 6,
         "height": 2
       }
     },
@@ -1009,7 +1023,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 43,
+        "y": 47,
         "width": 12,
         "height": 1
       }
@@ -1026,7 +1040,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 44,
+        "y": 48,
         "width": 12,
         "height": 4
       }
@@ -1043,7 +1057,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 48,
+        "y": 52,
         "width": 12,
         "height": 3
       }
@@ -1060,7 +1074,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 51,
+        "y": 55,
         "width": 6,
         "height": 4
       }
@@ -1076,7 +1090,7 @@
       },
       "layout": {
         "x": 6,
-        "y": 51,
+        "y": 55,
         "width": 6,
         "height": 4
       }
@@ -1095,7 +1109,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 55,
+        "y": 59,
         "width": 12,
         "height": 3
       }

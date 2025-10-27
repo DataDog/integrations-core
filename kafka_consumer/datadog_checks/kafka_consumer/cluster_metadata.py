@@ -113,6 +113,22 @@ class ClusterMetadataCollector:
             broker_tags = self._get_tags(cluster_id)
             self.check.gauge('broker.count', len(brokers), tags=broker_tags)
 
+            # Collect controller information
+            try:
+                cluster_future = self.client.kafka_client.describe_cluster()
+                cluster_info = cluster_future.result(timeout=self.config._request_timeout / 1000)
+                
+                if cluster_info.controller:
+                    controller_tags = self._get_tags(cluster_id) + [
+                        f'controller_id:{cluster_info.controller.id}',
+                        f'controller_host:{cluster_info.controller.host}',
+                        f'controller_port:{cluster_info.controller.port}',
+                    ]
+                    # Emit metric indicating which broker is the controller (value is controller_id)
+                    self.check.gauge('cluster.controller_id', cluster_info.controller.id, tags=controller_tags)
+            except Exception as e:
+                self.log.debug("Could not collect controller information: %s", e)
+
             # Track leader count and partition distribution per broker
             broker_leader_count = dict.fromkeys(brokers.keys(), 0)
             broker_partition_count = dict.fromkeys(brokers.keys(), 0)
@@ -497,8 +513,21 @@ class ClusterMetadataCollector:
 
                             member_info.append({'member_id': member_id, 'client_id': client_id, 'host': host})
 
-                            # Extract topics from member assignment
+                            # Extract topics and emit per-member metrics
                             if hasattr(member, 'assignment') and member.assignment:
+                                partition_count = len(member.assignment.topic_partitions)
+                                
+                                # Emit metric for number of partitions assigned to this member
+                                member_tags = state_tags + [
+                                    f'client_id:{client_id}',
+                                    f'member_host:{host}',
+                                ]
+                                self.check.gauge(
+                                    'consumer_group.member.partitions', 
+                                    partition_count, 
+                                    tags=member_tags
+                                )
+                                
                                 for tp in member.assignment.topic_partitions:
                                     topics_for_group.add(tp.topic)
 
