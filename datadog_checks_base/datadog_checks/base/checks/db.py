@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from abc import abstractmethod
+
 from . import AgentCheck
 
 
