@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from unittest import mock
 
-import mock
 import pytest
+
+from datadog_checks.ibm_spectrum_lsf.client import LSFClient
 
 
 def get_mock_output(method):
@@ -15,14 +17,14 @@ def get_mock_output(method):
 
 @pytest.fixture
 def mock_client():
-    client = mock.MagicMock()
-    client.lsid.side_effect = lambda: get_mock_output('lsid')
-    client.lsclusters.side_effect = lambda: get_mock_output('lsclusters')
-    client.bhosts.side_effect = lambda: get_mock_output('bhosts')
-    client.lshosts.side_effect = lambda: get_mock_output('lshosts')
-    client.lsload.side_effect = lambda: get_mock_output('lsload')
-    client.bslots.side_effect = lambda: get_mock_output('bslots')
-    client.bqueues.side_effect = lambda: get_mock_output('bqueues')
+    client = mock.create_autospec(LSFClient)
+    client.lsid.return_value = get_mock_output('lsid')
+    client.lsclusters.return_value = get_mock_output('lsclusters')
+    client.bhosts.return_value = get_mock_output('bhosts')
+    client.lshosts.return_value = get_mock_output('lshosts')
+    client.lsload.return_value = get_mock_output('lsload')
+    client.bslots.return_value = get_mock_output('bslots')
+    client.bqueues.return_value = get_mock_output('bqueues')
 
     yield client
 
