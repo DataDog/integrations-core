@@ -423,7 +423,7 @@
             "id": 409,
             "definition": {
               "type": "note",
-              "content": "**Cost Optimizations**: \nUnderstanding your primary cost drivers helps optimize spending. Input tokens typically cost less than output tokens, while cache operations offer significant savings. Monitor the distribution of costs across different token types to identify optimization opportunities.\n\nImplement prompt optimization to reduce token usage, use appropriate models for each task, leverage caching for repeated contexts, and [batching high volume requests](https://docs.anthropic.com/en/docs/build-with-claude/batch-processing). Consider implementing a routing layer that automatically selects the most cost-effective model based on task requirements.",
+              "content": "**Cost Optimizations**: \nUnderstanding your primary cost drivers helps optimize spending. Input tokens typically cost less than output tokens, while cache operations offer significant savings. Monitor the distribution of costs across different token types to identify optimization opportunities.\n\nImplement prompt optimization to reduce token usage, use appropriate models for each task, use caching for repeated contexts, and [batch high volume requests](https://docs.anthropic.com/en/docs/build-with-claude/batch-processing). Consider implementing a routing layer that automatically selects the most cost-effective model based on task requirements.",
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
