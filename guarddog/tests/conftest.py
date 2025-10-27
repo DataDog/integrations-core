@@ -8,7 +8,7 @@ import pytest
 INSTANCE = {
     "min_collection_interval": 15,
     "package_ecosystem": "pypi",
-    "path": "/opt/test/logs/requirements.txt",
+    "dependency_file_path": "/opt/test/logs/requirements.txt",
 }
 
 

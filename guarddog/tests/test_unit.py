@@ -6,6 +6,7 @@ import json
 from unittest.mock import Mock
 
 import pytest
+from mock import ANY
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.guarddog import GuarddogCheck
@@ -48,6 +49,33 @@ MOCK_RESPONSE = [
             },
             "path": "/tmp/tmpmm2wc69i/pandas",
         },
+    },
+]
+
+EXPECTED_RESPONSE = [
+    {
+        'timestamp': ANY,
+        'message': '{"log": {"dependency": "flask", "version": "1.0.0", '
+        '"result": {"issues": 1, "errors": {}, "results": {"release_zero": "0.0.0"}, '
+        '"path": "/tmp/tmpmm2wc69i/flask"}}, '
+        '"enrichment_details": {"triggered_rules": ["release_zero"], '
+        '"package_ecosystem": "pypi"}}',
+    },
+    {
+        'timestamp': ANY,
+        'message': '{"log": {"dependency": "requests", "version": "1.0.0", '
+        '"result": {"issues": 1, "errors": {}, "results": {"release_zero": "0.0.0"}, '
+        '"path": "/tmp/tmpmm2wc69i/requests"}}, '
+        '"enrichment_details": {"triggered_rules": ["release_zero"], '
+        '"package_ecosystem": "pypi"}}',
+    },
+    {
+        'timestamp': ANY,
+        'message': '{"log": {"dependency": "pandas", "version": "1.0.0", '
+        '"result": {"issues": 1, "errors": {}, "results": {"release_zero": "0.0.0"}, '
+        '"path": "/tmp/tmpmm2wc69i/pandas"}}, '
+        '"enrichment_details": {"triggered_rules": ["release_zero"], '
+        '"package_ecosystem": "pypi"}}',
     },
 ]
 
@@ -144,7 +172,7 @@ def test_get_guarddog_output(instance, mocker):
 
 
 @pytest.mark.unit
-def test_check_guarddog_command_successful(example_dependencies, instance, mocker):
+def test_check_guarddog_command_successful(datadog_agent, example_dependencies, instance, mocker):
     check = GuarddogCheck("guarddog", {}, [instance])
     check.package_ecosystem = "pypi"
     check.path = "/path/to/dependency_file"
@@ -162,17 +190,14 @@ def test_check_guarddog_command_successful(example_dependencies, instance, mocke
         "subprocess.run", return_value=Mock(stdout=mock_stdout, stderr=mock_stderr, returncode=mock_returncode)
     )
 
-    mock_send_log = mocker.patch.object(check, "send_log")
-
     check.check(None)
+    datadog_agent.assert_logs(check.check_id, EXPECTED_RESPONSE)
 
-    assert mock_send_log.call_count == len(MOCK_RESPONSE)
-
+    mock_send_log = mocker.spy(check, "send_log")
     for call in mock_send_log.call_args_list:
         args, _ = call
         sent_data = args[0]
         assert json.loads(sent_data["message"])['log']["dependency"] in example_dependencies.split("\n")
-        assert json.loads(sent_data["message"])["enrichment_details"]["triggered_rules"] == ["release_zero"]
 
 
 @pytest.mark.unit
@@ -200,7 +225,7 @@ def test_check_guarddog_output_json_decode_error(instance, mocker):
 
 
 @pytest.mark.unit
-def test_check_abs_path_guarddog_not_found(example_dependencies, instance, mocker):
+def test_check_abs_path_guarddog_not_found(datadog_agent, example_dependencies, instance, mocker):
     check = GuarddogCheck("guarddog", {}, [instance])
     check.package_ecosystem = "pypi"
     check.path = "/path/to/dependency_file"
@@ -220,15 +245,15 @@ def test_check_abs_path_guarddog_not_found(example_dependencies, instance, mocke
             Mock(stdout=mock_stdout, stderr=mock_stderr, returncode=mock_returncode),  # Second call succeeds
         ],
     )
-    mock_send_log = mocker.patch.object(check, "send_log")
-    check.check(None)
-    assert mock_send_log.call_count == len(MOCK_RESPONSE)
 
+    check.check(None)
+    datadog_agent.assert_logs(check.check_id, EXPECTED_RESPONSE)
+
+    mock_send_log = mocker.spy(check, "send_log")
     for call in mock_send_log.call_args_list:
         args, _ = call
         sent_data = args[0]
         assert json.loads(sent_data["message"])['log']["dependency"] in example_dependencies.split("\n")
-        assert json.loads(sent_data["message"])["enrichment_details"]["triggered_rules"] == ["release_zero"]
 
 
 @pytest.mark.unit
