@@ -48,12 +48,17 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
 
         output_lines = output.strip().split('\n')
         headers = output_lines.pop(0)
-        if len(headers.split()) != mapping.get('expected_columns'):
-            self.log.warning("Skipping %s metrics; unexpected return value", cmd_name)
+        delimiter = '|' if '|' in output else None
+        if len(headers.split(delimiter)) != mapping.get('expected_columns'):
+            (
+                self.log.warning(
+                    "Skipping %s metrics; unexpected return value: %s columns", cmd_name, len(headers.split(delimiter))
+                ),
+            )
             return
 
         for line in output_lines:
-            line_data = line.split()
+            line_data = [line.strip() for line in line.split(delimiter)]
             tags = self.process_tags(mapping.get('tags', []), line_data)
             self.submit_metrics(mapping.get('prefix'), mapping.get('metrics'), line_data, tags)
 

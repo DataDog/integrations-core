@@ -25,22 +25,28 @@ class LSFClient:
         return self._run_command(['lsclusters', '-w'])
 
     def bhosts(self):
-        return self._run_command(['bhosts', '-w'])
+        return self._run_command(
+            ['bhosts', '-o', "\"HOST_NAME STATUS JL_U MAX NJOBS RUN SSUSP USUSP RSV delimiter='|'\""]
+        )
 
     def lshosts(self):
         return self._run_command(
             [
                 'lshosts',
                 '-o',
-                '"HOST_NAME:50 type:30 model:30 cpuf: ncpus: maxmem: maxswp: server: nprocs: ncores: nthreads: maxtmp:"',  # noqa: E501
+                "\"HOST_NAME:50 type:30 model:30 cpuf: ncpus: maxmem: maxswp: server: nprocs: ncores: nthreads: maxtmp: delimiter='|'\"",  # noqa: E501
             ]
         )
 
     def lsload(self):
-        return self._run_command(['lsload', '-o', '"HOST_NAME status r15s r1m r15m ut pg io ls it tmp swp mem"'])
+        return self._run_command(
+            ['lsload', '-o', "\"HOST_NAME status r15s r1m r15m ut pg io ls it tmp swp mem delimiter='|'\""]
+        )
 
     def bslots(self):
         return self._run_command(['bslots'])
 
     def bqueues(self):
-        return self._run_command(['bqueues', '-o', '"QUEUE_NAME PRIO STATUS MAX JL_U JL_P JL_H NJOBS  PEND RUN SUSP"'])
+        return self._run_command(
+            ['bqueues', '-o', "\"QUEUE_NAME PRIO STATUS MAX JL_U JL_P JL_H NJOBS  PEND RUN SUSP delimiter='|'\""]
+        )

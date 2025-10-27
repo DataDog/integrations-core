@@ -1,9 +1,9 @@
-QUEUE_NAME PRIORITY STATUS MAX JL_U JL_P JL_H NJOBS PEND RUN SUSP
-admin 50 Open:Active - - - - 0 0 0 0
-owners 43 Open:Active - - - - 0 0 0 0
-priority 43 Open:Active - - - - 0 0 0 0
-night 40 Open:Active - - - - 0 0 0 0
-short 35 Open:Active - - - - 0 0 0 0
-normal 30 Open:Active - - - - 0 0 0 0
-interactive 30 Open:Active - - - - 0 0 0 0
-idle 20 Open:Active - - - - 0 0 0 0
+QUEUE_NAME|PRIORITY|STATUS|MAX|JL_U|JL_P|JL_H|NJOBS|PEND|RUN|SUSP
+admin|50|Open:Active|-|-|-|-|0|0|0|0
+owners|43|Open:Active|-|-|-|-|0|0|0|0
+priority|43|Open:Active|-|-|-|-|0|0|0|0
+night|40|Open:Inact_Win|-|-|-|-|0|0|0|0
+short|35|Open:Active|-|-|-|-|0|0|0|0
+normal|30|Open:Active|-|-|-|-|0|0|0|0
+interactive|30|Open:Active|-|-|-|-|0|0|0|0
+idle|20|Open:Active|-|-|-|-|0|0|0|0
