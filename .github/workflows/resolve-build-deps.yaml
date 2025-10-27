@@ -240,7 +240,6 @@ jobs:
       # Use PBS as suggested by: https://github.com/DataDog/integrations-core/pull/21692#pullrequestreview-3358660684
       # PBS stands for Python Build Standalone: https://astral.sh/blog/python-build-standalone
       env:
-        # CLAUDE: in resolve-build-deps.yaml, bump PYTHON_PATCH and PBS_* from astral-sh/python-build-standalone
         PYTHON_PATCH: 9
         PBS_RELEASE: 20251014
         PBS_SHA256__aarch64: 52721745b0fa3196e4d0381fa5c06dda1d54343b90d49d90c3bba52d1171bd98
