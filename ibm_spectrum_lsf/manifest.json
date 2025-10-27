@@ -34,7 +34,7 @@
       },
       "metrics": {
         "prefix": "ibm_spectrum_lsf.",
-        "check": "",
+        "check": "ibm_spectrum_lsf.can_connect",
         "metadata_path": "metadata.csv"
       }
     }
