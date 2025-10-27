@@ -147,8 +147,8 @@ class WinWMICheck(AgentCheck):
         self.log.debug("Extracted `tag_queries` tag: '%s'", tag)
         return tag
 
-    def _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags):
-        # type: (WMISampler, str, List[List[str]], List[str]) -> List[WMIMetric]
+    def _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags, tag_by_prefix):
+        # type: (WMISampler, str, List[List[str]], List[str], str) -> List[WMIMetric]
         """
         Extract and tag metrics from the WMISampler.
 
@@ -174,6 +174,8 @@ class WinWMICheck(AgentCheck):
 
         extracted_metrics = []
         tag_by = tag_by.lower()
+        if tag_by_prefix:
+            tag_by_prefix = tag_by_prefix.lower()
 
         for wmi_obj in wmi_sampler:
             tags = list(constant_tags) if constant_tags else []
@@ -203,11 +205,12 @@ class WinWMICheck(AgentCheck):
                 # Tag with `tag_by` parameter
                 for t in tag_by.split(','):
                     t = t.strip()
-                    if wmi_property == t:
+                    if normalized_wmi_property == t:
                         tag_value = str(wmi_value).lower()
                         if tag_queries and tag_value.find("#") > 0:
                             tag_value = tag_value[: tag_value.find("#")]
-
+                        if tag_by_prefix:
+                            t = "{prefix}_{name}".format(prefix=tag_by_prefix, name=t)
                         tags.append("{name}:{value}".format(name=t, value=tag_value))
                         continue
 
