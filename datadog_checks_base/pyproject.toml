@@ -40,7 +40,7 @@ deps = [
     "ddtrace==3.12.5",
     "jellyfish==1.2.0",
     "lazy-loader==0.4",
-    "prometheus-client==0.22.1",
+    "prometheus-client==0.23.1",
     "protobuf==6.32.0",
     "pydantic==2.11.7",
     "python-dateutil==2.9.0.post0",
