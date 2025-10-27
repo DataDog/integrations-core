@@ -90,7 +90,7 @@ class SchemaCollector(ABC):
                         # Because we're iterating over a cursor we need to try to get
                         # the next row to see if we've reached the last row
                         next_row = self._get_next(cursor)
-                        is_last_payload = database is databases[-1] and next_row is None
+                        is_last_payload = database == databases[-1] and next_row is None
                         self.maybe_flush(is_last_payload)
                 self._log.debug("Completed collection of schemas for database %s", database_name)
         except Exception as e:
@@ -140,7 +140,7 @@ class SchemaCollector(ABC):
 
     def maybe_flush(self, is_last_payload):
         if is_last_payload or len(self._queued_rows) >= self._config.payload_chunk_size:
-            event = self.base_event.copy()
+            event = self.base_event
             event["timestamp"] = now_ms()
             # DBM backend expects metadata to be an array of database objects
             event["metadata"] = self._queued_rows
@@ -162,6 +162,7 @@ class SchemaCollector(ABC):
         """
         raise NotImplementedError("Subclasses must implement kind")
 
+    @abstractmethod
     def _get_databases(self) -> list[DatabaseInfo]:
         """
         Returns a list of database dictionaries.
