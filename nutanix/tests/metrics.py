@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+HEALTH_METRICS = ["nutanix.health.up"]
+
 CLUSTER_STATS_METRICS_REQUIRED = [
     "nutanix.cluster.aggregate_hypervisor.memory.usage",
     "nutanix.cluster.controller.avg.io.latency",
@@ -145,3 +147,28 @@ VM_STATS_METRICS_OPTIONAL = [
     "nutanix.vm.hypervisor.vm_running_time_usecs",
     "nutanix.vm.memory.usage_bytes",
 ]
+
+CLUSTER_BASIC_METRICS = [
+    "nutanix.cluster.count",
+    "nutanix.cluster.nbr_nodes",
+    "nutanix.cluster.vm.count",
+    "nutanix.cluster.vm.inefficient_count",
+]
+
+HOST_BASIC_METRICS = [
+    "nutanix.host.count",
+]
+
+VM_BASIC_METRICS = [
+    "nutanix.vm.count",
+]
+
+ALL_METRICS = (
+    HEALTH_METRICS
+    + CLUSTER_BASIC_METRICS
+    + CLUSTER_STATS_METRICS_REQUIRED
+    + HOST_BASIC_METRICS
+    + HOST_STATS_METRICS_REQUIRED
+    + VM_BASIC_METRICS
+    + VM_STATS_METRICS_REQUIRED
+)
