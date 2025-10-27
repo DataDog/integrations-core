@@ -125,6 +125,34 @@ def test_ratelimiting_ttl_cache():
 
 
 class DBExceptionForTests(Exception):
+def test_dbm_async_job_missed_collection_interval(aggregator):
+    check = AgentCheck()
+    health = Health(check)
+    check.health = health
+    job = JobForTesting(check, min_collection_interval=1, job_execution_time=3)
+    job.run_job_loop([])
+    # Sleep longer than the target collection interval
+    time.sleep(1.5)
+    # Simulate the check calling run_job_loop on its run
+    job.run_job_loop([])
+    # One more run to check the cooldown
+    job.run_job_loop([])
+    job.cancel()
+
+    events = aggregator.get_event_platform_events("dbm-health")
+
+    # The cooldown should prevent the event from being submitted again
+    assert len(events) == 1
+    health_event = events[0]
+    assert health_event['name'] == HealthEvent.MISSED_COLLECTION.value
+    assert health_event['status'] == HealthStatus.WARNING.value
+    assert health_event['data']['job_name'] == 'test-job'
+    # This might be flakey, we can adjust the timing if needed
+    assert health_event['data']['elapsed_time'] > 1500
+    assert health_event['data']['elapsed_time'] < 2000
+
+
+class DBExceptionForTests(BaseException):
     pass
 
 

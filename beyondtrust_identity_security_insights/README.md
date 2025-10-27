@@ -8,8 +8,6 @@ Integrate BeyondTrust Identity Security Insights with Datadog's pre-built dashbo
 
 This integration also includes ready-to-use Cloud SIEM detection rules for enhanced monitoring and security. These Cloud SIEM rules can be used with [Datadog Workflow Automation][5] to orchestrate and automate your end-to-end processes with OOTB Workflow Blueprints.
 
-**Minimum Agent version:** 7.67.1
-
 ## Setup
 
 ### Configuration

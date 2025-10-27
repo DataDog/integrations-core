@@ -1099,17 +1099,21 @@ class PostgreSql(AgentCheck):
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._emit_running_metric()
-            self._collect_stats(tags)
+
+            if not self._config.only_custom_queries:
+                self._collect_stats(tags)
+                if self._config.dbm:
+                    self.statement_metrics.run_job_loop(tags)
+                    self.statement_samples.run_job_loop(tags)
+                    self.metadata_samples.run_job_loop(tags)
+                if self._config.collect_wal_metrics:
+                    # collect wal metrics for pg < 10, disabled by enabled
+                    self._collect_wal_metrics()
+
             if self._query_manager.queries:
                 self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
                 self._query_manager.execute(extra_tags=tags)
-            if self._config.dbm:
-                self.statement_metrics.run_job_loop(tags)
-                self.statement_samples.run_job_loop(tags)
-                self.metadata_samples.run_job_loop(tags)
-            if self._config.collect_wal_metrics:
-                # collect wal metrics for pg < 10, disabled by enabled
-                self._collect_wal_metrics()
+
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
