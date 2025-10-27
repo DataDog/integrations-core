@@ -11,20 +11,19 @@ files:
           type: string
           example: <PROXY_HOST>
       - name: proxy_port
-        value: <PROXY_PORT>
         description: The port of your proxy server.
         value:
           type: integer
       - name: proxy_user
-        value: <PROXY_USER>
         description: The username to authenticate your proxy server.
         value:
           type: string
+          example: <PROXY_USER>
       - name: proxy_password
-        value: <PROXY_PASSWORD>
         description: The password to authenticate your proxy server.
         value:
           type: string
+          example: <PROXY_PASSWORD>
       - template: init_config/default
   - template: instances
     options:
