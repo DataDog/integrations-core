@@ -1,4 +1,4 @@
-name: POC - Test Worker
+name: ZZ - POC - Test Worker
 
 on:
   workflow_dispatch:
