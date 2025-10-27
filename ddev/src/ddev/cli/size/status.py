@@ -158,34 +158,40 @@ def status_mode(
         get_dependencies,
         get_files,
     )
+    format = params["format"]
+    platform = params["platform"]
+    py_version = params["py_version"]
+    compressed = params["compressed"]
+    show_gui = params["show_gui"]
+    app = params["app"]
 
-    with params["app"].status("Calculating sizes..."):
-        sizes = get_files(repo_path, params["compressed"], params["py_version"], params["platform"]) + (
+    with app.status("Calculating sizes..."):
+        sizes = get_files(repo_path, compressed, py_version, platform) + (
             dependency_sizes
-            or get_dependencies(repo_path, params["platform"], params["py_version"], params["compressed"])
+            or get_dependencies(app, repo_path, platform, py_version, compressed)
         )
 
     sizes.sort()
 
-    if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
+    if not format or format == ["png"]:  # if no format is provided for the data print the table
         sizes.print_table(
-            params["app"], f"Disk Usage Status for {params['platform']} and Python version {params['py_version']}"
+            app, f"Disk Usage Status for {platform} and Python version {py_version}"
         )
 
     treemap_path = None
-    if params["format"] and "png" in params["format"]:
+    if format and "png" in format:
         treemap_path = os.path.join(
-            "size_status_visualizations", f"treemap_{params['platform']}_{params['py_version']}.png"
+            "size_status_visualizations", f"treemap_{platform}_{py_version}.png"
         )
 
-    if params["show_gui"] or treemap_path:
+    if show_gui or treemap_path:
         from ddev.cli.size.utils.common_funcs import SizeMode, plot_treemap
 
         plot_treemap(
-            params["app"],
+            app,
             sizes,
-            f"Disk Usage Status for {params['platform']} and Python version {params['py_version']}",
-            params["show_gui"],
+            f"Disk Usage Status for {platform} and Python version {py_version}",
+            show_gui,
             SizeMode.STATUS,
             treemap_path,
         )

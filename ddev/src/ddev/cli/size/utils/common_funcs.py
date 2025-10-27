@@ -288,10 +288,11 @@ def is_correct_dependency(platform: str, version: str, name: str) -> bool:
     return platform == _platform and version == _version
 
 
-def get_dependencies(repo_path: str | Path, platform: str, py_version: str, compressed: bool) -> Sizes:
+def get_dependencies(app: Application, repo_path: str | Path, platform: str, py_version: str, compressed: bool) -> Sizes:
     """
     Gets the list of dependencies for a given platform and Python version and returns a Sizes object.
     """
+    app.display_debug(f"Getting dependencies from lockfiles for {platform} and {py_version}")
     resolved_path = Path(repo_path) / ".deps" / "resolved"
     for filename in resolved_path.iterdir():
         if filename.is_file() and is_correct_dependency(platform, py_version, filename.name):

@@ -63,7 +63,7 @@ def artifact_exists(app: Application, commit: str, artifact_name: str, workflow:
 def get_previous_commit(app: Application, commit: str) -> str:
     try:
         commits = app.repo.git.log(["hash:%H"], n=2, source="origin/master")
-        app.display(f"Commits: {commits}")
+        app.display_debug(f"Last two commits on master: {commits}")
         if commits[0]["hash"] != commit:
             app.display_debug(f"Found last commit on master: {commits[0]['hash']}")
             return commits[0]["hash"]

@@ -221,12 +221,19 @@ def get_diff_from_artifacts(
 ) -> tuple[Sizes, TotalsDict, TotalsDict, bool]:
     from ddev.cli.size.utils.gha_artifacts import get_status_sizes_from_commit
 
+
+    compressed = params["compressed"]
+    quality_gate_threshold = params["quality_gate_threshold"]
+    to_dd_org = params["to_dd_org"]
+    to_dd_key = params["to_dd_key"]
+    to_dd_site = params["to_dd_site"]
+
     artifacts_sizes = Sizes([])
     passes_quality_gate = True
 
     try:
-        baseline_sizes = get_status_sizes_from_commit(app, baseline, params["compressed"])
-        commit_sizes = get_status_sizes_from_commit(app, commit, params["compressed"])
+        baseline_sizes = get_status_sizes_from_commit(app, baseline, compressed)
+        commit_sizes = get_status_sizes_from_commit(app, commit, compressed)
     except Exception:
         import traceback
 
@@ -246,28 +253,28 @@ def get_diff_from_artifacts(
         params["py_version"] = ver
         output_diff(params, baseline, commit, diff_sizes)
         artifacts_sizes = artifacts_sizes + diff_sizes
-        if params["quality_gate_threshold"]:
+        if quality_gate_threshold:
             passes_quality_gate = (
                 check_quality_gate(
                     app,
                     diff_sizes._total_sizes[plat][ver],
                     baseline_sizes._total_sizes[plat][ver],
-                    params["quality_gate_threshold"],
+                    quality_gate_threshold,
                     plat,
                     ver,
                 )
                 and passes_quality_gate
             )
-        if params["to_dd_org"] or params["to_dd_key"]:
+        if to_dd_org or to_dd_key:
             from .utils.common_funcs import SizeMode, send_metrics_to_dd
 
             send_metrics_to_dd(
                 app,
                 diff_sizes,
-                params["to_dd_org"],
-                params["to_dd_key"],
-                params["to_dd_site"],
-                params["compressed"],
+                to_dd_org,
+                to_dd_key,
+                to_dd_site,
+                compressed,
                 SizeMode.DIFF,
             )
 
@@ -278,6 +285,12 @@ def get_diff_from_repo(
     app: Application, baseline: str, commit: str, params: CLIParameters
 ) -> tuple[Sizes, TotalsDict, TotalsDict, bool]:
     from .utils.common_funcs import GitRepo
+
+    compressed = params["compressed"]
+    quality_gate_threshold = params["quality_gate_threshold"]
+    to_dd_org = params["to_dd_org"]
+    to_dd_key = params["to_dd_key"]
+    to_dd_site = params["to_dd_site"]
 
     with GitRepo(app.repo.path) as gitRepo:
         try:
@@ -293,7 +306,7 @@ def get_diff_from_repo(
 
             for plat, ver in params["combinations"]:
                 files_b, dependencies_b, files_c, dependencies_c = get_repo_info(
-                    gitRepo, plat, ver, baseline, commit, params["compressed"]
+                    gitRepo, plat, ver, baseline, commit, compressed
                 )
 
                 diff_sizes = files_c.diff(files_b) + dependencies_c.diff(dependencies_b)
@@ -306,28 +319,28 @@ def get_diff_from_repo(
                 params["py_version"] = ver
                 output_diff(params, baseline, commit, diff_sizes)
                 repo_sizes = repo_sizes + diff_sizes
-                if params["quality_gate_threshold"]:
+                if quality_gate_threshold:
                     passes_quality_gate = (
                         check_quality_gate(
                             app,
                             diff_sizes._total_sizes[plat][ver],
                             baseline_total_size[plat][ver],
-                            params["quality_gate_threshold"],
+                            quality_gate_threshold,
                             plat,
                             ver,
                         )
                         and passes_quality_gate
                     )
-                if params["to_dd_org"] or params["to_dd_key"]:
+                if to_dd_org or to_dd_key:
                     from .utils.common_funcs import SizeMode, send_metrics_to_dd
 
                     send_metrics_to_dd(
                         app,
                         diff_sizes,
-                        params["to_dd_org"],
-                        params["to_dd_key"],
-                        params["to_dd_site"],
-                        params["compressed"],
+                        to_dd_org,
+                        to_dd_key,
+                        to_dd_site,
+                        compressed,
                         SizeMode.DIFF,
                     )
 
@@ -340,37 +353,44 @@ def get_diff_from_repo(
 
 
 def output_diff(params: CLIParameters, baseline: str, commit: str, sizes: Sizes) -> None:
+    
+    platform = params["platform"]
+    py_version = params["py_version"]
+    format = params["format"]
+    show_gui = params["show_gui"]
+    app = params["app"]
+
     differences = sizes.len_non_zero()
     sizes.sort()
 
     if differences == 0:
-        params["app"].display(
-            f"No size differences were detected between the selected commits for {params['platform']}"
-            f" and Python version {params['py_version']}"
+        app.display(
+            f"No size differences were detected between the selected commits for {platform}"
+            f" and Python version {py_version}"
         )
         return
 
-    if not params["format"] or params["format"] == ["png"]:  # if no format is provided for the data print the table
+    if not format or format == ["png"]:  # if no format is provided for the data print the table
         sizes.print_table(
-            params["app"],
+            app,
             f"Disk Usage Differences between {baseline} and {commit}"
-            f" for {params['platform']} and Python version {params['py_version']}",
+            f" for {platform} and Python version {py_version}",
         )
 
     treemap_path = None
-    if params["format"] and "png" in params["format"]:
+    if format and "png" in format:
         treemap_path = os.path.join(
-            "size_diff_visualizations", f"treemap_{params['platform']}_{params['py_version']}.png"
+            "size_diff_visualizations", f"treemap_{platform}_{py_version}.png"
         )
 
-    if params["show_gui"] or treemap_path:
+    if show_gui or treemap_path:
         from .utils.common_funcs import SizeMode, plot_treemap
 
         plot_treemap(
-            params["app"],
+            app,
             sizes,
-            f"Disk Usage Differences for {params['platform']} and Python version {params['py_version']}",
-            params["show_gui"],
+            f"Disk Usage Differences for {platform} and Python version {py_version}",
+            show_gui,
             SizeMode.DIFF,
             treemap_path,
         )
