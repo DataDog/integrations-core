@@ -1,16 +1,35 @@
 {
   "title": "Hugging Face TGI - Overview",
-  "description": "# About\nMonitor your Hugging Face Text Generation Inference deployment with real-time metrics for requests, tokens, batching, and system health.",
+  "description": "# About\nMonitor your Hugging Face Text Generation Inference deployment with real-time metrics for requests, tokens, batching, and system health. (cloned)",
   "widgets": [
     {
       "id": 1,
       "definition": {
         "title": "About",
-        "banner_img": "/static/images/logos/hugging-face-tgi_large.svg",
+        "background_color": "vivid_yellow",
         "show_title": true,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
+          {
+            "id": 7638856905341489,
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/hugging-face-tgi_large.svg",
+              "url_dark_theme": "/static/images/logos/hugging-face-tgi_reversed_large.svg",
+              "sizing": "contain",
+              "has_background": true,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 5,
+              "height": 2
+            }
+          },
           {
             "id": 2,
             "definition": {
@@ -27,7 +46,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 0,
+              "y": 2,
               "width": 3,
               "height": 3
             }
@@ -48,7 +67,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 0,
+              "y": 2,
               "width": 2,
               "height": 3
             }
