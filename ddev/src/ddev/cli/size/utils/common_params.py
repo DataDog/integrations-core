@@ -36,10 +36,12 @@ def common_params(func: Callable) -> Callable:
 
 
 def validate_format(_, __, format: str) -> list[str]:
-    format_list = [f.strip() for f in format.split(",")] if format else []
+    if format == "":
+        raise click.BadParameter(f"A value must be provided. Supported formats are: {', '.join(VALID_FORMATS)}")
 
+    format_list = [f.strip() for f in format.split(",")] if format else []
     if unsupported_formats := set(format_list) - set(VALID_FORMATS):
         raise click.BadParameter(
-            f"Invalid format: {', '.join(unsupported_formats)}. Only {', '.join(VALID_FORMATS)} are supported."
+            f"{', '.join(unsupported_formats)}. Only {', '.join(VALID_FORMATS)} are supported"
         )
     return format_list
