@@ -26,10 +26,6 @@ def save_quality_gate_html(
     it ouputs the short version.
     """
     html = str()
-    html_headers = get_html_headers(threshold_percentage, baseline, passes_quality_gate)
-
-    if not file_path.exists():
-        file_path.write_text(html_headers, encoding="utf-8")
 
     type_str = (
         f"<h3>{'Compressed' if compressed else 'Uncompressed'} Size Changes "
@@ -66,8 +62,13 @@ def save_quality_gate_html(
 
         html = f"<details><summary>{type_str}</summary>\n{html}\n</details>"
 
-    with file_path.open(mode="a", encoding="utf-8") as f:
-        f.write(html)
+        if not file_path.exists():
+            file_path.write_text(html, encoding="utf-8")
+        else:
+            existing_content = file_path.read_text(encoding="utf-8")
+            passes = ("❌" not in existing_content) and passes_quality_gate
+            header = get_html_headers(threshold_percentage, baseline, passes)
+            file_path.write_text(f"{header}{existing_content}\n{html}", encoding="utf-8")
 
     app.display(f"HTML file saved to {file_path}")
 
@@ -84,11 +85,6 @@ def save_quality_gate_html_table(
     total_diff: TotalsDict,
     passes_quality_gate: bool,
 ) -> None:
-    html_headers = get_html_headers(threshold_percentage, baseline, passes_quality_gate)
-
-    if not file_path.exists():
-        file_path.write_text(html_headers, encoding="utf-8")
-
     type_str = (
         f"<h3>{'Compressed' if compressed else 'Uncompressed'} Size Changes "
         f"{'✅' if passes_quality_gate else '❌'}</h3></summary>"
@@ -165,9 +161,13 @@ def save_quality_gate_html_table(
 
         final_html = f"<details><summary>{type_str}</summary>\n{html_table}\n</details>"
 
-    with file_path.open(mode="a", encoding="utf-8") as f:
-        f.write(final_html)
-
+    if not file_path.exists():
+        file_path.write_text(final_html, encoding="utf-8")
+    else:
+        existing_content = file_path.read_text(encoding="utf-8")
+        passes = ("❌" not in existing_content) and passes_quality_gate
+        header = get_html_headers(threshold_percentage, baseline, passes)
+        file_path.write_text(f"{header}{existing_content}\n{final_html}", encoding="utf-8")
     app.display(f"HTML file saved to {file_path}")
 
 
