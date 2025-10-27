@@ -134,7 +134,7 @@ class Sizes(RootModel[list[Size]]):
                     platform=platform,
                     python_version=python_version,
                     delta_type=delta_type,
-                    percentage=percentage,
+                    percentage=round(percentage, 2),
                 )
             )
         return result
