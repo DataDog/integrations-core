@@ -85,7 +85,7 @@ class Health:
             Tags to associate with the health event.
         :param cooldown_time: int
             The cooldown period in seconds to prevent the events with the same name and status
-            from being submitted again. If None there is be no cooldown.
+            from being submitted again. If None there is no cooldown.
         :param cooldown_values: list of str
             Additional values to include in the cooldown key.
         :param data: A dictionary to be submitted as `data`. Must be JSON serializable.
