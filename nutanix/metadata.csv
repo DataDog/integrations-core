@@ -1,50 +1,105 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-nutanix.health.up,gauge,,,,"Value of 1 if the agent can connect to the Prism Central, and 0 otherwise.",0,nutanix,health,,prism_central
-nutanix.cluster.count,gauge,,,,Number of clusters,0,nutanix,cluster count,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.vm_count,gauge,,,,Number of VMs in the cluster,0,nutanix,vm count,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.node_count,gauge,,,,Number of nodes in the cluster,0,nutanix,node count,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.redundancy_factor,gauge,,,,Cluster redundancy factor,0,nutanix,redundancy,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.available,gauge,,,,Cluster availability status (1 if available),0,nutanix,available,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.cpu.usage_percent,gauge,,percent,,Cluster CPU usage percentage,0,nutanix,cpu usage,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.memory.usage_percent,gauge,,percent,,Cluster memory usage percentage,0,nutanix,memory usage,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.memory.usage_bytes,gauge,,byte,,Cluster memory usage in bytes,0,nutanix,memory bytes,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.storage.capacity_bytes,gauge,,byte,,Total storage capacity in bytes,0,nutanix,storage capacity,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.storage.usage_bytes,gauge,,byte,,Storage usage in bytes,0,nutanix,storage usage,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.storage.free_bytes,gauge,,byte,,Free storage in bytes,0,nutanix,storage free,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.iops.read,gauge,,operation,second,Cluster read IOPS,0,nutanix,read iops,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.iops.write,gauge,,operation,second,Cluster write IOPS,0,nutanix,write iops,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.throughput.read_bytes_per_sec,gauge,,byte,second,Cluster read throughput in bytes per second,0,nutanix,read throughput,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.throughput.write_bytes_per_sec,gauge,,byte,second,Cluster write throughput in bytes per second,0,nutanix,write throughput,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.latency.read_ms,gauge,,millisecond,,Cluster read latency in milliseconds,0,nutanix,read latency,,nutanix_cluster_id nutanix_cluster_name
-nutanix.cluster.latency.write_ms,gauge,,millisecond,,Cluster write latency in milliseconds,0,nutanix,write latency,,nutanix_cluster_id nutanix_cluster_name
-nutanix.storage_container.count,gauge,,,,Number of storage containers,0,nutanix,container count,,storage_container_name storage_container_id nutanix_cluster_id
-nutanix.host.count,gauge,,,,Number of hosts,0,nutanix,host count,,nutanix_host_id nutanix_host_name nutanix_cluster_id
-nutanix.host.cpu.usage_percent,gauge,,percent,,Host CPU usage percentage,0,nutanix,host cpu,,nutanix_host_id nutanix_host_name nutanix_cluster_id
-nutanix.host.memory.usage_percent,gauge,,percent,,Host memory usage percentage,0,nutanix,host memory,,nutanix_host_id nutanix_host_name nutanix_cluster_id
-nutanix.host.memory.usage_bytes,gauge,,byte,,Host memory usage in bytes,0,nutanix,host memory bytes,,nutanix_host_id nutanix_host_name nutanix_cluster_id
-nutanix.host.disk.iops.read,gauge,,operation,second,Host disk read IOPS,0,nutanix,host disk read,,nutanix_host_id nutanix_host_name nutanix_cluster_id
-nutanix.host.disk.iops.write,gauge,,operation,second,Host disk write IOPS,0,nutanix,host disk write,,nutanix_host_id nutanix_host_name nutanix_cluster_id
-nutanix.host.disk.throughput.read_bytes_per_sec,gauge,,byte,second,Host disk read throughput in bytes per second,0,nutanix,host disk read bps,,nutanix_host_id nutanix_host_name nutanix_cluster_id
-nutanix.host.disk.throughput.write_bytes_per_sec,gauge,,byte,second,Host disk write throughput in bytes per second,0,nutanix,host disk write bps,,nutanix_host_id nutanix_host_name nutanix_cluster_id
-nutanix.host.network.throughput.rx_bytes_per_sec,gauge,,byte,second,Host network receive throughput in bytes per second,0,nutanix,host net rx,,nutanix_host_id nutanix_host_name nutanix_cluster_id
-nutanix.host.network.throughput.tx_bytes_per_sec,gauge,,byte,second,Host network transmit throughput in bytes per second,0,nutanix,host net tx,,nutanix_host_id nutanix_host_name nutanix_cluster_id
-nutanix.vm.count,gauge,,,,Number of VMs,0,nutanix,vm count,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.cpu_count,gauge,,,,Number of vCPUs allocated to the VM,0,nutanix,vm vcpus,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.memory_size_bytes,gauge,,byte,,VM memory size in bytes,0,nutanix,vm memory size,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.cpu.usage_percent,gauge,,percent,,VM CPU usage percentage,0,nutanix,vm cpu usage,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.cpu.ready_time_ppm,gauge,,,,VM CPU ready time in parts per million (inefficiency indicator),0,nutanix,vm cpu ready,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.memory.usage_percent,gauge,,percent,,VM memory usage percentage,0,nutanix,vm mem usage,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.memory.usage_bytes,gauge,,byte,,VM memory usage in bytes,0,nutanix,vm mem bytes,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.disk.iops.read,gauge,,operation,second,VM disk read IOPS,0,nutanix,vm disk read,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.disk.iops.write,gauge,,operation,second,VM disk write IOPS,0,nutanix,vm disk write,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.disk.throughput.read_bytes_per_sec,gauge,,byte,second,VM disk read throughput in bytes per second,0,nutanix,vm disk read bps,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.disk.throughput.write_bytes_per_sec,gauge,,byte,second,VM disk write throughput in bytes per second,0,nutanix,vm disk write bps,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.disk.latency.read_ms,gauge,,millisecond,,VM disk read latency in milliseconds,0,nutanix,vm disk read lat,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.disk.latency.write_ms,gauge,,millisecond,,VM disk write latency in milliseconds,0,nutanix,vm disk write lat,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.network.throughput.rx_bytes_per_sec,gauge,,byte,second,VM network receive throughput in bytes per second,0,nutanix,vm net rx,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.vm.network.throughput.tx_bytes_per_sec,gauge,,byte,second,VM network transmit throughput in bytes per second,0,nutanix,vm net tx,,nutanix_vm_id nutanix_vm_name nutanix_cluster_id power_state
-nutanix.event.occurred,count,,,,Count of events by type and severity,0,nutanix,event,,event_type severity
-nutanix.alert.critical,gauge,,,,Number of critical alerts,0,nutanix,alert critical,,prism_central
-nutanix.alert.warning,gauge,,,,Number of warning alerts,0,nutanix,alert warning,,prism_central
-nutanix.alert.info,gauge,,,,Number of info alerts,0,nutanix,alert info,,prism_central
-nutanix.alert.active,gauge,,,,Active alerts by type severity and status,0,nutanix,alert active,,alert_type severity status
+nutanix.cluster.aggregate_hypervisor.memory.usage,gauge,,,,Cluster Aggregate Hypervisor Memory Usage.,0,nutanix,usage,,
+nutanix.cluster.controller.avg.io.latency,gauge,,,,Cluster Controller Avg Io Latency.,0,nutanix,latency,,
+nutanix.cluster.controller.avg.read.io.latency,gauge,,,,Cluster Controller Avg Read Io Latency.,0,nutanix,latency,,
+nutanix.cluster.controller.avg.write.io.latency,gauge,,,,Cluster Controller Avg Write Io Latency.,0,nutanix,latency,,
+nutanix.cluster.controller.num.iops,gauge,,,,Cluster Controller Num Iops.,0,nutanix,iops,,
+nutanix.cluster.controller.num.read.iops,gauge,,,,Cluster Controller Num Read Iops.,0,nutanix,iops,,
+nutanix.cluster.controller.num.write.iops,gauge,,,,Cluster Controller Num Write Iops.,0,nutanix,iops,,
+nutanix.cluster.controller.read.io.bandwidth,gauge,,,,Cluster Controller Read Io Bandwidth.,0,nutanix,bandwidth,,
+nutanix.cluster.controller.write.io.bandwidth,gauge,,,,Cluster Controller Write Io Bandwidth.,0,nutanix,bandwidth,,
+nutanix.cluster.count,gauge,,,,Cluster Count.,0,nutanix,count,,
+nutanix.cluster.free.physical_storage,gauge,,,,Cluster Free Physical Storage.,0,nutanix,physical_storage,,
+nutanix.cluster.health.check_score,gauge,,,,Cluster Health Check Score.,0,nutanix,check_score,,
+nutanix.cluster.hypervisor.cpu.usage,gauge,,,,Cluster Hypervisor Cpu Usage.,0,nutanix,usage,,
+nutanix.cluster.io.bandwidth,gauge,,,,Cluster Io Bandwidth.,0,nutanix,bandwidth,,
+nutanix.cluster.logical.storage.usage,gauge,,,,Cluster Logical Storage Usage.,0,nutanix,usage,,
+nutanix.cluster.nbr_nodes,gauge,,,,Cluster Nbr Nodes.,0,nutanix,nbr_nodes,,
+nutanix.cluster.storage.capacity,gauge,,,,Cluster Storage Capacity.,0,nutanix,capacity,,
+nutanix.cluster.storage.usage,gauge,,,,Cluster Storage Usage.,0,nutanix,usage,,
+nutanix.cluster.vm.count,gauge,,,,Cluster Vm Count.,0,nutanix,count,,
+nutanix.cluster.vm.inefficient_count,gauge,,,,Cluster Vm Inefficient Count.,0,nutanix,inefficient_count,,
+nutanix.health.up,gauge,,,,Health Up.,0,nutanix,up,,
+nutanix.host.aggregate_hypervisor.memory.usage,gauge,,,,Host Aggregate Hypervisor Memory Usage.,0,nutanix,usage,,
+nutanix.host.controller.avg.io.latency,gauge,,,,Host Controller Avg Io Latency.,0,nutanix,latency,,
+nutanix.host.controller.avg.read.io.latency,gauge,,,,Host Controller Avg Read Io Latency.,0,nutanix,latency,,
+nutanix.host.controller.avg.write.io.latency,gauge,,,,Host Controller Avg Write Io Latency.,0,nutanix,latency,,
+nutanix.host.controller.num.iops,gauge,,,,Host Controller Num Iops.,0,nutanix,iops,,
+nutanix.host.controller.num.read.iops,gauge,,,,Host Controller Num Read Iops.,0,nutanix,iops,,
+nutanix.host.controller.num.write.iops,gauge,,,,Host Controller Num Write Iops.,0,nutanix,iops,,
+nutanix.host.controller.read.io.bandwidth,gauge,,,,Host Controller Read Io Bandwidth.,0,nutanix,bandwidth,,
+nutanix.host.controller.write.io.bandwidth,gauge,,,,Host Controller Write Io Bandwidth.,0,nutanix,bandwidth,,
+nutanix.host.count,gauge,,,,Host Count.,0,nutanix,count,,
+nutanix.host.cpu.capacity,gauge,,,,Host Cpu Capacity.,0,nutanix,capacity,,
+nutanix.host.free.physical_storage,gauge,,,,Host Free Physical Storage.,0,nutanix,physical_storage,,
+nutanix.host.health.check_score,gauge,,,,Host Health Check Score.,0,nutanix,check_score,,
+nutanix.host.hypervisor.cpu.usage,gauge,,,,Host Hypervisor Cpu Usage.,0,nutanix,usage,,
+nutanix.host.io.bandwidth,gauge,,,,Host Io Bandwidth.,0,nutanix,bandwidth,,
+nutanix.host.logical.storage.usage,gauge,,,,Host Logical Storage Usage.,0,nutanix,usage,,
+nutanix.host.memory.capacity,gauge,,,,Host Memory Capacity.,0,nutanix,capacity,,
+nutanix.host.storage.capacity,gauge,,,,Host Storage Capacity.,0,nutanix,capacity,,
+nutanix.host.storage.usage,gauge,,,,Host Storage Usage.,0,nutanix,usage,,
+nutanix.vm.controller.avg_io_latency_micros,gauge,,microsecond,,Vm Controller Avg Io Latency Micros.,0,nutanix,avg_io_latency_micros,,
+nutanix.vm.controller.avg_read_io_latency_micros,gauge,,microsecond,,Vm Controller Avg Read Io Latency Micros.,0,nutanix,avg_read_io_latency_micros,,
+nutanix.vm.controller.avg_read_io_size_kb,gauge,,kilobyte,,Vm Controller Avg Read Io Size Kb.,0,nutanix,avg_read_io_size_kb,,
+nutanix.vm.controller.avg_write_io_latency_micros,gauge,,microsecond,,Vm Controller Avg Write Io Latency Micros.,0,nutanix,avg_write_io_latency_micros,,
+nutanix.vm.controller.avg_write_io_size_kb,gauge,,kilobyte,,Vm Controller Avg Write Io Size Kb.,0,nutanix,avg_write_io_size_kb,,
+nutanix.vm.controller.io_bandwidth_kbps,gauge,,kilobyte,second,Vm Controller Io Bandwidth Kbps.,0,nutanix,io_bandwidth_kbps,,
+nutanix.vm.controller.num_io,gauge,,,,Vm Controller Num Io.,0,nutanix,num_io,,
+nutanix.vm.controller.num_iops,gauge,,operation,second,Vm Controller Num Iops.,0,nutanix,num_iops,,
+nutanix.vm.controller.num_read_io,gauge,,,,Vm Controller Num Read Io.,0,nutanix,num_read_io,,
+nutanix.vm.controller.num_read_iops,gauge,,operation,second,Vm Controller Num Read Iops.,0,nutanix,num_read_iops,,
+nutanix.vm.controller.num_write_io,gauge,,,,Vm Controller Num Write Io.,0,nutanix,num_write_io,,
+nutanix.vm.controller.num_write_iops,gauge,,operation,second,Vm Controller Num Write Iops.,0,nutanix,num_write_iops,,
+nutanix.vm.controller.oplog_drain_dest_hdd_bytes,gauge,,byte,,Vm Controller Oplog Drain Dest Hdd Bytes.,0,nutanix,oplog_drain_dest_hdd_bytes,,
+nutanix.vm.controller.oplog_drain_dest_ssd_bytes,gauge,,byte,,Vm Controller Oplog Drain Dest Ssd Bytes.,0,nutanix,oplog_drain_dest_ssd_bytes,,
+nutanix.vm.controller.read_io_bandwidth_kbps,gauge,,kilobyte,second,Vm Controller Read Io Bandwidth Kbps.,0,nutanix,read_io_bandwidth_kbps,,
+nutanix.vm.controller.read_io_ppm,gauge,,,,Vm Controller Read Io Ppm.,0,nutanix,read_io_ppm,,
+nutanix.vm.controller.read_source_estore_hdd_local_bytes,gauge,,byte,,Vm Controller Read Source Estore Hdd Local Bytes.,0,nutanix,read_source_estore_hdd_local_bytes,,
+nutanix.vm.controller.read_source_estore_hdd_remote_bytes,gauge,,byte,,Vm Controller Read Source Estore Hdd Remote Bytes.,0,nutanix,read_source_estore_hdd_remote_bytes,,
+nutanix.vm.controller.read_source_estore_ssd_local_bytes,gauge,,byte,,Vm Controller Read Source Estore Ssd Local Bytes.,0,nutanix,read_source_estore_ssd_local_bytes,,
+nutanix.vm.controller.read_source_estore_ssd_remote_bytes,gauge,,byte,,Vm Controller Read Source Estore Ssd Remote Bytes.,0,nutanix,read_source_estore_ssd_remote_bytes,,
+nutanix.vm.controller.read_source_oplog_bytes,gauge,,byte,,Vm Controller Read Source Oplog Bytes.,0,nutanix,read_source_oplog_bytes,,
+nutanix.vm.controller.storage_tier_ssd_usage_bytes,gauge,,byte,,Vm Controller Storage Tier Ssd Usage Bytes.,0,nutanix,storage_tier_ssd_usage_bytes,,
+nutanix.vm.controller.timespan_micros,gauge,,microsecond,,Vm Controller Timespan Micros.,0,nutanix,timespan_micros,,
+nutanix.vm.controller.total_io_size_kb,gauge,,kilobyte,,Vm Controller Total Io Size Kb.,0,nutanix,total_io_size_kb,,
+nutanix.vm.controller.total_io_time_micros,gauge,,microsecond,,Vm Controller Total Io Time Micros.,0,nutanix,total_io_time_micros,,
+nutanix.vm.controller.total_read_io_size_kb,gauge,,kilobyte,,Vm Controller Total Read Io Size Kb.,0,nutanix,total_read_io_size_kb,,
+nutanix.vm.controller.total_read_io_time_micros,gauge,,microsecond,,Vm Controller Total Read Io Time Micros.,0,nutanix,total_read_io_time_micros,,
+nutanix.vm.controller.total_transformed_usage_bytes,gauge,,byte,,Vm Controller Total Transformed Usage Bytes.,0,nutanix,total_transformed_usage_bytes,,
+nutanix.vm.controller.user_bytes,gauge,,byte,,Vm Controller User Bytes.,0,nutanix,user_bytes,,
+nutanix.vm.controller.write_dest_estore_hdd_bytes,gauge,,byte,,Vm Controller Write Dest Estore Hdd Bytes.,0,nutanix,write_dest_estore_hdd_bytes,,
+nutanix.vm.controller.write_dest_estore_ssd_bytes,gauge,,byte,,Vm Controller Write Dest Estore Ssd Bytes.,0,nutanix,write_dest_estore_ssd_bytes,,
+nutanix.vm.controller.write_io_bandwidth_kbps,gauge,,kilobyte,second,Vm Controller Write Io Bandwidth Kbps.,0,nutanix,write_io_bandwidth_kbps,,
+nutanix.vm.controller.write_io_ppm,gauge,,,,Vm Controller Write Io Ppm.,0,nutanix,write_io_ppm,,
+nutanix.vm.controller.wss120second_read_mb,gauge,,megabyte,,Vm Controller Wss120second Read Mb.,0,nutanix,wss120second_read_mb,,
+nutanix.vm.controller.wss120second_union_mb,gauge,,megabyte,,Vm Controller Wss120second Union Mb.,0,nutanix,wss120second_union_mb,,
+nutanix.vm.controller.wss120second_write_mb,gauge,,megabyte,,Vm Controller Wss120second Write Mb.,0,nutanix,wss120second_write_mb,,
+nutanix.vm.controller.wss3600second_read_mb,gauge,,megabyte,,Vm Controller Wss3600second Read Mb.,0,nutanix,wss3600second_read_mb,,
+nutanix.vm.controller.wss3600second_union_mb,gauge,,megabyte,,Vm Controller Wss3600second Union Mb.,0,nutanix,wss3600second_union_mb,,
+nutanix.vm.controller.wss3600second_write_mb,gauge,,megabyte,,Vm Controller Wss3600second Write Mb.,0,nutanix,wss3600second_write_mb,,
+nutanix.vm.count,gauge,,,,Vm Count.,0,nutanix,count,,
+nutanix.vm.guest.memory_usage_ppm,gauge,,,,Vm Guest Memory Usage Ppm.,0,nutanix,memory_usage_ppm,,
+nutanix.vm.hypervisor.avg_io_latency_micros,gauge,,microsecond,,Vm Hypervisor Avg Io Latency Micros.,0,nutanix,avg_io_latency_micros,,
+nutanix.vm.hypervisor.cpu_ready_time_ppm,gauge,,,,Vm Hypervisor Cpu Ready Time Ppm.,0,nutanix,cpu_ready_time_ppm,,
+nutanix.vm.hypervisor.cpu_usage_ppm,gauge,,,,Vm Hypervisor Cpu Usage Ppm.,0,nutanix,cpu_usage_ppm,,
+nutanix.vm.hypervisor.io_bandwidth_kbps,gauge,,kilobyte,second,Vm Hypervisor Io Bandwidth Kbps.,0,nutanix,io_bandwidth_kbps,,
+nutanix.vm.hypervisor.memory_usage_ppm,gauge,,,,Vm Hypervisor Memory Usage Ppm.,0,nutanix,memory_usage_ppm,,
+nutanix.vm.hypervisor.num_io,gauge,,,,Vm Hypervisor Num Io.,0,nutanix,num_io,,
+nutanix.vm.hypervisor.num_iops,gauge,,operation,second,Vm Hypervisor Num Iops.,0,nutanix,num_iops,,
+nutanix.vm.hypervisor.num_read_io,gauge,,,,Vm Hypervisor Num Read Io.,0,nutanix,num_read_io,,
+nutanix.vm.hypervisor.num_read_iops,gauge,,operation,second,Vm Hypervisor Num Read Iops.,0,nutanix,num_read_iops,,
+nutanix.vm.hypervisor.num_receive_packets_dropped,gauge,,,,Vm Hypervisor Num Receive Packets Dropped.,0,nutanix,num_receive_packets_dropped,,
+nutanix.vm.hypervisor.num_received_bytes,gauge,,byte,,Vm Hypervisor Num Received Bytes.,0,nutanix,num_received_bytes,,
+nutanix.vm.hypervisor.num_transmit_packets_dropped,gauge,,,,Vm Hypervisor Num Transmit Packets Dropped.,0,nutanix,num_transmit_packets_dropped,,
+nutanix.vm.hypervisor.num_transmitted_bytes,gauge,,byte,,Vm Hypervisor Num Transmitted Bytes.,0,nutanix,num_transmitted_bytes,,
+nutanix.vm.hypervisor.num_write_io,gauge,,,,Vm Hypervisor Num Write Io.,0,nutanix,num_write_io,,
+nutanix.vm.hypervisor.num_write_iops,gauge,,operation,second,Vm Hypervisor Num Write Iops.,0,nutanix,num_write_iops,,
+nutanix.vm.hypervisor.read_io_bandwidth_kbps,gauge,,kilobyte,second,Vm Hypervisor Read Io Bandwidth Kbps.,0,nutanix,read_io_bandwidth_kbps,,
+nutanix.vm.hypervisor.timespan_micros,gauge,,microsecond,,Vm Hypervisor Timespan Micros.,0,nutanix,timespan_micros,,
+nutanix.vm.hypervisor.total_io_size_kb,gauge,,kilobyte,,Vm Hypervisor Total Io Size Kb.,0,nutanix,total_io_size_kb,,
+nutanix.vm.hypervisor.total_io_time_micros,gauge,,microsecond,,Vm Hypervisor Total Io Time Micros.,0,nutanix,total_io_time_micros,,
+nutanix.vm.hypervisor.total_read_io_size_kb,gauge,,kilobyte,,Vm Hypervisor Total Read Io Size Kb.,0,nutanix,total_read_io_size_kb,,
+nutanix.vm.hypervisor.write_io_bandwidth_kbps,gauge,,kilobyte,second,Vm Hypervisor Write Io Bandwidth Kbps.,0,nutanix,write_io_bandwidth_kbps,,
+nutanix.vm.memory.usage_ppm,gauge,,,,Vm Memory Usage Ppm.,0,nutanix,usage_ppm,,
+nutanix.vm.num_vcpus_used_ppm,gauge,,,,Vm Num Vcpus Used Ppm.,0,nutanix,num_vcpus_used_ppm,,

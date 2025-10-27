@@ -4,8 +4,14 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nutanix import NutanixCheck
-from tests.metrics import CLUSTER_STATS_METRICS_REQUIRED, HOST_STATS_METRICS_REQUIRED, VM_STATS_METRICS_REQUIRED
+from tests.metrics import (
+    ALL_METRICS,
+    CLUSTER_STATS_METRICS_REQUIRED,
+    HOST_STATS_METRICS_REQUIRED,
+    VM_STATS_METRICS_REQUIRED,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -130,3 +136,14 @@ def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get
 
     for metric in VM_STATS_METRICS_REQUIRED:
         aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
+
+
+def test_alL_metrics_in_metadata_csv(dd_run_check, aggregator, mock_instance, mock_http_get):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    for metric in ALL_METRICS:
+        aggregator.assert_metric(metric, at_least=1)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
