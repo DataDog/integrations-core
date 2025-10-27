@@ -118,16 +118,18 @@ class Health:
             "dbm-health",
         )
 
-    def submit_exception_health_event(self, exception: Exception, **kwargs):
+    def submit_exception_health_event(self, exception: Exception, data: dict):
         trace = traceback.extract_tb(exception.__traceback__)
         exc = trace.pop()
         if exc:
             self.submit_health_event(
                 name=HealthEvent.UNKNOWN_ERROR,
                 status=HealthStatus.ERROR,
-                file=exc.filename,
-                line=exc.lineno,
-                function=exc.name,
-                exception_type=type(exception).__name__,
-                **kwargs,
+                data={
+                    "file": exc.filename,
+                    "line": exc.lineno,
+                    "function": exc.name,
+                    "exception_type": type(exception).__name__,
+                    **(data or {}),
+                },
             )

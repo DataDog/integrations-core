@@ -441,7 +441,7 @@ class DBMAsyncJob(object):
 
                 if hasattr(self._check, 'health'):
                     try:
-                        self._check.health.submit_exception_health_event(e, job_name=self._job_name)
+                        self._check.health.submit_exception_health_event(e, data={"job_name": self._job_name})
                     except Exception as health_error:
                         self._log.exception(
                             "[%s] Failed to submit error health event", self._job_tags_str, health_error
