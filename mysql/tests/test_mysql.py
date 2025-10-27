@@ -892,3 +892,39 @@ def test_propagate_agent_tags(
                 status=MySql.OK,
                 tags=expected_tags,
             )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'dbm_enabled',
+    [
+        pytest.param(True, id="dbm_enabled"),
+        pytest.param(False, id="dbm_disabled"),
+    ],
+)
+def test_errors_raised_metric_with_dbm(aggregator, dd_run_check, instance_basic, dbm_enabled):
+    """
+    Test that the mysql.performance.errors_raised metric is only emitted when DBM is enabled
+    and MySQL version is 8.0+.
+    """
+    instance_basic['dbm'] = dbm_enabled
+    if dbm_enabled:
+        # Disable DBM features to avoid unnecessary collection overhead during test
+        instance_basic['collect_settings'] = {'enabled': False}
+        instance_basic['query_activity'] = {'enabled': False}
+        instance_basic['query_samples'] = {'enabled': False}
+        instance_basic['query_metrics'] = {'enabled': False}
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
+    dd_run_check(mysql_check)
+
+    # Verify service check succeeded
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, count=1)
+
+    # The metric should only be present when MySQL/Percona >= 8.0 AND DBM is enabled
+    if MYSQL_FLAVOR.lower() != 'mariadb' and MYSQL_VERSION_PARSED >= parse_version('8.0') and dbm_enabled:
+        aggregator.assert_metric('mysql.performance.errors_raised', at_least=1)
+    else:
+        # In all other cases the metric should not be present
+        aggregator.assert_metric('mysql.performance.errors_raised', count=0)

@@ -16,6 +16,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::AI/ML",
+      "Category::Log Collection",
       "Offering::Integration",
       "Submitted Data Type::Metrics"
     ]
@@ -37,16 +38,22 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-	    "text-generation-launcher",
-	    "text-generation-router"
+        "text-generation-launcher",
+        "text-generation-router"
       ]
     },
     "monitors": {
       "High request latency": "assets/monitors/request_latency_high.json",
-      "High queue size": "assets/monitors/queue_size_high.json", 
+      "High queue size": "assets/monitors/queue_size_high.json",
       "Slow token generation": "assets/monitors/token_generation_slow.json"
     },
-    "saved_views": {}
+    "saved_views": {
+      "Hugging Face TGI Logs Overview": "assets/saved_views/logs_overview.json",
+      "Hugging Face TGI Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    },
+    "logs": {
+      "source": "hugging_face_tgi"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

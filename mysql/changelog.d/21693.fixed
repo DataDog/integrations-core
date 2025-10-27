@@ -1,0 +1,1 @@
+Fixes error messages captured when failing to collect explain plans in order to surface actionable detail

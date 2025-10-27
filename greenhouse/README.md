@@ -10,8 +10,6 @@ This integration ingests the following logs:
 
 The Greenhouse integration collects these logs and sends them to Datadog. These logs are parsed and enriched through the built-in logs pipeline, which enables search and analysis. The integration also provides insight into activities on the Greenhouse platform through the out-of-the-box dashboards.
 
-**Minimum Agent version:** 7.57.2
-
 ## Setup
 
 ### Generate API credentials in Greenhouse
