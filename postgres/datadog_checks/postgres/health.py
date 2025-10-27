@@ -37,8 +37,7 @@ class PostgresHealth(Health):
         self,
         name: HealthEvent | PostgresHealthEvent,
         status: HealthStatus,
-        tags: list[str] = None,
-        data: dict = None,
+        data: dict,
         **kwargs,
     ):
         """
@@ -54,7 +53,7 @@ class PostgresHealth(Health):
             name=name,
             status=status,
             # If we have an error parsing the config we may not have tags yet
-            tags=(self.check.tags if hasattr(self.check, 'tags') else []) + (tags or []),
+            tags=self.check.tags if hasattr(self.check, 'tags') else [],
             data={
                 "database_instance": self.check.database_identifier,
                 "ddagenthostname": self.check.agent_hostname,
