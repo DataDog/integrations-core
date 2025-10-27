@@ -1114,13 +1114,14 @@ class MySql(AgentCheck):
     def _get_replica_stats(self, db):
         replica_results = defaultdict(dict)
         replica_status = self._get_replica_replication_status(db)
-        for replica in replica_status:
-            # MySQL <5.7 does not have Channel_Name.
-            # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-            channel = self._config.replication_channel or replica.get('Channel_Name') or 'default'
-            for key, value in replica.items():
-                if value is not None:
-                    replica_results[key]['channel:{0}'.format(channel)] = value
+        if replica_status:
+            for replica in replica_status:
+                # MySQL <5.7 does not have Channel_Name.
+                # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+                channel = self._config.replication_channel or replica.get('Channel_Name') or 'default'
+                for key, value in replica.items():
+                    if value is not None:
+                        replica_results[key]['channel:{0}'.format(channel)] = value
         return replica_results
 
     def _get_replica_replication_status(self, db):
