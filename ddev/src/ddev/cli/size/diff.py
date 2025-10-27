@@ -221,7 +221,6 @@ def get_diff_from_artifacts(
 ) -> tuple[Sizes, TotalsDict, TotalsDict, bool]:
     from ddev.cli.size.utils.gha_artifacts import get_status_sizes_from_commit
 
-
     compressed = params["compressed"]
     quality_gate_threshold = params["quality_gate_threshold"]
     to_dd_org = params["to_dd_org"]
@@ -306,7 +305,7 @@ def get_diff_from_repo(
 
             for plat, ver in params["combinations"]:
                 files_b, dependencies_b, files_c, dependencies_c = get_repo_info(
-                    gitRepo, plat, ver, baseline, commit, compressed
+                    app, gitRepo, plat, ver, baseline, commit, compressed
                 )
 
                 diff_sizes = files_c.diff(files_b) + dependencies_c.diff(dependencies_b)
@@ -353,7 +352,6 @@ def get_diff_from_repo(
 
 
 def output_diff(params: CLIParameters, baseline: str, commit: str, sizes: Sizes) -> None:
-    
     platform = params["platform"]
     py_version = params["py_version"]
     format = params["format"]
@@ -373,15 +371,12 @@ def output_diff(params: CLIParameters, baseline: str, commit: str, sizes: Sizes)
     if not format or format == ["png"]:  # if no format is provided for the data print the table
         sizes.print_table(
             app,
-            f"Disk Usage Differences between {baseline} and {commit}"
-            f" for {platform} and Python version {py_version}",
+            f"Disk Usage Differences between {baseline} and {commit} for {platform} and Python version {py_version}",
         )
 
     treemap_path = None
     if format and "png" in format:
-        treemap_path = os.path.join(
-            "size_diff_visualizations", f"treemap_{platform}_{py_version}.png"
-        )
+        treemap_path = os.path.join("size_diff_visualizations", f"treemap_{platform}_{py_version}.png")
 
     if show_gui or treemap_path:
         from .utils.common_funcs import SizeMode, plot_treemap
@@ -397,6 +392,7 @@ def output_diff(params: CLIParameters, baseline: str, commit: str, sizes: Sizes)
 
 
 def get_repo_info(
+    app: Application,
     gitRepo: GitRepo,
     platform: str,
     py_version: str,
@@ -427,11 +423,11 @@ def get_repo_info(
     repo = gitRepo.repo_dir
     gitRepo.checkout_commit(baseline)
     files_b = get_files(repo, compressed, py_version, platform)
-    dependencies_b = get_dependencies(repo, platform, py_version, compressed)
+    dependencies_b = get_dependencies(app, repo, platform, py_version, compressed)
 
     gitRepo.checkout_commit(commit)
     files_c = get_files(repo, compressed, py_version, platform)
-    dependencies_c = get_dependencies(repo, platform, py_version, compressed)
+    dependencies_c = get_dependencies(app, repo, platform, py_version, compressed)
 
     return files_b, dependencies_b, files_c, dependencies_c
 

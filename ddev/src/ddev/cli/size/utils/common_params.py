@@ -41,7 +41,5 @@ def validate_format(_, __, format: str) -> list[str]:
 
     format_list = [f.strip() for f in format.split(",")] if format else []
     if unsupported_formats := set(format_list) - set(VALID_FORMATS):
-        raise click.BadParameter(
-            f"{', '.join(unsupported_formats)}. Only {', '.join(VALID_FORMATS)} are supported"
-        )
+        raise click.BadParameter(f"{', '.join(unsupported_formats)}. Only {', '.join(VALID_FORMATS)} are supported")
     return format_list

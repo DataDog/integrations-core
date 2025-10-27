@@ -158,6 +158,7 @@ def status_mode(
         get_dependencies,
         get_files,
     )
+
     format = params["format"]
     platform = params["platform"]
     py_version = params["py_version"]
@@ -167,22 +168,17 @@ def status_mode(
 
     with app.status("Calculating sizes..."):
         sizes = get_files(repo_path, compressed, py_version, platform) + (
-            dependency_sizes
-            or get_dependencies(app, repo_path, platform, py_version, compressed)
+            dependency_sizes or get_dependencies(app, repo_path, platform, py_version, compressed)
         )
 
     sizes.sort()
 
     if not format or format == ["png"]:  # if no format is provided for the data print the table
-        sizes.print_table(
-            app, f"Disk Usage Status for {platform} and Python version {py_version}"
-        )
+        sizes.print_table(app, f"Disk Usage Status for {platform} and Python version {py_version}")
 
     treemap_path = None
     if format and "png" in format:
-        treemap_path = os.path.join(
-            "size_status_visualizations", f"treemap_{platform}_{py_version}.png"
-        )
+        treemap_path = os.path.join("size_status_visualizations", f"treemap_{platform}_{py_version}.png")
 
     if show_gui or treemap_path:
         from ddev.cli.size.utils.common_funcs import SizeMode, plot_treemap

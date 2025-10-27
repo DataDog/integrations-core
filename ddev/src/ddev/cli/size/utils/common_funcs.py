@@ -288,7 +288,9 @@ def is_correct_dependency(platform: str, version: str, name: str) -> bool:
     return platform == _platform and version == _version
 
 
-def get_dependencies(app: Application, repo_path: str | Path, platform: str, py_version: str, compressed: bool) -> Sizes:
+def get_dependencies(
+    app: Application, repo_path: str | Path, platform: str, py_version: str, compressed: bool
+) -> Sizes:
     """
     Gets the list of dependencies for a given platform and Python version and returns a Sizes object.
     """
