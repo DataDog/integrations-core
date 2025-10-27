@@ -5,6 +5,7 @@ import os
 import ssl
 
 import ldap3
+
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 
