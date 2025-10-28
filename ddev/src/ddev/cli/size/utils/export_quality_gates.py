@@ -62,15 +62,14 @@ def save_quality_gate_html(
 
         html = f"<details><summary>{type_str}</summary>\n{html}\n</details>"
 
-        if not file_path.exists():
-            file_path.write_text(html, encoding="utf-8")
-        else:
-            existing_content = file_path.read_text(encoding="utf-8")
-            passes = ("❌" not in existing_content) and passes_quality_gate
-            header = get_html_headers(threshold_percentage, baseline, passes)
-            file_path.write_text(f"{header}{existing_content}\n{html}", encoding="utf-8")
-
-    app.display(f"HTML file saved to {file_path}")
+    if not file_path.exists():
+        file_path.write_text(html, encoding="utf-8")
+    else:
+        existing_content = file_path.read_text(encoding="utf-8")
+        passes = ("❌" not in existing_content) and passes_quality_gate
+        header = get_html_headers(threshold_percentage, baseline, passes)
+        file_path.write_text(f"{header}{existing_content}\n{html}", encoding="utf-8")
+        app.display(f"HTML file saved to {file_path}")
 
 
 def save_quality_gate_html_table(

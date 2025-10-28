@@ -128,17 +128,17 @@ jobs:
     - name: Calculate diff
       id: ddev_size_diff
       run: |
-        cmd="ddev size diff ${{needs.define-current-commit.outputs.commit}} --format json --use-artifacts --python ${{ env.PYTHON_VERSION }}"
+        cmd="ddev -v size diff ${{needs.define-current-commit.outputs.commit}} --format json --use-artifacts --python ${{ env.PYTHON_VERSION }} --quality-gate-threshold ${{ vars.QUALITY_GATE_THRESHOLD_PERCENT }}"
         # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
         #   cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         # fi
 
         set +e
 
-        $cmd --compressed  --quality-gate-threshold ${{ vars.QUALITY_GATE_THRESHOLD_PERCENT }} 
+        $cmd --compressed  
         exit_code_compressed=$?
 
-        $cmd --quality-gate-threshold ${{ vars.QUALITY_GATE_THRESHOLD_PERCENT }} 
+        $cmd 
         exit_code_uncompressed=$?
 
         set -e
