@@ -86,7 +86,6 @@ def trigger_workflow(target: str, jobs: list[dict], ref: str, dry_run: bool = Fa
         '-H', 'Accept: application/vnd.github+json',
         '-H', 'X-GitHub-Api-Version: 2022-11-28',
         '/repos/DataDog/integrations-core/actions/workflows/zz-test-worker-poc.yaml/dispatches',
-        '-f', f'ref={ref}',
         '-f', f'inputs[matrix_json]={matrix_json}',
         '-f', f'inputs[ref]={ref}'
     ]
