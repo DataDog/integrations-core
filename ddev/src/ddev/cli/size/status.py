@@ -80,8 +80,6 @@ def status(
         versions = valid_versions if py_version is None else [py_version]
         combinations = [(p, v) for p in platforms for v in versions]
 
-        app.display_debug(f"Combinations to process: {combinations}")
-
         commits = None
         dependencies_resolved = False
         dependency_sizes: Sizes = Sizes([])
@@ -91,13 +89,15 @@ def status(
             from ddev.cli.size.utils.gha_artifacts import (
                 RESOLVE_BUILD_DEPS_WORKFLOW,
                 artifact_exists,
-                get_previous_sizes,
+                get_status_sizes,
             )
 
             commits = [commit]
             if not artifact_exists(app, commit, "target-" + next(iter(platforms)), RESOLVE_BUILD_DEPS_WORKFLOW):
                 app.display("\n -> Searching for dependency sizes in previous commit")
-                previous_sizes = get_previous_sizes(app, commit, compressed)
+                previous_sizes, previous_commit = get_status_sizes(app, compressed, branch="master")
+                if previous_commit and previous_sizes:
+                    app.display_debug(f"Previous commit: {previous_commit}")
             else:
                 dependencies_resolved = True
 

@@ -105,14 +105,6 @@ def diff(
         versions = valid_versions if py_version is None else [py_version]
         combinations = [(p, v) for p in platforms for v in versions]
 
-        if not baseline:
-            from ddev.cli.size.utils.gha_artifacts import get_previous_commit
-
-            baseline = get_previous_commit(app, commit)
-            if not baseline:
-                app.abort("No baseline commit found")
-            app.display(f"Comparing to commit: {baseline}")
-
         parameters: CLIParameters = {
             "app": app,
             "combinations": combinations,
@@ -126,10 +118,17 @@ def diff(
         }
 
         if use_artifacts:
-            diff_sizes, baseline_total_size, commit_total_size, passes_quality_gate = get_diff_from_artifacts(
+            diff_sizes, baseline_total_size, commit_total_size, passes_quality_gate, baseline = get_diff_from_artifacts(
                 app, baseline, commit, parameters
             )
         else:
+            from ddev.cli.size.utils.gha_artifacts import get_previous_commit
+
+            baseline = get_previous_commit(app, commit)
+            if not baseline:
+                app.abort("No baseline commit found")
+            app.display(f"Comparing to commit: {baseline}")
+
             diff_sizes, baseline_total_size, commit_total_size, passes_quality_gate = get_diff_from_repo(
                 app, baseline, commit, parameters
             )
@@ -217,9 +216,9 @@ def validate_parameters(
 
 
 def get_diff_from_artifacts(
-    app: Application, baseline: str, commit: str, params: CLIParameters
-) -> tuple[Sizes, TotalsDict, TotalsDict, bool]:
-    from ddev.cli.size.utils.gha_artifacts import get_status_sizes_from_commit
+    app: Application, baseline: str | None, commit: str, params: CLIParameters
+) -> tuple[Sizes, TotalsDict, TotalsDict, bool, str]:
+    from ddev.cli.size.utils.gha_artifacts import get_status_sizes
 
     compressed = params["compressed"]
     quality_gate_threshold = params["quality_gate_threshold"]
@@ -231,15 +230,19 @@ def get_diff_from_artifacts(
     passes_quality_gate = True
 
     try:
-        baseline_sizes = get_status_sizes_from_commit(app, baseline, compressed)
-        commit_sizes = get_status_sizes_from_commit(app, commit, compressed)
+        baseline_sizes, baseline_commit = (
+            get_status_sizes(app, compressed, commit=baseline)
+            if baseline
+            else get_status_sizes(app, compressed, branch="master")
+        )
+        commit_sizes, _ = get_status_sizes(app, compressed, commit=commit)
     except Exception:
         import traceback
 
         app.abort(traceback.format_exc())
 
-    if not baseline_sizes:
-        app.abort(f"Failed to get sizes for {baseline=}")
+    if not baseline_sizes or not baseline_commit:
+        app.abort(f"Failed to get sizes for baseline commit {baseline or 'master'}")
     if not commit_sizes:
         app.abort(f"Failed to get sizes for {commit=}")
 
@@ -250,7 +253,7 @@ def get_diff_from_artifacts(
 
         params["platform"] = plat
         params["py_version"] = ver
-        output_diff(params, baseline, commit, diff_sizes)
+        output_diff(params, baseline_commit, commit, diff_sizes)
         artifacts_sizes = artifacts_sizes + diff_sizes
         if quality_gate_threshold:
             passes_quality_gate = (
@@ -277,7 +280,7 @@ def get_diff_from_artifacts(
                 SizeMode.DIFF,
             )
 
-    return artifacts_sizes, baseline_sizes._total_sizes, commit_sizes._total_sizes, passes_quality_gate
+    return artifacts_sizes, baseline_sizes._total_sizes, commit_sizes._total_sizes, passes_quality_gate, baseline_commit
 
 
 def get_diff_from_repo(

@@ -32,18 +32,10 @@ def get_dependencies_from_artifact(
     )
 
 
-def get_previous_sizes(app: Application, commit: str, compressed: bool) -> Sizes:
-    previous_commit = get_previous_commit(app, commit)
-    if not previous_commit:
-        return Sizes([])
-    app.display(f"previous commit: {previous_commit}")
-    return get_status_sizes_from_commit(app, previous_commit, compressed)
-
-
 def artifact_exists(app: Application, commit: str, artifact_name: str, workflow: str) -> bool:
     import subprocess
 
-    run_id = get_run_id(app, commit, workflow)
+    run_id = get_run_id_by_commit(app, commit, workflow)
     if not run_id:
         return False
     result = subprocess.run(
@@ -84,7 +76,7 @@ def get_dep_sizes(app: Application, current_commit: str, platform: str, py_versi
     """
     import json
 
-    run_id = get_run_id(app, current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
+    run_id = get_run_id_by_commit(app, current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
     if run_id:
         dep_sizes_json_path = get_current_sizes_json(app, run_id, platform, py_version)
         if dep_sizes_json_path:
@@ -95,10 +87,10 @@ def get_dep_sizes(app: Application, current_commit: str, platform: str, py_versi
 
 
 @cache
-def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
+def get_run_id_by_commit(app: Application, commit: str, workflow: str) -> str | None:
     import subprocess
 
-    app.display_debug(f"Fetching workflow run ID for {commit} ({workflow.split('/')[-1]})")
+    app.display_debug(f"Fetching workflow run ID for {commit=} ({workflow.split('/')[-1]})")
 
     result = subprocess.run(
         [
@@ -127,6 +119,41 @@ def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
     return run_id
 
 
+@cache
+def get_last_run_id_by_branch(app: Application, branch: str, workflow: str) -> tuple[str | None, str | None]:
+    import json
+    import subprocess
+
+    app.display_debug(f"Fetching last workflow run ID for {branch} ({workflow.split('/')[-1]})")
+
+    try:
+        result = subprocess.run(
+            [
+                'gh',
+                'run',
+                'list',
+                '--workflow',
+                workflow,
+                '--branch',
+                branch,
+                '--json',
+                'databaseId,status,headSha',
+            ],
+            capture_output=True,
+            text=True,
+        )
+    except Exception as e:
+        app.display_error(f"Failed to get last workflow run ID for {branch} ({workflow.split('/')[-1]}): {e}")
+        return None, None
+
+    runs = json.loads(result.stdout)
+    for run in runs:
+        if run['status'] == 'completed':
+            app.display_debug(f"Found completed run {run['databaseId']} in commit {run['headSha']}")
+            return str(run['databaseId']), run['headSha']
+    return None, None
+
+
 def get_current_sizes_json(app: Application, run_id: str, platform: str, py_version: str) -> Path | None:
     '''
     Downloads the dependency sizes json for a given run id and platform when dependencies were resolved.
@@ -134,7 +161,7 @@ def get_current_sizes_json(app: Application, run_id: str, platform: str, py_vers
     import subprocess
     import tempfile
 
-    app.display(f"Retrieving dependency sizes artifact (run={run_id}, platform={platform})")
+    app.display(f"Retrieving dependency sizes artifact ({run_id=}, {platform=})")
     with tempfile.TemporaryDirectory() as tmpdir:
         app.display_debug(f"Downloading artifacts to {tmpdir}...")
         try:
@@ -155,9 +182,9 @@ def get_current_sizes_json(app: Application, run_id: str, platform: str, py_vers
             )
         except subprocess.CalledProcessError as e:
             if e.stderr and "no valid artifacts found" in e.stderr:
-                app.display_error(f"No resolved dependencies found for platform {platform} (run {run_id})")
+                app.display_error(f"No resolved dependencies found for {platform=} ({run_id=})")
             else:
-                app.display_error(f"Failed to download dependency sizes (run={run_id}, platform={platform}): {e}")
+                app.display_error(f"Failed to download dependency sizes ({run_id=}, {platform=}): {e}")
                 app.display_warning(e.stderr)
 
             return None
@@ -192,7 +219,7 @@ def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: 
 
         subprocess.run(cmd, check=True, text=True, capture_output=True)
     except subprocess.CalledProcessError as e:
-        app.display_warning(f"Failed to download artifact '{artifact_name}' (run {run_id}): {e}")
+        app.display_warning(f"Failed to download artifact '{artifact_name}' ({run_id=}): {e}")
         app.display_warning(e.stderr)
         return None
 
@@ -202,27 +229,36 @@ def get_artifact(app: Application, run_id: str, artifact_name: str, target_dir: 
 
 
 @cache
-def get_status_sizes_from_commit(
+def get_status_sizes(
     app: Application,
-    commit: str,
     compressed: bool,
-) -> Sizes:
+    commit: str | None = None,
+    branch: str | None = None,
+) -> tuple[Sizes, str]:
     import json
     import tempfile
 
     '''
-    Gets the sizes json for a given commit from the measure disk usage workflow.
+    Gets the sizes json for a given commit or for the latest run on a branch from the measure disk usage workflow.
+    If a branch is provided, it retrieves the most recent run for that branch.
     '''
     with tempfile.TemporaryDirectory() as tmpdir:
-        if (run_id := get_run_id(app, commit, MEASURE_DISK_USAGE_WORKFLOW)) is None:
-            return Sizes([])
+        if commit:
+            run_id = get_run_id_by_commit(app, commit, MEASURE_DISK_USAGE_WORKFLOW)
+        elif branch:
+            run_id, commit = get_last_run_id_by_branch(app, branch, MEASURE_DISK_USAGE_WORKFLOW)
+        else:
+            app.display_error("No commit or branch provided")
+            return Sizes([]), ""
+
+        if run_id is None or commit is None:
+            return Sizes([]), ""
 
         artifact_name = 'status_compressed.json' if compressed else 'status_uncompressed.json'
         sizes_json = get_artifact(app, run_id, artifact_name, tmpdir)
-
         if not sizes_json:
-            app.display_error(f"No dependency sizes found in commit {commit}\n")
-            return Sizes([])
+            app.display_error(f"No dependency sizes found in {commit=}\n")
+            return Sizes([]), ""
 
         sizes_list = list(json.loads(sizes_json.read_text()))
-        return Sizes([Size(**size) for size in sizes_list])
+        return Sizes([Size(**size) for size in sizes_list]), commit
