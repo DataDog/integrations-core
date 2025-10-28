@@ -323,6 +323,8 @@ integration/ibm_i:
 - ibm_i/**/*
 integration/ibm_mq:
 - ibm_mq/**/*
+integration/ibm_spectrum_lsf:
+- ibm_spectrum_lsf/**/*
 integration/ibm_was:
 - ibm_was/**/*
 integration/iboss:
