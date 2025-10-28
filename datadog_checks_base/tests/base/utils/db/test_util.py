@@ -128,7 +128,7 @@ def test_dbm_async_job_missed_collection_interval(aggregator):
     check = AgentCheck()
     health = Health(check)
     check.health = health
-    job = JobForTesting(check, min_collection_interval=1, job_execution_time=3)
+    job = JobForTesting(check, job_execution_time=3, rate_limit=1/1)
     job.run_job_loop([])
     # Sleep longer than the target collection interval
     time.sleep(1.5)
