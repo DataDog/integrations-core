@@ -133,9 +133,10 @@
           {
             "id": 7,
             "definition": {
-              "title": "Current Queue Size",
+              "title": "Average Queue Size",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -149,7 +150,7 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "avg:hugging_face_tgi.queue.size{$host}",
-                      "aggregator": "last"
+                      "aggregator": "avg"
                     }
                   ],
                   "response_format": "scalar",
@@ -192,7 +193,7 @@
               "hide_zero_counts": true,
               "show_status": true,
               "last_triggered_format": "relative",
-              "query": "tag:(integration:hugging_face_tgi)",
+              "query": "tag:(integration:hugging-face-tgi)",
               "sort": "status,asc",
               "count": 50,
               "start": 0,
@@ -432,7 +433,7 @@
           {
             "id": 13,
             "definition": {
-              "title": "Request Count",
+              "title": "Request count",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -442,14 +443,6 @@
               "requests": [
                 {
                   "formulas": [
-                    {
-                      "alias": "Requests",
-                      "style": {
-                        "palette": "classic",
-                        "palette_index": 4
-                      },
-                      "formula": "query1"
-                    },
                     {
                       "alias": "Success",
                       "style": {
@@ -468,11 +461,6 @@
                     }
                   ],
                   "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:hugging_face_tgi.request.count{$host}.as_count()"
-                    },
                     {
                       "data_source": "metrics",
                       "name": "query2",
@@ -496,14 +484,14 @@
             "layout": {
               "x": 0,
               "y": 1,
-              "width": 4,
-              "height": 4
+              "width": 6,
+              "height": 3
             }
           },
           {
             "id": 26,
             "definition": {
-              "title": "Processing Timeline Per Request ",
+              "title": "Processing timeline per request ",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -587,16 +575,16 @@
               ]
             },
             "layout": {
-              "x": 4,
+              "x": 6,
               "y": 1,
-              "width": 4,
-              "height": 4
+              "width": 6,
+              "height": 3
             }
           },
           {
             "id": 25,
             "definition": {
-              "title": "Queue Depth Over Time",
+              "title": "Queue depth over time",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -628,10 +616,10 @@
               ]
             },
             "layout": {
-              "x": 8,
-              "y": 1,
-              "width": 4,
-              "height": 4
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 3
             }
           }
         ]
@@ -640,7 +628,7 @@
         "x": 0,
         "y": 6,
         "width": 12,
-        "height": 6
+        "height": 8
       }
     },
     {
@@ -656,7 +644,7 @@
             "id": 16,
             "definition": {
               "type": "note",
-              "content": "Understand your model's token generation characteristics and performance patterns. These metrics help optimize inference efficiency by tracking generation rates and analyzing the relationship between input complexity and output quality.",
+              "content": "Understand your model's token generation characteristics and performance patterns. These metrics help track the model's input and output volumes.",
               "background_color": "yellow",
               "font_size": "16",
               "text_align": "center",
@@ -674,25 +662,72 @@
             }
           },
           {
-            "id": 17,
+            "id": 18,
             "definition": {
-              "title": "Token Generation Rate",
+              "title": "Total Input",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "alias": "Generated Tokens/sec",
+                      "alias": "Input Tokens",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:hugging_face_tgi.request.input_length.sum{$host}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "orange",
+                    "order_reverse": false,
+                    "color_order": "monotonic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 17,
+            "definition": {
+              "title": "Total Generated",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Generated Tokens",
                       "style": {
                         "palette": "classic",
                         "palette_index": 4
                       },
-                      "formula": "per_second(query1)"
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
@@ -712,71 +747,19 @@
               ]
             },
             "layout": {
-              "x": 0,
-              "y": 1,
-              "width": 6,
-              "height": 4
-            }
-          },
-          {
-            "id": 18,
-            "definition": {
-              "title": "Input/Output Token Distribution",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": true,
-              "legend_layout": "auto",
-              "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "alias": "Input Length",
-                      "formula": "query1"
-                    },
-                    {
-                      "alias": "Generated Tokens",
-                      "formula": "query2"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:hugging_face_tgi.request.input_length.sum{$host}.as_count()"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "sum:hugging_face_tgi.request.generated_tokens.sum{$host}.as_count()"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "orange",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "bars"
-                }
-              ],
-              "markers": []
-            },
-            "layout": {
               "x": 6,
               "y": 1,
               "width": 6,
-              "height": 4
+              "height": 3
             }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 12,
+        "y": 14,
         "width": 12,
-        "height": 6
+        "height": 5
       }
     },
     {
@@ -812,12 +795,13 @@
           {
             "id": 21,
             "definition": {
-              "title": "Batch sizes",
+              "title": "Batch size",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -825,10 +809,6 @@
                     {
                       "alias": "Current Batch Size",
                       "formula": "query1"
-                    },
-                    {
-                      "alias": "Next Batch Size",
-                      "formula": "query2"
                     }
                   ],
                   "queries": [
@@ -836,11 +816,6 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "avg:hugging_face_tgi.batch.current.size{$host}"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "avg:hugging_face_tgi.batch.next.size.sum{$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -861,98 +836,34 @@
             }
           },
           {
-            "id": 22,
+            "id": 2400395466412779,
             "definition": {
-              "title": "Batch processing durations",
+              "title": "Batch count",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
                   "formulas": [
                     {
-                      "alias": "Forward",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "formula": "query1"
-                    },
-                    {
-                      "alias": "Decode",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
+                      "alias": "Next Batch Count",
                       "formula": "query2"
-                    },
-                    {
-                      "alias": "Concatenate",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "formula": "query3"
-                    },
-                    {
-                      "alias": "Inference",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "formula": "query4"
-                    },
-                    {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
-                      "alias": "Filter",
-                      "formula": "query5"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:hugging_face_tgi.batch.forward.duration.sum{$host} by {method}.as_count()"
-                    },
-                    {
-                      "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:hugging_face_tgi.batch.decode.duration.sum{$host} by {method}.as_count()"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "sum:hugging_face_tgi.batch.concat.duration.sum{$host} by {method}.as_count()"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query4",
-                      "query": "sum:hugging_face_tgi.batch.inference.duration.sum{$host} by {method}.as_count()"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query5",
-                      "query": "sum:hugging_face_tgi.batch.filter.duration.sum{$host} by {method}.as_count()"
+                      "query": "sum:hugging_face_tgi.batch.next.size.count{$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
                   "style": {
+                    "palette": "dog_classic",
                     "line_type": "solid",
                     "line_width": "normal"
                   },
@@ -968,18 +879,73 @@
             }
           },
           {
-            "id": 27,
+            "id": 4619359413813279,
             "definition": {
-              "title": "Top inference batch methods",
+              "title": "Time spent by method",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "requests": [
                 {
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:hugging_face_tgi.batch.inference.count{$host} by {method}.as_count()",
+                      "query": "sum:hugging_face_tgi.batch.filter.duration.sum{$host} by {method}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:hugging_face_tgi.batch.concat.duration.sum{$host} by {method}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:hugging_face_tgi.batch.inference.duration.sum{$host} by {method}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:hugging_face_tgi.batch.decode.duration.sum{$host} by {method}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:hugging_face_tgi.batch.forward.duration.sum{$host} by {method}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "sum:hugging_face_tgi.batch.filter.duration.count{$host} by {method}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "query": "sum:hugging_face_tgi.batch.concat.duration.count{$host} by {method}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "query": "sum:hugging_face_tgi.batch.inference.duration.count{$host} by {method}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query9",
+                      "query": "sum:hugging_face_tgi.batch.decode.duration.count{$host} by {method}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query10",
+                      "query": "sum:hugging_face_tgi.batch.forward.duration.count{$host} by {method}.as_count()",
                       "aggregator": "sum"
                     }
                   ],
@@ -989,7 +955,7 @@
                   },
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "(query1 + query2 + query3 + query4 + query5)"
                     }
                   ],
                   "sort": {
@@ -1020,7 +986,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 19,
         "width": 12,
         "height": 6,
         "is_column_break": true
@@ -1120,7 +1086,7 @@
           {
             "id": 3743214108667418,
             "definition": {
-              "title": "Logs",
+              "title": "Error logs",
               "title_size": "16",
               "title_align": "left",
               "requests": [
@@ -1128,7 +1094,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "service:text-generation-inference OR source:hugging_face_tgi",
+                    "query_string": "(service:text-generation-inference OR source:hugging_face_tgi) AND status:error",
                     "indexes": [],
                     "storage": "hot"
                   },
@@ -1169,7 +1135,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 6,
+        "y": 25,
         "width": 12,
         "height": 6
       }
@@ -1228,7 +1194,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "@event_type:span @meta.model_provider:* @meta.span.kind:llm"
+                        "query": "@event_type:span @meta.model_provider:* @meta.span.kind:llm $host"
                       }
                     }
                   ],
@@ -1274,7 +1240,7 @@
                       "aggregator": "percentile",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "p95:ml_obs.span.duration{span_kind:llm}"
+                      "query": "p95:ml_obs.span.duration{span_kind:llm, $host}"
                     }
                   ],
                   "response_format": "scalar"
@@ -1318,7 +1284,7 @@
                       "aggregator": "percentile",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "p50:ml_obs.span.duration{span_kind:llm}"
+                      "query": "p50:ml_obs.span.duration{span_kind:llm,$host}"
                     }
                   ],
                   "response_format": "scalar"
@@ -1372,7 +1338,7 @@
                       "indexes": ["*"],
                       "name": "query2",
                       "search": {
-                        "query": "@event_type:span @meta.model_provider:* @meta.span.kind:llm"
+                        "query": "@event_type:span @meta.model_provider:* @meta.span.kind:llm $host"
                       }
                     }
                   ],
@@ -1420,7 +1386,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 12,
+        "y": 31,
         "width": 12,
         "height": 11
       }
