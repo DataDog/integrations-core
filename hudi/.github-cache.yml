@@ -1,3 +1,4 @@
+# Speed up the Spark download - archive.apache.org throttles heavy users.
 - path: tests/docker/spark-3.2.0-bin-hadoop3.2.tgz
   url: https://archive.apache.org/dist/spark/spark-3.2.0/spark-3.2.0-bin-hadoop3.2.tgz
   sha256: a78c30450ac862338dbc77e6e97bae69569e2c30615efa082d28d47c0781afef
