@@ -20,16 +20,6 @@
         "media_type": "image",
         "caption": "Barracuda SecureEdge Overview Bottom Light Mode",
         "image_url": "images/secure_edge_overview_bottom_section_light.png"
-      },
-      {
-        "media_type": "image",
-        "caption": "Barracuda SecureEdge Overview Dark Mode",
-        "image_url": "images/secure_edge_overview_dark.png"
-      },
-      {
-        "media_type": "image",
-        "caption": "Barracuda SecureEdge Overview Bottom Dark Mode",
-        "image_url": "images/secure_edge_overview_bottom_section_dark.png"
       }
     ],
     "classifier_tags": [
