@@ -1,0 +1,9 @@
+# Dummy cache file to test caching on Windows
+- path: tests/docker/test_file.zip
+  url: https://file-examples.com/wp-content/storage/2017/02/zip_2MB.zip
+  sha256: bb355825cee6364facb169ab94b27148a4272caf58c0c697b13a39c0d4a3a42d
+# Intentionally wrong hash
+- path: tests/docker/test_file_5mb.zip
+  url: https://file-examples.com/wp-content/storage/2017/02/zip_5MB.zip
+  sha256: 0000000000000000000000000000000000000000000000000000000000000000
+
