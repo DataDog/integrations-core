@@ -2,8 +2,4 @@
 - path: tests/docker/windows-3.13.9.json
   url: https://www.python.org/ftp/python/3.13.9/windows-3.13.9.json
   sha256: edd89c33136107c5d31f91850a4f62317880886b2bd29dbe0e4572c005bd63fa
-# Intentionally wrong hash
-- path: tests/docker/python-3.13.9-embed-arm64.zip.spdx.json
-  url: https://www.python.org/ftp/python/3.13.9/python-3.13.9-embed-arm64.zip.spdx.json
-  sha256: 0000000000000000000000000000000000000000000000000000000000000000
 
