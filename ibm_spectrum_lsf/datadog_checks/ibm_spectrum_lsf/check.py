@@ -5,7 +5,7 @@
 from datadog_checks.base import AgentCheck
 
 from .client import LSFClient
-from .common import BHOSTS, BQUEUES, BSLOTS, LSCLUSTERS, LSHOSTS, LSLOAD
+from .common import BHOSTS, BJOBS, BQUEUES, BSLOTS, LSCLUSTERS, LSHOSTS, LSLOAD
 from .config_models import ConfigMixin
 
 
@@ -112,6 +112,13 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         """
         self.collect_metrics_from_command(self.client.bqueues, BQUEUES)
 
+    def collect_bjobs(self):
+        """
+        JOBID|STAT|QUEUE|FROM_HOST|EXEC_HOST |RUN_TIME|CPU_USED|MEM|TIME_LEFT|SWAP|IDLE_FACTOR|%COMPLETE
+        65|PEND|normal|ip-10-11-220-188.ec2.internal | -|0 second(s)|-|-|-|-|-|-
+        """
+        self.collect_metrics_from_command(self.client.bjobs, BJOBS)
+
     def check(self, _):
         _, err, exit_code = self.client.lsid()
         if exit_code == 0:
@@ -128,3 +135,4 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         self.collect_lsload()
         self.collect_bslots()
         self.collect_bqueues()
+        self.collect_bjobs()

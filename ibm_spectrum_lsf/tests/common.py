@@ -65,6 +65,24 @@ BQUEUES_METRICS = [
     "ibm_spectrum_lsf.queue.running",
     "ibm_spectrum_lsf.queue.suspended",
 ]
+
+BJOBS_METRICS = [
+    "ibm_spectrum_lsf.job.cpu_used",
+    "ibm_spectrum_lsf.job.idle_factor",
+    "ibm_spectrum_lsf.job.mem",
+    "ibm_spectrum_lsf.job.percent_complete",
+    "ibm_spectrum_lsf.job.run_time",
+    "ibm_spectrum_lsf.job.swap",
+    "ibm_spectrum_lsf.job.time_left",
+]
+
 ALL_METRICS = (
-    LSID_METRICS + CLUSTER_METRICS + BHOST_METRICS + BSLOTS_METRICS + LHOST_METRICS + LSLOAD_METRICS + BQUEUES_METRICS
+    LSID_METRICS
+    + CLUSTER_METRICS
+    + BHOST_METRICS
+    + BSLOTS_METRICS
+    + LHOST_METRICS
+    + LSLOAD_METRICS
+    + BQUEUES_METRICS
+    + BJOBS_METRICS
 )

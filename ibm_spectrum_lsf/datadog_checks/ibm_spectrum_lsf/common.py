@@ -37,6 +37,28 @@ def transform_open(val):
     return is_open.lower() == "Open"
 
 
+def transform_job_id(val):
+    parts = val.split("[")
+    job_id = parts[0]
+    return job_id
+
+
+def transform_task_id(val):
+    parts = val.split("[")
+    if len(parts) > 1:
+        second_part = parts[1].split("]")
+        task_id = second_part[0]
+        return task_id
+    return None
+
+
+def transform_tag(val):
+    if val == "-":
+        return None
+    else:
+        return val
+
+
 LSCLUSTERS = {
     'name': 'lsclusters',
     'prefix': 'cluster',
@@ -163,5 +185,40 @@ BQUEUES = {
         {'name': 'pending', 'id': 8, 'transform': transform_float},
         {'name': 'running', 'id': 9, 'transform': transform_float},
         {'name': 'suspended', 'id': 10, 'transform': transform_float},
+    ],
+}
+
+BJOBS = {
+    'name': 'bjobs',
+    'prefix': 'job',
+    'expected_columns': 12,
+    'tags': [
+        {'name': 'job_id', 'id': 0, 'transform': transform_job_id},
+        {'name': 'task_id', 'id': 0, 'transform': transform_task_id},
+        {
+            'name': 'full_job_id',
+            'id': 0,
+        },
+        {
+            'name': 'queue',
+            'id': 2,
+        },
+        {
+            'name': 'from_host',
+            'id': 3,
+        },
+        {
+            'name': 'exec_host',
+            'id': 4,
+        },
+    ],
+    'metrics': [
+        {'name': 'run_time', 'id': 5, 'transform': transform_float},
+        {'name': 'cpu_used', 'id': 6, 'transform': transform_float},
+        {'name': 'mem', 'id': 7, 'transform': transform_float},
+        {'name': 'time_left', 'id': 8, 'transform': transform_float},
+        {'name': 'swap', 'id': 9, 'transform': transform_float},
+        {'name': 'idle_factor', 'id': 10, 'transform': transform_float},
+        {'name': 'percent_complete', 'id': 11, 'transform': transform_float},
     ],
 }

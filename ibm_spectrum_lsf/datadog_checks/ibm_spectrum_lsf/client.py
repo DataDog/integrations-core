@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import logging
 import subprocess
 
 
@@ -12,9 +11,8 @@ class LSFClient:
     def _run_command(self, command):
         self.log.debug("Running command: %s", command)
         try:
-            result = subprocess.run(' '.join(command), timeout=5, capture_output=True, text=True)
-            if self.log.isEnabledFor(logging.TRACE):
-                self.log.trace("Command output: %s", result.stdout)
+            result = subprocess.run(command, timeout=5, capture_output=True, text=True)
+            self.log.trace("Command output: %s", result.stdout)
             return result.stdout, result.stderr, result.returncode
         except Exception as e:
             return None, e, 1
@@ -51,4 +49,13 @@ class LSFClient:
     def bqueues(self):
         return self._run_command(
             ['bqueues', '-o', "QUEUE_NAME PRIO STATUS MAX JL_U JL_P JL_H NJOBS  PEND RUN SUSP delimiter='|'"]
+        )
+
+    def bjobs(self):
+        return self._run_command(
+            [
+                'bjobs',
+                '-o',
+                "jobid stat queue from_host:30 exec_host:20 run_time cpu_used mem time_left swap idle_factor %complete delimiter='|'",  # noqa: E501
+            ]
         )
