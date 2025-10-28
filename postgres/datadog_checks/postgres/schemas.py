@@ -294,7 +294,7 @@ class PostgresSchemaCollector(SchemaCollector):
                     )
                     {partitions_ctes}
 
-                    SELECT schema_tables.schema_id, schema_tables.schema_name, 
+                    SELECT schema_tables.schema_id, schema_tables.schema_name,
                     schema_tables.table_id, schema_tables.table_name,
                         array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
                         array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
@@ -366,7 +366,9 @@ class PostgresSchemaCollector(SchemaCollector):
                                 "name": cursor_row.get("table_name"),
                                 "owner": cursor_row.get("owner"),
                                 # The query can create duplicates of the joined tables
-                                "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values())[:self._config.max_columns],
+                                "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values())[
+                                    : self._config.max_columns
+                                ],
                                 "indexes": list({v and v['name']: v for v in cursor_row.get("indexes") or []}.values()),
                                 "foreign_keys": list(
                                     {v and v['name']: v for v in cursor_row.get("foreign_keys") or []}.values()
