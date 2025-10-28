@@ -307,7 +307,7 @@ class DBMAsyncJob(object):
         self._config_host = config_host
         # The min_collection_interval is the expected collection interval for the main check
         self._min_collection_interval = min_collection_interval
-        self._expected_collection_interval = 1/rate_limit
+        self._expected_collection_interval = 1/rate_limit if rate_limit > 0 else 0
         # map[dbname -> psycopg connection]
         self._log = get_check_logger()
         self._job_loop_future = None
