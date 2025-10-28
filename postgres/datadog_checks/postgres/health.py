@@ -37,6 +37,7 @@ class PostgresHealth(Health):
         self,
         name: HealthEvent | PostgresHealthEvent,
         status: HealthStatus,
+        data: dict,
         **kwargs,
     ):
         """
@@ -46,14 +47,17 @@ class PostgresHealth(Health):
             The name of the health event.
         :param status: HealthStatus
             The health status to submit.
-        :param kwargs: Additional keyword arguments to include in the event.
+        :param data: A dictionary to be submitted as `data`. Must be JSON serializable.
         """
         super().submit_health_event(
             name=name,
             status=status,
             # If we have an error parsing the config we may not have tags yet
             tags=self.check.tags if hasattr(self.check, 'tags') else [],
-            database_instance=self.check.database_identifier,
-            ddagenthostname=self.check.agent_hostname,
+            data={
+                "database_instance": self.check.database_identifier,
+                "ddagenthostname": self.check.agent_hostname,
+                **(data or {}),
+            },
             **kwargs,
         )
