@@ -246,7 +246,7 @@ services:
         condition: service_healthy
     environment:
       - DD_API_KEY=${DD_API_KEY}
-      - DD_SITE=datadoghq.com
+      - DD_SITE=${DD_SITE}
       - DD_HOSTNAME=kafka-test-agent
       - DD_LOGS_ENABLED=false
       - DD_AC_EXCLUDE=name:datadog-agent

@@ -117,7 +117,7 @@ class ClusterMetadataCollector:
             try:
                 cluster_future = self.client.kafka_client.describe_cluster()
                 cluster_info = cluster_future.result(timeout=self.config._request_timeout / 1000)
-                
+
                 if cluster_info.controller:
                     controller_tags = self._get_tags(cluster_id) + [
                         f'controller_id:{cluster_info.controller.id}',
@@ -516,18 +516,14 @@ class ClusterMetadataCollector:
                             # Extract topics and emit per-member metrics
                             if hasattr(member, 'assignment') and member.assignment:
                                 partition_count = len(member.assignment.topic_partitions)
-                                
+
                                 # Emit metric for number of partitions assigned to this member
                                 member_tags = state_tags + [
                                     f'client_id:{client_id}',
                                     f'member_host:{host}',
                                 ]
-                                self.check.gauge(
-                                    'consumer_group.member.partitions', 
-                                    partition_count, 
-                                    tags=member_tags
-                                )
-                                
+                                self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
+
                                 for tp in member.assignment.topic_partitions:
                                     topics_for_group.add(tp.topic)
 
