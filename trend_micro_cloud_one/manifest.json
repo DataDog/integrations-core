@@ -3,7 +3,7 @@
   "app_uuid": "06b13f44-cba3-48f1-8c73-338f22b9ad18",
   "app_id": "trend-micro-cloud-one",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
