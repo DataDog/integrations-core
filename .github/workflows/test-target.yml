@@ -230,10 +230,12 @@ jobs:
     - name: Verify cached files checksums
       if: steps.integration-cache.outputs.has-cache == 'true'
       run: |
+        has_errors=false
+        
         # Extract path and sha256 from each entry as tab-separated values
         entries=$(yq -r '.[] | [.path, .sha256] | @tsv' "$INTEGRATION_CACHE_FILE")
         
-        echo "$entries" | while IFS=$'\t' read -r rel_path expected_sha256; do
+        while IFS=$'\t' read -r rel_path expected_sha256; do
           full_path="${{ inputs.target }}/$rel_path"
           
           echo "Verifying $full_path..."
@@ -244,9 +246,13 @@ jobs:
             echo "::error::Expected: $expected_sha256"
             echo "::error::Got: $actual_sha256"
             rm -f "$full_path"
-            exit 1
+            has_errors=true
           fi
-        done
+        done <<< "$entries"
+        
+        if [ "$has_errors" = true ]; then
+          exit 1
+        fi
         
         echo "All checksums verified successfully"
 
