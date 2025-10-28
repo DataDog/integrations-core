@@ -1,0 +1,49 @@
+name: ZZ - POC - Trigger PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  trigger-checks:
+    name: Trigger Matrix Workflows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+      pull-requests: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+
+      - name: Trigger workflows for PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Triggering workflows for PR #${{ github.event.pull_request.number }}"
+          echo "Merge commit SHA: ${{ github.sha }}"
+          echo "PR head SHA: ${{ github.event.pull_request.head.sha }}"
+
+          python gh_workflow.py \
+            --ref ${{ github.sha }} \
+            --limit 10
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Workflow Trigger Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Triggered matrix workflows for PR #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Merge commit SHA**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR head SHA**: ${{ github.event.pull_request.head.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Job limit**: 10" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The triggered workflows will appear as separate checks on this PR." >> $GITHUB_STEP_SUMMARY
+
