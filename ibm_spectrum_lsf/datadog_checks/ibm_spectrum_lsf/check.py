@@ -14,7 +14,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
 
     def __init__(self, name, init_config, instances):
         super(IbmSpectrumLsfCheck, self).__init__(name, init_config, instances)
-        self.client = LSFClient()
+        self.client = LSFClient(self.log)
         self.check_initializations.append(self.parse_config)
 
     def parse_config(self):
@@ -57,6 +57,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
             )
             return
 
+        self.log.debug("Processing %s metrics", cmd_name)
         for line in output_lines:
             line_data = [line.strip() for line in line.split(delimiter)]
             tags = self.process_tags(mapping.get('tags', []), line_data)
@@ -116,8 +117,8 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         if exit_code == 0:
             self.gauge("can_connect", 1, self.tags)
         else:
-            self.log.error("Failed to get lsid output: %s. Skipping check", err)
             self.gauge("can_connect", 0, self.tags)
+            self.log.error("Failed to get lsid output: %s. Skipping check", err)
             return
 
         self.client.start_monitoring(self.config.min_collection_interval)
