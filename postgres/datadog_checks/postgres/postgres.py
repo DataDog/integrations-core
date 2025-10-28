@@ -138,6 +138,9 @@ class PostgreSql(AgentCheck):
         self.tags = list(self._config.tags)
         self.add_core_tags()
 
+        # Submit the initialization health event in case the `check` method is never called
+        self._submit_initialization_health_event()
+
         # Abort initializing the check if the config is invalid
         if validation_result.valid is False:
             self.log.error("Configuration validation failed: %s", validation_result.errors)
