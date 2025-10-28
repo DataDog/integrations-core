@@ -1,5 +1,0 @@
-# Dummy cache file to test caching on Windows
-- path: tests/docker/windows-3.13.9.json
-  url: https://www.python.org/ftp/python/3.13.9/windows-3.13.9.json
-  sha256: 0000000000000000000000000000000000000000000000000000000000000000
-
