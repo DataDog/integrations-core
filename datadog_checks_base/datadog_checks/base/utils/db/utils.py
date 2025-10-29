@@ -21,6 +21,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.db.health import DEFAULT_COOLDOWN, HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
@@ -293,6 +294,14 @@ class DBMAsyncJob(object):
         expected_db_exceptions=(),
         shutdown_callback=None,
         job_name=None,
+        # Some users may want to disable the missed collection event,
+        # for example if they set the collection interval intentionally low
+        # to effectively run the job in a loop
+        enable_missed_collection_event=True,
+        # List of features depenedent on the job running
+        # Defaults to [None] during init so that if no features are specified there will
+        # still be health events submitted for the job
+        features=None,
     ):
         self._check = check
         self._config_host = config_host
@@ -314,6 +323,10 @@ class DBMAsyncJob(object):
         self._enabled = enabled
         self._expected_db_exceptions = expected_db_exceptions
         self._job_name = job_name
+        self._enable_missed_collection_event = enable_missed_collection_event
+        self._features = features
+        if self._features is None:
+            self._features = [None]
 
     def cancel(self):
         """
@@ -342,6 +355,37 @@ class DBMAsyncJob(object):
         elif self._job_loop_future is None or not self._job_loop_future.running():
             self._job_loop_future = DBMAsyncJob.executor.submit(self._job_loop)
         else:
+            if (
+                hasattr(self._check, 'health')
+                and self._enable_missed_collection_event
+                and self._min_collection_interval >= 1
+                and self._last_run_start
+            ):
+                # Assume a collection interval of less than 1 second is an attempt to run the job in a loop
+                elapsed_time = time.time() - self._last_run_start
+                if elapsed_time > self._min_collection_interval:
+                    # Missed a collection interval, submit a health event for each feature that depends on this job
+                    for feature in self._features:
+                        self._check.health.submit_health_event(
+                            name=HealthEvent.MISSED_COLLECTION,
+                            status=HealthStatus.WARNING,
+                            tags=self._job_tags,
+                            # Use a cooldown to avoid spamming if the job is missing the collection interval
+                            # in a flappy manner
+                            cooldown_time=DEFAULT_COOLDOWN,
+                            cooldown_values=[self._dbms, self._job_name],
+                            data={
+                                "dbms": self._dbms,
+                                "job_name": self._job_name,
+                                "last_run_start": self._last_run_start,
+                                "elapsed_time": (time.time() - self._last_run_start) * 1000,
+                                "feature": feature,
+                            },
+                        )
+                    self._check.count(
+                        "dd.{}.async_job.missed_collection".format(self._dbms), 1, tags=self._job_tags, raw=True
+                    )
+
             self._log.debug("Job loop already running. job=%s", self._job_name)
 
     def _job_loop(self):
@@ -394,6 +438,14 @@ class DBMAsyncJob(object):
                     tags=self._job_tags + ["error:crash-{}".format(type(e))],
                     raw=True,
                 )
+
+                if hasattr(self._check, 'health'):
+                    try:
+                        self._check.health.submit_exception_health_event(e, data={"job_name": self._job_name})
+                    except Exception as health_error:
+                        self._log.exception(
+                            "[%s] Failed to submit error health event", self._job_tags_str, health_error
+                        )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
             if self._shutdown_callback:
@@ -410,6 +462,7 @@ class DBMAsyncJob(object):
 
     def _run_job_rate_limited(self):
         try:
+            self._last_run_start = time.time()
             self._run_job_traced()
         except:
             raise
