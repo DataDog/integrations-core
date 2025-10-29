@@ -5,6 +5,12 @@ python = ["3.13"]
 # https://www.couchbase.com/support-policy/EOL/
 version = ["7.0", "7.1", "7.2", "7.6"]
 
+# Metric source: REST or Prometheus
+metricsource = ["rest", "prometheus"]
+
+[envs.default.env-vars]
+COUCHBASE_METRIC_SOURCE = "rest"
+
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "COUCHBASE_VERSION", value = "7.0.5", if = ["7.0"] },
@@ -15,4 +21,7 @@ matrix.version.env-vars = [
   { key = "COUCHBASE_SYNCGW_VERSION", value = "3.3.0", if = ["7.1"] },
   { key = "COUCHBASE_SYNCGW_VERSION", value = "3.3.0", if = ["7.2"] },
   { key = "COUCHBASE_SYNCGW_VERSION", value = "3.3.0", if = ["7.6"] },
+]
+matrix.metricsource.env-vars = [
+  { key = "COUCHBASE_METRIC_SOURCE", value = "prometheus", if = ["prometheus"] },
 ]

@@ -7,10 +7,11 @@ import pytest
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import MOCKED_COUCHBASE_METRICS, QUERY_STATS
+from .common import COUCHBASE_METRIC_SOURCE, MOCKED_COUCHBASE_METRICS, QUERY_STATS
 from .conftest import mock_http_responses
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test_camel_case_to_joined_lower(instance):
     couchbase = Couchbase('couchbase', {}, [instance])
 
@@ -34,6 +35,7 @@ def test_camel_case_to_joined_lower(instance):
         )
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test_extract_seconds_value(instance):
     couchbase = Couchbase('couchbase', {}, [instance])
 
@@ -52,6 +54,7 @@ def test_extract_seconds_value(instance):
         )
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test__get_query_monitoring_data(instance_query):
     """
     `query_monitoring_url` can potentially fail, be sure we don't raise when the
@@ -61,6 +64,7 @@ def test__get_query_monitoring_data(instance_query):
     couchbase._get_query_monitoring_data()
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 @pytest.mark.parametrize(
     'test_case, extra_config, expected_http_kwargs',
     [
@@ -93,6 +97,7 @@ def test_config(test_case, extra_config, expected_http_kwargs, instance):
     assert check.http.options == http_wargs
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 @pytest.mark.parametrize(
     'test_input, expected_tags',
     [
@@ -124,6 +129,7 @@ def test_extract_index_tags(instance, test_input, expected_tags):
     assert eval(str(test_output)) == expected_tags
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test_unit(dd_run_check, check, instance, mocker, aggregator):
     mocker.patch("requests.Session.get", wraps=mock_http_responses)
 
@@ -140,6 +146,7 @@ def test_unit(dd_run_check, check, instance, mocker, aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test_unit_query_metrics(dd_run_check, check, instance_query, mocker, aggregator):
     mocker.patch("requests.Session.get", wraps=mock_http_responses)
 

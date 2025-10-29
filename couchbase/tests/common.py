@@ -37,8 +37,18 @@ COUCHBASE_MAJOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[0])
 COUCHBASE_MINOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[1])
 COUCHBASE_SYNCGW_MAJOR_VERSION = int(os.getenv('COUCHBASE_SYNCGW_VERSION').split(".")[0])
 COUCHBASE_SYNCGW_MINOR_VERSION = int(os.getenv('COUCHBASE_SYNCGW_VERSION').split(".")[1])
+COUCHBASE_METRIC_SOURCE = os.getenv('COUCHBASE_METRIC_SOURCE', 'rest')
+
+PROMETHEUS_URL = '{}/metrics'.format(URL)
 
 DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 1, 'tags': CUSTOM_TAGS}
+PROMETHEUS_INSTANCE = {
+    'prometheus_url': PROMETHEUS_URL,
+    'user': USER,
+    'password': PASSWORD,
+    'timeout': 1,
+    'tags': CUSTOM_TAGS,
+}
 
 SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.admin_net_bytes_recv",

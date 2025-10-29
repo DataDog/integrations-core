@@ -20,6 +20,7 @@ from .common import (
     BUCKET_TAGS,
     CHECK_TAGS,
     COUCHBASE_MAJOR_VERSION,
+    COUCHBASE_METRIC_SOURCE,
     INDEX_STATS_COUNT_METRICS,
     INDEX_STATS_GAUGE_METRICS,
     INDEX_STATS_INDEXER_METRICS,
@@ -34,6 +35,7 @@ from .common import (
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test_service_check(aggregator, instance, couchbase_container_ip):
     """
     Assert the OK service check
@@ -53,6 +55,7 @@ def test_service_check(aggregator, instance, couchbase_container_ip):
     )
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test_query_monitoring_metrics(aggregator, dd_run_check, instance_query, couchbase_container_ip):
     """
     Test system vitals metrics (prefixed "couchbase.query.")
@@ -66,6 +69,7 @@ def test_query_monitoring_metrics(aggregator, dd_run_check, instance_query, couc
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test_sync_gateway_metrics(aggregator, dd_run_check, instance_sg, couchbase_container_ip):
     """
     Test Sync Gateway metrics (prefixed "couchbase.sync_gateway.")
@@ -83,6 +87,7 @@ def test_sync_gateway_metrics(aggregator, dd_run_check, instance_sg, couchbase_c
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test_metadata(instance_query, dd_run_check, datadog_agent):
     check = Couchbase('couchbase', {}, [instance_query])
     check.check_id = 'test:123'
@@ -115,6 +120,7 @@ def test_metadata(instance_query, dd_run_check, datadog_agent):
 
 
 @pytest.mark.skipif(COUCHBASE_MAJOR_VERSION < 7, reason='Index metrics are only available for Couchbase 7+')
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, couchbase_container_ip):
     """
     Test Index Statistics metrics (prefixed "couchbase.index." and "couchbase.indexer.")
@@ -134,6 +140,7 @@ def test_index_stats_metrics(aggregator, dd_run_check, instance_index_stats, cou
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "rest", reason='REST-specific test')
 def test_metrics(aggregator, dd_run_check, instance, couchbase_container_ip):
     """
     Test couchbase metrics not including 'couchbase.query.'
@@ -153,3 +160,31 @@ def test_metrics(aggregator, dd_run_check, instance, couchbase_container_ip):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "prometheus", reason='Prometheus-specific test')
+def test_prometheus_check_instantiation(instance):
+    """
+    Test that the Prometheus check is instantiated correctly
+    """
+    couchbase = Couchbase('couchbase', {}, [instance])
+    # Verify the check is using CouchbaseCheckV2
+    from datadog_checks.couchbase.check import CouchbaseCheckV2
+
+    assert isinstance(couchbase, CouchbaseCheckV2), f"Expected CouchbaseCheckV2, got {type(couchbase)}"
+
+
+@pytest.mark.skipif(COUCHBASE_METRIC_SOURCE != "prometheus", reason='Prometheus-specific test')
+def test_prometheus_metrics_collection(aggregator, dd_run_check, instance):
+    """
+    Test that the Prometheus check collects metrics from the /metrics endpoint
+    """
+    couchbase = Couchbase('couchbase', {}, [instance])
+    dd_run_check(couchbase)
+
+    # Verify that metrics were collected
+    metrics = aggregator.metric_names
+    couchbase_metrics = [m for m in metrics if m.startswith('couchbase.')]
+
+    assert len(couchbase_metrics) > 0, "Expected to collect couchbase.* metrics from Prometheus endpoint"
+    assert len(couchbase_metrics) > 50, f"Expected to collect at least 50 metrics, but only got {len(couchbase_metrics)}"
