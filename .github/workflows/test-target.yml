@@ -230,6 +230,18 @@ jobs:
         ))}}
       run: ddev ci setup ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
 
+    - name: Verify ddtrace version
+      if: inputs.repo == 'core' && inputs.latest != true && inputs.minimum-base-package != true
+      timeout-minutes: 5
+      run: |-
+        # Run the ddtrace version check if it exists for this integration
+        if [ -f "${{ inputs.target }}/tests/test_ddtrace_version.py" ]; then
+          echo "Running ddtrace version verification for ${{ inputs.target }}"
+          ddev -v test ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }} -- tests/test_ddtrace_version.py -s
+        else
+          echo "No ddtrace version test found for ${{ inputs.target }}, skipping verification"
+        fi
+
     - name: Set up trace capturing
       if: inputs.repo == 'core'
       env:
@@ -244,7 +256,7 @@ jobs:
       env:
         # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
-        DD_PROFILING_STACK_V2_ENABLED: "false" # Workaround for ddtrace hangs with Python 3.13. #incident-43814
+        # DD_PROFILING_STACK_V2_ENABLED: "false" # Workaround for ddtrace hangs with Python 3.13. #incident-43814
       run: |
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
@@ -355,7 +367,7 @@ jobs:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
         # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
-        DD_PROFILING_STACK_V2_ENABLED: "false"  # Workaround for ddtrace hangs with Python 3.13. #incident-43814
+        # DD_PROFILING_STACK_V2_ENABLED: "false"  # Workaround for ddtrace hangs with Python 3.13. #incident-43814
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
         # This is done to avoid ddev from interpreting the arguments as environments
