@@ -1,0 +1,25 @@
+# Profile for legacy Cisco Wireless LAN Controllers
+device:
+  vendor: "cisco"
+
+metadata:
+  device:
+    fields:
+      type:
+        value: "wlc"
+
+# Metric packs for legacy WLC
+metric_packs:
+  - generic/metric_packs/base.yaml
+  - cisco/metric_packs/metadata.yaml
+  - cisco/metric_packs/cpu.yaml
+  - cisco/metric_packs/memory.yaml
+  - generic/metric_packs/interfaces.yaml
+  - cisco/metric_packs/wireless_controller.yaml
+
+# sysObjectIDs for matching legacy WLC devices
+sysobjectid:
+  - 1.3.6.1.4.1.9.1.618  # ciscoAIRCT2500
+  - 1.3.6.1.4.1.9.1.1034 # ciscoAIRCT4404
+  - 1.3.6.1.4.1.9.1.1279 # ciscoAIRCT5508
+

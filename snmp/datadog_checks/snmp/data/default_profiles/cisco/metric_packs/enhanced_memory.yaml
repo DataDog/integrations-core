@@ -1,0 +1,15 @@
+# Enhanced memory metrics (for Nexus and other platforms)
+metrics:
+  - MIB: CISCO-ENHANCED-MEMPOOL-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.221.1.1.1
+      name: cempMemPoolTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.221.1.1.1.1.7
+        name: memory.used
+      - OID: 1.3.6.1.4.1.9.9.221.1.1.1.1.8
+        name: memory.free
+    metric_tags:
+      - tag: mem
+        index: 1
+

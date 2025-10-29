@@ -1,0 +1,18 @@
+# Generic Cisco profile (fallback for unknown Cisco devices)
+device:
+  vendor: "cisco"
+
+# Metric packs for generic Cisco devices
+metric_packs:
+  - generic/metric_packs/base.yaml
+  - cisco/metric_packs/metadata.yaml
+  - cisco/metric_packs/cpu.yaml
+  - cisco/metric_packs/memory.yaml
+  - generic/metric_packs/interfaces.yaml
+  - generic/metric_packs/tcp.yaml
+  - generic/metric_packs/udp.yaml
+  - generic/metric_packs/ip.yaml
+
+# This is a generic profile, typically used when no specific profile matches
+# The sysObjectID list would be managed separately if needed
+

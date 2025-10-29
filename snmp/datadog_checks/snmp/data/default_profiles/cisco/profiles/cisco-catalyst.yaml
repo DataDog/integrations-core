@@ -1,0 +1,48 @@
+# Profile for Cisco Catalyst switches
+device:
+  vendor: "cisco"
+
+metadata:
+  device:
+    fields:
+      type:
+        value: "switch"
+      serial_number:
+        symbol:
+          MIB: CISCO-STACK-MIB
+          OID: 1.3.6.1.4.1.9.5.1.2.19.0
+          name: chassisSerialNumberString
+
+# Metric packs for Catalyst switches
+metric_packs:
+  - generic/metric_packs/base.yaml
+  - cisco/metric_packs/metadata.yaml
+  - cisco/metric_packs/cpu.yaml
+  - cisco/metric_packs/memory.yaml
+  - generic/metric_packs/interfaces.yaml
+  - generic/metric_packs/tcp.yaml
+  - generic/metric_packs/udp.yaml
+  - generic/metric_packs/ip.yaml
+  - generic/metric_packs/ospf.yaml
+  - generic/metric_packs/bgp.yaml
+  - cisco/metric_packs/environment.yaml
+  - cisco/metric_packs/fru.yaml
+  - cisco/metric_packs/entity_sensor.yaml
+  - cisco/metric_packs/stackwise.yaml
+  - cisco/metric_packs/catalyst_interfaces.yaml
+  - cisco/metric_packs/cpu_memory_extended.yaml
+  - cisco/metric_packs/rtt_monitoring.yaml
+  - cisco/metric_packs/virtual_switch.yaml
+
+# sysObjectIDs for matching Catalyst devices
+sysobjectid:
+  - 1.3.6.1.4.1.9.1.111  # ciscoCatalyst3500
+  - 1.3.6.1.4.1.9.1.241  # ciscoCat6000
+  - 1.3.6.1.4.1.9.1.516  # catalyst37xxStack
+  - 1.3.6.1.4.1.9.1.696  # catalyst2960G24
+  - 1.3.6.1.4.1.9.1.1208 # cat29xxStack
+  - 1.3.6.1.4.1.9.1.1641 # cat385048P
+  - 1.3.6.1.4.1.9.1.2494 # ciscoCat9300FixedSwitchStack
+  - 1.3.6.1.4.1.9.1.2688 # ciscoCat9500VirtualStack
+  # Additional sysObjectIDs can be found in the original cisco-catalyst.yaml
+

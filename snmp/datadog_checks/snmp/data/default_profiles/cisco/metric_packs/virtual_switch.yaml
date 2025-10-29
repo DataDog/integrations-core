@@ -1,0 +1,15 @@
+# Virtual Switch metrics (VSS - Virtual Switching System)
+metrics:
+  - MIB: CISCO-VIRTUAL-SWITCH-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.388.1.2.2
+      name: cvsChassisTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.388.1.2.2.1.3
+        name: cvsChassisUpTime
+    metric_tags:
+      - symbol:
+          OID: 1.3.6.1.4.1.9.9.388.1.2.2.1.1
+          name: cvsChassisSwitchID
+        tag: chassis_switch_id
+

@@ -1,0 +1,33 @@
+# Profile for Cisco UCS (Unified Computing System)
+device:
+  vendor: "cisco"
+
+metadata:
+  device:
+    fields:
+      type:
+        value: "server"
+
+# Metric packs for UCS
+metric_packs:
+  - generic/metric_packs/base.yaml
+  - cisco/metric_packs/metadata.yaml
+  - cisco/metric_packs/cpu.yaml
+  - cisco/metric_packs/memory.yaml
+  - generic/metric_packs/interfaces.yaml
+  - cisco/metric_packs/entity_sensor.yaml
+  - cisco/metric_packs/environment.yaml
+  - cisco/metric_packs/fru.yaml
+
+# sysObjectIDs for matching UCS devices
+sysobjectid:
+  - 1.3.6.1.4.1.9.1.1341 # ciscoUcsFI6296UP
+  - 1.3.6.1.4.1.9.1.1342 # ciscoUcsFI6248UP
+  - 1.3.6.1.4.1.9.1.1343 # ciscoUcsFI6248P
+  - 1.3.6.1.4.1.9.1.1477 # ciscoUcsC200M1
+  - 1.3.6.1.4.1.9.1.1478 # ciscoUcsC210M2
+  - 1.3.6.1.4.1.9.1.1479 # ciscoUcsC260M2
+  - 1.3.6.1.4.1.9.1.1587 # ciscoUcsFI6332UP
+  - 1.3.6.1.4.1.9.1.2054 # ciscoUcsC3260M3
+  - 1.3.6.1.4.1.9.1.2387 # ciscoUcsC3X60M4
+

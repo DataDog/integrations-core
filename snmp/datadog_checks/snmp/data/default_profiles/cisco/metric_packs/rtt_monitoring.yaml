@@ -1,0 +1,44 @@
+# Round Trip Time (RTT) monitoring metrics
+metrics:
+  - MIB: CISCO-RTTMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.42.1.2.10
+      name: rttMonLatestRttOperTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.42.1.2.10.1.1
+        name: rttMonLatestRttOperCompletionTime
+      - OID: 1.3.6.1.4.1.9.9.42.1.2.10.1.2
+        name: rttMonLatestRttOperSense
+    metric_tags:
+      - symbol:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.9.1.10
+          name: rttMonCtrlOperState
+        table: rttMonCtrlOperTable
+        tag: rtt_state
+        mapping:
+          1: reset
+          2: orderly_stop
+          3: immediate_stop
+          4: pending
+          5: inactive
+          6: active
+          7: restart
+      - symbol:
+          OID: 1.3.6.1.4.1.9.9.42.1.2.1.1.4
+          name: rttMonCtrlAdminRttType
+        table: rttMonCtrlAdminTable
+        tag: rtt_type
+      - index: 1
+        tag: rtt_index
+
+  - MIB: CISCO-RTTMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.42.1.2.9
+      name: rttMonCtrlOperTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.42.1.2.9.1.6
+        name: rttMonCtrlOperTimeoutOccurred
+    metric_tags:
+      - index: 1
+        tag: rtt_index
+

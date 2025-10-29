@@ -1,0 +1,23 @@
+# Profile for Cisco UC (Unified Communications) Virtual Machine
+device:
+  vendor: "cisco"
+
+metadata:
+  device:
+    fields:
+      type:
+        value: "voip-server"
+
+# Metric packs for UC Virtual Machine
+metric_packs:
+  - generic/metric_packs/base.yaml
+  - cisco/metric_packs/metadata.yaml
+  - cisco/metric_packs/cpu.yaml
+  - cisco/metric_packs/memory.yaml
+  - generic/metric_packs/interfaces.yaml
+  - cisco/metric_packs/voice.yaml
+
+# sysObjectID for UC Virtual Machine
+sysobjectid:
+  - 1.3.6.1.4.1.9.1.1348 # ciscoUCVirtualMachine
+
