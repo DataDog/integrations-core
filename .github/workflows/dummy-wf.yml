@@ -1,17 +1,14 @@
 name: Dummy workflow
+run-name: Dummy workflow - ${{ github.event.pull_request.title }}
+
 
 on:
-  workflow_run:
-    workflows:
-      - 'Resolve Dependencies and Build Wheels'
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  dummy:
+  dummy-job:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-            echo "Head branch: "
-            echo ${{ github.event.workflow_run.head_branch }}
-            echo "Ref: "
-            echo ${{ github.ref_name }}
-           
+      - run: echo "Hello, world!"
