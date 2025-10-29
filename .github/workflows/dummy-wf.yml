@@ -1,11 +1,11 @@
 name: Dummy workflow
-run-name: Dummy workflow - ${{ github.event.pull_request.title }}
+run-name: Dummy workflow (${{ github.event.pull_request.title }})
 
 
 on:
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   dummy-job:
