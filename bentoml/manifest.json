@@ -48,7 +48,9 @@
     "monitors": {
       "BentoML Liveness Monitor": "assets/monitors/bentoml_liveness_monitor.json"
     },
-    "saved_views": {}
+    "saved_views": {
+      "BentoML Logs Overview": "assets/saved_views/bentoml_overview.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
