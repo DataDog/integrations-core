@@ -110,6 +110,7 @@ def status(
 
             elif commit and not dependencies_resolved and previous_sizes:
                 dependency_sizes = previous_sizes.filter(platform=plat, python_version=ver, type="Dependency")
+                app.display_debug(f"{plat=}, {ver=}, {dependency_sizes._total_sizes[plat][ver]=}")
 
             if commit and not dependency_sizes:
                 app.display_error("Could not find dependency sizes in the artifacts: falling back to local lockfiles")

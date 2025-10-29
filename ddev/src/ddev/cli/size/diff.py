@@ -236,7 +236,9 @@ def get_diff_from_artifacts(
             if baseline
             else get_status_sizes(app, compressed, branch="master")
         )
+        app.display_debug(f"{baseline_sizes._total_sizes=}, {baseline_commit=}")
         commit_sizes, _ = get_status_sizes(app, compressed, commit=commit)
+        app.display_debug(f"{commit_sizes._total_sizes=}, {commit=}")
     except Exception:
         import traceback
 
