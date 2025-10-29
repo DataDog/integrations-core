@@ -60,12 +60,20 @@ def instance_persist_connections():
     return False
 
 
+def instance_prometheus_url():
+    return 'http://localhost:8091/_prometheus'
+
+
 def instance_query_monitoring_url():
     return 'http://localhost:8093'
 
 
 def instance_request_size():
     return 16
+
+
+def instance_server():
+    return 'http://localhost:8091'
 
 
 def instance_skip_proxy():
