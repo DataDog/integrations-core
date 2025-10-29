@@ -138,7 +138,7 @@ def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get
         aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
 
 
-def test_alL_metrics_in_metadata_csv(dd_run_check, aggregator, mock_instance, mock_http_get):
+def test_all_metrics_in_metadata_csv(dd_run_check, aggregator, mock_instance, mock_http_get):
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
