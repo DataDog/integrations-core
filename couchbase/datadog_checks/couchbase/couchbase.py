@@ -34,6 +34,8 @@ from datadog_checks.couchbase.couchbase_consts import (
     TO_SECONDS,
 )
 
+from .check import CouchbaseCheckV2
+
 
 class Couchbase(AgentCheck):
     """
@@ -42,6 +44,14 @@ class Couchbase(AgentCheck):
     """
 
     HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}, 'ssl_verify': {'name': 'tls_verify'}}
+
+    def __new__(cls, name, init_config, instances):
+        instance = instances[0]
+
+        if instance.get("prometheus_url"):
+            return CouchbaseCheckV2(name, init_config, instances)
+        else:
+            return super(Couchbase, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         super(Couchbase, self).__init__(name, init_config, instances)
