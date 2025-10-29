@@ -136,7 +136,6 @@
               "title": "Average Queue Size",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -670,7 +669,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -703,8 +701,8 @@
             "layout": {
               "x": 0,
               "y": 1,
-              "width": 6,
-              "height": 3
+              "width": 5,
+              "height": 4
             }
           },
           {
@@ -716,7 +714,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -747,10 +744,90 @@
               ]
             },
             "layout": {
-              "x": 6,
+              "x": 5,
               "y": 1,
-              "width": 6,
-              "height": 3
+              "width": 5,
+              "height": 4
+            }
+          },
+          {
+            "id": 2278476570708517,
+            "definition": {
+              "title": "Ingested",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:hugging_face_tgi.request.input_length.sum{$host}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {},
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 10,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 1031719254760586,
+            "definition": {
+              "title": "Output",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:hugging_face_tgi.request.generated_tokens.sum{$host}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars",
+                "yaxis": {}
+              }
+            },
+            "layout": {
+              "x": 10,
+              "y": 3,
+              "width": 2,
+              "height": 2
             }
           }
         ]
@@ -759,7 +836,7 @@
         "x": 0,
         "y": 14,
         "width": 12,
-        "height": 5
+        "height": 6
       }
     },
     {
@@ -793,6 +870,275 @@
             }
           },
           {
+            "id": 3279775942383392,
+            "definition": {
+              "title": "Average prefill time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Concatenation",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1 / query2"
+                    },
+                    {
+                      "alias": "Filter",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query3 / query4"
+                    },
+                    {
+                      "alias": "Forward",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query5 / query6"
+                    },
+                    {
+                      "alias": "Inference - Time to First Token",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query7 / query8"
+                    },
+                    {
+                      "alias": "Decode",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query9 / query10"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:hugging_face_tgi.batch.concat.duration.sum{$host,method:prefill}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:hugging_face_tgi.batch.concat.duration.count{$host,method:prefill}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:hugging_face_tgi.batch.filter.duration.sum{$host,method:prefill}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:hugging_face_tgi.batch.filter.duration.count{$host,method:prefill}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:hugging_face_tgi.batch.forward.duration.sum{$host,method:prefill}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "sum:hugging_face_tgi.batch.forward.duration.count{$host,method:prefill}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "query": "sum:hugging_face_tgi.batch.inference.duration.sum{$host,method:prefill}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "query": "sum:hugging_face_tgi.batch.inference.duration.count{$host,method:prefill}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query9",
+                      "query": "sum:hugging_face_tgi.batch.decode.duration.sum{$host,method:prefill}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query10",
+                      "query": "sum:hugging_face_tgi.batch.decode.duration.count{$host,method:prefill}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 5373651868721697,
+            "definition": {
+              "title": "Average decode time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Concatenation",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1 / query2"
+                    },
+                    {
+                      "alias": "Filter",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query3 / query4"
+                    },
+                    {
+                      "alias": "Forward",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query5 / query6"
+                    },
+                    {
+                      "alias": "Inference - Time Per Token",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query7 / query8"
+                    },
+                    {
+                      "alias": "Decode",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query9 / query10"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:hugging_face_tgi.batch.concat.duration.sum{$host,method:decode}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:hugging_face_tgi.batch.concat.duration.count{$host,method:decode}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:hugging_face_tgi.batch.filter.duration.sum{$host,method:decode}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:hugging_face_tgi.batch.filter.duration.count{$host,method:decode}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:hugging_face_tgi.batch.forward.duration.sum{$host,method:decode}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "sum:hugging_face_tgi.batch.forward.duration.count{$host,method:decode}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "query": "sum:hugging_face_tgi.batch.inference.duration.sum{$host,method:decode}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "query": "sum:hugging_face_tgi.batch.inference.duration.count{$host,method:decode}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query9",
+                      "query": "sum:hugging_face_tgi.batch.decode.duration.sum{$host,method:decode}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query10",
+                      "query": "sum:hugging_face_tgi.batch.decode.duration.count{$host,method:decode}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
             "id": 21,
             "definition": {
               "title": "Batch size",
@@ -801,7 +1147,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -830,9 +1175,9 @@
             },
             "layout": {
               "x": 0,
-              "y": 1,
-              "width": 4,
-              "height": 4
+              "y": 4,
+              "width": 6,
+              "height": 3
             }
           },
           {
@@ -844,7 +1189,6 @@
               "show_legend": true,
               "legend_layout": "auto",
               "legend_columns": ["avg", "min", "max", "value", "sum"],
-              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -872,123 +1216,19 @@
               ]
             },
             "layout": {
-              "x": 4,
-              "y": 1,
-              "width": 4,
-              "height": 4
-            }
-          },
-          {
-            "id": 4619359413813279,
-            "definition": {
-              "title": "Time spent by method",
-              "title_size": "16",
-              "title_align": "left",
-              "time": {},
-              "requests": [
-                {
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:hugging_face_tgi.batch.filter.duration.sum{$host} by {method}.as_count()",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "sum:hugging_face_tgi.batch.concat.duration.sum{$host} by {method}.as_count()",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "sum:hugging_face_tgi.batch.inference.duration.sum{$host} by {method}.as_count()",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query4",
-                      "query": "sum:hugging_face_tgi.batch.decode.duration.sum{$host} by {method}.as_count()",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query5",
-                      "query": "sum:hugging_face_tgi.batch.forward.duration.sum{$host} by {method}.as_count()",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query6",
-                      "query": "sum:hugging_face_tgi.batch.filter.duration.count{$host} by {method}.as_count()",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query7",
-                      "query": "sum:hugging_face_tgi.batch.concat.duration.count{$host} by {method}.as_count()",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query8",
-                      "query": "sum:hugging_face_tgi.batch.inference.duration.count{$host} by {method}.as_count()",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query9",
-                      "query": "sum:hugging_face_tgi.batch.decode.duration.count{$host} by {method}.as_count()",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query10",
-                      "query": "sum:hugging_face_tgi.batch.forward.duration.count{$host} by {method}.as_count()",
-                      "aggregator": "sum"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "style": {
-                    "palette": "datadog16"
-                  },
-                  "formulas": [
-                    {
-                      "formula": "(query1 + query2 + query3 + query4 + query5)"
-                    }
-                  ],
-                  "sort": {
-                    "count": 500,
-                    "order_by": [
-                      {
-                        "type": "formula",
-                        "index": 0,
-                        "order": "desc"
-                      }
-                    ]
-                  }
-                }
-              ],
-              "type": "sunburst",
-              "legend": {
-                "type": "automatic"
-              }
-            },
-            "layout": {
-              "x": 8,
-              "y": 1,
-              "width": 4,
-              "height": 4
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
             }
           }
         ]
       },
       "layout": {
         "x": 0,
-        "y": 19,
+        "y": 0,
         "width": 12,
-        "height": 6,
+        "height": 8,
         "is_column_break": true
       }
     },
@@ -1135,7 +1375,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 25,
+        "y": 8,
         "width": 12,
         "height": 6
       }
@@ -1386,7 +1626,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 31,
+        "y": 14,
         "width": 12,
         "height": 11
       }
