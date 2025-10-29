@@ -11,7 +11,7 @@
 
 ***Added***:
 
-* Added admin-scoped API key support for usage and cost data ingestion. This will ingest data for all projects in the organization if an admin-scoped API is provided.
+* Add admin-scoped API key support for usage and cost data ingestion. This ingests data for all projects in the organization if an admin-scoped API is provided.
 * Add an OOTB dashboard that leverages new usage metrics provided by admin-scoped API keys.
 
 ## 3.0.0 - 10/18/2025
