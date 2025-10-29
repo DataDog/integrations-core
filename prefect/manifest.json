@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "A Python-first workflow orchestration platform for data, ML, and automation",
     "title": "Prefect",
     "media": [],
     "classifier_tags": [
@@ -16,10 +16,10 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::Orchestration",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
@@ -34,17 +34,18 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "prefect.",
+        "prefix": "prefect.io.",
         "check": "",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "prefect"
+      ]
     },
-    "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
-    },
+    "dashboards": {},
     "monitors": {},
     "saved_views": {}
   },
