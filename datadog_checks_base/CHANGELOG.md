@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.22.1 / 2025-10-29
+
+***Fixed***:
+
+* Fix missed collection event to use correct collection interval. ([#21766](https://github.com/DataDog/integrations-core/pull/21766))
+
 ## 37.22.0 / 2025-10-27
 
 ***Added***:
