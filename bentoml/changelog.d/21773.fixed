@@ -1,1 +1,1 @@
-Remap endpoint label to bentoml_endpoint to prevent it from clashing with OMv2 default endpoint tag
+Remap `endpoint` label to `bentoml_endpoint` to prevent it from clashing with OMv2 default `endpoint` tag
