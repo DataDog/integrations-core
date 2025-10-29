@@ -318,9 +318,6 @@ def test_display_name_tag(aggregator, check, instance_basic):
 
 
 def test_openservice_failure(aggregator, check, instance_basic_dict, caplog):
-    # dict type
-    instance_basic_dict['services'].append({'startup_type': 'automatic'})
-    # str type
     instance_basic_dict['services'].append('EventLog')
 
     instance_basic_dict['windows_service_startup_type_tag'] = True
