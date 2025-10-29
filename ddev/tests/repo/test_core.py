@@ -28,10 +28,14 @@ class TestGetIntegration:
         with helpers.error(OSError, message=f'Integration does not exist: {repo.path.name}{os.sep}{integration}'):
             repo.integrations.get(integration)
 
-    def test_invalid(self, local_repo, helpers):
+    @pytest.mark.parametrize(
+        "integration",
+        # These are the directories that are not itnegrations nor packages
+        ["docs", "datadog_checks_tests_helper"],
+    )
+    def test_invalid(self, local_repo, helpers, integration):
         repo = Repository(local_repo.name, str(local_repo))
 
-        integration = '.github'
         with helpers.error(
             OSError, message=f'Path is not an integration nor a Python package: {repo.path.name}{os.sep}{integration}'
         ):
