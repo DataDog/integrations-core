@@ -1,6 +1,6 @@
 name: Dummy workflow
 
-run-name: "[${{ substring(github.event.pull_request.head.sha, 0, 7) }}] Dummy workflow"
+run-name: "[${{ github.event.pull_request.head.sha }}] Dummy workflow"
 
 on:
   pull_request:
