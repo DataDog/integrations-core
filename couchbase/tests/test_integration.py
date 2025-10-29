@@ -187,4 +187,6 @@ def test_prometheus_metrics_collection(aggregator, dd_run_check, instance):
     couchbase_metrics = [m for m in metrics if m.startswith('couchbase.')]
 
     assert len(couchbase_metrics) > 0, "Expected to collect couchbase.* metrics from Prometheus endpoint"
-    assert len(couchbase_metrics) > 50, f"Expected to collect at least 50 metrics, but only got {len(couchbase_metrics)}"
+    assert len(couchbase_metrics) > 50, (
+        f"Expected to collect at least 50 metrics, but only got {len(couchbase_metrics)}"
+    )
