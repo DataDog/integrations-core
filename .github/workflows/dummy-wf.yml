@@ -1,11 +1,9 @@
 name: Dummy workflow
 
-run-name: "[${{ github.event.pull_request.head.sha }}] Dummy workflow"
-
 on:
-  pull_request:
-    branches:
-      - master
+  workflow_run:
+    workflows:
+      - 'Resolve Dependencies and Build Wheels'
 
 jobs:
   dummy:
@@ -13,6 +11,7 @@ jobs:
     steps:
       - run: |
             echo "Head branch: "
+            echo ${{ github.event.workflow_run.head_branch }}
             echo "Ref: "
             echo ${{ github.ref_name }}
            
