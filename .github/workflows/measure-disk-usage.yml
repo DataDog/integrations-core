@@ -1,4 +1,5 @@
 name: Measure Disk Usage
+run-name: Measure Disk Usage (${{ github.event.workflow_run.head_branch }})
 
 on:
   workflow_run:
