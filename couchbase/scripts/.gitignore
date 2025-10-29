@@ -1,0 +1,6 @@
+# Ignore all files in scripts/ except the generation script and docs
+*
+!.gitignore
+!generate_metrics_code.py
+!__init__.py
+!README.md
