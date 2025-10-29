@@ -124,7 +124,8 @@ def diff(
         else:
             from ddev.cli.size.utils.gha_artifacts import get_previous_commit
 
-            baseline = get_previous_commit(app, commit)
+            baseline = get_previous_commit(app, commit) if baseline is None else baseline
+
             if not baseline:
                 app.abort("No baseline commit found")
             app.display(f"Comparing to commit: {baseline}")
@@ -438,7 +439,7 @@ def get_repo_info(
 def check_quality_gate(
     app: Application, total_diff: int, old_size: int, quality_gate_threshold: float, platform: str, py_version: str
 ) -> bool:
-    percentage = (total_diff / old_size) * 100
+    percentage = (total_diff / old_size) * 100 if old_size > 0 else 100
 
     if not (passes := (percentage < quality_gate_threshold)):
         app.display_error(f"Quality gate threshold not passed for {platform} and {py_version}")
