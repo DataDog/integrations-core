@@ -995,7 +995,7 @@ def get_last_dependency_sizes_artifact(
     size of that commit.
     '''
     size_type = 'compressed' if compressed else 'uncompressed'
-    app.display(f"Retrieving dependency sizes for {commit} ({platform}, py{py_version}, {size_type})")
+    app.display(f"\nRetrieving dependency sizes for {commit} ({platform}, py{py_version}, {size_type})")
 
     dep_sizes_json = get_dep_sizes_json(app, commit, platform, py_version)
     if not dep_sizes_json:
@@ -1033,6 +1033,11 @@ def get_dep_sizes_json(app: Application, current_commit: str, platform: str, py_
 def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
     app.display_debug(f"Fetching workflow run ID for {commit} ({os.path.basename(workflow)})")
 
+    if workflow == MEASURE_DISK_USAGE_WORKFLOW:
+        jq = f'.[] | select(.name == "Measure Disk Usage [{commit}]") | .databaseId'
+    else:
+        jq = '.[-1].databaseId'
+
     result = subprocess.run(
         [
             'gh',
@@ -1043,14 +1048,13 @@ def get_run_id(app: Application, commit: str, workflow: str) -> str | None:
             '-c',
             commit,
             '--json',
-            'databaseId',
+            'databaseId,name',
             '--jq',
-            '.[-1].databaseId',
+            jq,
         ],
         capture_output=True,
         text=True,
     )
-
     run_id = result.stdout.strip() if result.stdout else None
     if run_id:
         app.display_debug(f"Workflow run ID: {run_id}")
@@ -1065,7 +1069,7 @@ def get_current_sizes_json(app: Application, run_id: str, platform: str, py_vers
     '''
     Downloads the dependency sizes json for a given run id and platform when dependencies were resolved.
     '''
-    app.display(f"Retrieving dependency sizes artifact (run={run_id}, platform={platform})")
+    app.display(f"\nRetrieving dependency sizes artifact (run={run_id}, platform={platform})")
     with tempfile.TemporaryDirectory() as tmpdir:
         app.display_debug(f"Downloading artifacts to {tmpdir}...")
         try:
