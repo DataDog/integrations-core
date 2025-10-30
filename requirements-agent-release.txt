@@ -18,6 +18,7 @@ datadog-aspdotnet==4.4.0; sys_platform == 'win32'
 datadog-avi-vantage==6.1.0
 datadog-aws-neuron==3.1.0
 datadog-azure-iot-edge==6.2.0
+datadog-barracuda-secure-edge==1.0.0
 datadog-bentoml==1.1.0
 datadog-beyondtrust-password-safe==1.1.0
 datadog-boundary==4.1.0
