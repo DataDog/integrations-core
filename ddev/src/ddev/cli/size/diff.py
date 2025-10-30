@@ -70,8 +70,7 @@ def diff(
     value of the `--compare-to` option:
 
         - If `--compare-to` is provided, it will be used as the diff source
-        - If `--compare-to` is not provided, the source will be the merge base with master, if the command is run from
-          a feature branch, or the previous commit if the command is run in the master branch.
+        - If `--compare-to` is not provided, the baseline will be the last completed run on master.
 
     Both COMMIT and the value of `--compare-to` need to be the full commit sha.
     """
@@ -231,14 +230,16 @@ def get_diff_from_artifacts(
     passes_quality_gate = True
 
     try:
+        print(f"baseline: {baseline}, commit: {commit}")
         baseline_sizes, baseline_commit = (
             get_status_sizes(app, compressed, commit=baseline)
             if baseline
-            else get_status_sizes(app, compressed, branch="master")
+            else get_status_sizes(app, compressed, branch="origin/master", commit=commit)
         )
-        app.display_debug(f"{baseline_sizes._total_sizes=}, {baseline_commit=}")
+        # app.display_debug(f"{baseline_sizes._total_sizes=}, {baseline_commit=}")
         commit_sizes, _ = get_status_sizes(app, compressed, commit=commit)
-        app.display_debug(f"{commit_sizes._total_sizes=}, {commit=}")
+        app.display_debug(f" {baseline_commit=}, {commit=}")
+        # app.display_debug(f"{commit_sizes._total_sizes=}, {commit=}")
     except Exception:
         import traceback
 

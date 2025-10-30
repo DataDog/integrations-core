@@ -94,8 +94,8 @@ def status(
 
             commits = [commit]
             if not artifact_exists(app, commit, "target-" + next(iter(platforms)), RESOLVE_BUILD_DEPS_WORKFLOW):
-                app.display("\n -> Searching for dependency sizes in previous commit")
-                previous_sizes, previous_commit = get_status_sizes(app, compressed, branch="master")
+                app.display("\n -> Searching for dependency sizes in master")
+                previous_sizes, previous_commit = get_status_sizes(app, compressed, branch="origin/master")
                 if previous_commit and previous_sizes:
                     app.display_debug(f"Previous commit: {previous_commit}")
             else:

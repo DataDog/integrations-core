@@ -35,7 +35,7 @@ def get_dependencies_from_artifact(
 def artifact_exists(app: Application, commit: str, artifact_name: str, workflow: str) -> bool:
     import subprocess
 
-    run_id = get_run_id_by_commit(app, commit, workflow)
+    run_id, _ = get_run_id_by_commit(app, commit, workflow)
     if not run_id:
         return False
     result = subprocess.run(
@@ -76,7 +76,8 @@ def get_dep_sizes(app: Application, current_commit: str, platform: str, py_versi
     """
     import json
 
-    run_id = get_run_id_by_commit(app, current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
+    run_id, _ = get_run_id_by_commit(app, current_commit, RESOLVE_BUILD_DEPS_WORKFLOW)
+
     if run_id:
         dep_sizes_json_path = get_current_sizes_json(app, run_id, platform, py_version)
         if dep_sizes_json_path:
@@ -87,10 +88,15 @@ def get_dep_sizes(app: Application, current_commit: str, platform: str, py_versi
 
 
 @cache
-def get_run_id_by_commit(app: Application, commit: str, workflow: str) -> str | None:
+def get_run_id_by_commit(app: Application, commit: str, workflow: str) -> tuple[str | None, str | None]:
     import subprocess
 
-    app.display_debug(f"Fetching workflow run ID for {commit=} ({workflow.split('/')[-1]})")
+    app.display_debug(f"Fetching workflow run ID for {commit} ({workflow.split('/')[-1]})")
+
+    if workflow == MEASURE_DISK_USAGE_WORKFLOW:
+        jq = f'.[] | select(.name == "Measure Disk Usage [{commit}]") | (.databaseId | tostring) + "," + .status'
+    else:
+        jq = '.[-1] | (.databaseId | tostring) + "," + .status'
 
     result = subprocess.run(
         [
@@ -102,55 +108,37 @@ def get_run_id_by_commit(app: Application, commit: str, workflow: str) -> str | 
             '-c',
             commit,
             '--json',
-            'databaseId',
+            'databaseId,name,status',
             '--jq',
-            '.[-1].databaseId',
+            jq,
         ],
         capture_output=True,
         text=True,
     )
-
-    run_id = result.stdout.strip() if result.stdout else None
+    run_id, status = result.stdout.strip().split(',') if result.stdout else (None, None)
     if run_id:
         app.display_debug(f"Workflow run ID: {run_id}")
     else:
-        app.display_error(f"No workflow run found for {commit} ({workflow.split('/')[-1]})")
+        app.display_warning(f"No workflow run found for {commit} ({workflow.split('/')[-1]})")
 
-    return run_id
+    return run_id, status
 
 
 @cache
-def get_last_run_id_by_branch(app: Application, branch: str, workflow: str) -> tuple[str | None, str | None]:
-    import json
-    import subprocess
-
+def get_last_run_id_by_branch(
+    app: Application, branch: str, workflow: str, commit: str
+) -> tuple[str | None, str | None]:
     app.display_debug(f"Fetching last workflow run ID for {branch} ({workflow.split('/')[-1]})")
+    commits = app.repo.git.log(["hash:%H"], source=branch)
 
-    try:
-        result = subprocess.run(
-            [
-                'gh',
-                'run',
-                'list',
-                '--workflow',
-                workflow,
-                '--branch',
-                branch,
-                '--json',
-                'databaseId,status,headSha',
-            ],
-            capture_output=True,
-            text=True,
-        )
-    except Exception as e:
-        app.display_error(f"Failed to get last workflow run ID for {branch} ({workflow.split('/')[-1]}): {e}")
-        return None, None
-
-    runs = json.loads(result.stdout)
-    for run in runs:
-        if run['status'] == 'completed':
-            app.display_debug(f"Found completed run {run['databaseId']} in commit {run['headSha']}")
-            return str(run['databaseId']), run['headSha']
+    for _commit in commits:
+        app.display_debug(f"Checking commit: {_commit['hash']} and commit: {commit}")
+        if _commit['hash'] != commit:
+            run_id, status = get_run_id_by_commit(app, _commit['hash'], workflow)
+            app.display_debug(f"Run ID: {run_id}, Status: {status}")
+            if run_id and status == 'completed':
+                app.display_debug(f"Found completed run {run_id} in commit {_commit['hash']}")
+                return run_id, _commit['hash']
     return None, None
 
 
@@ -240,13 +228,13 @@ def get_status_sizes(
 
     '''
     Gets the sizes json for a given commit or for the latest run on a branch from the measure disk usage workflow.
-    If a branch is provided, it retrieves the most recent run for that branch.
+    If a branch is provided, it retrieves the most recent run for that branch other than the commit provided.
     '''
     with tempfile.TemporaryDirectory() as tmpdir:
-        if commit:
-            run_id = get_run_id_by_commit(app, commit, MEASURE_DISK_USAGE_WORKFLOW)
-        elif branch:
-            run_id, commit = get_last_run_id_by_branch(app, branch, MEASURE_DISK_USAGE_WORKFLOW)
+        if branch:
+            run_id, commit = get_last_run_id_by_branch(app, branch, MEASURE_DISK_USAGE_WORKFLOW, commit)
+        elif commit:
+            run_id, _ = get_run_id_by_commit(app, commit, MEASURE_DISK_USAGE_WORKFLOW)
         else:
             app.display_error("No commit or branch provided")
             return Sizes([]), ""
