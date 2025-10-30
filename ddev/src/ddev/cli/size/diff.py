@@ -236,17 +236,16 @@ def get_diff_from_artifacts(
             if baseline
             else get_status_sizes(app, compressed, branch="origin/master", commit=commit)
         )
-        # app.display_debug(f"{baseline_sizes._total_sizes=}, {baseline_commit=}")
+        app.display_debug(f"{baseline_sizes._total_sizes=}, {baseline_commit=}")
         commit_sizes, _ = get_status_sizes(app, compressed, commit=commit)
-        app.display_debug(f" {baseline_commit=}, {commit=}")
-        # app.display_debug(f"{commit_sizes._total_sizes=}, {commit=}")
+        app.display_debug(f"{commit_sizes._total_sizes=}, {commit=}")
     except Exception:
         import traceback
 
         app.abort(traceback.format_exc())
 
     if not baseline_sizes or not baseline_commit:
-        app.abort(f"Failed to get sizes for baseline commit {baseline or 'master'}")
+        app.abort(f"Failed to get sizes for baseline commit {baseline or baseline_commit}")
     if not commit_sizes:
         app.abort(f"Failed to get sizes for {commit=}")
 
