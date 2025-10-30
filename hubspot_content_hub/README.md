@@ -20,7 +20,7 @@ To integrate HubSpot with Datadog, Datadog connects to HubSpot using OAuth. The 
 4. After reading the instructions in the modal, click the **Authorize** button, which redirects you to the HubSpot login page.
 5. After logging in, you are prompted to select which HubSpot account you want to grant access to.
 6. Click **Authorize**.
-7. You’re redirected to Datadog’s HubSpot tile with a new account. Datadog recommends renaming the account to make it more recognizable. You can add multiple accounts, each with access to different organizations.
+7. You're redirected to Datadog's HubSpot tile with a new account. Datadog recommends renaming the account to make it more recognizable. You can add multiple accounts, each with access to different organizations.
 
 If the **Create Companies Reference Table** toggle is enabled, Datadog creates a [Reference Table][5] containing company data from your HubSpot account. This action requires the **crm.objects.companies.read** permission in Hubspot.
 
