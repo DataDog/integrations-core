@@ -103,7 +103,7 @@ def find_cpy(data):
 
 
 def get_extra_license_files(app: Application):
-    for integration in app.repo.integrations.iter():
+    for integration in app.repo.integrations.iter('all'):
         extra_license_file = integration.path / '3rdparty-extra-LICENSE.csv'
         if extra_license_file.is_file():
             yield extra_license_file
