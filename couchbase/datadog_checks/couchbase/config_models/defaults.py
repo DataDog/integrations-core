@@ -61,7 +61,7 @@ def instance_persist_connections():
 
 
 def instance_prometheus_url():
-    return 'http://localhost:8091/_prometheus'
+    return 'http://localhost:8091/metrics'
 
 
 def instance_query_monitoring_url():
