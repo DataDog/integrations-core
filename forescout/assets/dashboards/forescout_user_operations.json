@@ -26,7 +26,7 @@
             "id": 982040765925043,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides a detailed summary of user operations, covering license management activities and segment configuration changes for effective system administration and control.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides a detailed summary of user operations, covering license management activities and segment configuration changes for effective system administration and control.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",

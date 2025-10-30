@@ -26,7 +26,7 @@
             "id": 8200283501270123,
             "definition": {
                 "type": "note",
-                "content": "This dashboard provides a detailed overview of NAC policy match logs, highlighting source IP addresses, matched policies, and related enforcement actions.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard provides a detailed overview of NAC policy match logs, highlighting source IP addresses, matched policies, and related enforcement actions.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",

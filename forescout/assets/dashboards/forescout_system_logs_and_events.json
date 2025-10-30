@@ -26,7 +26,7 @@
             "id": 5728525392188572,
             "definition": {
                 "type": "note",
-                "content": "This dashboard offers a comprehensive overview of system logs and events, including license alerts, login activity, and overall system status to ensure continuous monitoring and operational health.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard offers a comprehensive overview of system logs and events, including license alerts, login activity, and overall system status to ensure continuous monitoring and operational health.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",

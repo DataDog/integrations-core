@@ -1,6 +1,6 @@
 {
     "title": "Forescout Overview",
-    "description": "This dashboard offers a comprehensive summary of forescout logs.",
+    "description": "This dashboard offers a comprehensive summary of Forescout logs.",
     "widgets": [
         {
             "id": 480110828767514,
@@ -26,7 +26,7 @@
             "id": 6093143310189425,
             "definition": {
                 "type": "note",
-                "content": "[Forescout](https://www.forescout.com/) is an agentless security appliance that dynamically identifies and evaluates network endpoints and applications as they connect. It provides remediation, enforces control policies, and continuously monitors devices to maintain security and compliance across the network.\n\nThis dashboard offers a comprehensive summary of forescout logs.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "[Forescout](https://www.forescout.com/) is a security appliance that dynamically identifies and evaluates network endpoints and applications as they connect. It provides remediation, enforces control policies, and continuously monitors devices to maintain security and compliance across the network.\n\nThis dashboard offers a comprehensive summary of Forescout logs.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -595,7 +595,7 @@
                         "id": 5796443987164897,
                         "definition": {
                             "type": "note",
-                            "content": "\nDatadog Cloud SIEM analyzes and correlates **Forescout** Events to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
+                            "content": "Datadog Cloud SIEM analyzes and correlates Forescout events to detect threats to your environment in real time. If you don't see signals, ensure you've enabled [Datadog Cloud SIEM](/security/home). ",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",

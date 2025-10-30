@@ -26,7 +26,7 @@
             "id": 4005569029054089,
             "definition": {
                 "type": "note",
-                "content": "This dashboard offers a comprehensive summary of threat protection activities, including suspicious connection attempts, scan events, lockdown actions, block events, and email worm detections.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "content": "This dashboard offers a comprehensive summary of threat protection activities, including suspicious connection attempts, scan events, lockdown actions, block events, and email worm detections.\n\nFor more information, see the [Forescout Integration Documentation](https://docs.datadoghq.com/integrations/forescout/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
