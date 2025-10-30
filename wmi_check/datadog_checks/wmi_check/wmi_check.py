@@ -21,7 +21,6 @@ class WMICheck(WinWMICheck):
         self.filters = self.instance.get('filters', [])  # type: List[Dict[str, WMIFilter]]
         self.metrics_to_capture = self.instance.get('metrics', [])  # type: List[List[str]]
         self.tag_by = self.instance.get('tag_by', "")  # type: str
-        self.tag_by_prefix = self.instance.get('tag_by_prefix', "")  # type: str
         self.tag_queries = self.instance.get('tag_queries', [])  # type: List[TagQuery]
 
         custom_tags = self.instance.get('tags', [])  # type: List[str]
@@ -38,7 +37,18 @@ class WMICheck(WinWMICheck):
         # Create or retrieve an existing WMISampler
         metric_name_and_type_by_property, properties = self.get_wmi_properties()
 
-        wmi_sampler = self.get_running_wmi_sampler(properties, self.filters, tag_by=self.tag_by)
+        tag_by_properties = ""
+        for t in self.tag_by.split(','):
+            t = t.strip()
+            if ' AS ' in t:
+                t_split = t.split(' AS ')
+                t = t_split[0].strip()
+                tag_by_properties += t + ","
+            else:
+                tag_by_properties += t + ","
+        tag_by_properties = tag_by_properties.rstrip(',')
+
+        wmi_sampler = self.get_running_wmi_sampler(properties, self.filters, tag_by=tag_by_properties)
 
         # Sample, extract & submit metrics
         try:
@@ -57,7 +67,7 @@ class WMICheck(WinWMICheck):
 
     def extract_metrics(self, wmi_sampler):
         # type: (WMISampler) -> List[WMIMetric]
-        return self._extract_metrics(wmi_sampler, self.tag_by, self.tag_queries, self.constant_tags, self.tag_by_prefix)
+        return self._extract_metrics(wmi_sampler, self.tag_by, self.tag_queries, self.constant_tags)
 
     def get_wmi_properties(self):
         # type: () -> WMIProperties

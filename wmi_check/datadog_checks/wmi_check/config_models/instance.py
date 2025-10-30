@@ -48,7 +48,6 @@ class InstanceConfig(BaseModel):
     provider: Optional[int] = None
     service: Optional[str] = None
     tag_by: Optional[str] = None
-    tag_by_prefix: Optional[str] = None
     tag_queries: Optional[tuple[tuple[str, ...], ...]] = None
     tags: Optional[tuple[str, ...]] = None
     username: Optional[str] = None
