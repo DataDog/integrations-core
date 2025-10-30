@@ -1,2 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-windows_service.uptime,gauge,,second,,The uptime (in seconds) of the host process of the Windows service,0,windows_services,uptime
+windows_service.uptime,gauge,,second,,The uptime (in seconds) of the host process of the Windows service,0,windows_service,uptime
