@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2025-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from .metrics_generated import METRIC_DATA
 
 # Mis-named or legacy metric names in Couchbase.
