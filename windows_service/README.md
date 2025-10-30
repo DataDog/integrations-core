@@ -85,6 +85,8 @@ Beginning with Agent version 7.40, the check can add a `windows_service_startup_
 
 Beginning with Agent version 7.55, the check can add a `display_name:<DISPLAY_NAME>` tag to each service check to indicate the display name of the service. Set the `collect_display_name_as_tag` option to `true` to include this tag with each service check.
 
+Beginning with Agent version 7.73, the check automatically adds a `windows_service_state:<STATE>` tag to each service check to indicate the state of the service.
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `windows_service` under the **Checks** section.

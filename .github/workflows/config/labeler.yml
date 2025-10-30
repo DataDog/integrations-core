@@ -487,6 +487,8 @@ integration/nvidia_nim:
 - nvidia_nim/**/*
 integration/nvidia_triton:
 - nvidia_triton/**/*
+integration/obsidian_security:
+- obsidian_security/**/*
 integration/octopus_deploy:
 - octopus_deploy/**/*
 integration/oke:
