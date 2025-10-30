@@ -10,7 +10,7 @@
     "changelog": "CHANGELOG.md",
     "description": "Monitor the model serving performance and system health of your Hugging Face TGI servers.",
     "title": "Hugging Face TGI",
-    "media": [],
+    "media": ["images/hugging_face_tgi_overview.png"],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
