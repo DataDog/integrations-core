@@ -4,10 +4,11 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 import yaml
+from rich.markup import escape
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -29,7 +30,7 @@ def labeler(app: Application, sync: bool):
 
     valid_integrations = dict.fromkeys(i.name for i in app.repo.integrations.iter("all"))
 
-    include = set(app.repo.config.get('/overrides/validate/labeler/include', []))
+    include = set(cast(list, app.repo.config.get('/overrides/validate/labeler/include', [])))
     for integration in include:
         valid_integrations[integration] = None
 
@@ -87,8 +88,14 @@ def labeler(app: Application, sync: bool):
     tracker.display()
 
     if tracker.errors:  # no cov
-        message = 'Try running `ddev validate labeler --sync`'
-        app.display_info(message)
+        message = (
+            'To fix this, you can take one of the following actions based on whether the failure is related to an Agent check or not:\n'
+            '\n'
+            '* If it is an Agent check, run `ddev validate labeler --sync`.\n'
+            '* If it is not an Agent check, you can mark it as such by adding '
+            'it to the `[overrides.is-integration]` table in your `.ddev/config.toml` file.'
+        )
+        app.display_info(escape(message))
         app.abort()
 
     app.display_success('Labeler configuration is valid')
