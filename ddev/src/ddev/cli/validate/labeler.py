@@ -89,7 +89,8 @@ def labeler(app: Application, sync: bool):
 
     if tracker.errors:  # no cov
         message = (
-            'To fix this, you can take one of the following actions based on whether the failure is related to an Agent check or not:\n'
+            'To fix this, you can take one of the following actions based on whether the failure is related to '
+            'an Agent check or not:\n'
             '\n'
             '* If it is an Agent check, run `ddev validate labeler --sync`.\n'
             '* If it is not an Agent check, you can mark it as such by adding '
