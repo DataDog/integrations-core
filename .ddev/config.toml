@@ -173,6 +173,7 @@ security_deps = ['in-toto', 'tuf', 'securesystemslib']
 # but since November 2025 manifest.json files are being removed, so the default is now
 # to treat all folders as integrations unless explicitly marked here as non-integrations.
 [overrides.is-integration]
+datadog_checks_base = false
 datadog_checks_dependency_provider = false
 datadog_checks_dev = false
 datadog_checks_downloader = false
