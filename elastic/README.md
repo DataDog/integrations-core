@@ -104,6 +104,7 @@ Each custom query has the following parameters:
    - `name` (required): The full metric name sent to Datadog. If you also set `type` to `tag`, then every metric collected by this query is tagged with this name.
    - `type` (optional): Designates the type of data sent. Possible values: `gauge`, `monotonic_count`, `rate`, `tag`. Defaults to `gauge`.
 - `payload` (optional): If declared, turns the GET request into a POST request. Use YAML formatting and a read-only user when writing custom queries with a payload.
+- `tags` (optional): The list of tags that should be included with each custom metric submitted.
 
 **Note:** When running custom queries, use a read only account to ensure that the Elasticsearch instance does not change.
 
@@ -127,7 +128,7 @@ custom_queries:
    tags:
    - custom_tag:1
 ```
-The custom query sends as a `GET` request. If you use an optional `payload` parameter, the request sends as a `POST` request. 
+The custom query sends as a `GET` request. If you use an optional `payload` parameter, the request sends as a `POST` request.
 
 `value_path` may either be string keys or list indices. Example:
 ```json
@@ -166,7 +167,7 @@ _Available for Agent versions >6.0_
    - To configure index slow logs for a given index `<INDEX>`:
 
      ```shell
-     curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d' {
+     curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d '{
        "index.indexing.slowlog.threshold.index.warn": "0ms",
        "index.indexing.slowlog.threshold.index.info": "0ms",
        "index.indexing.slowlog.threshold.index.debug": "0ms",
@@ -179,7 +180,7 @@ _Available for Agent versions >6.0_
    - To configure search slow logs for a given index `<INDEX>`:
 
      ```shell
-     curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d' {
+     curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d '{
        "index.search.slowlog.threshold.query.warn": "0ms",
        "index.search.slowlog.threshold.query.info": "0ms",
        "index.search.slowlog.threshold.query.debug": "0ms",
@@ -460,7 +461,7 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
-[2]: /account/settings/agent/latest
+[2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/elastic/datadog_checks/elastic/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags?tab=noncontainerizedenvironments#file-location
