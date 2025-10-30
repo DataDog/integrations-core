@@ -6,8 +6,6 @@ The TCP RTT check reports on roundtrip times between the host the Agent is runni
 
 This check is only shipped in the 64-bit DEB and RPM Datadog Agent v5 packages. The check is _not_ available with Datadog Agent v6.
 
-**Minimum Agent version:** 6.0.0
-
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
