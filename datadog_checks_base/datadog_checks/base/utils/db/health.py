@@ -19,7 +19,10 @@ try:
     import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
+
+
 import threading
+import traceback
 from enum import Enum
 
 
@@ -29,6 +32,7 @@ class HealthEvent(Enum):
     """
 
     INITIALIZATION = 'initialization'
+    UNKNOWN_ERROR = 'unknown_error'
     MISSED_COLLECTION = 'missed_collection'
 
 
@@ -66,8 +70,7 @@ class Health:
         name: HealthEvent,
         status: HealthStatus,
         tags: list[str] = None,
-        cooldown: bool = False,
-        cooldown_time: int = DEFAULT_COOLDOWN,
+        cooldown_time: int = None,
         cooldown_values: list[str] = None,
         data: dict = None,
     ):
@@ -80,15 +83,15 @@ class Health:
             The health status to submit.
         :param tags: list of str
             Tags to associate with the health event.
-        :param cooldown: int
+        :param cooldown_time: int
             The cooldown period in seconds to prevent the events with the same name and status
-            from being submitted again.
+            from being submitted again. If None there is no cooldown.
         :param cooldown_values: list of str
             Additional values to include in the cooldown key.
         :param data: A dictionary to be submitted as `data`. Must be JSON serializable.
         """
         category = self.check.__NAMESPACE__ or self.check.__class__.__name__.lower()
-        if cooldown:
+        if cooldown_time:
             cooldown_key = "|".join([category, name.value, status.value])
             if cooldown_values:
                 cooldown_key = "|".join([cooldown_key, "|".join([f"{v}" for v in cooldown_values])])
@@ -113,3 +116,19 @@ class Health:
             ),
             "dbm-health",
         )
+
+    def submit_exception_health_event(self, exception: Exception, data: dict):
+        trace = traceback.extract_tb(exception.__traceback__)
+        exc = trace.pop()
+        if exc:
+            self.submit_health_event(
+                name=HealthEvent.UNKNOWN_ERROR,
+                status=HealthStatus.ERROR,
+                data={
+                    "file": exc.filename,
+                    "line": exc.lineno,
+                    "function": exc.name,
+                    "exception_type": type(exception).__name__,
+                    **(data or {}),
+                },
+            )

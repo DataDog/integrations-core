@@ -32,7 +32,7 @@ def main():
 
             include_list.append(entry)
 
-    print(json.dumps({"include": include_list}))
+    print(json.dumps(include_list))
 
 
 if __name__ == "__main__":

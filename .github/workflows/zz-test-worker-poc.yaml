@@ -7,6 +7,11 @@ on:
         description: 'JSON string defining the dynamic matrices for all jobs'
         required: true
         type: string
+      ref:
+        description: 'Git ref to check out (branch, tag, or SHA). Use PR head SHA to report as PR check.'
+        required: false
+        type: string
+        default: 'master'
 
 jobs:
   setup:
@@ -40,16 +45,22 @@ jobs:
   run_work:
     needs: setup
     runs-on: ubuntu-latest
-    name: ${{ matrix.job_key }} (${{ matrix.value2 }})
+    name: ${{ matrix.name }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.setup.outputs.work_matrix) }}
+      matrix:
+        include: ${{ fromJSON(needs.setup.outputs.work_matrix) }}
 
     steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ inputs.ref }}
+
       - name: Run Generic Task
         run: |
-          echo "Running generic logic for job: ${{ matrix.job_key }}"
-          echo "Job Key: ${{ matrix.job_key }}"
-          echo "Value 1: ${{ matrix.value1 }}"
-          echo "Value 2: ${{ matrix.value2 }}"
-          echo "Value 3: ${{ matrix.value3 }}"
+          echo "Running generic logic for job: ${{ matrix.name }}"
+          echo "Platform: ${{ matrix.platform }}"
+          echo "Runner: ${{ matrix.runner }}"
+          echo "Target: ${{ matrix.target }}"
+          echo "Git SHA: $(git rev-parse HEAD)"

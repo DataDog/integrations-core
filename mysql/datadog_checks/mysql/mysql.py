@@ -1115,18 +1115,19 @@ class MySql(AgentCheck):
         replica_results = defaultdict(dict)
         replica_status = self._get_replica_replication_status(db)
         if replica_status:
-            # MySQL <5.7 does not have Channel_Name.
-            # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-            channel = self._config.replication_channel or replica_status.get('Channel_Name') or 'default'
-            for key, value in replica_status.items():
-                if value is not None:
-                    replica_results[key]['channel:{0}'.format(channel)] = value
+            for replica in replica_status:
+                # MySQL <5.7 does not have Channel_Name.
+                # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
+                channel = self._config.replication_channel or replica.get('Channel_Name') or 'default'
+                for key, value in replica.items():
+                    if value is not None:
+                        replica_results[key]['channel:{0}'.format(channel)] = value
         return replica_results
 
     def _get_replica_replication_status(self, db):
-        result = {}
+        results = []
         if not self._config.replication_enabled:
-            return result
+            return results
 
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
@@ -1136,8 +1137,8 @@ class MySql(AgentCheck):
                     show_replica_status_query(self.version, self.is_mariadb, self._config.replication_channel)
                 )
 
-                result = cursor.fetchone()
-                self.log.debug("Getting replication status: %s", result)
+                results = cursor.fetchall()
+                self.log.debug("Getting replication status: %s", results)
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             errno, msg = e.args
             if errno == 1617 and msg == "There is no master connection '{0}'".format(self._config.replication_channel):
@@ -1149,7 +1150,7 @@ class MySql(AgentCheck):
             else:
                 self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s", e)
 
-        return result
+        return results
 
     def _get_replicas_connected_count(self, db, above_560):
         """
@@ -1393,8 +1394,9 @@ class MySql(AgentCheck):
             return
 
         replica_status = self._get_replica_replication_status(db)
-        if replica_status:
-            self.cluster_uuid = replica_status.get('Source_UUID', replica_status.get('Master_UUID'))
+        # Currently we only support single primary source clustering
+        if replica_status and len(replica_status) > 0:
+            self.cluster_uuid = replica_status[0].get('Source_UUID', replica_status[0].get('Master_UUID'))
             if self.cluster_uuid:
                 self.tag_manager.set_tag('cluster_uuid', self.cluster_uuid, replace=True)
                 self.tag_manager.set_tag('replication_role', "replica", replace=True)
