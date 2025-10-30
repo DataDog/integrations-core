@@ -4,6 +4,7 @@
 
 import copy
 import logging
+import pytest
 from unittest.mock import patch
 
 from . import common
@@ -109,9 +110,18 @@ def test_tag_queries_without_alias(mock_sampler_with_tag_queries, aggregator, ch
     aggregator.assert_all_metrics_covered()
 
 
-def test_tag_by_is_correctly_prefixed(mock_sampler_with_tag_by_prefix, aggregator, check):
+@pytest.mark.parametrize(
+    "tag_by,result_tags",
+    [
+        ('Name AS wmi_name', ['wmi_name:foo']),
+        ('Name,Label AS wmi_label', ['name:foo', 'wmi_label:bar']),
+        ('name as wmi_name,label as wmi_label', ['wmi_name:foo', 'wmi_label:bar']),
+        ('nameaswmi_name', [])
+    ],
+)
+def test_tag_by_is_correctly_prefixed(mock_sampler_with_tag_by_prefix, aggregator, check, tag_by, result_tags):
     instance = copy.deepcopy(common.INSTANCE)
-    instance['tag_by_prefix'] = 'wmi'
+    instance['tag_by'] = tag_by
 
     c = check(instance)
 
@@ -119,13 +129,12 @@ def test_tag_by_is_correctly_prefixed(mock_sampler_with_tag_by_prefix, aggregato
         c.check(instance)
         assert mock_extract.called
         # Check the arguments it was called with
-        # _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags, tag_by_prefix)
+        # _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags)
         call_args = mock_extract.call_args
-        # The last positional argument (index 4) should be tag_by_prefix
-        assert call_args[0][4] == 'wmi'
+        assert call_args[0][1] == tag_by
 
-    # Verify metrics are tagged with the prefix
+    # Verify metrics are tagged with the alias
     for metric in common.INSTANCE_METRICS:
-        aggregator.assert_metric(metric, tags=['wmi_name:chrome.exe'], count=1)
+        aggregator.assert_metric(metric, tags=result_tags, count=1)
 
     aggregator.assert_all_metrics_covered()

@@ -114,10 +114,11 @@ def mock_sampler_with_tag_by_prefix():
         {
             "IOReadBytesPerSec": 20455,
             "IDProcess": 1234,
-            "Name": "chrome.exe",
+            "Name": "foo",
             "ThreadCount": 4,
             "VirtualBytes": 3811,
             "PercentProcessorTime": 5,
+            "Label": "bar",
         }
     ]
     main_property_names = [
@@ -127,6 +128,7 @@ def mock_sampler_with_tag_by_prefix():
         "PercentProcessorTime",
         "IDProcess",
         "Name",
+        "Label",
     ]
     main_sampler = MockSampler(main_wmi_objects, main_property_names)
     main_sampler.class_name = 'Win32_PerfFormattedData_PerfProc_Process'
