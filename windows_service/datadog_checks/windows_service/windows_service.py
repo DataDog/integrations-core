@@ -211,10 +211,7 @@ class ServiceView(object):
 def _build_process_cache() -> dict[int, "psutil.Process"]:
     process_cache_dict = {}
     for proc in psutil.process_iter(attrs=['pid', 'create_time']):
-        try:
-            process_cache_dict[proc.pid] = proc
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            pass
+        process_cache_dict[proc.pid] = proc
     return process_cache_dict
 
 
