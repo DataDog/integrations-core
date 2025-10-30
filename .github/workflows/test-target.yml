@@ -145,7 +145,15 @@ jobs:
         # Enable disk performance counters
         diskperf -y
 
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - name: Checkout repository
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        # Get all commits in the current branch to ensure that we can find a merge base
+        # for those tests where we need it
+        fetch-depth: ${{ github.event.pull_request.commits + 1 }}
+
+    - name: Fetch base commit
+      run: git fetch origin ${{ github.event.pull_request.base.sha }}
 
     - name: Set up Python 2.7
       if: inputs.test-py2
