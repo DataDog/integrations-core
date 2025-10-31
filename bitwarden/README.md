@@ -29,7 +29,7 @@ This integration seamlessly collects event logs, channeling them into Datadog fo
     | ------------------------------------- | ------------------------------------------------------------ |
     | Instance type                         | **Cloud** or **Self-hosted**                                         |
     | Self-hosted instance domain           | The domain of your self-hosted Bitwarden instance (required only for self-hosted Bitwarden setups). The instance must be publicly accessible through HTTPS. Example: vault.example.com, 123.123.123.123:8443.                                                                                              |
-    | Cloud Region                          | Select the region where your Bitwarden cloud account is located. Refer to [this documentation][4] to identify your region.   |
+    | Cloud Region                          | Select the region where your Bitwarden cloud account is located. See [Bitwarden's documentation][4] to identify your region.   |
     | Client ID                             | Client ID from Bitwarden Admin Console                       |
     | Client Secret                         | Client Secret from Bitwarden Admin Console                   |
 
