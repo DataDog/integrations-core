@@ -455,7 +455,7 @@ class VSphereCheck(AgentCheck):
                 tags.extend(self._config.base_tags)
 
                 if metric_name == INFRA_MODE_METRIC:
-                    infra_mode = datadog_agent.get_config('infrastructure_mode')
+                    infra_mode = self._config.infrastructure_mode
                     if infra_mode is not None and infra_mode != '' and infra_mode != 'full':
                         tags.append('infra_mode:{}'.format(infra_mode))
 
