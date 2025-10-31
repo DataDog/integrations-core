@@ -278,7 +278,9 @@ def main():
 
         if constraints_file := env_vars.get('PIP_CONSTRAINT'):
             env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
-
+        print("--------------------------------")
+        print("Building wheels")
+        print("--------------------------------")
         # Fetch or build wheels
         command_args = [
             str(python_path),
@@ -294,7 +296,9 @@ def main():
             '--extra-index-url',
             CUSTOM_EXTERNAL_INDEX,
         ]
-
+        print("--------------------------------")
+        print("Finished building wheels")
+        print("--------------------------------")
         check_process(command_args, env=env_vars)
 
         # Classify wheels
