@@ -1,0 +1,4 @@
+[build-system]
+# Tells the frontend to import the 'build_backend' module 
+# and use its 'build_wheel' function.
+build-backend = "build_backend"
