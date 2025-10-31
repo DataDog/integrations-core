@@ -20,7 +20,8 @@ You can configure this integration either as a standalone integration or as an a
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "LLM Observability" xxx -->
-Get end-to-end visibility into your LLM application using LiteLLM
+Get end-to-end visibility into your LLM application using LiteLLM.
+
 See the [LiteLLM integration docs][12] for details on how to get started with LLM Observability for LiteLLM.
 <!-- xxz tab xxx -->
 
