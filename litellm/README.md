@@ -16,6 +16,8 @@ Key metrics such as request/response counts, latency, error rates, token usage, 
 
 ## Setup
 
+You can configure this integration either as a standalone integration or as an agent check:
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "LLM Observability" xxx -->
 Get end-to-end visibility into your LLM application using LiteLLM
@@ -24,9 +26,6 @@ See the [LiteLLM integration docs][12] for details on how to get started with LL
 
 <!-- xxx tab "Agent Check: LiteLLM" xxx -->
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
 
 #### Installation
 
@@ -92,6 +91,9 @@ LiteLLM can send logs to Datadog through its callback system. You can configure 
 #### Validation
 
 Run the Agent's status subcommand ([see documentation][6]) and look for `litellm` under the Checks section.
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ## Data Collected
 
