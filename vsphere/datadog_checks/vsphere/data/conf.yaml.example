@@ -82,6 +82,11 @@ instances:
     #
     empty_default_hostname: true
 
+    ## @param infrastructure_mode - string - optional - default: full
+    ## The infrastructure mode to use.
+    #
+    # infrastructure_mode: full
+
     ## @param collection_level - integer - optional - default: 1
     ## A number between 1 and 4 to specify how many metrics will be sent
     ## 1: Only basic metrics - 4: every metric available.

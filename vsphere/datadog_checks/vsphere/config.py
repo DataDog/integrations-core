@@ -17,6 +17,7 @@ from datadog_checks.vsphere.constants import (
     BOTH,
     DEFAULT_BATCH_COLLECTOR_SIZE,
     DEFAULT_EVENT_RESOURCES,
+    DEFAULT_INFRASTRUCTURE_MODE,
     DEFAULT_MAX_QUERY_METRICS,
     DEFAULT_METRICS_PER_QUERY,
     DEFAULT_REFRESH_INFRASTRUCTURE_CACHE_INTERVAL,
@@ -85,6 +86,7 @@ class VSphereConfig(object):
         # Check option
         self.threads_count = instance.get("threads_count", DEFAULT_THREAD_COUNT)
         self.metrics_per_query = instance.get("metrics_per_query", DEFAULT_METRICS_PER_QUERY)
+        self.infrastructure_mode = instance.get("infrastructure_mode", DEFAULT_INFRASTRUCTURE_MODE)
         self.batch_collector_size = instance.get('batch_property_collector_size', DEFAULT_BATCH_COLLECTOR_SIZE)
         self.batch_tags_collector_size = instance.get('batch_tags_collector_size', DEFAULT_TAGS_COLLECTOR_SIZE)
         self.collect_events_only = is_affirmative(instance.get("collect_events_only", False))
