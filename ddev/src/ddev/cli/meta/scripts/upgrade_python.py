@@ -3,230 +3,393 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import itertools
+import asyncio
+import re
 from typing import TYPE_CHECKING
 
 import click
-
-from ddev.integration.core import Integration
+import httpx
+import orjson
+from packaging.version import Version
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
-    from ddev.src.ddev.validation.tracker import ValidationTracker
+    from ddev.validation.tracker import ValidationTracker
+
+# Python.org URLs
+PYTHON_FTP_URL = "https://www.python.org/ftp/python/"
+PYTHON_MACOS_PKG_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/python-{version}-macos11.pkg"
+PYTHON_SBOM_LINUX_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz.spdx.json"
+PYTHON_SBOM_WINDOWS_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/python-{version}-amd64.exe.spdx.json"
+
+# Regex patterns for Dockerfile updates
+# Linux: ENV PYTHON3_VERSION=3.13.7 (no quotes, matches version at end of line)
+LINUX_VERSION_PATTERN = re.compile(r'(ENV PYTHON3_VERSION=)(\d+\.\d+\.\d+)$', re.MULTILINE)
+# Windows: ENV PYTHON_VERSION="3.13.7" (with quotes)
+WINDOWS_VERSION_PATTERN = re.compile(r'(ENV PYTHON_VERSION=")(\d+\.\d+\.\d+)(")', re.MULTILINE)
+
+# SHA256 patterns must match the Python-specific ones:
+# Linux: SHA256 that comes after VERSION="${PYTHON3_VERSION}"
+LINUX_SHA_PATTERN = re.compile(r'VERSION="\$\{PYTHON3_VERSION\}"[^\n]*\n[^\n]*SHA256="([0-9a-f]+)"', re.MULTILINE)
+# Windows: -Hash in the same RUN block with python-$Env:PYTHON_VERSION-amd64.exe
+WINDOWS_SHA_PATTERN = re.compile(
+    r'python-\$Env:PYTHON_VERSION-amd64\.exe[^\n]*\n[^\n]*-Hash\s+\'([0-9a-f]+)\'', re.MULTILINE
+)
 
 
-@click.command('upgrade-python', short_help='Upgrade the Python version throughout the repository')
-@click.argument('version')
+@click.command('upgrade-python-version', short_help='Upgrade the Python version used in the repository.')
 @click.pass_obj
-def upgrade_python(app: Application, version: str):
-    """Upgrade the Python version of all test environments.
+def upgrade_python_version(app: Application):
+    """Upgrade the Python version used in the repository.
+
+    Automatically detects the latest Python version, fetches official SHA256 hashes,
+    and updates version references across:
+    - ddev/src/ddev/repo/constants.py
+    - .builders/images/*/Dockerfile (Linux and Windows)
+    - .github/workflows/resolve-build-deps.yaml (macOS)
 
     \b
-    `$ ddev meta scripts upgrade-python 3.11`
+    `$ ddev meta scripts upgrade-python-version`
     """
+    from ddev.repo.constants import PYTHON_VERSION as major_minor
+    from ddev.repo.constants import PYTHON_VERSION_FULL as current_version
 
-    from ddev.repo.constants import PYTHON_VERSION as old_version
+    tracker = app.create_validation_tracker('Python version upgrades')
 
-    tracker = app.create_validation_tracker('Python upgrades')
-
-    for target in integrations(app):
-        update_hatch_file(app, target.path, version, old_version, tracker)
-        update_pyproject_file(target, version, old_version, tracker)
-        update_setup_file(target, version, old_version, tracker)
-
-    update_ci_files(app, version, old_version, tracker)
-
-    if app.repo.name == 'core':
-        update_ddev_pyproject_file(app, version, old_version, tracker)
-        update_constants_file(app, version, old_version, tracker)
-        update_ddev_template_files(app, version, old_version, tracker)
-        app.display_warning("Documentation files have not been updated. Please modify them manually.")
-
-    tracker.display()
-
-    if tracker.errors:  # no cov
+    # Check for new version
+    latest_version = get_latest_python_version(app, major_minor)
+    if not latest_version:
+        app.display_error(f"Could not find latest Python version for {major_minor}")
         app.abort()
+        return  # Unreachable but helps type checker
 
-
-def integrations(app):
-    extra_integrations = []
-
-    if app.repo.name == 'core':
-        names = ["datadog_checks_dependency_provider"]
-        extra_integrations = [Integration(app.repo.path / name, app.repo.path, app.repo.config) for name in names]
-
-    return itertools.chain(app.repo.integrations.iter_packages(['all']), extra_integrations)
-
-
-def update_ci_files(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
-    for file in (app.repo.path / ".github" / "workflows").glob("*.yml"):
-        old_content = new_content = file.read_text()
-
-        for pattern in ("python-version: '{}'", 'PYTHON_VERSION: "{}"', "'{}'"):
-            if pattern.format(old_version) in new_content:
-                new_content = new_content.replace(pattern.format(old_version), pattern.format(new_version))
-
-        if old_content != new_content:
-            file.write_text(new_content)
-            tracker.success()
-
-
-def update_ddev_template_files(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
-    for check_type in ("check", "jmx", "logs"):
-        folder_path = (
-            app.repo.path
-            / 'datadog_checks_dev'
-            / 'datadog_checks'
-            / 'dev'
-            / 'tooling'
-            / 'templates'
-            / 'integration'
-            / check_type
-            / '{check_name}'
-        )
-        pyproject_file = folder_path / 'pyproject.toml'
-
-        if pyproject_file.is_file():
-            old_content = new_content = pyproject_file.read_text()
-
-            for pattern in ('requires-python = ">={}"', "Programming Language :: Python :: {}"):
-                new_content = new_content.replace(pattern.format(old_version), pattern.format(new_version))
-
-            if old_content != new_content:
-                pyproject_file.write_text(new_content)
-                tracker.success()
-
-        if (folder_path / 'hatch.toml').is_file():
-            update_hatch_file(app, folder_path, new_version, old_version, tracker)
-
-
-def update_ddev_pyproject_file(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
-    import tomlkit
-
-    config_file = app.repo.path / 'ddev' / 'pyproject.toml'
-    config = tomlkit.parse(config_file.read_text())
-    changed = False
-    new_version = f"py{new_version.replace('.', '')}"
-    old_version = f"py{old_version.replace('.', '')}"
-
-    if black_config := config.get('tool', {}).get('black', {}):
-        target_version = black_config.get('target-version', [])
-
-        for index, version in enumerate(target_version):
-            if version == old_version:
-                target_version[index] = new_version
-                tracker.success()
-                changed = True
-                break
-
-    if ruff_config := config.get('tool', {}).get('ruff', {}):
-        if ruff_config.get('target-version') == old_version:
-            ruff_config['target-version'] = new_version
-            tracker.success()
-            changed = True
-
-    if changed:
-        config_file.write_text(tomlkit.dumps(config))
-
-
-def update_setup_file(target, new_version: str, old_version: str, tracker: ValidationTracker):
-    setup_file = target.path / 'setup.py'
-
-    if setup_file.is_file():
-        content = setup_file.read_text()
-
-        if f"Programming Language :: Python :: {old_version}" in content:
-            content = content.replace(
-                f"Programming Language :: Python :: {old_version}", f"Programming Language :: Python :: {new_version}"
-            )
-
-            setup_file.write_text(content)
-            tracker.success()
-
-
-def update_constants_file(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
-    constant_file = app.repo.path / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
-
-    lines = constant_file.read_text().splitlines(keepends=True)
-    for i, line in enumerate(lines):
-        if line.startswith('PYTHON_VERSION = '):
-            lines[i] = line.replace(old_version, new_version)
-            break
-
-    constant_file.write_text(''.join(lines))
-    tracker.success()
-
-
-def update_pyproject_file(target, new_version: str, old_version: str, tracker: ValidationTracker):
-    import tomlkit
-
-    config_file = target.path / 'pyproject.toml'
-    config = tomlkit.parse(config_file.read_text())
-    changed = False
-
-    classifiers = config.get('project', {}).get('classifiers', [])
-    for index, classifier in enumerate(classifiers):
-        if classifier == f"Programming Language :: Python :: {old_version}":
-            classifiers[index] = f"Programming Language :: Python :: {new_version}"
-            changed = True
-            tracker.success()
-            break
-
-    if changed:
-        config_file.write_text(tomlkit.dumps(config))
-
-
-def update_hatch_file(app: Application, target_path, new_version: str, old_version: str, tracker: ValidationTracker):
-    import tomlkit
-
-    config_file = target_path / 'hatch.toml'
-
-    if not config_file.exists():
+    if Version(latest_version) <= Version(current_version):
+        app.display_info(f"Already at latest Python version: {current_version}")
         return
 
-    test_config = tomlkit.parse(config_file.read_text())
-    changed = False
+    app.display_info(f"Updating Python from {current_version} to {latest_version}")
 
-    for env in test_config.get('envs', {}).values():
-        if update_hatch_env(app, env, new_version, old_version, config_file, tracker):
-            changed = True
+    # Fetch and validate hashes (validation happens inside get_python_sha256_hashes)
+    try:
+        new_version_hashes = get_python_sha256_hashes(app, latest_version)
+    except Exception as e:
+        tracker.error(('SHA256 hashes',), message=f"Failed to fetch: {e}")
+        tracker.display()
+        app.abort()
+        return  # Unreachable but helps type checker
 
-    if changed:
-        config_file.write_text(tomlkit.dumps(test_config))
+    # Perform updates
+    upgrade_dockerfiles_python_version(app, latest_version, new_version_hashes, tracker)
+    upgrade_macos_python_version(app, latest_version, tracker)
+    upgrade_python_version_full_constant(app, latest_version, tracker)
+
+    # Display results
+    tracker.display()
+
+    if tracker.errors:
+        app.display_warning("Some updates failed. Please review the errors above.")
+        app.abort()
+        return  # Unreachable but helps type checker
+
+    app.display_success(f"Python version upgraded from {current_version} to {latest_version}")
 
 
-def update_hatch_env(
-    app: Application, env, new_version: str, old_version: str, config_file, tracker: ValidationTracker
-) -> bool:
-    changed = False
+def validate_version_string(version: str) -> bool:
+    """
+    Validate that version string is safe and matches expected format.
 
-    default_python = env.get('python', '')
-    if default_python == old_version:
-        env['python'] = new_version
+    Args:
+        version: Version string to validate
+
+    Returns:
+        True if valid, False otherwise
+    """
+    return bool(re.match(r'^\d+\.\d+\.\d+$', version))
+
+
+def validate_sha256(hash_str: str) -> bool:
+    """Validate SHA256 hash format (64 hex characters)."""
+    return bool(re.match(r'^[0-9A-Fa-f]{64}$', hash_str))
+
+
+def read_file_safely(file_path, file_label: str, tracker: ValidationTracker) -> str | None:
+    """
+    Read file with error handling.
+
+    Args:
+        file_path: Path to the file
+        file_label: Label for error messages
+        tracker: Validation tracker for error reporting
+
+    Returns:
+        File content as string, or None if an error occurred
+    """
+    if not file_path.exists():
+        tracker.error((file_label,), message=f'File not found: {file_path}')
+        return None
+
+    try:
+        return file_path.read_text()
+    except Exception as e:
+        tracker.error((file_label,), message=f'Failed to read: {e}')
+        return None
+
+
+def write_file_safely(file_path, content: str, file_label: str, tracker: ValidationTracker) -> bool:
+    """
+    Write file with error handling.
+
+    Args:
+        file_path: Path to the file
+        content: Content to write
+        file_label: Label for error messages
+        tracker: Validation tracker for success/error reporting
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        file_path.write_text(content)
         tracker.success()
-        changed = True
+        return True
+    except Exception as e:
+        tracker.error((file_label,), message=f'Failed to write: {e}')
+        return False
 
-    for variables in env.get('matrix', []):
-        pythons = variables.get('python', [])
-        for i, python in enumerate(pythons):
-            if python == old_version:
-                pythons[i] = new_version
-                tracker.success()
-                changed = True
 
-    for overrides in env.get('overrides', {}).get('matrix', {}).get('python', {}).values():
-        for override in overrides:
-            pythons = override.get('if', [])
-            for i, python in enumerate(pythons):
-                if python == old_version:
-                    pythons[i] = new_version
-                    tracker.success()
-                    changed = True
+def extract_sha256_from_sbom(packages: list, platform_name: str) -> str:
+    """
+    Extract SHA256 hash from SBOM packages.
 
-    if isinstance(env.get('overrides', {}), dict):
-        for name in list(env.get('overrides', {}).get('name', {}).keys()):
-            if f"py{old_version}" in name:
-                # TODO I don't find a way to keep the exact same format when I modify this.
-                app.display_warning(f'An override has been found in {config_file}. Please manually update it.')
+    Args:
+        packages: List of packages from SBOM
+        platform_name: Platform name for error messages (e.g., "Linux", "Windows")
 
-    return changed
+    Returns:
+        SHA256 hash string
+
+    Raises:
+        ValueError: If package, checksum, or hash format is invalid
+    """
+    cpython_package = next((pkg for pkg in packages if pkg.get('name') == "CPython"), None)
+    if cpython_package is None:
+        raise ValueError(f"Could not find CPython package in {platform_name} SBOM")
+
+    checksums = cpython_package.get('checksums', [])
+    checksum = next((cs for cs in checksums if cs.get('algorithm') == "SHA256"), None)
+    if checksum is None:
+        raise ValueError(f"Could not find SHA256 checksum in {platform_name} SBOM")
+
+    hash_value = checksum.get('checksumValue', '')
+    if not validate_sha256(hash_value):
+        raise ValueError(f"Invalid {platform_name} SHA256 hash format from SBOM: {hash_value}")
+
+    return hash_value
+
+
+def upgrade_dockerfiles_python_version(
+    app: Application, new_version: str, hashes: dict[str, str], tracker: ValidationTracker
+):
+    dockerfiles = [
+        app.repo.path / '.builders' / 'images' / 'linux-aarch64' / 'Dockerfile',
+        app.repo.path / '.builders' / 'images' / 'linux-x86_64' / 'Dockerfile',
+        app.repo.path / '.builders' / 'images' / 'windows-x86_64' / 'Dockerfile',
+    ]
+
+    try:
+        linux_sha = hashes['linux_source_sha256']
+        windows_sha = hashes['windows_amd64_sha256']
+    except KeyError as error:
+        tracker.error(('Dockerfiles',), message=f'Missing SHA256 hash entry: {error}')
+        return
+
+    for dockerfile in dockerfiles:
+        dockerfile_content = read_file_safely(dockerfile, dockerfile.name, tracker)
+        if dockerfile_content is None:
+            continue
+
+        is_windows = 'windows-x86_64' in dockerfile.parts
+        version_pattern = WINDOWS_VERSION_PATTERN if is_windows else LINUX_VERSION_PATTERN
+        sha_pattern = WINDOWS_SHA_PATTERN if is_windows else LINUX_SHA_PATTERN
+        target_sha = windows_sha if is_windows else linux_sha
+
+        def replace_version(match: re.Match[str], _is_windows=is_windows) -> str:
+            if _is_windows:
+                prefix, _old_version, suffix = match.groups()
+                return f'{prefix}{new_version}{suffix}'
+            else:
+                prefix, _old_version = match.groups()
+                return f'{prefix}{new_version}'
+
+        def replace_sha(match: re.Match[str], _target_sha=target_sha) -> str:
+            # The entire match contains the old hash, replace just the hash part
+            old_match = match.group(0)
+            old_hash = match.group(1)
+            return old_match.replace(old_hash, _target_sha)
+
+        # Helper to apply pattern substitution with error tracking
+        def apply_substitution(pattern: re.Pattern, replace_func, error_msg: str, _dockerfile=dockerfile) -> bool:
+            nonlocal dockerfile_content
+            dockerfile_content, count = pattern.subn(replace_func, dockerfile_content, count=1)
+            if count == 0:
+                tracker.error((_dockerfile.name,), message=error_msg)
+                return False
+            return True
+
+        # Apply version update
+        if not apply_substitution(version_pattern, replace_version, 'Could not find Python version pattern'):
+            continue
+
+        # Apply SHA256 update
+        if not apply_substitution(sha_pattern, replace_sha, 'Could not find SHA256 pattern'):
+            continue
+
+        write_file_safely(dockerfile, dockerfile_content, dockerfile.name, tracker)
+
+
+def upgrade_macos_python_version(app: Application, new_version: str, tracker: ValidationTracker):
+    macos_python_file = app.repo.path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
+
+    macos_content = read_file_safely(macos_python_file, 'macOS workflow', tracker)
+    if macos_content is None:
+        return
+
+    target_line = next((line for line in macos_content.splitlines() if 'PYTHON3_DOWNLOAD_URL' in line), None)
+
+    if target_line is None:
+        tracker.error(('macOS workflow',), message='Could not find PYTHON3_DOWNLOAD_URL')
+        return
+
+    new_url = PYTHON_MACOS_PKG_URL_TEMPLATE.format(version=new_version)
+    indent = target_line[: target_line.index('PYTHON3_DOWNLOAD_URL')]
+    new_line = f'{indent}PYTHON3_DOWNLOAD_URL: "{new_url}"'
+
+    if target_line == new_line:
+        app.display_info(f"Python version in macOS workflow is already at {new_version}")
+        return
+
+    updated_content = macos_content.replace(target_line, new_line, 1)
+    write_file_safely(macos_python_file, updated_content, 'macOS workflow', tracker)
+
+
+def upgrade_python_version_full_constant(app: Application, new_version: str, tracker: ValidationTracker):
+    constants_file = app.repo.path / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
+
+    constants_content = read_file_safely(constants_file, 'constants.py', tracker)
+    if constants_content is None:
+        return
+
+    prefix = 'PYTHON_VERSION_FULL = '
+    target_line = next((line for line in constants_content.splitlines() if line.startswith(prefix)), None)
+
+    if target_line is None:
+        tracker.error(('constants.py',), message='Could not find PYTHON_VERSION_FULL constant')
+        return
+
+    new_line = f"{prefix}'{new_version}'"
+    if target_line == new_line:
+        app.display_info(f"Python version in constants.py is already at {new_version}")
+        return
+
+    updated_content = constants_content.replace(target_line, new_line, 1)
+    write_file_safely(constants_file, updated_content, 'constants.py', tracker)
+
+
+def get_latest_python_version(app: Application, major_minor: str) -> str | None:
+    """
+    Get the latest Python version from python.org FTP directory.
+
+    Args:
+        major_minor: Python version in format "3.13"
+
+    Returns:
+        Latest version string (e.g., "3.13.1") or None if not found
+    """
+    try:
+        # Explicitly verify SSL/TLS certificate
+        response = httpx.get(PYTHON_FTP_URL, timeout=30, verify=True)
+        response.raise_for_status()
+    except httpx.RequestException as e:
+        app.display_error(f"Error fetching Python versions: {e}")
+        return None
+
+    # Parse directory listing for version folders
+    # Looking for patterns like: <a href="3.13.0/">3.13.0/</a>
+    pattern = rf'<a href="({re.escape(major_minor)}\.\d+)/">'
+    versions = []
+
+    for line in response.text.split("\n"):
+        match = re.search(pattern, line)
+        if match:
+            version_str = match.group(1)
+            try:
+                versions.append(Version(version_str))
+            except Exception:
+                # Skip invalid versions
+                continue
+
+    if not versions:
+        return None
+
+    # Sort and return the latest version
+    versions.sort()
+    return str(versions[-1])
+
+
+def get_python_sha256_hashes(app: Application, version: str) -> dict[str, str]:
+    """
+    Fetch SHA256 hashes for Python release artifacts using SBOM files.
+
+    Args:
+        version: Python version string (e.g., "3.13.7")
+
+    Returns:
+        Dictionary with SHA256 hashes:
+        {
+            'linux_source_sha256': '<64-char hex hash>',
+            'windows_amd64_sha256': '<64-char hex hash>'
+        }
+
+    Raises:
+        ValueError: If version format is invalid
+        RuntimeError: If SBOM files cannot be fetched or parsed
+    """
+    # Validate version format before using in URL construction (security)
+    if not validate_version_string(version):
+        raise ValueError(f"Invalid version format: {version}")
+
+    # Construct SBOM URLs for the files we need
+    sbom_urls = [
+        PYTHON_SBOM_LINUX_URL_TEMPLATE.format(version=version),
+        PYTHON_SBOM_WINDOWS_URL_TEMPLATE.format(version=version),
+    ]
+
+    # Download and parse each SBOM JSON file
+    async def get_sbom_data(client, url):
+        try:
+            # Explicitly verify SSL/TLS certificates
+            response = await client.get(url, timeout=30.0)
+            response.raise_for_status()
+            data = orjson.loads(response.text)
+
+            # Validate SBOM structure
+            if not isinstance(data, dict):
+                raise ValueError(f"Invalid SBOM format: expected dict, got {type(data)}")
+            if 'packages' not in data:
+                raise ValueError("Invalid SBOM format: missing 'packages' field")
+
+            return data.get('packages', [])
+        except Exception as e:
+            raise RuntimeError(f'Error processing URL {url}: {e}') from e
+
+    async def fetch_sbom_data(urls):
+        async with httpx.AsyncClient(verify=True) as client:
+            return await asyncio.gather(*(get_sbom_data(client, url) for url in urls))
+
+    sbom_packages = asyncio.run(fetch_sbom_data(sbom_urls))
+
+    # Extract SHA256 hashes from SBOM packages
+    linux_hash = extract_sha256_from_sbom(sbom_packages[0], 'Linux')
+    windows_hash = extract_sha256_from_sbom(sbom_packages[1], 'Windows')
+
+    return {'linux_source_sha256': linux_hash, 'windows_amd64_sha256': windows_hash}
