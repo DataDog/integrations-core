@@ -67,6 +67,11 @@ class WinWMICheck(AgentCheck):
             target_class = tag_query[1]
             link_target_class_property = tag_query[2]
             target_property = tag_query[3]
+            # Check if an alias is provided
+            if len(tag_query) > 4:
+                alias = tag_query[4]
+            else:
+                alias = None
         except IndexError:
             self.log.error(
                 "Wrong `tag_queries` parameter format. Please refer to the configuration file for more information."
@@ -82,7 +87,7 @@ class WinWMICheck(AgentCheck):
             )
             raise
 
-        return target_class, target_property, [{link_target_class_property: link_source_property}]
+        return target_class, target_property, alias, [{link_target_class_property: link_source_property}]
 
     def _raise_on_invalid_tag_query_result(self, sampler, wmi_obj, tag_query):
         # type: (WMISampler, WMIObject, TagQuery) -> None
@@ -120,7 +125,7 @@ class WinWMICheck(AgentCheck):
         self.log.debug("`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, tag_query)
 
         # Extract query information
-        target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
+        target_class, target_property, alias, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
 
         # Create a specific sampler
         with WMISampler(
@@ -133,7 +138,11 @@ class WinWMICheck(AgentCheck):
 
             link_value = str(tag_query_sampler[0][target_property]).lower()
 
-        tag = "{tag_name}:{tag_value}".format(tag_name=target_property.lower(), tag_value="_".join(link_value.split()))
+        if alias:
+            tag_name = alias
+        else:
+            tag_name = target_property.lower()
+        tag = "{tag_name}:{tag_value}".format(tag_name=tag_name, tag_value="_".join(link_value.split()))
 
         self.log.debug("Extracted `tag_queries` tag: '%s'", tag)
         return tag
@@ -194,12 +203,21 @@ class WinWMICheck(AgentCheck):
                 # Tag with `tag_by` parameter
                 for t in tag_by.split(','):
                     t = t.strip()
-                    if wmi_property == t:
+                    if ' as ' in t:
+                        t_split = t.split(' as ')
+                        t = t_split[0].strip()
+                        alias = t_split[1].strip()
+                    else:
+                        alias = None
+                    if normalized_wmi_property == t:
                         tag_value = str(wmi_value).lower()
                         if tag_queries and tag_value.find("#") > 0:
                             tag_value = tag_value[: tag_value.find("#")]
 
-                        tags.append("{name}:{value}".format(name=t, value=tag_value))
+                        if alias:
+                            tags.append("{name}:{value}".format(name=alias, value=tag_value))
+                        else:
+                            tags.append("{name}:{value}".format(name=t, value=tag_value))
                         continue
 
                 # No metric extraction on 'Name' and properties in tag_by
@@ -260,6 +278,7 @@ class WinWMICheck(AgentCheck):
     def get_running_wmi_sampler(self, properties, filters, **kwargs):
         # type: (List[str], List[Dict[str, WMIFilter]], **Any) -> WMISampler
         tag_by = kwargs.pop('tag_by', "")
+
         return self._get_running_wmi_sampler(
             instance_key=None,
             wmi_class=self.wmi_class,

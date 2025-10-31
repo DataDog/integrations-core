@@ -4,6 +4,9 @@
 
 import copy
 import logging
+from unittest.mock import patch
+
+import pytest
 
 from . import common
 
@@ -76,3 +79,63 @@ def test_tag_by_is_correctly_requested(mock_proc_sampler, aggregator, check):
     c.check(instance)
     get_running_wmi_sampler = c._get_running_wmi_sampler
     assert get_running_wmi_sampler.call_args.kwargs['tag_by'] == 'Name'
+
+
+def test_tag_queries_with_alias(mock_sampler_with_tag_queries, aggregator, check):
+    instance = copy.deepcopy(common.INSTANCE)
+    # Add tag_queries: [source_property, target_class, link_property, target_property, alias]
+    instance['tag_queries'] = [['IDProcess', 'Win32_Process', 'Handle', 'Name', 'process_name']]
+
+    c = check(instance)
+    c.check(instance)
+
+    # Verify metrics are tagged with the alias 'process_name' instead of 'name'
+    for metric in common.INSTANCE_METRICS:
+        aggregator.assert_metric(metric, tags=['process_name:chrome.exe'], count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_tag_queries_without_alias(mock_sampler_with_tag_queries, aggregator, check):
+    instance = copy.deepcopy(common.INSTANCE)
+    # Add tag_queries without alias (only 4 elements)
+    instance['tag_queries'] = [['IDProcess', 'Win32_Process', 'Handle', 'Name']]
+
+    c = check(instance)
+    c.check(instance)
+
+    # Verify metrics are tagged with 'name' (the property name, lowercased)
+    for metric in common.INSTANCE_METRICS:
+        aggregator.assert_metric(metric, tags=['name:chrome.exe'], count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize(
+    "tag_by,result_tags",
+    [
+        ('Name AS wmi_name', ['wmi_name:foo']),
+        ('Name,Label AS wmi_label', ['name:foo', 'wmi_label:bar']),
+        ('name as wmi_name,label as wmi_label', ['wmi_name:foo', 'wmi_label:bar']),
+        ('nameaswmi_name', []),
+    ],
+)
+def test_tag_by_is_correctly_prefixed(mock_sampler_with_tag_by_prefix, aggregator, check, tag_by, result_tags):
+    instance = copy.deepcopy(common.INSTANCE)
+    instance['tag_by'] = tag_by
+
+    c = check(instance)
+
+    with patch.object(c, '_extract_metrics', wraps=c._extract_metrics) as mock_extract:
+        c.check(instance)
+        assert mock_extract.called
+        # Check the arguments it was called with
+        # _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags)
+        call_args = mock_extract.call_args
+        assert call_args[0][1] == tag_by
+
+    # Verify metrics are tagged with the alias
+    for metric in common.INSTANCE_METRICS:
+        aggregator.assert_metric(metric, tags=result_tags, count=1)
+
+    aggregator.assert_all_metrics_covered()

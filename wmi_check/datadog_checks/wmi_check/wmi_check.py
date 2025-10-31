@@ -37,7 +37,18 @@ class WMICheck(WinWMICheck):
         # Create or retrieve an existing WMISampler
         metric_name_and_type_by_property, properties = self.get_wmi_properties()
 
-        wmi_sampler = self.get_running_wmi_sampler(properties, self.filters, tag_by=self.tag_by)
+        tag_by_properties = ""
+        for t in self.tag_by.split(','):
+            t = t.strip()
+            if ' AS ' in t:
+                t_split = t.split(' AS ')
+                t = t_split[0].strip()
+                tag_by_properties += t + ","
+            else:
+                tag_by_properties += t + ","
+        tag_by_properties = tag_by_properties.rstrip(',')
+
+        wmi_sampler = self.get_running_wmi_sampler(properties, self.filters, tag_by=tag_by_properties)
 
         # Sample, extract & submit metrics
         try:
