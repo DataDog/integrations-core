@@ -216,7 +216,7 @@ def main():
 
         if constraints_file := env_vars.get('PIP_CONSTRAINT'):
             env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
-            
+
         print("--------------------------------")
         print("Building wheels")
         print("--------------------------------")
@@ -227,7 +227,7 @@ def main():
             'pip',
             'wheel',
             '--config-settings',
-            f'--build-backend={MOUNT_DIR / "scripts" / "pyproject.toml"}',
+            f'--build-backend={MOUNT_DIR / "scripts" / "build_backend.py"}',
             '-r',
             str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir',
