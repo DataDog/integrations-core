@@ -1,0 +1,266 @@
+id: cloudflare-api-shield
+tests:
+ -
+  sample: |-
+    {
+      "date" : "2025-08-22",
+      "edgeResponseStatus" : 200,
+      "datetimeHour" : "2025-08-22T09:00:00Z",
+      "firewallForAiAnyPiiCategory" : 0,
+      "__typename" : "ZoneHttpRequestsAdaptive",
+      "clientRequestScheme" : "https",
+      "clientSSLProtocol" : "TLSv1.3",
+      "apiGatewayMatchedEndpoint" : "",
+      "datetimeFiveMinutes" : "2025-08-22T09:05:00Z",
+      "apiGatewayMatchedHost" : "",
+      "zoneVersion" : 0,
+      "datetime" : "2025-08-22T09:07:44Z",
+      "securityAction" : "unknown",
+      "clientIP" : "10.10.10.10",
+      "securitySource" : "unknown",
+      "userAgentBrowser" : "Unknown",
+      "userAgentOS" : "Unknown",
+      "clientCountryName" : "US",
+      "clientRequestHTTPMethodName" : "POST",
+      "datetimeMinute" : "2025-08-22T09:07:00Z",
+      "clientDeviceType" : "unknown",
+      "cacheStatus" : "dynamic",
+      "clientRequestHTTPHost" : "test.org",
+      "userAgent" : "WordPress/6.8.2; https://test.org",
+      "requestSource" : "eyeball",
+      "leakedCredentialCheckResult" : "none",
+      "clientAsn" : "14618",
+      "clientRequestPath" : "/wp-cron.php",
+      "firewallForAiInjectionScore" : 0,
+      "datetimeFifteenMinutes" : "2025-08-22T09:00:00Z",
+      "originResponseDurationMs" : 97,
+      "clientRequestHTTPProtocol" : "HTTP/1.1",
+      "clientRequestQuery" : "?doing_wp_cron=123",
+      "clientASNDescription" : "Dummy"
+    }
+  service: "http-request-logs"
+  result:
+    custom:
+      __typename: "ZoneHttpRequestsAdaptive"
+      apiGatewayMatchedEndpoint: ""
+      apiGatewayMatchedHost: ""
+      cacheStatus: "dynamic"
+      clientASNDescription: "Dummy"
+      clientAsn: "14618"
+      clientCountryName: "US"
+      clientDeviceType: "unknown"
+      clientRequestHTTPProtocol: "HTTP/1.1"
+      clientSSLProtocol: "TLSv1.3"
+      date: "2025-08-22"
+      datetime: "2025-08-22T09:07:44Z"
+      datetimeFifteenMinutes: "2025-08-22T09:00:00Z"
+      datetimeFiveMinutes: "2025-08-22T09:05:00Z"
+      datetimeHour: "2025-08-22T09:00:00Z"
+      datetimeMinute: "2025-08-22T09:07:00Z"
+      duration: 97
+      evt:
+        outcome: "unknown"
+      firewallForAiAnyPiiCategory: 0
+      firewallForAiInjectionScore: 0
+      http:
+        method: "POST"
+        status_code: 200
+        url_details:
+          host: "test.org"
+          path: "/wp-cron.php"
+          queryString: "?doing_wp_cron=123"
+          scheme: "https"
+        useragent: "WordPress/6.8.2; https://test.org"
+        useragent_details:
+          browser:
+            family: "WordPress"
+            major: "6"
+            minor: "8"
+            patch: "2"
+          device:
+            brand: "Spider"
+            category: "Bot"
+            family: "Spider"
+            model: "Desktop"
+          os:
+            family: "Other"
+      leakedCredentialCheckResult: "none"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      requestSource: "eyeball"
+      securitySource: "unknown"
+      userAgentBrowser: "Unknown"
+      userAgentOS: "Unknown"
+      zoneVersion: 0
+    message: |-
+      {
+        "date" : "2025-08-22",
+        "edgeResponseStatus" : 200,
+        "datetimeHour" : "2025-08-22T09:00:00Z",
+        "firewallForAiAnyPiiCategory" : 0,
+        "__typename" : "ZoneHttpRequestsAdaptive",
+        "clientRequestScheme" : "https",
+        "clientSSLProtocol" : "TLSv1.3",
+        "apiGatewayMatchedEndpoint" : "",
+        "datetimeFiveMinutes" : "2025-08-22T09:05:00Z",
+        "apiGatewayMatchedHost" : "",
+        "zoneVersion" : 0,
+        "datetime" : "2025-08-22T09:07:44Z",
+        "securityAction" : "unknown",
+        "clientIP" : "10.10.10.10",
+        "securitySource" : "unknown",
+        "userAgentBrowser" : "Unknown",
+        "userAgentOS" : "Unknown",
+        "clientCountryName" : "US",
+        "clientRequestHTTPMethodName" : "POST",
+        "datetimeMinute" : "2025-08-22T09:07:00Z",
+        "clientDeviceType" : "unknown",
+        "cacheStatus" : "dynamic",
+        "clientRequestHTTPHost" : "test.org",
+        "userAgent" : "WordPress/6.8.2; https://test.org",
+        "requestSource" : "eyeball",
+        "leakedCredentialCheckResult" : "none",
+        "clientAsn" : "14618",
+        "clientRequestPath" : "/wp-cron.php",
+        "firewallForAiInjectionScore" : 0,
+        "datetimeFifteenMinutes" : "2025-08-22T09:00:00Z",
+        "originResponseDurationMs" : 97,
+        "clientRequestHTTPProtocol" : "HTTP/1.1",
+        "clientRequestQuery" : "?doing_wp_cron=123",
+        "clientASNDescription" : "Dummy"
+      }
+    service: "http-request-logs"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1755853664000
+ -
+  sample: |-
+    {
+      "actor" : {
+        "context" : "dash",
+        "id" : "1234",
+        "ip_address" : "10.10.10.10",
+        "type" : "user",
+        "email" : "test@test.com"
+      },
+      "resource" : {
+        "product" : "api_gateway",
+        "scope" : "zones",
+        "type" : "operations"
+      },
+      "zone" : {
+        "name" : "test.org",
+        "id" : "1234"
+      },
+      "action" : {
+        "result" : "success",
+        "description" : "Retrieve information about all operations on a zone",
+        "time" : "2025-08-22T09:53:53.186Z",
+        "type" : "view"
+      },
+      "raw" : {
+        "status_code" : 200,
+        "method" : "GET",
+        "cf_ray_id" : "97317c5339700ac9",
+        "uri" : "/zones/12343/api_gateway/operations?feature=schema_info&page=1&per_page=10&order=endpoint&direction=desc",
+        "user_agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+      },
+      "id" : "1234",
+      "account" : {
+        "name" : "test@test.com's Account",
+        "id" : "1234"
+      }
+    }
+  service: "audit-logs"
+  result:
+    custom:
+      account:
+        id: "1234"
+        name: "test@test.com's Account"
+      action:
+        time: "2025-08-22T09:53:53.186Z"
+        type: "view"
+      actor:
+        context: "dash"
+        type: "user"
+      evt:
+        name: "Retrieve information about all operations on a zone"
+        outcome: "success"
+      http:
+        method: "GET"
+        status_code: 200
+        useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "139"
+            minor: "0"
+            patch: "0"
+            patch_minor: "0"
+          device:
+            category: "Desktop"
+            family: "Other"
+          os:
+            family: "Windows"
+            major: "10"
+      id: "1234"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      raw:
+        cf_ray_id: "97317c5339700ac9"
+        uri: "/zones/12343/api_gateway/operations?feature=schema_info&page=1&per_page=10&order=endpoint&direction=desc"
+      resource:
+        product: "api_gateway"
+        scope: "zones"
+        type: "operations"
+      usr:
+        email: "test@test.com"
+        id: "1234"
+      zone:
+        id: "1234"
+        name: "test.org"
+    message: |-
+      {
+        "actor" : {
+          "context" : "dash",
+          "id" : "1234",
+          "ip_address" : "10.10.10.10",
+          "type" : "user",
+          "email" : "test@test.com"
+        },
+        "resource" : {
+          "product" : "api_gateway",
+          "scope" : "zones",
+          "type" : "operations"
+        },
+        "zone" : {
+          "name" : "test.org",
+          "id" : "1234"
+        },
+        "action" : {
+          "result" : "success",
+          "description" : "Retrieve information about all operations on a zone",
+          "time" : "2025-08-22T09:53:53.186Z",
+          "type" : "view"
+        },
+        "raw" : {
+          "status_code" : 200,
+          "method" : "GET",
+          "cf_ray_id" : "97317c5339700ac9",
+          "uri" : "/zones/12343/api_gateway/operations?feature=schema_info&page=1&per_page=10&order=endpoint&direction=desc",
+          "user_agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+        },
+        "id" : "1234",
+        "account" : {
+          "name" : "test@test.com's Account",
+          "id" : "1234"
+        }
+      }
+    service: "audit-logs"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1755856433186
