@@ -21,8 +21,6 @@ import pathspec
 import urllib3
 from dotenv import dotenv_values
 from utils import iter_wheels
-from wheel.cli.pack import pack
-from wheel.cli.unpack import unpack
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
@@ -143,84 +141,72 @@ def wheel_was_built(wheel: Path) -> bool:
     return file_hash != wheel_hashes[wheel.name]
 
 
-def remove_test_files(wheel_path: Path) -> bool:
-    '''
-    Unpack the wheel, remove excluded test files, then repack it to rebuild RECORD correctly.
-    '''
-    # First, check whether the wheel contains any files that should be excluded. If not, leave it untouched.
-    with ZipFile(wheel_path, 'r') as zf:
-        excluded_members = [name for name in zf.namelist() if is_excluded_from_wheel(name)]
+# def remove_test_files(wheel_path: Path) -> bool:
+#     '''
+#     Unpack the wheel, remove excluded test files, then repack it to rebuild RECORD correctly.
+#     '''
+#     # First, check whether the wheel contains any files that should be excluded. If not, leave it untouched.
+#     with ZipFile(wheel_path, 'r') as zf:
+#         excluded_members = [name for name in zf.namelist() if is_excluded_from_wheel(name)]
 
-    if not excluded_members:
-        # Nothing to strip, so skip rewriting the wheel
-        return False
-    with TemporaryDirectory() as td:
-        td_path = Path(td)
+#     if not excluded_members:
+#         # Nothing to strip, so skip rewriting the wheel
+#         return False
+#     with TemporaryDirectory() as td:
+#         td_path = Path(td)
 
-        # Unpack the wheel into temp dir
-        unpack(wheel_path, dest=td_path)
-        unpacked_dir = next(td_path.iterdir())
-        # Remove excluded files/folders
-        for root, dirs, files in os.walk(td, topdown=False):
-            for d in list(dirs):
-                full_dir = Path(root) / d
-                rel = full_dir.relative_to(unpacked_dir).as_posix()
-                if is_excluded_from_wheel(rel):
-                    shutil.rmtree(full_dir)
-                    dirs.remove(d)
-            for f in files:
-                rel = Path(root).joinpath(f).relative_to(unpacked_dir).as_posix()
-                if is_excluded_from_wheel(rel):
-                    os.remove(Path(root) / f)
+#         # Unpack the wheel into temp dir
+#         unpack(wheel_path, dest=td_path)
+#         unpacked_dir = next(td_path.iterdir())
+#         # Remove excluded files/folders
+#         for root, dirs, files in os.walk(td, topdown=False):
+#             for d in list(dirs):
+#                 full_dir = Path(root) / d
+#                 rel = full_dir.relative_to(unpacked_dir).as_posix()
+#                 if is_excluded_from_wheel(rel):
+#                     shutil.rmtree(full_dir)
+#                     dirs.remove(d)
+#             for f in files:
+#                 rel = Path(root).joinpath(f).relative_to(unpacked_dir).as_posix()
+#                 if is_excluded_from_wheel(rel):
+#                     os.remove(Path(root) / f)
 
-        print(f'Tests removed from {wheel_path.name}')
-        
-        dest_dir = wheel_path.parent
-        before = {p.resolve() for p in dest_dir.glob("*.whl")}
-        # Repack to same directory, regenerating RECORD
-        pack(unpacked_dir, dest_dir=dest_dir, build_number=None)
+#         print(f'Tests removed from {wheel_path.name}')
 
-        # The wheel might not be platform-specific, so repacking restores its original name.
-        # We need to move the repacked wheel to wheel_path, which was changed to be platform-specific.
-        after = {p.resolve() for p in wheel_path.parent.glob("*.whl")}
-        new_files = sorted(after - before, key=lambda p: p.stat().st_mtime, reverse=True)
+#         dest_dir = wheel_path.parent
+#         before = {p.resolve() for p in dest_dir.glob("*.whl")}
+#         # Repack to same directory, regenerating RECORD
+#         pack(unpacked_dir, dest_dir=dest_dir, build_number=None)
 
-        if new_files:
-            shutil.move(str(new_files[0]), str(wheel_path))
+#         # The wheel might not be platform-specific, so repacking restores its original name.
+#         # We need to move the repacked wheel to wheel_path, which was changed to be platform-specific.
+#         after = {p.resolve() for p in wheel_path.parent.glob("*.whl")}
+#         new_files = sorted(after - before, key=lambda p: p.stat().st_mtime, reverse=True)
 
-
-    return True
-
-@cache
-def _load_excluded_spec() -> pathspec.PathSpec:
-    """
-    Load excluded paths from files_to_remove.toml and compile them
-    with .gitignore-style semantics.
-    """
-    config_path = Path(__file__).parent / "files_to_remove.toml"
-    with open(config_path, "rb") as f:
-        config = tomllib.load(f)
-
-    patterns = config.get("excluded_paths", [])
-    return pathspec.PathSpec.from_lines("gitignore", patterns)
-
-def is_excluded_from_wheel(path: str | Path) -> bool:
-    """
-    Return True if `path` (file or directory) should be excluded per files_to_remove.toml.
-    Matches:
-      - type annotation files: **/*.pyi, **/py.typed
-      - test directories listed with a trailing '/'
-    """
-    spec = _load_excluded_spec()
-    rel = Path(path).as_posix()
-
-    if spec.match_file(rel) or spec.match_file(rel + "/"):
-        return True
-
-    return False
+#         if new_files:
+#             shutil.move(str(new_files[0]), str(wheel_path))
 
 
-def add_dependency(dependencies: dict[str, str], wheel: Path) -> None:
+#     return True
+
+
+# def is_excluded_from_wheel(path: str | Path) -> bool:
+#     """
+#     Return True if `path` (file or directory) should be excluded per files_to_remove.toml.
+#     Matches:
+#       - type annotation files: **/*.pyi, **/py.typed
+#       - test directories listed with a trailing '/'
+#     """
+#     spec = _load_excluded_spec()
+#     rel = Path(path).as_posix()
+
+#     if spec.match_file(rel) or spec.match_file(rel + "/"):
+#         return True
+
+#     return False
+
+
+def add_dependency(dependencies: dict[str, str], sizes: dict[str, WheelSizes], wheel: Path) -> None:
     project_metadata = extract_metadata(wheel)
     project_name = normalize_project_name(project_metadata['Name'])
     project_version = project_metadata['Version']
@@ -295,10 +281,18 @@ def main():
 
         # Fetch or build wheels
         command_args = [
-            str(python_path), '-m', 'pip', 'wheel',
-            '-r', str(MOUNT_DIR / 'requirements.in'),
-            '--wheel-dir', str(staged_wheel_dir),
-            '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
+            str(python_path),
+            '-m',
+            'pip',
+            'wheel',
+            '--config-settings',
+            '--build-backend=.builders/scripts/build_backend.py',
+            '-r',
+            str(MOUNT_DIR / 'requirements.in'),
+            '--wheel-dir',
+            str(staged_wheel_dir),
+            '--extra-index-url',
+            CUSTOM_EXTERNAL_INDEX,
         ]
 
         check_process(command_args, env=env_vars)
@@ -330,25 +324,31 @@ def main():
     dependencies: dict[str, tuple[str, str]] = {}
     sizes: dict[str, WheelSizes] = {}
 
-    # Handle wheels currently in the external directory and move them to the built directory if they were modified
-    for wheel in iter_wheels(external_wheels_dir):
-        was_modified = remove_test_files(wheel)
-        if was_modified:
-            # A modified wheel is no longer external → move it to built directory
-            new_path = built_wheels_dir / wheel.name
-            wheel.rename(new_path)
-            wheel = new_path
-            print(f'Moved {wheel.name} to built directory')
+    # # Handle wheels currently in the external directory and move them to the built directory if they were modified
+    # for wheel in iter_wheels(external_wheels_dir):
+    #     was_modified = remove_test_files(wheel)
+    #     if was_modified:
+    #         # A modified wheel is no longer external → move it to built directory
+    #         new_path = built_wheels_dir / wheel.name
+    #         wheel.rename(new_path)
+    #         wheel = new_path
+    #         print(f'Moved {wheel.name} to built directory')
 
-        add_dependency(dependencies, sizes wheel)
+    #     add_dependency(dependencies, sizes, wheel)
 
-    # Handle wheels already in the built directory
-    for wheel in iter_wheels(built_wheels_dir):
-        remove_test_files(wheel)
-        add_dependency(dependencies, sizes, wheel)
+    # # Handle wheels already in the built directory
+    # for wheel in iter_wheels(built_wheels_dir):
+    #     remove_test_files(wheel)
+    #    add_dependency(dependencies, sizes, wheel)
 
+    for wheel_dir in wheels_dir.iterdir():
+        for wheel in wheel_dir.iterdir():
+            project_metadata = extract_metadata(wheel)
+            project_name = normalize_project_name(project_metadata['Name'])
+            project_version = project_metadata['Version']
+            dependencies[project_name] = project_version
 
-
+    sizes[project_name] = {'version': project_version, **calculate_wheel_sizes(wheel)}
 
     output_path = MOUNT_DIR / 'sizes.json'
     with output_path.open('w', encoding='utf-8') as fp:
