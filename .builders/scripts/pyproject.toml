@@ -1,4 +1,5 @@
 [build-system]
 # Tells the frontend to import the 'build_backend' module 
 # and use its 'build_wheel' function.
+requires = ["setuptools", "wheel", "pathspec"]
 build-backend = "build_backend"
