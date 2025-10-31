@@ -232,8 +232,8 @@ def main():
             str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir',
             str(staged_wheel_dir),
-            '--extra-index-url',
-            CUSTOM_EXTERNAL_INDEX,
+            # '--extra-index-url',
+            # CUSTOM_EXTERNAL_INDEX,
         ]
 
         check_process(command_args, env=env_vars)
