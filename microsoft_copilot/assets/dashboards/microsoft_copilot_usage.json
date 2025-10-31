@@ -1,0 +1,1752 @@
+{
+  "title": "Microsoft Copilot Usage",
+  "description": "Track the adoption of Copilot within your Microsoft 365 organization.",
+  "widgets": [
+    {
+      "id": 878955245378656,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6361563733700849,
+            "definition": {
+              "type": "image",
+              "url": "/api/v2/images/3a67543d-8301-4dae-bcd8-0ccf5e041b45",
+              "url_dark_theme": "/api/v2/images/216ba6ac-706b-4420-8ff9-58a33a9d7124",
+              "sizing": "contain",
+              "margin": "md",
+              "has_background": false,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 2508822010448026,
+            "definition": {
+              "title": "Usage of Copilot in Any Application",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_red",
+                      "value": 25
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 60
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.anyapp.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.anyapp.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 0
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 4698654642100834,
+            "definition": {
+              "type": "note",
+              "content": "Percentage of Copilot enabled users which are interacting with Copilot within any application.\n\n",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 10,
+              "y": 0,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 6544225029855812,
+            "definition": {
+              "type": "note",
+              "content": "This dashboard provides an overview of Copilot usage among licensed users in your Microsoft 365 organization.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 7032118608350450,
+            "definition": {
+              "type": "note",
+              "content": "Copilot usage within eight applications is reported: Copilot Chat, Outlook, Word, Teams, OneNote, PowerPoint, Excel, and Loop.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 5242552873618746,
+            "definition": {
+              "title": "Users Enabled/Active Across Any Application",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Enabled",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Active",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.copilotchat.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.copilotchat.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8138763535560108,
+            "definition": {
+              "type": "note",
+              "content": "_Application usage reports are time delayed by up to three days._",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 8103835845010090,
+            "definition": {
+              "title": "Monitor Summary",
+              "type": "manage_status",
+              "display_format": "list",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(source:microsoft_copilot AND service:user-detail-report)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 3955370034957714,
+      "definition": {
+        "title": "Users Enabled/Active by Application and Current Usage",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7315815739800173,
+            "definition": {
+              "title": "Copilot Chat",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Enabled",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Active",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.copilotchat.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.copilotchat.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 10,
+              "height": 2
+            }
+          },
+          {
+            "id": 1852924157805890,
+            "definition": {
+              "title": "Copilot Chat",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 / query2) * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_red",
+                      "value": 25
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 60
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.copilotchat.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.copilotchat.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 7301284880017313,
+            "definition": {
+              "title": "Word",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Enabled",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Active",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.word.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.word.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 10,
+              "height": 2
+            }
+          },
+          {
+            "id": 313612107856178,
+            "definition": {
+              "title": "Word",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_red",
+                      "value": 25
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 60
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.word.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.word.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 8770120708068288,
+            "definition": {
+              "title": "Outlook",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Enabled",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Active",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.outlook.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.outlook.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 10,
+              "height": 2
+            }
+          },
+          {
+            "id": 172273208241718,
+            "definition": {
+              "title": "Outlook",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_red",
+                      "value": 25
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 60
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.outlook.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.word.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 4,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 7460775653979432,
+            "definition": {
+              "title": "PowerPoint",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Enabled",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Active",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.powerpoint.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.powerpoint.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 10,
+              "height": 2
+            }
+          },
+          {
+            "id": 6195906421817956,
+            "definition": {
+              "title": "Powerpoint",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_red",
+                      "value": 25
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 60
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.powerpoint.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.powerpoint.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 6,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 8582885349192450,
+            "definition": {
+              "title": "Teams",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Enabled",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Active",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.teams.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.teams.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 10,
+              "height": 2
+            }
+          },
+          {
+            "id": 7147310070661452,
+            "definition": {
+              "title": "Teams",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_red",
+                      "value": 25
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 60
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.teams.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.teams.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 8,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 1354132382860298,
+            "definition": {
+              "title": "Excel",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Enabled",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Active",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.excel.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.excel.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 10,
+              "height": 2
+            }
+          },
+          {
+            "id": 2378496913123449,
+            "definition": {
+              "title": "Excel",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_red",
+                      "value": 25
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 60
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.excel.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.excel.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 10,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 3017350528511965,
+            "definition": {
+              "title": "OneNote",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Enabled",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Active",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.onenote.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.onenote.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 10,
+              "height": 2
+            }
+          },
+          {
+            "id": 5069696736733369,
+            "definition": {
+              "title": "OneNote",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_red",
+                      "value": 25
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 60
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.onenote.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.onenote.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 12,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 7977457162981002,
+            "definition": {
+              "title": "Loop",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Enabled",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Active",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.loop.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.loop.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 14,
+              "width": 10,
+              "height": 2
+            }
+          },
+          {
+            "id": 6381360396609160,
+            "definition": {
+              "title": "Loop",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_red",
+                      "value": 25
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_yellow",
+                      "value": 50
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_green",
+                      "value": 60
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:microsoft_copilot.loop.users.active{*}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "avg:microsoft_copilot.loop.users.enabled{*}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [],
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 14,
+              "width": 2,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 17
+      }
+    },
+    {
+      "id": 7564344497056068,
+      "definition": {
+        "title": "Individual User Activity",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2853491448254754,
+            "definition": {
+              "title": "User Interaction Across All Applications",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Copilot Chat",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Teams",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Word",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Outlook",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "PowerPoint",
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "OneNote",
+                      "formula": "query6"
+                    },
+                    {
+                      "alias": "Loop",
+                      "formula": "query7"
+                    },
+                    {
+                      "alias": "Excel",
+                      "formula": "query8"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail-report @active.copilotChat:1"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail-report @active.microsoftTeams:1"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail-report @active.word:1"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail-report @active.outlook:1"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query5",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail-report @active.powerPoint:1"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query6",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail-report @active.oneNote:1"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query7",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail-report @active.loop:1"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    },
+                    {
+                      "name": "query8",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail-report @active.excel:1"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "custom_links": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 5461572840552152,
+            "definition": {
+              "type": "note",
+              "content": "If your organization allows display of user principal names in reports, then the following lists will be useful to determine which Copilot-licensed users within your organization are not taking advantage of their license. Otherwise, you will see anonymized names. See [the Microsoft documentation](https://learn.microsoft.com/en-us/troubleshoot/microsoft-365/miscellaneous/reports-show-anonymous-user-name) on how to manage this feature.",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 3116375507166434,
+            "definition": {
+              "title": "Days Users are Inactive with Copilot Across All Applications",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail-report @active.copilotChat:0 @active.microsoftTeams:0 @active.word:0 @active.excel:0 @active.powerPoint:0 @active.outlook:0 @active.oneNote:0 @active.loop:0"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@report.userPrincipalName",
+                          "limit": 30,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 10,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 60,
+                      "palette": "white_on_red"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "day"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 30,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "warm"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 2082352610520474,
+            "definition": {
+              "title": "Most Days Inactive with Copilot Chat",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:microsoft-copilot service:user-detail-report @active.copilotChat:0"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@report.userPrincipalName",
+                          "limit": 30,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 10,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 60,
+                      "palette": "white_on_red"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "day"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 30,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "warm"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 10,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 15,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 4045398119388688,
+      "definition": {
+        "title": "User Detail Logs",
+        "background_color": "pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1945022109528680,
+            "definition": {
+              "title": "All Logs",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "query": {
+                    "query_string": "source:microsoft-copilot",
+                    "sort": {
+                      "column": "timestamp",
+                      "order": "desc"
+                    },
+                    "data_source": "logs_stream",
+                    "storage": "hot",
+                    "indexes": []
+                  },
+                  "response_format": "event_list",
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 15,
+        "width": 12,
+        "height": 5
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
