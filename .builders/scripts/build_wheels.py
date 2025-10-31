@@ -216,6 +216,7 @@ def main():
 
         if constraints_file := env_vars.get('PIP_CONSTRAINT'):
             env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
+            
         print("--------------------------------")
         print("Building wheels")
         print("--------------------------------")
@@ -234,11 +235,11 @@ def main():
             '--extra-index-url',
             CUSTOM_EXTERNAL_INDEX,
         ]
+
+        check_process(command_args, env=env_vars)
         print("--------------------------------")
         print("Finished building wheels")
         print("--------------------------------")
-        check_process(command_args, env=env_vars)
-
         # Classify wheels
         for wheel in iter_wheels(staged_wheel_dir):
             if wheel_was_built(wheel):
