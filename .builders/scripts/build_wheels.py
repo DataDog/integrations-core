@@ -226,7 +226,7 @@ def main():
             'pip',
             'wheel',
             '--config-settings',
-            f'--build-backend={MOUNT_DIR / "scripts" / "pyproject.toml"}'
+            f'--build-backend={MOUNT_DIR / "scripts" / "pyproject.toml"}',
             '-r',
             str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir',
