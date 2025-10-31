@@ -13,8 +13,10 @@ from setuptools import build_meta as _orig
 def remove_test_files(wheel_path: Path) -> None:
     """
     Remove excluded files and directories from a built wheel.
+    Prints the number of files removed.
     """
     tmp_wheel = wheel_path.with_suffix(".tmp.whl")
+    removed_count = 0
 
     with (
         zipfile.ZipFile(wheel_path, "r") as zin,
@@ -23,12 +25,14 @@ def remove_test_files(wheel_path: Path) -> None:
         for info in zin.infolist():
             rel = info.filename
             if is_excluded_from_wheel(rel):
+                removed_count += 1
                 continue  # skip excluded file or directory
 
             data = zin.read(rel)
             zout.writestr(info, data)
 
     shutil.move(tmp_wheel, wheel_path)
+    print(f"Removed {removed_count} files from {wheel_path.name}")
 
 
 def is_excluded_from_wheel(path: str | Path) -> bool:
@@ -76,6 +80,7 @@ def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
 # prepare_metadata_for_build_wheel = _orig.prepare_metadata_for_build_wheel
 # build_sdist = _orig.build_sdist
 # (better do by iterating over _orig methods instead)
+print("-> Inspecting _orig methods")
 for name, func in inspect.getmembers(_orig, inspect.isfunction):
     # Only copy methods if they haven't been defined in the current module
     # (i.e., don't overwrite your custom build_wheel)
