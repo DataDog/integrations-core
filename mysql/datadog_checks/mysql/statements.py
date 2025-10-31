@@ -20,7 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
 
-from .util import DatabaseConfigurationError, connect_with_session_variables, warning_with_tags
+from .util import DatabaseConfigurationError, ManagedAuthConnectionMixin, warning_with_tags
 
 try:
     import datadog_agent
@@ -56,13 +56,13 @@ def _row_key(row):
     return row['schema_name'], row['query_signature']
 
 
-class MySQLStatementMetrics(DBMAsyncJob):
+class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
     """
 
-    def __init__(self, check, config, connection_args):
-        # (MySql, MySQLConfig) -> None
+    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
+        # (MySql, MySQLConfig, Callable, bool) -> None
         collection_interval = float(config.statement_metrics_config.get('collection_interval', 10))
         if collection_interval <= 0:
             collection_interval = 10
@@ -78,8 +78,11 @@ class MySQLStatementMetrics(DBMAsyncJob):
             shutdown_callback=self._close_db_conn,
         )
         self._check = check
+        self._collect_prepared_statements = None
         self._metric_collection_interval = collection_interval
-        self._connection_args = connection_args
+        self._connection_args_provider = connection_args_provider
+        self._uses_managed_auth = uses_managed_auth
+        self._db_created_at = 0
         self._db = None
         self._config = config
         self.log = get_check_logger()
@@ -100,16 +103,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
             maxsize=self._config.statement_rows_cache_max_size,
             ttl=self._config.statement_rows_cache_ttl,
         )
-
-    def _get_db_connection(self):
-        """
-        lazy reconnect db
-        pymysql connections are not thread safe so we can't reuse the same connection from the main check
-        :return:
-        """
-        if not self._db:
-            self._db = connect_with_session_variables(**self._connection_args)
-        return self._db
 
     def _close_db_conn(self):
         if self._db:
@@ -164,7 +157,6 @@ class MySQLStatementMetrics(DBMAsyncJob):
             'timestamp': time.time() * 1000,
             'mysql_version': self._check.version.version + '+' + self._check.version.build,
             'mysql_flavor': self._check.version.flavor,
-            "ddagenthostname": self._check.agent_hostname,
             'ddagentversion': datadog_agent.get_version(),
             'min_collection_interval': self._metric_collection_interval,
             'tags': tags,
@@ -223,9 +215,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         only_query_recent_statements = self._config.statement_metrics_config.get('only_query_recent_statements', False)
         # Since `performance_schema.prepared_statements_instances` doesn't have a last_seen column,
         # we only collect prepared statements if we're not querying recent statements
-        collect_prepared_statements = not only_query_recent_statements and self._config.statement_metrics_config.get(
-            'collect_prepared_statements', True
-        )
+        collect_prepared_statements = not only_query_recent_statements and self.collect_prepared_statements
 
         condition = (
             "WHERE `last_seen` >= %s"
@@ -374,3 +364,18 @@ class MySQLStatementMetrics(DBMAsyncJob):
                 },
                 "mysql": {"schema": row["schema_name"]},
             }
+
+    @property
+    def collect_prepared_statements(self):
+        if self._collect_prepared_statements is None:
+            # prepared_statements_instances table was added to MariaDB 10.5.2
+            if self._check.is_mariadb and self._check.version.version_compatible((10, 5, 2)) is False:
+                self._collect_prepared_statements = False
+            # prepared_statements_instances table was added to MySQL 5.7.4
+            elif self._check.version.version_compatible((5, 7, 4)) is False:
+                self._collect_prepared_statements = False
+            else:
+                self._collect_prepared_statements = self._config.statement_metrics_config.get(
+                    'collect_prepared_statements', True
+                )
+        return self._collect_prepared_statements

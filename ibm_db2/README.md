@@ -6,6 +6,8 @@
 
 This check monitors [IBM Db2][2] through the Datadog Agent.
 
+**Minimum Agent version:** 6.11.0
+
 ## Setup
 
 ### Installation

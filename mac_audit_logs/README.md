@@ -16,6 +16,8 @@ This integration collects Mac audit logs and sends them to Datadog for analysis,
 * [Log Explorer][2]
 * [Cloud SIEM][3]
 
+**Minimum Agent version:** 7.69.0
+
 ## Setup
 
 ### Installation

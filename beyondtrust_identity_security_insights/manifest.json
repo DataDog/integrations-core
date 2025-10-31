@@ -31,7 +31,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 51341700,
       "source_type_name": "BeyondTrust Identity Security Insights",
       "events": {
@@ -42,7 +42,7 @@
       "BeyondTrust Identity Security Insights - Detections": "assets/dashboards/beyondtrust_identity_security_insights_detections.json"
     },
     "logs": {
-      "source": "beyondtrust-identity-security-insights"
+      "source": "beyond-trust-identity-security-insights"
     }
   },
   "author": {

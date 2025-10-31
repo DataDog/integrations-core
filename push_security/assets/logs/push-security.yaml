@@ -1,0 +1,665 @@
+id: push-security
+metric_id: push-security
+backend_only: false
+installation_sources: 
+  - pushsecurity
+facets:
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
+      - Web Access
+    name: URL Path
+    path: http.url
+    source: log
+  - groups:
+      - Web Access
+    name: User-Agent
+    path: http.useragent
+    source: log
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+pipeline:
+  type: pipeline
+  name: Push Security
+  enabled: true
+  filter:
+    query: source:pushsecurity
+  processors:
+    - type: arithmetic-processor
+      name: Convert `timestamp` epoch to milliseconds epoch
+      enabled: true
+      expression: timestamp * 1000
+      target: timestamp
+      replaceMissing: false
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: service-remapper
+      name: Define `category` as the official service of the log
+      enabled: true
+      sources:
+        - category
+    - type: message-remapper
+      name: Define `description` as the official message of the log
+      enabled: true
+      sources:
+        - description
+    - type: attribute-remapper
+      name: Map `friendlyName` to `evt.name`
+      enabled: true
+      sources:
+        - friendlyName
+      sourceType: attribute
+      target: evt.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: pipeline
+      name: Parse Detection Create, and Update Events
+      enabled: true
+      filter:
+        query: service:DETECTION @type:(CREATE OR UPDATE)
+      processors:
+        - type: string-builder-processor
+          name: Prepare `fullName` string for user
+          enabled: true
+          template: "%{new.employee.firstName} %{new.employee.lastName}"
+          target: new.employee.fullName
+          replaceMissing: true
+        - name: Lookup on `new.severity` to `severity`
+          enabled: true
+          source: new.severity
+          target: severity
+          lookupTable: |-
+            CRITICAL,critical
+            HIGH,warning
+            MEDIUM,notice
+            LOW,info
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `severity` as the official status of the log
+          enabled: true
+          sources:
+            - severity
+        - type: attribute-remapper
+          name: Map `new.employee.id` to `usr.id`
+          enabled: true
+          sources:
+            - new.employee.id
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.employee.fullName` to `usr.name`
+          enabled: true
+          sources:
+            - new.employee.fullName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.employee.email` to `usr.email`
+          enabled: true
+          sources:
+            - new.employee.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.response` to `evt.outcome`
+          enabled: true
+          sources:
+            - new.response
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Detection Delete Events
+      enabled: true
+      filter:
+        query: service:DETECTION @type:DELETE
+      processors:
+        - type: string-builder-processor
+          name: Prepare `fullName` string for user
+          enabled: true
+          template: "%{old.employee.firstName} %{old.employee.lastName}"
+          target: old.employee.fullName
+          replaceMissing: true
+        - name: Lookup on `old.severity` to `severity`
+          enabled: true
+          source: old.severity
+          target: severity
+          lookupTable: |-
+            CRITICAL,critical
+            HIGH,warning
+            MEDIUM,notice
+            LOW,info
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `severity` as the official status of the log
+          enabled: true
+          sources:
+            - severity
+        - type: attribute-remapper
+          name: Map `old.employee.id` to `usr.id`
+          enabled: true
+          sources:
+            - old.employee.id
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `old.employee.fullName` to `usr.name`
+          enabled: true
+          sources:
+            - old.employee.fullName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `old.employee.email` to `usr.email`
+          enabled: true
+          sources:
+            - old.employee.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `old.response` to `evt.outcome`
+          enabled: true
+          sources:
+            - old.response
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Activity Events
+      enabled: true
+      filter:
+        query: service:ACTIVITY
+      processors:
+        - type: attribute-remapper
+          name: Map `new.employeeId` to `usr.id`
+          enabled: true
+          sources:
+            - new.employeeId
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.loginUrl` to `http.url`
+          enabled: true
+          sources:
+            - new.loginUrl
+          sourceType: attribute
+          target: http.url
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.sourceIpAddress` to `network.client.ip`
+          enabled: true
+          sources:
+            - new.sourceIpAddress
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.userAgent` to `http.useragent`
+          enabled: true
+          sources:
+            - new.userAgent
+          sourceType: attribute
+          target: http.useragent
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Control Events
+      enabled: true
+      filter:
+        query: service:CONTROL
+      processors:
+        - type: string-builder-processor
+          name: Prepare `fullName` string for user
+          enabled: true
+          template: "%{new.employee.firstName} %{new.employee.lastName}"
+          target: new.employee.fullName
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `new.employee.id` to `usr.id`
+          enabled: true
+          sources:
+            - new.employee.id
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.employee.fullName` to `usr.name`
+          enabled: true
+          sources:
+            - new.employee.fullName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.employee.email` to `usr.email`
+          enabled: true
+          sources:
+            - new.employee.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.action` to `evt.outcome`
+          enabled: true
+          sources:
+            - new.action
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.url` to `http.url`
+          enabled: true
+          sources:
+            - new.url
+          sourceType: attribute
+          target: http.url
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.sourceIpAddress` to `network.client.ip`
+          enabled: true
+          sources:
+            - new.sourceIpAddress
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.userAgent` to `http.useragent`
+          enabled: true
+          sources:
+            - new.userAgent
+          sourceType: attribute
+          target: http.useragent
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Audit Events with Actor Email
+      enabled: true
+      filter:
+        query: service:AUDIT @actor.email:*
+      processors:
+        - type: attribute-remapper
+          name: Map `actor.email` to `usr.email`
+          enabled: true
+          sources:
+            - actor.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.sourceIpAddress` to `network.client.ip`
+          enabled: true
+          sources:
+            - actor.sourceIpAddress
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.userAgent` to `http.useragent`
+          enabled: true
+          sources:
+            - actor.userAgent
+          sourceType: attribute
+          target: http.useragent
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Audit Events with Actor API Key
+      enabled: true
+      filter:
+        query: service:AUDIT @actor.apiKeyName:*
+      processors:
+        - type: attribute-remapper
+          name: Map `actor.apiKeyCreatedBy` to `usr.email`
+          enabled: true
+          sources:
+            - actor.apiKeyCreatedBy
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.sourceIpAddress` to `network.client.ip`
+          enabled: true
+          sources:
+            - actor.sourceIpAddress
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `actor.userAgent` to `http.useragent`
+          enabled: true
+          sources:
+            - actor.userAgent
+          sourceType: attribute
+          target: http.useragent
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Entity Events without Finding and Employee Events
+      enabled: true
+      filter:
+        query: service:ENTITY @type:(CREATE OR UPDATE) -@object:(FINDING OR EMPLOYEE)
+      processors:
+        - type: attribute-remapper
+          name: Map `new.employeeId,new.ownerId` to `usr.id`
+          enabled: true
+          sources:
+            - new.employeeId
+            - new.ownerId
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.email` to `usr.email`
+          enabled: true
+          sources:
+            - new.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parsing Entity Delete Events without Finding and Employee Events
+      enabled: true
+      filter:
+        query: service:ENTITY @type:DELETE -@object:(FINDING OR EMPLOYEE)
+      processors:
+        - type: attribute-remapper
+          name: Map `old.employeeId,old.ownerId` to `usr.id`
+          enabled: true
+          sources:
+            - old.employeeId
+            - old.ownerId
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `old.email` to `usr.email`
+          enabled: true
+          sources:
+            - old.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parsing Entity Employee Create and Update Events
+      enabled: true
+      filter:
+        query: service:ENTITY @type:(CREATE OR UPDATE) @object:EMPLOYEE
+      processors:
+        - type: string-builder-processor
+          name: Prepare `fullName` string for user
+          enabled: true
+          template: "%{new.firstName} %{new.lastName}"
+          target: new.fullName
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `new.fullName` to `usr.name`
+          enabled: true
+          sources:
+            - new.fullName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.id` to `usr.id`
+          enabled: true
+          sources:
+            - new.id
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parsing Entity Finding Create and Update Events
+      enabled: true
+      filter:
+        query: service:ENTITY @type:(CREATE OR UPDATE) @object:FINDING
+      processors:
+        - type: string-builder-processor
+          name: Prepare `fullName` string for user
+          enabled: true
+          template: "%{new.employee.firstName} %{new.employee.lastName}"
+          target: new.employee.fullName
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `new.employee.fullName` to `usr.name`
+          enabled: true
+          sources:
+            - new.employee.fullName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new.employee.email` to `usr.email`
+          enabled: true
+          sources:
+            - new.employee.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parsing Entity Employee Delete Events
+      enabled: true
+      filter:
+        query: service:ENTITY @type:DELETE @object:EMPLOYEE
+      processors:
+        - type: string-builder-processor
+          name: Prepare `fullName` string for user
+          enabled: true
+          template: "%{old.firstName} %{old.lastName}"
+          target: old.fullName
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `old.fullName` to `usr.name`
+          enabled: true
+          sources:
+            - old.fullName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `old.id` to `usr.id`
+          enabled: true
+          sources:
+            - old.id
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parsing Entity Finding Delete Events
+      enabled: true
+      filter:
+        query: service:ENTITY @type:DELETE @object:FINDING
+      processors:
+        - type: string-builder-processor
+          name: Prepare `fullName` string for user
+          enabled: true
+          template: "%{old.employee.firstName} %{old.employee.lastName}"
+          target: old.employee.fullName
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `old.employee.fullName` to `usr.name`
+          enabled: true
+          sources:
+            - old.employee.fullName
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `old.employee.email` to `usr.email`
+          enabled: true
+          sources:
+            - old.employee.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: geo-ip-parser
+      name: Extract geolocation information
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
+    - type: user-agent-parser
+      name: User Agent Parser for `http.useragent`
+      enabled: true
+      sources:
+        - http.useragent
+      target: http.useragent_details
+      encoded: false
+      combineVersionDetails: false

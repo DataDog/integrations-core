@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import email
+import json
 import os
 import re
 import shutil
@@ -13,6 +14,7 @@ from functools import cache
 from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import TypedDict
 from zipfile import ZipFile
 
 import pathspec
@@ -26,6 +28,10 @@ INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
+
+class WheelSizes(TypedDict):
+    compressed: int
+    uncompressed: int
 
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
@@ -219,6 +225,13 @@ def add_dependency(dependencies: dict[str, str], wheel: Path) -> None:
     project_name = normalize_project_name(project_metadata['Name'])
     project_version = project_metadata['Version']
     dependencies[project_name] = project_version
+    sizes[project_name] = {'version': project_version, **calculate_wheel_sizes(wheel)}
+
+def calculate_wheel_sizes(wheel_path: Path) -> WheelSizes:
+    compressed_size = wheel_path.stat(follow_symlinks=True).st_size
+    with ZipFile(wheel_path) as zf:
+        uncompressed_size = sum(zinfo.file_size for zinfo in zf.infolist())
+    return {'compressed': compressed_size, 'uncompressed': uncompressed_size}
 
 
 def main():
@@ -315,6 +328,8 @@ def main():
         )
 
     dependencies: dict[str, tuple[str, str]] = {}
+    sizes: dict[str, WheelSizes] = {}
+
     # Handle wheels currently in the external directory and move them to the built directory if they were modified
     for wheel in iter_wheels(external_wheels_dir):
         was_modified = remove_test_files(wheel)
@@ -325,12 +340,19 @@ def main():
             wheel = new_path
             print(f'Moved {wheel.name} to built directory')
 
-        add_dependency(dependencies, wheel)
+        add_dependency(dependencies, sizes wheel)
 
     # Handle wheels already in the built directory
     for wheel in iter_wheels(built_wheels_dir):
         remove_test_files(wheel)
-        add_dependency(dependencies, wheel)
+        add_dependency(dependencies, sizes, wheel)
+
+
+
+
+    output_path = MOUNT_DIR / 'sizes.json'
+    with output_path.open('w', encoding='utf-8') as fp:
+        json.dump(sizes, fp, indent=2, sort_keys=True)
 
     final_requirements = MOUNT_DIR / 'frozen.txt'
     with final_requirements.open('w', encoding='utf-8') as f:

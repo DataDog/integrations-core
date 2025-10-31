@@ -6,6 +6,8 @@ The Process Check lets you:
 - Collect resource usage metrics for specific running processes on any host. For example, CPU, memory, I/O, and number of threads.
 - Use [Process Monitors][1] to configure thresholds for how many instances of a specific process should be running and get alerts when the thresholds aren't met (see **Service Checks** below).
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

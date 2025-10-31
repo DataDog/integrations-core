@@ -9,6 +9,8 @@ This check monitors [TLS][1] protocol versions, certificate expiration and valid
 1. Only TCP is supported.
 2. Only leaf / end user certificates are verified (not intermediate and root certificates).
 
+**Minimum Agent version:** 6.12.0
+
 ## Setup
 
 ### Installation
