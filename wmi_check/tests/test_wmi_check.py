@@ -4,8 +4,9 @@
 
 import copy
 import logging
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from . import common
 
@@ -116,7 +117,7 @@ def test_tag_queries_without_alias(mock_sampler_with_tag_queries, aggregator, ch
         ('Name AS wmi_name', ['wmi_name:foo']),
         ('Name,Label AS wmi_label', ['name:foo', 'wmi_label:bar']),
         ('name as wmi_name,label as wmi_label', ['wmi_name:foo', 'wmi_label:bar']),
-        ('nameaswmi_name', [])
+        ('nameaswmi_name', []),
     ],
 )
 def test_tag_by_is_correctly_prefixed(mock_sampler_with_tag_by_prefix, aggregator, check, tag_by, result_tags):
