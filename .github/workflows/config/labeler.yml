@@ -283,6 +283,8 @@ integration/gpu:
 - gpu/**/*
 integration/greenhouse:
 - greenhouse/**/*
+integration/guarddog:
+- guarddog/**/*
 integration/gunicorn:
 - gunicorn/**/*
 integration/haproxy:
