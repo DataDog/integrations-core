@@ -1,1 +1,0 @@
-Switch from using shell=True to shell=False in subprocess command

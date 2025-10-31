@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.2.1 / 2025-10-31
+
+***Fixed***:
+
+* Fix Ceph version lookup for newer releases of Ceph ([#21279](https://github.com/DataDog/integrations-core/pull/21279))
+
 ## 4.2.0 / 2025-10-02
 
 ***Added***:

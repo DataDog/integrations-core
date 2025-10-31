@@ -1,1 +1,0 @@
-Add `collect_vpn` config and `disabled` config in `interface_configs` to SNMP conf.yaml.example.

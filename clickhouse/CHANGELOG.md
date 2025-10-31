@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.1.0 / 2025-10-31
+
+***Added***:
+
+* Added metric to fix typo (keerper to keeper). Old metric to be deprecated down the line. ([#21642](https://github.com/DataDog/integrations-core/pull/21642))
+
 ## 6.0.0 / 2025-10-02
 
 ***Changed***:

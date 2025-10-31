@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 8.3.0 / 2025-10-31
+
+***Added***:
+
+* Add RabbitMQ stream metrics and queue info metric for replication monitoring.
+
+  Adds 20 new metrics from RabbitMQ Prometheus plugin:
+  - rabbitmq.queue.info (gauge) with membership/queue_type tags for replication monitoring
+  - 17 stream error counters (rabbitmq.global.stream.error.*)
+  - 2 stream health gauges (rabbitmq.stream.segments, rabbitmq.stream.consumer_max_offset_lag) ([#21604](https://github.com/DataDog/integrations-core/pull/21604))
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
 ## 8.2.0 / 2025-10-02
 
 ***Added***:

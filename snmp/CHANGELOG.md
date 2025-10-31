@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 12.1.0 / 2025-10-31
+
+***Added***:
+
+* Add `collect_vpn` config and `disabled` config in `interface_configs` to SNMP conf.yaml.example. ([#21620](https://github.com/DataDog/integrations-core/pull/21620))
+* [Juniper SRX] Update Juniper SRX SNMP profile to support new SRX models ([#21698](https://github.com/DataDog/integrations-core/pull/21698))
+
 ## 12.0.0 / 2025-10-02
 
 ***Changed***:

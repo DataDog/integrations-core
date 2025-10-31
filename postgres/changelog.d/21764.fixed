@@ -1,1 +1,0 @@
-Fix handling health event tags in Postgres to allow for additional tags as an argument.
