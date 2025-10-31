@@ -159,6 +159,7 @@ class InstanceConfig(BaseModel):
     hostname_transform: Optional[str] = None
     include_datastore_cluster_folder_tag: Optional[bool] = None
     include_events: Optional[tuple[IncludeEvent, ...]] = None
+    infrastructure_mode: Optional[str] = None
     max_historical_metrics: Optional[int] = None
     metric_filters: Optional[MetricFilters] = None
     metric_patterns: Optional[MetricPatterns] = None
