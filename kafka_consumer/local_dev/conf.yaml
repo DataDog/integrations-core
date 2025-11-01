@@ -1,0 +1,18 @@
+init_config:
+
+instances:
+  - kafka_connect_str: kafka:29092
+
+    # Monitor all consumer groups
+    monitor_unlisted_consumer_groups: true
+
+    # Enable cluster monitoring (collects broker, topic, partition, consumer group, and schema registry metadata)
+    enable_cluster_monitoring: true
+    
+    schema_registry_url: http://schema-registry:8081
+
+    # Enable data streams for lag in seconds
+    data_streams_enabled: true
+
+    min_collection_interval: 30
+
