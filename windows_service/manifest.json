@@ -48,6 +48,11 @@
       "events": {
         "creates_events": false
       },
+      "metrics": {
+        "prefix": "windows_service.",
+        "check": "windows_service.uptime",
+        "metadata_path": "metadata.csv"
+      },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
