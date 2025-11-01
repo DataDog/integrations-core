@@ -1,0 +1,3 @@
+# Ignore downloaded tarballs
+*.tgz
+
