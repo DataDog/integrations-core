@@ -3,6 +3,8 @@ from collections.abc import Callable
 
 import click
 
+VALID_FORMATS = ["png", "csv", "markdown", "json"]
+
 
 def common_params(func: Callable) -> Callable:
     @functools.wraps(func)
@@ -12,9 +14,8 @@ def common_params(func: Callable) -> Callable:
     @click.option("--compressed", is_flag=True, help="Measure compressed size")
     @click.option(
         "--format",
-        show_default=True,
-        help="Format of the output (comma-separated values: png, csv, markdown, json)",
-        callback=lambda _, __, v: v.split(",") if v else [],
+        help=f"Format of the output (comma-separated values: {', '.join(VALID_FORMATS)})",
+        callback=validate_format,
     )
     @click.option(
         "--show-gui",
@@ -32,3 +33,13 @@ def common_params(func: Callable) -> Callable:
         return ctx.invoke(func, *args, **kwargs)
 
     return wrapper
+
+
+def validate_format(_, __, format: str) -> list[str]:
+    if format == "":
+        raise click.BadParameter(f"A value must be provided. Supported formats are: {', '.join(VALID_FORMATS)}")
+
+    format_list = [f.strip() for f in format.split(",")] if format else []
+    if unsupported_formats := set(format_list) - set(VALID_FORMATS):
+        raise click.BadParameter(f"{', '.join(unsupported_formats)}. Only {', '.join(VALID_FORMATS)} are supported")
+    return format_list
