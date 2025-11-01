@@ -10,6 +10,7 @@ files:
     options:
     - name: nginx_status_url
       required: true
+      display_priority: 2
       description: |
         For every instance, you need an `nginx_status_url` and can optionally
         supply a list of tags.  This plugin requires nginx to be compiled with
@@ -17,7 +18,7 @@ files:
         configuration stanza.  On debian/ubuntu, this is included in the
         `nginx-extras` package.  For more details, see:
 
-          http://docs.datadoghq.com/integrations/nginx/
+          https://docs.datadoghq.com/integrations/nginx/
 
         For NGINX Plus API Release 13+ users using the http_api_module,
         set nginx_status_url to the location of the `/api` endpoint.
@@ -27,10 +28,10 @@ files:
         type: string
     - name: use_plus_api
       description: |
-        If you are using the commercial version of nginx, for releases R13 and above,
-        there is a new API to replace the extended status API.
-        See https://www.nginx.com/blog/nginx-plus-r13-released/
-        To use it set `use_plus_api` to true
+        If you are using the commercial version of NGINX for releases R13 and above,
+        there is a new API that replaces the extended status API.
+        See https://www.nginx.com/blog/nginx-plus-r13-released/.
+        To use it, set `use_plus_api` to `true`.
       value:
         type: boolean
         example: false
@@ -69,12 +70,14 @@ files:
     - template: instances/http
     - template: instances/default
       overrides:
+        disable_generic_tags.display_priority: 1
         disable_generic_tags.hidden: False
         disable_generic_tags.enabled: True
         disable_generic_tags.description: |
-          Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
-          getting mixed with other integration tags.
-          Note that this is only relevant to service check submissions. Metrics do not include any generic tags.
+          Generic tags such as `cluster` will be replaced by nginx_cluster to avoid
+          getting mixed with other integration tags. Note that this is only relevant 
+          to service check submissions. Metrics do not include any generic tags. 
+          Datadog recommends setting this to `true` to avoid confusion.
 
   - template: logs
     example:
