@@ -80,7 +80,7 @@ class IntegrationRegistry:
             return self.__cache[name]
 
         path = self.repo.path / name
-        if not (path.is_dir() and not self.repo.git.is_worktree(path)):
+        if not path.is_dir() or self.repo.git.is_worktree(path):
             raise OSError(f'Integration does not exist: {Path(self.repo.path.name, name)}')
 
         integration = Integration(path, self.repo.path, self.repo.config)
@@ -176,6 +176,11 @@ class IntegrationRegistry:
             return
 
         for path in sorted(self.repo.path.iterdir()):
+            # Ignore any non-directory entries since integrations are always directories
+            # Hidden directories are also not integrations
+            if not path.is_dir() or path.name.startswith('.'):
+                continue
+
             # Ignore any subdirectory that is a worktree
             if self.repo.git.is_worktree(path):
                 continue
@@ -200,10 +205,7 @@ class IntegrationRegistry:
         if not selection or 'changed' in selection:
             return self.__get_changed_root_entries() or None
 
-        if 'all' in selection:
-            return set()
-
-        return set(selection)
+        return set() if 'all' in selection else set(selection)
 
     def __get_changed_root_entries(self) -> set[str]:
         return {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files()}
