@@ -64,7 +64,7 @@ jobs:
           REPO="${{ github.repository }}"
 
           CHANGED_FILES=$(gh api "repos/$REPO/compare/${{ steps.set_sha.outputs.prev_sha }}...${{ steps.set_sha.outputs.curr_sha }}" --paginate | \
-          jq -r '.files | map(.filename) | join(" ")')
+          jq -r 'select(.files != null) | .files | map(.filename) | join(" ")')
 
           echo "files_changed=$CHANGED_FILES" >> $GITHUB_OUTPUT
           echo "files_changed=$CHANGED_FILES"
@@ -218,10 +218,8 @@ jobs:
         job:
         - arch: x86_64
           os: macos-13
-          macosx_version_min: "10.12"
         - arch: aarch64
           os: macos-13-xlarge # "macOS 13 Arm64" as per https://github.com/actions/runner-images/blob/main/README.md
-          macosx_version_min: "11.0"
     env:
       TARGET_NAME: macos-${{ matrix.job.arch }}
       OUT_DIR: output/macos-${{ matrix.job.arch }}
@@ -265,7 +263,7 @@ jobs:
     - name: Run the build
       env:
         # This sets the minimum macOS version compatible for all built artifacts
-        MACOSX_DEPLOYMENT_TARGET: ${{ matrix.job.macosx_version_min }}
+        MACOSX_DEPLOYMENT_TARGET: "11.0" # https://docs.datadoghq.com/agent/supported_platforms/?tab=macos
         CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
       run: |-
         # If we hit the cache, we can skip the builder setup

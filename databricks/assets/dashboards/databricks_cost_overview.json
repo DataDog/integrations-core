@@ -53,9 +53,9 @@
         "title_size": "16",
         "title_align": "left",
         "time": {
-          "type": "fixed",
-          "from": 1751932800000,
-          "to": 1754611200000,
+          "type": "live",
+          "unit": "month",
+          "value": 1,
           "hide_incomplete_cost_data": true
         },
         "type": "query_value",
@@ -100,9 +100,9 @@
         "title_size": "16",
         "title_align": "left",
         "time": {
-          "type": "fixed",
-          "from": 1751932800000,
-          "to": 1754611200000,
+          "type": "live",
+          "unit": "month",
+          "value": 1,
           "hide_incomplete_cost_data": true
         },
         "type": "query_value",
@@ -147,9 +147,9 @@
         "title_size": "16",
         "title_align": "left",
         "time": {
-          "type": "fixed",
-          "from": 1749826086865,
-          "to": 1752504486865,
+          "type": "live",
+          "unit": "month",
+          "value": 1,
           "hide_incomplete_cost_data": true
         },
         "type": "query_value",
@@ -655,7 +655,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {cluster_id}",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,cluster_id:*} by {cluster_id}",
                       "aggregator": "sum"
                     }
                   ],
@@ -722,7 +722,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {cluster_id}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,cluster_id:*} by {cluster_id}.rollup(sum, daily)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -759,7 +759,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$workspace_id,$cluster_id,$job_id,$charge_description,$servicename} by {job_id}",
+                      "query": "sum:all.cost{providername:Databricks,$workspace_id,$cluster_id,$job_id,$charge_description,$servicename,job_id:*} by {job_id}",
                       "aggregator": "sum"
                     }
                   ],
@@ -826,7 +826,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {job_id}.rollup(sum, daily)"
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,job_id:*} by {job_id}.rollup(sum, daily)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -903,7 +903,7 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id} by {cluster_id}",
+                      "query": "sum:all.cost{providername:Databricks,$job_id,$workspace_id,$servicename,$charge_description,$cluster_id,cluster_id:*} by {cluster_id}",
                       "aggregator": "sum"
                     },
                     {
@@ -959,7 +959,7 @@
                     },
                     {
                       "alias": "% Memory Allocation",
-                      "formula": "1 - (query3 / query4)",
+                      "formula": "100 * (1 - (query3 / query4))",
                       "number_format": {
                         "unit": {
                           "type": "canonical_unit",

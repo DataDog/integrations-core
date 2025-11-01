@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 import subprocess
 from datetime import datetime, timezone
@@ -37,6 +38,8 @@ def _get_stat_type(suffix: str, unit: str) -> str:
     """
     if suffix == 'count':
         return 'count'
+    elif suffix == 'bucket':
+        return 'histogram'
     elif unit in RATE_UNITS:
         return 'rate'
     else:
@@ -61,6 +64,30 @@ def _handle_ip_in_param(parts: List[str]) -> Tuple[List[str], bool]:
     except ValueError:
         return [], False
     return [*parts[: index - 3], new_part, *parts[index + 1 :]], True
+
+
+def _sanitize_command(bin_path: str) -> None:
+    """
+    Validate that the binary path is safe to execute.
+
+    Ensures the path is absolute and is an expected Lustre binary.
+
+    Raises:
+        ValueError: If the path is not absolute or not an expected binary
+    """
+    # Allowlist of expected Lustre binaries
+    EXPECTED_BINARIES = {'lctl', 'lnetctl', 'lfs'}
+
+    # Check if the path is absolute
+    if not os.path.isabs(bin_path):
+        raise ValueError(f'Binary path must be absolute: {bin_path}')
+
+    # Extract the binary name from the path
+    binary_name = os.path.basename(bin_path)
+
+    # Check if it's an expected Lustre binary
+    if binary_name not in EXPECTED_BINARIES:
+        raise ValueError(f'Unexpected binary: {binary_name}. Expected one of: {EXPECTED_BINARIES}')
 
 
 class LustreCheck(AgentCheck):
@@ -202,10 +229,15 @@ class LustreCheck(AgentCheck):
         if bin not in self._bin_mapping:
             raise ValueError('Unknown binary: {}'.format(bin))
         bin_path = self._bin_mapping[bin]
-        cmd = f'{"sudo " if sudo else ""}{bin_path} {" ".join(args)}'
+        _sanitize_command(bin_path)
+        cmd = [bin_path, *args]
+        if sudo:
+            cmd.insert(0, "sudo")
         try:
             self.log.debug('Running command: %s', cmd)
-            output = subprocess.run(cmd, timeout=5, shell=True, capture_output=True, text=True)
+            output = subprocess.run(
+                cmd, timeout=5, shell=False, capture_output=True, text=True
+            )  # Explicitly disable shell invocation to prevent command injection
             if not output.returncode == 0 and output.stderr:
                 self.log.debug(
                     'Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr
@@ -268,11 +300,9 @@ class LustreCheck(AgentCheck):
         for suffix, value in values.items():
             if suffix == 'samples':
                 suffix = 'count'
-            if suffix == 'unit':
-                continue
-            if suffix == 'hist':
-                # TODO: Handle histogram metrics if needed
-                self.log.debug("Histograms are currently not supported. Ignoring %s", f"job_stats.{name}")
+            elif suffix == 'hist':
+                suffix = 'bucket'
+            elif suffix == 'unit':
                 continue
             metric_type = _get_stat_type(suffix, values['unit'])
             self._submit(f'job_stats.{name}.{suffix}', value, metric_type, tags=tags)
@@ -586,7 +616,7 @@ class LustreCheck(AgentCheck):
         self.log.debug('Fetching changelog from index %s to %s for target %s', start_index, end_index, target)
         return self._run_command('lfs', 'changelog', target, start_index, end_index, sudo=True)
 
-    def _submit(self, name: str, value: Union[int, float], metric_type: str, tags: List[str]) -> None:
+    def _submit(self, name: str, value: Union[int, float, Dict[str, Any]], metric_type: str, tags: List[str]) -> None:
         """
         Submits a single metric.
         """
@@ -597,5 +627,17 @@ class LustreCheck(AgentCheck):
         elif metric_type == 'count':
             self.monotonic_count(name, value, tags=tags)
         elif metric_type == 'histogram':
-            self.log.debug("Histograms are currently not supported. Ignoring %s", f"{name}")
-            return
+            if not isinstance(value, Dict):
+                self.log.debug("Unexpected value for metric type histogram: %s", value)
+                return
+            cumulative_count = 0
+            previous_bucket = 0
+            for bucket, count in value.items():
+                cumulative_count += count
+                self.monotonic_count(
+                    name, cumulative_count, tags=tags + [f'upper_bound:{bucket}', f'lower_bound:{previous_bucket}']
+                )
+                previous_bucket = bucket
+            self.monotonic_count(
+                name, cumulative_count, tags=tags + ['upper_bound:+Inf', f'lower_bound:{previous_bucket}']
+            )

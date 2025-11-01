@@ -6,8 +6,6 @@
 
 Integrate with Datadog to gain insights into Contentful activities related to content and other actions as part of your Contentful spaces and environments.
 
-**Minimum Agent version:** 7.55.2
-
 ## Setup
 
 Follow the instructions below to configure this integration for your Contentful space.

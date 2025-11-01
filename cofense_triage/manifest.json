@@ -8,10 +8,22 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Cofense Triage events",
+    "description": "Gain insights into Cofense Triage events.",
     "title": "Cofense Triage",
-    "media": [],
+    "media": [
+      {
+        "caption": "Cofense Triage - Insights",
+        "image_url": "images/cofense_triage_insights_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cofense Triage - Insights",
+        "image_url": "images/cofense_triage_insights_2.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
+      "Category::Cloud",
       "Category::Log Collection",
       "Category::Security",
       "Offering::Integration",
@@ -26,6 +38,12 @@
       "events": {
         "creates_events": false
       }
+    },
+    "dashboards": {
+      "Cofense Triage - Insights": "assets/dashboards/cofense_triage_insights.json"
+    },
+    "logs": {
+      "source": "cofense-triage"
     }
   },
   "author": {
