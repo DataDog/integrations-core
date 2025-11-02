@@ -36,7 +36,7 @@
       },
       "metrics": {
         "prefix": "nutanix.",
-        "check": "",
+        "check": "nutanix.health.up",
         "metadata_path": "metadata.csv"
       }
     },
