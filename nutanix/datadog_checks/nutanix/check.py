@@ -209,13 +209,16 @@ class NutanixCheck(AgentCheck):
 
     def _extract_cluster_tags(self, cluster):
         """Extract tags from a cluster object."""
-        cluster_id = cluster.get("extId", "unknown")
-        cluster_name = cluster.get("name", "unknown")
 
-        tags = [
-            f"ntnx_cluster_id:{cluster_id}",
-            f"ntnx_cluster_name:{cluster_name}",
-        ]
+        tags = []
+
+        cluster_id = cluster.get("extId")
+        if cluster_id:
+            tags.append(f"ntnx_cluster_id:{cluster_id}")
+
+        cluster_name = cluster.get("name")
+        if cluster_name:
+            tags.append(f"ntnx_cluster_name:{cluster_name}")
 
         if tenant_id := cluster.get("tenantId"):
             tags.append(f"ntnx_tenant_id:{tenant_id}")
@@ -227,46 +230,47 @@ class NutanixCheck(AgentCheck):
 
     def _extract_vm_tags(self, vm):
         """Extract tags from a VM object."""
-        vm_tags = []
+        tags = []
+
         vm_id = vm.get("extId")
         if vm_id:
-            vm_tags.append(f"ntnx_vm_id:{vm_id}")
+            tags.append(f"ntnx_vm_id:{vm_id}")
 
         vm_name = vm.get("name")
         if vm_name:
-            vm_tags.append(f"ntnx_vm_name:{vm_name}")
+            tags.append(f"ntnx_vm_name:{vm_name}")
 
         vm_generation_uuid = vm.get("generationUuid")
         if vm_generation_uuid:
-            vm_tags.append(f"ntnx_generation_uuid:{vm_generation_uuid}")
+            tags.append(f"ntnx_generation_uuid:{vm_generation_uuid}")
 
         categories = vm.get("categories")
         if categories:
             for c in categories:
                 category_id = c.get("extId")
-                vm_tags.append(f"ntnx_category_id:{category_id}")
+                tags.append(f"ntnx_category_id:{category_id}")
 
         owner_id = vm.get("ownershipInfo", {}).get("owner", {}).get("extId")
         if owner_id:
-            vm_tags.append(f"ntnx_owner_id:{owner_id}")
+            tags.append(f"ntnx_owner_id:{owner_id}")
 
         host_id = vm.get("host", {}).get("extId")
         if host_id:
-            vm_tags.append(f"ntnx_host_id:{host_id}")
+            tags.append(f"ntnx_host_id:{host_id}")
 
         cluster_id = vm.get("cluster", {}).get("extId")
         if cluster_id:
-            vm_tags.append(f"ntnx_cluster_id:{cluster_id}")
+            tags.append(f"ntnx_cluster_id:{cluster_id}")
 
         availability_zone_id = vm.get("availabilityZone", {}).get("extId")
         if availability_zone_id:
-            vm_tags.append(f"ntnx_availability_zone_id:{availability_zone_id}")
+            tags.append(f"ntnx_availability_zone_id:{availability_zone_id}")
 
         is_agent_vm = is_affirmative(vm.get("isAgentVm"))
         if is_agent_vm:
-            vm_tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
+            tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
 
-        return vm_tags
+        return tags
 
     def _get_request_data(self, endpoint, params=None):
         """Make an API request to Prism Central and return the data field."""
