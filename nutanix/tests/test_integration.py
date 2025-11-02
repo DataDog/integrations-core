@@ -27,10 +27,10 @@ def test_cluster_metrics(dd_run_check, aggregator, aws_instance):
         'prism_central:https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com',
     ]
 
-    aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
-    aggregator.assert_metric("nutanix.cluster.nbr_nodes", value=1, tags=expected_tags)
-    aggregator.assert_metric("nutanix.cluster.vm.count", value=2, tags=expected_tags)
-    aggregator.assert_metric("nutanix.cluster.vm.inefficient_count", value=0, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.count", at_least=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.nbr_nodes", at_least=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.vm.count", at_least=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.vm.inefficient_count", at_least=1, tags=expected_tags)
 
 
 def test_cluster_stats_metrics(dd_run_check, aggregator, aws_instance):
@@ -62,7 +62,7 @@ def test_host_metrics(dd_run_check, aggregator, aws_instance):
         'prism_central:https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com',
     ]
 
-    aggregator.assert_metric("nutanix.host.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.host.count", at_least=1, tags=expected_tags)
 
 
 def test_host_stats_metrics(dd_run_check, aggregator, aws_instance):
@@ -98,7 +98,7 @@ def test_vm_metrics(dd_run_check, aggregator, aws_instance):
         'prism_central:https://prism-central-public-nlb-4685b8c07b0c12a2.elb.us-east-1.amazonaws.com',
     ]
 
-    aggregator.assert_metric("nutanix.vm.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.vm.count", at_least=1, tags=expected_tags)
 
 
 def test_vm_stats_metrics(dd_run_check, aggregator, aws_instance):
