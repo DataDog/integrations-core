@@ -8,18 +8,19 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Monitor the health and performance of your Nutanix Cluster",
     "title": "Nutanix",
     "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::OS & System",
+      "Category::Cloud",
+      "Category::Network",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
     ]
   },
   "assets": {
