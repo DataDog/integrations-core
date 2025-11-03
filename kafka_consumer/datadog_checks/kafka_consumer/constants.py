@@ -21,3 +21,7 @@ KAFKA_INTERNAL_TOPICS = {
 
 # https://github.com/confluentinc/confluent-kafka-python/issues/1329#issuecomment-1109627240
 OFFSET_INVALID = -1001
+
+# Watermark query sentinels for batched offsets_for_times
+HIGH_WATERMARK = -1  # latest offset
+LOW_WATERMARK = 0  # earliest offset (timestamp 0)

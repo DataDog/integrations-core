@@ -83,6 +83,9 @@ class KafkaConfig:
         # Data Streams live messages
         self.live_messages_configs = instance.get('live_messages_configs', [])
 
+        self._cluster_monitoring_enabled = is_affirmative(instance.get('enable_cluster_monitoring', False))
+        self._collect_schema_registry = instance.get('schema_registry_url')
+
     def validate_config(self):
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')

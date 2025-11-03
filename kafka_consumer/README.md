@@ -58,6 +58,27 @@ instances:
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+### Cluster Monitoring (Preview)
+
+In addition to consumer lag metrics, this integration can collect comprehensive cluster metadata when `enable_cluster_monitoring` is enabled:
+
+- **Broker information**: Configuration and health metrics
+- **Topic and partition details**: Sizes, offsets, replication status
+- **Consumer group metadata**: Member details and group state
+- **Schema registry**: Schema information (if schema_registry_url is provided)
+
+All cluster monitoring metrics are tagged with `kafka_cluster_id` for easy filtering.
+
+**Note**: This feature is in preview and may increase Agent resource consumption on large clusters. Configuration and schema events are cached to reduce volume.
+
+Example configuration:
+```yaml
+instances:
+  - kafka_connect_str: localhost:9092
+    enable_cluster_monitoring: true
+    schema_registry_url: http://localhost:8081  # optional
+```
+
 ### Validation
 
 1. [Run the Agent's status subcommand][8] and look for `kafka_consumer` under the Checks section.

@@ -36,6 +36,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_cluster_monitoring():
+    return False
+
+
 def instance_min_collection_interval():
     return 15
 
@@ -54,6 +58,10 @@ def instance_sasl_kerberos_principal():
 
 def instance_sasl_kerberos_service_name():
     return 'kafka'
+
+
+def instance_schema_registry_url():
+    return 'http://localhost:8081'
 
 
 def instance_security_protocol():
