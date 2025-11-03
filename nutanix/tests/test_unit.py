@@ -81,7 +81,7 @@ def test_host_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
         'prism_central:10.0.0.197',
     ]
 
-    aggregator.assert_metric("nutanix.host.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.host.count", value=1, tags=expected_tags, hostname="10-0-0-9-aws-us-east-1a")
 
 
 def test_host_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -100,7 +100,7 @@ def test_host_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_g
     ]
 
     for metric in HOST_STATS_METRICS_REQUIRED:
-        aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
+        aggregator.assert_metric(metric, at_least=1, tags=expected_tags, hostname="10-0-0-9-aws-us-east-1a")
 
 
 def test_vm_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -117,7 +117,7 @@ def test_vm_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
         'prism_central:10.0.0.197',
     ]
 
-    aggregator.assert_metric("nutanix.vm.count", value=1, tags=expected_tags)
+    aggregator.assert_metric("nutanix.vm.count", value=1, tags=expected_tags, hostname="PC-OptionName-1")
 
 
 def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
@@ -135,7 +135,7 @@ def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get
     ]
 
     for metric in VM_STATS_METRICS_REQUIRED:
-        aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
+        aggregator.assert_metric(metric, at_least=1, tags=expected_tags, hostname="PC-OptionName-1")
 
 
 def test_all_metrics_in_metadata_csv(dd_run_check, aggregator, mock_instance, mock_http_get):

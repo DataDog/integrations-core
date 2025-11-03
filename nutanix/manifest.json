@@ -20,7 +20,7 @@
       "Category::Network",
       "Category::Metrics",
       "Offering::Integration",
-      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {

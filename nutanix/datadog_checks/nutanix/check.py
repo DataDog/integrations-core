@@ -112,14 +112,15 @@ class NutanixCheck(AgentCheck):
     def _process_vm(self, vm):
         """Process and report metrics for a single vm."""
         vm_id = vm.get("extId", "unknown")
+        hostname = vm.get("name")
         vm_tags = self.base_tags + self._extract_vm_tags(vm)
 
-        self._report_vm_basic_metrics(vm, vm_tags)
-        self._report_vm_stats(vm_id, vm_tags)
+        self._report_vm_basic_metrics(vm, hostname, vm_tags)
+        self._report_vm_stats(vm_id, hostname, vm_tags)
 
-    def _report_vm_basic_metrics(self, vm, vm_tags):
+    def _report_vm_basic_metrics(self, vm, hostname, vm_tags):
         """Report basic vm metrics (counts)."""
-        self.gauge("vm.count", 1, tags=vm_tags)
+        self.gauge("vm.count", 1, hostname=hostname, tags=vm_tags)
 
     def _report_cluster_basic_metrics(self, cluster, cluster_tags):
         """Report basic cluster metrics (counts)."""
@@ -146,7 +147,7 @@ class NutanixCheck(AgentCheck):
                 if value is not None:
                     self.gauge(metric_name, value, tags=cluster_tags)
 
-    def _report_vm_stats(self, vm_id, vm_tags):
+    def _report_vm_stats(self, vm_id, hostname, vm_tags):
         """Report time-series stats for a vm."""
         stats = self._get_vm_stats(vm_id)
         if not stats:
@@ -157,7 +158,7 @@ class NutanixCheck(AgentCheck):
             for s in stats:
                 value = s.get(key)
                 if value is not None:
-                    self.gauge(metric_name, value, tags=vm_tags)
+                    self.gauge(metric_name, value, hostname=hostname, tags=vm_tags)
 
     def _process_hosts(self, cluster):
         """Process and report metrics for all hosts in a cluster."""
@@ -167,8 +168,9 @@ class NutanixCheck(AgentCheck):
         hosts = self._get_hosts_by_cluster(cluster_id)
         for host in hosts:
             host_id = host.get("extId")
+            hostname = host.get("hostName")
             host_tags = cluster_tags + self._extract_host_tags(host)
-            self.gauge("host.count", 1, tags=host_tags)
+            self.gauge("host.count", 1, hostname=hostname, tags=host_tags)
 
             stats = self._get_host_stats(cluster_id, host_id)
             if not stats:
@@ -180,7 +182,7 @@ class NutanixCheck(AgentCheck):
                 for entry in entries:
                     value = entry.get("value")
                     if value is not None:
-                        self.gauge(metric_name, value, tags=host_tags)
+                        self.gauge(metric_name, value, hostname=hostname, tags=host_tags)
 
     def _extract_host_tags(self, host):
         """Extract tags from a host object."""
