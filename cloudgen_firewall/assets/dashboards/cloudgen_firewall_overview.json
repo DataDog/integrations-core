@@ -15,6 +15,7 @@
                         "definition": {
                             "type": "image",
                             "url": "https://static.datadoghq.com/static/images/logos/cloudgen-firewall_large.svg",
+                            "url_dark_theme": "https://static.datadoghq.com/static/images/logos/cloudgen-firewall_reversed_large.svg",
                             "sizing": "cover",
                             "margin": "md",
                             "has_background": true,
