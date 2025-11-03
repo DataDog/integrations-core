@@ -71,8 +71,7 @@ def ci(app: Application, sync: bool):
             # Look for pattern like: DataDog/integrations-core/.github/workflows/test-target.yml@<ref>
             # <ref> can be a branch name (alphanumeric + dots/dashes/underscores) or commit SHA (hex only)
             match = re.search(
-                r'DataDog/integrations-core/\.github/workflows/test-target\.yml@([a-zA-Z0-9_.-]+)',
-                existing_workflow
+                r'DataDog/integrations-core/\.github/workflows/test-target\.yml@([a-zA-Z0-9_.-]+)', existing_workflow
             )
             if match:
                 workflow_ref = match.group(1)
@@ -82,7 +81,7 @@ def ci(app: Application, sync: bool):
             existing_windows_workflow = windows_jobs_workflow_path_temp.read_text()
             match = re.search(
                 r'DataDog/integrations-core/\.github/workflows/test-target\.yml@([a-zA-Z0-9_.-]+)',
-                existing_windows_workflow
+                existing_windows_workflow,
             )
             if match:
                 windows_workflow_ref = match.group(1)
