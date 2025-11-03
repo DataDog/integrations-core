@@ -14,7 +14,7 @@ def test_upgrade_python(fake_repo, ddev):
     result = ddev('meta', 'scripts', 'upgrade-python', NEW_PYTHON_VERSION)
 
     assert result.exit_code == 0, result.output
-    assert result.output.endswith('Python upgrades\n\nPassed: 9\n')
+    assert result.output.endswith('Python upgrades\n\nPassed: 12\n')
 
     contents = constant_file.read_text()
     assert f'PYTHON_VERSION = {OLD_PYTHON_VERSION!r}' not in contents
@@ -35,6 +35,18 @@ def test_upgrade_python(fake_repo, ddev):
         contents = pyproject_file.read_text()
         assert f'Programming Language :: Python :: {OLD_PYTHON_VERSION}' not in contents
         assert f'Programming Language :: Python :: {NEW_PYTHON_VERSION}' in contents
+
+    ddev_file = fake_repo.path / 'ddev' / 'pyproject.toml'
+    contents = ddev_file.read_text()
+    assert f'target-version = ["py{OLD_PYTHON_VERSION.replace('.', '')}"]' not in contents
+    assert f'target-version = ["py{NEW_PYTHON_VERSION.replace('.', '')}"]' in contents
+
+    pyproject_file = fake_repo.path / 'pyproject.toml'
+    contents = pyproject_file.read_text()
+    assert f'target-version = ["py{OLD_PYTHON_VERSION.replace('.', '')}"]' not in contents
+    assert f'target-version = ["py{NEW_PYTHON_VERSION.replace('.', '')}"]' in contents
+    assert f'python_version = "{OLD_PYTHON_VERSION}"' not in contents
+    assert f'python_version = "{NEW_PYTHON_VERSION}"' in contents
 
     template_file = (
         fake_repo.path

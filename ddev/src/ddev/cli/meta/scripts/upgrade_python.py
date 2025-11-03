@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import click
 
 from ddev.integration.core import Integration
+from ddev.utils.fs import Path
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -31,13 +32,14 @@ def upgrade_python(app: Application, version: str):
 
     for target in integrations(app):
         update_hatch_file(app, target.path, version, old_version, tracker)
-        update_pyproject_file(target, version, old_version, tracker)
+        update_integration_pyproject_file(target, version, old_version, tracker)
         update_setup_file(target, version, old_version, tracker)
 
     update_ci_files(app, version, old_version, tracker)
 
     if app.repo.name == 'core':
-        update_ddev_pyproject_file(app, version, old_version, tracker)
+        update_pyproject_file(app.repo.path / 'ddev', version, old_version, tracker)
+        update_pyproject_file(app.repo.path, version, old_version, tracker)
         update_constants_file(app, version, old_version, tracker)
         update_ddev_template_files(app, version, old_version, tracker)
         app.display_warning("Documentation files have not been updated. Please modify them manually.")
@@ -48,7 +50,7 @@ def upgrade_python(app: Application, version: str):
         app.abort()
 
 
-def integrations(app):
+def integrations(app: Application):
     extra_integrations = []
 
     if app.repo.name == 'core':
@@ -100,12 +102,19 @@ def update_ddev_template_files(app: Application, new_version: str, old_version: 
             update_hatch_file(app, folder_path, new_version, old_version, tracker)
 
 
-def update_ddev_pyproject_file(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
+def update_pyproject_file(target_path: Path, new_version: str, old_version: str, tracker: ValidationTracker):
     import tomlkit
 
-    config_file = app.repo.path / 'ddev' / 'pyproject.toml'
+    config_file = target_path / 'pyproject.toml'
     config = tomlkit.parse(config_file.read_text())
     changed = False
+
+    if mypy_config := config.get('tool', {}).get('mypy', {}):
+        if mypy_config.get('python_version') == old_version:
+            mypy_config['python_version'] = new_version
+            tracker.success()
+            changed = True
+
     new_version = f"py{new_version.replace('.', '')}"
     old_version = f"py{old_version.replace('.', '')}"
 
@@ -157,7 +166,7 @@ def update_constants_file(app: Application, new_version: str, old_version: str, 
     tracker.success()
 
 
-def update_pyproject_file(target, new_version: str, old_version: str, tracker: ValidationTracker):
+def update_integration_pyproject_file(target, new_version: str, old_version: str, tracker: ValidationTracker):
     import tomlkit
 
     config_file = target.path / 'pyproject.toml'
