@@ -147,3 +147,46 @@ def test_all_metrics_in_metadata_csv(dd_run_check, aggregator, mock_instance, mo
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
+
+
+def test_external_tags_for_host(dd_run_check, aggregator, mock_instance, mock_http_get, datadog_agent):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    # Assert external tags for the host
+    datadog_agent.assert_external_tags(
+        '10-0-0-9-aws-us-east-1a',
+        {
+            'nutanix': [
+                'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+                'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
+                'ntnx_host_name:10-0-0-9-aws-us-east-1a',
+                'ntnx_host_type:HYPER_CONVERGED',
+                'ntnx_hypervisor_name:AHV 10.0.1.4',
+                'ntnx_hypervisor_type:AHV',
+                'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+                'prism_central:10.0.0.197',
+            ]
+        },
+    )
+
+
+def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http_get, datadog_agent):
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    # Assert external tags for the VM
+    datadog_agent.assert_external_tags(
+        'PC-OptionName-1',
+        {
+            'nutanix': [
+                'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
+                'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
+                'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
+                'ntnx_owner_id:00000000-0000-0000-0000-000000000000',
+                'ntnx_vm_id:f3272103-ea1e-4a90-8318-899636993ed6',
+                'ntnx_vm_name:PC-OptionName-1',
+                'prism_central:10.0.0.197',
+            ]
+        },
+    )

@@ -38,12 +38,27 @@ class NutanixCheck(AgentCheck):
         self.base_tags = self.instance.get("tags", [])
         self.base_tags.append(f"prism_central:{self.pc_ip}")
 
+        self.external_tags = []
+
+    def _set_external_tags_for_host(self, hostname: str, tags: list[str]):
+        for i, entry in enumerate(self.external_tags):
+            if entry[0] == hostname:
+                self.external_tags[i] = (hostname, {self.__NAMESPACE__: tags})
+                return
+
+        self.external_tags.append((hostname, {self.__NAMESPACE__: tags}))
+
     def check(self, _):
         if not self._check_health():
             return
 
         self._collect_cluster_metrics()
         self._collect_vm_metrics()
+
+        if self.external_tags:
+            self.set_external_tags(self.external_tags)
+
+        self.external_tags = []
 
     def _check_health(self):
         try:
@@ -115,6 +130,7 @@ class NutanixCheck(AgentCheck):
         hostname = vm.get("name")
         vm_tags = self.base_tags + self._extract_vm_tags(vm)
 
+        self._set_external_tags_for_host(hostname, vm_tags)
         self._report_vm_basic_metrics(vm, hostname, vm_tags)
         self._report_vm_stats(vm_id, hostname, vm_tags)
 
@@ -171,6 +187,8 @@ class NutanixCheck(AgentCheck):
             hostname = host.get("hostName")
             host_tags = cluster_tags + self._extract_host_tags(host)
             self.gauge("host.count", 1, hostname=hostname, tags=host_tags)
+
+            self._set_external_tags_for_host(hostname, host_tags)
 
             stats = self._get_host_stats(cluster_id, host_id)
             if not stats:
