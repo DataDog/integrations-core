@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 1.2.0 / 2025-10-31
+
+***Security***:
+
+* Switch from using shell=True to shell=False in subprocess command ([#21690](https://github.com/DataDog/integrations-core/pull/21690))
+
+***Added***:
+
+* Add histogram bucket metrics for `lustre.jobstats.read_bytes` and `lustre.jobstats.write_bytes` ([#21589](https://github.com/DataDog/integrations-core/pull/21589))
+
 ## 1.1.0 / 2025-10-02
 
 ***Added***:
