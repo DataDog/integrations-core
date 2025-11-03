@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.2.0 / 2025-10-31
+
+***Added***:
+
+* Update python classifier to python 3.13 ([#21473](https://github.com/DataDog/integrations-core/pull/21473))
+
 ## 1.1.0 / 2025-10-02
 
 ***Added***:

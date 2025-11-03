@@ -1,1 +1,0 @@
-Resend Postgres initialization event every six hours to avoid event expiration
