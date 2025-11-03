@@ -93,9 +93,9 @@ def mock_http_get(mocker):
             mock_resp.json = mocker.Mock(return_value=clusters_data)
             return mock_resp
 
-        if 'api/vmm/v4.0/ahv/stats/vms/f3272103-ea1e-4a90-8318-899636993ed6' in url:
-            vms_data = load_fixture("vm_stats_f3272103-ea1e-4a90-8318-899636993ed6.json")
-            mock_resp.json = mocker.Mock(return_value=vms_data)
+        if 'api/vmm/v4.0/ahv/stats/vms/' in url:
+            all_vm_stats = load_fixture("vms_stats.json")
+            mock_resp.json = mocker.Mock(return_value=all_vm_stats)
             return mock_resp
 
         if 'api/vmm/v4.0/ahv/config/vms' in url:

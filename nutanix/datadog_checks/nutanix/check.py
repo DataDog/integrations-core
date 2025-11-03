@@ -105,8 +105,10 @@ class NutanixCheck(AgentCheck):
                 self.log.warning("No vms found")
                 return
 
+            all_vm_stats_dict = self._get_all_vm_stats()
+
             for vm in vms:
-                self._process_vm(vm)
+                self._process_vm(vm, all_vm_stats_dict)
 
         except Exception as e:
             self.log.exception("Error collecting cluster metrics: %s", e)
@@ -124,7 +126,7 @@ class NutanixCheck(AgentCheck):
         self._report_cluster_basic_metrics(cluster, cluster_tags)
         self._report_cluster_stats(cluster_id, cluster_tags)
 
-    def _process_vm(self, vm):
+    def _process_vm(self, vm, all_vm_stats_dict):
         """Process and report metrics for a single vm."""
         vm_id = vm.get("extId", "unknown")
         hostname = vm.get("name")
@@ -132,7 +134,7 @@ class NutanixCheck(AgentCheck):
 
         self._set_external_tags_for_host(hostname, vm_tags)
         self._report_vm_basic_metrics(vm, hostname, vm_tags)
-        self._report_vm_stats(vm_id, hostname, vm_tags)
+        self._report_vm_stats(vm_id, hostname, vm_tags, all_vm_stats_dict)
 
     def _report_vm_basic_metrics(self, vm, hostname, vm_tags):
         """Report basic vm metrics (counts)."""
@@ -163,9 +165,9 @@ class NutanixCheck(AgentCheck):
                 if value is not None:
                     self.gauge(metric_name, value, tags=cluster_tags)
 
-    def _report_vm_stats(self, vm_id, hostname, vm_tags):
+    def _report_vm_stats(self, vm_id, hostname, vm_tags, all_vm_stats_dict):
         """Report time-series stats for a vm."""
-        stats = self._get_vm_stats(vm_id)
+        stats = all_vm_stats_dict.get(vm_id)
         if not stats:
             self.log.debug("No vm stats returned for vm %s", vm_id)
             return
@@ -349,9 +351,12 @@ class NutanixCheck(AgentCheck):
             f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}", params=params
         )
 
-    def _get_vm_stats(self, vm_id: str):
+    def _get_all_vm_stats(self):
         """
-        Fetch time-series stats for a specific vm.
+        Fetch time-series stats for all VMs and return as a dictionary.
+
+        Returns:
+            dict: Dictionary mapping vmExtId -> stats array
         """
         start_time, end_time = self._calculate_stats_time_window()
 
@@ -363,7 +368,18 @@ class NutanixCheck(AgentCheck):
             "$select": "*",
         }
 
-        return self._get_request_data(f"api/vmm/v4.0/ahv/stats/vms/{vm_id}", params=params).get("stats", [])
+        # TODO: add support for pagination
+        vm_stats_data = self._get_request_data("api/vmm/v4.0/ahv/stats/vms/", params=params)
+
+        # Create dictionary mapping vmExtId -> stats
+        all_vm_stats_dict = {}
+        for vm_stat in vm_stats_data:
+            vm_id = vm_stat.get("extId")
+            stats = vm_stat.get("stats", [])
+            if vm_id:
+                all_vm_stats_dict[vm_id] = stats
+
+        return all_vm_stats_dict
 
     def _calculate_stats_time_window(self):
         """
