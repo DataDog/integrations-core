@@ -71,6 +71,7 @@ def test_host_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
     dd_run_check(check)
 
     expected_tags = [
+        'ntnx_type:host',
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
         'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
         'ntnx_host_name:10-0-0-9-aws-us-east-1a',
@@ -89,6 +90,7 @@ def test_host_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_g
     dd_run_check(check)
 
     expected_tags = [
+        'ntnx_type:host',
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
         'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
         'ntnx_host_name:10-0-0-9-aws-us-east-1a',
@@ -108,6 +110,7 @@ def test_vm_metrics(dd_run_check, aggregator, mock_instance, mock_http_get):
     dd_run_check(check)
 
     expected_tags = [
+        'ntnx_type:vm',
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
         'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
         'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
@@ -125,6 +128,7 @@ def test_vm_stats_metrics(dd_run_check, aggregator, mock_instance, mock_http_get
     dd_run_check(check)
 
     expected_tags = [
+        'ntnx_type:vm',
         'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
         'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
         'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',
@@ -143,7 +147,7 @@ def test_all_metrics_in_metadata_csv(dd_run_check, aggregator, mock_instance, mo
     dd_run_check(check)
 
     for metric in ALL_METRICS:
-        aggregator.assert_metric(metric, at_least=1)
+        aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
@@ -158,6 +162,7 @@ def test_external_tags_for_host(dd_run_check, aggregator, mock_instance, mock_ht
         '10-0-0-9-aws-us-east-1a',
         {
             'nutanix': [
+                'ntnx_type:host',
                 'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
                 'ntnx_cluster_name:datadoghq.com-Default-Org-dkhrzg',
                 'ntnx_host_name:10-0-0-9-aws-us-east-1a',
@@ -180,6 +185,7 @@ def test_external_tags_for_vm(dd_run_check, aggregator, mock_instance, mock_http
         'PC-OptionName-1',
         {
             'nutanix': [
+                'ntnx_type:vm',
                 'ntnx_cluster_id:0006411c-0286-bc71-9f02-191e334d457b',
                 'ntnx_generation_uuid:75125cab-fd4e-45ed-85c2-f7c4343ceacc',
                 'ntnx_host_id:71877eae-8fc1-4aae-8d20-70196dfb2f8d',

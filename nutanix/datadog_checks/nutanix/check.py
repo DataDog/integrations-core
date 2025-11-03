@@ -208,6 +208,8 @@ class NutanixCheck(AgentCheck):
         """Extract tags from a host object."""
         tags = []
 
+        tags.append("ntnx_type:host")
+
         if tenant_id := host.get("tenantId"):
             tags.append(f"ntnx_tenant_id:{tenant_id}")
 
@@ -253,6 +255,8 @@ class NutanixCheck(AgentCheck):
     def _extract_vm_tags(self, vm):
         """Extract tags from a VM object."""
         tags = []
+
+        tags.append("ntnx_type:vm")
 
         vm_id = vm.get("extId")
         if vm_id:
