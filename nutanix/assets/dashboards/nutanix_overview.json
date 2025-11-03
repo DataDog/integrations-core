@@ -1,1 +1,2710 @@
-{"title":"Nutanix Overview","description":"Monitor Nutanix hyperconverged infrastructure health, performance, and resource utilization. Track cluster metrics, node/host performance, and VM statistics including IOPS, latency, bandwidth, CPU/memory usage, and storage. Filter by cluster, host, or VM for detailed analysis.","widgets":[{"id":0,"definition":{"title":"Cluster Health Overview","background_color":"vivid_purple","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":4124810358470391,"definition":{"type":"image","url":"https://upload.wikimedia.org/wikipedia/commons/e/ea/Nutanix_Logo.svg","sizing":"contain","margin":"md","has_background":false,"has_border":false,"vertical_align":"center","horizontal_align":"center"},"layout":{"x":0,"y":0,"width":6,"height":2}},{"id":4,"definition":{"title":"Host Count","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.nbr_nodes{$ntnx_cluster_name}","aggregator":"last"}]}],"autoscale":true,"precision":0},"layout":{"x":6,"y":0,"width":2,"height":2}},{"id":5,"definition":{"title":"VM Count","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.vm.count{$ntnx_cluster_name}","aggregator":"last"}]}],"autoscale":true,"precision":0},"layout":{"x":8,"y":0,"width":2,"height":2}},{"id":6,"definition":{"title":"Inefficient VMs","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.vm.inefficient_count{$ntnx_cluster_name}","aggregator":"last"}],"conditional_formats":[{"comparator":"=","value":0,"palette":"white_on_green"},{"comparator":">","value":1,"palette":"white_on_yellow"}]}],"autoscale":true,"precision":0},"layout":{"x":10,"y":0,"width":2,"height":2}},{"id":22172841039590,"definition":{"type":"note","content":"**The Datadog Nutanix dashboard gives you broad visibility into the health, performance, and resource usage of your hyperconverged infrastructure including clusters, hosts, and virtual machines.**\n\n  Further reading for Nutanix monitoring:\n  - [Datadog's Nutanix integration docs](https://docs.datadoghq.com/integrations/nutanix)\n","background_color":"white","font_size":"14","text_align":"left","vertical_align":"top","show_tick":false,"tick_pos":"50%","tick_edge":"left","has_padding":true},"layout":{"x":0,"y":2,"width":6,"height":2}},{"id":2,"definition":{"title":"Cluster Health Score","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.health.check_score{$ntnx_cluster_name}","aggregator":"last"}]}],"autoscale":true,"precision":2},"layout":{"x":6,"y":2,"width":2,"height":2}},{"id":3,"definition":{"title":"Cluster Count","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.count{$ntnx_cluster_name}","aggregator":"last"}]}],"autoscale":true,"precision":0},"layout":{"x":8,"y":2,"width":2,"height":2}},{"id":1,"definition":{"title":"Health Status","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.health.up{$ntnx_cluster_name}","aggregator":"last"}]}],"autoscale":true,"precision":0},"layout":{"x":10,"y":2,"width":2,"height":2}}]},"layout":{"x":0,"y":0,"width":12,"height":5}},{"id":7,"definition":{"title":"Cluster Metrics","background_color":"vivid_blue","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":10,"definition":{"title":"Cluster CPU Usage","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value","sum"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.hypervisor.cpu.usage{$ntnx_cluster_name} by {ntnx_cluster_name}"}],"formulas":[{"alias":"CPU Usage","formula":"query1 / 10000","number_format":{"unit":{"type":"canonical_unit","unit_name":"percent"}}}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true}},"layout":{"x":0,"y":0,"width":3,"height":2}},{"id":8,"definition":{"title":"Cluster Storage Usage vs Capacity","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.storage.usage{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Storage Used"}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.storage.capacity{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Storage Capacity"}],"style":{"palette":"grey","line_type":"dashed","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true}},"layout":{"x":3,"y":0,"width":3,"height":2}},{"id":9,"definition":{"title":"Cluster Free Physical Storage","title_size":"16","title_align":"left","show_legend":true,"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.free.physical_storage{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Free Physical Storage"}],"style":{"palette":"green","line_type":"solid","line_width":"normal"},"display_type":"area"}],"yaxis":{"include_zero":true}},"layout":{"x":6,"y":0,"width":3,"height":2}},{"id":12,"definition":{"title":"Cluster Logical Storage Usage","title_size":"16","title_align":"left","show_legend":true,"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.logical.storage.usage{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Logical Storage Used"}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"area"}],"yaxis":{"include_zero":true}},"layout":{"x":9,"y":0,"width":3,"height":2}},{"id":11,"definition":{"title":"Cluster Memory Usage","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value","sum"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.aggregate_hypervisor.memory.usage{$ntnx_cluster_name}"}],"formulas":[{"alias":"Memory Usage","number_format":{"unit":{"type":"canonical_unit","unit_name":"percent"}},"formula":"query1 / 10000"}],"style":{"palette":"purple","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true}},"layout":{"x":0,"y":2,"width":3,"height":2}},{"id":14,"definition":{"title":"Cluster IOPS (Total, Read, Write)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.controller.num.iops{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Total IOPS"}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.controller.num.read.iops{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Read IOPS"}],"style":{"palette":"cool","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.controller.num.write.iops{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Write IOPS"}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true,"label":"IOPS"}},"layout":{"x":3,"y":2,"width":3,"height":2}},{"id":16,"definition":{"title":"Cluster IO Bandwidth (Total, Read, Write)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.io.bandwidth{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Total Bandwidth","number_format":{"unit":{"type":"canonical_unit","unit_name":"kilobit"}}}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"area"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.controller.read.io.bandwidth{$ntnx_cluster_name}"}],"formulas":[{"alias":"Read Bandwidth","formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"kilobit"}}}],"style":{"palette":"cool","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.controller.write.io.bandwidth{$ntnx_cluster_name}"}],"formulas":[{"alias":"Write Bandwidth","formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"kilobit"}}}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true}},"layout":{"x":6,"y":2,"width":3,"height":2}},{"id":15,"definition":{"title":"Cluster IO Latency (Avg, Read, Write)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.controller.avg.io.latency{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Avg Latency","number_format":{"unit":{"type":"canonical_unit","unit_name":"microsecond"}}}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.controller.avg.read.io.latency{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Read Latency","number_format":{"unit":{"type":"canonical_unit","unit_name":"microsecond"}}}],"style":{"palette":"cool","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.controller.avg.write.io.latency{$ntnx_cluster_name}"}],"formulas":[{"formula":"query1","alias":"Write Latency","number_format":{"unit":{"type":"canonical_unit","unit_name":"microsecond"}}}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true}},"layout":{"x":9,"y":2,"width":3,"height":2}}]},"layout":{"x":0,"y":5,"width":12,"height":5}},{"id":17,"definition":{"title":"Host Metrics","background_color":"vivid_green","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":18,"definition":{"title":"Host Count","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.count{$ntnx_cluster_name,$ntnx_host_name}","aggregator":"last"}]}],"autoscale":true,"precision":0},"layout":{"x":0,"y":0,"width":3,"height":1}},{"id":20,"definition":{"title":"Top 10 Hosts by CPU Usage","title_size":"16","title_align":"left","type":"toplist","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.hypervisor.cpu.usage{$ntnx_cluster_name,$ntnx_host_name} by {host}","aggregator":"avg"}],"formulas":[{"formula":"query1","alias":"CPU Usage"}],"sort":{"count":10,"order_by":[{"type":"formula","index":0,"order":"desc"}]}}]},"layout":{"x":3,"y":0,"width":4,"height":3}},{"id":21,"definition":{"title":"Top 10 Hosts by Storage Usage","title_size":"16","title_align":"left","type":"toplist","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.storage.usage{$ntnx_cluster_name,$ntnx_host_name} by {host}","aggregator":"avg"}],"formulas":[{"formula":"query1","alias":"Storage Used"}],"sort":{"count":10,"order_by":[{"type":"formula","index":0,"order":"desc"}]}}]},"layout":{"x":7,"y":0,"width":5,"height":3}},{"id":19,"definition":{"title":"Avg Host Health Score","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.health.check_score{$ntnx_cluster_name,$ntnx_host_name}","aggregator":"avg"}]}],"autoscale":true,"precision":2,"timeseries_background":{"type":"area","yaxis":{"include_zero":true}}},"layout":{"x":0,"y":1,"width":3,"height":2}},{"id":22,"definition":{"title":"Host CPU Usage by Host","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.hypervisor.cpu.usage{$ntnx_cluster_name,$ntnx_host_name} by {host}"}],"formulas":[{"alias":"CPU Usage","formula":"query1 / 10000","number_format":{"unit":{"type":"canonical_unit","unit_name":"percent"}}}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true}},"layout":{"x":0,"y":3,"width":3,"height":2}},{"id":23,"definition":{"title":"Host Memory Usage by Host","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.aggregate_hypervisor.memory.usage{$ntnx_cluster_name,$ntnx_host_name} by {host}"}],"formulas":[{"alias":"Memory Usage","formula":"query1 / 10000","number_format":{"unit":{"type":"canonical_unit","unit_name":"percent"}}}],"style":{"palette":"purple","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true}},"layout":{"x":3,"y":3,"width":3,"height":2}},{"id":26,"definition":{"title":"Host Storage Usage vs Capacity by Host","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.storage.usage{$ntnx_cluster_name,$ntnx_host_name} by {host}"}],"formulas":[{"formula":"query1","alias":"Storage Used"}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.storage.capacity{$ntnx_cluster_name,$ntnx_host_name} by {host}"}],"formulas":[{"formula":"query1","alias":"Storage Capacity"}],"style":{"palette":"grey","line_type":"dashed","line_width":"thin"},"display_type":"line"}],"yaxis":{"include_zero":true}},"layout":{"x":6,"y":3,"width":3,"height":2}},{"id":27,"definition":{"title":"Host IO Bandwidth (Total, Read, Write)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.io.bandwidth{$ntnx_cluster_name,$ntnx_host_name} by {host}"}],"formulas":[{"formula":"query1","alias":"Total Bandwidth"}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.controller.read.io.bandwidth{$ntnx_cluster_name,$ntnx_host_name} by {host}"}],"formulas":[{"formula":"query1","alias":"Read Bandwidth"}],"style":{"palette":"cool","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.controller.write.io.bandwidth{$ntnx_cluster_name,$ntnx_host_name} by {host}"}],"formulas":[{"formula":"query1","alias":"Write Bandwidth"}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true}},"layout":{"x":9,"y":3,"width":3,"height":2}},{"id":24,"definition":{"title":"Host IOPS by Host (Total, Read, Write)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.controller.num.iops{$ntnx_cluster_name,$ntnx_host_name} by {host}"},{"data_source":"metrics","name":"query2","query":"avg:nutanix.host.controller.num.read.iops{$ntnx_cluster_name,$ntnx_host_name} by {host}"},{"data_source":"metrics","name":"query3","query":"avg:nutanix.host.controller.num.write.iops{$ntnx_cluster_name,$ntnx_host_name} by {host}"}],"formulas":[{"alias":"Total","number_format":{"unit":{"type":"canonical_unit","unit_name":"operation"}},"formula":"query1"},{"alias":"Read","number_format":{"unit":{"type":"canonical_unit","unit_name":"operation"}},"formula":"query2"},{"alias":"Write","number_format":{"unit":{"type":"canonical_unit","unit_name":"operation"}},"formula":"query3"}],"style":{"palette":"dog_classic","order_by":"tags","order_reverse":false,"line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true,"label":"IOPS"}},"layout":{"x":0,"y":5,"width":6,"height":2}},{"id":25,"definition":{"title":"Host IO Latency by Host (Total, Read, Write)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.host.controller.avg.io.latency{$ntnx_cluster_name,$ntnx_host_name} by {host}"},{"data_source":"metrics","name":"query2","query":"avg:nutanix.host.controller.avg.read.io.latency{$ntnx_cluster_name,$ntnx_host_name} by {host}"},{"data_source":"metrics","name":"query3","query":"avg:nutanix.host.controller.avg.write.io.latency{$ntnx_cluster_name,$ntnx_host_name} by {host}"}],"formulas":[{"alias":"Total","number_format":{"unit":{"type":"canonical_unit","unit_name":"microsecond"}},"formula":"query1"},{"alias":"Read","number_format":{"unit":{"type":"canonical_unit","unit_name":"microsecond"}},"formula":"query2"},{"alias":"Write","number_format":{"unit":{"type":"canonical_unit","unit_name":"microsecond"}},"formula":"query3"}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true}},"layout":{"x":6,"y":5,"width":6,"height":2}}]},"layout":{"x":0,"y":10,"width":12,"height":8}},{"id":28,"definition":{"title":"Virtual Machine Metrics","background_color":"vivid_orange","show_title":true,"type":"group","layout_type":"ordered","widgets":[{"id":29,"definition":{"title":"Total VM Count","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.count{$ntnx_cluster_name,$ntnx_vm_name}","aggregator":"last"}]}],"autoscale":true,"precision":0,"timeseries_background":{"type":"area","yaxis":{"include_zero":true}}},"layout":{"x":0,"y":0,"width":3,"height":1}},{"id":30,"definition":{"title":"Top 10 VMs by CPU Usage","title_size":"16","title_align":"left","type":"toplist","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.cpu_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name} by {ntnx_vm_name}","aggregator":"avg"}],"formulas":[{"formula":"query1 / 10000"}],"sort":{"order_by":[{"type":"formula","index":0,"order":"desc"}],"count":10}}],"style":{}},"layout":{"x":3,"y":0,"width":4,"height":3}},{"id":31,"definition":{"title":"Top 10 VMs by Memory Usage","title_size":"16","title_align":"left","type":"toplist","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.memory_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name} by {ntnx_vm_name}","aggregator":"avg"}],"formulas":[{"formula":"query1 / 10000"}],"sort":{"count":10,"order_by":[{"type":"formula","index":0,"order":"desc"}]}}],"style":{}},"layout":{"x":7,"y":0,"width":5,"height":3}},{"id":7456556061837928,"definition":{"title":"Inefficient VM Count","title_size":"16","title_align":"left","type":"query_value","requests":[{"response_format":"scalar","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.cluster.vm.inefficient_count{$ntnx_cluster_name}","aggregator":"last"}],"formulas":[{"formula":"query1"}],"conditional_formats":[{"comparator":">","value":0,"palette":"white_on_yellow"}]}],"autoscale":true,"precision":0,"timeseries_background":{"yaxis":{"include_zero":true},"type":"area"}},"layout":{"x":0,"y":1,"width":3,"height":2}},{"id":32,"definition":{"title":"VM CPU Usage","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value","sum"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.cpu_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"number_format":{"unit":{"type":"canonical_unit","unit_name":"percent"}},"alias":"CPU Usage","formula":"query1 / 10000"}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true,"label":"Usage (ppm)","scale":"linear","max":"auto"}},"layout":{"x":0,"y":3,"width":3,"height":2}},{"id":33,"definition":{"title":"VM Memory Usage","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value","sum"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.memory_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"number_format":{"unit":{"type":"canonical_unit","unit_name":"percent"}},"alias":"Memory Usage","formula":"query1 / 10000"}],"style":{"palette":"purple","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true,"label":"Usage (ppm)","max":"auto"}},"layout":{"x":3,"y":3,"width":3,"height":2}},{"id":36,"definition":{"title":"VM Controller IO Bandwidth (KB/s)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.io_bandwidth_kbps{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"kilobyte"}},"alias":"Total Bandwidth"}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"area"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.read_io_bandwidth_kbps{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"kilobyte"}},"alias":"Read Bandwidth"}],"style":{"palette":"cool","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.write_io_bandwidth_kbps{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"kilobyte"}},"alias":"Write Bandwidth"}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true,"label":"Bandwidth (KB/s)"}},"layout":{"x":6,"y":3,"width":3,"height":2}},{"id":34,"definition":{"title":"VM Controller IOPS (ops/sec)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.num_iops{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","alias":"Total IOPS","number_format":{"unit":{"type":"canonical_unit","unit_name":"operation"}}}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.num_read_iops{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","alias":"Read IOPS","number_format":{"unit":{"type":"canonical_unit","unit_name":"operation"}}}],"style":{"palette":"cool","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.num_write_iops{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","alias":"Write IOPS","number_format":{"unit":{"type":"canonical_unit","unit_name":"operation"}}}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true,"label":"IOPS"}},"layout":{"x":9,"y":3,"width":3,"height":2}},{"id":40,"definition":{"title":"VM CPU Ready Time","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value","sum"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.cpu_ready_time_ppm{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"alias":"CPU Ready Time","formula":"query1 / 10000","number_format":{"unit":{"type":"canonical_unit","unit_name":"percent"}}}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true,"label":"Usage (ppm)"}},"layout":{"x":0,"y":5,"width":3,"height":2}},{"id":39,"definition":{"title":"VM Storage - User Bytes","title_size":"16","title_align":"left","show_legend":true,"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.user_bytes{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"byte"}},"alias":"User Storage"}],"style":{"palette":"purple","line_type":"solid","line_width":"normal"},"display_type":"area"}],"yaxis":{"include_zero":true,"label":"Size (bytes)"}},"layout":{"x":3,"y":5,"width":3,"height":2}},{"id":42,"definition":{"title":"VM Hypervisor IOPS (ops/sec)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.num_iops{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","alias":"Total IOPS","number_format":{"unit":{"type":"canonical_unit","unit_name":"operation"}}}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.num_read_iops{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","alias":"Read IOPS","number_format":{"unit":{"type":"canonical_unit","unit_name":"operation"}}}],"style":{"palette":"cool","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.num_write_iops{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","alias":"Write IOPS","number_format":{"unit":{"type":"canonical_unit","unit_name":"operation"}}}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true,"label":"IOPS"}},"layout":{"x":6,"y":5,"width":3,"height":2}},{"id":41,"definition":{"title":"VM Average IO Size (KB)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.avg_read_io_size_kb{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"kilobyte"}},"alias":"Avg Read IO Size"}],"style":{"palette":"cool","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.avg_write_io_size_kb{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"kilobyte"}},"alias":"Avg Write IO Size"}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true,"label":"IO Size (KB)"}},"layout":{"x":9,"y":5,"width":3,"height":2}},{"id":37,"definition":{"title":"VM Network Traffic (bytes)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.num_received_bytes{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"byte"}},"alias":"Network Received"}],"style":{"palette":"cool","line_type":"solid","line_width":"normal"},"display_type":"area"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.num_transmitted_bytes{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"byte"}},"alias":"Network Transmitted"}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"area"}],"yaxis":{"include_zero":true,"label":"Size (bytes)"}},"layout":{"x":0,"y":7,"width":3,"height":2}},{"id":38,"definition":{"title":"VM Network Packets Dropped","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value","sum"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.num_receive_packets_dropped{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","alias":"RX Packets Dropped","number_format":{"unit":{"type":"canonical_unit","unit_name":"packet"}}}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"bars"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.hypervisor.num_transmit_packets_dropped{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","alias":"TX Packets Dropped","number_format":{"unit":{"type":"canonical_unit","unit_name":"packet"}}}],"style":{"palette":"orange","line_type":"solid","line_width":"normal"},"display_type":"bars"}],"yaxis":{"include_zero":true,"label":"Packets"}},"layout":{"x":3,"y":7,"width":3,"height":2}},{"id":35,"definition":{"title":"VM Controller IO Latency (microseconds)","title_size":"16","title_align":"left","show_legend":true,"legend_layout":"auto","legend_columns":["avg","min","max","value"],"type":"timeseries","requests":[{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.avg_io_latency_micros{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"microsecond"}},"alias":"Avg Latency"}],"style":{"palette":"dog_classic","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.avg_read_io_latency_micros{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"microsecond"}},"alias":"Read Latency"}],"style":{"palette":"cool","line_type":"solid","line_width":"normal"},"display_type":"line"},{"response_format":"timeseries","queries":[{"data_source":"metrics","name":"query1","query":"avg:nutanix.vm.controller.avg_write_io_latency_micros{$ntnx_cluster_name,$ntnx_vm_name}"}],"formulas":[{"formula":"query1","number_format":{"unit":{"type":"canonical_unit","unit_name":"microsecond"}},"alias":"Write Latency"}],"style":{"palette":"warm","line_type":"solid","line_width":"normal"},"display_type":"line"}],"yaxis":{"include_zero":true,"label":"Latency (μs)"}},"layout":{"x":6,"y":7,"width":6,"height":2}}]},"layout":{"x":0,"y":18,"width":12,"height":10}}],"template_variables":[{"name":"ntnx_cluster_name","prefix":"ntnx_cluster_name","available_values":[],"default":"*"},{"name":"ntnx_host_name","prefix":"ntnx_host_name","available_values":[],"default":"*"},{"name":"ntnx_vm_name","prefix":"ntnx_vm_name","available_values":[],"default":"*"}],"layout_type":"ordered","notify_list":[],"reflow_type":"fixed"}
+{
+  "title": "Nutanix Overview",
+  "description": "Monitor Nutanix hyperconverged infrastructure health, performance, and resource utilization. Track cluster metrics, node/host performance, and VM statistics including IOPS, latency, bandwidth, CPU/memory usage, and storage. Filter by cluster, host, or VM for detailed analysis.",
+  "widgets": [
+    {
+      "id": 0,
+      "definition": {
+        "title": "Cluster Health Overview",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4124810358470391,
+            "definition": {
+              "type": "image",
+              "url": "https://upload.wikimedia.org/wikipedia/commons/e/ea/Nutanix_Logo.svg",
+              "sizing": "contain",
+              "margin": "md",
+              "has_background": false,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 4,
+            "definition": {
+              "title": "Host Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.nbr_nodes{$ntnx_cluster_name}",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 5,
+            "definition": {
+              "title": "VM Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.vm.count{$ntnx_cluster_name}",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 6,
+            "definition": {
+              "title": "Inefficient VMs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.vm.inefficient_count{$ntnx_cluster_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 1,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 22172841039590,
+            "definition": {
+              "type": "note",
+              "content": "**The Datadog Nutanix dashboard gives you broad visibility into the health, performance, and resource usage of your hyperconverged infrastructure including clusters, hosts, and virtual machines.**\n\n  Further reading for Nutanix monitoring:\n  - [Datadog's Nutanix integration docs](https://docs.datadoghq.com/integrations/nutanix)\n",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 2,
+            "definition": {
+              "title": "Cluster Health Score",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.health.check_score{$ntnx_cluster_name}",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 3,
+            "definition": {
+              "title": "Cluster Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.count{$ntnx_cluster_name}",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 8,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 1,
+            "definition": {
+              "title": "Health Status",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.health.up{$ntnx_cluster_name}",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 10,
+              "y": 2,
+              "width": 2,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 7,
+      "definition": {
+        "title": "Cluster Metrics",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 10,
+            "definition": {
+              "title": "Cluster CPU Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.hypervisor.cpu.usage{$ntnx_cluster_name} by {ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "CPU Usage",
+                      "formula": "query1 / 10000",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 8,
+            "definition": {
+              "title": "Cluster Storage Usage vs Capacity",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.storage.usage{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Storage Used",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.storage.capacity{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Storage Capacity",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "grey",
+                    "line_type": "dashed",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 9,
+            "definition": {
+              "title": "Cluster Free Physical Storage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.free.physical_storage{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Free Physical Storage",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 12,
+            "definition": {
+              "title": "Cluster Logical Storage Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.logical.storage.usage{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Logical Storage Used",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 11,
+            "definition": {
+              "title": "Cluster Memory Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.aggregate_hypervisor.memory.usage{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Memory Usage",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "query1 / 10000"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 14,
+            "definition": {
+              "title": "Cluster IOPS (Total, Read, Write)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.controller.num.iops{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Total IOPS"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.controller.num.read.iops{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Read IOPS"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.controller.num.write.iops{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Write IOPS"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "IOPS"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 16,
+            "definition": {
+              "title": "Cluster IO Bandwidth (Total, Read, Write)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.io.bandwidth{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Total Bandwidth",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kilobit"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.controller.read.io.bandwidth{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Read Bandwidth",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kilobit"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.controller.write.io.bandwidth{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Write Bandwidth",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kilobit"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 15,
+            "definition": {
+              "title": "Cluster IO Latency (Avg, Read, Write)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.controller.avg.io.latency{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Avg Latency",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.controller.avg.read.io.latency{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Read Latency",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.controller.avg.write.io.latency{$ntnx_cluster_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Write Latency",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 17,
+      "definition": {
+        "title": "Host Metrics",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 18,
+            "definition": {
+              "title": "Host Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.count{$ntnx_cluster_name,$ntnx_host_name}",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 1
+            }
+          },
+          {
+            "id": 20,
+            "definition": {
+              "title": "Top 10 Hosts by CPU Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.hypervisor.cpu.usage{$ntnx_cluster_name,$ntnx_host_name} by {host}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 / 10000",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ],
+                    "count": 10
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 21,
+            "definition": {
+              "title": "Top 10 Hosts by Storage Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.storage.usage{$ntnx_cluster_name,$ntnx_host_name} by {host}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Storage Used",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 7,
+              "y": 0,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 19,
+            "definition": {
+              "title": "Avg Host Health Score",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.health.check_score{$ntnx_cluster_name,$ntnx_host_name}",
+                      "aggregator": "avg"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 22,
+            "definition": {
+              "title": "Host CPU Usage by Host",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.hypervisor.cpu.usage{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "CPU Usage",
+                      "formula": "query1 / 10000",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 23,
+            "definition": {
+              "title": "Host Memory Usage by Host",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.aggregate_hypervisor.memory.usage{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Memory Usage",
+                      "formula": "query1 / 10000",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 26,
+            "definition": {
+              "title": "Host Storage Usage vs Capacity by Host",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.storage.usage{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Storage Used",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.storage.capacity{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Storage Capacity",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "grey",
+                    "line_type": "dashed",
+                    "line_width": "thin"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 27,
+            "definition": {
+              "title": "Host IO Bandwidth (Total, Read, Write)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.io.bandwidth{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Total Bandwidth"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.controller.read.io.bandwidth{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Read Bandwidth"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.controller.write.io.bandwidth{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Write Bandwidth"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 24,
+            "definition": {
+              "title": "Host IOPS by Host (Total, Read, Write)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.controller.num.iops{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:nutanix.host.controller.num.read.iops{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:nutanix.host.controller.num.write.iops{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Total",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "operation"
+                        }
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Read",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "operation"
+                        }
+                      },
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Write",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "operation"
+                        }
+                      },
+                      "formula": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "tags",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "IOPS"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 25,
+            "definition": {
+              "title": "Host IO Latency by Host (Total, Read, Write)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.host.controller.avg.io.latency{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:nutanix.host.controller.avg.read.io.latency{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:nutanix.host.controller.avg.write.io.latency{$ntnx_cluster_name,$ntnx_host_name} by {host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Total",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Read",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      },
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Write",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      },
+                      "formula": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 28,
+      "definition": {
+        "title": "Virtual Machine Metrics",
+        "background_color": "vivid_orange",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 29,
+            "definition": {
+              "title": "Total VM Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.count{$ntnx_cluster_name,$ntnx_vm_name}",
+                      "aggregator": "last"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "area",
+                "yaxis": {
+                  "include_zero": true
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 3,
+              "height": 1
+            }
+          },
+          {
+            "id": 30,
+            "definition": {
+              "title": "Top 10 VMs by CPU Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.cpu_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name} by {ntnx_vm_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 / 10000"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ],
+                    "count": 10
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 3,
+              "y": 0,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 31,
+            "definition": {
+              "title": "Top 10 VMs by Memory Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.memory_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name} by {ntnx_vm_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 / 10000"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 7,
+              "y": 0,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 7456556061837928,
+            "definition": {
+              "title": "Inefficient VM Count",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.cluster.vm.inefficient_count{$ntnx_cluster_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": true
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 32,
+            "definition": {
+              "title": "VM CPU Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.cpu_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "alias": "CPU Usage",
+                      "formula": "query1 / 10000"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "Usage (ppm)",
+                "scale": "linear",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 33,
+            "definition": {
+              "title": "VM Memory Usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.memory_usage_ppm{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "alias": "Memory Usage",
+                      "formula": "query1 / 10000"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "Usage (ppm)",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 36,
+            "definition": {
+              "title": "VM Controller IO Bandwidth (KB/s)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.io_bandwidth_kbps{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kilobyte"
+                        }
+                      },
+                      "alias": "Total Bandwidth"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.read_io_bandwidth_kbps{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kilobyte"
+                        }
+                      },
+                      "alias": "Read Bandwidth"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.write_io_bandwidth_kbps{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kilobyte"
+                        }
+                      },
+                      "alias": "Write Bandwidth"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "Bandwidth (KB/s)"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 34,
+            "definition": {
+              "title": "VM Controller IOPS (ops/sec)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.num_iops{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Total IOPS",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "operation"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.num_read_iops{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Read IOPS",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "operation"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.num_write_iops{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Write IOPS",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "operation"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "IOPS"
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 40,
+            "definition": {
+              "title": "VM CPU Ready Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.cpu_ready_time_ppm{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "CPU Ready Time",
+                      "formula": "query1 / 10000",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "Usage (ppm)"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 39,
+            "definition": {
+              "title": "VM Storage - User Bytes",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.user_bytes{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      },
+                      "alias": "User Storage"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "Size (bytes)"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 5,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 42,
+            "definition": {
+              "title": "VM Hypervisor IOPS (ops/sec)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.num_iops{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Total IOPS",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "operation"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.num_read_iops{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Read IOPS",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "operation"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.num_write_iops{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Write IOPS",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "operation"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "IOPS"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 5,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 41,
+            "definition": {
+              "title": "VM Average IO Size (KB)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.avg_read_io_size_kb{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kilobyte"
+                        }
+                      },
+                      "alias": "Avg Read IO Size"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.avg_write_io_size_kb{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kilobyte"
+                        }
+                      },
+                      "alias": "Avg Write IO Size"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "IO Size (KB)"
+              }
+            },
+            "layout": {
+              "x": 9,
+              "y": 5,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 37,
+            "definition": {
+              "title": "VM Network Traffic (bytes)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.num_received_bytes{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      },
+                      "alias": "Network Received"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.num_transmitted_bytes{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      },
+                      "alias": "Network Transmitted"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "Size (bytes)"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 38,
+            "definition": {
+              "title": "VM Network Packets Dropped",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.num_receive_packets_dropped{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "RX Packets Dropped",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.hypervisor.num_transmit_packets_dropped{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "TX Packets Dropped",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "Packets"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 7,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 35,
+            "definition": {
+              "title": "VM Controller IO Latency (microseconds)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.avg_io_latency_micros{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      },
+                      "alias": "Avg Latency"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.avg_read_io_latency_micros{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      },
+                      "alias": "Read Latency"
+                    }
+                  ],
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:nutanix.vm.controller.avg_write_io_latency_micros{$ntnx_cluster_name,$ntnx_vm_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "microsecond"
+                        }
+                      },
+                      "alias": "Write Latency"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "Latency (μs)"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 7,
+              "width": 6,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 18,
+        "width": 12,
+        "height": 10,
+        "is_column_break": true
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "ntnx_cluster_name",
+      "prefix": "ntnx_cluster_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "ntnx_host_name",
+      "prefix": "ntnx_host_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "ntnx_vm_name",
+      "prefix": "ntnx_vm_name",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
