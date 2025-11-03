@@ -105,8 +105,8 @@ class RestApiOptions(BaseModel):
     connect_timeout: Optional[float] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
-    kerberos_auth: Optional[str] = None
-    kerberos_cache: Optional[Literal['required', 'optional', 'disabled']] = None
+    kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
+    kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
     kerberos_force_initiate: Optional[bool] = None
     kerberos_hostname: Optional[str] = None
