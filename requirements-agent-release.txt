@@ -52,7 +52,11 @@ datadog-couch==9.1.1
 datadog-couchbase==6.2.0
 datadog-crio==5.1.1
 datadog-datadog-cluster-agent==6.2.1
+<<<<<<< HEAD
 datadog-datadog-csi-driver==1.2.0; sys_platform != 'win32'
+=======
+datadog-datadog-csi-driver==1.1.0; sys_platform != 'win32'
+>>>>>>> aad9a53566 ([Release] Release integrations for 7.73 (#21797))
 datadog-dcgm==4.1.1
 datadog-delinea-privilege-manager==1.1.0
 datadog-delinea-secret-server==1.2.0
