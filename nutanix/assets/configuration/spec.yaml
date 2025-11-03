@@ -41,6 +41,6 @@ files:
           - template: instances/http
           - template: instances/default
             overrides:
-              min_collection_interval.display_default: 60
-              min_collection_interval.value.example: 60
+              min_collection_interval.display_default: 120
+              min_collection_interval.value.example: 120
               min_collection_interval.enabled: true
