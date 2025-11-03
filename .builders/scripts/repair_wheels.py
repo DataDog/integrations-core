@@ -6,10 +6,12 @@ import re
 import shutil
 import sys
 import time
+from collections import defaultdict
 from fnmatch import fnmatch
 from functools import cache
 from hashlib import sha256
 from pathlib import Path
+from pprint import pprint
 from typing import Iterator, NamedTuple
 from zipfile import ZipFile
 
@@ -248,9 +250,15 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
         r'libc\+\+\.1\.dylib',
         r'^/System/Library/',
     ]]
+    used_exclusions = defaultdict(set)
 
     def copy_filt_func(libname):
-        return not any(excl.search(libname) for excl in exclusions)
+        matched = 0
+        for excl in exclusions:
+            if excl.search(libname):
+                used_exclusions[excl.pattern].add(libname)
+                matched += 1
+        return matched == 0
 
     min_macos_version = Version(os.environ["MACOSX_DEPLOYMENT_TARGET"])
 
@@ -284,6 +292,13 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
         else:
             print('No libraries were copied into the wheel.')
 
+    print("Used exclusions:")
+    pprint(dict(used_exclusions))
+    unused_exclusions = {excl.pattern for excl in exclusions if excl.pattern not in used_exclusions}
+    if unused_exclusions:
+        print("Please remove unused exclusions:")
+        pprint(unused_exclusions)
+        exit(1)
 
 REPAIR_FUNCTIONS = {
     'linux': repair_linux,
