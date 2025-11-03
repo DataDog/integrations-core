@@ -80,15 +80,15 @@ EXPECTED_RESPONSE = [
 ]
 
 
-def test_instance_check(dd_run_check, aggregator, instance):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_instance_check(dd_run_check, aggregator, config, instance):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
 
     assert isinstance(check, AgentCheck)
 
 
 @pytest.mark.unit
-def test_validate_configurations_with_wrong_package_ecosystem(instance):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_validate_configurations_with_wrong_package_ecosystem(config, instance):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
 
     wrong_package_ecosystem = "test"
     err_message = f"Invalid Package Ecosystem provided: {wrong_package_ecosystem}"
@@ -98,8 +98,8 @@ def test_validate_configurations_with_wrong_package_ecosystem(instance):
 
 
 @pytest.mark.unit
-def test_validate_configurations_with_empty_dependency_file_path(instance):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_validate_configurations_with_empty_dependency_file_path(config, instance):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
 
     empty_path = ""
     package_ecosystem = "pypi"
@@ -113,8 +113,8 @@ def test_validate_configurations_with_empty_dependency_file_path(instance):
 
 
 @pytest.mark.unit
-def test_validate_configurations_with_nonexistent_dependency_file_path(instance):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_validate_configurations_with_nonexistent_dependency_file_path(config, instance):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
 
     nonexistent_path = "/nonexistent/path/requirements.txt"
     check.package_ecosystem = "pypi"
@@ -125,8 +125,8 @@ def test_validate_configurations_with_nonexistent_dependency_file_path(instance)
 
 
 @pytest.mark.unit
-def test_validate_configurations_with_unreadable_dependency_file_path(instance, mocker):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_validate_configurations_with_unreadable_dependency_file_path(config, instance, mocker):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
 
     unreadable_path = "/unreadable/path/requirements.txt"
     check.package_ecosystem = "pypi"
@@ -141,8 +141,25 @@ def test_validate_configurations_with_unreadable_dependency_file_path(instance, 
 
 
 @pytest.mark.unit
-def test_check_validate_config(instance, mocker):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_validate_configurations_with_empty_string_guarddog_path(config, instance, mocker):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
+
+    err_message = "guarddog_path field should not be an empty string"
+
+    # Mock Dependency File Checks
+    mocker.patch("os.path.exists", return_value=True)
+    mocker.patch("os.access", return_value=True)
+
+    with pytest.raises(ConfigurationError, match=err_message):
+        check.package_ecosystem = "pypi"
+        check.path = "/path/to/dependency_file"
+        check.guarddog_path = ""
+        check.validate_config()
+
+
+@pytest.mark.unit
+def test_check_validate_config(config, instance, mocker):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
     check.package_ecosystem = "pypi"
     check.path = "/path/to/dependency_file"
 
@@ -153,8 +170,8 @@ def test_check_validate_config(instance, mocker):
 
 
 @pytest.mark.unit
-def test_get_guarddog_output(instance, mocker):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_get_guarddog_output(config, instance, mocker):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
     expected_stdout = "command output"
     expected_stderr = "command error"
     expected_returncode = 0
@@ -172,8 +189,8 @@ def test_get_guarddog_output(instance, mocker):
 
 
 @pytest.mark.unit
-def test_check_guarddog_command_successful(datadog_agent, example_dependencies, instance, mocker):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_check_guarddog_command_successful(config, datadog_agent, example_dependencies, instance, mocker):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
     check.package_ecosystem = "pypi"
     check.path = "/path/to/dependency_file"
     mock_stdout = json.dumps(
@@ -201,8 +218,8 @@ def test_check_guarddog_command_successful(datadog_agent, example_dependencies, 
 
 
 @pytest.mark.unit
-def test_check_guarddog_command_fails(instance, mocker):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_check_guarddog_command_fails(config, instance, mocker):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
     check.package_ecosystem = "pypi"
     check.path = "/path/to/dependency_file"
     mocker.patch.object(check, "validate_config")
@@ -213,8 +230,8 @@ def test_check_guarddog_command_fails(instance, mocker):
 
 
 @pytest.mark.unit
-def test_check_guarddog_output_json_decode_error(instance, mocker):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_check_guarddog_output_json_decode_error(config, instance, mocker):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
     check.package_ecosystem = "pypi"
     check.path = "/path/to/dependency_file"
     mocker.patch.object(check, "validate_config")
@@ -225,40 +242,8 @@ def test_check_guarddog_output_json_decode_error(instance, mocker):
 
 
 @pytest.mark.unit
-def test_check_abs_path_guarddog_not_found(datadog_agent, example_dependencies, instance, mocker):
-    check = GuarddogCheck("guarddog", {}, [instance])
-    check.package_ecosystem = "pypi"
-    check.path = "/path/to/dependency_file"
-    mocker.patch.object(check, "validate_config")
-    mocker.patch("os.path.exists", return_value=True)
-    mocker.patch("os.access", return_value=True)
-    mock_stdout = json.dumps(
-        MOCK_RESPONSE,
-        separators=(",", ":"),
-    )
-    mock_stderr = ""
-    mock_returncode = 0
-    mocker.patch(
-        "subprocess.run",
-        side_effect=[
-            FileNotFoundError("Guarddog Not Found"),  # First call raises FileNotFoundError
-            Mock(stdout=mock_stdout, stderr=mock_stderr, returncode=mock_returncode),  # Second call succeeds
-        ],
-    )
-
-    check.check(None)
-    datadog_agent.assert_logs(check.check_id, EXPECTED_RESPONSE)
-
-    mock_send_log = mocker.spy(check, "send_log")
-    for call in mock_send_log.call_args_list:
-        args, _ = call
-        sent_data = args[0]
-        assert json.loads(sent_data["message"])['log']["dependency"] in example_dependencies.split("\n")
-
-
-@pytest.mark.unit
-def test_check_both_guarddog_command_fails(instance, mocker):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_check_abs_path_guarddog_not_found(config, datadog_agent, example_dependencies, instance, mocker):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
     check.package_ecosystem = "pypi"
     check.path = "/path/to/dependency_file"
     mocker.patch.object(check, "validate_config")
@@ -266,18 +251,15 @@ def test_check_both_guarddog_command_fails(instance, mocker):
     mocker.patch("os.access", return_value=True)
     mocker.patch(
         "subprocess.run",
-        side_effect=[
-            FileNotFoundError("Guarddog Not Found"),  # First call raises FileNotFoundError
-            Mock(stdout="", stderr="Error occurred", returncode="1"),  # Second call succeeds
-        ],
+        side_effect=[FileNotFoundError("Guarddog Not Found")],
     )
-    with pytest.raises(RuntimeError, match="Error occurred"):
+    with pytest.raises(FileNotFoundError):
         check.check(None)
 
 
 @pytest.mark.unit
-def test_check_both_guarddog_command_fails_with_not_found(instance, mocker):
-    check = GuarddogCheck("guarddog", {}, [instance])
+def test_check_both_guarddog_command_fails_with_not_found(config, instance, mocker):
+    check = GuarddogCheck("guarddog", config['init_config'], [instance])
     check.package_ecosystem = "pypi"
     check.path = "/path/to/dependency_file"
     mocker.patch.object(check, "validate_config")

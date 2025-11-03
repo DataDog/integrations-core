@@ -24,6 +24,7 @@ class GuarddogCheck(AgentCheck):
             if self.instance.get("dependency_file_path")
             else None
         )
+        self.guarddog_path = str(init_config.get('guarddog_path')).strip()
         self.check_initializations.append(self.validate_config)
 
     def get_guarddog_output(self, cmd_with_abs_path) -> subprocess.CompletedProcess:
@@ -31,16 +32,10 @@ class GuarddogCheck(AgentCheck):
             self.log.debug("Running command: %s", cmd_with_abs_path)
             cmd_output_with_abs_path = subprocess.run(cmd_with_abs_path.split(), capture_output=True, text=True)
             return cmd_output_with_abs_path
-        except FileNotFoundError:
-            try:
-                cmd = cmd_with_abs_path.replace(constants.GUARDDOG_ENVIRONMENT_PATH, "guarddog")
-                self.log.debug(cmd)
-                cmd_output = subprocess.run(cmd.split(), capture_output=True, text=True)
-                return cmd_output
-            except FileNotFoundError as cmd_error:
-                err_message = "Guarddog is not Installed. Please follow the Guarddog installation steps."
-                self.log.error(err_message)
-                raise cmd_error
+        except FileNotFoundError as cmd_error:
+            err_message = "Guarddog is not found at configured path."
+            self.log.error(err_message)
+            raise cmd_error
 
     def get_enriched_event(self, enrichment_details, result) -> dict:
         return {
@@ -72,15 +67,19 @@ class GuarddogCheck(AgentCheck):
             self.log.error(err_message)
             raise ConfigurationError(err_message)
 
+        elif self.guarddog_path == "":
+            err_message = "guarddog_path field should not be an empty string"
+            self.log.error(err_message)
+            raise ConfigurationError(err_message)
+
     def check(self, _):
         try:
             current_time = get_current_datetime()
-
             guarddog_command = constants.GUARDDOG_COMMAND.format(
                 package_ecosystem=self.package_ecosystem,
                 path=self.path,
             )
-            cmd_result = self.get_guarddog_output(guarddog_command)
+            cmd_result = self.get_guarddog_output(self.guarddog_path + " " + guarddog_command)
             if cmd_result.returncode != 0:
                 cmd_result_err_message = f"Guarddog command failed: {cmd_result.stderr}"
                 self.log.error(cmd_result_err_message)

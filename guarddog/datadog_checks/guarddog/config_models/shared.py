@@ -25,6 +25,7 @@ class SharedConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    guarddog_path: str
     service: Optional[str] = None
 
     @model_validator(mode='before')

@@ -22,6 +22,11 @@
 #
 init_config:
 
+    ## @param guarddog_path - string - required
+    ## Absolute path to the Guarddog file.
+    #
+    guarddog_path: <ABSOLUTE_PATH_OF_GUARDDOG>
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##

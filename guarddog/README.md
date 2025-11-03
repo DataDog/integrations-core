@@ -19,26 +19,20 @@ The Guarddog check is already included with the [Datadog Agent][7] package, so n
 
 #### Install Guarddog
 
-Note: 
-  - Guarddog requires python version 3.10 or higher.
-  - Guarddog must be installed at the specified path below within the virtual environment.
+  Note: 
+      - Guarddog requires python version 3.10 or higher.
+      - The Datadog Agent must have access to the Guarddog executable path.
 
-Please execute the steps below as the root user to install Guarddog:
-  1. Create a Guarddog directory.
+1. Install Guarddog using pip:
+    ```shell
+    pip3 install guarddog
+    ```
+2. Run this command to find the Guarddog executable path:
+    ```shell
+    which guarddog
+    ```
+    This path is required for the **guarddog_path** parameter in **guarddog.d/conf.yaml** file.
 
-      ```shell
-      mkdir /opt/guarddog
-      ```
-  2. Create a Virtual environment for Guarddog Installation.
-
-      ```shell
-      python3 -m venv /opt/guarddog/guarddog-env
-      ```
-  3. Install Guarddog inside **guarddog-env** environment.
-
-      ```shell
-      /opt/guarddog/guarddog-env/bin/python3 -m pip install guarddog
-      ```
 
 #### Log collection
 
@@ -55,6 +49,12 @@ Please execute the steps below as the root user to install Guarddog:
         - type: integration
           service: guarddog
           source: guarddog
+
+      init_config:
+          ## @param guarddog_path - string - required
+          ## Absolute path to the Guarddog file. Example: /usr/local/bin/guarddog
+          #
+          guarddog_path: <ABSOLUTE_PATH_OF_GUARDDOG>
 
       instances:
           ## @param package_ecosystem - string - required
