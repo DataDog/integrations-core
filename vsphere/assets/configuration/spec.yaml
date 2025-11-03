@@ -50,7 +50,7 @@ files:
             example: false
       - name: infrastructure_mode
         description: |
-          The infrastructure mode to use.
+          The infrastructure mode to use. Valid values are 'full' (default) and 'basic'.
         value:
           type: string
           example: full

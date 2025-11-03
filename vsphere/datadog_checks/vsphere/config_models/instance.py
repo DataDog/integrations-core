@@ -13,7 +13,6 @@ from types import MappingProxyType
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
-from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -105,7 +104,7 @@ class RestApiOptions(BaseModel):
     connect_timeout: Optional[float] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
-    kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
+    kerberos_auth: Optional[str] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
     kerberos_force_initiate: Optional[bool] = None

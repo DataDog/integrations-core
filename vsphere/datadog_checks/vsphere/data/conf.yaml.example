@@ -83,7 +83,7 @@ instances:
     empty_default_hostname: true
 
     ## @param infrastructure_mode - string - optional - default: full
-    ## The infrastructure mode to use.
+    ## The infrastructure mode to use. Valid values are 'full' (default) and 'basic'.
     #
     # infrastructure_mode: full
 
