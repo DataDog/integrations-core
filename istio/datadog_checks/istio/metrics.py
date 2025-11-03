@@ -305,6 +305,7 @@ ISTIOD_METRICS = {
         'pilot.conflict.outbound_listener.tcp_over_current_http'
     ),
     'pilot_conflict_outbound_listener_tcp_over_current_tcp': ('pilot.conflict.outbound_listener.tcp_over_current_tcp'),
+    'pilot_debounce_time': 'pilot.debounce_time',
     'pilot_destrule_subsets': 'pilot.destrule_subsets',
     'pilot_duplicate_envoy_clusters': 'pilot.duplicate_envoy_clusters',
     'pilot_eds_no_instances': 'pilot.eds_no_instances',
@@ -315,6 +316,7 @@ ISTIOD_METRICS = {
     'pilot_mcp_sink_request_acks_total': 'pilot.mcp_sink.request_acks_total',
     'pilot_no_ip': 'pilot.no_ip',
     'pilot_proxy_convergence_time': 'pilot.proxy_convergence_time',
+    'pilot_pushcontext_init_seconds': 'pilot.pushcontext_init_seconds',
     'pilot_rds_expired_nonce': 'pilot.rds_expired_nonce',
     'pilot_services': 'pilot.services',
     'pilot_total_xds_internal_errors': 'pilot.total_xds_internal_errors',
