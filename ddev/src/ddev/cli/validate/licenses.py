@@ -102,14 +102,10 @@ def find_cpy(data):
             return cpy
 
 
-def get_extra_license_files(app):
-    import os
-
-    for path in app.repo.path.iterdir():
-        if not os.path.isfile(os.path.join('', path, 'manifest.json')):
-            continue
-        extra_license_file = os.path.join('', path, '3rdparty-extra-LICENSE.csv')
-        if os.path.isfile(extra_license_file):
+def get_extra_license_files(app: Application):
+    for integration in app.repo.integrations.iter('all'):
+        extra_license_file = integration.path / '3rdparty-extra-LICENSE.csv'
+        if extra_license_file.is_file():
             yield extra_license_file
 
 
