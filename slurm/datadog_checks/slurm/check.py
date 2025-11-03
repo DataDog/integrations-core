@@ -9,6 +9,7 @@ from datetime import timedelta
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.time import get_timestamp
+from datadog_checks.base.utils.tagging import tagger
 
 from .config_models import ConfigMixin
 from .constants import (
@@ -156,7 +157,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             commands.append(('scontrol', self.scontrol_cmd, self.process_scontrol))
 
         for name, cmd, process_func in commands:
-            self.log.debug("Running %s command: %s", name, cmd)
+            self.log.info("Running %s command: %s", name, cmd)
             out, err, ret = get_subprocess_output(cmd)
             if ret != 0:
                 self.log.error("Error running %s: %s", name, err)
@@ -597,6 +598,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             for header, value in zip(headers, fields):
                 new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
                 tags.append(f"{new_header}:{value}")
+
+                if new_header == "pid":
+                    tags.extend(tagger.tag(f"process://{value}", tagger.ORCHESTRATOR))
 
                 if header == "JOBID" and value.isdigit():
                     job_id = value
