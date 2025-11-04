@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.10.1 / 2025-10-31
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
 ## 4.10.0 / 2025-10-02
 
 ***Added***:
