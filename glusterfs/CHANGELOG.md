@@ -8,7 +8,7 @@
 
 * Add volume heal entries count metric ([#21634](https://github.com/DataDog/integrations-core/pull/21634))
 
-## 3.1.0 / 2025-10-02
+## 3.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 
