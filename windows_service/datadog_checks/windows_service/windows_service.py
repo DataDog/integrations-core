@@ -343,6 +343,7 @@ class WindowsService(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
             self.log.debug('service state for %s %s', service_name, status)
             self.gauge('windows_service.uptime', service_uptime, tags=tags)
+            self.gauge('windows_service.state', 1, tags=tags)
 
         if 'ALL' not in services:
             for service in services_unseen:
@@ -365,3 +366,5 @@ class WindowsService(AgentCheck):
 
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
                 self.log.debug('service state for %s %s', service, status)
+                self.gauge('windows_service.uptime', 0, tags=tags)
+                self.gauge('windows_service.state', 1, tags=tags)
