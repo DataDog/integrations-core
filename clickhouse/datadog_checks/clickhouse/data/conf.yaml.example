@@ -24,10 +24,11 @@ init_config:
 #
 instances:
 
-    ## @param server - string - required
+  -
+    ## @param server - string - optional
     ## The hostname used to connect to the system.
     #
-  - server: <SERVER>
+    # server: <SERVER>
 
     ## @param port - integer - optional - default: 9000
     ## The port used to connect to the system.
@@ -86,6 +87,46 @@ instances:
     #
     # verify: true
 
+    ## @param dbm - boolean - optional - default: false
+    ## Enable Database Monitoring (DBM) to collect query samples and execution plans.
+    ## This feature provides deep observability into query performance.
+    #
+    # dbm: false
+
+    ## Configuration for collecting query samples when Database Monitoring (DBM) is enabled.
+    ## Query samples provide insights into the queries being executed on your ClickHouse instance.
+    #
+    # query_samples:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query samples.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## The interval in seconds between query sample collections.
+        ## Lower values provide more granular data but increase overhead.
+        #
+        # collection_interval: 10
+
+        ## @param samples_per_hour_per_query - number - optional - default: 15
+        ## The maximum number of samples to collect per unique query signature per hour.
+        ## This helps limit the volume of data collected while still providing useful insights.
+        #
+        # samples_per_hour_per_query: 15
+
+        ## @param seen_samples_cache_maxsize - number - optional - default: 10000
+        ## The maximum size of the cache used to track which query samples have been collected.
+        ## A larger cache can help avoid collecting duplicate samples.
+        #
+        # seen_samples_cache_maxsize: 10000
+
+        ## @param run_sync - boolean - optional - default: false
+        ## Whether to run query sample collection synchronously in the check run.
+        ## Set to false (default) to run asynchronously in a separate thread.
+        #
+        # run_sync: false
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.
@@ -105,48 +146,51 @@ instances:
     ## Each query must have 2 fields, and can have a third optional field:
     ##
     ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
-    ##     Use the pipe `|` if you require a multi-line script.
+    ##            Use the pipe `|` if you require a multi-line script.
     ## 2. columns - The list representing each column, ordered sequentially from left to right.
-    ##     The number of columns must equal the number of columns returned in the query.
-    ##     There are 2 required pieces of data:
-    ##       1. name - The suffix to append to `<INTEGRATION>.` to form
-    ##           the full metric name. If `type` is a `tag` type, this column is considered a tag and applied
-    ##           to every metric collected by this particular query.
-    ##       2. type - The submission method (gauge, monotonic_count, etc.).
-    ##           This can also be set to the following `tag` types to tag each metric in the row with the name
-    ##           and value of the item in this column:
-    ##             1. tag - This is the default tag type
-    ##             2. tag_list - This allows multiple values to be attached to the tag name. For example: 
-    ##                 ```
-    ##                 query = {
-    ##                   "name": "example",
-    ##                   "query": "...",
-    ##                   "columns": [
-    ##                     {"name": "server_tag", "type": "tag_list"},
-    ##                     {"name": "foo", "type": "gauge"},
-    ##                   ]
-    ##                 }
-    ##                 ```
-    ##                 May result in:
-    ##                 ```
-    ##                 gauge("foo", tags=["server_tag:us", "server_tag:primary", "server_tag:default"])
-    ##                 gauge("foo", tags=["server_tag:eu"])
-    ##                 gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
-    ##                 ```
-    ##             3. tag_not_null - This only sets tags in the metric if the value is not null
-    ##           You can use the `count` type to perform aggregation for queries that return multiple rows with
-    ##           the same or no tags.
-    ##     Columns without a name are ignored. To skip a column, enter:
-    ##     ```
-    ##       - {}
-    ##     ```
+    ##              The number of columns must equal the number of columns returned in the query.
+    ##              There are 2 required pieces of data:
+    ##                a. name - The suffix to append to `<INTEGRATION>.` to form
+    ##                          the full metric name. If `type` is a `tag` type, this column is
+    ##                          considered a tag and applied to every
+    ##                          metric collected by this particular query.
+    ##                b. type - The submission method (gauge, monotonic_count, etc.).
+    ##                          This can also be set to the following `tag` types to
+    ##                          tag each metric in the row with the name and value
+    ##                          of the item in this column:
+    ##                           i. tag           - This is the default tag type
+    ##                           ii. tag_list     - This allows multiple values to be attached
+    ##                                             to the tag name. For example: 
+    ##
+    ##                                             query = {
+    ##                                               "name": "example",
+    ##                                               "query": "...",
+    ##                                               "columns": [
+    ##                                                 {"name": "server_tag", "type": "tag_list"},
+    ##                                                 {"name": "foo", "type": "gauge"},
+    ##                                               ]
+    ##                                             }
+    ##
+    ##                                             May result in:
+    ##                                             gauge("foo", tags=[
+    ##                                                                 "server_tag:us",
+    ##                                                                 "server_tag:primary",
+    ##                                                                 "server_tag:default"
+    ##                                                               ])
+    ##                                             gauge("foo", tags=["server_tag:eu"])
+    ##                                             gauge("foo", tags=["server_tag:eu", "server_tag:primary"])
+    ##                           iii. tag_not_null - This only sets tags in the metric if the value is not null
+    ##                          You can use the `count` type to perform aggregation
+    ##                          for queries that return multiple rows with the same or no tags.
+    ##              Columns without a name are ignored. To skip a column, enter:
+    ##                - {}
     ## 3. tags (optional) - A list of tags to apply to each metric.
     ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
     ##     If collection_interval is not set, the query will be run every check run.
-    ##     If the collection interval is less than check collection interval, the query will be run every check
-    ##     run.
-    ##     If the collection interval is greater than check collection interval, the query will NOT BE RUN
-    ##     exactly at the collection interval.
+    ##     If the collection interval is less than check collection interval, 
+    ##     the query will be run every check run.
+    ##     If the collection interval is greater than check collection interval, 
+    ##     the query will NOT BE RUN exactly at the collection interval.
     ##     The query will be run at the next check run after the collection interval has passed.
     ## 5. metric_prefix (optional) - The prefix to apply to each metric.
     #
