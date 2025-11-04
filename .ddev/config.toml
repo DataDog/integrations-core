@@ -143,7 +143,7 @@ exclude = [
     'tcp_check',
 ]
 unsorted = [
-    'couch', # tests depend on the order for now
+    'couch',   # tests depend on the order for now
     'envoy',
     'ibm_ace',
     'istio',
@@ -152,21 +152,33 @@ unsorted = [
 
 [overrides.dep.updates]
 exclude = [
-    'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
-    'pysnmp',  # Breaking snmp tests
-    'aerospike',  # v8+ breaks agent build.
+    'pyasn1',          # https://github.com/pyasn1/pyasn1/issues/52
+    'pysnmp',          # Breaking snmp tests
+    'aerospike',       # v8+ breaks agent build.
     'confluent-kafka',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
     'psutil',
-    'pyvmomi', # 9+ has breaking changes
-    'pymongo', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
+    'pyvmomi',      # 9+ has breaking changes
+    'pymongo',      # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
     'foundationdb', # 7+ has a breaking changes
 ]
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
-security_deps = [
-    'in-toto',
-    'tuf',
-    'securesystemslib',
-]
+security_deps = ['in-toto', 'tuf', 'securesystemslib']
+
+
+# Explicitly mark folders as non-integrations. By default, all folders are assumed to be
+# integrations. Previously, only folders with manifest.json were considered integrations,
+# but since November 2025 manifest.json files are being removed, so the default is now
+# to treat all folders as integrations unless explicitly marked here as non-integrations.
+[overrides.is-integration]
+datadog_checks_base = false
+datadog_checks_dependency_provider = false
+datadog_checks_dev = false
+datadog_checks_downloader = false
+datadog_checks_tests_helper = false
+ddev = false
+docs = false
+# This is a directory that exists only in CI but need to include it to avoid tests failing in CI
+trace-captures = false
