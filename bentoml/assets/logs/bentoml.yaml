@@ -17,7 +17,7 @@ pipeline:
         - "22025-10-07T23:10:10.287722"
       grok:
         matchRules: |
-          timestamp%{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"):timestamp}
+          timestamp %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"):timestamp}
     - type: grok-parser
       name:  BentoML Parser
       enabled: true
