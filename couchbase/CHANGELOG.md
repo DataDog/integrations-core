@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 6.2.0 / 2025-10-31
+
+***Added***:
+
+* Changed Server and Sync Gateway versions to reflect current EOL status. This adds 45 new Sync Gateway metrics covering cache usage, replication errors/throttling, compaction and resync activity, REST API traffic, replication bandwidth, resource utilization, and fatal error signals — giving operators clearer visibility into performance, reliability, and system health. ([#21284](https://github.com/DataDog/integrations-core/pull/21284))
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
 ## 6.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:

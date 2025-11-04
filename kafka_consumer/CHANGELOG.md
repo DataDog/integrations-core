@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.9.1 / 2025-10-31
+
+***Fixed***:
+
+* Correctly support schema registry bytes in Avro & Protobuf messages ([#21632](https://github.com/DataDog/integrations-core/pull/21632))
+
 ## 6.9.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:

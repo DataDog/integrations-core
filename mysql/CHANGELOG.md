@@ -2,6 +2,20 @@
 
 <!-- towncrier release notes start -->
 
+## 15.10.0 / 2025-10-31
+
+***Added***:
+
+* Adds a new metric `mysql.performance.errors_raised` which reports back a monotonic count of errors from `performance_schema.events_errors_summary_global_by_error` table where available ([#21451](https://github.com/DataDog/integrations-core/pull/21451))
+* Add additional context to the database_identifier configuration description. ([#21575](https://github.com/DataDog/integrations-core/pull/21575))
+
+***Fixed***:
+
+* Fix AWS RDS IAM authentication token expiration causing connection failures after token expires. ([#21507](https://github.com/DataDog/integrations-core/pull/21507))
+* Fixes error messages captured when failing to collect explain plans in order to surface actionable detail ([#21693](https://github.com/DataDog/integrations-core/pull/21693))
+* Filters out noisy `ER_NO_SYSTEM_TABLE_ACCESS` from the monitoring user which get triggered when querying `information_schema` tables ([#21740](https://github.com/DataDog/integrations-core/pull/21740))
+* Fix collecting replication metrics and tags for multi-source replicas ([#21754](https://github.com/DataDog/integrations-core/pull/21754))
+
 ## 15.9.2 / 2025-10-08 / Agent 7.72.0
 
 ***Fixed***:

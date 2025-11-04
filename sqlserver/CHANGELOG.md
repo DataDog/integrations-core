@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 22.11.0 / 2025-10-31
+
+***Added***:
+
+* Add additional context to the database_identifier configuration description. ([#21575](https://github.com/DataDog/integrations-core/pull/21575))
+
 ## 22.10.1 / 2025-10-03 / Agent 7.72.0
 
 ***Fixed***:
