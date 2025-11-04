@@ -16,7 +16,7 @@
 * Filters out noisy `ER_NO_SYSTEM_TABLE_ACCESS` from the monitoring user which get triggered when querying `information_schema` tables ([#21740](https://github.com/DataDog/integrations-core/pull/21740))
 * Fix collecting replication metrics and tags for multi-source replicas ([#21754](https://github.com/DataDog/integrations-core/pull/21754))
 
-## 15.9.2 / 2025-10-08
+## 15.9.2 / 2025-10-08 / Agent 7.72.0
 
 ***Fixed***:
 

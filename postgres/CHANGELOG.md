@@ -17,7 +17,7 @@
 * Fix logic for only_custom_queries configuration option. ([#21708](https://github.com/DataDog/integrations-core/pull/21708))
 * Fix handling health event tags in Postgres to allow for additional tags as an argument. ([#21764](https://github.com/DataDog/integrations-core/pull/21764))
 
-## 23.1.2 / 2025-10-07
+## 23.1.2 / 2025-10-07 / Agent 7.72.0
 
 ***Fixed***:
 

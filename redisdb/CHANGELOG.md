@@ -8,7 +8,7 @@
 
 * Add new metrics collected from the INFO command ([#21555](https://github.com/DataDog/integrations-core/pull/21555))
 
-## 8.2.0 / 2025-10-02
+## 8.2.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 
