@@ -292,13 +292,13 @@ class SQLServerSchemaCollector(SchemaCollector):
                 yield cursor
 
     def _get_next(self, cursor):
-        return cursor.fetchone()
+        return cursor.fetchone_dict()
 
     def _get_all(self, cursor):
-        return cursor.fetchall()
+        return cursor.fetchall_dict()
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
-        print(cursor_row)
+        
         # We intentionally dont call super because MySQL has no logical databases
         object = super()._map_row(database, cursor_row)
         # Map the cursor row to the expected schema, and strip out None values
@@ -313,13 +313,13 @@ class SQLServerSchemaCollector(SchemaCollector):
                         "name": cursor_row.get("table_name"),
                         # The query can create duplicates of the joined tables
                         "columns": list(
-                            {v and v['name']: v for v in json.loads(cursor_row.get("columns")) or []}.values()
+                            {v and v['name']: v for v in json.loads(cursor_row.get("columns") or "[]")}.values()
                         ),
                         "indexes": list(
-                            {v and v['name']: v for v in json.loads(cursor_row.get("indexes")) or []}.values()
+                            {v and v['name']: v for v in json.loads(cursor_row.get("indexes") or "[]")}.values()
                         ),
                         "foreign_keys": list(
-                            {v and v['name']: v for v in json.loads(cursor_row.get("foreign_keys")) or []}.values()
+                            {v and v['name']: v for v in json.loads(cursor_row.get("foreign_keys") or "[]")}.values()
                         ),
                         # "toast_table": cursor_row.get("toast_table"),
                         # "num_partitions": cursor_row.get("num_partitions"),
