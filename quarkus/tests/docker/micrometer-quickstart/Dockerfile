@@ -1,6 +1,9 @@
 # Use the official JDK 19 image as the base image for the build stage
 FROM amazoncorretto:19-al2-jdk AS build
 
+# Install curl for Maven wrapper downloads (fallback if maven-wrapper.jar is missing)
+RUN yum install -y curl && yum clean all
+
 # Enable preview features
 ENV JAVA_OPTS="--enable-preview"
 
