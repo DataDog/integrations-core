@@ -1,4 +1,5 @@
 [env.collectors.datadog-checks]
+check-types = true
 
 [[envs.default.matrix]]
 python = ["3.12"]

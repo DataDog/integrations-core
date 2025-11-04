@@ -1,2 +1,2 @@
 HOST_NAME|STATUS|JL_U|MAX|NJOBS|RUN|SSUSP|USUSP|RSV
-ip-11-21-111-198..ec2.internal|ok|-|4|0|0|0|0|0
+ip-11-21-111-198.ec2.internal|ok|-|4|0|0|0|0|0

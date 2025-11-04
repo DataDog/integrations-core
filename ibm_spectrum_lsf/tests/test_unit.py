@@ -23,10 +23,11 @@ def test_lsid_err(mock_client, dd_run_check, aggregator, instance, caplog):
 def test_check(mock_client, dd_run_check, aggregator, instance):
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client
+
     dd_run_check(check)
 
     for metric in ALL_METRICS:
-        aggregator.assert_metric(metric)
+        aggregator.assert_metric(metric["name"], metric["val"], tags=metric["tags"])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -38,8 +39,9 @@ def test_lscluster_error(mock_client, dd_run_check, aggregator, instance):
     mock_client.lsclusters.side_effect = lambda *args, **kwargs: (None, "Can't connect", 1)
     dd_run_check(check)
 
-    for metric in set(ALL_METRICS) - set(CLUSTER_METRICS):
-        aggregator.assert_metric(metric)
+    for metric in ALL_METRICS:
+        if metric not in CLUSTER_METRICS:
+            aggregator.assert_metric(metric["name"], metric["val"], tags=metric["tags"])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -51,8 +53,9 @@ def test_lscluster_wrong_column_num(mock_client, dd_run_check, aggregator, insta
     mock_client.lsclusters.side_effect = lambda *args, **kwargs: get_mock_output('lsclusters_err')
     dd_run_check(check)
 
-    for metric in set(ALL_METRICS) - set(CLUSTER_METRICS):
-        aggregator.assert_metric(metric)
+    for metric in ALL_METRICS:
+        if metric not in CLUSTER_METRICS:
+            aggregator.assert_metric(metric["name"], metric["val"], tags=metric["tags"])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
