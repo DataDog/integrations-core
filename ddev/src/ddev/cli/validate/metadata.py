@@ -95,8 +95,11 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
         # a metrics prefix because we want to validate that manifest files include it.
         if current_check.manifest.path.is_file():
             metric_prefix = current_check.manifest.get("/assets/integration/metrics/prefix", "")
-        else:
-            metric_prefix = app.repo.config.get(f"/overrides/validate/metrics-prefix/{current_check.name}", "")
+        elif (metric_prefix := app.repo.config.get(f"/overrides/metrics-prefix/{current_check.name}", None)) is None:
+            metric_prefix = ""
+            if current_check.name not in metadata_utils.PROVIDER_INTEGRATIONS:
+                errors = True
+                error_message += f'{current_check.name}: metric_prefix does not exist in manifest or overrides.\n'
 
         metadata_file = current_check.metrics_file
 
@@ -108,7 +111,6 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
         duplicate_short_name_set: set = set()
         duplicate_description_set: set = set()
 
-        metric_prefix_error_shown = False
         if metadata_file.stat().st_size == 0:
             errors = True
 
@@ -180,12 +182,6 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
                     'metric_name'
                 ].startswith(metric_prefix):
                     metric_prefix_count[prefix] += 1
-            else:
-                errors = True
-                if not metric_prefix_error_shown and current_check.name not in metadata_utils.PROVIDER_INTEGRATIONS:
-                    metric_prefix_error_shown = True
-
-                    error_message += f'{current_check.name}:{line} metric_prefix does not exist in manifest.\n'
 
             # metric_type header
             if row['metric_type'] and row['metric_type'] not in metadata_utils.VALID_METRIC_TYPE:
