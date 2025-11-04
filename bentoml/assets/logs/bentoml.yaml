@@ -18,6 +18,7 @@ pipeline:
       grok:
         matchRules: |
           timestamp %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"):timestamp}
+        supportRules: ""
     - type: grok-parser
       name:  BentoML Parser
       enabled: true
