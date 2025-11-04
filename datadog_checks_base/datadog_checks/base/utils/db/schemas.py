@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, Iterable, Sized, TypedDict, Union
 
 from datadog_checks.base.utils.serialization import json
 
@@ -74,15 +74,11 @@ class SchemaCollector(ABC):
                     self._log.warning("database has no name %v", database)
                     continue
                 with self._get_cursor(database_name) as cursor:
-                    # Get the next row from the cursor
-                    next_row = self._get_next(cursor)
-                    while next_row:
-                        self._queued_rows.append(self._map_row(database, next_row))
+                    row_count = len(cursor)
+                    for i, row in enumerate(cursor):
+                        self._queued_rows.append(self._map_row(database, row))
                         self._total_rows_count += 1
-                        # Because we're iterating over a cursor we need to try to get
-                        # the next row to see if we've reached the last row
-                        next_row = self._get_next(cursor)
-                        is_last_payload = database == databases[-1] and next_row is None
+                        is_last_payload = database == databases[-1] and i == row_count - 1
                         self.maybe_flush(is_last_payload)
                 self._log.debug("Completed collection of schemas for database %s", database_name)
         except Exception as e:
@@ -163,7 +159,7 @@ class SchemaCollector(ABC):
         raise NotImplementedError("Subclasses must implement _get_databases")
 
     @abstractmethod
-    def _get_cursor(self, database):
+    def _get_cursor(self, database) -> Union[Sized, Iterable[dict]]:
         """
         Returns a cursor for the given database.
         Subclasses should override this method to return the cursor for the given database.
