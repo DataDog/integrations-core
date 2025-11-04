@@ -94,7 +94,7 @@ class Integration:
 
     @cached_property
     def normalized_display_name(self) -> str:
-        display_name = self.manifest.get('/assets/integration/source_type_name', self.name)
+        display_name = self.display_name
         normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
         normalized_integration = re.sub("_+", "_", normalized_integration)
         normalized_integration = normalized_integration.strip("_")
