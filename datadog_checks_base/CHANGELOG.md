@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.23.0 / 2025-10-31
+
+***Added***:
+
+* Bump ddtrace to version 3.16.4 ([#21773](https://github.com/DataDog/integrations-core/pull/21773))
+
 ## 37.22.1 / 2025-10-29
 
 ***Fixed***:
@@ -20,7 +26,7 @@
 * Update CA certificate loading logic to not load certificates when `tls_verify` is false ([#21607](https://github.com/DataDog/integrations-core/pull/21607))
 * Add `certifi` fallback for missing default CA certificates ([#21609](https://github.com/DataDog/integrations-core/pull/21609))
 
-## 37.21.1 / 2025-10-09
+## 37.21.1 / 2025-10-09 / Agent 7.72.0
 
 ***Fixed***:
 
