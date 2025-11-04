@@ -8,9 +8,35 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Gain insights into Kandji logs.",
     "title": "Kandji",
-    "media": [],
+    "media": [
+      {
+        "caption": "Kandji - Overview",
+        "image_url": "images/kandji_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Kandji - Audit",
+        "image_url": "images/kandji_audit_1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Kandji - Audit",
+        "image_url": "images/kandji_audit_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Kandji - Threat Insights",
+        "image_url": "images/kandji_threat_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Kandji - Detections",
+        "image_url": "images/kandji_detection.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Cloud",
       "Category::Log Collection",
@@ -29,6 +55,15 @@
       "events": {
         "creates_events": false
       }
+    },
+    "dashboards": {
+      "Kandji - Overview": "assets/dashboards/kandji_overview.json",
+      "Kandji - Audit": "assets/dashboards/kandji_audit.json",
+      "Kandji - Threat Insights": "assets/dashboards/kandji_threat_insights.json",
+      "Kandji - Detections": "assets/dashboards/kandji_detections.json"
+    },
+    "logs": {
+      "source": "kandji"
     }
   },
   "author": {
