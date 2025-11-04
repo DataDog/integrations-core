@@ -14,7 +14,6 @@ files:
   - template: instances
     options:
     - name: server
-      required: true
       description: The hostname used to connect to the system.
       value:
         type: string
@@ -52,7 +51,7 @@ files:
       description: |
         The compression algorithm to use. The default is no compression.
         If br is specified, the brotli library must be installed separately.
-        
+
         Valid values are:
           - lz4
           - zstd
@@ -74,6 +73,51 @@ files:
       value:
         type: boolean
         example: True
+    - name: dbm
+      description: |
+        Enable Database Monitoring (DBM) to collect query samples and execution plans.
+        This feature provides deep observability into query performance.
+      value:
+        type: boolean
+        example: false
+    - name: query_samples
+      description: |
+        Configuration for collecting query samples when Database Monitoring (DBM) is enabled.
+        Query samples provide insights into the queries being executed on your ClickHouse instance.
+      options:
+        - name: enabled
+          description: Enable collection of query samples.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            The interval in seconds between query sample collections.
+            Lower values provide more granular data but increase overhead.
+          value:
+            type: number
+            example: 10
+        - name: samples_per_hour_per_query
+          description: |
+            The maximum number of samples to collect per unique query signature per hour.
+            This helps limit the volume of data collected while still providing useful insights.
+          value:
+            type: number
+            example: 15
+        - name: seen_samples_cache_maxsize
+          description: |
+            The maximum size of the cache used to track which query samples have been collected.
+            A larger cache can help avoid collecting duplicate samples.
+          value:
+            type: number
+            example: 10000
+        - name: run_sync
+          description: |
+            Whether to run query sample collection synchronously in the check run.
+            Set to false (default) to run asynchronously in a separate thread.
+          value:
+            type: boolean
+            example: false
     - template: instances/db
       overrides:
         custom_queries.value.example:
