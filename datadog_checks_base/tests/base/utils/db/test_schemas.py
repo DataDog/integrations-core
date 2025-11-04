@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import contextmanager
-from typing import Iterable, Sized
 
 import pytest
 
@@ -52,25 +51,6 @@ class TestDatabaseCheck(DatabaseCheck):
         return self._cloud_metadata
 
 
-class TestCursor(Iterable, Sized):
-    __test__ = False
-    def __init__(self, rows: list[dict]):
-        self._rows = rows
-        self._index = 0
-
-    def __iter__(self):
-        return self
-
-    def __len__(self):
-        return len(self._rows)
-
-    def __next__(self):
-        if self._index < len(self._rows):
-            row = self._rows[self._index]
-            self._index += 1
-            return row
-        raise StopIteration
-
 class TestSchemaCollector(SchemaCollector):
     __test__ = False
 
@@ -84,7 +64,7 @@ class TestSchemaCollector(SchemaCollector):
 
     @contextmanager
     def _get_cursor(self, database: str):
-        yield TestCursor(self._rows)
+        yield {}
 
     def _get_next(self, _cursor):
         if self._row_index < len(self._rows):
