@@ -343,7 +343,8 @@ def dd_environment(full_e2e_config):
 
     conditions += [CheckDockerLogs(compose_file, completion_message)]
 
-    with docker_run(
-        compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3, capture=False
-    ):
-        yield full_e2e_config, E2E_METADATA
+    # with docker_run(
+    #     compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3, capture=False
+    # ):
+    #     yield full_e2e_config, E2E_METADATA
+    return full_e2e_config, E2E_METADATA

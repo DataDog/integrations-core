@@ -14,5 +14,5 @@ services:
       - TZ=${TZ}
     ports:
       - "1433:1433"
-    volumes:
-      - ${DD_LOG_1}:/var/opt/mssql/log/errorlog
+    # volumes:
+    #   - ${DD_LOG_1}:/var/opt/mssql/log/errorlog

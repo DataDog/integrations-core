@@ -8,6 +8,7 @@ import contextlib
 from typing import TYPE_CHECKING, TypedDict
 
 import orjson as json
+
 from datadog_checks.sqlserver.utils import execute_query
 
 if TYPE_CHECKING:
@@ -44,16 +45,19 @@ WHERE s.name NOT IN ('sys', 'information_schema')
 
 TABLES_IN_SCHEMA_QUERY = """
 SELECT
-    object_id AS table_id, name AS table_name
+    object_id AS table_id, name AS table_name, schema_id
 FROM
     sys.tables
 """
 
 COLUMN_QUERY = """
 SELECT
-    column_name AS name, data_type, column_default, is_nullable AS nullable , table_name, ordinal_position
+    c.name, t.name as data_type, dc.definition as column_default, c.is_nullable AS nullable, c.collation_name, c.precision, c.scale, c.max_length
 FROM
-    INFORMATION_SCHEMA.COLUMNS
+    sys.columns c
+    INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+    LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id
+WHERE c.object_id = schema_tables.table_id
 """
 
 PARTITIONS_QUERY = """
@@ -72,8 +76,9 @@ SELECT
 FROM
     sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id
     AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+WHERE i.object_id = schema_tables.table_id
 GROUP BY i.object_id, i.name, i.type,
-    i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled;
+    i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled
 """
 
 INDEX_QUERY_PRE_2017 = """
@@ -93,6 +98,7 @@ SELECT
         FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS column_names
 FROM
     sys.indexes i
+WHERE i.object_id = schema_tables.table_id
 GROUP BY
     i.object_id,
     i.name,
@@ -101,7 +107,7 @@ GROUP BY
     i.is_unique,
     i.is_primary_key,
     i.is_unique_constraint,
-    i.is_disabled;
+    i.is_disabled
 """
 
 FOREIGN_KEY_QUERY = """
@@ -117,12 +123,13 @@ SELECT
 FROM
     sys.foreign_keys AS FK
     JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
+WHERE FK.parent_object_id = schema_tables.table_id    
 GROUP BY
     FK.name,
     FK.parent_object_id,
     FK.referenced_object_id,
     FK.delete_referential_action_desc,
-    FK.update_referential_action_desc;
+    FK.update_referential_action_desc
 """
 
 FOREIGN_KEY_QUERY_PRE_2017 = """
@@ -151,7 +158,7 @@ GROUP BY
     FK.parent_object_id,
     FK.referenced_object_id,
     FK.delete_referential_action_desc,
-    FK.update_referential_action_desc;
+    FK.update_referential_action_desc
 """
 
 
@@ -216,18 +223,25 @@ class SQLServerSchemaCollector(SchemaCollector):
                 columns_query = COLUMN_QUERY
                 indexes_query = INDEX_QUERY
                 constraints_query = FOREIGN_KEY_QUERY
-                column_columns = "'name':columns.name, 'column_type':columns.column_type, 'default':columns.default,"
-                "'nullable':columns.nullable, 'ordinal_position':columns.ordinal_position,"
-                "'column_key':columns.column_key"
-                index_columns = "'name':indexes.name, 'collation':indexes.collation, 'cardinality':indexes.cardinality,"
-                "'index_type':indexes.index_type, 'seq_in_index':indexes.seq_in_index,"
-                "'column_name':indexes.column_name,"
-                "'sub_part':indexes.sub_part, 'packed':indexes.packed, 'nullable':indexes.nullable,"
-                "'non_unique':indexes.non_unique"
-                constraint_columns = "'name':constraints.name, 'constraint_schema':constraints.constraint_schema,"
-                "'table_name':constraints.table_name, 'referenced_table_schema':constraints.referenced_table_schema,"
-                "'referenced_table_name':constraints.referenced_table_name,"
-                "'referenced_column_names':constraints.referenced_column_names"
+                column_columns = """'name':columns.name, 
+                'column_type':columns.column_type, 
+                'column_default':columns.column_default,
+                'nullable':columns.nullable, 
+                'ordinal_position':columns.ordinal_position"""
+                index_columns = """'name':indexes.name,
+                'type':indexes.type, 
+                'is_unique':indexes.is_unique,
+                'is_primary_key':indexes.is_primary_key,
+                'is_unique_constraint':indexes.is_unique_constraint,
+                'is_disabled':indexes.is_disabled,
+                'column_names':indexes.column_names"""
+                constraint_columns = """'foreign_key_name':constraints.foreign_key_name, 
+                'referencing_table':constraints.referencing_table,
+                'referencing_column':constraints.referencing_column, 
+                'referenced_table':constraints.referenced_table,
+                'referenced_column':constraints.referenced_column, 
+                'delete_action':constraints.delete_action,
+                'update_action':constraints.update_action"""
                 # partition_ctes = (
                 #     f"""
                 #     ,
@@ -272,40 +286,26 @@ class SQLServerSchemaCollector(SchemaCollector):
                     tables AS (
                         {tables_query}
                     ),
-                    schema_tables AS (
-                        SELECT schemas.schema_name, schemas.schema_id, schemas.owner_name
+                    schema_tables AS (                        
+                        SELECT TOP {limit} schemas.schema_name, schemas.schema_id, schemas.owner_name,
                         tables.table_id, tables.table_name
                         FROM schemas
                         LEFT JOIN tables ON schemas.schema_id = tables.schema_id
                         ORDER BY schemas.schema_name, tables.table_name
-                        LIMIT {limit}
-                    ),
-                    columns AS (
-                        {columns_query}
-                    ),
-                    indexes AS (
-                        {indexes_query}
-                    ),
-                    constraints AS (
-                        {constraints_query}
                     )
+                    
                     {partition_ctes}
-                    SELECT * FROM (
+                    
                     SELECT schema_tables.schema_name, schema_tables.table_name,
-                        json_arrayagg(json_object({column_columns})) columns,
-                        json_arrayagg(json_object({index_columns})) indexes,
-                        json_arrayagg(json_object({constraint_columns})) foreign_keys
+                        json_query(({columns_query} FOR JSON PATH), '$') as columns
+                        , json_query(({indexes_query} FOR JSON PATH), '$') as indexes
+                        , json_query(({constraints_query} FOR JSON PATH), '$') as foreign_keys
                         {partition_selects}
                     FROM schema_tables
-                        LEFT JOIN columns ON schema_tables.table_name = columns.table_name
-                            and schema_tables.schema_name = columns.schema_name
-                        LEFT JOIN indexes ON indexes.object_id = schema_tables.table_id
-                        LEFT JOIN constraints ON constraints.parent_object_id = schema_tables.table_id
                         {partition_joins}
-                    GROUP BY schema_tables.schema_name, schema_tables.table_name
-                    ) t
                     ;
                 """
+                # print(query)
                 # cursor.execute("SET SESSION MAX_EXECUTION_TIME=60000;")
                 cursor.execute(query)
                 yield cursor

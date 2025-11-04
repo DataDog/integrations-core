@@ -135,14 +135,14 @@ class SQLServer(DatabaseCheck):
         self._agent_hostname = None
         self._database_hostname = None
         self._database_identifier = None
-        self.connection = None
+        self._connection = None
         self.failed_connections = {}
         self.instance_metrics = []
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
-        self.cloud_metadata = self._config.cloud_metadata
+        self._cloud_metadata = self._config.cloud_metadata
         self.tag_manager = TagManager(normalizer=lambda tag: self.normalize_tag(tag).lower())
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
 
@@ -362,6 +362,17 @@ class SQLServer(DatabaseCheck):
             self._database_hostname = self.resolve_db_host()
         return self._database_hostname
 
+    @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
+
+    @property
+    def dbms_version(self):
+        return "{},{}".format(
+            self.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+        )
+
     def load_static_information(self):
         engine_edition_reloaded = False
         expected_keys = {
@@ -459,9 +470,15 @@ class SQLServer(DatabaseCheck):
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
 
+    @property
+    def connection(self):
+        if self._connection is None:
+            self.initialize_connection()
+        return self._connection
+
     def initialize_connection(self):
         # Initialize the connection object once
-        self.connection = Connection(
+        self._connection = Connection(
             init_config=self.init_config,
             instance_config=self.instance,
             service_check_handler=self.handle_service_check,
@@ -1083,10 +1100,7 @@ class SQLServer(DatabaseCheck):
                 "dbms": "sqlserver",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
-                "dbms_version": "{},{}".format(
-                    self.static_info_cache.get(STATIC_INFO_VERSION, ""),
-                    self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-                ),
+                "dbms_version": self.dbms_version,
                 "integration_version": __version__,
                 "tags": self.tag_manager.get_tags(),
                 "timestamp": time.time() * 1000,

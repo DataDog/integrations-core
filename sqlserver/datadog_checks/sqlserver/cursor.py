@@ -30,3 +30,7 @@ class CommenterCursorWrapper:
         # This method ensures that any other attributes or methods not explicitly defined here
         # are passed through to the underlying cursor.
         return getattr(self.__cursor, item)
+
+    def fetchall_dict(self):
+        columns = [i[0] for i in self.__cursor.description]
+        return [dict(zip(columns, row)) for row in self.__cursor.fetchall()]

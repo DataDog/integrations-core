@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from abc import abstractmethod
+
 from . import AgentCheck
 
 
@@ -22,21 +24,26 @@ class DatabaseCheck(AgentCheck):
         self.event_platform_event(raw_event, "dbm-health")
 
     @property
+    @abstractmethod
     def reported_hostname(self) -> str | None:
         raise NotImplementedError("reported_hostname is not implemented for this check")
 
     @property
+    @abstractmethod
     def database_identifier(self) -> str:
         raise NotImplementedError("database_identifier is not implemented for this check")
 
     @property
+    @abstractmethod
     def dbms_version(self) -> str:
         raise NotImplementedError("dbms_version is not implemented for this check")
 
     @property
+    @abstractmethod
     def tags(self) -> list[str]:
         raise NotImplementedError("tags is not implemented for this check")
 
     @property
+    @abstractmethod
     def cloud_metadata(self) -> dict:
         raise NotImplementedError("cloud_metadata is not implemented for this check")

@@ -2,27 +2,29 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Callable, Optional
+
 import pytest
 
-from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
 from datadog_checks.sqlserver import SQLServer
-from . import common
+from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
 
+from . import common
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
 @pytest.fixture
-def dbm_instance(instance_basic):
-    instance_basic['dbm'] = True
-    instance_basic['min_collection_interval'] = 0.1
-    instance_basic['query_samples'] = {'enabled': False}
-    instance_basic['query_activity'] = {'enabled': False}
-    instance_basic['query_metrics'] = {'enabled': False}
-    instance_basic['collect_resources'] = {'enabled': False, 'run_sync': True}
-    instance_basic['collect_settings'] = {'enabled': False, 'run_sync': True}
-    instance_basic['collect_schemas'] = {'enabled': True, 'run_sync': True}
-    return instance_basic
+def dbm_instance(instance_docker):
+    instance_docker['dbm'] = True
+    instance_docker['min_collection_interval'] = 0.1
+    instance_docker['query_samples'] = {'enabled': False}
+    instance_docker['query_activity'] = {'enabled': False}
+    instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['collect_resources'] = {'enabled': False, 'run_sync': True}
+    instance_docker['collect_settings'] = {'enabled': False, 'run_sync': True}
+    instance_docker['collect_schemas'] = {'enabled': True, 'run_sync': True}
+    return instance_docker
+
 
 @pytest.fixture(scope="function")
 def integration_check() -> Callable[[dict, Optional[dict]], SQLServer]:
@@ -44,13 +46,27 @@ def test_get_cursor(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     collector = SQLServerSchemaCollector(check)
 
-    with collector._get_cursor('datadog_test') as cursor:
+    with collector._get_cursor('datadog_test_schemas') as cursor:
         assert cursor is not None
         schemas = []
-        for row in cursor:
+        rows = cursor.fetchall_dict()
+        for row in rows:
             schemas.append(row['schema_name'])
 
-        assert set(schemas) == {'datadog_test_schemas', 'datadog', 'datadog_test_schemas_second', 'testdb'}
+        assert set(schemas) == {
+            'db_accessadmin',
+            'db_denydatawriter',
+            'test_schema',
+            'db_datawriter',
+            'db_ddladmin',
+            'db_datareader',
+            'db_securityadmin',
+            'db_denydatareader',
+            'db_backupoperator',
+            'dbo',
+            'guest',
+            'db_owner',
+        }
 
 
 def test_tables(dbm_instance, integration_check):
@@ -64,7 +80,16 @@ def test_tables(dbm_instance, integration_check):
             if row['table_name']:
                 tables.append(row['table_name'])
 
-    assert set(tables) =={'cities', 'RestaurantReviews', 'cities_partitioned', 'users', 'Restaurants', 'ϑings', 'landmarks', 'ts'} 
+    assert set(tables) == {
+        'cities',
+        'RestaurantReviews',
+        'cities_partitioned',
+        'users',
+        'Restaurants',
+        'ϑings',
+        'landmarks',
+        'ts',
+    }
 
 
 # def test_columns(dbm_instance, integration_check):
