@@ -75,6 +75,8 @@ class SchemaCollector(ABC):
                     continue
                 with self._get_cursor(database_name) as cursor:
                     # Get the next row from the cursor
+                    # We need to know when we've reached the last row so we can efficiently flush the last payload
+                    # without an empty final payload
                     next_row = self._get_next(cursor)
                     while next_row:
                         self._queued_rows.append(self._map_row(database, next_row))
