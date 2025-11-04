@@ -27,7 +27,7 @@ pipeline:
         - "2025-10-22T15:49:41-0400 [INFO] [entry_service:Summarization:1] 127.0.0.1:50870 (scheme=http,method=POST,path=/summarize,type=application/json,length=227) (status=200,type=text/plain; charset=utf-8,length=407) 5890.581ms (trace=ab27d3de318c77adc1a75e34786fb557,span=29583fecc118996f,sampled=0,service.name=Summarization)"
       grok:
         matchRules: |
-          general %{_timestamp} \[%{word:level}\] \[%{_component}\] %{_client} \(%{notSpace:request:keyvalue("=","/:")}\) \(%{_response}\) %{_latency} \(%{notSpace:tracing:keyvalue}\).*
+          general %{_timestamp} \[%{word:level}\] \[%{_component}\] %{_client} \(%{data:request:keyvalue("=","/:")}\) \(%{_response}\) %{_latency} \(%{data:tracing:keyvalue}\).*
         supportRules: |
           _timestamp %{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
           _component %{word:component_name}\:%{word:service.name}\:%{number:service.instance}
