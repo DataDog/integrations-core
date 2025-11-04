@@ -110,7 +110,7 @@ class ConstantRateLimiter:
 
     def __init__(self, rate_limit_s, max_sleep_chunk_s=5):
         """
-        :param rate_limit_s: rate limit in seconds
+        :param rate_limit_s: rate limit in executions per second
         :param max_sleep_chunk_s: maximum size of each sleep chunk while waiting for the next period
         """
         self.rate_limit_s = max(rate_limit_s, 0)
@@ -305,7 +305,9 @@ class DBMAsyncJob(object):
     ):
         self._check = check
         self._config_host = config_host
+        # The min_collection_interval is the expected collection interval for the main check
         self._min_collection_interval = min_collection_interval
+        self._expected_collection_interval = 1 / rate_limit if rate_limit > 0 else 0
         # map[dbname -> psycopg connection]
         self._log = get_check_logger()
         self._job_loop_future = None
@@ -358,12 +360,12 @@ class DBMAsyncJob(object):
             if (
                 hasattr(self._check, 'health')
                 and self._enable_missed_collection_event
-                and self._min_collection_interval >= 1
+                and self._expected_collection_interval >= 1
                 and self._last_run_start
             ):
                 # Assume a collection interval of less than 1 second is an attempt to run the job in a loop
                 elapsed_time = time.time() - self._last_run_start
-                if elapsed_time > self._min_collection_interval:
+                if elapsed_time > self._expected_collection_interval:
                     # Missed a collection interval, submit a health event for each feature that depends on this job
                     for feature in self._features:
                         self._check.health.submit_health_event(
@@ -377,8 +379,10 @@ class DBMAsyncJob(object):
                             data={
                                 "dbms": self._dbms,
                                 "job_name": self._job_name,
-                                "last_run_start": self._last_run_start,
-                                "elapsed_time": (time.time() - self._last_run_start) * 1000,
+                                # send in ms for consistency with other metrics
+                                "last_run_start": self._last_run_start * 1000,
+                                "elapsed_time": elapsed_time * 1000,
+                                "expected_collection_interval": self._expected_collection_interval * 1000,
                                 "feature": feature,
                             },
                         )
