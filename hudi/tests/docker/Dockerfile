@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM amazoncorretto:8-alpine-jdk
 
 ARG SPARK_VERSION
 ARG HADOOP_VERSION
