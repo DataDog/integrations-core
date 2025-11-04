@@ -7,6 +7,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
+from .statement_samples import ClickhouseStatementSamples
 from .utils import ErrorSanitizer
 
 
@@ -29,6 +30,10 @@ class ClickhouseCheck(AgentCheck):
         self._tls_ca_cert = self.instance.get('tls_ca_cert', None)
         self._verify = self.instance.get('verify', True)
         self._tags = self.instance.get('tags', [])
+
+        # DBM-related properties
+        self._resolved_hostname = None
+        self._database_identifier = None
 
         # Add global tags
         self._tags.append('server:{}'.format(self._server))
@@ -58,10 +63,31 @@ class ClickhouseCheck(AgentCheck):
         )
         self.check_initializations.append(self._query_manager.compile_queries)
 
+        # Initialize statement samples if DBM is enabled
+        self._dbm_enabled = is_affirmative(self.instance.get('dbm', False))
+        self._query_samples_config = self.instance.get('query_samples', {})
+        if self._dbm_enabled and self._query_samples_config.get('enabled', True):
+            # Create a simple config object for statement samples
+            class QuerySamplesConfig:
+                def __init__(self, config_dict):
+                    self.enabled = config_dict.get('enabled', True)
+                    self.collection_interval = config_dict.get('collection_interval', 10)
+                    self.run_sync = config_dict.get('run_sync', False)
+                    self.samples_per_hour_per_query = config_dict.get('samples_per_hour_per_query', 15)
+                    self.seen_samples_cache_maxsize = config_dict.get('seen_samples_cache_maxsize', 10000)
+
+            self.statement_samples = ClickhouseStatementSamples(self, QuerySamplesConfig(self._query_samples_config))
+        else:
+            self.statement_samples = None
+
     def check(self, _):
         self.connect()
         self._query_manager.execute()
         self.collect_version()
+
+        # Run statement samples if DBM is enabled
+        if self.statement_samples:
+            self.statement_samples.run_job_loop(self._tags)
 
     @AgentCheck.metadata_entrypoint
     def collect_version(self):
@@ -74,6 +100,29 @@ class ClickhouseCheck(AgentCheck):
 
     def execute_query_raw(self, query):
         return self._client.query(query).result_rows
+
+    def _get_debug_tags(self):
+        """Return debug tags for metrics"""
+        return ['server:{}'.format(self._server)]
+
+    @property
+    def reported_hostname(self):
+        """
+        Get the hostname to be reported in metrics and events.
+        """
+        if self._resolved_hostname is None:
+            self._resolved_hostname = self._server
+        return self._resolved_hostname
+
+    @property
+    def database_identifier(self):
+        """
+        Get a unique identifier for this database instance.
+        """
+        if self._database_identifier is None:
+            # Create a unique identifier based on server, port, and database name
+            self._database_identifier = "{}:{}:{}".format(self._server, self._port, self._db)
+        return self._database_identifier
 
     def validate_config(self):
         if not self._server:
