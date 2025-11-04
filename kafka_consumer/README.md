@@ -69,7 +69,7 @@ In addition to consumer lag metrics, this integration can collect comprehensive 
 
 All cluster monitoring metrics are tagged with `kafka_cluster_id` for easy filtering.
 
-**Note**: This feature is in preview and may increase Agent resource consumption on large clusters. Configuration and schema events are cached to reduce volume.
+**Note**: This feature is in Preview and may increase Agent resource consumption on large clusters. The integration caches configuration and schema events to reduce volume.
 
 Example configuration:
 ```yaml
