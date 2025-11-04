@@ -600,7 +600,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 tags.append(f"{new_header}:{value}")
 
                 if new_header == "pid":
-                    tags.extend(tagger.tag(f"process://{value}", tagger.ORCHESTRATOR))
+                    pidtags = tagger.tag(f"process://{value}", tagger.ORCHESTRATOR)
+                    if pidtags:  # Guard against tagger.tag returning None
+                        tags.extend(pidtags)
 
                 if header == "JOBID" and value.isdigit():
                     job_id = value
