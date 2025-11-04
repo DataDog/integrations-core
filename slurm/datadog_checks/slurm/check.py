@@ -600,6 +600,8 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 tags.append(f"{new_header}:{value}")
 
                 if new_header == "pid":
+                    # Example gpu tags being returned:
+                    # ['gpu_vendor:nvidia', 'gpu_device:tesla_v100', 'gpu_uuid:gpu_xxxx...']
                     pidtags = tagger.tag(f"process://{value}", tagger.ORCHESTRATOR)
                     if pidtags:  # Guard against tagger.tag returning None
                         tags.extend(pidtags)
