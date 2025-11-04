@@ -90,7 +90,14 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
         if current_check.name.startswith('datadog_checks_'):
             continue
 
-        metric_prefix = current_check.manifest.get("/assets/integration/metrics/prefix", "")
+        # If the manifest exists, the metrics prefix must be defined in it. If it does not exist we can use the one
+        # defined in the repository ddev overrides. We should not default to overrides if the manifest does not include
+        # a metrics prefix because we want to validate that manifest files include it.
+        if current_check.manifest.path.is_file():
+            metric_prefix = current_check.manifest.get("/assets/integration/metrics/prefix", "")
+        else:
+            metric_prefix = app.repo.config.get(f"/overrides/validate/metrics-prefix/{current_check.name}", "")
+
         metadata_file = current_check.metrics_file
 
         # To make logging less verbose, common errors are counted for current check
