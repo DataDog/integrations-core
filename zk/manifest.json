@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "01aee33c-0c85-4800-ab79-c02a25da04fa",
   "app_id": "zookeeper",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

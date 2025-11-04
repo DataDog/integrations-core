@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "bd010509-c47d-49ed-a9a7-d8c699c88f4c",
   "app_id": "klaviyo",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -10,7 +11,22 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Klaviyo marketing and eCommerce events.",
     "title": "Klaviyo",
-    "media": [],
+    "media": [
+      {
+        "caption": "Klaviyo - Marketing Overview",
+        "image_url": "images/klaviyo_marketing_overview_part1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Klaviyo - Marketing Overview (Continued)",
+        "image_url": "images/klaviyo_marketing_overview_part2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Klaviyo - eCommerce Overview",
+        "image_url": "images/klaviyo_ecommerce_overview.png",
+        "media_type": "image"
+      }],
     "classifier_tags": [
       "Category::Log Collection",
       "Submitted Data Type::Logs",
@@ -28,6 +44,19 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+        "Klaviyo - Marketing Overview": "assets/dashboards/klaviyo_marketing_overview.json",
+        "Klaviyo - eCommerce Overview": "assets/dashboards/klaviyo_ecommerce_overview.json"
+    },
+    "logs": {
+        "source": "klaviyo"
+    },
+    "monitors": {
+      "High number of refunded orders" : "assets/monitors/high_number_of_refunds.json",
+      "High percentage of dropped or bounced email" : "assets/monitors/high_percentage_of_email_failures.json",
+      "High percentage of email marked as spam" : "assets/monitors/high_percentage_of_email_marked_as_spam.json",
+      "High percentage of SMS delivery failures" : "assets/monitors/high_percentage_of_sms_failures.json"
     }
   },
   "author": {

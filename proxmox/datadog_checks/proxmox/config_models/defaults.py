@@ -24,6 +24,28 @@ def instance_auth_type():
     return 'basic'
 
 
+def instance_collect_tasks():
+    return False
+
+
+def instance_collected_task_types():
+    return [
+        'qmstart',
+        'qmstop',
+        'qmshutdown',
+        'qmreboot',
+        'qmigrate',
+        'qmsuspend',
+        'vzstart',
+        'vzshutdown',
+        'vzsuspend',
+        'startall',
+        'stopall',
+        'suspendall',
+        'aptupdate',
+    ]
+
+
 def instance_disable_generic_tags():
     return False
 

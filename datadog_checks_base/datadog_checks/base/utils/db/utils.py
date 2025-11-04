@@ -21,6 +21,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.db.health import DEFAULT_COOLDOWN, HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.types import Transformer  # noqa: F401
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.tracing import INTEGRATION_TRACING_SERVICE_NAME, tracing_enabled
@@ -107,21 +108,33 @@ class ConstantRateLimiter:
     Basic rate limiter that sleeps long enough to ensure the rate limit is not exceeded. Not thread safe.
     """
 
-    def __init__(self, rate_limit_s):
+    def __init__(self, rate_limit_s, max_sleep_chunk_s=5):
         """
-        :param rate_limit_s: rate limit in seconds
+        :param rate_limit_s: rate limit in executions per second
+        :param max_sleep_chunk_s: maximum size of each sleep chunk while waiting for the next period
         """
         self.rate_limit_s = max(rate_limit_s, 0)
         self.period_s = 1.0 / self.rate_limit_s if self.rate_limit_s > 0 else 0
         self.last_event = 0
+        self.max_sleep_chunk_s = max(0, max_sleep_chunk_s)
 
-    def update_last_time_and_sleep(self):
+    def update_last_time_and_sleep(self, cancel_event: Optional[threading.Event] = None):
         """
         Sleeps long enough to enforce the rate limit
         """
-        elapsed_s = time.time() - self.last_event
-        sleep_amount = max(self.period_s - elapsed_s, 0)
-        time.sleep(sleep_amount)
+        if self.period_s <= 0:
+            self.update_last_time()
+            return
+
+        deadline = self.last_event + self.period_s
+        while True:
+            now = time.time()
+            remaining = deadline - now
+            if remaining <= 0:
+                break
+            if cancel_event is not None and cancel_event.is_set():
+                break
+            time.sleep(min(remaining, self.max_sleep_chunk_s if self.max_sleep_chunk_s > 0 else remaining))
         self.update_last_time()
 
     def shall_execute(self):
@@ -275,15 +288,26 @@ class DBMAsyncJob(object):
         min_collection_interval=15,
         dbms="TODO",
         rate_limit=1,
+        max_sleep_chunk_s=1,
         run_sync=False,
         enabled=True,
         expected_db_exceptions=(),
         shutdown_callback=None,
         job_name=None,
+        # Some users may want to disable the missed collection event,
+        # for example if they set the collection interval intentionally low
+        # to effectively run the job in a loop
+        enable_missed_collection_event=True,
+        # List of features depenedent on the job running
+        # Defaults to [None] during init so that if no features are specified there will
+        # still be health events submitted for the job
+        features=None,
     ):
         self._check = check
         self._config_host = config_host
+        # The min_collection_interval is the expected collection interval for the main check
         self._min_collection_interval = min_collection_interval
+        self._expected_collection_interval = 1 / rate_limit if rate_limit > 0 else 0
         # map[dbname -> psycopg connection]
         self._log = get_check_logger()
         self._job_loop_future = None
@@ -295,11 +319,16 @@ class DBMAsyncJob(object):
         self._last_check_run = 0
         self._shutdown_callback = shutdown_callback
         self._dbms = dbms
-        self._rate_limiter = ConstantRateLimiter(rate_limit)
+        self._rate_limiter = ConstantRateLimiter(rate_limit, max_sleep_chunk_s=max_sleep_chunk_s)
+        self._max_sleep_chunk_s = max_sleep_chunk_s
         self._run_sync = run_sync
         self._enabled = enabled
         self._expected_db_exceptions = expected_db_exceptions
         self._job_name = job_name
+        self._enable_missed_collection_event = enable_missed_collection_event
+        self._features = features
+        if self._features is None:
+            self._features = [None]
 
     def cancel(self):
         """
@@ -328,13 +357,46 @@ class DBMAsyncJob(object):
         elif self._job_loop_future is None or not self._job_loop_future.running():
             self._job_loop_future = DBMAsyncJob.executor.submit(self._job_loop)
         else:
+            if (
+                hasattr(self._check, 'health')
+                and self._enable_missed_collection_event
+                and self._expected_collection_interval >= 1
+                and self._last_run_start
+            ):
+                # Assume a collection interval of less than 1 second is an attempt to run the job in a loop
+                elapsed_time = time.time() - self._last_run_start
+                if elapsed_time > self._expected_collection_interval:
+                    # Missed a collection interval, submit a health event for each feature that depends on this job
+                    for feature in self._features:
+                        self._check.health.submit_health_event(
+                            name=HealthEvent.MISSED_COLLECTION,
+                            status=HealthStatus.WARNING,
+                            tags=self._job_tags,
+                            # Use a cooldown to avoid spamming if the job is missing the collection interval
+                            # in a flappy manner
+                            cooldown_time=DEFAULT_COOLDOWN,
+                            cooldown_values=[self._dbms, self._job_name],
+                            data={
+                                "dbms": self._dbms,
+                                "job_name": self._job_name,
+                                # send in ms for consistency with other metrics
+                                "last_run_start": self._last_run_start * 1000,
+                                "elapsed_time": elapsed_time * 1000,
+                                "expected_collection_interval": self._expected_collection_interval * 1000,
+                                "feature": feature,
+                            },
+                        )
+                    self._check.count(
+                        "dd.{}.async_job.missed_collection".format(self._dbms), 1, tags=self._job_tags, raw=True
+                    )
+
             self._log.debug("Job loop already running. job=%s", self._job_name)
 
     def _job_loop(self):
         try:
             self._log.info("[%s] Starting job loop", self._job_tags_str)
             while True:
-                if self._cancel_event.isSet():
+                if self._cancel_event.is_set():
                     self._log.info("[%s] Job loop cancelled", self._job_tags_str)
                     self._check.count("dd.{}.async_job.cancel".format(self._dbms), 1, tags=self._job_tags, raw=True)
                     break
@@ -353,7 +415,7 @@ class DBMAsyncJob(object):
                 else:
                     self._run_job_rate_limited()
         except Exception as e:
-            if self._cancel_event.isSet():
+            if self._cancel_event.is_set():
                 # canceling can cause exceptions if the connection is closed the middle of the check run
                 # in this case we still want to report it as a cancellation instead of a crash
                 self._log.debug("[%s] Job loop error after cancel: %s", self._job_tags_str, e)
@@ -380,6 +442,14 @@ class DBMAsyncJob(object):
                     tags=self._job_tags + ["error:crash-{}".format(type(e))],
                     raw=True,
                 )
+
+                if hasattr(self._check, 'health'):
+                    try:
+                        self._check.health.submit_exception_health_event(e, data={"job_name": self._job_name})
+                    except Exception as health_error:
+                        self._log.exception(
+                            "[%s] Failed to submit error health event", self._job_tags_str, health_error
+                        )
         finally:
             self._log.info("[%s] Shutting down job loop", self._job_tags_str)
             if self._shutdown_callback:
@@ -387,7 +457,7 @@ class DBMAsyncJob(object):
 
     def _set_rate_limit(self, rate_limit):
         if self._rate_limiter.rate_limit_s != rate_limit:
-            self._rate_limiter = ConstantRateLimiter(rate_limit)
+            self._rate_limiter = ConstantRateLimiter(rate_limit, max_sleep_chunk_s=self._max_sleep_chunk_s)
 
     def _run_sync_job_rate_limited(self):
         if self._rate_limiter.shall_execute():
@@ -396,12 +466,13 @@ class DBMAsyncJob(object):
 
     def _run_job_rate_limited(self):
         try:
+            self._last_run_start = time.time()
             self._run_job_traced()
         except:
             raise
         finally:
-            if not self._cancel_event.isSet():
-                self._rate_limiter.update_last_time_and_sleep()
+            if not self._cancel_event.is_set():
+                self._rate_limiter.update_last_time_and_sleep(cancel_event=self._cancel_event)
             else:
                 self._rate_limiter.update_last_time()
 
@@ -457,12 +528,13 @@ class TagManager:
     multiple times.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, normalizer: Optional[Callable[[Union[str, bytes]], str]] = None) -> None:
         self._tags: Dict[Union[str, TagType], List[str]] = {}
         self._cached_tag_list: Optional[tuple[str, ...]] = None
         self._keyless: TagType = TagType.KEYLESS
+        self._normalizer = normalizer
 
-    def set_tag(self, key: Optional[str], value: str, replace: bool = False) -> None:
+    def set_tag(self, key: Optional[str], value: str, replace: bool = False, normalize: bool = False) -> None:
         """
         Set a tag with the given key and value.
         If key is None or empty, the value is stored as a keyless tag.
@@ -471,7 +543,11 @@ class TagManager:
             value (str): The tag value
             replace (bool): If True, replaces all existing values for this key
                            If False, appends the value if it doesn't exist
+            normalize (bool): If True, applies tag normalization using the configured normalizer
         """
+        if normalize and self._normalizer:
+            value = self._normalizer(value)
+
         if not key:
             key = self._keyless
 
@@ -484,13 +560,14 @@ class TagManager:
             # Invalidate the cache since tags have changed
             self._cached_tag_list = None
 
-    def set_tags_from_list(self, tag_list: List[str], replace: bool = False) -> None:
+    def set_tags_from_list(self, tag_list: List[str], replace: bool = False, normalize: bool = False) -> None:
         """
         Set multiple tags from a list of strings.
         Strings can be in "key:value" format or just "value" format.
         Args:
             tag_list (List[str]): List of tags in "key:value" format or just "value"
             replace (bool): If True, replaces all existing tags with the new tags list
+            normalize (bool): If True, applies tag normalization using the configured normalizer
         """
         if replace:
             self._tags.clear()
@@ -499,11 +576,11 @@ class TagManager:
         for tag in tag_list:
             if ':' in tag:
                 key, value = tag.split(':', 1)
-                self.set_tag(key, value)
+                self.set_tag(key, value, normalize=normalize)
             else:
-                self.set_tag(None, tag)
+                self.set_tag(None, tag, normalize=normalize)
 
-    def delete_tag(self, key: Optional[str], value: Optional[str] = None) -> bool:
+    def delete_tag(self, key: Optional[str], value: Optional[str] = None, normalize: bool = False) -> bool:
         """
         Delete a tag or specific value for a tag.
         For keyless tags, use None or empty string as the key.
@@ -511,9 +588,13 @@ class TagManager:
             key (str): The tag key to delete, or None/empty for keyless tags
             value (str, optional): If provided, only deletes this specific value for the key.
                                  If None, deletes all values for the key.
+            normalize (bool): If True, applies tag normalization to the value for lookup
         Returns:
             bool: True if something was deleted, False otherwise
         """
+        if normalize and self._normalizer and value:
+            value = self._normalizer(value)
+
         if not key:
             key = self._keyless
 

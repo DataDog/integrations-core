@@ -100,7 +100,7 @@ To install the {integration_name} check on your host:
         install_info = third_party_install_info
         # Static fields
         license_header = ''
-        support_type = 'partner'
+        support_type = ''
         integration_links = ''
     if repo_choice == 'core':
         check_name = normalized_integration_name

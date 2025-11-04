@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "39909ffc-71f0-4c0c-b75e-9951f1ff7d10",
   "app_id": "proxmox",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -18,11 +19,13 @@
       "Category::OS & System",
       "Category::Cloud",
       "Category::Network",
+      "Category::Event Management",
       "Category::Metrics",
       "Category::Log Collection",
       "Offering::Integration",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Events"
     ]
   },
   "assets": {
@@ -61,6 +64,15 @@
     },
     "dashboards": {
       "Proxmox Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "CPU Usage is High on Proxmox VM": "assets/monitors/vm_cpu_usage.json",
+      "CPU Usage is High on Proxmox Node": "assets/monitors/node_cpu_usage.json",
+      "Memory Usage is High on Proxmox VM": "assets/monitors/vm_memory_usage.json",
+      "Memory Usage is High on Proxmox Node": "assets/monitors/node_memory_usage.json"
+    },
+    "saved_views": {
+      "proxmox_api_logs": "assets/saved_views/proxmox_api_logs.json"
     }
   },
   "author": {

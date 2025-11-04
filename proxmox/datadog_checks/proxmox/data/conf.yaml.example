@@ -50,6 +50,30 @@ instances:
     #
   - proxmox_server: http://localhost:8006/api2/json
 
+    ## @param collect_tasks - boolean - optional - default: false
+    ## Whether or not to collect Proxmox tasks as events.
+    #
+    # collect_tasks: true
+
+    ## @param collected_task_types - list of strings - optional
+    ## Which Proxmox task types to collect. When `collect_tasks` is enabled, the integration will collect
+    ## the following task types by default:
+    ##   - qmstart
+    ##   - qhstop
+    ##   - qmshutdown
+    ##   - qmreboot
+    ##   - qmigrate
+    ##   - qmsuspend
+    ##   - vzstart
+    ##   - vzshutdown
+    ##   - vzsuspend
+    ##   - startall
+    ##   - stopall
+    ##   - suspendall
+    ##   - aptupdate
+    #
+    # collected_task_types: []
+
     ## @param headers - mapping - optional
     ## Headers to use for every request. An Authorization header including the Proxmox API token is required
     ## for authentication for the REST API.
@@ -104,6 +128,30 @@ instances:
     ## Agent inside a Proxmox VM or Node, because in this scenario the host tags are unrelated to other metrics.
     #
     # empty_default_hostname: true
+
+    ## @param resource_filters - list of mappings - optional
+    ## Each filter in the list is composed of three parameters.
+    ## 'resource' is one of vm/node/container/storage/pool/sdn on which to apply the filter
+    ## 'patterns' is a list of matching regex, if any of those matches, the resource is monitored.
+    ## 'type' is either the include list (default) or exclude list. If a resource is both included and excluded, it is
+    ##        considered excluded.
+    ## 'property' is the kind of property on which to apply the filter and must be one of these values:
+    ##    - resource_name (default) to filter on the resource name (defined by Proxmox)
+    ##    - hostname (available only for VMs and nodes) to filter on the hostname
+    #
+    # resource_filters:
+    #   - resource: vm
+    #     property: hostname
+    #     patterns:
+    #     - .*
+    #   - resource: node
+    #     type: exclude
+    #     patterns:
+    #     - .+
+    #   - resource: container
+    #     type: include
+    #     patterns:
+    #     - thiscontainer
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
@@ -171,7 +219,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -194,7 +242,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #

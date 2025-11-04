@@ -2,12 +2,23 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
+from typing import ChainMap
+
 import mock
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.lustre import LustreCheck
-from datadog_checks.lustre.constants import CURATED_PARAMS, DEFAULT_STATS, EXTRA_STATS, JOBSTATS_PARAMS
+from datadog_checks.lustre.constants import (
+    CURATED_PARAMS,
+    DEFAULT_STATS,
+    EXTRA_STATS,
+    JOBID_TAG_PARAMS,
+    JOBSTATS_PARAMS,
+    TAGS_WITH_FILESYSTEM,
+    LustreParam,
+)
 
 from .metrics import (
     CLIENT_METRICS,
@@ -50,8 +61,9 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
         'node_type': node_type,
         'enable_extra_params': 'true',
         'enable_lnetctl_detailed': 'true',
-        'filesystems': [''],
+        'filesystems': ['*'],
     }
+    filesystem_tag_metric_prefixes = set()
     mapping = {
         'lctl get_param -ny version': 'all_version.txt',
         'lctl dl': dl_fixture,
@@ -59,9 +71,11 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
         'lnetctl net show': 'all_lnet_net.txt',
         'lnetctl peer show': 'all_lnet_peer.txt',
     }
-    for param in DEFAULT_STATS + EXTRA_STATS + JOBSTATS_PARAMS + CURATED_PARAMS:
+    for param in DEFAULT_STATS + EXTRA_STATS + JOBSTATS_PARAMS + JOBID_TAG_PARAMS + CURATED_PARAMS:
         mapping[f'lctl list_param {param.regex}'] = param.regex
         mapping[f'lctl get_param -ny {param.regex}'] = param.fixture
+        if any(wildcard in TAGS_WITH_FILESYSTEM for wildcard in param.wildcards):
+            filesystem_tag_metric_prefixes.add(f"lustre.{param.prefix}")
 
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [instance])
@@ -69,6 +83,8 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
 
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+        if any(metric.startswith(prefix) for prefix in filesystem_tag_metric_prefixes):
+            aggregator.assert_metric_has_tags(metric, tags=["filesystem:*"])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
@@ -81,18 +97,25 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
     ],
 )
 def test_jobstats(aggregator, mock_lustre_commands, node_type, fixture_file, expected_metrics):
-    instance = {'node_type': node_type}
-    mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
-        'lctl dl': f'{node_type}_dl_yaml.txt',
-        'lctl list_param': "all_list_param.txt",
-        'lctl get_param': fixture_file,
-    }
+    instance = {'node_type': node_type, 'filesystems': ['lustre']}
+
+    jobid_tag_commands = {f'lctl get_param -ny {param.regex}': f'{param.fixture}' for param in JOBID_TAG_PARAMS}
+    mapping = ChainMap(
+        {
+            'lctl get_param -ny version': 'all_version.txt',
+            'lctl dl': f'{node_type}_dl_yaml.txt',
+            'lctl list_param': "all_list_param.txt",
+            'lctl get_param': fixture_file,
+        },
+        jobid_tag_commands,
+    )
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [instance])
-        check.submit_jobstats_metrics(['lustre'])
+        check.submit_jobstats_metrics()
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tags(metric, tags=['jobid_var:disable', 'jobid_name:%e.%u'])
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.parametrize(
@@ -235,7 +258,7 @@ def test_submit_param_data(aggregator, instance, mock_lustre_commands):
     }
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [instance])
-        check.submit_param_data(DEFAULT_STATS, ['lustre'])
+        check.submit_param_data(DEFAULT_STATS)
 
     # Verify some general stats metrics are submitted
     expected_metrics = [
@@ -254,19 +277,23 @@ def test_extract_tags_from_param(mock_lustre_commands):
         'lctl dl': 'client_dl_yaml.txt',
     }
     with mock_lustre_commands(mapping):
-        check = LustreCheck('lustre', {}, [{}])
+        check = LustreCheck('lustre', {}, [{"filesystems": ["lustre"]}])
 
         # Test with wildcards
         tags = check._extract_tags_from_param(
             'mdc.*.stats', 'mdc.lustre-MDT0000-mdc-ffff8803f0d41000.stats', ('device_uuid',)
         )
-        assert tags == ['device_uuid:lustre-MDT0000-mdc-ffff8803f0d41000']
+        assert tags == ['device_uuid:lustre-MDT0000-mdc-ffff8803f0d41000', 'filesystem:lustre']
 
         # Test with multiple wildcards
         tags = check._extract_tags_from_param(
             'mdt.*.exports.*.stats', 'mdt.lustre-MDT0000.exports.172.31.16.218@tcp.stats', ('device_name', 'nid')
         )
-        assert tags == ['device_name:lustre-MDT0000', 'nid:172.31.16.218@tcp']
+        assert tags == ['device_name:lustre-MDT0000', 'filesystem:lustre', 'nid:172.31.16.218@tcp']
+
+        # Test with malformed IP
+        tags = check._extract_tags_from_param('mdt.*.stats', 'mdt.172.malformed.16.218@tcp.stats', ('nid',))
+        assert tags == []
 
         # Test with no wildcards
         tags = check._extract_tags_from_param('mds.MDS.mdt.stats', 'mds.MDS.mdt.stats', ())
@@ -473,3 +500,156 @@ def test_run_command_exceptions():
     # Test subprocess exception
     with mock.patch('subprocess.run', side_effect=Exception("Command failed")):
         assert check._run_command('lctl', 'test') == ''
+
+
+def test_node_type_determination_logging(caplog, mock_lustre_commands):
+    """Test logging for node type determination errors."""
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+    }
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            with mock.patch.object(LustreCheck, '_update_devices', side_effect=Exception("Device error")):
+                LustreCheck('lustre', {}, [{}])
+
+        log_text = caplog.text
+        assert 'Failed to determine node type:' in log_text
+
+
+def test_filesystem_discovery_logging(caplog, mock_lustre_commands):
+    """Test logging for filesystem discovery."""
+    filesystem = 'testfilesystem'
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lctl list_param mdt.*.job_stats': f'mdt.{filesystem}-MDT0000.job_stats',
+    }
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            LustreCheck('lustre', {}, [{'node_type': 'mds'}]).update()
+
+        log_text = caplog.text
+        assert 'Finding filesystems...' in log_text
+        assert f'Found filesystem(s): [\'{filesystem}\']' in log_text
+
+    mapping.update(
+        {
+            'lctl list_param mdt.*.job_stats': 'mdt.000.job_stats',
+        }
+    )
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            LustreCheck('lustre', {}, [{'node_type': 'mds'}]).update()
+
+        log_text = caplog.text
+        assert 'Finding filesystems...' in log_text
+        assert 'Failed to find filesystems: Nothing matched regex' in log_text
+
+
+def test_lnet_error_logging(caplog, mock_lustre_commands):
+    """Test logging for LNET data retrieval errors."""
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lnetctl stats show': 'invalid yaml',
+    }
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            check = LustreCheck('lustre', {}, [{}])
+            with mock.patch('yaml.safe_load', side_effect=Exception("YAML error")):
+                check._get_lnet_metrics('stats')
+
+        log_text = caplog.text
+        assert 'Could not get lnet stats, caught exception:' in log_text
+
+
+def test_parameter_filtering_logging(caplog, mock_lustre_commands):
+    """Test logging for parameter filtering based on node type and filesystem."""
+    wrong_filesystem_param = 'some.wrongfilesystem-MDT0000.param.mds'
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lctl list_param some.*.param.mds': wrong_filesystem_param,
+    }
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            check = LustreCheck('lustre', {}, [{'node_type': 'mds', 'filesystems': ['lustre']}])
+            params = {
+                LustreParam(
+                    regex="some.*.param.client",
+                    node_types=("client",),
+                    wildcards=("device_name",),
+                    prefix="",
+                    fixture="",
+                ),
+                LustreParam(
+                    regex="some.*.param.mds",
+                    node_types=("mds",),
+                    wildcards=("device_name",),
+                    prefix="",
+                    fixture="",
+                ),
+            }
+            check.submit_param_data(params)
+
+        log_text = caplog.text
+        assert 'Skipping param some.*.param.client for node type mds' in log_text
+        assert f'Skipping param {wrong_filesystem_param} as it did not match any filesystem' in log_text
+
+
+def test_changelog_logging(caplog, mock_lustre_commands):
+    """Test logging for changelog operations."""
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl': 'client_dl_yaml.txt',
+        'lfs changelog': 'test_changelog',
+    }
+
+    with mock_lustre_commands(mapping):
+        with caplog.at_level(logging.DEBUG):
+            check = LustreCheck('lustre', {}, [{}])
+
+            # Test changelog cursor error
+            with mock.patch.object(check, 'get_log_cursor', side_effect=Exception("Cursor error")):
+                check._get_changelog('lustre-MDT0000', 100)
+
+        log_text = caplog.text
+        assert 'Could not retrieve log cursor, assuming initialization' in log_text
+        assert 'Fetching changelog from index 0 to 100' in log_text
+        assert 'Collecting changelogs for:' in log_text
+
+
+@pytest.mark.parametrize(
+    'bin_path, should_pass',
+    [
+        pytest.param('/usr/sbin/lctl', True, id='valid_lctl'),
+        pytest.param('/usr/sbin/lnetctl', True, id='valid_lnetctl'),
+        pytest.param('/usr/bin/lfs', True, id='valid_lfs'),
+        pytest.param('/custom/path/lctl', True, id='custom_path_lctl'),
+        pytest.param('lctl', False, id='relative_path'),
+        pytest.param('./lctl', False, id='relative_with_dot'),
+        pytest.param('/bin/bash', False, id='shell_bash'),
+        pytest.param('/bin/sh', False, id='shell_sh'),
+        pytest.param('/usr/bin/zsh', False, id='shell_zsh'),
+        pytest.param('/usr/bin/python', False, id='unexpected_binary'),
+        pytest.param('/sbin/sudo', False, id='sudo_binary'),
+        pytest.param('/usr/bin/cat', False, id='cat_binary'),
+    ],
+)
+def test_sanitize_command(bin_path, should_pass):
+    """Test _sanitize_command with various binary paths."""
+    from datadog_checks.lustre.check import _sanitize_command
+
+    if should_pass:
+        # Should not raise an exception
+        _sanitize_command(bin_path)
+    else:
+        # Should raise ValueError
+        with pytest.raises(ValueError):
+            _sanitize_command(bin_path)

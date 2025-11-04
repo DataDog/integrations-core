@@ -1,982 +1,1320 @@
 {
-  "title": "Kubernetes DaemonSets Overview",
-  "description": "Our Kubernetes dashboard gives you broad visibility into the scale, status, and resource usage of your cluster and its containers. Further reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
-  "widgets": [
-    {
-      "id": 0,
-      "layout": {
-        "x": 30,
-        "y": 6,
-        "width": 14,
-        "height": 14
-      },
-      "definition": {
-        "title": "Ready",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {},
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
-            "aggregator": "last",
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "palette": "green_on_white",
-                "value": 0
-              }
-            ]
-          }
-        ],
-        "autoscale": true,
-        "precision": 0
-      }
-    },
-    {
-      "id": 1,
-      "layout": {
-        "x": 60,
-        "y": 42,
-        "width": 59,
-        "height": 14
-      },
-      "definition": {
-        "title": "Replicas Ready",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}",
-            "style": {
-              "palette": "green",
-              "line_type": "solid",
-              "line_width": "normal"
+    "title": "Kubernetes DaemonSets Overview",
+    "description": "Our Kubernetes dashboard gives you broad visibility into the scale, status, and resource usage of your cluster and its containers. Further reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 0,
+            "layout": {
+                "x": 30,
+                "y": 6,
+                "width": 14,
+                "height": 14
             },
-            "display_type": "area"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
+            "definition": {
+                "title": "Ready",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "green_on_white",
+                                "value": 0
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+                                "aggregator": "last"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            }
         },
-        "markers": []
-      }
-    },
-    {
-      "id": 4,
-      "layout": {
-        "x": 15,
-        "y": 6,
-        "width": 14,
-        "height": 14
-      },
-      "definition": {
-        "title": "Desired",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {},
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
-            "aggregator": "last",
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "palette": "green_on_white",
-                "value": 0
-              }
-            ]
-          }
-        ],
-        "autoscale": true,
-        "precision": 0
-      }
-    },
-    {
-      "id": 5,
-      "layout": {
-        "x": 0,
-        "y": 42,
-        "width": 59,
-        "height": 14
-      },
-      "definition": {
-        "title": "Replicas Desired",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}",
-            "style": {
-              "palette": "cool",
-              "line_type": "solid",
-              "line_width": "normal"
+        {
+            "id": 1,
+            "layout": {
+                "x": 60,
+                "y": 42,
+                "width": 59,
+                "height": 14
             },
-            "display_type": "area"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
+            "definition": {
+                "title": "Replicas Ready",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}"
+                            }
+                        ],
+                        "style": {
+                            "palette": "green",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "area"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            }
         },
-        "markers": []
-      }
-    },
-    {
-      "id": 6,
-      "layout": {
-        "x": 60,
-        "y": 57,
-        "width": 59,
-        "height": 14
-      },
-      "definition": {
-        "title": "Replicas Desired but Not Ready",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}-sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}",
-            "style": {
-              "palette": "warm",
-              "line_type": "solid",
-              "line_width": "normal"
+        {
+            "id": 4,
+            "layout": {
+                "x": 15,
+                "y": 6,
+                "width": 14,
+                "height": 14
             },
-            "display_type": "area"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
+            "definition": {
+                "title": "Desired",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "green_on_white",
+                                "value": 0
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+                                "aggregator": "last"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            }
         },
-        "markers": []
-      }
-    },
-    {
-      "id": 7,
-      "layout": {
-        "x": 0,
-        "y": 0,
-        "width": 119,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Overview",
-        "background_color": "gray",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 9,
-      "layout": {
-        "x": 90,
-        "y": 6,
-        "width": 29,
-        "height": 14
-      },
-      "definition": {
-        "title": "Replicas Ready",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        {
+            "id": 5,
+            "layout": {
+                "x": 0,
+                "y": 42,
+                "width": 59,
+                "height": 14
             },
-            "display_type": "area"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
+            "definition": {
+                "title": "Replicas Desired",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}"
+                            }
+                        ],
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "area"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            }
         },
-        "markers": []
-      }
-    },
-    {
-      "id": 10,
-      "layout": {
-        "x": 60,
-        "y": 21,
-        "width": 29,
-        "height": 14
-      },
-      "definition": {
-        "title": "Replicas Changes",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {},
-        "type": "change",
-        "requests": [
-          {
-            "q": "top(avg:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_replica_set}, 10, 'mean', 'desc')",
-            "compare_to": "hour_before",
-            "increase_good": true,
-            "order_by": "change",
-            "change_type": "absolute",
-            "order_dir": "desc"
-          }
-        ]
-      }
-    },
-    {
-      "id": 11,
-      "layout": {
-        "x": 90,
-        "y": 21,
-        "width": 29,
-        "height": 14
-      },
-      "definition": {
-        "title": "Replicas Not Ready",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}-sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        {
+            "id": 6,
+            "layout": {
+                "x": 60,
+                "y": 57,
+                "width": 59,
+                "height": 14
             },
-            "display_type": "area"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
+            "definition": {
+                "title": "Replicas Desired but Not Ready",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1 - query2"
+                            }
+                        ],
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "area"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            }
         },
-        "markers": []
-      }
-    },
-    {
-      "id": 12,
-      "layout": {
-        "x": 0,
-        "y": 36,
-        "width": 119,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Replicas by DaemonSets",
-        "background_color": "gray",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 13,
-      "layout": {
-        "x": 0,
-        "y": 72,
-        "width": 119,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Resources",
-        "background_color": "gray",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 14,
-      "layout": {
-        "x": 0,
-        "y": 84,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "CPU Usage by DaemonSet",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "exclude_null(sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set})",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        {
+            "id": 7,
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 119,
+                "height": 5
             },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
+            "definition": {
+                "type": "note",
+                "content": "Overview",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            }
         },
-        "markers": []
-      }
-    },
-    {
-      "id": 15,
-      "layout": {
-        "x": 60,
-        "y": 84,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "Memory Usage by DaemonSet",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "exclude_null(sum:kubernetes.memory.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_daemon_set})",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        {
+            "id": 9,
+            "layout": {
+                "x": 90,
+                "y": 6,
+                "width": 29,
+                "height": 14
             },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
+            "definition": {
+                "title": "Replicas Ready",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "area"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            }
         },
-        "markers": []
-      }
-    },
-    {
-      "id": 16,
-      "layout": {
-        "x": 60,
-        "y": 109,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "Most memory-intensive DaemonSet",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(exclude_null(sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
-          }
-        ]
-      }
-    },
-    {
-      "id": 17,
-      "layout": {
-        "x": 0,
-        "y": 109,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "Most CPU-intensive DaemonSet",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(exclude_null(sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
-          }
-        ]
-      }
-    },
-    {
-      "id": 18,
-      "layout": {
-        "x": 0,
-        "y": 134,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "CPU requests, limits, and usage",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0",
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:kubernetes.cpu.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.cpu.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
+        {
+            "id": 10,
+            "layout": {
+                "x": 60,
+                "y": 21,
+                "width": 29,
+                "height": 14
             },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
+            "definition": {
+                "title": "Replicas Changes",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "change",
+                "requests": [
+                    {
+                        "increase_good": true,
+                        "order_by": "change",
+                        "change_type": "absolute",
+                        "order_dir": "desc",
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "hour_before(query1)"
+                            },
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "metrics",
+                                "query": "avg:kubernetes_state.daemonset.ready{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_replica_set}",
+                                "aggregator": "avg"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": 11,
+            "layout": {
+                "x": 90,
+                "y": 21,
+                "width": 29,
+                "height": 14
+            },
+            "definition": {
+                "title": "Replicas Not Ready",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.desired{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1 - query2"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "area"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            }
+        },
+        {
+            "id": 12,
+            "layout": {
+                "x": 0,
+                "y": 36,
+                "width": 119,
+                "height": 5
+            },
+            "definition": {
+                "type": "note",
+                "content": "Replicas by DaemonSets",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            }
+        },
+        {
+            "id": 13,
+            "layout": {
+                "x": 0,
+                "y": 72,
+                "width": 119,
+                "height": 5
+            },
+            "definition": {
+                "type": "note",
+                "content": "Resources",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            }
+        },
+        {
+            "id": 14,
+            "layout": {
+                "x": 0,
+                "y": 84,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "CPU Usage by DaemonSet",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name,kube_namespace,kube_daemon_set}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            }
+        },
+        {
+            "id": 15,
+            "layout": {
+                "x": 60,
+                "y": 84,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "Memory Usage by DaemonSet",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.memory.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_daemon_set}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            }
+        },
+        {
+            "id": 16,
+            "layout": {
+                "x": 60,
+                "y": 109,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "Most memory-intensive DaemonSet",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.memory.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": 17,
+            "layout": {
+                "x": 0,
+                "y": 109,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "Most CPU-intensive DaemonSet",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.cpu.usage.total{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": 18,
+            "layout": {
+                "x": 0,
+                "y": 134,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "CPU requests, limits, and usage",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.cpu.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:kubernetes.cpu.usage.total{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query3",
+                                "query": "sum:kubernetes.cpu.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                }
+            }
+        },
+        {
+            "id": 19,
+            "layout": {
+                "x": 60,
+                "y": 134,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "Memory requests, limits, and usage",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.memory.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:kubernetes.memory.rss{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query3",
+                                "query": "sum:kubernetes.memory.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                }
+            }
+        },
+        {
+            "id": 20,
+            "layout": {
+                "x": 0,
+                "y": 78,
+                "width": 59,
+                "height": 5
+            },
+            "definition": {
+                "type": "note",
+                "content": "CPU",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            }
+        },
+        {
+            "id": 21,
+            "layout": {
+                "x": 60,
+                "y": 78,
+                "width": 59,
+                "height": 5
+            },
+            "definition": {
+                "type": "note",
+                "content": "Memory",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            }
+        },
+        {
+            "id": 22,
+            "layout": {
+                "x": 0,
+                "y": 159,
+                "width": 59,
+                "height": 5
+            },
+            "definition": {
+                "type": "note",
+                "content": "Disk",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            }
+        },
+        {
+            "id": 23,
+            "layout": {
+                "x": 60,
+                "y": 159,
+                "width": 59,
+                "height": 5
+            },
+            "definition": {
+                "type": "note",
+                "content": "Network",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            }
+        },
+        {
+            "id": 24,
+            "layout": {
+                "x": 60,
+                "y": 165,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "Network Usage (Rx / Tx rate)",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.network.rx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:kubernetes.network.tx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            },
+                            {
+                                "formula": "exclude_null(query2)"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            }
+        },
+        {
+            "id": 25,
+            "layout": {
+                "x": 60,
+                "y": 190,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "Network Errors",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.network.rx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+                            },
+                            {
+                                "data_source": "metrics",
+                                "name": "query2",
+                                "query": "sum:kubernetes.network.tx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            },
+                            {
+                                "formula": "exclude_null(query2)"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": [
+                    {
+                        "label": "y = 0",
+                        "value": "y = 0",
+                        "display_type": "ok dashed"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 26,
+            "layout": {
+                "x": 0,
+                "y": 165,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "Disk Usage",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.filesystem.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            }
+        },
+        {
+            "id": 27,
+            "layout": {
+                "x": 0,
+                "y": 190,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "Disk Usage %",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.filesystem.usage_pct{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1) * 100"
+                            }
+                        ],
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": [
+                    {
+                        "label": " 100% ",
+                        "value": "y = 100",
+                        "display_type": "error dashed"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 28,
+            "layout": {
+                "x": 0,
+                "y": 215,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "Most Disk-intensive DaemonSets",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": 29,
+            "layout": {
+                "x": 60,
+                "y": 215,
+                "width": 59,
+                "height": 24
+            },
+            "definition": {
+                "title": "Most Network-intensive DaemonSets",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "4h"
+                },
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "exclude_null(query1)"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": 30,
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 14,
+                "height": 14
+            },
+            "definition": {
+                "title": "DaemonSets",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}",
+                                "aggregator": "last"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "count_nonzero(query1)"
+                            }
+                        ]
+                    }
+                ],
+                "precision": 0
+            }
+        },
+        {
+            "id": 32,
+            "layout": {
+                "x": 60,
+                "y": 6,
+                "width": 29,
+                "height": 14
+            },
+            "definition": {
+                "title": "DaemonSets Size By Cluster",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "max:kubernetes_state.daemonset.desired{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name}",
+                                "aggregator": "avg"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": 6231570606563465,
+            "layout": {
+                "x": 45,
+                "y": 6,
+                "width": 14,
+                "height": 14
+            },
+            "definition": {
+                "title": "Scheduled",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "green_on_white",
+                                "value": 0
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.scheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+                                "aggregator": "last"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            }
+        },
+        {
+            "id": 2755452721159086,
+            "layout": {
+                "x": 45,
+                "y": 21,
+                "width": 14,
+                "height": 14
+            },
+            "definition": {
+                "title": "Misscheduled",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "green_on_white",
+                                "value": 0
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.misscheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
+                                "aggregator": "last"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            }
+        },
+        {
+            "id": 5553998018648320,
+            "layout": {
+                "x": 0,
+                "y": 57,
+                "width": 59,
+                "height": 14
+            },
+            "definition": {
+                "title": "Replicas Misscheduled",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_size": "0",
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "response_format": "timeseries",
+                        "queries": [
+                            {
+                                "data_source": "metrics",
+                                "name": "query1",
+                                "query": "sum:kubernetes_state.daemonset.misscheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}"
+                            }
+                        ],
+                        "style": {
+                            "palette": "cool",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "area"
+                    }
+                ],
+                "yaxis": {
+                    "scale": "linear",
+                    "label": "",
+                    "include_zero": true,
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "markers": []
+            }
         }
-      }
-    },
-    {
-      "id": 19,
-      "layout": {
-        "x": 60,
-        "y": 134,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "Memory requests, limits, and usage",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0",
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:kubernetes.memory.requests{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.memory.rss{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}, sum:kubernetes.memory.limits{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set}",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
+    ],
+    "template_variables": [
+        {
+            "name": "scope",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "kube_cluster_name",
+            "prefix": "kube_cluster_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "kube_namespace",
+            "prefix": "kube_namespace",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "kube_daemon_set",
+            "prefix": "kube_daemon_set",
+            "available_values": [],
+            "default": "*"
         }
-      }
-    },
-    {
-      "id": 20,
-      "layout": {
-        "x": 0,
-        "y": 78,
-        "width": 59,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "CPU",
-        "background_color": "gray",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 21,
-      "layout": {
-        "x": 60,
-        "y": 78,
-        "width": 59,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Memory",
-        "background_color": "gray",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 22,
-      "layout": {
-        "x": 0,
-        "y": 159,
-        "width": 59,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Disk",
-        "background_color": "gray",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 23,
-      "layout": {
-        "x": 60,
-        "y": 159,
-        "width": 59,
-        "height": 5
-      },
-      "definition": {
-        "type": "note",
-        "content": "Network",
-        "background_color": "gray",
-        "font_size": "18",
-        "text_align": "center",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "bottom"
-      }
-    },
-    {
-      "id": 24,
-      "layout": {
-        "x": 60,
-        "y": 165,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "Network Usage (Rx / Tx rate)",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "exclude_null(sum:kubernetes.network.rx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), exclude_null(sum:kubernetes.network.tx_bytes{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 25,
-      "layout": {
-        "x": 60,
-        "y": 190,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "Network Errors",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "exclude_null(sum:kubernetes.network.rx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), exclude_null(sum:kubernetes.network.tx_errors{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": [
-          {
-            "label": "y = 0",
-            "value": "y = 0",
-            "display_type": "ok dashed"
-          }
-        ]
-      }
-    },
-    {
-      "id": 26,
-      "layout": {
-        "x": 0,
-        "y": 165,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "Disk Usage",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "exclude_null(sum:kubernetes.filesystem.usage{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    },
-    {
-      "id": 27,
-      "layout": {
-        "x": 0,
-        "y": 190,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "Disk Usage %",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": true,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "exclude_null(sum:kubernetes.filesystem.usage_pct{$kube_namespace,$scope,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set})*100",
-            "style": {
-              "palette": "dog_classic",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "line"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": [
-          {
-            "label": " 100% ",
-            "value": "y = 100",
-            "display_type": "error dashed"
-          }
-        ]
-      }
-    },
-    {
-      "id": 28,
-      "layout": {
-        "x": -1,
-        "y": 215,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "Most Disk-intensive DaemonSets",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(exclude_null(sum:kubernetes.filesystem.usage{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
-          }
-        ]
-      }
-    },
-    {
-      "id": 29,
-      "layout": {
-        "x": 60,
-        "y": 215,
-        "width": 59,
-        "height": 24
-      },
-      "definition": {
-        "title": "Most Network-intensive DaemonSets",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {
-          "live_span": "4h"
-        },
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(exclude_null(sum:kubernetes.network.tx_bytes{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_namespace,kube_cluster_name,kube_daemon_set}), 10, 'mean', 'desc')"
-          }
-        ]
-      }
-    },
-    {
-      "id": 30,
-      "layout": {
-        "x": 0,
-        "y": 6,
-        "width": 14,
-        "height": 14
-      },
-      "definition": {
-        "title": "DaemonSets",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {},
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "count_nonzero(sum:kubernetes_state.daemonset.ready{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set})",
-            "aggregator": "last",
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "palette": "white_on_green",
-                "value": 0
-              }
-            ]
-          }
-        ],
-        "precision": 0
-      }
-    },
-    {
-      "id": 32,
-      "layout": {
-        "x": 60,
-        "y": 6,
-        "width": 29,
-        "height": 14
-      },
-      "definition": {
-        "title": "DaemonSets Size By Cluster",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {},
-        "type": "toplist",
-        "requests": [
-          {
-            "q": "top(max:kubernetes_state.daemonset.desired{$scope,$kube_namespace,$kube_cluster_name,$kube_daemon_set} by {kube_cluster_name}, 10, 'mean', 'desc')"
-          }
-        ]
-      }
-    },
-    {
-      "id": 6231570606563465,
-      "layout": {
-        "x": 45,
-        "y": 6,
-        "width": 14,
-        "height": 14
-      },
-      "definition": {
-        "title": "Scheduled",
-        "title_size": "16",
-        "title_align": "left",
-        "time": {},
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "sum:kubernetes_state.daemonset.scheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
-            "aggregator": "last",
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "palette": "green_on_white",
-                "value": 0
-              }
-            ]
-          }
-        ],
-        "autoscale": true,
-        "precision": 0
-      }
-    },
-    {
-      "id": 2755452721159086,
-      "layout": {
-        "x": 45,
-        "y": 21,
-        "width": 14,
-        "height": 14
-      },
-      "definition": {
-        "title": "Misscheduled",
-        "title_size": "16",
-        "title_align": "left",
-        "type": "query_value",
-        "requests": [
-          {
-            "q": "sum:kubernetes_state.daemonset.misscheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set}",
-            "aggregator": "last",
-            "conditional_formats": [
-              {
-                "comparator": ">",
-                "palette": "green_on_white",
-                "value": 0
-              }
-            ]
-          }
-        ],
-        "autoscale": true,
-        "precision": 0
-      }
-    },
-    {
-      "id": 5553998018648320,
-      "layout": {
-        "x": 0,
-        "y": 57,
-        "width": 59,
-        "height": 14
-      },
-      "definition": {
-        "title": "Replicas Misscheduled",
-        "title_size": "16",
-        "title_align": "left",
-        "show_legend": false,
-        "legend_size": "0",
-        "time": {},
-        "type": "timeseries",
-        "requests": [
-          {
-            "q": "sum:kubernetes_state.daemonset.misscheduled{$scope,$kube_cluster_name,$kube_namespace,$kube_daemon_set} by {kube_daemon_set}",
-            "style": {
-              "palette": "cool",
-              "line_type": "solid",
-              "line_width": "normal"
-            },
-            "display_type": "area"
-          }
-        ],
-        "yaxis": {
-          "scale": "linear",
-          "label": "",
-          "include_zero": true,
-          "min": "auto",
-          "max": "auto"
-        },
-        "markers": []
-      }
-    }
-  ],
-  "template_variables": [
-    {
-      "name": "scope",
-      "default": "*",
-      "prefix": null
-    },
-    {
-      "name": "kube_cluster_name",
-      "default": "*",
-      "prefix": "kube_cluster_name"
-    },
-    {
-      "name": "kube_namespace",
-      "default": "*",
-      "prefix": "kube_namespace"
-    },
-    {
-      "name": "kube_daemon_set",
-      "default": "*",
-      "prefix": "kube_daemon_set"
-    }
-  ],
-  "layout_type": "free",
-  "is_read_only": true,
-  "notify_list": []
+    ],
+    "layout_type": "free",
+    "notify_list": []
 }

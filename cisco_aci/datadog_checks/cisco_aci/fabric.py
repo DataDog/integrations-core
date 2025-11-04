@@ -9,8 +9,8 @@ from . import aci_metrics, exceptions, helpers, ndm
 
 VENDOR_CISCO = 'cisco'
 PAYLOAD_METADATA_BATCH_SIZE = 100
-DEVICE_USER_TAGS_PREFIX = "dd.internal.resource:ndm_device_user_tags"
-INTERFACE_USER_TAGS_PREFIX = "dd.internal.resource:ndm_interface_user_tags"
+DEVICE_TAGS_PREFIX = "dd.internal.resource:ndm_device"
+INTERFACE_TAGS_PREFIX = "dd.internal.resource:ndm_interface"
 
 
 class Fabric:
@@ -104,7 +104,7 @@ class Fabric:
                     device_metadata.append(ndm.create_node_metadata(node_attrs, tags, self.namespace))
 
                     device_id = '{}:{}'.format(self.namespace, node_attrs.get('address', ''))
-                    tags.append('{}:{}'.format(DEVICE_USER_TAGS_PREFIX, device_id))
+                    tags.append('{}:{}'.format(DEVICE_TAGS_PREFIX, device_id))
 
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
@@ -140,10 +140,11 @@ class Fabric:
                 interface_metadata = ndm.create_interface_metadata(e, node.get('address', ''), self.namespace)
                 interfaces.append(interface_metadata)
                 device_id = '{}:{}'.format(self.namespace, node.get('address', ''))
-                tags.append('{}:{}'.format(DEVICE_USER_TAGS_PREFIX, device_id))
+                tags.append('{}:{}'.format(DEVICE_TAGS_PREFIX, device_id))
                 tags.append(
-                    "{}:{}:{}".format(
-                        INTERFACE_USER_TAGS_PREFIX, interface_metadata.device_id, str(interface_metadata.index)
+                    "{}:{}".format(
+                        INTERFACE_TAGS_PREFIX,
+                        ndm.get_interface_dd_id(interface_metadata.device_id, interface_metadata.raw_id),
                     ),
                 )
                 self.submit_interface_status_metric(

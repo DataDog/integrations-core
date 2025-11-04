@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "847f92f2-77e2-4429-844f-50f4d9c8097f",
   "app_id": "statsd",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

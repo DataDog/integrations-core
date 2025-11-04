@@ -467,6 +467,12 @@ files:
           type: boolean
           example: true
           display_default: true
+      - name: collect_vpn
+        description: Enable collection of VPN tunnels and route table data.
+        value:
+          type: boolean
+          example: true
+          display_default: false
 
       - name: interface_configs
         description: |
@@ -480,6 +486,7 @@ files:
               tags:                # (optional) interface level tags
                 - "testTagKey:testTagValue"
                 - "tagKey2:tagValue2"
+              disabled: true        # (optional) disables monitoring for matched interfaces, default value is false
         value:
           type: array
           items:
@@ -498,6 +505,9 @@ files:
               tags:
                 - "monitored:true"
                 - "customKey:customValue"
+            - match_field: name
+              match_value: eth5
+              disabled: true
       - name: ping
         description: |
           Configure ICMP pings for all hosts in SNMP autodiscovery

@@ -40,7 +40,7 @@ def fake_repo(tmp_path_factory, config_file, ddev):
             """[env.collectors.datadog-checks]
 
         [[envs.default.matrix]]
-        python = ["3.12"]
+        python = ["3.13"]
 
         """,
         )

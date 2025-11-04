@@ -66,7 +66,7 @@ class SqlserverMetadata(DBMAsyncJob):
         super(SqlserverMetadata, self).__init__(
             check,
             run_sync=is_affirmative(self._config.settings_config.get('run_sync', False)),
-            enabled=is_affirmative(self._config.settings_config.get('enabled', False)),
+            enabled=is_affirmative(self._config.settings_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",

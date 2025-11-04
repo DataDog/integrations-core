@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4c298061-c7d2-4ce6-ab3e-5378039de65a",
   "app_id": "aws-fargate",
+  "owner": "container-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -79,6 +80,13 @@
     },
     "dashboards": {
       "Amazon Fargate": "assets/dashboards/amazon_fargate_overview.json"
+    },
+    "monitors": {
+      "ECS Fargate CPU Usage": "assets/monitors/ecs_fargate_cpu_usage.json",
+      "ECS Fargate Memory Usage": "assets/monitors/ecs_fargate_mem_usage.json",
+      "ECS Fargate Ephemeral Storage Utilization": "assets/monitors/ecs_fargate_ephemeral_storage.json",
+      "ECS Fargate Network Received Error Rate": "assets/monitors/ecs_fargate_net_rcvd.json",
+      "ECS Fargate Network Sent Error Rate": "assets/monitors/ecs_fargate_net_sent.json"
     }
   }
 }

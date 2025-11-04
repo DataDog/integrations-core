@@ -112,13 +112,14 @@ def git(*args) -> str:
     return process.stdout
 
 
-def get_changed_files(*, ref: str, local: bool) -> list[str]:
+def get_changed_files(*, ref: str, exact: bool, local: bool) -> list[str]:
     changed_files = set()
 
     # Committed e.g.:
     # A   relative/path/to/file.added
     # M   relative/path/to/file.modified
-    for line in git('diff', '--name-status', f'{ref}...').splitlines():
+    strategy = '..' if exact else '...'
+    for line in git('diff', '--name-status', f'{ref}{strategy}').splitlines():
         if not is_git_warning_line(line):
             _, relative_path = line.split(maxsplit=1)
             changed_files.add(relative_path)
@@ -136,8 +137,8 @@ def get_changed_files(*, ref: str, local: bool) -> list[str]:
     return sorted(changed_files, key=lambda path: (path, -path.count('/')))
 
 
-def get_changed_targets(root: Path, *, ref: str, local: bool, verbose: bool) -> list[str]:
-    changed_files = get_changed_files(ref=ref, local=local)
+def get_changed_targets(root: Path, *, ref: str, exact: bool, local: bool, verbose: bool) -> list[str]:
+    changed_files = get_changed_files(ref=ref, exact=exact, local=local)
     if verbose:
         print('\n'.join(changed_files), file=sys.stderr)
 
@@ -217,6 +218,42 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             else:
                 platform_ids = ['linux']
 
+        hatch_toml = root / target / 'hatch.toml'
+        target_envs: dict[str, list[str]] = {}
+        if hatch_toml.is_file():
+            hatch_config = tomllib.loads(hatch_toml.read_text(encoding='utf-8'))
+            env_matrix = hatch_config.get('envs', {}).get('default', {}).get('matrix')
+            # convert the env matrix to a list of targets for each combination of values
+            if env_matrix:
+                for env in env_matrix:
+                    if not isinstance(env, dict):
+                        continue
+
+                    # Create a list of all combinations of values
+                    keys = env.keys()
+                    values = [[f"py{v}" if key == "python" else v for v in env[key]] for key in keys]
+                    if not values:
+                        continue
+
+                    # Generate all combinations of values
+                    from itertools import product
+
+                    # This maps the lists of target envs into all their permutations
+                    # For example, if the env matrix is:
+                    # { 'foo': ['bar', 'baz'], 'python': ['3.8', '3.9'] }
+                    # The permutations would be:
+                    # - bar-py3.8
+                    # - bar-py3.9
+                    # - baz-py3.8
+                    # - baz-py3.9
+                    # If 'os' is one of the keys, we use it to put the combinations into the right platform
+                    # so that we can get the correct runner for the target-env
+
+                    os_index = list(keys).index('os') if 'os' in keys else -1
+                    for combination in product(*values):
+                        os = combination[os_index] if os_index != -1 else platform_ids[0]
+                        target_envs.setdefault(os, []).append('-'.join(combination))
+
         runners = matrix_overrides.get('runners', {})
         for platform_id in platform_ids:
             if platform_id not in PLATFORMS:
@@ -247,8 +284,15 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             if supported_python_versions:
                 config['python-support'] = ''.join(supported_python_versions)
 
-            config['name'] = normalize_job_name(config['name'])
-            job_matrix.append(config)
+            job_name = normalize_job_name(config['name'])
+            if platform_id in target_envs:
+                for target_env in target_envs[platform_id]:
+                    if target_env != target:
+                        config['name'] = f'{job_name} ({target_env})'
+                    job_matrix.append({**config, 'target-env': target_env})
+            else:
+                config['name'] = job_name
+                job_matrix.append({**config})
 
     return job_matrix
 
@@ -259,6 +303,7 @@ def main():
 
     parser = argparse.ArgumentParser(prog=__name__, allow_abbrev=False)
     parser.add_argument('--ref', default='origin/master')
+    parser.add_argument('--exact', action='store_true', help='Whether ref refers to the merge base')
     parser.add_argument('-a', '--all', action='store_true')
     parser.add_argument('-p', '--pretty', action='store_true')
     parser.add_argument('-v', '--verbose', action='store_true')
@@ -268,7 +313,7 @@ def main():
     targets = (
         get_all_targets(root)
         if args.all
-        else get_changed_targets(root, ref=args.ref, local=args.pretty, verbose=args.verbose)
+        else get_changed_targets(root, ref=args.ref, exact=args.exact, local=args.pretty, verbose=args.verbose)
     )
     job_matrix = construct_job_matrix(root, targets)
 

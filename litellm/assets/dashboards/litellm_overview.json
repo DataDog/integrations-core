@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "[LiteLLM](https://www.litellm.ai/)\u00a0is a lightweight, open-source proxy and analytics layer for large language model (LLM) APIs. It enables unified access, observability, and cost control across multiple LLM providers.\n\nThis dashboard provides a comprehensive, real-time view of all LLM API activity flowing through the LiteLLM proxy layer. It is designed to help teams monitor performance, track key usage metrics, detect anomalies, and manage costs across multiple large language model providers.\n\n**Further reading:**\n\n- [Datadog LiteLLM Integration Documentation](https://docs.datadoghq.com/integrations/litellm/)\n- [LiteLLM Docs](https://docs.litellm.ai/docs/)\n- [LiteLLM Monitoring Docs](https://docs.litellm.ai/docs/proxy/prometheus)",
+    "description": "[LiteLLM](https://www.litellm.ai/) is a lightweight, open-source proxy and analytics layer for large language model (LLM) APIs. It enables unified access, observability, and cost control across multiple LLM providers.\n\nThis dashboard provides a comprehensive, real-time view of all LLM API activity flowing through the LiteLLM proxy layer. It is designed to help teams monitor performance, track key usage metrics, detect anomalies, and manage costs across multiple large language model providers.\n\n**Further reading:**\n\n- [Datadog LiteLLM Integration Documentation](https://docs.datadoghq.com/integrations/litellm/)\n- [LiteLLM Docs](https://docs.litellm.ai/docs/)\n- [LiteLLM Monitoring Docs](https://docs.litellm.ai/docs/proxy/prometheus)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -53,7 +53,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "[LiteLLM](https://www.litellm.ai/) is a lightweight, open-source proxy and analytics layer for large language model (LLM) APIs. It enables unified access, observability, and cost control across multiple LLM providers.\n\nThis dashboard provides a comprehensive, real-time view of all LLM API activity flowing through the LiteLLM proxy layer. It is designed to help teams monitor performance, track key usage metrics, detect anomalies, and manage costs across multiple large language model providers.",
+                            "content": "[LiteLLM](https://www.litellm.ai/) is a lightweight, open-source proxy and analytics layer for large language model (LLM) APIs. It enables unified access, observability, and cost control across multiple LLM providers.\n\nThis dashboard provides a comprehensive, real-time view of all LLM API activity flowing through the LiteLLM proxy layer. It is designed to help teams monitor performance, track key usage metrics, detect anomalies, and manage costs across multiple large language model providers.\n\nIn addition to the native integration, use Datadog's LLM Observability to evaluate, troubleshoot, and iterate on your LLM agents or applications using LiteLLM. LLM Observability SDK can\u00a0__[automatically trace](https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation?tab=python)__\u00a0your LLM operations. __[Get started today.](https://docs.datadoghq.com/llm_observability/quickstart/?tab=python)__",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -74,7 +74,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Further reading:**\n\n- [Datadog LiteLLM Integration Documentation](https://docs.datadoghq.com/integrations/litellm/)\n- [LiteLLM Docs](https://docs.litellm.ai/docs/)\n- [LiteLLM Monitoring Docs](https://docs.litellm.ai/docs/proxy/prometheus)",
+                            "content": "**Further reading:**\n\n- [Datadog LiteLLM Integration Documentation](https://docs.datadoghq.com/integrations/litellm/)\n- [LiteLLM Docs](https://docs.litellm.ai/docs/)\n- [LiteLLM Monitoring Docs](https://docs.litellm.ai/docs/proxy/prometheus)\n- [Get started with LiteLLM and Datadog LLM Observability](https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation/?tab=python#litellm)",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
@@ -906,7 +906,6 @@
                                 },
                                 "palette": "dog_classic"
                             },
-                            "time": {},
                             "title": "Remaining API Key Budget",
                             "title_align": "left",
                             "title_size": "16",
@@ -2501,9 +2500,10 @@
             "id": 7250476941150852,
             "layout": {
                 "height": 11,
+                "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 51
+                "y": 0
             }
         },
         {
@@ -2787,7 +2787,7 @@
                 "height": 11,
                 "width": 12,
                 "x": 0,
-                "y": 62
+                "y": 11
             }
         },
         {
@@ -2883,7 +2883,262 @@
                 "height": 6,
                 "width": 12,
                 "x": 0,
-                "y": 73
+                "y": 22
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "LLM Observability ",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "[Datadog LLM Observability](https://docs.datadoghq.com/llm_observability/quickstart/?tab=python) enables you to experiment, troubleshoot, monitor, and evaluate LLM agents or applications. Get real-time visibility into inputs and outputs, errors, latency, token usage, and more, along with in-depth quality and security checks at every stage, including data retrieval, tool calls, and agent interactions.\n\nLLM Observability SDK can [automatically trace](https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation?tab=python) your LLM operations. Datadog's LLM Observability views integrate with LiteLLM metrics to provide visibility into your workflows.\n\nFor setup instructions and auto-instrumentation, check out the [LLM Observability Quickstart Guide](https://docs.datadoghq.com/llm_observability/quickstart/?tab=python).\n\nTo explore model-level usage, token attribution, cost analysis, and request tracing across teams and providers, visit the [LLM Observability dashboard](https://app.datadoghq.com/dash/integration/llm_operational_insights).",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 1692340165130004,
+                        "layout": {
+                            "height": 2,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "llm_observability",
+                                            "group_by": [],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "@event_type:span @meta.model_provider:* @meta.span.kind:llm"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Total LLM Requests",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3902525824901928,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "percentile",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "p95:ml_obs.span.duration{span_kind:llm}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "LLM Call Response Time (p95)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2848364602362541,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 4,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "second"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "percentile",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "p50:ml_obs.span.duration{span_kind:llm}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "LLM Call Response Time (p50)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 8997641233217794,
+                        "layout": {
+                            "height": 3,
+                            "width": 4,
+                            "x": 8,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [
+                                {
+                                    "label": "View related spans in LLM Observability",
+                                    "link": "/llm/traces?query=@meta.model_name%3A{{@meta.model_name.value}}%20@event_type%3Aspan%20@parent_id%3A*%20@{{$ml_app}}%20{{$version}}&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
+                                }
+                            ],
+                            "hide_total": false,
+                            "legend": {
+                                "type": "table"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "llm_observability",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@meta.model_provider",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@meta.model_name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query2",
+                                            "search": {
+                                                "query": "@event_type:span @meta.model_provider:* @meta.span.kind:llm"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Model Usage",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 2995771392271954,
+                        "layout": {
+                            "height": 5,
+                            "width": 12,
+                            "x": 0,
+                            "y": 5
+                        }
+                    }
+                ]
+            },
+            "id": 6876435950632807,
+            "layout": {
+                "height": 11,
+                "width": 12,
+                "x": 0,
+                "y": 28
             }
         }
     ]

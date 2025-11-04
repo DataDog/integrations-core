@@ -2,9 +2,20 @@
 check-types = true
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 krakend = ["2.10"]
 
 [envs.default.overrides]
 matrix.krakend.env-vars = "KRAKEND_VERSION"
 matrix.krakend.dependencies = ["httpx"]
+
+[envs.lab]
+dependencies = ["click", "requests", "rich", "httpx", "pyyaml"]
+
+[envs.lab.scripts]
+start = "python -m tests.lab.traffic_generator start {args}"
+generate = "python -m tests.lab.traffic_generator generate {args}"
+stop = "python -m tests.lab.traffic_generator stop {args}"
+
+[envs.lab.env-vars]
+KRAKEND_IS_LAB = "true"

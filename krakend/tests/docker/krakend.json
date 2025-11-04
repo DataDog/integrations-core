@@ -51,7 +51,8 @@
         "telemetry/logging": {
             "level": "DEBUG",
             "prefix": "[KRAKEND]",
-            "stdout": true
+            "stdout": true,
+            "format": "logstash"
         }
     },
     "endpoints": [
@@ -131,27 +132,12 @@
             ]
         },
         {
-            "endpoint": "/api/read-error",
+            "endpoint": "/api/not-found",
             "method": "GET",
             "output_encoding": "json",
             "backend": [
                 {
-                    "url_pattern": "/read-error/",
-                    "encoding": "json",
-                    "method": "GET",
-                    "host": [
-                        "api:8000"
-                    ]
-                }
-            ]
-        },
-        {
-            "endpoint": "/api/trigger-read-error",
-            "method": "GET",
-            "output_encoding": "json",
-            "backend": [
-                {
-                    "url_pattern": "/trigger-read-error/",
+                    "url_pattern": "/hastalavista/",
                     "encoding": "json",
                     "method": "GET",
                     "host": [

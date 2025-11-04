@@ -2,4 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-__version__ = "22.15.0"
+__version__ = "23.2.0"

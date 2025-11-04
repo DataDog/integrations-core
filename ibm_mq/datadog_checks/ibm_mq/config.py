@@ -98,6 +98,7 @@ class IBMMQConfig:
         self.qm_timezone = instance.get('queue_manager_timezone', 'UTC')  # type: str
         self.auto_discover_channels = instance.get('auto_discover_channels', True)  # type: bool
         self.use_qm_tz_for_metrics = is_affirmative(instance.get('use_qm_tz_for_metrics', False))  # type: bool
+        self.auto_discover_queues_via_names = is_affirmative(instance.get('auto_discover_queues_via_names', False))  # type: bool
 
         # Initialize timezone handling
         # First validate the timezone if it's not UTC

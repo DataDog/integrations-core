@@ -9,6 +9,8 @@ This integration ingests the following logs:
 
 The Falco integration seamlessly ingests the data of Falco logs using the webhook. Before ingestion of the data, it normalizes and enriches the logs, ensuring a consistent data format and enhancing information content for downstream processing and analysis. The integration provides insights into alert logs through the out-of-the-box dashboards.
 
+**Minimum Agent version:** 7.59.1
+
 ## Setup
 
 ### Configuration
@@ -97,6 +99,15 @@ After configuration, verify that Falco metrics are being ingested by Datadog. Yo
 <!-- xxz tab xxx -->
 <!-- xxx tab "Agent" xxx -->
 ##### Agent
+Update the settings in the configuration file (`falco.yaml`) as shown below:
+
+  ```yaml
+  json_output: true
+  file_output:
+    enabled: true
+    filename: <PATH TO LOGS>
+  ```
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
    ```yaml
@@ -109,7 +120,7 @@ After configuration, verify that Falco metrics are being ingested by Datadog. Yo
    logs:
      - type: file
        path: <PATH TO LOGS>
-       service: myservice
+       service: <SERVICE NAME>
        source: falco
    ```
 

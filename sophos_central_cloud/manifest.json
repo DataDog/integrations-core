@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7293cd88-ceda-4094-94cd-09851f203f0e",
   "app_id": "sophos-central-cloud",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -6,7 +6,7 @@ from __future__ import annotations
 import os
 import re
 from functools import cached_property
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Iterator, cast
 
 from ddev.integration.metrics import Metric
 from ddev.repo.constants import NOT_SHIPPABLE
@@ -175,7 +175,13 @@ class Integration:
 
     @cached_property
     def is_integration(self) -> bool:
-        return (self.path / 'manifest.json').is_file()
+        if (self.path / 'manifest.json').is_file():
+            return True
+
+        # If the manifest.json file is not present check the respository configuration to
+        # get the is_integration flag for this particular integration.
+        # If the folder is not listed, it is assumed to be an integration.
+        return cast(bool, self.repo_config.get(f'/overrides/is-integration/{self.name}', default=True))
 
     @cached_property
     def has_metrics(self) -> bool:

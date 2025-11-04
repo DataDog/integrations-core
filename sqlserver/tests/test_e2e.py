@@ -21,7 +21,7 @@ from .common import (
     UNEXPECTED_QUERY_EXECUTOR_AO_METRICS,
     inc_perf_counter_metrics,
 )
-from .utils import always_on, not_windows_ado, not_windows_ci
+from .utils import always_on, not_windows_ci
 
 try:
     import pyodbc
@@ -99,7 +99,7 @@ def test_ao_secondary_replica(dd_agent_check, init_config, instance_ao_docker_se
     )
 
 
-@not_windows_ado
+@not_windows_ci
 def test_check_docker(dd_agent_check, init_config, instance_e2e):
     # run sync to ensure only a single run of both
     # set a very small collection interval so the tests go fast

@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "9f98de10-9c98-4601-ae36-cbe25c4be018",
   "app_id": "cisco-umbrella-dns",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
