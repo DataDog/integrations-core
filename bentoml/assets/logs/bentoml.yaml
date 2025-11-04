@@ -30,11 +30,11 @@ pipeline:
           general %{_timestamp} \[%{word:level}\] \[%{_component}\] %{_client} \(%{data:request:keyvalue("=","/:")}\) \(%{_response}\) %{_latency} \(%{_tracing}\).*
         supportRules: |
           _timestamp %{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
-          _component %{word:component_name}\:%{word:service.name}\:%{number:service.instance}
-          _client %{ip:client.ip}\:%{number:client.port}
+          _component %{word:component_name}\:%{word:service.name}\:%{integer:service.instance}
+          _client %{ip:client.ip}\:%{integer:client.port}
           _response status=%{word:response.code},type=%{notSpace:response.type} charset=%{notSpace:response.charset},length=%{number:response.length}
           _latency %{number:request.latency_ms}ms
-          _tracing trace=%{notSpace:tracing.trace_id},span=%{notSpace:tracing.span_id},sampled=%{number:tracing.sampled},service.name=%{notSpace:tracing.service.name}
+          _tracing trace=%{notSpace:tracing.trace_id},span=%{notSpace:tracing.span_id},sampled=%{integer:tracing.sampled},service.name=%{notSpace:tracing.service.name}
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
