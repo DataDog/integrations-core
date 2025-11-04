@@ -90,9 +90,8 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
         if current_check.name.startswith('datadog_checks_'):
             continue
 
-        metric_prefix = (
-            current_check.manifest.get("/assets/integration/metrics/prefix", "")
-            or app.repo.config.get(f"/overrides/metrics-prefix/{current_check.name}", "")
+        metric_prefix = current_check.manifest.get("/assets/integration/metrics/prefix", "") or app.repo.config.get(
+            f"/overrides/metrics-prefix/{current_check.name}", ""
         )
 
         if not metric_prefix and current_check.name not in metadata_utils.PROVIDER_INTEGRATIONS:
