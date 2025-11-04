@@ -65,7 +65,7 @@ In addition to consumer lag metrics, this integration can collect comprehensive 
 - **Broker information**: Configuration and health metrics
 - **Topic and partition details**: Sizes, offsets, replication status
 - **Consumer group metadata**: Member details and group state
-- **Schema registry**: Schema information (if schema_registry_url is provided)
+- **Schema registry**: Schema information (if `schema_registry_url` is provided)
 
 All cluster monitoring metrics are tagged with `kafka_cluster_id` for easy filtering.
 
