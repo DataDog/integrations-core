@@ -2,17 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import string
+from typing import Optional
 
 
-def is_affirmative(val):
+def is_affirmative(val: str) -> bool:
     return "yes" in val.lower()
 
 
-def transform_status(status):
+def transform_status(status: str) -> int:
     return int(status == "ok")
 
 
-def transform_float(val):
+def transform_float(val: str) -> float:
     if val == "-":
         return -1
     else:
@@ -20,30 +21,30 @@ def transform_float(val):
         return float(val)
 
 
-def transform_runtime(val):
+def transform_runtime(val: str) -> float:
     if val == "UNLIMITED":
         return -1
     else:
         return transform_float(val)
 
 
-def transform_active(val):
+def transform_active(val: str) -> bool:
     _, active = val.split(":")
     return active.lower() == "Active"
 
 
-def transform_open(val):
+def transform_open(val: str) -> bool:
     is_open, _ = val.split(":")
     return is_open.lower() == "Open"
 
 
-def transform_job_id(val):
+def transform_job_id(val: str) -> str:
     parts = val.split("[")
     job_id = parts[0]
     return job_id
 
 
-def transform_task_id(val):
+def transform_task_id(val: str) -> Optional[str]:
     parts = val.split("[")
     if len(parts) > 1:
         second_part = parts[1].split("]")
@@ -52,7 +53,7 @@ def transform_task_id(val):
     return None
 
 
-def transform_tag(val):
+def transform_tag(val: str) -> Optional[str]:
     parsed = val.strip()
     if parsed == '-':
         return None

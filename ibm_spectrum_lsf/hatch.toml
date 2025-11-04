@@ -3,7 +3,7 @@ check-types = true
 mypy-args = [
   "--install-types",
   "--non-interactive",
-  "datadog_checks/",
+  "datadog_checks/ibm_spectrum_lsf",
   "tests/",
 ]
 mypy-deps = [
