@@ -52,7 +52,8 @@ FROM
 
 COLUMN_QUERY = """
 SELECT
-    c.name, t.name as data_type, dc.definition as column_default, c.is_nullable AS nullable, c.collation_name, c.precision, c.scale, c.max_length
+    c.name, t.name as data_type, dc.definition as column_default, c.is_nullable AS nullable,
+    c.collation_name, c.precision, c.scale, c.max_length
 FROM
     sys.columns c
     INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
@@ -123,7 +124,7 @@ SELECT
 FROM
     sys.foreign_keys AS FK
     JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
-WHERE FK.parent_object_id = schema_tables.table_id    
+WHERE FK.parent_object_id = schema_tables.table_id
 GROUP BY
     FK.name,
     FK.parent_object_id,
@@ -223,25 +224,6 @@ class SQLServerSchemaCollector(SchemaCollector):
                 columns_query = COLUMN_QUERY
                 indexes_query = INDEX_QUERY
                 constraints_query = FOREIGN_KEY_QUERY
-                column_columns = """'name':columns.name, 
-                'column_type':columns.column_type, 
-                'column_default':columns.column_default,
-                'nullable':columns.nullable, 
-                'ordinal_position':columns.ordinal_position"""
-                index_columns = """'name':indexes.name,
-                'type':indexes.type, 
-                'is_unique':indexes.is_unique,
-                'is_primary_key':indexes.is_primary_key,
-                'is_unique_constraint':indexes.is_unique_constraint,
-                'is_disabled':indexes.is_disabled,
-                'column_names':indexes.column_names"""
-                constraint_columns = """'foreign_key_name':constraints.foreign_key_name, 
-                'referencing_table':constraints.referencing_table,
-                'referencing_column':constraints.referencing_column, 
-                'referenced_table':constraints.referenced_table,
-                'referenced_column':constraints.referenced_column, 
-                'delete_action':constraints.delete_action,
-                'update_action':constraints.update_action"""
                 # partition_ctes = (
                 #     f"""
                 #     ,
@@ -286,16 +268,15 @@ class SQLServerSchemaCollector(SchemaCollector):
                     tables AS (
                         {tables_query}
                     ),
-                    schema_tables AS (                        
+                    schema_tables AS (
                         SELECT TOP {limit} schemas.schema_name, schemas.schema_id, schemas.owner_name,
                         tables.table_id, tables.table_name
                         FROM schemas
                         LEFT JOIN tables ON schemas.schema_id = tables.schema_id
                         ORDER BY schemas.schema_name, tables.table_name
                     )
-                    
                     {partition_ctes}
-                    
+
                     SELECT schema_tables.schema_name, schema_tables.table_name,
                         json_query(({columns_query} FOR JSON PATH), '$') as columns
                         , json_query(({indexes_query} FOR JSON PATH), '$') as indexes

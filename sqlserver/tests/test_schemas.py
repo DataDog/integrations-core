@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 from typing import Callable, Optional
 
 import pytest
@@ -73,61 +74,60 @@ def test_tables(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     collector = SQLServerSchemaCollector(check)
 
-    with collector._get_cursor('datadog_test') as cursor:
+    with collector._get_cursor('datadog_test_schemas') as cursor:
         assert cursor is not None
         tables = []
-        for row in cursor:
+        rows = cursor.fetchall_dict()
+        for row in rows:
             if row['table_name']:
                 tables.append(row['table_name'])
 
-    assert set(tables) == {
-        'cities',
-        'RestaurantReviews',
-        'cities_partitioned',
-        'users',
-        'Restaurants',
-        'ϑings',
-        'landmarks',
-        'ts',
-    }
+    assert set(tables) == {'cities', 'Restaurants', 'RestaurantReviews', 'landmarks'}
 
 
-# def test_columns(dbm_instance, integration_check):
-#     check = integration_check(dbm_instance)
-#     check.version = POSTGRES_VERSION
-#     collector = PostgresSchemaCollector(check)
+def test_columns(dbm_instance, integration_check):
+    check = integration_check(dbm_instance)
+    collector = SQLServerSchemaCollector(check)
 
-#     with collector._get_cursor('datadog_test') as cursor:
-#         assert cursor is not None
-#         # Assert that at least one row has columns
-#         assert any(row['columns'] for row in cursor)
-#         for row in cursor:
-#             if row['columns']:
-#                 for column in row['columns']:
-#                     assert column['name'] is not None
-#                     assert column['data_type'] is not None
-#             if row['table_name'] == 'cities':
-#                 assert row['columns']
-#                 assert row['columns'][0]['name']
+    with collector._get_cursor('datadog_test_schemas') as cursor:
+        assert cursor is not None
+        # Assert that at least one row has columns
+        rows = cursor.fetchall_dict()
+        assert any(row['columns'] for row in rows)
+        for row in rows:
+            if row['columns']:
+                columns = json.loads(row['columns'])
+                for column in columns:
+                    assert column['name'] is not None
+                    assert column['data_type'] is not None
+            if row['table_name'] == 'cities':
+                columns = json.loads(row['columns'])
+                assert columns[0]['name'] is not None
 
 
-# def test_indexes(dbm_instance, integration_check):
-#     check = integration_check(dbm_instance)
-#     check.version = POSTGRES_VERSION
-#     collector = PostgresSchemaCollector(check)
+def test_indexes(dbm_instance, integration_check):
+    check = integration_check(dbm_instance)
+    collector = SQLServerSchemaCollector(check)
 
-#     with collector._get_cursor('datadog_test') as cursor:
-#         assert cursor is not None
-#         # Assert that at least one row has indexes
-#         assert any(row['indexes'] for row in cursor)
-#         for row in cursor:
-#             if row['indexes']:
-#                 for index in row['indexes']:
-#                     assert index['name'] is not None
-#                     assert index['definition'] is not None
-#             if row['table_name'] == 'cities':
-#                 assert row['indexes']
-#                 assert row['indexes'][0]['name']
+    with collector._get_cursor('datadog_test_schemas') as cursor:
+        assert cursor is not None
+        # Assert that at least one row has indexes
+        rows = cursor.fetchall_dict()
+        assert any(row['indexes'] for row in rows)
+        for row in rows:
+            if row['indexes']:
+                indexes = json.loads(row['indexes'])
+                for index in indexes:
+                    assert index['name'] is not None
+                    assert index['type'] is not None
+                    assert index['is_unique'] is not None
+                    assert index['is_primary_key'] is not None
+                    assert index['is_unique_constraint'] is not None
+                    assert index['is_disabled'] is not None
+                    assert index['column_names'] is not None
+            if row['table_name'] == 'cities':
+                indexes = json.loads(row['indexes'])
+                assert indexes[0]['name'] is not None
 
 
 def test_collect_schemas(dbm_instance, integration_check):
