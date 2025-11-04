@@ -90,16 +90,14 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
         if current_check.name.startswith('datadog_checks_'):
             continue
 
-        # If the manifest exists, the metrics prefix must be defined in it. If it does not exist we can use the one
-        # defined in the repository ddev overrides. We should not default to overrides if the manifest does not include
-        # a metrics prefix because we want to validate that manifest files include it.
-        if current_check.manifest.path.is_file():
-            metric_prefix = current_check.manifest.get("/assets/integration/metrics/prefix", "")
-        elif (metric_prefix := app.repo.config.get(f"/overrides/metrics-prefix/{current_check.name}", None)) is None:
-            metric_prefix = ""
-            if current_check.name not in metadata_utils.PROVIDER_INTEGRATIONS:
-                errors = True
-                error_message += f'{current_check.name}: metric_prefix does not exist in manifest or overrides.\n'
+        metric_prefix = (
+            current_check.manifest.get("/assets/integration/metrics/prefix", "")
+            or app.repo.config.get(f"/overrides/metrics-prefix/{current_check.name}", "")
+        )
+
+        if not metric_prefix and current_check.name not in metadata_utils.PROVIDER_INTEGRATIONS:
+            errors = True
+            error_message += f'{current_check.name}: metric_prefix does not exist in manifest or overrides.\n'
 
         metadata_file = current_check.metrics_file
 
@@ -287,7 +285,7 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
             error_message += (
                 f"{current_check.name}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
             )
-            error_message += "defined in the manifest.\n"
+            error_message += f"defined for this integration: {metric_prefix=}.\n"
 
         unsorted = set(app.repo.config.get('/overrides/validate/metrics/unsorted', []))
 
