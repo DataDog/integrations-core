@@ -87,9 +87,8 @@ def test_tag_by_is_correctly_requested(mock_proc_sampler, aggregator, check):
         ([['IDProcess', 'Win32_Process', 'Handle', 'Name AS process_name']], ['process_name:chrome.exe']),
         ([['IDProcess', 'Win32_Process', 'Handle', 'Name AS ProcessName']], ['processname:chrome.exe']),
         ([['IDProcess', 'Win32_Process', 'Handle', 'Name']], ['name:chrome.exe']),
-        ([['IDProcess', 'Win32_Process', 'Handle', 'Name', ]], ['name:chrome.exe']),
         ([['IDProcess', 'Win32_Process', 'Handle', 'Name', '']], ['name:chrome.exe']),
-        ([['IDProcess', 'Win32_Process', 'Handle', 'Name as process_name', 'foo']], ['process_name:chrome.exe'])
+        ([['IDProcess', 'Win32_Process', 'Handle', 'Name as process_name', 'foo']], ['process_name:chrome.exe']),
     ],
 )
 def test_tag_queries_with_alias(mock_sampler_with_tag_queries, aggregator, check, tag_query, result_tags):
