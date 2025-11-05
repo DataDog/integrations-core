@@ -4,7 +4,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
+from typing import Callable, Optional
 
 from datadog_checks.base.log import AgentLogger
 
@@ -29,31 +29,45 @@ class LSFMetric:
     tags: list[str]
 
 
-def process_table_tags(tag_mapping: list[dict], line_data: list[str]) -> list[str]:
+@dataclass
+class LSFTagMapping:
+    name: str
+    id: int
+    transform: Callable[[str], str]
+
+
+@dataclass
+class LSFMetricMapping:
+    name: str
+    id: int
+    transform: Callable[[str], int]
+
+
+def process_table_tags(tag_mapping: list[LSFTagMapping], line_data: list[str]) -> list[str]:
     tags = []
     for tag in tag_mapping:
-        val = line_data[tag['id']]
-        transformer = tag.get('transform')
+        val = line_data[tag.id]
+        transformer = tag.transform
         if transformer:
             val = transformer(val)
             if val is None:
                 continue
-        key = tag['name']
+        key = tag.name
         tags.append(f"{key}:{val}")
 
     return tags
 
 
 def process_table_metrics(
-    prefix: str, metric_mapping: list[dict], line_data: list[str], tags: list[str]
+    prefix: str, metric_mapping: list[LSFMetricMapping], line_data: list[str], tags: list[str]
 ) -> list[LSFMetric]:
     metrics = []
     for metric in metric_mapping:
-        val = line_data[metric['id']]
-        transformer = metric['transform']
+        val = line_data[metric.id]
+        transformer = metric.transform
         val = transformer(val)
 
-        name = metric['name']
+        name = metric.name
         metrics.append(LSFMetric(f"{prefix}.{name}", val, tags))
     return metrics
 
@@ -124,16 +138,15 @@ class LsClustersProcessor(LSFMetricsProcessor):
 
     def process_metrics(self) -> list[LSFMetric]:
         tags = [
-            {'name': 'lsf_cluster', 'id': 0},
-            {'name': 'lsf_management_host', 'id': 2},
-            {'name': 'lsf_admin', 'id': 3},
+            LSFTagMapping('lsf_cluster', 0, transform_tag),
+            LSFTagMapping('lsf_management_host', 2, transform_tag),
+            LSFTagMapping('lsf_admin', 3, transform_tag),
         ]
         metrics = [
-            {'name': 'status', 'id': 1, 'transform': transform_status},
-            {'name': 'hosts', 'id': 4, 'transform': transform_float},
-            {'name': 'servers', 'id': 5, 'transform': transform_float},
+            LSFMetricMapping('status', 1, transform_status),
+            LSFMetricMapping('hosts', 4, transform_float),
+            LSFMetricMapping('servers', 5, transform_float),
         ]
-
         return self.parse_table_command(metrics, tags)
 
 
@@ -149,21 +162,16 @@ class BHostsProcessor(LSFMetricsProcessor):
         return self.client.bhosts()
 
     def process_metrics(self) -> list[LSFMetric]:
-        tags = [
-            {
-                'name': 'lsf_host',
-                'id': 0,
-            }
-        ]
+        tags = [LSFTagMapping('lsf_host', 0, transform_tag)]
         metrics = [
-            {'name': 'status', 'id': 1, 'transform': transform_status},
-            {'name': 'slots_per_user', 'id': 2, 'transform': transform_float},
-            {'name': 'max_jobs', 'id': 3, 'transform': transform_float},
-            {'name': 'num_jobs', 'id': 4, 'transform': transform_float},
-            {'name': 'running', 'id': 5, 'transform': transform_float},
-            {'name': 'suspended', 'id': 6, 'transform': transform_float},
-            {'name': 'user_suspended', 'id': 7, 'transform': transform_float},
-            {'name': 'reserved', 'id': 8, 'transform': transform_float},
+            LSFMetricMapping('status', 1, transform_status),
+            LSFMetricMapping('slots_per_user', 2, transform_float),
+            LSFMetricMapping('max_jobs', 3, transform_float),
+            LSFMetricMapping('num_jobs', 4, transform_float),
+            LSFMetricMapping('running', 5, transform_float),
+            LSFMetricMapping('suspended', 6, transform_float),
+            LSFMetricMapping('user_suspended', 7, transform_float),
+            LSFMetricMapping('reserved', 8, transform_float),
         ]
 
         return self.parse_table_command(metrics, tags)
@@ -182,29 +190,20 @@ class LSHostsProcessor(LSFMetricsProcessor):
 
     def process_metrics(self) -> list[LSFMetric]:
         tags = [
-            {
-                'name': 'lsf_host',
-                'id': 0,
-            },
-            {
-                'name': 'host_type',
-                'id': 1,
-            },
-            {
-                'name': 'host_model',
-                'id': 2,
-            },
+            LSFTagMapping('lsf_host', 0, transform_tag),
+            LSFTagMapping('host_type', 1, transform_tag),
+            LSFTagMapping('host_model', 2, transform_tag),
         ]
         metrics = [
-            {'name': 'cpu_factor', 'id': 3, 'transform': transform_float},
-            {'name': 'num_cpus', 'id': 4, 'transform': transform_float},
-            {'name': 'max_mem', 'id': 5, 'transform': transform_float},
-            {'name': 'max_swap', 'id': 6, 'transform': transform_float},
-            {'name': 'is_server', 'id': 7, 'transform': is_affirmative},
-            {'name': 'num_procs', 'id': 8, 'transform': transform_float},
-            {'name': 'num_cores', 'id': 9, 'transform': transform_float},
-            {'name': 'num_threads', 'id': 10, 'transform': transform_float},
-            {'name': 'max_temp', 'id': 11, 'transform': transform_float},
+            LSFMetricMapping('cpu_factor', 3, transform_float),
+            LSFMetricMapping('num_cpus', 4, transform_float),
+            LSFMetricMapping('max_mem', 5, transform_float),
+            LSFMetricMapping('max_swap', 6, transform_float),
+            LSFMetricMapping('is_server', 7, is_affirmative),
+            LSFMetricMapping('num_procs', 8, transform_float),
+            LSFMetricMapping('num_cores', 9, transform_float),
+            LSFMetricMapping('num_threads', 10, transform_float),
+            LSFMetricMapping('max_temp', 11, transform_float),
         ]
 
         return self.parse_table_command(metrics, tags)
@@ -222,25 +221,20 @@ class LsLoadProcessor(LSFMetricsProcessor):
         return self.client.lsload()
 
     def process_metrics(self) -> list[LSFMetric]:
-        tags = [
-            {
-                'name': 'lsf_host',
-                'id': 0,
-            }
-        ]
+        tags = [LSFTagMapping('lsf_host', 0, transform_tag)]
         metrics = [
-            {'name': 'status', 'id': 1, 'transform': transform_status},
-            {'name': 'cpu.run_queue_length.15s', 'id': 2, 'transform': transform_float},
-            {'name': 'cpu.run_queue_length.1m', 'id': 3, 'transform': transform_float},
-            {'name': 'cpu.run_queue_length.15m', 'id': 4, 'transform': transform_float},
-            {'name': 'cpu.utilization', 'id': 5, 'transform': transform_float},
-            {'name': 'mem.paging_rate', 'id': 6, 'transform': transform_float},
-            {'name': 'disk.io', 'id': 7, 'transform': transform_float},
-            {'name': 'login_users', 'id': 8, 'transform': transform_float},
-            {'name': 'idle_time', 'id': 9, 'transform': transform_float},
-            {'name': 'mem.free', 'id': 10, 'transform': transform_float},
-            {'name': 'mem.available_swap', 'id': 11, 'transform': transform_float},
-            {'name': 'mem.available_ram', 'id': 12, 'transform': transform_float},
+            LSFMetricMapping('status', 1, transform_status),
+            LSFMetricMapping('cpu.run_queue_length.15s', 2, transform_float),
+            LSFMetricMapping('cpu.run_queue_length.1m', 3, transform_float),
+            LSFMetricMapping('cpu.run_queue_length.15m', 4, transform_float),
+            LSFMetricMapping('cpu.utilization', 5, transform_float),
+            LSFMetricMapping('mem.paging_rate', 6, transform_float),
+            LSFMetricMapping('disk.io', 7, transform_float),
+            LSFMetricMapping('login_users', 8, transform_float),
+            LSFMetricMapping('idle_time', 9, transform_float),
+            LSFMetricMapping('mem.free', 10, transform_float),
+            LSFMetricMapping('mem.available_swap', 11, transform_float),
+            LSFMetricMapping('mem.available_ram', 12, transform_float),
         ]
 
         return self.parse_table_command(metrics, tags)
@@ -258,10 +252,10 @@ class BSlotsProcessor(LSFMetricsProcessor):
         return self.client.bslots()
 
     def process_metrics(self) -> list[LSFMetric]:
-        tags: list[dict] = []
+        tags: list[LSFTagMapping] = []
         metrics = [
-            {'name': 'backfill.available', 'id': 0, 'transform': transform_float},
-            {'name': 'runtime_limit', 'id': 1, 'transform': transform_runtime},
+            LSFMetricMapping('backfill.available', 0, transform_float),
+            LSFMetricMapping('runtime_limit', 1, transform_runtime),
         ]
 
         return self.parse_table_command(metrics, tags)
@@ -279,24 +273,19 @@ class BQueuesProcessor(LSFMetricsProcessor):
         return self.client.bqueues()
 
     def process_metrics(self) -> list[LSFMetric]:
-        tags = [
-            {
-                'name': 'queue_name',
-                'id': 0,
-            }
-        ]
+        tags = [LSFTagMapping('queue_name', 0, transform_tag)]
         metrics = [
-            {'name': 'priority', 'id': 1, 'transform': transform_float},
-            {'name': 'is_open', 'id': 2, 'transform': transform_open},
-            {'name': 'is_active', 'id': 2, 'transform': transform_active},
-            {'name': 'max_jobs', 'id': 3, 'transform': transform_float},
-            {'name': 'max_jobs_per_user', 'id': 4, 'transform': transform_float},
-            {'name': 'max_jobs_per_processor', 'id': 5, 'transform': transform_float},
-            {'name': 'max_jobs_per_host', 'id': 6, 'transform': transform_float},
-            {'name': 'num_job_slots', 'id': 7, 'transform': transform_float},
-            {'name': 'pending', 'id': 8, 'transform': transform_float},
-            {'name': 'running', 'id': 9, 'transform': transform_float},
-            {'name': 'suspended', 'id': 10, 'transform': transform_float},
+            LSFMetricMapping('priority', 1, transform_float),
+            LSFMetricMapping('is_open', 2, transform_open),
+            LSFMetricMapping('is_active', 2, transform_active),
+            LSFMetricMapping('max_jobs', 3, transform_float),
+            LSFMetricMapping('max_jobs_per_user', 4, transform_float),
+            LSFMetricMapping('max_jobs_per_processor', 5, transform_float),
+            LSFMetricMapping('max_jobs_per_host', 6, transform_float),
+            LSFMetricMapping('num_job_slots', 7, transform_float),
+            LSFMetricMapping('pending', 8, transform_float),
+            LSFMetricMapping('running', 9, transform_float),
+            LSFMetricMapping('suspended', 10, transform_float),
         ]
 
         return self.parse_table_command(metrics, tags)
@@ -307,7 +296,7 @@ class BJobsProcessor(LSFMetricsProcessor):
         super().__init__(client, logger, base_tags)
         self.delimiter = '|'
         self.name = 'bjobs'
-        self.expected_columns = 12
+        self.expected_columns = 11
         self.prefix = 'job'
 
     def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
@@ -315,27 +304,21 @@ class BJobsProcessor(LSFMetricsProcessor):
 
     def process_metrics(self) -> list[LSFMetric]:
         tags = [
-            {'name': 'job_id', 'id': 0, 'transform': transform_job_id},
-            {'name': 'task_id', 'id': 0, 'transform': transform_task_id},
-            {
-                'name': 'full_job_id',
-                'id': 0,
-            },
-            {
-                'name': 'queue',
-                'id': 2,
-            },
-            {'name': 'from_host', 'id': 3, 'transform': transform_tag},
-            {'name': 'exec_host', 'id': 4, 'transform': transform_tag},
+            LSFTagMapping('job_id', 0, transform_job_id),
+            LSFTagMapping('task_id', 0, transform_task_id),
+            LSFTagMapping('full_job_id', 0, transform_tag),
+            LSFTagMapping('queue', 1, transform_tag),
+            LSFTagMapping('from_host', 2, transform_tag),
+            LSFTagMapping('exec_host', 3, transform_tag),
         ]
         metrics = [
-            {'name': 'run_time', 'id': 5, 'transform': transform_float},
-            {'name': 'cpu_used', 'id': 6, 'transform': transform_float},
-            {'name': 'mem', 'id': 7, 'transform': transform_float},
-            {'name': 'time_left', 'id': 8, 'transform': transform_float},
-            {'name': 'swap', 'id': 9, 'transform': transform_float},
-            {'name': 'idle_factor', 'id': 10, 'transform': transform_float},
-            {'name': 'percent_complete', 'id': 11, 'transform': transform_float},
+            LSFMetricMapping('run_time', 4, transform_float),
+            LSFMetricMapping('cpu_used', 5, transform_float),
+            LSFMetricMapping('mem', 6, transform_float),
+            LSFMetricMapping('time_left', 7, transform_float),
+            LSFMetricMapping('swap', 8, transform_float),
+            LSFMetricMapping('idle_factor', 9, transform_float),
+            LSFMetricMapping('percent_complete', 10, transform_float),
         ]
 
         return self.parse_table_command(metrics, tags)
