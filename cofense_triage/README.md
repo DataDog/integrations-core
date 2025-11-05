@@ -45,8 +45,8 @@ Note: Use the maximum rate limit for optimal performance.
 
 #### Whitelist Datadog IP Addresses
 
-1. Use an API platform such as Postman, or curl to make a GET request to the [Datadog API endpoint][3].
-2. Once you receive the response, locate the **webhooks** section in the JSON. It will look something like this:
+1. Use an API platform such as Postman or the curl command to make a GET request to the [Datadog API endpoint][3].
+2. After you receive the response, locate the **webhooks** section in the JSON. It looks something like this:
    ```json
       "webhooks": {
          "prefixes_ipv4": [
@@ -57,7 +57,7 @@ Note: Use the maximum rate limit for optimal performance.
          }
    ```
 3. From the **prefixes_ipv4** list under the Webhooks section, copy each CIDR entry.
-4. Work with Cofense Support team to get these IP ranges whitelisted.
+4. Work with Cofense support team to get these IP ranges whitelisted.
 
 ## Data Collected
 
