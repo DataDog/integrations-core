@@ -27,36 +27,8 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-# Query to get recent queries from system.query_log
-# We collect queries that have finished execution and have sufficient information
-QUERY_LOG_QUERY = """
-SELECT
-    event_time,
-    query_id,
-    query,
-    type,
-    user,
-    query_duration_ms,
-    read_rows,
-    read_bytes,
-    written_rows,
-    written_bytes,
-    result_rows,
-    result_bytes,
-    memory_usage,
-    exception
-FROM system.query_log
-WHERE
-    type IN ('QueryFinish', 'ExceptionWhileProcessing')
-    AND event_time >= toDateTime('{start_time}')
-    AND event_time < toDateTime('{end_time}')
-    AND query NOT LIKE '%system.query_log%'
-    AND query NOT LIKE '%system.processes%'
-ORDER BY event_time DESC
-LIMIT {limit}
-"""
-
-# Query to get active queries from system.processes
+# Query to get currently running/active queries from system.processes
+# This is the ClickHouse equivalent of Postgres pg_stat_activity
 ACTIVE_QUERIES_QUERY = """
 SELECT
     elapsed,
@@ -68,10 +40,25 @@ SELECT
     written_rows,
     written_bytes,
     memory_usage,
-    initial_query_id
+    initial_query_id,
+    initial_user,
+    query_kind,
+    is_initial_query
 FROM system.processes
-WHERE query NOT LIKE '%%system.processes%%'
+WHERE query NOT LIKE '%system.processes%'
+  AND query NOT LIKE '%system.query_log%'
+  AND query != ''
 """
+
+# Columns from system.processes which correspond to attributes common to all databases
+# and are therefore stored under other standard keys
+system_processes_sample_exclude_keys = {
+    # we process & obfuscate this separately
+    'query',
+    # stored separately
+    'user',
+    'query_id',
+}
 
 
 def agent_check_getter(self):
@@ -80,7 +67,8 @@ def agent_check_getter(self):
 
 class ClickhouseStatementSamples(DBMAsyncJob):
     """
-    Collects statement samples from ClickHouse query logs.
+    Collects statement samples from ClickHouse active queries (system.processes).
+    Similar to Postgres integration using pg_stat_activity.
     """
 
     def __init__(self, check: ClickhouseCheck, config):
@@ -101,7 +89,6 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         self._config = config
         self._tags_no_db = None
         self.tags = None
-        self._last_collection_timestamp = None
 
         # Get obfuscator options from config if available
         obfuscate_options = {
@@ -118,12 +105,6 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             ttl=60 * 60 / getattr(config, 'samples_per_hour_per_query', 15),
         )
 
-        # Cache for storing query execution plans
-        self._explain_plan_cache = TTLCache(
-            maxsize=1000,
-            ttl=3600,  # 1 hour TTL
-        )
-
         self._collection_interval = collection_interval
 
     def _dbtags(self, db, *extra_tags):
@@ -137,59 +118,17 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             t.extend(self._tags_no_db)
         return t
 
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_query_log_samples(self):
-        """
-        Fetch recent queries from system.query_log
-        """
-        start_time = time.time()
-
-        # Calculate time window for query collection
-        end_time_ts = time.time()
-        if self._last_collection_timestamp is None:
-            # First run: collect queries from the last collection interval
-            start_time_ts = end_time_ts - self._collection_interval
-        else:
-            start_time_ts = self._last_collection_timestamp
-
-        # Convert to datetime strings for ClickHouse
-        from datetime import datetime
-
-        start_time_dt = datetime.fromtimestamp(start_time_ts)
-        end_time_dt = datetime.fromtimestamp(end_time_ts)
-
-        params = {
-            'start_time': start_time_dt.strftime('%Y-%m-%d %H:%M:%S'),
-            'end_time': end_time_dt.strftime('%Y-%m-%d %H:%M:%S'),
-            'limit': 100,
-        }
-
-        try:
-            # Execute query using the check's client
-            query = QUERY_LOG_QUERY.format(**params)
-            self._log.debug("Executing query log query: %s", query)
-            rows = self._check.execute_query_raw(query)
-
-            self._last_collection_timestamp = end_time_ts
-
-            self._report_check_hist_metrics(start_time, len(rows), "get_query_log_samples")
-            self._log.info("Loaded %s rows from system.query_log", len(rows))
-
-            return rows
-        except Exception as e:
-            self._log.exception("Failed to collect query log samples: %s", str(e))
-            self._check.count(
-                "dd.clickhouse.statement_samples.error",
-                1,
-                tags=self.tags + ["error:query-log-fetch"] + self._get_debug_tags(),
-                raw=True,
-            )
-            return []
+    def _get_debug_tags(self):
+        t = []
+        if self._tags_no_db:
+            t.extend(self._tags_no_db)
+        return t
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_active_queries(self):
         """
         Fetch currently running queries from system.processes
+        This is analogous to Postgres querying pg_stat_activity
         """
         start_time = time.time()
 
@@ -201,51 +140,55 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
             return rows
         except Exception as e:
-            self._log.warning("Failed to collect active queries: %s", str(e))
+            self._log.exception("Failed to collect active queries: %s", str(e))
+            self._check.count(
+                "dd.clickhouse.statement_samples.error",
+                1,
+                tags=self.tags + ["error:active-queries-fetch"] + self._get_debug_tags(),
+                raw=True,
+            )
             return []
 
-    def _normalize_query_log_row(self, row):
+    def _normalize_active_query_row(self, row):
         """
-        Normalize a row from system.query_log into a standard format
+        Normalize a row from system.processes into a standard format
         """
         try:
             (
-                event_time,
+                elapsed,
                 query_id,
                 query,
-                query_type,
                 user,
-                query_duration_ms,
                 read_rows,
                 read_bytes,
                 written_rows,
                 written_bytes,
-                result_rows,
-                result_bytes,
                 memory_usage,
-                exception,
+                initial_query_id,
+                initial_user,
+                query_kind,
+                is_initial_query,
             ) = row
 
             normalized_row = {
-                'timestamp': event_time,
+                'elapsed': float(elapsed) if elapsed else 0,
                 'query_id': str(query_id),
                 'query': str(query),
-                'type': str(query_type),
                 'user': str(user),
-                'duration_ms': float(query_duration_ms) if query_duration_ms else 0,
                 'read_rows': int(read_rows) if read_rows else 0,
                 'read_bytes': int(read_bytes) if read_bytes else 0,
                 'written_rows': int(written_rows) if written_rows else 0,
                 'written_bytes': int(written_bytes) if written_bytes else 0,
-                'result_rows': int(result_rows) if result_rows else 0,
-                'result_bytes': int(result_bytes) if result_bytes else 0,
                 'memory_usage': int(memory_usage) if memory_usage else 0,
-                'exception': str(exception) if exception else None,
+                'initial_query_id': str(initial_query_id) if initial_query_id else None,
+                'initial_user': str(initial_user) if initial_user else None,
+                'query_kind': str(query_kind) if query_kind else None,
+                'is_initial_query': bool(is_initial_query) if is_initial_query is not None else True,
             }
 
             return self._obfuscate_and_normalize_query(normalized_row)
         except Exception as e:
-            self._log.warning("Failed to normalize query log row: %s, row: %s", str(e), row)
+            self._log.warning("Failed to normalize active query row: %s, row: %s", str(e), row)
             raise
 
     def _obfuscate_and_normalize_query(self, row):
@@ -257,56 +200,58 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             statement = obfuscate_sql_with_metadata(row['query'], self._obfuscate_options)
             obfuscated_query = statement['query']
             metadata = statement['metadata']
-            row['query_signature'] = compute_sql_signature(obfuscated_query)
+
+            row['statement'] = obfuscated_query
             row['dd_tables'] = metadata.get('tables', None)
             row['dd_commands'] = metadata.get('commands', None)
             row['dd_comments'] = metadata.get('comments', None)
-        except Exception as e:
-            self._log.debug("Failed to obfuscate query: %s", e)
-            self._check.count(
-                "dd.clickhouse.statement_samples.error",
-                1,
-                tags=self.tags + ["error:sql-obfuscate"] + self._check._get_debug_tags(),
-                raw=True,
-            )
-            # Use a default query signature if obfuscation fails
-            row['query_signature'] = compute_sql_signature(row['query'][:100])
 
-        row['statement'] = obfuscated_query
+            # Compute query signature
+            row['query_signature'] = compute_sql_signature(obfuscated_query)
+
+        except Exception as e:
+            self._log.warning(
+                "Failed to obfuscate query: %s, query: %s", str(e), row.get('query', '')[:100]
+            )
+            # On obfuscation error, we still want to emit the row
+            row['statement'] = None
+            row['query_signature'] = compute_sql_signature(row['query'])
+            row['dd_tables'] = None
+            row['dd_commands'] = None
+            row['dd_comments'] = None
+
         return row
 
-    def _get_debug_tags(self):
-        return self._check._get_debug_tags() if hasattr(self._check, '_get_debug_tags') else []
+    def _filter_and_normalize_statement_rows(self, rows):
+        """
+        Filter and normalize rows from system.processes
+        """
+        normalized_rows = []
+        for row in rows:
+            try:
+                normalized_row = self._normalize_active_query_row(row)
+                if normalized_row and normalized_row.get('statement'):
+                    normalized_rows.append(normalized_row)
+            except Exception as e:
+                self._log.debug("Failed to normalize row: %s", e)
 
-    def _report_check_hist_metrics(self, start_time, row_len, method_name):
-        """
-        Report histogram metrics for check operations
-        """
-        elapsed_ms = (time.time() - start_time) * 1000
-        self._check.histogram(
-            f"dd.clickhouse.{method_name}.time",
-            elapsed_ms,
-            tags=self.tags + self._get_debug_tags(),
-            raw=True,
-        )
-        self._check.histogram(
-            f"dd.clickhouse.{method_name}.rows",
-            row_len,
-            tags=self.tags + self._get_debug_tags(),
-            raw=True,
-        )
+        return normalized_rows
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
         """
-        Main method to collect and submit statement samples
+        Main method to collect and submit statement samples from active queries
+        Similar to Postgres _collect_statement_samples
         """
         start_time = time.time()
 
-        # Get query log samples
-        rows = self._get_query_log_samples()
+        # Get active queries from system.processes
+        rows = self._get_active_queries()
 
-        self._log.info("Retrieved %s query log samples for processing", len(rows))
+        self._log.info("Retrieved %s active queries for processing", len(rows))
+
+        # Normalize and filter rows
+        rows = self._filter_and_normalize_statement_rows(rows)
 
         submitted_count = 0
         skipped_count = 0
@@ -314,10 +259,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
         for row in rows:
             try:
-                normalized_row = self._normalize_query_log_row(row)
-
                 # Check if we should submit this sample based on rate limiting
-                query_signature = normalized_row.get('query_signature')
+                query_signature = row.get('query_signature')
                 if not query_signature:
                     self._log.debug("Skipping row without query signature")
                     skipped_count += 1
@@ -328,22 +271,21 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                     continue
 
                 # Create the event payload
-                event = self._create_sample_event(normalized_row)
+                event = self._create_sample_event(row)
 
                 # Log the event payload for debugging
-                self._log.info("Query sample event payload: ddsource=%s, query_signature=%s",
+                self._log.debug("Query sample event payload: ddsource=%s, query_signature=%s",
                               event.get('ddsource'), query_signature[:50] if query_signature else 'N/A')
 
                 # Submit the event
                 event_json = json.dumps(event, default=default_json_event_encoding)
-                self._log.debug("Full event JSON (first 500 chars): %s", event_json[:500])
                 self._check.database_monitoring_query_sample(event_json)
                 submitted_count += 1
                 self._log.debug("Submitted query sample for signature: %s", query_signature[:50])
 
             except Exception as e:
                 error_count += 1
-                self._log.exception("Error processing query log row: %s", e)
+                self._log.exception("Error processing active query row: %s", e)
                 self._check.count(
                     "dd.clickhouse.statement_samples.error",
                     1,
@@ -358,30 +300,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             submitted_count, skipped_count, error_count, elapsed_ms
         )
 
-        self._check.histogram(
-            "dd.clickhouse.collect_statement_samples.time",
-            elapsed_ms,
-            tags=self.tags + self._get_debug_tags(),
-            raw=True,
-        )
-        self._check.count(
-            "dd.clickhouse.collect_statement_samples.events_submitted.count",
-            submitted_count,
-            tags=self.tags + self._get_debug_tags(),
-            raw=True,
-        )
-        self._check.count(
-            "dd.clickhouse.collect_statement_samples.events_skipped.count",
-            skipped_count,
-            tags=self.tags + self._get_debug_tags(),
-            raw=True,
-        )
-        self._check.count(
-            "dd.clickhouse.collect_statement_samples.events_errors.count",
-            error_count,
-            tags=self.tags + self._get_debug_tags(),
-            raw=True,
-        )
+        # Report cache size metrics
         self._check.gauge(
             "dd.clickhouse.collect_statement_samples.seen_samples_cache.len",
             len(self._seen_samples_ratelimiter),
@@ -392,6 +311,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
     def _create_sample_event(self, row):
         """
         Create a database monitoring query sample event
+        Format follows Postgres integration pattern
         """
         db = self._check._db
 
@@ -400,7 +320,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "clickhouse",
-            "dbm_type": "sample",
+            "dbm_type": "plan",  # Using "plan" type like Postgres (even without actual explain plans)
             "ddtags": ",".join(self._dbtags(db)),
             "timestamp": int(time.time() * 1000),
             "db": {
@@ -415,26 +335,13 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 },
             },
             "clickhouse": {
-                "query_id": row.get('query_id'),
-                "type": row.get('type'),
-                "duration_ms": row.get('duration_ms'),
-                "read_rows": row.get('read_rows'),
-                "read_bytes": row.get('read_bytes'),
-                "written_rows": row.get('written_rows'),
-                "written_bytes": row.get('written_bytes'),
-                "result_rows": row.get('result_rows'),
-                "result_bytes": row.get('result_bytes'),
-                "memory_usage": row.get('memory_usage'),
+                k: v for k, v in row.items() if k not in system_processes_sample_exclude_keys
             },
         }
 
-        # Add exception information if present
-        if row.get('exception'):
-            event['clickhouse']['exception'] = row['exception']
-
-        # Add duration if available
-        if row.get('duration_ms'):
-            event['duration'] = int(row['duration_ms'] * 1e6)  # Convert to nanoseconds
+        # Add duration if available (elapsed time in seconds, convert to nanoseconds)
+        if row.get('elapsed'):
+            event['duration'] = int(row['elapsed'] * 1e9)
 
         return event
 
