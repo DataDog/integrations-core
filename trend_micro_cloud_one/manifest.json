@@ -87,9 +87,6 @@
       "Trend Micro Cloud One - Log Inspection and Web Reputation Events": "assets/dashboards/trend_micro_cloud_one_log_inspection_and_web_reputation_events.json",
       "Trend Micro Cloud One - Network Security Insights": "assets/dashboards/trend_micro_cloud_one_network_security_insights.json",
       "Trend Micro Cloud One - File Storage Security Insights": "assets/dashboards/trend_micro_cloud_one_file_storage_security_insights.json"
-    },
-    "logs": {
-      "source": "trend-micro-cloud-one"
     }
   },
   "author": {

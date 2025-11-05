@@ -175,7 +175,7 @@ def test_manifest_metric_prefix_dne(ddev, repository, helpers):
         └── Apache
             └── {outfile}
 
-                apache:2 metric_prefix does not exist in manifest.
+                apache: metric_prefix does not exist in manifest or overrides.
 
         Errors: 1
         """
@@ -577,7 +577,7 @@ def test_prefix_match(ddev, repository, helpers):
             └── {outfile}
 
                 apache: `invalid_metric_prefix` appears 1 time(s) and does not match
-                metric_prefix defined in the manifest.
+                metric_prefix defined for this integration: metric_prefix='apache.'.
 
         Errors: 1
         """
