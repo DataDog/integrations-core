@@ -250,13 +250,14 @@ class WindowsService(AgentCheck):
         super().__init__(name, init_config, instances)
         self._service_pid_cache: dict[str, int] = {}
 
-    def _get_service_restarts(self, service_name: str, current_pid: int) -> bool:
-        prev_pid = self._service_pid_cache.get(service_name, 0)
+    def _get_service_restarts(self, service_name: str, current_pid: int) -> int:
+        if current_pid == 0:
+            return 0
+        prev_pid = self._service_pid_cache.get(service_name, None)
         restarts = 0
-        # pid of services are taken from EnumServicesStatusEx
-        # if the pid is 0, the service is not running
-        if current_pid != 0 and prev_pid != 0 and current_pid != prev_pid:
+        if prev_pid is not None and prev_pid != current_pid:
             restarts = 1
+        # only store the last running pid for the service
         self._service_pid_cache[service_name] = current_pid
         return restarts
 
