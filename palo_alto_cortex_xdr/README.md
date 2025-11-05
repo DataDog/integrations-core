@@ -11,8 +11,6 @@ This integration ingests the following logs:
 
 The Palo Alto Cortex XDR integration seamlessly collects the data of Palo Alto Cortex XDR logs using REST APIs. Before ingesting the data, it normalizes and enriches the logs, ensuring a consistent data format and enhancing information content for downstream processing and analysis. The integration provides insights into incidents and alerts using out-of-the-box dashboards.
 
-**Minimum Agent version:** 7.55.2
-
 ## Setup
 
 ### Generate API credentials in Palo Alto Cortex XDR
