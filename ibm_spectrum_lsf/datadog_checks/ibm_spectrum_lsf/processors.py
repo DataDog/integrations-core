@@ -33,14 +33,14 @@ class LSFMetric:
 class LSFTagMapping:
     name: str
     id: int
-    transform: Callable[[str], str]
+    transform: Callable[[str], Optional[str]]
 
 
 @dataclass
 class LSFMetricMapping:
     name: str
     id: int
-    transform: Callable[[str], int]
+    transform: Callable[[str], float]
 
 
 def process_table_tags(tag_mapping: list[LSFTagMapping], line_data: list[str]) -> list[str]:
@@ -48,12 +48,11 @@ def process_table_tags(tag_mapping: list[LSFTagMapping], line_data: list[str]) -
     for tag in tag_mapping:
         val = line_data[tag.id]
         transformer = tag.transform
-        if transformer:
-            val = transformer(val)
-            if val is None:
-                continue
+        transformed_val = transformer(val)
+        if transformed_val is None:
+            continue
         key = tag.name
-        tags.append(f"{key}:{val}")
+        tags.append(f"{key}:{transformed_val}")
 
     return tags
 
@@ -65,10 +64,10 @@ def process_table_metrics(
     for metric in metric_mapping:
         val = line_data[metric.id]
         transformer = metric.transform
-        val = transformer(val)
+        transformed_val = transformer(val)
 
         name = metric.name
-        metrics.append(LSFMetric(f"{prefix}.{name}", val, tags))
+        metrics.append(LSFMetric(f"{prefix}.{name}", transformed_val, tags))
     return metrics
 
 
@@ -88,7 +87,9 @@ class LSFMetricsProcessor(ABC):
     def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
         pass
 
-    def parse_table_command(self, metric_mapping: list[dict], tag_mapping: list[dict]) -> list[LSFMetric]:
+    def parse_table_command(
+        self, metric_mapping: list[LSFMetricMapping], tag_mapping: list[LSFTagMapping]
+    ) -> list[LSFMetric]:
         output, err, exit_code = self.run_lsf_command()
         if exit_code != 0 or output is None:
             self.log.error("Failed to get %s output: %s", self.name, err)
