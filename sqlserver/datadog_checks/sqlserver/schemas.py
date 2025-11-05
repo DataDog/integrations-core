@@ -7,7 +7,7 @@ from __future__ import annotations
 import contextlib
 from typing import TYPE_CHECKING, TypedDict
 
-import orjson as json
+from datadog_checks.base.utils.serialization import json
 
 from datadog_checks.sqlserver.utils import execute_query
 
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.sqlserver.const import (
+    DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
     SWITCH_DB_STATEMENT,
 )
 
@@ -52,8 +53,7 @@ FROM
 
 COLUMN_QUERY = """
 SELECT
-    c.name, t.name as data_type, dc.definition as column_default, c.is_nullable AS nullable,
-    c.collation_name, c.precision, c.scale, c.max_length
+    c.name, t.name as data_type, coalesce(dc.definition, 'None') as "default", c.is_nullable AS nullable
 FROM
     sys.columns c
     INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
@@ -61,18 +61,9 @@ FROM
 WHERE c.object_id = schema_tables.table_id
 """
 
-PARTITIONS_QUERY = """
-SELECT
-    object_id AS id, COUNT(*) AS partition_count
-FROM
-    sys.partitions
-WHERE
-    object_id IN ({}) GROUP BY object_id;
-"""
-
 INDEX_QUERY = """
 SELECT
-    i.object_id AS table_id, i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
+    i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
     i.is_disabled, STRING_AGG(c.name, ',') AS column_names
 FROM
     sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id
@@ -113,7 +104,6 @@ GROUP BY
 
 FOREIGN_KEY_QUERY = """
 SELECT
-    FK.parent_object_id AS table_id,
     FK.name AS foreign_key_name,
     OBJECT_NAME(FK.parent_object_id) AS referencing_table,
     STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column,
@@ -162,6 +152,16 @@ GROUP BY
     FK.update_referential_action_desc
 """
 
+PARTITIONS_QUERY = """
+SELECT
+    COUNT(*) AS partition_count
+FROM
+    sys.partitions
+WHERE
+    object_id = schema_tables.table_id
+GROUP BY object_id
+"""
+
 
 # The schema collector sends lists of DatabaseObjects to the agent
 # The format is for backwards compatibility with the current backend
@@ -181,9 +181,15 @@ class TableObject(TypedDict):
     indexes: list
     foreign_keys: list
 
+class SchemaObject(TypedDict):
+    name: str
+    id: str
+    owner: str
+    tables: list[TableObject]
 
-class MySqlDatabaseObject(DatabaseObject):
-    schemas: list[TableObject]
+
+class SQLServerDatabaseObject(DatabaseObject):
+    schemas: list[SchemaObject]
 
 
 class SQLServerSchemaCollector(SchemaCollector):
@@ -191,7 +197,7 @@ class SQLServerSchemaCollector(SchemaCollector):
 
     def __init__(self, check: SQLServer):
         config = SchemaCollectorConfig()
-        config.collection_interval = check._config.schema_config.get("collection_interval")
+        config.collection_interval = check._config.schema_config.get("collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
         # config.max_tables = check._config.collect_schemas.max_tables
         # config.exclude_databases =  check._config.collect_schemas.exclude_databases
         # config.include_databases =  check._config.collect_schemas.include_databases
@@ -224,42 +230,13 @@ class SQLServerSchemaCollector(SchemaCollector):
                 columns_query = COLUMN_QUERY
                 indexes_query = INDEX_QUERY
                 constraints_query = FOREIGN_KEY_QUERY
-                # partition_ctes = (
-                #     f"""
-                #     ,
-                #     partition_keys AS (
-                #         {PARTITION_KEY_QUERY}
-                #     ),
-                #     num_partitions AS (
-                #         {NUM_PARTITIONS_QUERY}
-                #     )
-                # """
-                #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
-                #     else ""
-                # )
-                # partition_joins = (
-                #     """
-                #     LEFT JOIN partition_keys ON tables.table_id = partition_keys.table_id
-                #     LEFT JOIN num_partitions ON tables.table_id = num_partitions.table_id
-                # """
-                #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
-                #     else ""
-                # )
-                # parition_selects = (
-                #     """
-                # ,
-                #     partition_keys.partition_key,
-                #     num_partitions.num_partitions
-                # """
-                #     if VersionUtils.transform_version(str(self._check.version))["version.major"] > "9"
-                #     else ""
-                # )
-                partition_ctes = ""
-                partition_joins = ""
-                partition_selects = ""
+                partitions_query = PARTITIONS_QUERY
+                
                 # limit = int(self._config.max_tables or 1_000_000)
                 limit = 1_000_000
 
+# Note that we INNER JOIN tables to omit schemas with no tables
+# This is a simple way to omit the system tables like db_blah
                 query = f"""
                     WITH
                     schemas AS (
@@ -272,22 +249,19 @@ class SQLServerSchemaCollector(SchemaCollector):
                         SELECT TOP {limit} schemas.schema_name, schemas.schema_id, schemas.owner_name,
                         tables.table_id, tables.table_name
                         FROM schemas
-                        LEFT JOIN tables ON schemas.schema_id = tables.schema_id
+                        INNER JOIN tables ON schemas.schema_id = tables.schema_id
                         ORDER BY schemas.schema_name, tables.table_name
                     )
-                    {partition_ctes}
 
-                    SELECT schema_tables.schema_name, schema_tables.table_name,
-                        json_query(({columns_query} FOR JSON PATH), '$') as columns
+                    SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name, schema_tables.table_name
+                        , json_query(({columns_query} FOR JSON PATH), '$') as columns
                         , json_query(({indexes_query} FOR JSON PATH), '$') as indexes
                         , json_query(({constraints_query} FOR JSON PATH), '$') as foreign_keys
-                        {partition_selects}
+                        , ({partitions_query}) as partition_count
                     FROM schema_tables
-                        {partition_joins}
                     ;
                 """
                 # print(query)
-                # cursor.execute("SET SESSION MAX_EXECUTION_TIME=60000;")
                 cursor.execute(query)
                 yield cursor
 
@@ -297,19 +271,18 @@ class SQLServerSchemaCollector(SchemaCollector):
     def _get_all(self, cursor):
         return cursor.fetchall_dict()
 
-    def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
-        
-        # We intentionally dont call super because MySQL has no logical databases
+    def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:        
         object = super()._map_row(database, cursor_row)
         # Map the cursor row to the expected schema, and strip out None values
-        object["tables"] = {
+        object["schemas"] = [{
             "name": cursor_row.get("schema_name"),
             "id": cursor_row.get("schema_id"),
-            "owner": cursor_row.get("owner_name"),
+            "owner_name": cursor_row.get("owner_name"),
             "tables": [
                 {
                     k: v
                     for k, v in {
+                        "id": cursor_row.get("table_id"),
                         "name": cursor_row.get("table_name"),
                         # The query can create duplicates of the joined tables
                         "columns": list(
@@ -319,16 +292,14 @@ class SQLServerSchemaCollector(SchemaCollector):
                             {v and v['name']: v for v in json.loads(cursor_row.get("indexes") or "[]")}.values()
                         ),
                         "foreign_keys": list(
-                            {v and v['name']: v for v in json.loads(cursor_row.get("foreign_keys") or "[]")}.values()
+                            {v and v['foreign_key_name']: v for v in json.loads(cursor_row.get("foreign_keys") or "[]")}.values()
                         ),
-                        # "toast_table": cursor_row.get("toast_table"),
-                        # "num_partitions": cursor_row.get("num_partitions"),
-                        # "partition_key": cursor_row.get("partition_key"),
+                        "partitions": {
+                            "partition_count": cursor_row.get("partition_count")
+                        },
                     }.items()
                     if v is not None
-                }
-                if cursor_row.get("table_name") is not None
-                else None
-            ],
-        }
+                }                
+            ] if cursor_row.get("table_name") is not None else [],
+        }]
         return object

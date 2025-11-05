@@ -51,7 +51,6 @@ from datadog_checks.sqlserver.database_metrics import (
 )
 from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
-from datadog_checks.sqlserver.schemas_old import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
@@ -182,7 +181,6 @@ class SQLServer(DatabaseCheck):
         self._database_metrics = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
 
-        self._schemas = Schemas(self, self._config)
 
     def initialize_xe_session_handlers(self):
         """Initialize the XE session handlers without starting them"""
@@ -196,7 +194,6 @@ class SQLServer(DatabaseCheck):
         self.procedure_metrics.cancel()
         self.activity.cancel()
         self.sql_metadata.cancel()
-        self._schemas.cancel()
         self.deadlocks.cancel()
 
         # Cancel all XE session handlers
@@ -865,7 +862,6 @@ class SQLServer(DatabaseCheck):
                 self.procedure_metrics.run_job_loop(self.tag_manager.get_tags())
                 self.activity.run_job_loop(self.tag_manager.get_tags())
                 self.sql_metadata.run_job_loop(self.tag_manager.get_tags())
-                self._schemas.run_job_loop(self.tag_manager.get_tags())
                 self.deadlocks.run_job_loop(self.tag_manager.get_tags())
 
                 # Run XE session handlers
