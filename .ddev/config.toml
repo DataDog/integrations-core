@@ -12,6 +12,7 @@ openstack_controller = "OpenStack Controller"
 pulsar = "Pulsar"
 teamcity = "TeamCity"
 win32_event_log = "Windows Event Log"
+lustre = "Lustre"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
