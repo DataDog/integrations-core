@@ -28,7 +28,10 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
         self.check_initializations.append(self.initialize_processors)
 
     def parse_config(self):
-        self.tags = self.config.tags if self.config.tags else []
+        self.tags = []
+        self.log.warning(self.config.tags)
+        if self.config.tags:
+            self.tags.extend(self.config.tags)
         self.tags.append(f"lsf_cluster_name:{self.config.cluster_name}")
 
     def initialize_processors(self):

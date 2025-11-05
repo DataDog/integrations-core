@@ -3,7 +3,7 @@ check-types = true
 mypy-args = [
   "--install-types",
   "--non-interactive",
-  "datadog_checks/ibm_spectrum_lsf",
+  "datadog_checks/",
   "tests/",
 ]
 mypy-deps = [
@@ -11,4 +11,4 @@ mypy-deps = [
 ]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]

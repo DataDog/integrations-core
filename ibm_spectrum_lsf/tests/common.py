@@ -246,9 +246,9 @@ BQUEUES_METRICS = [
     {
         "name": "ibm_spectrum_lsf.queue.is_active",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:idle'],
-        "val": 0,
+        "val": 1,
     },
-    {"name": "ibm_spectrum_lsf.queue.is_open", "tags": ['lsf_cluster_name:test-cluster', 'queue_name:idle'], "val": 0},
+    {"name": "ibm_spectrum_lsf.queue.is_open", "tags": ['lsf_cluster_name:test-cluster', 'queue_name:idle'], "val": 1},
     {
         "name": "ibm_spectrum_lsf.queue.max_jobs",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:idle'],
@@ -292,7 +292,7 @@ BQUEUES_METRICS = [
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:night'],
         "val": 0,
     },
-    {"name": "ibm_spectrum_lsf.queue.is_open", "tags": ['lsf_cluster_name:test-cluster', 'queue_name:night'], "val": 0},
+    {"name": "ibm_spectrum_lsf.queue.is_open", "tags": ['lsf_cluster_name:test-cluster', 'queue_name:night'], "val": 1},
     {
         "name": "ibm_spectrum_lsf.queue.max_jobs",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:night'],
@@ -334,12 +334,12 @@ BQUEUES_METRICS = [
     {
         "name": "ibm_spectrum_lsf.queue.is_active",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:interactive'],
-        "val": 0,
+        "val": 1,
     },
     {
         "name": "ibm_spectrum_lsf.queue.is_open",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:interactive'],
-        "val": 0,
+        "val": 1,
     },
     {
         "name": "ibm_spectrum_lsf.queue.max_jobs",
@@ -390,12 +390,12 @@ BQUEUES_METRICS = [
     {
         "name": "ibm_spectrum_lsf.queue.is_active",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:normal'],
-        "val": 0,
+        "val": 1,
     },
     {
         "name": "ibm_spectrum_lsf.queue.is_open",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:normal'],
-        "val": 0,
+        "val": 1,
     },
     {
         "name": "ibm_spectrum_lsf.queue.max_jobs",
@@ -446,9 +446,9 @@ BQUEUES_METRICS = [
     {
         "name": "ibm_spectrum_lsf.queue.is_active",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:short'],
-        "val": 0,
+        "val": 1,
     },
-    {"name": "ibm_spectrum_lsf.queue.is_open", "tags": ['lsf_cluster_name:test-cluster', 'queue_name:short'], "val": 0},
+    {"name": "ibm_spectrum_lsf.queue.is_open", "tags": ['lsf_cluster_name:test-cluster', 'queue_name:short'], "val": 1},
     {
         "name": "ibm_spectrum_lsf.queue.max_jobs",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:short'],
@@ -490,12 +490,12 @@ BQUEUES_METRICS = [
     {
         "name": "ibm_spectrum_lsf.queue.is_active",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:priority'],
-        "val": 0,
+        "val": 1,
     },
     {
         "name": "ibm_spectrum_lsf.queue.is_open",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:priority'],
-        "val": 0,
+        "val": 1,
     },
     {
         "name": "ibm_spectrum_lsf.queue.max_jobs",
@@ -546,12 +546,12 @@ BQUEUES_METRICS = [
     {
         "name": "ibm_spectrum_lsf.queue.is_active",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:owners'],
-        "val": 0,
+        "val": 1,
     },
     {
         "name": "ibm_spectrum_lsf.queue.is_open",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:owners'],
-        "val": 0,
+        "val": 1,
     },
     {
         "name": "ibm_spectrum_lsf.queue.max_jobs",
@@ -602,9 +602,9 @@ BQUEUES_METRICS = [
     {
         "name": "ibm_spectrum_lsf.queue.is_active",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:admin'],
-        "val": 0,
+        "val": 1,
     },
-    {"name": "ibm_spectrum_lsf.queue.is_open", "tags": ['lsf_cluster_name:test-cluster', 'queue_name:admin'], "val": 0},
+    {"name": "ibm_spectrum_lsf.queue.is_open", "tags": ['lsf_cluster_name:test-cluster', 'queue_name:admin'], "val": 1},
     {
         "name": "ibm_spectrum_lsf.queue.max_jobs",
         "tags": ['lsf_cluster_name:test-cluster', 'queue_name:admin'],

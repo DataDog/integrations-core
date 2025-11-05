@@ -33,6 +33,21 @@ def test_check(mock_client, dd_run_check, aggregator, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+def test_check_tags(mock_client, dd_run_check, aggregator, instance):
+    tag_instance = instance
+    tag_instance['tags'] = ["test_check"]
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+
+    dd_run_check(check)
+
+    for metric in ALL_METRICS:
+        aggregator.assert_metric(metric["name"], metric["val"], tags=metric["tags"] + ["test_check"])
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
 def test_lscluster_error(mock_client, dd_run_check, aggregator, instance):
     check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
     check.client = mock_client

@@ -30,12 +30,12 @@ def transform_runtime(val: str) -> float:
 
 def transform_active(val: str) -> bool:
     _, active = val.split(":")
-    return active.lower() == "Active"
+    return active.lower() == "active"
 
 
 def transform_open(val: str) -> bool:
     is_open, _ = val.split(":")
-    return is_open.lower() == "Open"
+    return is_open.lower() == "open"
 
 
 def transform_job_id(val: str) -> str:
