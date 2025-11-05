@@ -43,6 +43,22 @@ Note: Use the maximum rate limit for optimal performance.
    | Client Secret | The Client Secret of your Cofense Triage account. |
 2. Click **Save** to save your settings.
 
+#### Whitelist Datadog IP Addresses
+
+1. Use an API platform such as Postman, or curl to make a GET request to the [Datadog API endpoint][3].
+2. Once you receive the response, locate the **webhooks** section in the JSON. It will look something like this:
+   ```json
+      "webhooks": {
+         "prefixes_ipv4": [
+            "0.0.0.0/32",
+            ...
+         ],
+         "prefixes_ipv6": []
+         }
+   ```
+3. From the **prefixes_ipv4** list under the Webhooks section, copy each CIDR entry.
+4. Work with Cofense Support team to get these IP ranges whitelisted.
+
 ## Data Collected
 
 ### Logs
@@ -63,3 +79,4 @@ Need help? Contact [Datadog support][2].
 
 [1]: https://cofense.com/pdr-platform
 [2]: https://docs.datadoghq.com/help/
+[3]: https://docs.datadoghq.com/api/latest/ip-ranges/
