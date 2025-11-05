@@ -126,9 +126,6 @@ VM_STATS_METRICS_REQUIRED = [
     "nutanix.vm.hypervisor.write_io_bandwidth_kbps",
     "nutanix.vm.memory.usage_ppm",
     "nutanix.vm.num_vcpus_used_ppm",
-    "nutanix.vm.disk.capacity_bytes",
-    "nutanix.vm.disk.usage_ppm",
-    "nutanix.vm.hypervisor.vm_running_time_usecs",
 ]
 
 VM_STATS_METRICS_OPTIONAL = [
@@ -146,6 +143,9 @@ VM_STATS_METRICS_OPTIONAL = [
     "nutanix.vm.hypervisor.swap_in_rate_kbps",
     "nutanix.vm.hypervisor.swap_out_rate_kbps",
     "nutanix.vm.memory.usage_bytes",
+    "nutanix.vm.disk.capacity_bytes",
+    "nutanix.vm.disk.usage_ppm",
+    "nutanix.vm.hypervisor.vm_running_time_usecs",
 ]
 
 CLUSTER_BASIC_METRICS = [
