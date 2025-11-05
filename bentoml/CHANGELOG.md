@@ -13,7 +13,7 @@
 * Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
 * Remap `endpoint` label to `bentoml_endpoint` to prevent it from clashing with OMv2 default `endpoint` tag ([#21777](https://github.com/DataDog/integrations-core/pull/21777))
 
-## 1.1.0 / 2025-10-02
+## 1.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

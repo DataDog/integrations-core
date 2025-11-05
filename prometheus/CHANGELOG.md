@@ -8,7 +8,7 @@
 
 * Fix support of common instance options and fix indentation of `conf.yaml.example` file. ([#21584](https://github.com/DataDog/integrations-core/pull/21584))
 
-## 6.1.0 / 2025-10-02
+## 6.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

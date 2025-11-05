@@ -14,6 +14,10 @@ teamcity = "TeamCity"
 win32_event_log = "Windows Event Log"
 krakend = "KrakenD"
 
+[overrides.metrics-prefix]
+krakend = "krakend.api."
+lustre = "lustre."
+
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
 

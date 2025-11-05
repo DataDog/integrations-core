@@ -12,7 +12,7 @@
 
 * Add histogram bucket metrics for `lustre.jobstats.read_bytes` and `lustre.jobstats.write_bytes` ([#21589](https://github.com/DataDog/integrations-core/pull/21589))
 
-## 1.1.0 / 2025-10-02
+## 1.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

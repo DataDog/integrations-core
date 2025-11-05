@@ -9,7 +9,7 @@
 * Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
 * Move `disable_legacy_service_tag` config param up in conf.yaml.example ([#21743](https://github.com/DataDog/integrations-core/pull/21743))
 
-## 5.1.0 / 2025-10-02
+## 5.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 
