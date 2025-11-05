@@ -17,7 +17,6 @@ CONTROLLER_READINESS = '/api/status/readiness'
 
 
 class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
-
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'traefik_mesh'
 

@@ -22,6 +22,13 @@ init_config:
     #
     # shared_process_list_cache_duration: 120
 
+    ## @param reset_cache_on_process_changes - boolean - optional - default: true
+    ## When set to true, the shared process list cache is reset (forced to refresh) when a process disappears 
+    ## during scanning or when no matching processes are found for an instance. This ensures fresh process data 
+    ## but may impact performance on systems with frequent process changes.
+    #
+    # reset_cache_on_process_changes: true
+
     ## @param procfs_path - string - optional
     ## Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
     ## DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead

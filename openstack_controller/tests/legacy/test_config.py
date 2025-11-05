@@ -36,7 +36,6 @@ pytestmark = [
     ],
 )
 def test_config_invalid(instance, exception_msg, dd_run_check):
-
     check = OpenStackControllerLegacyCheck(CHECK_NAME, {}, [instance])
 
     with pytest.raises(Exception, match=exception_msg):
@@ -78,7 +77,6 @@ def test_config_invalid(instance, exception_msg, dd_run_check):
     ],
 )
 def test_config_invalid_openstack_auth(instance, exception_msg, dd_run_check):
-
     check = OpenStackControllerLegacyCheck(CHECK_NAME, {}, [instance])
 
     with pytest.raises(Exception, match=exception_msg):

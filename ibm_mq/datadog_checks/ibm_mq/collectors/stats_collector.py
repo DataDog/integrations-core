@@ -5,11 +5,10 @@
 from dateutil.tz import UTC
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_Q
 
+from datadog_checks.ibm_mq.metrics import METRIC_PREFIX, channel_stats_metrics, queue_stats_metrics
+from datadog_checks.ibm_mq.stats import ChannelStats
 from datadog_checks.ibm_mq.stats.base_stats import BaseStats
 from datadog_checks.ibm_mq.stats.queue_stats import QueueStats
-
-from ..metrics import METRIC_PREFIX, channel_stats_metrics, queue_stats_metrics
-from ..stats import ChannelStats
 
 try:
     import pymqi

@@ -180,7 +180,8 @@ def test_can_connect_service_check_state(
     instance, aggregator, test_case_name, request_mock_effects, expected_tags, expect_exception, expected_status
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.side_effect = request_mock_effects
         try:
             check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
@@ -198,7 +199,8 @@ def test_can_connect_service_with_instance_cluster_name(instance, aggregator):
     expected_tags = ['url:http://hello.com/state'] + cluster_name_tag + additional_tags
     expected_status = AgentCheck.OK
     check = MesosSlave('mesos_slave', {}, [instance])
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.side_effect = [mock.MagicMock(status_code=200, content='{}')]
         try:
             check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
@@ -216,7 +218,8 @@ def test_can_connect_service_check_stats(
     instance, aggregator, test_case_name, request_mock_effects, expected_tags, expect_exception, expected_status
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
-    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+    r = mock.MagicMock()
+    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
         r.get.side_effect = request_mock_effects
         try:
             check._process_stats_info('http://hello.com', instance['tags'])

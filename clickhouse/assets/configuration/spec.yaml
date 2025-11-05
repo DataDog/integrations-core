@@ -50,11 +50,13 @@ files:
     - name: compression
       description: |
         The compression algorithm to use. The default is no compression.
-
+        If br is specified, the brotli library must be installed separately.
+        
         Valid values are:
-
           - lz4
-          - lz4hc
+          - zstd
+          - br
+          - gzip
       value:
         type: string
     - name: tls_ca_cert

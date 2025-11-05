@@ -26,9 +26,10 @@ class MySQLConfig(object):
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
         self.options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
-        replication_channel = self.options.get('replication_channel')
-        if replication_channel:
-            self.tags.append("channel:{0}".format(replication_channel))
+        self.disable_innodb_metrics = is_affirmative(self.options.get('disable_innodb_metrics', False))
+        self.replication_channel = self.options.get('replication_channel')
+        if self.replication_channel:
+            self.tags.append("channel:{0}".format(self.replication_channel))
         self.queries = instance.get('queries', [])
         self.ssl = instance.get('ssl', {})
         self.additional_status = instance.get('additional_status', [])
@@ -38,17 +39,21 @@ class MySQLConfig(object):
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
         self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
+        self.replication_enabled = is_affirmative(self.options.get('replication', self.dbm_enabled))
         self.table_rows_stats_enabled = is_affirmative(self.options.get('table_rows_stats_metrics', False))
         self.statement_metrics_limits = instance.get('statement_metrics_limits', None)
         self.full_statement_text_cache_max_size = instance.get('full_statement_text_cache_max_size', 10000)
         self.full_statement_text_samples_per_hour_per_query = instance.get(
             'full_statement_text_samples_per_hour_per_query', 1
         )
+        self.statement_rows_cache_max_size = instance.get('statement_rows_cache_max_size', 10000)
+        self.statement_rows_cache_ttl = instance.get('statement_rows_cache_ttl', 3600)
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.settings_config = instance.get('collect_settings', {}) or {}
         self.activity_config = instance.get('query_activity', {}) or {}
-        self.schemas_config: dict = instance.get('schemas_collection', {}) or {}
+        # Backward compatibility: check new names first, then fall back to old names
+        self.schemas_config: dict = instance.get('collect_schemas', instance.get('schemas_collection', {})) or {}
         self.index_config: dict = instance.get('index_metrics', {}) or {}
         self.collect_blocking_queries = is_affirmative(instance.get('collect_blocking_queries', False))
 

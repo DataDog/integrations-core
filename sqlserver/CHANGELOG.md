@@ -2,7 +2,81 @@
 
 <!-- towncrier release notes start -->
 
-## 22.6.0 / 2025-05-19
+## 22.11.0 / 2025-10-31
+
+***Added***:
+
+* Add additional context to the database_identifier configuration description. ([#21575](https://github.com/DataDog/integrations-core/pull/21575))
+
+## 22.10.1 / 2025-10-03 / Agent 7.72.0
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 22.10.0 / 2025-10-02
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Add SQL Server database metric `user_access`. ([#21406](https://github.com/DataDog/integrations-core/pull/21406))
+* Normalize `sqlserver_servername` and `sqlserver_instancename` tag values to avoid duplicate tags. ([#21475](https://github.com/DataDog/integrations-core/pull/21475))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+* Add `replace_bind_parameter` to sqlserver obfuscator option to support obfuscate bind parameters like `@P1`. ([#21481](https://github.com/DataDog/integrations-core/pull/21481))
+
+***Fixed***:
+
+* Compile and reuse connection error regex patterns ([#21319](https://github.com/DataDog/integrations-core/pull/21319))
+
+## 22.9.1 / 2025-10-03 / Agent 7.71.1
+
+***Fixed***:
+
+* Remove ddagenthostname from metrics for Postgres, MySQL, and SQLServer ([#21523](https://github.com/DataDog/integrations-core/pull/21523))
+
+## 22.9.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update core tags with agent host name for DB integrations(postgres, mysql, sqlserver) ([#20991](https://github.com/DataDog/integrations-core/pull/20991))
+* Enable collect_settings by default for DBM enabled integrations ([#21172](https://github.com/DataDog/integrations-core/pull/21172))
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+## 22.8.0 / 2025-08-07 / Agent 7.70.0
+
+***Added***:
+
+* Add new collect_* configuration options (collect_schemas, collect_deadlocks, collect_xe) to replace deprecated *_collection options while maintaining backward compatibility. ([#20599](https://github.com/DataDog/integrations-core/pull/20599))
+
+***Fixed***:
+
+* Add deprecated `collect_schemas`, `collect_xe` and `collect_deadlocks` option to `config.yaml.example`. These config options are deprecated at Agent 7.70.0 and will be removed in a future release. ([#20781](https://github.com/DataDog/integrations-core/pull/20781))
+* Lift `pyodbc` dependency exclusion for macOS on AArch64/ARM64 ([#20812](https://github.com/DataDog/integrations-core/pull/20812))
+* Improve descriptions and examples in example configuration file ([#20878](https://github.com/DataDog/integrations-core/pull/20878))
+
+## 22.7.1 / 2025-07-10 / Agent 7.69.0
+
+***Fixed***:
+
+* Fixes "Column 'sys.foreign_keys.object_id' is invalid in the select list ..." error with the `FOREIGN_KEY_QUERY_PRE_2017` query ([#20546](https://github.com/DataDog/integrations-core/pull/20546))
+* Emit `session_id` in XE events as an integer always, remove unnecessary `event_source` field ([#20559](https://github.com/DataDog/integrations-core/pull/20559))
+* Only submit plan events when we have a plan definition ([#20584](https://github.com/DataDog/integrations-core/pull/20584))
+* Remove relative imports for non parent modules ([#20646](https://github.com/DataDog/integrations-core/pull/20646))
+
+## 22.7.0 / 2025-06-12 / Agent 7.68.0
+
+***Added***:
+
+* Add $full_server_name support as template variable to sqlserver template config key ([#20342](https://github.com/DataDog/integrations-core/pull/20342))
+* Add size and row count collection for tables in SQLServer ([#20367](https://github.com/DataDog/integrations-core/pull/20367))
+* Update dependencies ([#20399](https://github.com/DataDog/integrations-core/pull/20399))
+* Add `sys.dm_exec_sessions.client_interface_name` to activity samples payload. ([#20463](https://github.com/DataDog/integrations-core/pull/20463))
+
+***Fixed***:
+
+* Update SQL server to TagManager and fix race conditions in tag values dependent on server queries ([#20424](https://github.com/DataDog/integrations-core/pull/20424))
+
+## 22.6.0 / 2025-05-19 / Agent 7.67.0
 
 ***Added***:
 

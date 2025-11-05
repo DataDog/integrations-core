@@ -8,7 +8,8 @@ from typing import List, Optional
 
 import requests
 
-from ..fs import basepath
+from datadog_checks.dev.fs import basepath
+
 from .constants import CHANGELOG_LABEL_PREFIX, get_root
 
 API_URL = 'https://api.github.com'

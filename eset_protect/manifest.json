@@ -1,0 +1,80 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "d0cb30d2-2295-40d1-9d05-36b3530a7a29",
+  "app_id": "eset-protect",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into ESET Protect Events.",
+    "title": "ESET Protect",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "ESET Protect - Overview",
+        "image_url": "images/eset_protect_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "ESET Protect - Filtered Websites Events",
+        "image_url": "images/eset_protect_filtered_websites_events.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "ESET Protect - Threat Events",
+        "image_url": "images/eset_protect_threat_events.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "ESET Protect - Firewall Events",
+        "image_url": "images/eset_protect_firewall_events.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "ESET Protect - Audit Events",
+        "image_url": "images/eset_protect_audit_events.png"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 46412852,
+      "source_type_name": "ESET Protect",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "ESET Protect - Overview": "assets/dashboards/eset_protect_overview.json",
+      "ESET Protect - Filtered Websites Events": "assets/dashboards/eset_protect_filtered_websites_events.json",
+      "ESET Protect - Threat Events": "assets/dashboards/eset_protect_threat_events.json",
+      "ESET Protect - Firewall Events": "assets/dashboards/eset_protect_firewall_events.json",
+      "ESET Protect - Audit Events": "assets/dashboards/eset_protect_audit_events.json"
+    },
+    "logs": {
+      "source": "eset-protect"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

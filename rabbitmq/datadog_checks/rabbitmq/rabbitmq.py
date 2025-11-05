@@ -490,7 +490,7 @@ class RabbitMQManagement(AgentCheck):
         if grab_all_data or not len(data):
             data = self._get_data(urljoin(base_url, object_type))
 
-        stats = {vhost: 0 for vhost in vhosts}
+        stats = dict.fromkeys(vhosts, 0)
         connection_states = defaultdict(int)
         for conn in data:
             if conn['vhost'] in vhosts:
@@ -556,7 +556,7 @@ class RabbitMQManagement(AgentCheck):
         for vhost in vhosts:
             tags = ['vhost:{}'.format(vhost)] + custom_tags
             # We need to urlencode the vhost because it can be '/'.
-            path = u'aliveness-test/{}'.format(quote_plus(vhost))
+            path = 'aliveness-test/{}'.format(quote_plus(vhost))
             aliveness_url = urljoin(base_url, path)
             aliveness_response = {}
             try:
@@ -569,6 +569,6 @@ class RabbitMQManagement(AgentCheck):
                 message = None
             else:
                 status = AgentCheck.CRITICAL
-                message = u"Response from aliveness API: {}".format(aliveness_response)
+                message = "Response from aliveness API: {}".format(aliveness_response)
 
             self.service_check('rabbitmq.aliveness', status, tags, message=message)

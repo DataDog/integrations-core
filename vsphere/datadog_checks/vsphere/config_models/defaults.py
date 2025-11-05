@@ -72,6 +72,10 @@ def instance_include_datastore_cluster_folder_tag():
     return True
 
 
+def instance_infrastructure_mode():
+    return 'full'
+
+
 def instance_max_historical_metrics():
     return 256
 

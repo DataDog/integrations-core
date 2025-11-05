@@ -1,22 +1,28 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import shutil
+
 import pytest
 
 from ddev.repo.core import Repository
+from ddev.utils.fs import Path
+from ddev.utils.git import GitRepository
 
 # Whenenever we bump python version, we also need to bump the python
 # version in the conftest.py.
-OLD_PYTHON_VERSION = "3.12"
-NEW_PYTHON_VERSION = "3.13"
+OLD_PYTHON_VERSION = "3.13"
+NEW_PYTHON_VERSION = "3.14"
 
 
 @pytest.fixture
-def fake_repo(tmp_path_factory, config_file, ddev):
+def fake_repo(tmp_path_factory, config_file, local_repo, ddev, mocker):
     repo_path = tmp_path_factory.mktemp('integrations-core')
     repo = Repository('integrations-core', str(repo_path))
 
-    config_file.model.repos['core'] = str(repo.path)
+    mocker.patch.object(GitRepository, 'worktrees', return_value=[])
+
+    config_file.model.repos["core"] = str(repo.path)
     config_file.save()
 
     write_file(
@@ -36,6 +42,7 @@ FULL_NAMES = {{
 
 # This is automatically maintained
 PYTHON_VERSION = '{OLD_PYTHON_VERSION}'
+PYTHON_VERSION_FULL = '3.13.7'
 """,
     )
 
@@ -138,6 +145,25 @@ classifiers = [
 ]
 """,
     )
+
+    # Copy actual Dockerfiles from the real repository for Python upgrade tests
+    dockerfiles_to_copy = [
+        '.builders/images/linux-aarch64/Dockerfile',
+        '.builders/images/linux-x86_64/Dockerfile',
+        '.builders/images/windows-x86_64/Dockerfile',
+    ]
+
+    for dockerfile_path in dockerfiles_to_copy:
+        source = Path(local_repo) / dockerfile_path
+        dest = repo_path / dockerfile_path
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, dest)
+
+    # Copy actual macOS workflow file for Python upgrade tests
+    workflow_source = Path(local_repo) / '.github' / 'workflows' / 'resolve-build-deps.yaml'
+    workflow_dest = repo_path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
+    workflow_dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(workflow_source, workflow_dest)
 
     yield repo
 

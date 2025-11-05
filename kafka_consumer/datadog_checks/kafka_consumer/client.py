@@ -13,6 +13,7 @@ class KafkaClient:
         self.log = log
         self._kafka_client = None
         self._consumer = None
+        self._cluster_metadata = None
 
     @property
     def kafka_client(self):
@@ -106,18 +107,48 @@ class KafkaClient:
             )
         ]
 
-    def get_partitions_for_topic(self, topic):
+    def _list_topics(self):
+        if self._cluster_metadata:
+            return self._cluster_metadata
+
         try:
-            cluster_metadata = self.kafka_client.list_topics(topic, timeout=self.config._request_timeout)
+            self.request_metadata_update()
+
+        except KafkaException as e:
+            self.log.error("Received exception when listing topics: %s", e)
+
+        return self._cluster_metadata
+
+    def get_topic_partitions(self):
+        topic_partitions = {}
+        try:
+            cluster_metadata = self._list_topics()
+            for topic in cluster_metadata.topics:
+                topic_metadata = cluster_metadata.topics[topic]
+                partitions = list(topic_metadata.partitions)
+                topic_partitions[topic] = partitions
+
+        except KafkaException as e:
+            self.log.error("Received exception when listing topics: %s", e)
+
+        return topic_partitions
+
+    def get_partitions_for_topic(self, topic):
+        partitions = []
+        try:
+            cluster_metadata = self._list_topics()
         except KafkaException as e:
             self.log.error("Received exception when getting partitions for topic %s: %s", topic, e)
             return []
-        topic_metadata = cluster_metadata.topics[topic]
-        return list(topic_metadata.partitions)
+
+        if topic in cluster_metadata.topics:
+            topic_metadata = cluster_metadata.topics[topic]
+            partitions = list(topic_metadata.partitions)
+        return partitions
 
     def request_metadata_update(self):
         # https://github.com/confluentinc/confluent-kafka-python/issues/594
-        self.kafka_client.list_topics(None, timeout=self.config._request_timeout)
+        self._cluster_metadata = self.kafka_client.list_topics(None, timeout=self.config._request_timeout)
 
     def list_consumer_groups(self):
         groups = []
@@ -171,6 +202,22 @@ class KafkaClient:
                 tpo.append((tp.topic, tp.partition, tp.offset))
             offsets.append((response_offset_info.group_id, tpo))
         return offsets
+
+    def start_collecting_messages(self, start_offsets, consumer_group):
+        self.open_consumer(consumer_group)
+        self._consumer.assign(start_offsets)
+
+    def get_next_message(self):
+        return self._consumer.poll(timeout=1)
+
+    def delete_consumer_group(self, consumer_group):
+        """Delete a consumer group using the AdminClient."""
+        try:
+            future = self.kafka_client.delete_consumer_groups([consumer_group])
+            future[consumer_group].result(timeout=self.config._request_timeout)
+            self.log.debug("Successfully deleted consumer group: %s", consumer_group)
+        except Exception as e:
+            self.log.warning("Failed to delete consumer group %s: %s", consumer_group, e)
 
     def describe_consumer_group(self, consumer_group):
         desc = self.kafka_client.describe_consumer_groups([consumer_group])[consumer_group].result()

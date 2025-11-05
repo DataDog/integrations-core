@@ -305,7 +305,7 @@ class TokuMX(AgentCheck):
                     server,
                     socketTimeoutMS=DEFAULT_TIMEOUT * 1000,
                     read_preference=ReadPreference.SECONDARY,
-                    **ssl_params
+                    **ssl_params,
                 )
             else:
                 conn = MongoClient(server, socketTimeoutMS=DEFAULT_TIMEOUT * 1000, **ssl_params)

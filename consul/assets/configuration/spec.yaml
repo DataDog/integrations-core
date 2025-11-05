@@ -9,6 +9,7 @@ files:
   - template: instances
     options:
     - name: url
+      display_priority: 2
       required: true
       description: |
         Where your Consul HTTP server lives,
@@ -62,6 +63,7 @@ files:
 
     - name: acl_token
       description: ACL token to use for authentication.
+      secret: true
       value:
         type: string
 
@@ -124,14 +126,24 @@ files:
         example: 1
 
     - name: disable_legacy_service_tag
+      display_priority: 1
       description: |
-        Whether or not to stop submitting the tag `service` that has been renamed
-        to `consul_service` and disable the associated deprecation warning.
+        Whether to stop submitting the `service` tag, which has been renamed to `consul_service`, and to disable 
+        the associated deprecation warning. Datadog recommends setting this to `true`.
       value:
         type: boolean
         display_default: false
         example: true
       enabled: true
+
+    - name: collect_health_checks
+      description: |
+        Whether to enable new service health checks from this instance. Enabling this will
+        also emit an event for every failed service health check.
+      value:
+        type: boolean
+        display_default: false
+        example: true
 
     - template: instances/http
     - template: instances/default

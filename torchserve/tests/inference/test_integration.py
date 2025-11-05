@@ -23,7 +23,6 @@ def test_check(dd_run_check, aggregator, check, inference_instance):
 
 
 def test_check_unknown_url(dd_run_check, aggregator, check, inference_instance):
-
     inference_instance["inference_api_url"] = "http://unknown_host:12345"
     inference_instance["timeout"] = 1  # speedup the test
 

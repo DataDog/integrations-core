@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: glusterfs
 metric_id: glusterfs
 backend_only: false

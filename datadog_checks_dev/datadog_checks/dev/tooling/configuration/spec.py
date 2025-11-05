@@ -10,15 +10,6 @@ def spec_validator(spec: dict, loader) -> None:
         loader.errors.append(f'{loader.source}: Configuration specifications must be a mapping object')
         return
 
-    if 'name' not in spec:
-        loader.errors.append(f'{loader.source}: Configuration specifications must contain a top-level `name` attribute')
-        return
-
-    name = spec['name']
-    if not isinstance(name, str):
-        loader.errors.append(f'{loader.source}: The top-level `name` attribute must be a string')
-        return
-
     release_version = spec.setdefault('version', loader.version)
     if not release_version:
         loader.errors.append(

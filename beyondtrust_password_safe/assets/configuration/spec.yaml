@@ -1,0 +1,10 @@
+name: BeyondTrust Password Safe
+files:
+- name: beyondtrust_password_safe.yaml
+  options:
+  - template: logs
+    example:
+    - type: tcp
+      port: <PORT>
+      source: beyondtrust-password-safe
+      service: password-safe

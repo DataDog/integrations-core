@@ -1,10 +1,11 @@
 [env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["3.12"]
+python = ["3.13"]
 version = ["0.34"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "STRIMZI_VERSION", value = "0.34.0", if = ["0.34"] },
+  { key = "KUBERNETES_VERSION", value = "1.32.5", if = ["0.34"] } # Strimzi 0.34 does not support Kubernetes 1.33.
 ]

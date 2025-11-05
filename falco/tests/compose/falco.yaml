@@ -1,0 +1,43 @@
+# falco.yaml
+
+engine:
+  kind: modern_ebpf
+
+rules_files:
+  - /etc/falco/falco_rules.yaml
+  - /etc/falco/falco_rules.local.yaml
+  - /etc/falco/rules.d
+
+stdout_output:
+  enabled: true
+
+metrics:
+  enabled: true
+  interval: 1h
+  rules_counters_enabled: true
+  resource_utilization_enabled: true
+  state_counters_enabled: true
+  kernel_event_counters_enabled: true
+  # Enabling `kernel_event_counters_per_cpu_enabled` automatically enables `kernel_event_counters_enabled`
+  kernel_event_counters_per_cpu_enabled: false
+  libbpf_stats_enabled: true
+  plugins_metrics_enabled: true
+  jemalloc_stats_enabled: false
+  convert_memory_to_mb: true
+  include_empty_values: false
+
+plugins:
+  - name: container
+    # path to the plugin .so file
+    library_path: libcontainer.so
+    init_config:
+      label_max_len: 100 # (optional, default: 100; container labels larger than this won't be reported)
+      with_size: false # (optional, default: false; whether to enable container size inspection, which is inherently slow)
+      
+load_plugins: [container]
+
+webserver:
+  enabled: true
+  listen_port: 8765
+  listen_address: 0.0.0.0
+  prometheus_metrics_enabled: true

@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: gitlab
 metric_id: gitlab
 backend_only: false

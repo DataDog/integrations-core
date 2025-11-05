@@ -2,7 +2,8 @@
   "manifest_version": "2.0.0",
   "app_uuid": "77acdb8a-4ea8-4294-baa7-d5ccfe698d9f",
   "app_id": "appgate-sdp",
-  "display_on_public_website": false,
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

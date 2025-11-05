@@ -1,0 +1,112 @@
+{
+    "version": 2,
+    "created_at": "2025-07-02",
+    "last_updated_at": "2025-07-02",
+    "title": "High rate of unprevented threats detected",
+    "description": "It monitors the rate of unprevented threats detected on an asset. A high rate indicates potential security gaps or ineffective controls, increasing the risk of breaches and compromising system integrity.",
+    "definition": {
+        "id": 176625718,
+        "name": "High rate of unprevented threats detected",
+        "type": "log alert",
+        "query": "formula(\"((query - query1) / query) * 100\").last(\"30m\") >= 5",
+        "message": "{{#is_warning}}⚠️ **Warning**: The rate of unprevented threats has exceeded the warning threshold for the asset below:\n\n- **Asset ID**: {{log.attributes.assetId}}\n- **Asset Name**: {{log.attributes.computerName}}  \n- **Current Value**: {{value}}%  \n- **Warning Threshold**: {{warn_threshold}}%\n{{/is_warning}}\n\n\n{{#is_alert}}🚨 **Alert**: The rate of unprevented threats has exceeded the critical threshold for the asset below:\n\n- **Asset ID**: {{log.attributes.assetId}}  \n- **Asset Name**: {{log.attributes.computerName}}  \n- **Current Value**: {{value}}%  \n- **Alert Threshold**: {{threshold}}%\n{{/is_alert}}\n\n\n@example@example.com",
+        "tags": [
+            "integration:iboss"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 5,
+                "warning": 2
+            },
+            "enable_logs_sample": false,
+            "notify_audit": false,
+            "on_missing_data": "default",
+            "include_tags": true,
+            "variables": [
+                {
+                    "data_source": "logs",
+                    "name": "query",
+                    "search": {
+                        "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@computerName:(\\\"-\\\" OR \\\"\\\")"
+                    },
+                    "compute": {
+                        "aggregation": "count",
+                        "metric": "count"
+                    },
+                    "indexes": [
+                        "*"
+                    ],
+                    "group_by": [
+                        {
+                            "facet": "@assetId",
+                            "limit": 10,
+                            "sort": {
+                                "aggregation": "count",
+                                "order": "desc",
+                                "metric": "count"
+                            },
+                            "should_exclude_missing": true
+                        },
+                        {
+                            "facet": "@computerName",
+                            "limit": 10,
+                            "sort": {
+                                "aggregation": "count",
+                                "order": "desc",
+                                "metric": "count"
+                            },
+                            "should_exclude_missing": true
+                        }
+                    ],
+                    "storage": "hot"
+                },
+                {
+                    "name": "query1",
+                    "data_source": "logs",
+                    "search": {
+                        "query": "source:iboss @logSubType:(MALWARE_SOURCE OR MALWARE_CONTENT OR DLP OR INFECTION OR PHISHING) -@computerName:(\\\"-\\\" OR \\\"\\\") @action:Blocked"
+                    },
+                    "indexes": [
+                        "*"
+                    ],
+                    "group_by": [
+                        {
+                            "facet": "@assetId",
+                            "limit": 10,
+                            "sort": {
+                                "aggregation": "count",
+                                "order": "desc",
+                                "metric": "count"
+                            },
+                            "should_exclude_missing": true
+                        },
+                        {
+                            "facet": "@computerName",
+                            "limit": 10,
+                            "sort": {
+                                "aggregation": "count",
+                                "order": "desc",
+                                "metric": "count"
+                            },
+                            "should_exclude_missing": true
+                        }
+                    ],
+                    "compute": {
+                        "aggregation": "count"
+                    },
+                    "storage": "hot"
+                }
+            ],
+            "new_group_delay": 60,
+            "groupby_simple_monitor": false,
+            "silenced": {}
+        },
+        "priority": null,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:iboss"
+    ]
+}

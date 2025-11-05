@@ -359,15 +359,24 @@ def assert_all_profile_metrics_and_tags_covered(profile, aggregator):
     metric_and_tags = collect_profile_metrics_and_tags(profile)
     global_tags = set(
         metric_and_tags["global_tags"]
-        + ['device_namespace', 'snmp_device', 'snmp_host', 'snmp_profile', 'device_id', 'device_ip', 'device_hostname']
+        + [
+            'device_namespace',
+            'snmp_device',
+            'agent_host',
+            'snmp_host',
+            'snmp_profile',
+            'device_id',
+            'device_ip',
+            'device_hostname',
+        ]
     )
 
     for metric, metric_info in metric_and_tags["table_metrics"].items():
         collected_metric_tag_keys = get_collected_metric_tag_keys(aggregator, metric) - ASSERT_ALL_PROFILE_EXCLUDED_TAGS
         expected_metric_tag_keys = global_tags | set(metric_info.get('tags'))
-        assert (
-            collected_metric_tag_keys == expected_metric_tag_keys
-        ), "collected and profile metric tags differ for metric `{}`".format(metric)
+        assert collected_metric_tag_keys == expected_metric_tag_keys, (
+            "collected and profile metric tags differ for metric `{}`".format(metric)
+        )
     for metric in metric_and_tags["scalar_metrics"]:
         assert len(aggregator.metrics('snmp.' + metric)) > 0
         for collected_metric in aggregator.metrics('snmp.' + metric):

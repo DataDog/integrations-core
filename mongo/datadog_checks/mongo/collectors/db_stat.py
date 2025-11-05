@@ -44,8 +44,8 @@ class DbStatCollector(MongoCollector):
         # Check if parameter dbstats_tag_dbname is true to include dbname as a tag
         if self.dbstats_tag_dbname:
             additional_tags = [
-                u"cluster:db:{0}".format(self.db_name),  # FIXME: 8.x, was kept for backward compatibility
-                u"db:{0}".format(self.db_name),
+                "cluster:db:{0}".format(self.db_name),  # FIXME: 8.x, was kept for backward compatibility
+                "db:{0}".format(self.db_name),
             ]
         else:
             additional_tags = None

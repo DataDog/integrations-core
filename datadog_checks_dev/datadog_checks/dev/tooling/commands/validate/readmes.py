@@ -8,13 +8,20 @@ import click
 import markdown
 from bs4 import BeautifulSoup
 
-from ....fs import chdir, create_file
-from ....subprocess import run_command
-from ....utils import download_file
-from ...constants import get_root
-from ...testing import process_checks_option
-from ...utils import complete_valid_checks, get_readme_file, read_readme_file
-from ..console import CONTEXT_SETTINGS, abort, annotate_display_queue, echo_failure, echo_info, echo_success
+from datadog_checks.dev.fs import chdir, create_file
+from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    annotate_display_queue,
+    echo_failure,
+    echo_info,
+    echo_success,
+)
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.testing import process_checks_option
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_readme_file, read_readme_file
+from datadog_checks.dev.utils import download_file
 
 IMAGE_EXTENSIONS = {".png", ".jpg"}
 
@@ -53,6 +60,17 @@ def readmes(ctx, check, format_links):
     for integration in integrations:
         display_queue = []
         readme_path = get_readme_file(integration)
+
+        if not os.path.exists(readme_path) and repo in ('extras', 'marketplace'):
+            # We are in the process of migrating extras and marketplace to manage READMEs in the Publishing Platform.
+            # We'll revisit this validation once we know for sure how we handle READMEs in the new world.
+            echo_info(
+                f"Skipping README.md validation for {integration}: "
+                "'integrations-extras' and 'marketplace' packages are migrating to the Publishing Platform "
+                "for README management. If you are not using the Publishing Platform, please ensure your package "
+                "includes a README.md file."
+            )
+            continue
 
         # Validate the README itself
         validate_readme(integration, repo, display_queue, files_failed, readme_counter)

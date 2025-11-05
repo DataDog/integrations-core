@@ -1,0 +1,157 @@
+id: "bitwarden"
+tests:
+ -
+  sample: |-
+    {
+      "enrichment_details" : {
+        "actingUser" : {
+          "name" : "Jimmy",
+          "type" : 0,
+          "email" : "jimmy@abc.com"
+        },
+        "member" : {
+          "name" : "Gini",
+          "type" : 1,
+          "email" : "gini123@abc.com"
+        }
+      },
+      "event" : {
+        "date" : "2025-04-29T08:57:59.6413435Z",
+        "ipAddress" : "100.100.100.100",
+        "actingUserId" : "11aa11a1-1212-11a1-11a1-a2aa25aa2",
+        "type" : 1504,
+        "device" : 9,
+        "object" : "event",
+        "memberId" : "111aaa11-a1a1-1111-a11a-a1aa00111111"
+      }
+    }
+  result:
+    custom:
+      enrichment_details:
+        actingUser:
+          type: 0
+          userType: "Owner"
+        member:
+          email: "gini123@abc.com"
+          name: "Gini"
+          type: 1
+          userType: "Admin"
+      event:
+        date: "2025-04-29T08:57:59.6413435Z"
+        device: 9
+        deviceType: "Chrome"
+        memberId: "111aaa11-a1a1-1111-a11a-a1aa00111111"
+        object: "event"
+        type: 1504
+      eventCategory: "organization-events"
+      evt:
+        name: "OrganizationUser_UpdatedGroups"
+      network:
+        client:
+          geoip: {}
+          ip: "100.100.100.100"
+      usr:
+        email: "jimmy@abc.com"
+        id: "11aa11a1-1212-11a1-11a1-a2aa25aa2"
+        name: "Jimmy"
+    message: |-
+      {
+        "enrichment_details" : {
+          "actingUser" : {
+            "name" : "Jimmy",
+            "type" : 0,
+            "email" : "jimmy@abc.com"
+          },
+          "member" : {
+            "name" : "Gini",
+            "type" : 1,
+            "email" : "gini123@abc.com"
+          }
+        },
+        "event" : {
+          "date" : "2025-04-29T08:57:59.6413435Z",
+          "ipAddress" : "100.100.100.100",
+          "actingUserId" : "11aa11a1-1212-11a1-11a1-a2aa25aa2",
+          "type" : 1504,
+          "device" : 9,
+          "object" : "event",
+          "memberId" : "111aaa11-a1a1-1111-a11a-a1aa00111111"
+        }
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1745917079641
+ -
+  sample: |-
+    {
+      "enrichment_details" : {
+        "actingUser" : {
+          "name" : "Jimmy",
+          "type" : 0,
+          "email" : "jimmy@abc.com"
+        },
+        "group" : {
+          "name" : "Administrators"
+        }
+      },
+      "event" : {
+        "date" : "2025-04-25T09:28:30.4884417Z",
+        "groupId" : "a1111a-aa11-a11-1a11-a1111aa",
+        "ipAddress" : "100.100.100.100",
+        "actingUserId" : "111aaa11-a1a1-1111-a11a-a1aa00111111",
+        "type" : 1400,
+        "device" : 9,
+        "object" : "event"
+      }
+    }
+  result:
+    custom:
+      enrichment_details:
+        actingUser:
+          type: 0
+          userType: "Owner"
+        group:
+          name: "Administrators"
+      event:
+        date: "2025-04-25T09:28:30.4884417Z"
+        device: 9
+        deviceType: "Chrome"
+        groupId: "a1111a-aa11-a11-1a11-a1111aa"
+        object: "event"
+        type: 1400
+      eventCategory: "group-events"
+      evt:
+        name: "Group_Created"
+      network:
+        client:
+          geoip: {}
+          ip: "100.100.100.100"
+      usr:
+        email: "jimmy@abc.com"
+        id: "111aaa11-a1a1-1111-a11a-a1aa00111111"
+        name: "Jimmy"
+    message: |-
+      {
+        "enrichment_details" : {
+          "actingUser" : {
+            "name" : "Jimmy",
+            "type" : 0,
+            "email" : "jimmy@abc.com"
+          },
+          "group" : {
+            "name" : "Administrators"
+          }
+        },
+        "event" : {
+          "date" : "2025-04-25T09:28:30.4884417Z",
+          "groupId" : "a1111a-aa11-a11-1a11-a1111aa",
+          "ipAddress" : "100.100.100.100",
+          "actingUserId" : "111aaa11-a1a1-1111-a11a-a1aa00111111",
+          "type" : 1400,
+          "device" : 9,
+          "object" : "event"
+        }
+      }
+    tags:
+    - "source:LOGS_SOURCE"
+    timestamp: 1745573310488

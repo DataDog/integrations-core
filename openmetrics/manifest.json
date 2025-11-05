@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "302b841e-8270-4ecd-948e-f16317a316bc",
   "app_id": "openmetrics",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

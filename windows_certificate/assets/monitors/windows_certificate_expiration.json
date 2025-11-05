@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2025-05-13",
+	"last_updated_at": "2025-05-13",
+	"title": "A certificate is expired or about to expire",
+	"description": "This monitor alerts when there are certificates in the Windows Certificate Store that are expired or close to expiring.",
+	"tags": [
+	  "integration:windows-certificate"
+	],
+	"definition": {
+	  "name": "A certificate is expired or about to expire",
+	  "type": "service check",
+	  "query": "\"windows_certificate.cert_expiration\".over(\"*\").by(\"certificate_store\",\"host\",\"subject_cn\").last(2).count_by_status()",
+	  "message": "The Windows Certificate integration is reporting the following for Certificate: {{subject_cn.name}} in Store: {{certificate_store.name}}\n\n{{#is_warning}}\n\nWarning: {{check_message}}\n\n{{/is_warning}}\n\n{{#is_alert}}\n\nAlert: {{check_message}}\n\n{{/is_alert}}",
+	  "tags": [
+		"integration:windows_certificate"
+	  ],
+	  "options": {
+		"thresholds": {
+		  "critical": 1,
+		  "warning": 1,
+		  "ok": 1
+		},
+		"notify_audit": false,
+		"notify_no_data": false,
+		"renotify_interval": 0,
+		"timeout_h": 0,
+		"threshold_windows": null,
+		"include_tags": true,
+		"new_group_delay": 60,
+		"avalanche_window": 10
+	  },
+	  "priority": null
+	}
+  }

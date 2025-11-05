@@ -13,8 +13,13 @@ ORDER BY `percentile` ASC
 LIMIT 1"""
 
 SQL_QUERY_TABLE_ROWS_STATS = """\
-SELECT table_schema, table_name, rows_read, rows_changed
-FROM information_schema.table_statistics"""
+SELECT
+    OBJECT_SCHEMA as table_schema,
+    OBJECT_NAME as table_name,
+    COUNT_READ as rows_read,
+    COUNT_WRITE as rows_changed
+FROM performance_schema.table_io_waits_summary_by_table
+WHERE OBJECT_SCHEMA NOT IN ('mysql', 'performance_schema', 'information_schema')"""
 
 SQL_QUERY_SCHEMA_SIZE = """\
 SELECT table_schema, IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
@@ -51,9 +56,6 @@ SQL_INNODB_ENGINES = """\
 SELECT engine
 FROM information_schema.ENGINES
 WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""
-
-SQL_SERVER_ID_AWS_AURORA = """\
-SHOW VARIABLES LIKE 'aurora_server_id'"""
 
 SQL_REPLICATION_ROLE_AWS_AURORA = """\
 SELECT IF(session_id = 'MASTER_SESSION_ID','writer', 'reader') AS replication_role
@@ -115,14 +117,6 @@ SELECT table_name as `table_name`,
        extra as `extra`
 FROM INFORMATION_SCHEMA.COLUMNS
 WHERE table_schema = %s AND table_name IN ({});
-"""
-
-SQL_INDEXES_EXPRESSION_COLUMN_CHECK = """
-    SELECT COUNT(*) as column_count
-    FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_SCHEMA = 'information_schema'
-      AND TABLE_NAME = 'STATISTICS'
-      AND COLUMN_NAME = 'EXPRESSION';
 """
 
 SQL_INDEXES = """\
@@ -248,6 +242,28 @@ QUERY_USER_CONNECTIONS = {
     ],
 }
 
+QUERY_ERRORS_RAISED = {
+    'name': 'performance_schema.events_errors_summary_global_by_error',
+    'query': """
+        SELECT
+            SUM(SUM_ERROR_RAISED) as errors_raised,
+            ERROR_NUMBER as error_number,
+            ERROR_NAME as error_name
+        FROM performance_schema.events_errors_summary_by_user_by_error
+        WHERE
+            SUM_ERROR_RAISED > 0
+            AND ERROR_NUMBER IS NOT NULL
+            AND ERROR_NAME IS NOT NULL
+            AND NOT (ERROR_NAME = 'ER_NO_SYSTEM_TABLE_ACCESS' AND USER = '{user}')
+        GROUP BY ERROR_NUMBER, ERROR_NAME
+    """.strip(),
+    'columns': [
+        {'name': 'mysql.performance.errors_raised', 'type': 'monotonic_count'},
+        {'name': 'error_number', 'type': 'tag'},
+        {'name': 'error_name', 'type': 'tag'},
+    ],
+}
+
 
 def show_replica_status_query(version, is_mariadb, channel=''):
     if version.version_compatible((10, 5, 1)) or not is_mariadb and version.version_compatible((8, 0, 22)):
@@ -258,3 +274,15 @@ def show_replica_status_query(version, is_mariadb, channel=''):
         return "{0} FOR CHANNEL '{1}';".format(base_query, channel)
     else:
         return "{0};".format(base_query)
+
+
+def get_indexes_query(version, is_mariadb, table_names):
+    """
+    Get the appropriate indexes query based on MySQL version and flavor.
+    The EXPRESSION column was introduced in MySQL 8.0.13 for functional indexes.
+    MariaDB doesn't support functional indexes.
+    """
+    if not is_mariadb and version.version_compatible((8, 0, 13)):
+        return SQL_INDEXES_8_0_13.format(table_names)
+    else:
+        return SQL_INDEXES.format(table_names)

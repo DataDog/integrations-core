@@ -24,7 +24,7 @@ from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_IN
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
@@ -77,6 +77,7 @@ SELECT
     sess.host_name as host_name,
     sess.program_name as program_name,
     sess.is_user_process as is_user_process,
+    sess.client_interface_name as client_interface_name,
     {input_buffer_columns}
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
@@ -118,7 +119,8 @@ SELECT
     c.client_net_address as client_address,
     sess.host_name as host_name,
     sess.program_name as program_name,
-    sess.is_user_process as is_user_process
+    sess.is_user_process as is_user_process,
+    sess.client_interface_name as client_interface_name
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
@@ -175,8 +177,6 @@ class SqlserverActivity(DBMAsyncJob):
     """Collects query metrics and plans"""
 
     def __init__(self, check, config: SQLServerConfig):
-        # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
         self._obfuscator_options_for_tail_text = to_native_string(
@@ -322,7 +322,7 @@ class SqlserverActivity(DBMAsyncJob):
                 "ddagentversion": datadog_agent.get_version(),
                 "ddsource": "sqlserver",
                 "dbm_type": "rqt",
-                "ddtags": ",".join(self.tags),
+                "ddtags": ",".join(self._check.tag_manager.get_tags()),
                 'service': self._config.service,
                 "db": {
                     "instance": row.get('database_name', None),
@@ -461,7 +461,7 @@ class SqlserverActivity(DBMAsyncJob):
             "ddsource": "sqlserver",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,
-            "ddtags": self.tags,
+            "ddtags": self._check.tag_manager.get_tags(),
             "timestamp": time.time() * 1000,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),

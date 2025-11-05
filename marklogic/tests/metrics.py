@@ -66,6 +66,8 @@ FOREST_STATUS_TREE_CACHE_METRICS = [
     'marklogic.forests.compressed-tree-cache-ratio',
 ]
 
+OPTIONAL_FOREST_METRICS = ['marklogic.forests.current-foreign-master-database']
+
 HOST_STATUS_METRICS_SPECIFIC_OPTIONAL = [
     # TODO: needs preprocessing to be available
     'marklogic.hosts.memory-process-huge-pages-size',
@@ -280,4 +282,4 @@ GLOBAL_METRICS = (
     + TRANSACTION_STATUS_METRICS
 )
 
-OPTIONAL_METRICS = HOST_STATUS_METRICS_SPECIFIC_OPTIONAL
+OPTIONAL_METRICS = HOST_STATUS_METRICS_SPECIFIC_OPTIONAL + OPTIONAL_FOREST_METRICS

@@ -9,7 +9,6 @@ from .common import ensure_bytes
 
 
 class TailFile(object):
-
     CRC_SIZE = 16
 
     def __init__(self, logger, path, callback):
@@ -22,7 +21,6 @@ class TailFile(object):
         self._callback = callback
 
     def _open_file(self, move_end=False, pos=False):
-
         already_open = False
         # close and reopen to handle logrotate
         if self._f is not None:

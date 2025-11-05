@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 import pytest
 from lxml import etree
 
+from datadog_checks.base.utils.db.utils import TagManager
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.base import TimestampHandler
 from datadog_checks.sqlserver.xe_collection.error_events import ErrorEventsHandler
@@ -52,14 +53,13 @@ def assert_event_field_values(event, expected_values):
             assert event[field] == expected
 
 
-def validate_common_payload_fields(payload, expected_source, expected_type):
+def validate_common_payload_fields(payload, expected_type):
     """Validate common fields in event payloads"""
     assert 'timestamp' in payload
     assert payload['host'] == 'test-host'
     assert payload['ddagentversion'] == '7.30.0'
     assert payload['ddsource'] == 'sqlserver'
     assert payload['dbm_type'] == expected_type
-    assert payload['event_source'] == expected_source
     assert 'service' in payload
 
     # Fields that only exist in regular events (non-RQT)
@@ -101,7 +101,8 @@ def mock_check():
 
     check.static_info_cache = {'version': '2019', 'engine_edition': 'Standard Edition'}
     check.resolved_hostname = "test-host"
-    check.tags = ["test:tag"]
+    check.tag_manager = TagManager()
+    check.tag_manager.set_tag('test', 'tag')
     check.database_monitoring_query_activity = Mock()
     check.database_monitoring_query_sample = Mock()
     return check
@@ -884,9 +885,7 @@ class TestPayloadGeneration:
         payload = query_completion_handler._create_event_payload(raw_event)
 
         # Validate common payload fields
-        validate_common_payload_fields(
-            payload, expected_source='datadog_query_completions', expected_type='query_completion'
-        )
+        validate_common_payload_fields(payload, expected_type='query_completion')
 
         # Verify query details
         query_details = payload['query_details']
@@ -938,7 +937,7 @@ class TestPayloadGeneration:
         rqt_event = query_completion_handler._create_rqt_event(event, raw_sql_fields, query_details)
 
         # Validate common payload fields
-        validate_common_payload_fields(rqt_event, expected_source='datadog_query_completions', expected_type='rqt')
+        validate_common_payload_fields(rqt_event, expected_type='rqt')
 
         # Verify DB fields
         assert rqt_event['db']['instance'] == 'TestDB'
@@ -997,7 +996,7 @@ class TestPayloadGeneration:
         rqt_event = error_events_handler._create_rqt_event(event, raw_sql_fields, query_details)
 
         # Validate common payload fields
-        validate_common_payload_fields(rqt_event, expected_source='datadog_query_errors', expected_type='rqt')
+        validate_common_payload_fields(rqt_event, expected_type='rqt')
 
         # Verify DB fields
         assert rqt_event['db']['instance'] == 'TestDB'
@@ -1097,7 +1096,7 @@ class TestPayloadGeneration:
         rqt_event = error_events_handler._create_rqt_event(event, raw_sql_fields, query_details)
 
         # Validate common payload fields
-        validate_common_payload_fields(rqt_event, expected_source='datadog_query_errors', expected_type='rqt')
+        validate_common_payload_fields(rqt_event, expected_type='rqt')
 
         # Verify DB fields
         assert rqt_event['db']['instance'] == 'TestDB'
@@ -1151,10 +1150,10 @@ class TestRunJob:
         # Create modified XML with specific timestamp
         modified_xml = sample_multiple_events_xml.replace("2023-01-01T12:01:00.456Z", "2023-01-01T12:02:00.789Z")
 
-        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=modified_xml
+        with (
+            patch.object(query_completion_handler, 'session_exists', return_value=True),
+            patch.object(query_completion_handler, '_query_ring_buffer', return_value=modified_xml),
         ):
-
             # Process events directly to set timestamp
             events = query_completion_handler._process_events(modified_xml)
             if events:
@@ -1176,10 +1175,11 @@ class TestRunJob:
             return '{}'
 
         # Mock all necessary methods
-        with patch.object(query_completion_handler, 'session_exists', return_value=True), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml
-        ), patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit, patch(
-            'datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload
+        with (
+            patch.object(query_completion_handler, 'session_exists', return_value=True),
+            patch.object(query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml),
+            patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit,
+            patch('datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload),
         ):
             # Run the job
             query_completion_handler.run_job()
@@ -1240,16 +1240,14 @@ class TestRunJob:
 
         # Create a spy on the _create_event_payload method to capture what would be created
         # for each individual event before batching
-        with patch.object(
-            query_completion_handler, '_create_event_payload', wraps=query_completion_handler._create_event_payload
-        ) as mock_create_payload, patch.object(
-            query_completion_handler, 'session_exists', return_value=True
-        ), patch.object(
-            query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml
-        ), patch.object(
-            query_completion_handler._check, 'database_monitoring_query_activity'
-        ) as mock_submit, patch(
-            'datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload
+        with (
+            patch.object(
+                query_completion_handler, '_create_event_payload', wraps=query_completion_handler._create_event_payload
+            ) as mock_create_payload,
+            patch.object(query_completion_handler, 'session_exists', return_value=True),
+            patch.object(query_completion_handler, '_query_ring_buffer', return_value=sample_multiple_events_xml),
+            patch.object(query_completion_handler._check, 'database_monitoring_query_activity') as mock_submit,
+            patch('datadog_checks.sqlserver.xe_collection.base.json.dumps', side_effect=capture_payload),
         ):
             # Run the job
             query_completion_handler.run_job()
@@ -1273,3 +1271,21 @@ class TestRunJob:
             # Verify the batch exists and contains multiple events
             assert batch_key in original_payload, f"Missing '{batch_key}' array in payload"
             assert len(original_payload[batch_key]) > 1, "Expected multiple events in the batch"
+
+
+@pytest.mark.unit
+def test_collect_xe_config(instance_docker):
+    instance_docker['collect_xe'] = {"query_completions": {"enabled": True}, "query_errors": {"enabled": True}}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    assert check._config.xe_collection_config == {
+        "query_completions": {"enabled": True},
+        "query_errors": {"enabled": True},
+    }
+
+    instance_docker.pop('collect_xe')
+    instance_docker['xe_collection'] = {"query_completions": {"enabled": True}, "query_errors": {"enabled": True}}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    assert check._config.xe_collection_config == {
+        "query_completions": {"enabled": True},
+        "query_errors": {"enabled": True},
+    }

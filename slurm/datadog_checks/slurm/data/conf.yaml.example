@@ -45,11 +45,11 @@ instances:
     #
     # collect_sshare_stats: true
 
-    ## @param collect_scontrol_stats - boolean - optional - default: true
+    ## @param collect_scontrol_stats - boolean - optional - default: false
     ## Whether or not to collect statistics from the scontrol command. This is mainly used in the worker 
     ## node to collect the list of running jobs along with their PIDs.
     #
-    # collect_scontrol_stats: true
+    # collect_scontrol_stats: false
 
     ## @param collect_gpu_stats - boolean - optional - default: false
     ## Whether or not to collect GPU statistics when Slurm is configured to use GPUs.

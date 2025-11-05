@@ -157,7 +157,7 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         response = check.poll(mocked_prometheus_scraper_config)
         messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
         messages.sort(key=lambda x: x.name)
@@ -174,7 +174,7 @@ def test_poll_octet_stream(mocked_prometheus_check, mocked_prometheus_scraper_co
     mock_response.status_code = 200
     mock_response.headers = {'Content-Type': 'application/octet-stream'}
 
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         response = check.poll(mocked_prometheus_scraper_config)
         messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
         assert len(messages) == 40
@@ -185,10 +185,10 @@ def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_pr
     ref_gauge = GaugeMetricFamily(
         'process_virtual_memory_bytes',
         'Virtual memory size in bytes.',
-        labels=['my_1st_label', 'my_2nd_label', 'labél_nat', 'labél_mix', u'labél_uni'],
+        labels=['my_1st_label', 'my_2nd_label', 'labél_nat', 'labél_mix', 'labél_uni'],
     )
     ref_gauge.add_metric(
-        ['my_1st_label_value', 'my_2nd_label_value', 'my_labél_val', u'my_labél_val🐶', u'my_labél_val'], 54927360.0
+        ['my_1st_label_value', 'my_2nd_label_value', 'my_labél_val', 'my_labél_val🐶', 'my_labél_val'], 54927360.0
     )
 
     check = mocked_prometheus_check
@@ -1695,7 +1695,7 @@ def test_ignore_metrics_multiple_wildcards(
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process(config)
 
         # Make sure metrics are ignored
@@ -1803,7 +1803,7 @@ def test_metrics_with_ignore_label_values(
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process(config)
 
         # Make sure metrics are ignored
@@ -1854,7 +1854,7 @@ def test_match_metrics_multiple_wildcards(
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process(config)
 
         aggregator.assert_metric('prometheus.go_memstats_mcache_inuse_bytes', count=1)
@@ -2304,7 +2304,7 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process(mocked_prometheus_scraper_config)
         assert 'dd-agent-1337' in mocked_prometheus_scraper_config['_label_mapping']['pod']
         assert 'dd-agent-62bgh' not in mocked_prometheus_scraper_config['_label_mapping']['pod']
@@ -2464,7 +2464,7 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
     mock_response = mock.MagicMock(
         status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
     )
-    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+    with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process(mocked_prometheus_scraper_config)
         assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
         assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'
@@ -2582,7 +2582,7 @@ def mock_filter_get():
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
             status_code=200,
             iter_lines=lambda **kwargs: text_data.split("\n"),
@@ -2672,7 +2672,7 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, 
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.get', return_value=MockResponse('httpbin.org')):
+    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')
@@ -2696,7 +2696,7 @@ def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_che
     # `prometheus_url` changed just before calling `send_request`
     scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
 
-    with caplog.at_level(logging.DEBUG), mock.patch('requests.get', return_value=MockResponse('httpbin.org')):
+    with caplog.at_level(logging.DEBUG), mock.patch('requests.Session.get', return_value=MockResponse('httpbin.org')):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
 
     assert "httpbin.org" in resp.content.decode('utf-8')

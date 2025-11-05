@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ...utils.common import to_native_string
-from .. import AgentCheck
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.common import to_native_string
+
 from .mixins import PrometheusScraperMixin
 
 # Prometheus check is a parent class providing a structure and some helpers

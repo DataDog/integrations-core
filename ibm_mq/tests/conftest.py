@@ -56,6 +56,11 @@ def instance_collect_all():
 
 
 @pytest.fixture
+def instance_collect_all_via_names():
+    return copy.deepcopy(common.INSTANCE_COLLECT_ALL_VIA_NAMES)
+
+
+@pytest.fixture
 def instance_queue_regex_tag():
     return copy.deepcopy(common.INSTANCE_QUEUE_REGEX_TAG)
 
@@ -187,7 +192,6 @@ def prepare_queue_manager():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-
     if common.MQ_VERSION == 9:
         log_pattern = "AMQ5026I: The listener 'DEV.LISTENER.TCP' has started. ProcessId"
     elif common.MQ_VERSION == 8:

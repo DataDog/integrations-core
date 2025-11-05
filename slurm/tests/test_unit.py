@@ -20,6 +20,7 @@ from .common import (
     SINFO_2_T,
     SINFO_3_F,
     SINFO_3_T,
+    SINFO_LEVEL_2_MAP,
     SINFO_MAP,
     SLURM_VERSION,
     SQUEUE_MAP,
@@ -90,6 +91,59 @@ def test_sinfo_processing(mock_get_subprocess_output, instance, aggregator):
     for metric in SINFO_MAP['metrics']:
         aggregator.assert_metric(name=metric['name'], value=metric['value'], tags=metric['tags'])
     aggregator.assert_all_metrics_covered()
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_sinfo_level_2_processing(mock_get_subprocess_output, instance, aggregator, caplog):
+    instance['collect_sinfo_stats'] = True
+    instance['sinfo_collection_level'] = 2
+    instance['collect_gpu_stats'] = False
+    check = SlurmCheck('slurm', {}, [instance])
+    # sinfo has 4 subprocess calls now: metadata, partition_cluster, partition_info, and node data.
+    # So I'm mocking all of them.
+    mock_output_metadata = ("", "", 1)
+    mock_output_partition_cluster = (mock_output('sinfo_partition_cluster.txt'), "", 0)
+    mock_output_partition_info = (mock_output('sinfo_partition_info.txt'), "", 0)
+    mock_output_main = (mock_output('sinfo_collection_level_2.txt'), "", 0)
+    mock_get_subprocess_output.side_effect = [
+        mock_output_metadata,
+        mock_output_partition_cluster,
+        mock_output_partition_info,
+        mock_output_main,
+    ]
+
+    with caplog.at_level('DEBUG'):
+        check.check(None)
+        assert "out of range for tag" not in caplog.text
+        assert "out of range for metric" not in caplog.text
+
+    for metric in SINFO_LEVEL_2_MAP['metrics']:
+        aggregator.assert_metric(name=metric['name'], value=metric['value'], tags=metric['tags'])
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_sinfo_error_logs(mock_get_subprocess_output, instance, caplog):
+    instance['collect_sinfo_stats'] = True
+    instance['sinfo_collection_level'] = 3
+    instance['collect_gpu_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+
+    # Use the real fixture file for the main sinfo output
+    sinfo_output = mock_output('sinfo_collection_level_2.txt')
+
+    # sinfo has 4 subprocess calls now: metadata, partition_cluster, partition_info, and node data.
+    # So I'm mocking all of them.
+    mock_get_subprocess_output.side_effect = [
+        ("", "", 1),
+        ("", "", 1),
+        ("", "", 1),
+        (sinfo_output, "", 0),
+    ]
+
+    with caplog.at_level('DEBUG'):
+        check.check(None)
+        assert "out of range for tag" in caplog.text
+        assert "out of range for metric" in caplog.text
 
 
 @patch('datadog_checks.slurm.check.get_subprocess_output')

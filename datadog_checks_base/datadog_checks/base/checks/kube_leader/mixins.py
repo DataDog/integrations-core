@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.checks import AgentCheck
 
-from .. import AgentCheck
 from .record import ElectionRecordAnnotation, ElectionRecordLease
 
 # Import lazily to reduce memory footprint

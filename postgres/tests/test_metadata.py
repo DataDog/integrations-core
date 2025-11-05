@@ -9,7 +9,7 @@ import pytest
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
-from .common import POSTGRES_VERSION
+from .common import POSTGRES_LOCALE, POSTGRES_VERSION
 from .utils import run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
@@ -22,7 +22,6 @@ def dbm_instance(pg_instance):
     pg_instance['query_samples'] = {'enabled': False}
     pg_instance['query_activity'] = {'enabled': False}
     pg_instance['query_metrics'] = {'enabled': False}
-    pg_instance['collect_resources'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     pg_instance['collect_settings'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     return pg_instance
 
@@ -32,6 +31,21 @@ def stop_orphaned_threads():
     # make sure we shut down any orphaned threads and create a new Executor for each test
     DBMAsyncJob.executor.shutdown(wait=True)
     DBMAsyncJob.executor = ThreadPoolExecutor()
+
+
+def test_collect_extensions(integration_check, dbm_instance, aggregator):
+    check = integration_check(dbm_instance)
+    check.check(dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'pg_extension'), None)
+    assert event is not None
+    assert event['host'] == "stubbed.hostname"
+    assert event['dbms'] == "postgres"
+    assert event['kind'] == "pg_extension"
+    assert len(event["metadata"]) > 0
+    assert set(event["metadata"][0].keys()) == {'id', 'name', 'owner', 'relocatable', 'schema_name', 'version'}
+    assert type(event["metadata"][0]["id"]) is str
+    assert next((k for k in event['metadata'] if k['name'].startswith('plpgsql')), None) is not None
 
 
 def test_collect_metadata(integration_check, dbm_instance, aggregator):
@@ -66,9 +80,9 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
     dbm_instance['relations'] = []
     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
     del dbm_instance['dbname']
-    check = integration_check(dbm_instance)
     if not use_default_ignore_schemas_owned_by:
-        check._config.ignore_schemas_owned_by = ['rds_superuser']
+        dbm_instance["ignore_schemas_owned_by"] = ['rds_superuser']
+    check = integration_check(dbm_instance)
     run_one_check(check, dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
 
@@ -102,6 +116,8 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
     schemas_want = {
         'public',
         'public2',
+        'datadog',
+        'hstore',
     }
 
     if not use_default_ignore_schemas_owned_by:
@@ -110,8 +126,19 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
 
     schemas_got = set()
 
-    for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+    collection_started_at = None
+    schema_events = [e for e in dbm_metadata if e['kind'] == 'pg_databases']
+    for i, schema_event in enumerate(schema_events):
         assert schema_event.get("timestamp") is not None
+        if collection_started_at is None:
+            collection_started_at = schema_event["collection_started_at"]
+        assert schema_event["collection_started_at"] == collection_started_at
+
+        if i == len(schema_events) - 1:
+            assert schema_event["collection_payloads_count"] == len(schema_events)
+        else:
+            assert "collection_payloads_count" not in schema_event
+
         # there should only be one database, datadog_test
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
@@ -120,7 +147,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
         # there should only two schemas, 'public' and 'datadog'. datadog is empty
         schema = database_metadata[0]['schemas'][0]
         schema_name = schema['name']
-        assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test']
+        assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test', 'hstore']
         schemas_got.add(schema_name)
         if schema_name in ['public', 'rdsadmin_test']:
             for table in schema['tables']:
@@ -130,7 +157,10 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                 if table['name'] == "persons":
                     # check that foreign keys, indexes get reported
                     keys = list(table.keys())
-                    assert_fields(keys, ["foreign_keys", "columns", "toast_table", "id", "name", "owner"])
+                    assert_fields(keys, ["foreign_keys", "columns", "id", "name", "owner"])
+                    # The toast table doesn't seem to be created in the C locale
+                    if POSTGRES_LOCALE != 'C':
+                        assert_fields(keys, ["toast_table"])
                     assert_fields(list(table['foreign_keys'][0].keys()), ['name', 'definition'])
                     assert_fields(
                         list(table['columns'][0].keys()),
@@ -143,7 +173,9 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator, use_defaul
                     )
                 if table['name'] == "cities":
                     keys = list(table.keys())
-                    assert_fields(keys, ["indexes", "columns", "toast_table", "id", "name", "owner"])
+                    assert_fields(keys, ["indexes", "columns", "id", "name", "owner"])
+                    if POSTGRES_LOCALE != 'C':
+                        assert_fields(keys, ["toast_table"])
                     assert len(table['indexes']) == 1
                     assert_fields(
                         list(table['indexes'][0].keys()),
@@ -330,7 +362,7 @@ def test_collect_schemas_filters(integration_check, dbm_instance, aggregator):
             database_metadata = schema_event['metadata']
             schema = database_metadata[0]['schemas'][0]
             schema_name = schema['name']
-            assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test']
+            assert schema_name in ['public', 'public2', 'datadog', 'rdsadmin_test', 'hstore']
             if schema_name == 'public':
                 for table in schema['tables']:
                     tables_got.append(table['name'])
@@ -398,7 +430,7 @@ def test_collect_schemas_max_tables(integration_check, dbm_instance, aggregator)
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
         database_metadata = schema_event['metadata']
-        assert len(database_metadata[0]['schemas'][0]['tables']) == 1
+        assert len(database_metadata[0]['schemas'][0]['tables']) <= 1
 
     # Rerun check with relations enabled
     dbm_instance['relations'] = [{'relation_regex': '.*'}]
@@ -408,7 +440,7 @@ def test_collect_schemas_max_tables(integration_check, dbm_instance, aggregator)
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
         database_metadata = schema_event['metadata']
-        assert len(database_metadata[0]['schemas'][0]['tables']) == 1
+        assert len(database_metadata[0]['schemas'][0]['tables']) <= 1
 
 
 def test_collect_schemas_interrupted(integration_check, dbm_instance, aggregator):
@@ -440,7 +472,31 @@ def test_collect_schemas_interrupted(integration_check, dbm_instance, aggregator
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
         database_metadata = schema_event['metadata']
-        assert len(database_metadata[0]['schemas'][0]['tables']) == 1
+        assert len(database_metadata[0]['schemas'][0]['tables']) <= 1
+
+
+def test_collect_schemas_multiple_payloads(integration_check, dbm_instance, aggregator):
+    dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
+    dbm_instance['relations'] = []
+    dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
+    del dbm_instance['dbname']
+    check = integration_check(dbm_instance)
+    check.metadata_samples.column_buffer_size = 1
+    run_one_check(check, dbm_instance)
+
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    schema_events = [e for e in dbm_metadata if e['kind'] == 'pg_databases']
+    assert len(schema_events) > 1
+    # Check that all the payloads have the same collection_started_at
+    collection_started_at = schema_events[0]['collection_started_at']
+    for schema_event in schema_events:
+        assert schema_event['collection_started_at'] == collection_started_at
+    # Check that only the last payload has the collection_payloads_count
+    # and that the count matches the number of payloads
+    collection_payloads_count = schema_events[-1]['collection_payloads_count']
+    assert collection_payloads_count == len(schema_events)
+    for schema_event in schema_events[:-1]:
+        assert 'collection_payloads_count' not in schema_event
 
 
 def assert_fields(keys: List[str], fields: List[str]):

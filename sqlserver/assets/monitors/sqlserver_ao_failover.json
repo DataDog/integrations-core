@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "created_at": "2025-06-11",
+  "last_updated_at": "2025-06-11",
+  "title": "Availability group failover detected",
+  "tags": ["integration:sql-server"],
+  "description": "This monitor checks if your availability group has failed over from one primary replica to another.",
+  "definition": {
+    "message": "SQLServer availability group has failed over from one primary replica to another",
+    "name": "[SQLServer] Availability group failover detected",
+    "options": {
+      "thresholds": {
+        "critical": 1
+      },
+      "notify_audit": false,
+      "on_missing_data": "default",
+      "include_tags": true,
+      "new_group_delay": 60
+    },
+    "query": "max(last_5m):sum(max:sqlserver.ao.replica_status{replica_role:primary} by {replica_server_name,availability_group_name}.rollup(max, 60), { availability_group_name }) > 1",
+    "tags": ["integration:sql-server"],
+    "type": "query alert"
+  }
+}

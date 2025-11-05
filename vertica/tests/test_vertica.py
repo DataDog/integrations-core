@@ -11,7 +11,10 @@ from datadog_checks.vertica.vertica import VerticaClient
 from . import common
 from .metrics import ALL_METRICS
 
+skip_integration = pytest.mark.skip(reason="Vertica Docker image is no longer available")
 
+
+# E2E tests are disabled in hatch.toml (e2e-env = false)
 @pytest.mark.e2e
 @pytest.mark.parametrize('connection_load_balance', [False, True])
 def test_check_e2e(dd_agent_check, instance, connection_load_balance):
@@ -25,9 +28,9 @@ def test_check_e2e(dd_agent_check, instance, connection_load_balance):
     aggregator.assert_all_metrics_covered()
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, datadog_agent, instance, dd_run_check):
-
     check = VerticaCheck('vertica', {}, [instance])
     check.check_id = 'test:123'
     dd_run_check(check)
@@ -44,6 +47,7 @@ def test_check(aggregator, datadog_agent, instance, dd_run_check):
     datadog_agent.assert_metadata_count(len(version_metadata) + 4)
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_vertica_log_file_not_created(aggregator, instance, dd_run_check):
     instance['client_lib_log_level'] = 'DEBUG'
@@ -57,6 +61,7 @@ def test_vertica_log_file_not_created(aggregator, instance, dd_run_check):
     assert not os.path.exists(vertica_default_log)
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_connection_load_balance(monkeypatch):
     options = common.connection_options_from_config(common.CONFIG)
@@ -70,6 +75,7 @@ def test_check_connection_load_balance(monkeypatch):
     assert client.connection != old_connection
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_connect_resets_connection_when_connection_closed():
     options = common.connection_options_from_config(common.CONFIG)
@@ -84,6 +90,7 @@ def test_connect_resets_connection_when_connection_closed():
     assert client.connection != old_connection
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_connect_when_connection_is_open_reuses_connection():
     options = common.connection_options_from_config(common.CONFIG)
@@ -93,6 +100,7 @@ def test_connect_when_connection_is_open_reuses_connection():
     assert client.connect() == conn
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_custom_queries(aggregator, instance, dd_run_check):
     instance['custom_queries'] = [
@@ -111,6 +119,7 @@ def test_custom_queries(aggregator, instance, dd_run_check):
     )
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_include_all_metric_groups(aggregator, instance, dd_run_check):
     check = VerticaCheck('vertica', {}, [instance])
@@ -129,6 +138,7 @@ def test_include_all_metric_groups(aggregator, instance, dd_run_check):
     aggregator.assert_metric('vertica.node.resource_requests', metric_type=aggregator.GAUGE)
 
 
+@skip_integration
 @pytest.mark.usefixtures('dd_environment')
 def test_include_system_metric_group(aggregator, instance, dd_run_check):
     instance['metric_groups'] = ['system']

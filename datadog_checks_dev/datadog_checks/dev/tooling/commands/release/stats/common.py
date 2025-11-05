@@ -4,7 +4,8 @@
 import datetime
 import re
 
-from ....github import (
+from datadog_checks.dev.tooling.commands.console import echo_failure, echo_info
+from datadog_checks.dev.tooling.github import (
     get_commit,
     get_compare,
     get_pr_from_hash,
@@ -14,7 +15,6 @@ from ....github import (
     get_tags,
     parse_pr_number,
 )
-from ...console import echo_failure, echo_info
 
 
 class PullRequest:

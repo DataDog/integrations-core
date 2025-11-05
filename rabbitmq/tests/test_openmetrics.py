@@ -19,7 +19,7 @@ from .metrics import (
     AGGREGATED_ONLY_METRICS,
     DEFAULT_OPENMETRICS,
     MISSING_OPENMETRICS,
-    RABBITMQ_4_0_ADDED,
+    RABBITMQ_4_0_QUEUE_DELIVERY_METRICS,
     SUMMARY_METRICS,
 )
 
@@ -155,7 +155,7 @@ def test_unaggregated_endpoint(endpoint, fixture_file, expected_metrics, aggrega
         pytest.param(
             'detailed?family=queue_delivery_metrics',
             "detailed-queue_delivery_metrics.txt",
-            RABBITMQ_4_0_ADDED,
+            RABBITMQ_4_0_QUEUE_DELIVERY_METRICS,
             id="detailed, query queue_delivery_metrics family",
         ),
     ],
@@ -196,7 +196,7 @@ def mock_http_responses(url, **_params):
         '/metrics/detailed?family=queue_consumer_count&vhost=test': 'detailed-queue_consumer_count.txt',
         '/metrics/detailed?family=queue_delivery_metrics': 'detailed-queue_delivery_metrics.txt',
         (
-            '/metrics/detailed?family=queue_consumer_count' '&family=queue_coarse_metrics'
+            '/metrics/detailed?family=queue_consumer_count&family=queue_coarse_metrics'
         ): 'detailed-queue_coarse_metrics-queue_consumer_count.txt',
         (
             '/metrics/detailed?family=vhost_status&family=exchange_names&family=exchange_bindings'
@@ -245,7 +245,7 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
             'include_aggregated_endpoint': True,
         }
     )
-    mocker.patch('requests.get', wraps=mock_http_responses)
+    mocker.patch('requests.Session.get', wraps=mock_http_responses)
     dd_run_check(check)
 
     meta_metrics = {'rabbitmq.build_info', 'rabbitmq.identity_info'}
@@ -289,7 +289,7 @@ def test_detailed_only_metrics(aggregator, dd_run_check, mocker):
             'include_aggregated_endpoint': True,
         }
     )
-    mocker.patch('requests.get', wraps=mock_http_responses)
+    mocker.patch('requests.Session.get', wraps=mock_http_responses)
     dd_run_check(check)
 
     detailed_only_metrics = (

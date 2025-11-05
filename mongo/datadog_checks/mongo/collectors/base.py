@@ -61,7 +61,7 @@ class MongoCollector(object):
             metric_name = re.compile(pattern).sub(repl, metric_name)
 
         # Normalize, and wrap
-        return u"{metric_prefix}{normalized_metric_name}{metric_suffix}".format(
+        return "{metric_prefix}{normalized_metric_name}{metric_suffix}".format(
             normalized_metric_name=self.check.normalize(metric_name.lower()),
             metric_prefix=metric_prefix,
             metric_suffix=metric_suffix,
@@ -106,7 +106,7 @@ class MongoCollector(object):
             # value is now status[x][y][z]
             if not isinstance(value, (int, float)):
                 raise TypeError(
-                    u"{0} value is a {1}, it should be an int, or a float instead.".format(metric_name, type(value))
+                    "{0} value is a {1}, it should be an int, or a float instead.".format(metric_name, type(value))
                 )
 
             # Submit the metric

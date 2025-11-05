@@ -4,6 +4,8 @@
 
 Track overall and per-pool stats on each of your Twemproxy servers. This Agent check collects metrics for client and server connections and errors, request and response rates, bytes in and out of the proxy, and more.
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation

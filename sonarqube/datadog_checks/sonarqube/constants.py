@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # <WEB_ENDPOINT>/api/metrics/types
-NUMERIC_TYPES = {'BOOL', 'FLOAT', 'INT', 'PERCENT', 'RATING'}
+NUMERIC_TYPES = {'BOOL', 'FLOAT', 'INT', 'PERCENT', 'RATING', 'WORK_DUR'}
 
 MAX_PAGES = 100
 

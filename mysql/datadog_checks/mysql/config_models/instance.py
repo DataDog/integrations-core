@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
-from . import defaults, validators
+from . import defaults, deprecations, validators
 
 
 class ManagedAuthentication(BaseModel):
@@ -46,6 +46,16 @@ class Azure(BaseModel):
     )
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
+
+
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_execution_time: Optional[float] = None
 
 
 class CollectSettings(BaseModel):
@@ -158,6 +168,7 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_prepared_statements: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     only_query_recent_statements: Optional[bool] = None
@@ -215,6 +226,7 @@ class InstanceConfig(BaseModel):
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     charset: Optional[str] = None
+    collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     connect_timeout: Optional[float] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
@@ -252,6 +264,12 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     use_global_custom_queries: Optional[str] = None
     username: Optional[str] = None
+
+    @model_validator(mode='before')
+    def _handle_deprecations(cls, values, info):
+        fields = info.context['configured_fields']
+        validation.utils.handle_deprecations('instances', deprecations.instance(), fields, info.context)
+        return values
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

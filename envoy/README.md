@@ -2,11 +2,26 @@
 
 ## Overview
 
+### Metrics
+
 This check collects distributed system observability metrics from [Envoy][1].
+
+### Security
+
+[Datadog App and API Protection][30] extends visibility and inline threat mitigation to your Envoy proxy instance.
+
+With this integration, you can detect and block attacks such as API abuse, business logic exploitation, and code layer threats directly at the edge of your cloud infrastructure.
+
+Key Benefits:
+- **Inline threat detection and blocking** at the load balancer using Datadog Security Signals
+- **Real-time insights** into application-layer attacks with traces and logs in one unified view
+- **Edge enforcement** against OWASP API threats, credential stuffing, injection attacks, and more
+
+**Minimum Agent version:** 6.1.0
 
 ## Setup
 
-### Installation
+### Installation (Metrics)
 
 The Envoy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
 
@@ -170,6 +185,34 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 [Run the Agent's status subcommand][13] and look for `envoy` under the Checks section.
 
+### Installation (Security - App and API Protection)
+
+The installation process requires a different approach than enabling this integration.
+
+#### Envoy
+
+The installation instructions are available in the [Enabling App and API Protection for Envoy][31] documentation.
+
+#### Istio
+
+The installation instructions are available in the [Enabling App and API Protection for Istio][32] documentation.
+
+#### Validation
+
+To validate App and API Protection threat detection, send known attack patterns to your Envoy instance. For example, you can trigger the Security Scanner Detected rule by running the following curl script:
+
+```sh
+for ((i=1;i<=250;i++)); 
+do
+    # Target existing service's routes
+    curl https://your-envoy-url/existing-route -A dd-test-scanner-log;
+    # Target non existing service's routes
+    curl https://your-envoy-url/non-existing-route -A dd-test-scanner-log;
+done
+```
+
+A few minutes after enabling the App and API Protection for Envoy and sending known attack patterns, threat information will appear in the Application Signals Explorer.
+
 ## Data Collected
 
 ### Metrics
@@ -215,3 +258,6 @@ Need help? Contact [Datadog support][16].
 [16]: https://docs.datadoghq.com/help/
 [17]: https://docs.datadoghq.com/integrations/openmetrics/
 [18]: https://github.com/DataDog/integrations-core/blob/7.33.x/envoy/datadog_checks/envoy/data/conf.yaml.example
+[30]: https://docs.datadoghq.com/security/application_security/?source=envoy-tile-overview
+[31]: https://docs.datadoghq.com/security/application_security/setup/envoy/?source=envoy-tile-setup
+[32]: https://docs.datadoghq.com/security/application_security/setup/istio/?source=envoy-tile-setup

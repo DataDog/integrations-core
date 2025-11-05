@@ -11,6 +11,8 @@ Enable this integration to:
 
 For more information, see the [Windows Event Logging documentation][13].
 
+**Minimum Agent version:** 6.0.0
+
 ## Setup
 
 ### Installation
@@ -259,7 +261,7 @@ Here is an example regex pattern to only collect Windows Events Logs from a cert
 logs:
   - type: windows_event
     channel_path: Security
-    source: windows.event
+    source: windows.events
     service: Windows
     log_processing_rules:
       - type: include_at_match
@@ -284,7 +286,7 @@ The following regex must be used to match these EventIDs:
 logs:
   - type: windows_event
     channel_path: Security
-    source: windows.event
+    source: windows.events
     service: Windows
     log_processing_rules:
       - type: include_at_match
@@ -298,7 +300,7 @@ Agent versions 7.41 or later normalize the EventID field. This removes the need 
 logs:
   - type: windows_event
     channel_path: Security
-    source: windows.event
+    source: windows.events
     service: Windows
     log_processing_rules:
       - type: include_at_match

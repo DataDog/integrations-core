@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2025-06-30",
+    "last_updated_at": "2025-06-30",
+    "title": "Kuma xDS High Configuration Delivery Latency",
+    "tags": [
+        "integration:kuma"
+    ],
+    "description": "Monitors the 99th percentile latency of xDS configuration delivery to data plane proxies. High latency can delay policy updates and impact the responsiveness of configuration changes in your service mesh.",
+    "definition": {
+        "message": "{{#is_alert}}\n\nKuma xDS configuration delivery is experiencing high latency on {{instance_id.name}} in zone {{zone.name}}.\n\nP99 latency: {{value}}ms\n\nHigh configuration delivery latency delays the application of policy updates to data plane proxies. This can impact:\n- Time to apply traffic routing changes\n- Security policy enforcement delays\n- Service discovery update lag\n\nPossible causes:\n- Control plane resource constraints\n- Large number of data plane connections\n- Complex policy configurations\n- Network latency between control and data planes\n\n{{/is_alert}}",
+        "name": "[Kuma] xDS High Configuration Delivery Latency",
+        "options": {
+            "thresholds": {
+                "critical": 5000,
+                "warning": 2000
+            },
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {},
+            "notify_no_data": false,
+            "renotify_interval": 0,
+            "require_full_window": false
+        },
+        "priority": 3,
+        "query": "avg(last_10m):avg:kuma.xds.delivery.quantile{quantile:0.99} by {instance_id,zone} > 5000",
+        "tags": [
+            "integration:kuma"
+        ],
+        "type": "query alert"
+    }
+} 

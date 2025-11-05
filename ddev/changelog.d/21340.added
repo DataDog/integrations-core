@@ -1,0 +1,1 @@
+Adds a new method `merge_base` in the `GitRepository` class. 

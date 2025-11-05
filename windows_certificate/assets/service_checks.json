@@ -1,0 +1,68 @@
+[
+    {
+        "agent_version": "7.67.0",
+        "integration": "Windows Certificate Store",
+        "groups": [
+            "certificate_store",
+            "subject_cn",
+            "subject_ou",
+            "subject_c",
+            "subject_o",
+            "subject_l",
+            "certificate_thumbprint",
+            "certificate_serial_number",
+            "server"
+        ],
+        "check": "windows_certificate.cert_expiration",
+        "statuses": [
+            "ok",
+            "critical",
+            "warning"
+        ],
+        "name": "Certificate expiration",
+        "description": "Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`, returns `WARNING` if the certificate expires in less than `days_warning`, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.69.0",
+        "integration": "Windows Certificate Store",
+        "groups": [
+            "certificate_store",
+            "crl_issuer_l",
+            "crl_issuer_ou",
+            "crl_issuer_o",
+            "crl_thumbprint",
+            "server"
+        ],
+        "check": "windows_certificate.crl_expiration",
+        "statuses": [
+            "ok",
+            "critical",
+            "warning"
+        ],
+        "name": "CRL expiration",
+        "description": "Returns `CRITICAL` if the certificate revocation list (CRL) has expired. Returns `WARNING` if the CRL expires in less than `crl_days_warning`. Otherwise, returns `OK`."
+    },
+    {
+        "agent_version": "7.70.0",
+        "integration": "Windows Certificate Store",
+        "groups": [
+            "certificate_store",
+            "subject_cn",
+            "subject_ou",
+            "subject_c",
+            "subject_o",
+            "subject_l",
+            "certificate_thumbprint",
+            "certificate_serial_number",
+            "server"
+        ],
+        "check": "windows_certificate.cert_chain_validation",
+        "statuses": [
+            "ok",
+            "critical",
+            "warning"
+        ],
+        "name": "Certificate chain validation",
+        "description": "Returns `CRITICAL` if the certificate chain validation fails. Otherwise, returns `OK`."
+    }
+]

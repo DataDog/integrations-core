@@ -41,5 +41,7 @@ VOLUME_STATS.update(VOL_SUBVOL_STATS)
 BRICK_STATS = {'block_size': 'block_size'}
 BRICK_STATS.update(GENERAL_STATS)
 
+HEAL_INFO_STATS = {'nr_entries': 'entries.count'}
+
 # Parse metric values that contain measurements, e.g "2.00 GiB"
 PARSE_METRICS = ['v_size_used', 'v_size']

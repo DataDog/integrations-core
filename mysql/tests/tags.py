@@ -5,38 +5,45 @@ from . import common
 
 
 def database_instance_resource_tags(hostname):
-    return [
+    return (
         f'dd.internal.resource:database_instance:{hostname}',
         f'database_hostname:{hostname}',
         f'database_instance:{hostname}',
-    ]
+    )
 
 
-METRIC_TAGS = ['tag1:value1', 'tag2:value2']
-METRIC_TAGS_WITH_RESOURCE = [
+METRIC_TAGS = ('tag1:value1', 'tag2:value2')
+METRIC_TAGS_WITH_RESOURCE = (
     'tag1:value1',
     'tag2:value2',
     *database_instance_resource_tags('stubbed.hostname'),
     'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
-]
-SC_TAGS = [
+)
+SC_TAGS = (
     'port:' + str(common.PORT),
     'tag1:value1',
     'tag2:value2',
-]
-SC_TAGS_MIN = [
+)
+SC_TAGS_MIN = (
     'port:' + str(common.PORT),
     *database_instance_resource_tags('stubbed.hostname'),
-]
-SC_TAGS_REPLICA = [
+)
+SC_TAGS_REPLICA = (
     'port:' + str(common.SLAVE_PORT),
     'tag1:value1',
     'tag2:value2',
     'dd.internal.resource:database_instance:stubbed.hostname',
     'database_hostname:stubbed.hostname',
     'database_instance:stubbed.hostname',
-]
-SC_FAILURE_TAGS = [
+)
+SC_FAILURE_TAGS = (
     'port:unix_socket',
     *database_instance_resource_tags('stubbed.hostname'),
-]
+)
+
+
+def metrics_tags_with_resource(mysql_check):
+    _tags = METRIC_TAGS_WITH_RESOURCE
+    if common.MYSQL_FLAVOR.lower() in ('mysql', 'percona'):
+        _tags += ("server_uuid:{}".format(mysql_check.server_uuid),)
+    return _tags

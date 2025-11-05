@@ -52,7 +52,7 @@ instances:
   - octopus_endpoint: http://localhost:80
 
     ## @param environments - mapping - optional
-    ## Optional configuration to indicate the environments that we want to be processed. If not configured,
+    ## Optional configuration to indicate the environments to process. If not configured,
     ## all environments are processed.
     ##
     ## The 'include' key indicates the regular expressions of the environments for reporting metrics.
@@ -62,7 +62,7 @@ instances:
     ## that it might match on.
     ##
     ## The 'exclude' key indicates the regular expressions of those environments for not reporting metrics.
-    ## The excludes has priority over the includes, that is, if an environment matches an exclude, it is not
+    ## The excludes have priority over the includes; that is, if an environment matches an exclude, it is not
     ## processed even if it matches an include. The 'include' key must be used if using the 'exclude' key.
     ##
     ## The 'limit' key allows limiting the number of environments processed to avoid a combinatorial explosion of
@@ -89,21 +89,21 @@ instances:
       X-Octopus-ApiKey: <OCTOPUS_API_KEY>
 
     ## @param spaces - mapping - optional
-    ## Optional configuration to indicate the spaces that we want to be processed. If not configured,
-    ## all spaces and their corresponding project groups and projects are be processed.
+    ## Optional configuration to indicate the spaces to process. If not configured,
+    ## all spaces and their corresponding project groups and projects are processed.
     ##
     ## The 'include' key indicates the regular expressions of the spaces for reporting metrics 
     ## and the configuration to be applied to each of them. Each group can have a 'project-groups'-like configuration,
     ## that enables or disables metric collection for the project groups matching that condition. For further details
     ## see the next section, 'project-groups'. If no configuration associated with the key is indicated with the regular
-    ## expression, they are be processed with the default configuration.
+    ## expression, they are processed with the default configuration.
     ##
     ## The spaces are processed in the order indicated in the 'include'.
     ## If a space is matched on an 'include' key, it is only processed there and not in a later 'include'
     ## that it might match on.
     ##
     ## The 'exclude' key indicates the regular expressions of those spaces for not reporting metrics.
-    ## The excludes have priority over the includes, that is, if a space matches an exclude, it is not
+    ## The excludes have priority over the includes; that is, if a space matches an exclude, it is not
     ## processed even if it matches an include. The 'include' key must be used if using the 'exclude' key.
     ##
     ## The 'limit' key allows limiting the number of spaces processed to avoid a combinatorial explosion of tags
@@ -131,28 +131,28 @@ instances:
     # spaces: {}
 
     ## @param project_groups - mapping - optional
-    ## Optional configuration to indicate the project groups that we want to be processed. If not configured,
+    ## Optional configuration to indicate the project groups to process. If not configured,
     ## all project groups are processed.
     ##
     ## The 'include' key indicates the regular expressions of the project groups for reporting metrics
     ## and the configuration to be applied to each of them. Each group can have a 'projects'-like
     ## configuration, that enables or disables metric collection for the projects matching that condition. For
     ## further details see previous section 'projects'. If no configuration associated with the key is indicated with
-    ## the regular expression, they are be processed with the default configuration.
+    ## the regular expression, they are processed with the default configuration.
     ##
     ## The project groups are processed in the order indicated in the 'include'.
     ## If a project group is matched on an 'include' key, it is only processed there and not in a later 'include'
     ## that it might match on.
     ##
     ## The 'exclude' key indicates the regular expressions of those project groups for not reporting metrics.
-    ## The excludes has priority over the includes, that is, if a project group matches an exclude, it is not
+    ## The excludes have priority over the includes; that is, if a project group matches an exclude, it is not
     ## processed even if it matches an include. The 'include' key must be used if using the 'exclude' key.
     ##
     ## The 'limit' key allows limiting the number of project groups processed to avoid a combinatorial explosion of
     ## tags associated with a metric.
     ##
     ## The 'interval' key indicates the validity time of the last list of project groups obtained through the
-    ## endpoint. If 'interval' is not indicated, the list of project groups are obtained each time the check is
+    ## endpoint. If 'interval' is not indicated, the list of project groups is obtained each time the check is
     ## executed and is not cached.
     ##
     ## In the following example, all project groups are processed except those whose name begins with 'tmp_'
@@ -170,17 +170,17 @@ instances:
     # project_groups: {}
 
     ## @param projects - mapping - optional
-    ## Optional configuration to indicate the projects that we want to be processed. If not configured,
+    ## Optional configuration to indicate the projects to process. If not configured,
     ## all projects are processed.
     ##
     ## The 'include' key indicates the regular expressions of the projects for reporting metrics.
     ##
     ## The projects are processed in the order indicated in the 'include'.
-    ## If a projects is matched on an 'include' key, it is only processed there and not in a later 'include'
+    ## If a project is matched on an 'include' key, it is only processed there and not in a later 'include'
     ## that it might match on.
     ##
     ## The 'exclude' key indicates the regular expressions of those projects for not reporting metrics.
-    ## The excludes has priority over the includes, that is, if a projects matches an exclude, it is not
+    ## The excludes have priority over the includes; that is, if a project matches an exclude, it is not
     ## processed even if it matches an include. The 'include' key must be used if using the 'exclude' key.
     ##
     ## The 'limit' key allows limiting the number of projects processed to avoid a combinatorial explosion of tags
@@ -327,7 +327,7 @@ instances:
 
     ## @param auth_type - string - optional - default: basic
     ## The type of authentication to use. The available types (and related options) are:
-    ##
+    ## ```
     ##   - basic
     ##     |__ username
     ##     |__ password
@@ -350,7 +350,7 @@ instances:
     ##     |__ aws_region
     ##     |__ aws_host
     ##     |__ aws_service
-    ##
+    ## ```
     ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`.
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #

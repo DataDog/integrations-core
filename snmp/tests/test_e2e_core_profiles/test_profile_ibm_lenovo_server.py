@@ -35,8 +35,9 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
-        'ibm_imm_machine_level_product_name:Jaded acted their but acted kept driving ' 'Jaded Jaded',
+        'ibm_imm_machine_level_product_name:Jaded acted their but acted kept driving Jaded Jaded',
         'ibm_imm_machine_level_serial_number:driving quaintly quaintly but driving',
     ]
 

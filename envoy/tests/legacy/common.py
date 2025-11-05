@@ -37,12 +37,30 @@ INSTANCES = {
 }
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
 
-EXT_METRICS = [
+EXT_AUTHZ_METRICS = [
     "envoy.cluster.ext_authz.denied",
     "envoy.cluster.ext_authz.disabled",
     "envoy.cluster.ext_authz.error",
     "envoy.cluster.ext_authz.failure_mode_allowed",
     "envoy.cluster.ext_authz.ok",
+]
+
+EXT_PROC_METRICS = [
+    "envoy.http.ext_proc.streams_started",
+    "envoy.http.ext_proc.stream_msgs_sent",
+    "envoy.http.ext_proc.stream_msgs_received",
+    "envoy.http.ext_proc.spurious_msgs_received",
+    "envoy.http.ext_proc.streams_closed",
+    "envoy.http.ext_proc.streams_failed",
+    "envoy.http.ext_proc.failure_mode_allowed",
+    "envoy.http.ext_proc.message_timeouts",
+    "envoy.http.ext_proc.rejected_header_mutations",
+    "envoy.http.ext_proc.override_message_timeout_received",
+    "envoy.http.ext_proc.override_message_timeout_ignored",
+    "envoy.http.ext_proc.clear_route_cache_ignored",
+    "envoy.http.ext_proc.clear_route_cache_disabled",
+    "envoy.http.ext_proc.clear_route_cache_upstream_ignored",
+    "envoy.http.ext_proc.send_immediate_resp_upstream_ignored",
 ]
 
 LOCAL_RATE_LIMIT_METRICS = [

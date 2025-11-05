@@ -38,7 +38,7 @@ def test_no_metrics_failure(aggregator, check):
         check.check(NO_METRIC_CONFIG)
 
     assert str(excinfo.value) == (
-        "No metrics were fetched for this instance. Make sure that http://localhost:18180 " "is the proper url."
+        "No metrics were fetched for this instance. Make sure that http://localhost:18180 is the proper url."
     )
 
     sc_tags = ['apache_host:localhost', 'port:18180']

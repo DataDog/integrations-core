@@ -8,6 +8,10 @@ Integrate Metabase with Datadog to gain insights into activity event logs, view 
 
 ## Setup
 
+### Prerequisites
+
+- This integration requires a Metabase Pro or Enterprise plan.
+
 ### Generate API credentials in Metabase
 
 1. Log into your Metabase instance as an administrator.

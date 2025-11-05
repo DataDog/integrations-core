@@ -14,7 +14,6 @@ AddrTuple = namedtuple('AddrTuple', ['address', 'socket_type'])
 
 
 class TCPCheck(AgentCheck):
-
     SOURCE_TYPE_NAME = 'system'
     SERVICE_CHECK_NAME = 'tcp.can_connect'
     CONFIGURATION_ERROR_MSG = "`{}` is an invalid `{}`; a {} must be specified."
@@ -152,9 +151,7 @@ class TCPCheck(AgentCheck):
                         addr,
                         """Socket error: {}.
                     The connection timed out after {} ms because it took more time than the system tcp stack allows.
-                    You might want to change this setting to allow longer timeouts""".format(
-                            str(e), length
-                        ),
+                    You might want to change this setting to allow longer timeouts""".format(str(e), length),
                     )
                 else:
                     self.log.info(

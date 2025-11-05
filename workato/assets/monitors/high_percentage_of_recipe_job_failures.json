@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "created_at": "2025-08-20",
+  "last_updated_at": "2025-08-20",
+  "title": "High percentage of job failures for recipe",
+  "description": "The number of recent job failures for a recipe exceeds the threshold.",
+  "definition": {
+    "id": 181800008,
+    "name": "High percentage of job failures for recipe",
+    "type": "log alert",
+    "query": "formula(\"(query / query1) * 100\").last(\"1h\") > 50",
+    "message": "{{#is_alert}}The percentage of failures for {{[@workato.recipe_name].name}} has exceeded threshold.{{/is_alert}}\n{{#is_alert_recovery}}The job failure percentage for {{[@workato.recipe_name].name}} has recovered {{/is_alert_recovery}}\n\n@email@example.com",
+    "tags": [
+        "source:workato"
+    ],
+    "options": {
+        "thresholds": {
+            "critical": 50
+        },
+        "enable_logs_sample": false,
+        "notify_audit": false,
+        "on_missing_data": "default",
+        "include_tags": false,
+        "new_group_delay": 60,
+        "variables": [
+            {
+                "name": "query",
+                "data_source": "logs",
+                "search": {
+                    "query": "source:workato service:jobs status:error"
+                },
+                "indexes": [
+                    "*"
+                ],
+                "group_by": [
+                    {
+                        "facet": "@workato.recipe_name",
+                        "limit": 10,
+                        "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                        },
+                        "should_exclude_missing": true
+                    }
+                ],
+                "compute": {
+                    "aggregation": "count"
+                },
+                "storage": "hot"
+            },
+            {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                    "query": "source:workato service:jobs"
+                },
+                "indexes": [
+                    "*"
+                ],
+                "group_by": [
+                    {
+                        "facet": "@workato.recipe_name",
+                        "limit": 10,
+                        "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                        },
+                        "should_exclude_missing": true
+                    }
+                ],
+                "compute": {
+                    "aggregation": "count"
+                },
+                "storage": "hot"
+            }
+        ],
+        "groupby_simple_monitor": false
+    },
+    "priority": null
+  },
+  "tags": [
+    "integration:workato"
+  ]
+}

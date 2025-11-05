@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "485341cc-3dee-4136-b147-dda76171701a",
   "app_id": "ceph",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

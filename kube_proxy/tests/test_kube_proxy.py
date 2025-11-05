@@ -25,7 +25,7 @@ def mock_iptables():
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_iptables = mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
             status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
         ),
@@ -40,7 +40,7 @@ def mock_userspace():
     with open(f_name, 'r') as f:
         text_data = f.read()
     mock_userspace = mock.patch(
-        'requests.get',
+        'requests.Session.get',
         return_value=mock.MagicMock(
             status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
         ),
@@ -119,13 +119,13 @@ def test_service_check_ok(monkeypatch):
     ]
 
     # successful health check
-    with mock.patch("requests.get", return_value=mock.MagicMock(status_code=200)):
+    with mock.patch('requests.Session.get', return_value=mock.MagicMock(status_code=200)):
         check._perform_service_check(instance)
 
     # failed health check
     raise_error = mock.Mock()
     raise_error.side_effect = requests.HTTPError('health check failed')
-    with mock.patch("requests.get", return_value=mock.MagicMock(raise_for_status=raise_error)):
+    with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=raise_error)):
         check._perform_service_check(instance)
 
     check.service_check.assert_has_calls(calls)

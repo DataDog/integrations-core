@@ -8,11 +8,11 @@ from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompati
 
 from .metrics import AGENT_V2_METRICS, OPERATOR_V2_METRICS, construct_metrics_config
 
-CILIUM_VERSION = {'cilium_version': {'type': 'metadata', 'label': 'version', 'name': 'version'}}
+CILIUM_VERSION = {"cilium_version": {"type": "metadata", "label": "version", "name": "version"}}
 
 
 class CiliumCheckV2(OpenMetricsBaseCheckV2):
-    __NAMESPACE__ = 'cilium'
+    __NAMESPACE__ = "cilium"
 
     DEFAULT_METRIC_LIMIT = 0
 
@@ -38,8 +38,8 @@ class CiliumCheckV2(OpenMetricsBaseCheckV2):
         metrics = construct_metrics_config(metrics)
         metrics.append(CILIUM_VERSION)
         config = {
-            'openmetrics_endpoint': endpoint,
-            'metrics': metrics,
+            "openmetrics_endpoint": endpoint,
+            "metrics": metrics,
         }
         config.update(self.instance)
         return config
@@ -48,4 +48,4 @@ class CiliumCheckV2(OpenMetricsBaseCheckV2):
         return OpenMetricsCompatibilityScraper(self, self.get_config_with_defaults(config))
 
     def get_config_with_defaults(self, config):
-        return ChainMap(config, {'metrics': config.pop('metrics')})
+        return ChainMap(config, {"metrics": config.pop("metrics")})

@@ -23,6 +23,14 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: disable_missing_mountpoints_warning
+      required: false
+      description: |
+        If true, no warning is logged if host has check enabled but no NFS mount point is found.
+      value:
+        type: boolean
+        default: false
+        example: false
     - template: instances/default
   - template: logs
     example:

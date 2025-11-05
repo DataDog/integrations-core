@@ -108,7 +108,7 @@
                       "aggregator": "sum",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "count:openai.request.duration{$env,$service,$version,$model,$organization,$openai.user.api_key}.as_count()"
+                      "query": "sum:openai.api.usage.n_requests{$model,$operation}.as_count()"
                     }
                   ],
                   "response_format": "scalar"

@@ -35,6 +35,7 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'bcn_sys_id_product:1.3.6.1.4.1.13315.2.1',
         'bcn_sys_id_os_release:OS v1.2.3',

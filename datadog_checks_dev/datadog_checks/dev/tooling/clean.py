@@ -6,7 +6,8 @@ import os
 from glob import iglob
 from os.path import join
 
-from ..fs import dir_exists, remove_path
+from datadog_checks.dev.fs import dir_exists, remove_path
+
 from .utils import is_package
 
 DELETE_IN_ROOT = {'.cache', '.coverage', '.eggs', '.pytest_cache', '.tox', 'build', 'dist', '*.egg-info', '.benchmarks'}

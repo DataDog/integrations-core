@@ -1,3 +1,4 @@
+# bypass-global-facets-path-checks
 id: ibm_was
 metric_id: ibm-was
 backend_only: false

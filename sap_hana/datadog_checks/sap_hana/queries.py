@@ -21,6 +21,7 @@ for view in views:
     for row in cur.fetchall():
         print(f'    {row[0]}')
 """
+
 from .utils import compact_query
 
 

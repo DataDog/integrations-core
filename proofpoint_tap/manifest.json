@@ -1,0 +1,62 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "16ad3243-233b-4a1e-a523-98a35c29162b",
+  "app_id": "proofpoint-tap",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Proofpoint TAP events",
+    "title": "Proofpoint TAP",
+    "media": [
+      {
+        "caption": "Proofpoint TAP Overview",
+        "image_url": "images/proofpoint_tap_overview.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Proofpoint TAP Clicks Insights",
+        "image_url": "images/proofpoint_tap_clicks_insights.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Proofpoint TAP Messages Insights",
+        "image_url": "images/proofpoint_tap_messages_insights.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 50851544,
+      "source_type_name": "Proofpoint TAP",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Proofpoint TAP - Overview": "assets/dashboards/proofpoint_tap_overview.json",
+      "Proofpoint TAP - Clicks Insights": "assets/dashboards/proofpoint_tap_clicks_insights.json",
+      "Proofpoint TAP - Messages Insights": "assets/dashboards/proofpoint_tap_messages_insights.json"
+    },
+    "logs": {
+      "source": "proofpoint-tap"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

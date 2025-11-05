@@ -28,7 +28,7 @@ from datadog_checks.sqlserver.utils import is_azure_sql_database
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from datadog_checks.base.stubs import datadog_agent
 
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
@@ -255,7 +255,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     def __init__(self, check, config: SQLServerConfig):
         # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
         collection_interval = float(
@@ -511,14 +510,13 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             "database_instance": self._check.database_identifier,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
-            'tags': self.tags,
+            'tags': self._check.tag_manager.get_tags(),
             'kind': 'query_metrics',
             'cloud_metadata': self._check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': datadog_agent.get_version(),
-            'ddagenthostname': self._check.agent_hostname,
             'service': self._config.service,
         }
 
@@ -566,7 +564,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            tags = list(self.tags)
+            tags = self._check.tag_manager.get_tags()
             if 'database_name' in row:
                 tags += ["db:{}".format(row['database_name'])]
             yield {
@@ -627,7 +625,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
-                obfuscated_plan, collection_errors = None, None
+                obfuscated_plan = None
+                collection_errors = []
 
                 try:
                     if raw_plan:
@@ -640,13 +639,21 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         self.log.warning("Failed to obfuscate plan=[%s] | %s", raw_plan, context)
                     else:
                         self.log.debug("Failed to obfuscate plan | %s", context)
-                    collection_errors = [{'code': "obfuscate_xml_plan_error", 'message': str(e)}]
+                    collection_errors.append({'code': "obfuscate_xml_plan_error", 'message': str(e)})
                     self._check.count(
                         "dd.sqlserver.statements.error",
                         1,
                         **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))]),
                     )
-                tags = list(self.tags)
+                tags = self._check.tag_manager.get_tags()
+
+                if is_plan_encrypted:
+                    collection_errors.append({'code': "plan_encrypted", 'message': "cannot collect encrypted plan"})
+
+                # Do not submit plan events if no plan is available and there is no collection error.
+                # This avoids sending empty plan events when a plan is not available in the cache.
+                if not raw_plan and not collection_errors:
+                    continue
 
                 # for stored procedures, we want to send the plan
                 # events with the full procedure text, not the text
@@ -678,7 +685,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         "plan": {
                             "definition": obfuscated_plan,
                             "signature": row['query_plan_hash'],
-                            "collection_errors": collection_errors,
+                            "collection_errors": collection_errors if collection_errors else None,
                         },
                         "query_signature": query_signature,
                         "procedure_signature": row.get('procedure_signature', None),

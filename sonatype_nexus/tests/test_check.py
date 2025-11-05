@@ -15,7 +15,7 @@ from .conftest import instance
 @pytest.fixture
 def mock_http_response(mocker):
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop("method", "requests.get"), return_value=MockResponse(*args, **kwargs)
+        kwargs.pop("method", "requests.Session.get"), return_value=MockResponse(*args, **kwargs)
     )
 
 

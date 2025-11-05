@@ -1,7 +1,7 @@
 {
   "version": 2,
   "created_at": "2020-07-28",
-  "last_updated_at": "2022-12-07",
+  "last_updated_at": "2025-06-12",
   "title": "Kubernetes Statefulset Replicas are failing",
   "tags": [
     "integration:kubernetes"
@@ -9,7 +9,7 @@
   "description": "Kubernetes replicas are clones that facilitate self-healing for pods. Each pod has a desired number of replica Pods that should be running at any given time. This monitor tracks when the number of replicas per statefulset is falling.",
   "definition": {
     "message": "More than one Statefulset Replica's pods are down in Statefulset {{kube_namespace.name}}/{{kube_stateful_set.name}}. This might present an unsafe situation for any further manual operations, such as killing other pods.",
-    "name": "[kubernetes] Monitor Kubernetes Statefulset Replicas",
+    "name": "[Kubernetes] Monitor Kubernetes Statefulset Replicas",
     "options": {
       "escalation_message": "",
       "include_tags": true,

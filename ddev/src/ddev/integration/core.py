@@ -6,7 +6,7 @@ from __future__ import annotations
 import os
 import re
 from functools import cached_property
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Iterator, cast
 
 from ddev.integration.metrics import Metric
 from ddev.repo.constants import NOT_SHIPPABLE
@@ -15,15 +15,6 @@ from ddev.utils.fs import Path
 if TYPE_CHECKING:
     from ddev.integration.manifest import Manifest
     from ddev.repo.config import RepositoryConfig
-
-# The manifest.json file can contain the source_type_name field that the validation uses to validate different parts
-# of the integration. Zabbix was renamed to Zabbix (Community Version) in the manifest.json file, so we need to map
-# it back to Zabbix for validations to pass
-EXCEPTION_MAPPER = {
-    'Zabbix (Community Version)': 'Zabbix',
-    'Scalr (Community Version)': 'Scalr',
-    'Zscaler (Community Version)': 'Zscaler',
-}
 
 
 class Integration:
@@ -103,8 +94,7 @@ class Integration:
 
     @cached_property
     def normalized_display_name(self) -> str:
-        display_name = self.manifest.get('/assets/integration/source_type_name', self.name)
-        display_name = EXCEPTION_MAPPER.get(display_name, display_name)
+        display_name = self.display_name
         normalized_integration = re.sub("[^0-9A-Za-z-]", "_", display_name)
         normalized_integration = re.sub("_+", "_", normalized_integration)
         normalized_integration = normalized_integration.strip("_")
@@ -185,7 +175,13 @@ class Integration:
 
     @cached_property
     def is_integration(self) -> bool:
-        return (self.path / 'manifest.json').is_file()
+        if (self.path / 'manifest.json').is_file():
+            return True
+
+        # If the manifest.json file is not present check the respository configuration to
+        # get the is_integration flag for this particular integration.
+        # If the folder is not listed, it is assumed to be an integration.
+        return cast(bool, self.repo_config.get(f'/overrides/is-integration/{self.name}', default=True))
 
     @cached_property
     def has_metrics(self) -> bool:

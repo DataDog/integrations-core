@@ -80,8 +80,10 @@ files:
       default: false
     - name: database_identifier
       description: |
-        Controls how the database is identified. The default value is the resolved hostname for the instance,
-        which respects the `reported_hostname` option.
+        Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
+        billable instance.
+
+        The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
 
         This value will be used as-is for the display name of the instance but will be normalized
         when applied as the `database_instance` tag. Please see https://docs.datadoghq.com/getting_started/tagging/
@@ -430,6 +432,23 @@ files:
             - name: enabled
               type: boolean
               example: false
+        - name: table_size_metrics
+          description: |
+            Configure collection of table size metrics.
+
+            Set `table_size_metrics.enabled` to true to enable collection of table size metrics. 
+            Does not collect tempdb metrics.
+            Defaults to false.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
+            - name: collection_interval
+              type: integer
+              example: 600
+              display_default: 600
     - name: agent_jobs
       description: Configure collection of SQL Server Agent jobs events and metrics
       options:
@@ -517,7 +536,7 @@ files:
             Enable collection of sys.configurations. Requires `dbm: true`.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collection_interval
           description: |
             Set the database settings collection interval (in seconds). Each collection involves a single query to
@@ -873,6 +892,13 @@ files:
             type: boolean
             example: false
             display_default: false
+        - name: replace_bind_parameter
+          description: |
+            Set to `true` to replace bind parameters (e.g. `@p1`) with `?` in your obfuscated SQL statements.
+          value:
+            type: boolean
+            example: false
+            display_default: false
         - name: keep_trailing_semicolon
           description: |
             Set to `true` to keep trailing semicolons in your normalized SQL statements.
@@ -889,13 +915,13 @@ files:
             display_default: false
     - name: collect_raw_query_statement
       description: |
-        Configure the collection of raw query statements in query activity, execution plans, and XE events.
-        To collect raw query statements from XE events, set `xe_collection.query_completions.enabled` and
-        `xe_collection.query_errors.enabled` to `true`.
-        Raw query statements and execution plans may contain sensitive information (e.g., passwords)
+        Configure the collection of raw query statements in query activity, and XE events.
+        To collect raw query statements from XE events, set `collect_xe.query_completions.enabled` and
+        `collect_xe.query_errors.enabled` to `true`.
+        Raw query statements may contain sensitive information (e.g., passwords)
         or personally identifiable information in query text.
-        Enabling this option will allow the collection and ingestion of raw query statements and
-        execution plans into Datadog, which can then become viewable in query samples or explain plans.
+        Enabling this option will allow the collection and ingestion of raw query statements 
+        into Datadog, which can then become viewable in query samples.
         This option is disabled by default.
         Note: Collection of raw query statements is currently in preview.
         If you are interested in participating, please reach out to your Datadog Customer Success Manager.
@@ -970,9 +996,36 @@ files:
         type: number
         example: 1800
         display_default: 300
-    - name: schemas_collection
+    - name: collect_schemas
       description: |
-        Available for Agent 7.56 and newer.
+        Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
+        only for the database configured with `database` parameter.
+      options:
+        - name: enabled
+          description: |
+            Enable schema collection. Requires `dbm: true`. Defaults to false.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+          value:
+            type: number
+            example: 600
+        - name: max_execution_time
+          description: |
+            Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
+            Capped by `collect_schemas.collection_interval`
+          value:
+            type: number
+            example: 10
+    - name: schemas_collection
+      deprecation:
+        Agent version: 7.70.0
+        Migration: Use `collect_schemas` instead.
+      description: |
+        DEPRECATED: Use `collect_schemas` instead.
         Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
         only for the database configured with `database` parameter.
       options:
@@ -1003,7 +1056,7 @@ files:
       value:
         example: false
         type: boolean
-    - name: xe_collection
+    - name: collect_xe
       description: |
         Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
 
@@ -1072,8 +1125,107 @@ files:
               type: integer
               example: 1000
               display_default: 1000
-    - name: deadlocks_collection
+    - name: xe_collection
+      deprecation:
+        Agent version: 7.70.0
+        Migration: Use `collect_xe` instead.
       description: |
+        DEPRECATED: Use `collect_xe` instead.
+        Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
+
+        Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
+      options:
+        - name: debug_sample_events
+          description: |
+            Set the maximum number of XE events to log in debug mode per collection. Used for troubleshooting.
+            This only affects logging when debug mode is enabled. Defaults to 3.
+          hidden: true
+          value:
+            type: integer
+            example: 3
+            display_default: 3
+        - name: query_completions
+          description: |
+            Configure the collection of completed queries from the `datadog_query_completions` XE session.
+
+            Set `query_completions.enabled` to `true` to enable the collection of query completion events.
+
+            Use `query_completions.collection_interval` to set the interval (in seconds) for the collection of
+            query completion events. Defaults to 10 seconds. If you intend on updating this value,
+            it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+
+            Use `query_completions.max_events` to set the maximum number of query completion events to process
+            per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query,
+            so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
+            - name: collection_interval
+              type: number
+              example: 10
+              display_default: 10
+            - name: max_events
+              type: integer
+              example: 1000
+              display_default: 1000
+        - name: query_errors
+          description: |
+            Configure the collection of query errors from the `datadog_query_errors` XE session.
+
+            Set `query_errors.enabled` to `true` to enable the collection of query error events.
+
+            Use `query_errors.collection_interval` to set the interval (in seconds) for the collection of
+            query error events. Defaults to 10 seconds. If you intend on updating this value,
+            it is strongly recommended to use a consistent value throughout all SQL Server agent deployments.
+
+            Use `query_errors.max_events` to set the maximum number of query error events to process
+            per collection. Note that SQL Server's ring buffer has a maximum of 1000 events per query,
+            so values above 1000 will still be capped at 1000 by the database engine. Defaults to 1000.
+          value:
+            type: object
+            properties:
+            - name: enabled
+              type: boolean
+              example: false
+            - name: collection_interval
+              type: number
+              example: 10
+              display_default: 10
+            - name: max_events
+              type: integer
+              example: 1000
+              display_default: 1000
+    - name: collect_deadlocks
+      description: |
+        Configure the collection of deadlock data.
+      options:
+        - name: enabled
+          description: |
+            Enable the collection of deadlock data. Requires `dbm: true`. Disabled by default.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the interval for collecting deadlock data, in seconds. Defaults to 600 seconds.
+          value:
+            type: number
+            example: 600
+        - name: max_deadlocks
+          description: |
+            Set the maximum number of deadlocks to retrieve per collection.
+          value:
+            type: number
+            example: 100
+    - name: deadlocks_collection
+      deprecation:
+        Agent version: 7.70.0
+        Migration: Use `collect_deadlocks` instead.
+      description: |
+        DEPRECATED: Use `collect_deadlocks` instead.
         Configure the collection of deadlock data.
       options:
         - name: enabled

@@ -1,0 +1,67 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "26ca5752-33bd-4206-8e93-34a70eb7e9b4",
+  "app_id": "bitwarden",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into the Bitwarden event logs",
+    "title": "Bitwarden",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Bitwarden Overview",
+        "image_url": "images/bitwarden_overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Bitwarden User and Organization Insights",
+        "image_url": "images/bitwarden_user_and_organization_insights_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Bitwarden User and Organization Insights",
+        "image_url": "images/bitwarden_user_and_organization_insights_2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Bitwarden Vault Insights",
+        "image_url": "images/bitwarden_vault_insights.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 47883130,
+      "source_type_name": "Bitwarden",
+      "events": {
+        "creates_events": false
+      }
+    },
+    "dashboards": {
+      "Bitwarden Overview": "assets/dashboards/bitwarden_overview.json",
+      "Bitwarden - User & Organization Insights": "assets/dashboards/bitwarden_user_and_organization_insights.json",
+      "Bitwarden - Vault Insights": "assets/dashboards/bitwarden_vault_insights.json"
+    },
+    "logs": {
+      "source": "bitwarden"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

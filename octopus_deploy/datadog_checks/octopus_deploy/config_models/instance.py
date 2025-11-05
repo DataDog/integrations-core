@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -37,7 +38,7 @@ class Environments(BaseModel):
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[Union[str, MappingProxyType[str, Any]], ...]] = None
     interval: Optional[int] = None
-    limit: Optional[int] = Field(None, description='Maximum number of environments to be processed.\n')
+    limit: Optional[int] = Field(None, description='Maximum number of environments processed.\n')
 
 
 class MetricPatterns(BaseModel):
@@ -57,7 +58,7 @@ class ProjectGroups(BaseModel):
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[Union[str, MappingProxyType[str, Any]], ...]] = None
     interval: Optional[int] = None
-    limit: Optional[int] = Field(None, description='Maximum number of project groups to be processed.\n')
+    limit: Optional[int] = Field(None, description='Maximum number of project groups processed.\n')
 
 
 class Projects(BaseModel):
@@ -68,7 +69,7 @@ class Projects(BaseModel):
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[Union[str, MappingProxyType[str, Any]], ...]] = None
     interval: Optional[int] = None
-    limit: Optional[int] = Field(None, description='Maximum number of projects to be processed.\n')
+    limit: Optional[int] = Field(None, description='Maximum number of projects processed.\n')
 
 
 class Proxy(BaseModel):
@@ -111,7 +112,7 @@ class InstanceConfig(BaseModel):
     environments: Optional[Environments] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
-    kerberos_auth: Optional[str] = None
+    kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
     kerberos_force_initiate: Optional[bool] = None

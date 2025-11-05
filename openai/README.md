@@ -13,7 +13,7 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 <!-- xxx tabs xxx -->
 <!-- xxx tab "API Key" xxx -->
 
-**Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
+**Note**: Providing an admin key collects `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
 
 ### Installation
 
@@ -27,6 +27,7 @@ Datadog's OpenAI integration allows you to collect usage metrics, cost data, and
 
 - An **OpenAI account** with the admin write permissions
 - A **valid OpenAI API key** with appropriate access for **usage and cost metrics** or **LLM Observability**.
+- An admin-scoped API key is required to ingest usage and cost data.
 
 ## Setup
 
@@ -49,9 +50,9 @@ Datadog's OpenAI integration allows you to collect usage metrics, cost data, and
 
 ### Additional Notes
 
-- This integration only collects `openai.api.usage*` metrics.
+- This integration only collects `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics.
 - If you enable Cloud Cost Management for OpenAI, you have access to cost metrics.
-- No additional permissions or setup are required for standard usage metrics.
+- An admin-scoped API key is required.
 
 ## Additional Resources
 
@@ -66,7 +67,7 @@ Datadog's OpenAI integration allows you to collect usage metrics, cost data, and
 <!-- xxz tab xxx -->
 <!-- xxx tab "Python" xxx -->
 
-**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
+**Note**: This setup method does not collect `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics. To collect these metrics, also follow the API key setup instructions.
 
 ### Installation
 
@@ -413,7 +414,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 <!-- xxz tab xxx -->
 <!-- xxx tab "PHP" xxx -->
 
-**Note**: To collect `openai.api.usage.*` metrics, follow the API key setup instructions.
+**Note**: To collect OpenAI `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics, follow the API key setup instructions.
 
 ### Installation
 
@@ -469,7 +470,11 @@ To validate that the APM PHP library can communicate with your Agent, examine th
 
 ### Metrics
 
-The `openai.api.usage.*` metrics are only collected with the API key setup method. All remaining metrics below are collected with the APM setup methods.
+The `openai.api.usage.*` metrics are collected when a project-scoped API key is provided. Project-scoped API key support will be deprecated in the near future.
+
+The `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` metrics are collected when an admin-scoped API key is provided.
+
+All remaining metrics below are collected with the APM setup methods.
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
 

@@ -5,6 +5,8 @@
 This check monitors [Flink][1]. Datadog collects Flink metrics through Flink's
 [Datadog HTTP Reporter][2], which uses [Datadog's HTTP API][3].
 
+**Minimum Agent version:** 7.17.2
+
 ## Setup
 
 ### Installation
@@ -15,6 +17,27 @@ No additional installation is needed on your server.
 ### Configuration
 
 #### Metric collection
+
+<!-- partial
+{{< site-region region="gov" >}}
+1. Configure the [StatsD reporter][14] in Flink.
+   In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines:
+   ```yaml
+   metrics.reporter.stsd.factory.class: org.apache.flink.metrics.statsd.StatsDReporterFactory
+   metrics.reporter.stsd.host: datadog-agent
+   metrics.reporter.stsd.port: 8125
+   metrics.reporter.stsd.interval: 60 SECONDS 
+    ```
+2. Ensure DogStatsD/StatsD is enabled within Datadog Agent and consider setting `DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true` for containerized environments.
+3. Restart Flink to start sending your Flink metrics to Datadog.
+
+[14]: https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/metric_reporters/#statsd
+
+{{< /site-region >}}
+partial -->
+
+<!-- partial
+{{< site-region region="us,us3,us5,eu,ap1" >}}
 
 1. Configure the [Datadog HTTP Reporter][2] in Flink.
 
@@ -48,6 +71,12 @@ No additional installation is needed on your server.
      **Note**: By default, any variables in metric names are sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
 
 4. Restart Flink to start sending your Flink metrics to Datadog.
+
+[2]: https://nightlies.apache.org/flink/flink-docs-release-1.16/docs/deployment/metric_reporters/#datadog
+[5]: /organization-settings/api-keys
+
+{{< /site-region >}}
+partial -->
 
 #### Log collection
 

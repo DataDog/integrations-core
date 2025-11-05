@@ -1,0 +1,2996 @@
+{
+    "title": "iboss - Real-Time Bandwidth Log Analytics",
+    "description": "This dashboard provides a comprehensive analysis of network bandwidth consumption across domains, applications, countries, locations, protocols, and users using logs.",
+    "widgets": [
+        {
+            "id": 4568158192584104,
+            "definition": {
+                "type": "image",
+                "url": "https://www.iboss.com/storage/2022/09/500x144-logo-black@2x.png",
+                "url_dark_theme": "https://www.iboss.com/core/assets/iboss/img/2022_iboss-wordmark-primary-white.svg",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 4468601177937035,
+            "definition": {
+                "type": "note",
+                "content": "This dashboard provides a comprehensive analysis of network bandwidth consumption across domains, applications, countries, locations, protocols, and users using logs.\n\nFor more information, see the [iboss Integration Documentation](https://docs.datadoghq.com/integrations/iboss/).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "green",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "top",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 3796163147504955,
+            "definition": {
+                "type": "note",
+                "content": "**Note**\n- This dashboard is populated using iboss logs forwarded via a [Datadog Agent](https://docs.datadoghq.com/agent).\n- Please follow the **Installation** and **Configuration** steps [here](/integrations/iboss) to enable log collection.\n\n",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "left",
+                "vertical_align": "center",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 3,
+                "width": 12,
+                "height": 2
+            }
+        },
+        {
+            "id": 5674747001583122,
+            "definition": {
+                "title": "Bytes Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "byte_in_decimal_bytes_family"
+                                    }
+                                },
+                                "alias": "Total Bytes",
+                                "formula": "query1"
+                            },
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "byte_in_decimal_bytes_family"
+                                    }
+                                },
+                                "alias": "Upstream Bytes",
+                                "formula": "query2"
+                            },
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "byte_in_decimal_bytes_family"
+                                    }
+                                },
+                                "alias": "Downstream Bytes",
+                                "formula": "query3"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@totalByteCount"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query2",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@network.bytes_read"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "name": "query3",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@network.bytes_written"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "order_by": "values",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 3764268660116358,
+            "definition": {
+                "title": "Domains",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4112448236904623,
+                        "definition": {
+                            "title": "Top Domains by Total Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8715084496360398,
+                        "definition": {
+                            "title": "Top Domains by Downstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_written"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7372978844204560,
+                        "definition": {
+                            "title": "Top Domains by Upstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_read"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5178667319251777,
+                        "definition": {
+                            "title": "Domain Bandwidth Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.host",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 3000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Upstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Downstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 3375835385530392,
+            "definition": {
+                "title": "Destination Countries",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6144521018543157,
+                        "definition": {
+                            "title": "Top Countries by Total Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.country.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7180962266921169,
+                        "definition": {
+                            "title": "Top Countries by Downstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.country.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_written"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1371298062808067,
+                        "definition": {
+                            "title": "Top Countries by Upstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.country.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_read"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8698160376822167,
+                        "definition": {
+                            "title": "Country Bandwidth Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.country.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.country.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.country.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 3000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Upstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Downstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 18,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 8649601599528091,
+            "definition": {
+                "title": "Destination Locations",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2302728373606690,
+                        "definition": {
+                            "title": "Top Locations by Total Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.continent.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8041126334569219,
+                        "definition": {
+                            "title": "Top Locations by Downstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.continent.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_written"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7842856615227341,
+                        "definition": {
+                            "title": "Top Locations by Upstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.continent.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_read"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1281441199702341,
+                        "definition": {
+                            "title": "Location Bandwidth Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.continent.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.continent.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.geoip.continent.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 3000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Upstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Downstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 27,
+                "width": 12,
+                "height": 9,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 4380161908998245,
+            "definition": {
+                "title": "Protocols",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3309841776476321,
+                        "definition": {
+                            "title": "Top Protocols by Total Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG -@http.url_details.scheme:(\"-\" OR \"\") $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.scheme",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 209818987200690,
+                        "definition": {
+                            "title": "Top Protocols by Downstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG -@http.url_details.scheme:(\"-\" OR \"\") $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.scheme",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_written"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4051830612024859,
+                        "definition": {
+                            "title": "Top Protocols by Upstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG -@http.url_details.scheme:(\"-\" OR \"\") $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.scheme",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_read"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3520517125722734,
+                        "definition": {
+                            "title": "Protocol Bandwidth Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG -@http.url_details.scheme:(\"-\" OR \"\") $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.scheme",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG -@http.url_details.scheme:(\"-\" OR \"\") $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.scheme",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG -@http.url_details.scheme:(\"-\" OR \"\") $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@http.url_details.scheme",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 3000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Upstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Downstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7791888804989555,
+                        "definition": {
+                            "title": "Protocol Bandwidth Summary by Asset",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG -@http.url_details.scheme:(\"-\" OR \"\") $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@computerName",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@assetId",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@http.url_details.scheme",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG -@http.url_details.scheme:(\"-\" OR \"\") $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@computerName",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@assetId",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@http.url_details.scheme",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG -@http.url_details.scheme:(\"-\" OR \"\") $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@computerName",
+                                                    "limit": 30,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@assetId",
+                                                    "limit": 15,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@http.url_details.scheme",
+                                                    "limit": 5,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 6750,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "alias": "Total Upstream Bytes",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Downstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 36,
+                "width": 12,
+                "height": 13
+            }
+        },
+        {
+            "id": 1119168433168640,
+            "definition": {
+                "title": "Users",
+                "background_color": "vivid_green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5069386387119055,
+                        "definition": {
+                            "title": "Top Users by Total Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8547158381869504,
+                        "definition": {
+                            "title": "Top Users by Downstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_written"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8381951211230806,
+                        "definition": {
+                            "title": "Top Users by Upstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_read"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4453975987331410,
+                        "definition": {
+                            "title": "User Bandwidth Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@usr.name",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 3000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Upstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Downstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 49,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 8744100846837046,
+            "definition": {
+                "title": "Applications",
+                "background_color": "green",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4648020664360579,
+                        "definition": {
+                            "title": "Top Applications by Total Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@applicationName",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4201819169145110,
+                        "definition": {
+                            "title": "Top Applications by Downstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@applicationName",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_written"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 53862056346844,
+                        "definition": {
+                            "title": "Top Applications by Upstream Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@applicationName",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@network.bytes_read"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 1000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "none"
+                                },
+                                "scaling": "absolute"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 406453682287263,
+                        "definition": {
+                            "title": "Application Bandwidth Summary",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@applicationName",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@totalByteCount"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@applicationName",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query3",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:iboss @evt.name:WEB_LOG $domain $user $protocol $application $country $destination_location $computer_name $asset_id $host $location"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@applicationName",
+                                                    "limit": 1000,
+                                                    "sort": {
+                                                        "aggregation": "sum",
+                                                        "order": "desc",
+                                                        "metric": "@totalByteCount"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 3000,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_green"
+                                                }
+                                            ],
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Upstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "Total Downstream Bytes",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_decimal_bytes_family"
+                                                }
+                                            },
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "value": 0,
+                                                    "palette": "black_on_light_yellow"
+                                                }
+                                            ],
+                                            "formula": "query3"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "always"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 58,
+                "width": 12,
+                "height": 9
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "host",
+            "prefix": "@hostname",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "user",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "asset_id",
+            "prefix": "@assetId",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "computer_name",
+            "prefix": "@computerName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "domain",
+            "prefix": "@http.url_details.host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "destination_location",
+            "prefix": "@network.destination.geoip.continent.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "application",
+            "prefix": "@applicationName",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "country",
+            "prefix": "@network.destination.geoip.country.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "protocol",
+            "prefix": "@http.url_details.scheme",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "location",
+            "prefix": "@location",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

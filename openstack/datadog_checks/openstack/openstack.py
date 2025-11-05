@@ -888,7 +888,6 @@ class OpenStackCheck(AgentCheck):
 
             # Don't collect Deleted or Shut off VMs on the first run:
             if i_key in self.changes_since_time:
-
                 # Get a list of deleted serversTimestamp used to filter the call to get the list
                 # Need to have admin perms for this to take affect
                 query_params['deleted'] = 'true'
@@ -1105,7 +1104,6 @@ class OpenStackCheck(AgentCheck):
         try:
             instance_scope = self.get_scope_for_instance(instance)
         except KeyError:
-
             # We're missing a project scope for this instance
             # Let's populate it now
             try:

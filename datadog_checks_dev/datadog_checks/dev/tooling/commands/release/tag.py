@@ -3,10 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...git import git_fetch, git_tag, git_tag_list
-from ...release import get_release_tag_string
-from ...utils import complete_valid_checks, get_valid_checks, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from datadog_checks.dev.tooling.commands.console import (
+    CONTEXT_SETTINGS,
+    abort,
+    echo_info,
+    echo_success,
+    echo_waiting,
+    echo_warning,
+)
+from datadog_checks.dev.tooling.git import git_fetch, git_tag, git_tag_list
+from datadog_checks.dev.tooling.release import get_release_tag_string
+from datadog_checks.dev.tooling.utils import complete_valid_checks, get_valid_checks, get_version_string
 
 # 0.0.1 is the initial pre-release version that is generated from the integration's template.
 # Releasing any version > 0.0.1 for a core integration requires a tag.*.link file to be updated in the PR

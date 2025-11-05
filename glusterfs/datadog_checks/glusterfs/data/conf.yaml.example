@@ -2,13 +2,13 @@
 #
 init_config:
 
-    ## @param gstatus_path - string - optional - default: /opt/datadog-agent/embedded/sbin/gstatus
+    ## @param gstatus_path - string - optional - default: <datadog-agent>/embedded/sbin/gstatus
     ## Path to the gstatus command.
     ##
     ## A version of the gstatus is shipped with the Agent binary.
     ## If you are using a source install, specify the location of gstatus.
     #
-    # gstatus_path: /opt/datadog-agent/embedded/sbin/gstatus
+    # gstatus_path: <datadog-agent>/embedded/sbin/gstatus
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -25,7 +25,7 @@ instances:
     ## @param use_sudo - boolean - optional - default: true
     ## GlusterFS requires sudo. Please be sure to add the following line to your sudoers file:
     ##
-    ## dd-agent ALL=(ALL) NOPASSWD:/opt/datadog-agent/embedded/sbin/gstatus
+    ## dd-agent ALL=(ALL) NOPASSWD:<datadog-agent>/embedded/sbin/gstatus
     ##
     ## Enable the option for the check to run with sudo.
     #

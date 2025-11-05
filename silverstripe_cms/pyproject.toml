@@ -25,11 +25,11 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: BSD License",
     "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=37.0.0",
+    "datadog-checks-base>=37.21.0",
 ]
 dynamic = [
     "version",
@@ -37,8 +37,8 @@ dynamic = [
 
 [project.optional-dependencies]
 deps = [
-    "psycopg2-binary==2.9.9",
-    "PyMySQL==1.1.1"
+    "psycopg[c,pool]==3.2.10",
+    "pymysql==1.1.2",
 ]
 
 [project.urls]

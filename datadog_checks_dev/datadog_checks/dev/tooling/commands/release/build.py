@@ -5,11 +5,11 @@ import os
 
 import click
 
-from ....fs import basepath, dir_exists, remove_path, resolve_path
-from ...constants import get_root
-from ...release import build_package
-from ...utils import complete_testable_checks, get_valid_checks
-from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
+from datadog_checks.dev.fs import basepath, dir_exists, remove_path, resolve_path
+from datadog_checks.dev.tooling.commands.console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
+from datadog_checks.dev.tooling.constants import get_root
+from datadog_checks.dev.tooling.release import build_package
+from datadog_checks.dev.tooling.utils import complete_testable_checks, get_valid_checks
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Build a wheel for a check')

@@ -7,9 +7,9 @@
       "definition": {
         "title": "About MySQL",
         "title_align": "center",
-        "type": "group",
         "banner_img": "/static/images/integration_dashboard/mysql_hero_1.jpeg",
         "show_title": false,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -68,8 +68,8 @@
       "definition": {
         "title": "Basic Activity Monitor",
         "title_align": "center",
-        "type": "group",
         "background_color": "white",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -81,8 +81,6 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "avg:mysql.net.aborted_connects{$scope}",
-                  "aggregator": "avg",
                   "conditional_formats": [
                     {
                       "comparator": "<=",
@@ -93,6 +91,15 @@
                       "comparator": ">",
                       "palette": "white_on_red",
                       "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:mysql.net.aborted_connects{$scope}",
+                      "semantic_mode": "combined"
                     }
                   ]
                 }
@@ -115,8 +122,15 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "avg:mysql.net.connections{$scope}",
-                  "aggregator": "avg"
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:mysql.net.connections{$scope}",
+                      "semantic_mode": "combined"
+                    }
+                  ]
                 }
               ],
               "precision": 2
@@ -137,8 +151,16 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "avg:mysql.net.max_connections{$scope}",
-                  "aggregator": "avg"
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:mysql.net.max_connections{$scope}",
+                      "aggregator": "avg",
+                      "semantic_mode": "combined"
+                    }
+                  ]
                 }
               ],
               "autoscale": true,
@@ -165,8 +187,8 @@
       "definition": {
         "title": "Performance",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_blue",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -176,7 +198,6 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
-              "legend_size": "0",
               "legend_layout": "auto",
               "legend_columns": [
                 "avg",
@@ -194,12 +215,12 @@
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.performance.slow_queries{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -297,8 +318,8 @@
       "definition": {
         "title": "Throughput",
         "title_align": "center",
-        "type": "group",
         "background_color": "blue",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -308,7 +329,6 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
-              "legend_size": "0",
               "legend_layout": "auto",
               "legend_columns": [
                 "avg",
@@ -320,13 +340,18 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "on_right_yaxis": false,
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.performance.com_select{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
                     }
                   ],
                   "style": {
@@ -371,13 +396,18 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "on_right_yaxis": false,
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.performance.com_insert{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
                     }
                   ],
                   "style": {
@@ -428,12 +458,12 @@
                     }
                   ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.performance.com_update{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -478,13 +508,18 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "on_right_yaxis": false,
                   "response_format": "timeseries",
                   "queries": [
                     {
                       "query": "avg:mysql.performance.com_delete{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
                     }
                   ],
                   "style": {
@@ -546,8 +581,8 @@
       "definition": {
         "title": "MySQL Resource Utilization",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_green",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -568,18 +603,13 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.performance.threads_running{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -624,18 +654,13 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.performance.threads_connected{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -701,19 +726,13 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Cache Utilization"
-                    }
-                  ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.performance.key_cache_utilization{$scope} by {service}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -758,28 +777,19 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Data Reads"
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Data Writes"
-                    }
-                  ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.innodb.data_reads{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mysql.innodb.data_writes{$scope}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -824,37 +834,25 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Available Buffer Pool"
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Used Buffer Pool"
-                    },
-                    {
-                      "formula": "query3",
-                      "alias": "Total Buffer Pool"
-                    }
-                  ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.innodb.buffer_pool_free{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mysql.innodb.buffer_pool_used{$scope}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mysql.innodb.buffer_pool_total{$scope}",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query3",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -899,37 +897,25 @@
               "type": "timeseries",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Total Pages"
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Free Pages"
-                    },
-                    {
-                      "formula": "query3",
-                      "alias": "Pages Data"
-                    }
-                  ],
                   "response_format": "timeseries",
-                  "on_right_yaxis": false,
                   "queries": [
                     {
                       "query": "avg:mysql.innodb.buffer_pool_pages_total{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mysql.innodb.buffer_pool_pages_free{$scope}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:mysql.innodb.buffer_pool_pages_data{$scope}",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query3",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -992,8 +978,8 @@
       "definition": {
         "title": "System Resource Utilization",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_orange",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1045,32 +1031,38 @@
                     {
                       "query": "avg:system.cpu.idle{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.cpu.system{$scope}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.cpu.iowait{$scope}",
                       "data_source": "metrics",
-                      "name": "query3"
+                      "name": "query3",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.cpu.user{$scope}",
                       "data_source": "metrics",
-                      "name": "query4"
+                      "name": "query4",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.cpu.stolen{$scope}",
                       "data_source": "metrics",
-                      "name": "query5"
+                      "name": "query5",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.cpu.guest{$scope}",
                       "data_source": "metrics",
-                      "name": "query6"
+                      "name": "query6",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1134,7 +1126,8 @@
                     {
                       "query": "avg:system.load.1{$scope}",
                       "data_source": "metrics",
-                      "name": "query1"
+                      "name": "query1",
+                      "semantic_mode": "combined"
                     },
                     {
                       "query": "avg:system.load.5{$scope}",
@@ -1209,7 +1202,8 @@
                     {
                       "query": "sum:system.mem.total{$scope}",
                       "data_source": "metrics",
-                      "name": "query2"
+                      "name": "query2",
+                      "semantic_mode": "combined"
                     }
                   ],
                   "style": {
@@ -1358,6 +1352,12 @@
             }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 20,
+        "width": 12,
+        "height": 6
       }
     },
     {
@@ -1365,8 +1365,8 @@
       "definition": {
         "title": "Logs",
         "title_align": "center",
-        "type": "group",
         "background_color": "white",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1375,20 +1375,44 @@
               "title": "Error Logs",
               "title_size": "16",
               "title_align": "left",
-              "type": "log_stream",
-              "indexes": [],
-              "query": "source:mysql  $scope status:error",
-              "sort": {
-                "column": "time",
-                "order": "desc"
-              },
-              "columns": [
-                "core_host",
-                "core_service"
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:mysql $scope status:error",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
               ],
-              "show_date_column": true,
-              "show_message_column": true,
-              "message_display": "expanded-md"
+              "type": "list_stream"
             },
             "layout": {
               "x": 0,
@@ -1403,20 +1427,44 @@
               "title": "All Logs",
               "title_size": "16",
               "title_align": "left",
-              "type": "log_stream",
-              "indexes": [],
-              "query": "source:mysql $scope",
-              "sort": {
-                "column": "time",
-                "order": "desc"
-              },
-              "columns": [
-                "core_host",
-                "core_service"
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:mysql $scope",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
               ],
-              "show_date_column": true,
-              "show_message_column": true,
-              "message_display": "expanded-md"
+              "type": "list_stream"
             },
             "layout": {
               "x": 6,
@@ -1426,17 +1474,23 @@
             }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 26,
+        "width": 12,
+        "height": 5
       }
     }
   ],
   "template_variables": [
     {
       "name": "scope",
+      "available_values": [],
       "default": "*"
     }
   ],
   "layout_type": "ordered",
-  "is_read_only": false,
   "notify_list": [],
   "reflow_type": "fixed"
 }

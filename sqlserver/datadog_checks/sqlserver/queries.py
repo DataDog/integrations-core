@@ -135,6 +135,7 @@ WHERE
     FK.parent_object_id IN ({})
 GROUP BY
     FK.name,
+    FK.object_id,
     FK.parent_object_id,
     FK.referenced_object_id,
     FK.delete_referential_action_desc,
