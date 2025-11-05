@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [IBM Spectrum LSF][1] through the Datadog Agent. 
+This check monitors [IBM Spectrum LSF][1] using the Datadog Agent. 
 
 Include a high level overview of what this integration does:
 - What does your product do (in 1-2 sentences)?
