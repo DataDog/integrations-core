@@ -1013,6 +1013,12 @@ files:
           value:
             type: number
             example: 600
+        - name: max_tables
+          description: |
+            Set the maximum number of tables to collect. Defaults to 300.
+          value:
+            type: integer
+            example: 300
         - name: max_execution_time
           deprecation:
             Agent version: 7.74.0

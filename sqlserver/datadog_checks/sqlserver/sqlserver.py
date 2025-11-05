@@ -181,7 +181,6 @@ class SQLServer(DatabaseCheck):
         self._database_metrics = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
 
-
     def initialize_xe_session_handlers(self):
         """Initialize the XE session handlers without starting them"""
         # Initialize XE session handlers if not already initialized

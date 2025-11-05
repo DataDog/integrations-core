@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 
 import logging
-import re
 from copy import copy, deepcopy
 
 import pytest
@@ -116,13 +115,13 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'name': 'id',
                                 'data_type': 'int',
                                 'default': '((0))',
-                                'nullable': True,                                
+                                'nullable': True,
                             },
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
                                 'default': 'None',
-                                'nullable': True,                                
+                                'nullable': True,
                             },
                         ],
                         'foreign_keys': [],
@@ -162,19 +161,18 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'name': 'id',
                                 'data_type': 'int',
                                 'default': '((0))',
-                                'nullable': False,                                
+                                'nullable': False,
                             },
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
-                                'default': 'None',
-                                'nullable': True,                                
+                                'nullable': True,
                             },
                             {
                                 'name': 'population',
                                 'data_type': 'int',
                                 'default': '((0))',
-                                'nullable': False,                                
+                                'nullable': False,
                             },
                         ],
                         'foreign_keys': [],
@@ -217,13 +215,13 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'name': 'name',
                                 'data_type': 'varchar',
                                 'default': 'None',
-                                'nullable': True,                                
+                                'nullable': True,
                             },
                             {
                                 'name': 'city_id',
                                 'data_type': 'int',
                                 'default': '((0))',
-                                'nullable': True,                                
+                                'nullable': True,
                             },
                         ],
                         'indexes': [],
@@ -248,19 +246,19 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'name': 'RestaurantName',
                                 'data_type': 'varchar',
                                 'default': 'None',
-                                'nullable': True,                                
+                                'nullable': True,
                             },
                             {
                                 'name': 'District',
                                 'data_type': 'varchar',
                                 'default': 'None',
-                                'nullable': True,                                
+                                'nullable': True,
                             },
                             {
                                 'name': 'Review',
                                 'data_type': 'varchar',
                                 'default': 'None',
-                                'nullable': True,                                
+                                'nullable': True,
                             },
                         ],
                         'indexes': [],
@@ -360,9 +358,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         database_metadata = schema_event['metadata']
         for db_metadata in database_metadata:
             db_name = db_metadata['name']
-            
+
             if db_name in actual_payloads:
-                actual_payloads[db_name]['schemas'][0]['tables'] = actual_payloads[db_name]['schemas'][0]['tables'] + db_metadata['schemas'][0]['tables']
+                actual_payloads[db_name]['schemas'][0]['tables'] = (
+                    actual_payloads[db_name]['schemas'][0]['tables'] + db_metadata['schemas'][0]['tables']
+                )
             else:
                 actual_payloads[db_name] = db_metadata
 
@@ -377,6 +377,3 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         print(actual_payload)
         print(expected_data_for_db[db_name])
         assert deep_compare(actual_payload, expected_data_for_db[db_name])
-
-
-

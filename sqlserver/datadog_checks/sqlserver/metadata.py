@@ -11,10 +11,11 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
 )
+from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
+
 try:
     import datadog_agent
 except ImportError:
@@ -86,7 +87,9 @@ class SqlserverMetadata(DBMAsyncJob):
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
         self._schema_collector = SQLServerSchemaCollector(check)
         self._schema_config = self._config.schema_config
-        self._schema_collection_interval = self._schema_config.get('collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
+        self._schema_collection_interval = self._schema_config.get(
+            'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+        )
         self._last_schemas_collection_time = 0
 
     def _close_db_conn(self):
@@ -157,7 +160,7 @@ class SqlserverMetadata(DBMAsyncJob):
                 }
                 self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
         self.collect_schemas()
-    
+
     def collect_schemas(self):
         if not self._schema_config.get('enabled', False):
             return

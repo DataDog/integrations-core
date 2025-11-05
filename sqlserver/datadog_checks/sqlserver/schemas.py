@@ -8,7 +8,6 @@ import contextlib
 from typing import TYPE_CHECKING, TypedDict
 
 from datadog_checks.base.utils.serialization import json
-
 from datadog_checks.sqlserver.utils import execute_query
 
 if TYPE_CHECKING:
@@ -181,6 +180,7 @@ class TableObject(TypedDict):
     indexes: list
     foreign_keys: list
 
+
 class SchemaObject(TypedDict):
     name: str
     id: str
@@ -197,15 +197,10 @@ class SQLServerSchemaCollector(SchemaCollector):
 
     def __init__(self, check: SQLServer):
         config = SchemaCollectorConfig()
-        config.collection_interval = check._config.schema_config.get("collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
-        # config.max_tables = check._config.collect_schemas.max_tables
-        # config.exclude_databases =  check._config.collect_schemas.exclude_databases
-        # config.include_databases =  check._config.collect_schemas.include_databases
-        # config.exclude_schemas =  check._config.collect_schemas.exclude_schemas
-        # config.include_schemas =  check._config.collect_schemas.include_schemas
-        # config.exclude_tables =  check._config.collect_schemas.exclude_tables
-        # config.include_tables =  check._config.collect_schemas.include_tables
-        # config.max_columns =  check._config.collect_schemas.max_columns
+        config.collection_interval = check._config.schema_config.get(
+            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+        )
+        config.max_tables = check._config.schema_config.get('max_tables', 300)
         super().__init__(check, config)
 
     @property
@@ -231,12 +226,11 @@ class SQLServerSchemaCollector(SchemaCollector):
                 indexes_query = INDEX_QUERY
                 constraints_query = FOREIGN_KEY_QUERY
                 partitions_query = PARTITIONS_QUERY
-                
-                # limit = int(self._config.max_tables or 1_000_000)
-                limit = 1_000_000
 
-# Note that we INNER JOIN tables to omit schemas with no tables
-# This is a simple way to omit the system tables like db_blah
+                limit = int(self._config.max_tables or 1_000_000)
+
+                # Note that we INNER JOIN tables to omit schemas with no tables
+                # This is a simple way to omit the system tables like db_blah
                 query = f"""
                     WITH
                     schemas AS (
@@ -253,7 +247,8 @@ class SQLServerSchemaCollector(SchemaCollector):
                         ORDER BY schemas.schema_name, tables.table_name
                     )
 
-                    SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name, schema_tables.table_name
+                    SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
+                        schema_tables.table_name
                         , json_query(({columns_query} FOR JSON PATH), '$') as columns
                         , json_query(({indexes_query} FOR JSON PATH), '$') as indexes
                         , json_query(({constraints_query} FOR JSON PATH), '$') as foreign_keys
@@ -271,35 +266,40 @@ class SQLServerSchemaCollector(SchemaCollector):
     def _get_all(self, cursor):
         return cursor.fetchall_dict()
 
-    def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:        
+    def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
         # Map the cursor row to the expected schema, and strip out None values
-        object["schemas"] = [{
-            "name": cursor_row.get("schema_name"),
-            "id": cursor_row.get("schema_id"),
-            "owner_name": cursor_row.get("owner_name"),
-            "tables": [
-                {
-                    k: v
-                    for k, v in {
-                        "id": cursor_row.get("table_id"),
-                        "name": cursor_row.get("table_name"),
-                        # The query can create duplicates of the joined tables
-                        "columns": list(
-                            {v and v['name']: v for v in json.loads(cursor_row.get("columns") or "[]")}.values()
-                        ),
-                        "indexes": list(
-                            {v and v['name']: v for v in json.loads(cursor_row.get("indexes") or "[]")}.values()
-                        ),
-                        "foreign_keys": list(
-                            {v and v['foreign_key_name']: v for v in json.loads(cursor_row.get("foreign_keys") or "[]")}.values()
-                        ),
-                        "partitions": {
-                            "partition_count": cursor_row.get("partition_count")
-                        },
-                    }.items()
-                    if v is not None
-                }                
-            ] if cursor_row.get("table_name") is not None else [],
-        }]
+        object["schemas"] = [
+            {
+                "name": cursor_row.get("schema_name"),
+                "id": cursor_row.get("schema_id"),
+                "owner_name": cursor_row.get("owner_name"),
+                "tables": [
+                    {
+                        k: v
+                        for k, v in {
+                            "id": cursor_row.get("table_id"),
+                            "name": cursor_row.get("table_name"),
+                            # The query can create duplicates of the joined tables
+                            "columns": list(
+                                {v and v['name']: v for v in json.loads(cursor_row.get("columns") or "[]")}.values()
+                            ),
+                            "indexes": list(
+                                {v and v['name']: v for v in json.loads(cursor_row.get("indexes") or "[]")}.values()
+                            ),
+                            "foreign_keys": list(
+                                {
+                                    v and v['foreign_key_name']: v
+                                    for v in json.loads(cursor_row.get("foreign_keys") or "[]")
+                                }.values()
+                            ),
+                            "partitions": {"partition_count": cursor_row.get("partition_count")},
+                        }.items()
+                        if v is not None
+                    }
+                ]
+                if cursor_row.get("table_name") is not None
+                else [],
+            }
+        ]
         return object
