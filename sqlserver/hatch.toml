@@ -5,7 +5,7 @@ base-package-features = ["deps", "db", "json"]
 python = ["3.13"]
 os = ["linux"]
 driver = ["FreeTDS", "odbc"]
-version = ["2016", "2019", "2022"]
+version = ["2017", "2019", "2022"]
 setup = ["single", "ha"]
 
 # test the compatibility of sqlserver running on non-utc timezone
@@ -59,7 +59,6 @@ matrix.setup.env-vars = [
 matrix.version.env-vars = [
   { key = "SQLSERVER_MAJOR_VERSION" },
   { key = "SQLSERVER_ENGINE_EDITION" },
-  { key = "SQLSERVER_IMAGE_TAG", value = "2016-CU31-GDR2-ubuntu-18.04", if = ["2017"], platform = ["linux"] },
   { key = "SQLSERVER_IMAGE_TAG", value = "2017-CU31-GDR2-ubuntu-18.04", if = ["2017"], platform = ["linux"] },
   { key = "SQLSERVER_IMAGE_TAG", value = "2019-CU28-GDR1-ubuntu-20.04", if = ["2019"], platform = ["linux"] },
   { key = "SQLSERVER_IMAGE_TAG", value = "2022-CU12-GDR1-ubuntu-20.04", if = ["2022"], platform = ["linux"] },

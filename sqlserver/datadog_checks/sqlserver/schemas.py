@@ -280,19 +280,9 @@ class SQLServerSchemaCollector(SchemaCollector):
                         for k, v in {
                             "id": cursor_row.get("table_id"),
                             "name": cursor_row.get("table_name"),
-                            # The query can create duplicates of the joined tables
-                            "columns": list(
-                                {v and v['name']: v for v in json.loads(cursor_row.get("columns") or "[]")}.values()
-                            ),
-                            "indexes": list(
-                                {v and v['name']: v for v in json.loads(cursor_row.get("indexes") or "[]")}.values()
-                            ),
-                            "foreign_keys": list(
-                                {
-                                    v and v['foreign_key_name']: v
-                                    for v in json.loads(cursor_row.get("foreign_keys") or "[]")
-                                }.values()
-                            ),
+                            "columns": json.loads(cursor_row.get("columns") or "[]"),
+                            "indexes": json.loads(cursor_row.get("indexes") or "[]"),
+                            "foreign_keys": json.loads(cursor_row.get("foreign_keys") or "[]"),
                             "partitions": {"partition_count": cursor_row.get("partition_count")},
                         }.items()
                         if v is not None

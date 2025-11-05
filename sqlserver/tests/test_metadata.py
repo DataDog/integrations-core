@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import logging
 from copy import copy, deepcopy
+import pprint
 
 import pytest
 
@@ -166,6 +167,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             {
                                 'name': 'name',
                                 'data_type': 'varchar',
+                                'default': 'None',
                                 'nullable': True,
                             },
                             {
@@ -374,6 +376,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_ids(actual_payload)
         # index columns may be in any order
         normalize_indexes_columns(actual_payload)
-        print(actual_payload)
-        print(expected_data_for_db[db_name])
-        assert deep_compare(actual_payload, expected_data_for_db[db_name])
+        matches = deep_compare(actual_payload, expected_data_for_db[db_name])
+        if not matches:
+            pprint.pprint(actual_payload)
+            pprint.pprint(expected_data_for_db[db_name])
+        assert matches
