@@ -330,8 +330,14 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 # Create the event payload
                 event = self._create_sample_event(normalized_row)
 
+                # Log the event payload for debugging
+                self._log.info("Query sample event payload: ddsource=%s, query_signature=%s",
+                              event.get('ddsource'), query_signature[:50] if query_signature else 'N/A')
+
                 # Submit the event
-                self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+                event_json = json.dumps(event, default=default_json_event_encoding)
+                self._log.debug("Full event JSON (first 500 chars): %s", event_json[:500])
+                self._check.database_monitoring_query_sample(event_json)
                 submitted_count += 1
                 self._log.debug("Submitted query sample for signature: %s", query_signature[:50])
 
