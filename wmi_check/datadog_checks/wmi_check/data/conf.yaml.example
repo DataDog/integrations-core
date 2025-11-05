@@ -141,20 +141,20 @@ instances:
     ## The `tag_queries`  parameter lets you specify a list of queries, to tag metrics with a target class property.
     ## Each item in the list is a set of :
     ##
-    ## `[<LINK_SOURCE_PROPERTY>, <TARGET_CLASS>, <LINK_TARGET_CLASS_PROPERTY>, <TARGET_PROPERTY>, <TAG_ALIAS>]`
+    ## `[<LINK_SOURCE_PROPERTY>, <TARGET_CLASS>, <LINK_TARGET_CLASS_PROPERTY>, <TARGET_PROPERTY> AS <TAG_ALIAS>]`
     ##
     ##   * `<LINK_SOURCE_PROPERTY>` contains the link value
     ##   * `<TARGET_CLASS>` is the class to link to
     ##   * `<LINK_TARGET_CLASS_PROPERTY>` is the target class property to link to
     ##   * `<TARGET_PROPERTY>` contains the value to tag with
-    ##   * `<TAG_ALIAS>` is the alias to use for the tag. If not provided, the target property's name will be used.
+    ##   * `<TAG_ALIAS>`is the alias to use for the tag. If not provided, the target property's name will be used.
     ##
     ## It translates to a WMI query:
     ##
     ## SELECT '<TARGET_PROPERTY>' FROM '<TARGET_CLASS>' WHERE '<LINK_TARGET_CLASS_PROPERTY>' = '<LINK_SOURCE_PROPERTY>'
     #
     # tag_queries:
-    #   - [<LINK_SOURCE_PROPERTY>, <TARGET_CLASS>, <LINK_TARGET_CLASS_PROPERTY>, <TARGET_PROPERTY>]
+    #   - [<LINK_SOURCE_PROPERTY>, <TARGET_CLASS>, <LINK_TARGET_CLASS_PROPERTY>, <TARGET_PROPERTY> AS <TAG_ALIAS>]
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

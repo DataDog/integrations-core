@@ -66,12 +66,7 @@ class WinWMICheck(AgentCheck):
             link_source_property = int(wmi_obj[tag_query[0]])
             target_class = tag_query[1]
             link_target_class_property = tag_query[2]
-            target_property = tag_query[3]
-            # Check if an alias is provided
-            if len(tag_query) > 4:
-                alias = tag_query[4]
-            else:
-                alias = None
+            target_property, alias = self.parse_alias(tag_query[3])
         except IndexError:
             self.log.error(
                 "Wrong `tag_queries` parameter format. Please refer to the configuration file for more information."
@@ -139,7 +134,7 @@ class WinWMICheck(AgentCheck):
             link_value = str(tag_query_sampler[0][target_property]).lower()
 
         if alias:
-            tag_name = alias
+            tag_name = alias.lower()
         else:
             tag_name = target_property.lower()
         tag = "{tag_name}:{tag_value}".format(tag_name=tag_name, tag_value="_".join(link_value.split()))
@@ -202,13 +197,7 @@ class WinWMICheck(AgentCheck):
                     continue
                 # Tag with `tag_by` parameter
                 for t in tag_by.split(','):
-                    t = t.strip()
-                    if ' as ' in t:
-                        t_split = t.split(' as ')
-                        t = t_split[0].strip()
-                        alias = t_split[1].strip()
-                    else:
-                        alias = None
+                    t, alias = self.parse_alias(t)
                     if normalized_wmi_property == t:
                         tag_value = str(wmi_value).lower()
                         if tag_queries and tag_value.find("#") > 0:
@@ -221,7 +210,7 @@ class WinWMICheck(AgentCheck):
                         continue
 
                 # No metric extraction on 'Name' and properties in tag_by
-                if wmi_property == 'name' or normalized_wmi_property in tag_by.lower():
+                if normalized_wmi_property == 'name' or normalized_wmi_property in tag_by.lower():
                     continue
 
                 try:
@@ -321,6 +310,22 @@ class WinWMICheck(AgentCheck):
             self._wmi_props = (metric_name_by_property, properties)
 
         return self._wmi_props
+
+    def parse_alias(self, property):
+        # type: (str) -> Tuple[str, Optional[str]]
+        """
+        Parse an alias from a string.
+        """
+        if ' AS ' in property or ' as ' in property:
+            property_split = property.split(' AS ') if ' AS ' in property else property.split(' as ')
+            property = property_split[0].strip()
+            alias = property_split[1].strip()
+            if alias == "":
+                self.log.warning("No alias provided for property: %s", property)
+                alias = None
+        else:
+            alias = None
+        return property, alias
 
 
 def from_time(

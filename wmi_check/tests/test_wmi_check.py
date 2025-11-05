@@ -81,17 +81,28 @@ def test_tag_by_is_correctly_requested(mock_proc_sampler, aggregator, check):
     assert get_running_wmi_sampler.call_args.kwargs['tag_by'] == 'Name'
 
 
-def test_tag_queries_with_alias(mock_sampler_with_tag_queries, aggregator, check):
+@pytest.mark.parametrize(
+    "tag_query,result_tags",
+    [
+        ([['IDProcess', 'Win32_Process', 'Handle', 'Name AS process_name']], ['process_name:chrome.exe']),
+        ([['IDProcess', 'Win32_Process', 'Handle', 'Name AS ProcessName']], ['processname:chrome.exe']),
+        ([['IDProcess', 'Win32_Process', 'Handle', 'Name']], ['name:chrome.exe']),
+        ([['IDProcess', 'Win32_Process', 'Handle', 'Name', ]], ['name:chrome.exe']),
+        ([['IDProcess', 'Win32_Process', 'Handle', 'Name', '']], ['name:chrome.exe']),
+        ([['IDProcess', 'Win32_Process', 'Handle', 'Name as process_name', 'foo']], ['process_name:chrome.exe'])
+    ],
+)
+def test_tag_queries_with_alias(mock_sampler_with_tag_queries, aggregator, check, tag_query, result_tags):
     instance = copy.deepcopy(common.INSTANCE)
     # Add tag_queries: [source_property, target_class, link_property, target_property, alias]
-    instance['tag_queries'] = [['IDProcess', 'Win32_Process', 'Handle', 'Name', 'process_name']]
+    instance['tag_queries'] = tag_query
 
     c = check(instance)
     c.check(instance)
 
     # Verify metrics are tagged with the alias 'process_name' instead of 'name'
     for metric in common.INSTANCE_METRICS:
-        aggregator.assert_metric(metric, tags=['process_name:chrome.exe'], count=1)
+        aggregator.assert_metric(metric, tags=result_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
 
@@ -118,6 +129,7 @@ def test_tag_queries_without_alias(mock_sampler_with_tag_queries, aggregator, ch
         ('Name,Label AS wmi_label', ['name:foo', 'wmi_label:bar']),
         ('name as wmi_name,label as wmi_label', ['wmi_name:foo', 'wmi_label:bar']),
         ('nameaswmi_name', []),
+        ('Name AS , Label AS wmi_label', ['name:foo', 'wmi_label:bar']),
     ],
 )
 def test_tag_by_is_correctly_prefixed(mock_sampler_with_tag_by_prefix, aggregator, check, tag_by, result_tags):
