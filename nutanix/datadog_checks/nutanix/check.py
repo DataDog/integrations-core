@@ -39,6 +39,8 @@ class NutanixCheck(AgentCheck):
         self.base_tags.append(f"prism_central:{self.pc_ip}")
 
         self.external_tags = []
+        self.cluster_names = {}  # Mapping of cluster_id -> cluster_name
+        self.host_names = {}  # Mapping of host_id -> host_name
 
     def _set_external_tags_for_host(self, hostname: str, tags: list[str]):
         for i, entry in enumerate(self.external_tags):
@@ -49,6 +51,11 @@ class NutanixCheck(AgentCheck):
         self.external_tags.append((hostname, {self.__NAMESPACE__: tags}))
 
     def check(self, _):
+        # Clear caches at the beginning of each check run to prevent unbounded growth
+        self.cluster_names = {}
+        self.host_names = {}
+        self.external_tags = []
+
         if not self._check_health():
             return
 
@@ -57,8 +64,6 @@ class NutanixCheck(AgentCheck):
 
         if self.external_tags:
             self.set_external_tags(self.external_tags)
-
-        self.external_tags = []
 
     def _check_health(self):
         try:
@@ -87,6 +92,12 @@ class NutanixCheck(AgentCheck):
                 return
 
             for cluster in clusters:
+                # Store cluster name mapping for VM tagging
+                cluster_id = cluster.get("extId")
+                cluster_name = cluster.get("name")
+                if cluster_id and cluster_name:
+                    self.cluster_names[cluster_id] = cluster_name
+
                 if self._is_prism_central_cluster(cluster):
                     self.log.debug("Skipping Prism Central cluster")
                     continue
@@ -187,6 +198,11 @@ class NutanixCheck(AgentCheck):
         for host in hosts:
             host_id = host.get("extId")
             hostname = host.get("hostName")
+
+            # Store host name mapping for VM tagging
+            if host_id and hostname:
+                self.host_names[host_id] = hostname
+
             host_tags = cluster_tags + self._extract_host_tags(host)
             self.gauge("host.count", 1, hostname=hostname, tags=host_tags)
 
@@ -283,10 +299,16 @@ class NutanixCheck(AgentCheck):
         host_id = vm.get("host", {}).get("extId")
         if host_id:
             tags.append(f"ntnx_host_id:{host_id}")
+            # Add host name if available in mapping
+            if host_id in self.host_names:
+                tags.append(f"ntnx_host_name:{self.host_names[host_id]}")
 
         cluster_id = vm.get("cluster", {}).get("extId")
         if cluster_id:
             tags.append(f"ntnx_cluster_id:{cluster_id}")
+            # Add cluster name if available in mapping
+            if cluster_id in self.cluster_names:
+                tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
 
         availability_zone_id = vm.get("availabilityZone", {}).get("extId")
         if availability_zone_id:
