@@ -306,6 +306,10 @@ def apply_validated_defaults(args: dict, instance: dict, validation_result: Vali
     if args.get('collect_default_database'):
         args['ignore_databases'] = [d for d in args['ignore_databases'] if d != 'postgres']
 
+    # When autodiscovery is enabled, use global_view_db as the main database for DBM jobs
+    if args.get('database_autodiscovery', {}).get('enabled'):
+        args['dbname'] = args.get('database_autodiscovery', {}).get('global_view_db', 'postgres')
+
     apply_cloud_defaults(args, instance, validation_result)
 
 
