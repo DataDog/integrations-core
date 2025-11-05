@@ -39,8 +39,9 @@ class WMICheck(WinWMICheck):
 
         tag_by_properties = ""
         for t in self.tag_by.split(','):
-            if ' AS ' in t:
-                t_split = t.split(' AS ')
+            t = t.strip()
+            if ' AS' in t or ' as' in t:
+                t_split = t.split(' AS') if ' AS' in t else t.split(' as')
                 t = t_split[0].strip()
                 tag_by_properties += t + ","
             else:

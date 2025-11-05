@@ -316,8 +316,9 @@ class WinWMICheck(AgentCheck):
         """
         Parse an alias from a string.
         """
-        if ' AS ' in property or ' as ' in property:
-            property_split = property.split(' AS ') if ' AS ' in property else property.split(' as ')
+        property = property.strip()
+        if ' AS' in property or ' as' in property:
+            property_split = property.split(' AS') if ' AS' in property else property.split(' as')
             property = property_split[0].strip()
             alias = property_split[1].strip()
             if alias == "":

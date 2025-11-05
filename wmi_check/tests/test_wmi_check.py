@@ -89,6 +89,7 @@ def test_tag_by_is_correctly_requested(mock_proc_sampler, aggregator, check):
         ([['IDProcess', 'Win32_Process', 'Handle', 'Name']], ['name:chrome.exe']),
         ([['IDProcess', 'Win32_Process', 'Handle', 'Name', '']], ['name:chrome.exe']),
         ([['IDProcess', 'Win32_Process', 'Handle', 'Name as process_name', 'foo']], ['process_name:chrome.exe']),
+        ([['IDProcess', 'Win32_Process', 'Handle', 'Name AS', 'foo']], ['name:chrome.exe']),
     ],
 )
 def test_tag_queries_with_alias(mock_sampler_with_tag_queries, aggregator, check, tag_query, result_tags):
@@ -129,6 +130,7 @@ def test_tag_queries_without_alias(mock_sampler_with_tag_queries, aggregator, ch
         ('name as wmi_name,label as wmi_label', ['wmi_name:foo', 'wmi_label:bar']),
         ('nameaswmi_name', []),
         ('Name AS , Label AS wmi_label', ['name:foo', 'wmi_label:bar']),
+        ('Name AS', ['name:foo']),
     ],
 )
 def test_tag_by_is_correctly_prefixed(mock_sampler_with_tag_by_prefix, aggregator, check, tag_by, result_tags):
