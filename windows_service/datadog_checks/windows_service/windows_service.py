@@ -246,6 +246,20 @@ class WindowsService(AgentCheck):
     }
     UNKNOWN_LITERAL = "unknown"
 
+    def __init__(self, name, init_config, instances):
+        super().__init__(name, init_config, instances)
+        self._service_pid_cache: dict[str, int] = {}
+
+    def _get_service_restarts(self, service_name: str, current_pid: int) -> bool:
+        prev_pid = self._service_pid_cache.get(service_name, 0)
+        restarts = 0
+        # pid of services are taken from EnumServicesStatusEx
+        # if the pid is 0, the service is not running
+        if current_pid != 0 and prev_pid != 0 and current_pid != prev_pid:
+            restarts = 1
+        self._service_pid_cache[service_name] = current_pid
+        return restarts
+
     def check(self, instance):
         services = instance.get('services', [])
         custom_tags = instance.get('tags', [])
@@ -318,6 +332,8 @@ class WindowsService(AgentCheck):
             if service_pid != 0:
                 service_uptime = _get_process_uptime_from_cache(service_pid, process_cache)
 
+            service_restarts = self._get_service_restarts(service_name, service_pid)
+
             status = self.STATE_TO_STATUS.get(state, self.UNKNOWN)
             state_string = self.STATE_TO_STRING.get(state, self.UNKNOWN_LITERAL)
 
@@ -344,6 +360,7 @@ class WindowsService(AgentCheck):
             self.log.debug('service state for %s %s', service_name, status)
             self.gauge('windows_service.uptime', service_uptime, tags=tags)
             self.gauge('windows_service.state', 1, tags=tags)
+            self.count('windows_service.restarts', service_restarts, tags=tags)
 
         if 'ALL' not in services:
             for service in services_unseen:
@@ -368,3 +385,4 @@ class WindowsService(AgentCheck):
                 self.log.debug('service state for %s %s', service, status)
                 self.gauge('windows_service.uptime', 0, tags=tags)
                 self.gauge('windows_service.state', 1, tags=tags)
+                self.count('windows_service.restarts', 0, tags=tags)
