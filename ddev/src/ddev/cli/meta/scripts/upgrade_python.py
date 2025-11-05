@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 
 # Python.org URLs
 PYTHON_FTP_URL = "https://www.python.org/ftp/python/"
-PYTHON_MACOS_PKG_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/python-{version}-macos11.pkg"
 PYTHON_SBOM_LINUX_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz.spdx.json"
 PYTHON_SBOM_WINDOWS_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/python-{version}-amd64.exe.spdx.json"
 
@@ -46,7 +45,9 @@ def upgrade_python_version(app: Application):
     and updates version references across:
     - ddev/src/ddev/repo/constants.py
     - .builders/images/*/Dockerfile (Linux and Windows)
-    - .github/workflows/resolve-build-deps.yaml (macOS)
+
+    Note: .github/workflows/resolve-build-deps.yaml must be updated manually as
+    workflow files require a personal access token to modify.
 
     \b
     `$ ddev meta scripts upgrade-python-version`
@@ -80,7 +81,6 @@ def upgrade_python_version(app: Application):
 
     # Perform updates
     upgrade_dockerfiles_python_version(app, latest_version, new_version_hashes, tracker)
-    upgrade_macos_python_version(app, latest_version, tracker)
     upgrade_python_version_full_constant(app, latest_version, tracker)
 
     # Display results
@@ -245,31 +245,6 @@ def upgrade_dockerfiles_python_version(
             continue
 
         write_file_safely(dockerfile, dockerfile_content, dockerfile.name, tracker)
-
-
-def upgrade_macos_python_version(app: Application, new_version: str, tracker: ValidationTracker):
-    macos_python_file = app.repo.path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
-
-    macos_content = read_file_safely(macos_python_file, 'macOS workflow', tracker)
-    if macos_content is None:
-        return
-
-    target_line = next((line for line in macos_content.splitlines() if 'PYTHON3_DOWNLOAD_URL' in line), None)
-
-    if target_line is None:
-        tracker.error(('macOS workflow',), message='Could not find PYTHON3_DOWNLOAD_URL')
-        return
-
-    new_url = PYTHON_MACOS_PKG_URL_TEMPLATE.format(version=new_version)
-    indent = target_line[: target_line.index('PYTHON3_DOWNLOAD_URL')]
-    new_line = f'{indent}PYTHON3_DOWNLOAD_URL: "{new_url}"'
-
-    if target_line == new_line:
-        app.display_info(f"Python version in macOS workflow is already at {new_version}")
-        return
-
-    updated_content = macos_content.replace(target_line, new_line, 1)
-    write_file_safely(macos_python_file, updated_content, 'macOS workflow', tracker)
 
 
 def upgrade_python_version_full_constant(app: Application, new_version: str, tracker: ValidationTracker):
