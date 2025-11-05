@@ -1,0 +1,327 @@
+# HELP n8n_process_cpu_user_seconds_total Total user CPU time spent in seconds.
+# TYPE n8n_process_cpu_user_seconds_total counter
+n8n_process_cpu_user_seconds_total 8.298932999999998
+
+# HELP n8n_process_cpu_system_seconds_total Total system CPU time spent in seconds.
+# TYPE n8n_process_cpu_system_seconds_total counter
+n8n_process_cpu_system_seconds_total 3.1041119999999998
+
+# HELP n8n_process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE n8n_process_cpu_seconds_total counter
+n8n_process_cpu_seconds_total 11.403044999999999
+
+# HELP n8n_process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE n8n_process_start_time_seconds gauge
+n8n_process_start_time_seconds 1761656578
+
+# HELP n8n_process_resident_memory_bytes Resident memory size in bytes.
+# TYPE n8n_process_resident_memory_bytes gauge
+n8n_process_resident_memory_bytes 245043200
+
+# HELP n8n_process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE n8n_process_virtual_memory_bytes gauge
+n8n_process_virtual_memory_bytes 33656197120
+
+# HELP n8n_process_heap_bytes Process heap size in bytes.
+# TYPE n8n_process_heap_bytes gauge
+n8n_process_heap_bytes 277200896
+
+# HELP n8n_process_open_fds Number of open file descriptors.
+# TYPE n8n_process_open_fds gauge
+n8n_process_open_fds 44
+
+# HELP n8n_process_max_fds Maximum number of open file descriptors.
+# TYPE n8n_process_max_fds gauge
+n8n_process_max_fds 1048576
+
+# HELP n8n_nodejs_eventloop_lag_seconds Lag of event loop in seconds.
+# TYPE n8n_nodejs_eventloop_lag_seconds gauge
+n8n_nodejs_eventloop_lag_seconds 0.002765567
+
+# HELP n8n_nodejs_eventloop_lag_min_seconds The minimum recorded event loop delay.
+# TYPE n8n_nodejs_eventloop_lag_min_seconds gauge
+n8n_nodejs_eventloop_lag_min_seconds 0.010018816
+
+# HELP n8n_nodejs_eventloop_lag_max_seconds The maximum recorded event loop delay.
+# TYPE n8n_nodejs_eventloop_lag_max_seconds gauge
+n8n_nodejs_eventloop_lag_max_seconds 0.011239423
+
+# HELP n8n_nodejs_eventloop_lag_mean_seconds The mean of the recorded event loop delays.
+# TYPE n8n_nodejs_eventloop_lag_mean_seconds gauge
+n8n_nodejs_eventloop_lag_mean_seconds 0.010092521938958708
+
+# HELP n8n_nodejs_eventloop_lag_stddev_seconds The standard deviation of the recorded event loop delays.
+# TYPE n8n_nodejs_eventloop_lag_stddev_seconds gauge
+n8n_nodejs_eventloop_lag_stddev_seconds 0.00016945350643679045
+
+# HELP n8n_nodejs_eventloop_lag_p50_seconds The 50th percentile of the recorded event loop delays.
+# TYPE n8n_nodejs_eventloop_lag_p50_seconds gauge
+n8n_nodejs_eventloop_lag_p50_seconds 0.010067967
+
+# HELP n8n_nodejs_eventloop_lag_p90_seconds The 90th percentile of the recorded event loop delays.
+# TYPE n8n_nodejs_eventloop_lag_p90_seconds gauge
+n8n_nodejs_eventloop_lag_p90_seconds 0.010067967
+
+# HELP n8n_nodejs_eventloop_lag_p99_seconds The 99th percentile of the recorded event loop delays.
+# TYPE n8n_nodejs_eventloop_lag_p99_seconds gauge
+n8n_nodejs_eventloop_lag_p99_seconds 0.011124735
+
+# HELP n8n_nodejs_active_resources Number of active resources that are currently keeping the event loop alive, grouped by async resource type.
+# TYPE n8n_nodejs_active_resources gauge
+n8n_nodejs_active_resources{type="PipeWrap"} 2
+n8n_nodejs_active_resources{type="TCPServerWrap"} 1
+n8n_nodejs_active_resources{type="TCPSocketWrap"} 1
+n8n_nodejs_active_resources{type="Timeout"} 13
+n8n_nodejs_active_resources{type="Immediate"} 1
+
+# HELP n8n_nodejs_active_resources_total Total number of active resources.
+# TYPE n8n_nodejs_active_resources_total gauge
+n8n_nodejs_active_resources_total 18
+
+# HELP n8n_nodejs_active_handles Number of active libuv handles grouped by handle type. Every handle type is C++ class name.
+# TYPE n8n_nodejs_active_handles gauge
+n8n_nodejs_active_handles{type="Socket"} 3
+n8n_nodejs_active_handles{type="Server"} 1
+
+# HELP n8n_nodejs_active_handles_total Total number of active handles.
+# TYPE n8n_nodejs_active_handles_total gauge
+n8n_nodejs_active_handles_total 4
+
+# HELP n8n_nodejs_active_requests Number of active libuv requests grouped by request type. Every request type is C++ class name.
+# TYPE n8n_nodejs_active_requests gauge
+
+# HELP n8n_nodejs_active_requests_total Total number of active requests.
+# TYPE n8n_nodejs_active_requests_total gauge
+n8n_nodejs_active_requests_total 0
+
+# HELP n8n_nodejs_heap_size_total_bytes Process heap size from Node.js in bytes.
+# TYPE n8n_nodejs_heap_size_total_bytes gauge
+n8n_nodejs_heap_size_total_bytes 142774272
+
+# HELP n8n_nodejs_heap_size_used_bytes Process heap size used from Node.js in bytes.
+# TYPE n8n_nodejs_heap_size_used_bytes gauge
+n8n_nodejs_heap_size_used_bytes 136342632
+
+# HELP n8n_nodejs_external_memory_bytes Node.js external memory size in bytes.
+# TYPE n8n_nodejs_external_memory_bytes gauge
+n8n_nodejs_external_memory_bytes 20824585
+
+# HELP n8n_nodejs_heap_space_size_total_bytes Process heap space size total from Node.js in bytes.
+# TYPE n8n_nodejs_heap_space_size_total_bytes gauge
+n8n_nodejs_heap_space_size_total_bytes{space="read_only"} 0
+n8n_nodejs_heap_space_size_total_bytes{space="new"} 1048576
+n8n_nodejs_heap_space_size_total_bytes{space="old"} 122208256
+n8n_nodejs_heap_space_size_total_bytes{space="code"} 4718592
+n8n_nodejs_heap_space_size_total_bytes{space="shared"} 0
+n8n_nodejs_heap_space_size_total_bytes{space="trusted"} 7643136
+n8n_nodejs_heap_space_size_total_bytes{space="new_large_object"} 0
+n8n_nodejs_heap_space_size_total_bytes{space="large_object"} 7000064
+n8n_nodejs_heap_space_size_total_bytes{space="code_large_object"} 155648
+n8n_nodejs_heap_space_size_total_bytes{space="shared_large_object"} 0
+n8n_nodejs_heap_space_size_total_bytes{space="trusted_large_object"} 0
+
+# HELP n8n_nodejs_heap_space_size_used_bytes Process heap space size used from Node.js in bytes.
+# TYPE n8n_nodejs_heap_space_size_used_bytes gauge
+n8n_nodejs_heap_space_size_used_bytes{space="read_only"} 0
+n8n_nodejs_heap_space_size_used_bytes{space="new"} 652896
+n8n_nodejs_heap_space_size_used_bytes{space="old"} 119347344
+n8n_nodejs_heap_space_size_used_bytes{space="code"} 4183424
+n8n_nodejs_heap_space_size_used_bytes{space="shared"} 0
+n8n_nodejs_heap_space_size_used_bytes{space="trusted"} 5187192
+n8n_nodejs_heap_space_size_used_bytes{space="new_large_object"} 0
+n8n_nodejs_heap_space_size_used_bytes{space="large_object"} 6837144
+n8n_nodejs_heap_space_size_used_bytes{space="code_large_object"} 138432
+n8n_nodejs_heap_space_size_used_bytes{space="shared_large_object"} 0
+n8n_nodejs_heap_space_size_used_bytes{space="trusted_large_object"} 0
+
+# HELP n8n_nodejs_heap_space_size_available_bytes Process heap space size available from Node.js in bytes.
+# TYPE n8n_nodejs_heap_space_size_available_bytes gauge
+n8n_nodejs_heap_space_size_available_bytes{space="read_only"} 0
+n8n_nodejs_heap_space_size_available_bytes{space="new"} 378016
+n8n_nodejs_heap_space_size_available_bytes{space="old"} 430568
+n8n_nodejs_heap_space_size_available_bytes{space="code"} 239680
+n8n_nodejs_heap_space_size_available_bytes{space="shared"} 0
+n8n_nodejs_heap_space_size_available_bytes{space="trusted"} 2323072
+n8n_nodejs_heap_space_size_available_bytes{space="new_large_object"} 1048576
+n8n_nodejs_heap_space_size_available_bytes{space="large_object"} 0
+n8n_nodejs_heap_space_size_available_bytes{space="code_large_object"} 0
+n8n_nodejs_heap_space_size_available_bytes{space="shared_large_object"} 0
+n8n_nodejs_heap_space_size_available_bytes{space="trusted_large_object"} 0
+
+# HELP n8n_nodejs_version_info Node.js version info.
+# TYPE n8n_nodejs_version_info gauge
+n8n_nodejs_version_info{version="v22.18.0",major="22",minor="18",patch="0"} 1
+
+# HELP n8n_nodejs_gc_duration_seconds Garbage collection duration by kind, one of major, minor, incremental or weakcb.
+# TYPE n8n_nodejs_gc_duration_seconds histogram
+n8n_nodejs_gc_duration_seconds_bucket{le="0.001",kind="minor"} 128
+n8n_nodejs_gc_duration_seconds_bucket{le="0.01",kind="minor"} 132
+n8n_nodejs_gc_duration_seconds_bucket{le="0.1",kind="minor"} 132
+n8n_nodejs_gc_duration_seconds_bucket{le="1",kind="minor"} 132
+n8n_nodejs_gc_duration_seconds_bucket{le="2",kind="minor"} 132
+n8n_nodejs_gc_duration_seconds_bucket{le="5",kind="minor"} 132
+n8n_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="minor"} 132
+n8n_nodejs_gc_duration_seconds_sum{kind="minor"} 0.09924478498101237
+n8n_nodejs_gc_duration_seconds_count{kind="minor"} 132
+n8n_nodejs_gc_duration_seconds_bucket{le="0.001",kind="incremental"} 1
+n8n_nodejs_gc_duration_seconds_bucket{le="0.01",kind="incremental"} 2
+n8n_nodejs_gc_duration_seconds_bucket{le="0.1",kind="incremental"} 2
+n8n_nodejs_gc_duration_seconds_bucket{le="1",kind="incremental"} 2
+n8n_nodejs_gc_duration_seconds_bucket{le="2",kind="incremental"} 2
+n8n_nodejs_gc_duration_seconds_bucket{le="5",kind="incremental"} 2
+n8n_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="incremental"} 2
+n8n_nodejs_gc_duration_seconds_sum{kind="incremental"} 0.0022786640077829363
+n8n_nodejs_gc_duration_seconds_count{kind="incremental"} 2
+n8n_nodejs_gc_duration_seconds_bucket{le="0.001",kind="major"} 0
+n8n_nodejs_gc_duration_seconds_bucket{le="0.01",kind="major"} 0
+n8n_nodejs_gc_duration_seconds_bucket{le="0.1",kind="major"} 2
+n8n_nodejs_gc_duration_seconds_bucket{le="1",kind="major"} 2
+n8n_nodejs_gc_duration_seconds_bucket{le="2",kind="major"} 2
+n8n_nodejs_gc_duration_seconds_bucket{le="5",kind="major"} 2
+n8n_nodejs_gc_duration_seconds_bucket{le="+Inf",kind="major"} 2
+n8n_nodejs_gc_duration_seconds_sum{kind="major"} 0.1028408939987421
+n8n_nodejs_gc_duration_seconds_count{kind="major"} 2
+
+# HELP n8n_version_info n8n version info.
+# TYPE n8n_version_info gauge
+n8n_version_info{version="v1.117.2",major="1",minor="117",patch="2"} 1
+
+# HELP n8n_instance_role_leader Whether this main instance is the leader (1) or not (0).
+# TYPE n8n_instance_role_leader gauge
+n8n_instance_role_leader 1
+
+# HELP n8n_http_request_duration_seconds duration histogram of http responses labeled with: status_code
+# TYPE n8n_http_request_duration_seconds histogram
+
+# HELP n8n_last_activity last instance activity (backend request) in Unix time (seconds).
+# TYPE n8n_last_activity gauge
+n8n_last_activity 1761656582
+
+# HELP n8n_active_workflow_count Total number of active workflows.
+# TYPE n8n_active_workflow_count gauge
+n8n_active_workflow_count{workflow_id="wf_8a3b2c1d"} 0
+n8n_active_workflow_count{workflow_id="wf_7f4e9a2b"} 0
+n8n_active_workflow_count{workflow_id="wf_5d6c8e1f"} 0
+
+# HELP n8n_nodejs_event_loop_lag_seconds Event loop lag in seconds
+# TYPE n8n_nodejs_event_loop_lag_seconds gauge
+n8n_nodejs_event_loop_lag_seconds 0.0035
+
+# HELP n8n_nodejs_heap_total_bytes Total heap size allocated in bytes
+# TYPE n8n_nodejs_heap_total_bytes gauge
+n8n_nodejs_heap_total_bytes 73400320
+
+# HELP n8n_nodejs_heap_used_bytes Heap memory used in bytes
+# TYPE n8n_nodejs_heap_used_bytes gauge
+n8n_nodejs_heap_used_bytes 51200000
+
+# HELP n8n_workflow_executions_total Total number of workflow executions
+# TYPE n8n_workflow_executions_total counter
+n8n_workflow_executions_total{status="success",workflow_id="wf_8a3b2c1d"} 45
+n8n_workflow_executions_total{status="success",workflow_id="wf_7f4e9a2b"} 38
+n8n_workflow_executions_total{status="success",workflow_id="wf_5d6c8e1f"} 45
+n8n_workflow_executions_total{status="error",workflow_id="wf_8a3b2c1d"} 3
+n8n_workflow_executions_total{status="error",workflow_id="wf_5d6c8e1f"} 4
+
+# HELP n8n_workflow_executions_duration_seconds Workflow execution duration in seconds
+# TYPE n8n_workflow_executions_duration_seconds histogram
+n8n_workflow_executions_duration_seconds_bucket{le="0.1",workflow_id="wf_8a3b2c1d"} 5
+n8n_workflow_executions_duration_seconds_bucket{le="1",workflow_id="wf_8a3b2c1d"} 18
+n8n_workflow_executions_duration_seconds_bucket{le="+Inf",workflow_id="wf_8a3b2c1d"} 48
+n8n_workflow_executions_duration_seconds_sum{workflow_id="wf_8a3b2c1d"} 14.3
+n8n_workflow_executions_duration_seconds_count{workflow_id="wf_8a3b2c1d"} 48
+n8n_workflow_executions_duration_seconds_bucket{le="0.1",workflow_id="wf_7f4e9a2b"} 4
+n8n_workflow_executions_duration_seconds_bucket{le="1",workflow_id="wf_7f4e9a2b"} 15
+n8n_workflow_executions_duration_seconds_bucket{le="+Inf",workflow_id="wf_7f4e9a2b"} 38
+n8n_workflow_executions_duration_seconds_sum{workflow_id="wf_7f4e9a2b"} 11.2
+n8n_workflow_executions_duration_seconds_count{workflow_id="wf_7f4e9a2b"} 38
+n8n_workflow_executions_duration_seconds_bucket{le="0.1",workflow_id="wf_5d6c8e1f"} 3
+n8n_workflow_executions_duration_seconds_bucket{le="1",workflow_id="wf_5d6c8e1f"} 12
+n8n_workflow_executions_duration_seconds_bucket{le="+Inf",workflow_id="wf_5d6c8e1f"} 49
+n8n_workflow_executions_duration_seconds_sum{workflow_id="wf_5d6c8e1f"} 12.7
+n8n_workflow_executions_duration_seconds_count{workflow_id="wf_5d6c8e1f"} 49
+
+# HELP n8n_queue_jobs_total Total number of queue jobs
+# TYPE n8n_queue_jobs_total counter
+n8n_queue_jobs_total{state="waiting"} 3
+n8n_queue_jobs_total{state="active"} 2
+n8n_queue_jobs_total{state="completed"} 148
+n8n_queue_jobs_total{state="failed"} 5
+
+# HELP n8n_queue_jobs_duration_seconds Job duration in seconds
+# TYPE n8n_queue_jobs_duration_seconds histogram
+n8n_queue_jobs_duration_seconds_bucket{le="0.1"} 22
+n8n_queue_jobs_duration_seconds_bucket{le="1"} 84
+n8n_queue_jobs_duration_seconds_bucket{le="+Inf"} 150
+n8n_queue_jobs_duration_seconds_sum 44.8
+n8n_queue_jobs_duration_seconds_count 150
+
+# HELP n8n_api_requests_total Total API requests
+# TYPE n8n_api_requests_total counter
+n8n_api_requests_total{method="GET",endpoint="/workflows"} 240
+n8n_api_requests_total{method="POST",endpoint="/executions"} 75
+
+# HELP n8n_api_request_duration_seconds API request duration in seconds
+# TYPE n8n_api_request_duration_seconds histogram
+n8n_api_request_duration_seconds_bucket{le="0.1"} 90
+n8n_api_request_duration_seconds_bucket{le="1"} 120
+n8n_api_request_duration_seconds_bucket{le="+Inf"} 125
+n8n_api_request_duration_seconds_sum 15.3
+n8n_api_request_duration_seconds_count 125
+
+# HELP n8n_cache_operations_total Total cache operations
+# TYPE n8n_cache_operations_total counter
+n8n_cache_operations_total{operation="get"} 1250
+n8n_cache_operations_total{operation="set"} 320
+n8n_cache_operations_total{operation="delete"} 10
+
+# HELP n8n_cache_hits_total Cache hits
+# TYPE n8n_cache_hits_total counter
+n8n_cache_hits_total 1080
+
+# HELP n8n_cache_misses_total Cache misses
+# TYPE n8n_cache_misses_total counter
+n8n_cache_misses_total 170
+
+# HELP n8n_cache_errors_total Cache errors
+# TYPE n8n_cache_errors_total counter
+n8n_cache_errors_total 0
+
+# HELP n8n_cache_latency_seconds Cache operation latency in seconds
+# TYPE n8n_cache_latency_seconds histogram
+n8n_cache_latency_seconds_bucket{le="0.001"} 90
+n8n_cache_latency_seconds_bucket{le="0.01"} 240
+n8n_cache_latency_seconds_bucket{le="+Inf"} 260
+n8n_cache_latency_seconds_sum 1.42
+n8n_cache_latency_seconds_count 260
+
+# HELP n8n_eventbus_events_total Total events published on the event bus
+# TYPE n8n_eventbus_events_total counter
+n8n_eventbus_events_total{event_type="workflowStarted"} 140
+n8n_eventbus_events_total{event_type="workflowCompleted"} 135
+n8n_eventbus_events_total{event_type="workflowFailed"} 5
+
+# HELP n8n_eventbus_events_processed_total Total processed events
+# TYPE n8n_eventbus_events_processed_total counter
+n8n_eventbus_events_processed_total 138
+
+# HELP n8n_eventbus_events_failed_total Total failed event processing
+# TYPE n8n_eventbus_events_failed_total counter
+n8n_eventbus_events_failed_total 2
+
+# HELP n8n_eventbus_queue_size Current event queue size
+# TYPE n8n_eventbus_queue_size gauge
+n8n_eventbus_queue_size 1
+
+# HELP n8n_eventbus_connections_total Active event bus backend connections
+# TYPE n8n_eventbus_connections_total gauge
+n8n_eventbus_connections_total 1
+
+# HELP n8n_workflow_executions_active Number of active workflow executions
+# TYPE n8n_workflow_executions_active gauge
+n8n_workflow_executions_active 3
+
+# HELP n8n_queue_job_attempts_total Total number of job attempts
+# TYPE n8n_queue_job_attempts_total counter
+n8n_queue_job_attempts_total{result="success"} 435
+n8n_queue_job_attempts_total{result="failed"} 12
