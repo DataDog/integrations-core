@@ -1,1 +1,1 @@
-Add tag aliases to tag_by and tag_queries
+Allow tag aliases for wmi `tag_by` and `tag_queries` parameters
