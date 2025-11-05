@@ -1,0 +1,1 @@
+Allow the `validate metadata` command to get the metrics-prefix from the repo overrides config in case the manifest file does not exist
