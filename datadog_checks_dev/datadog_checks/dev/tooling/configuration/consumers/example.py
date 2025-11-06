@@ -86,6 +86,18 @@ def option_enabled(option):
 
     return option['required']
 
+def validate_fields(fields_dict, option_name, allowed_fields, field_level, writer):
+
+    invalid_fields = [field for field in fields_dict if field not in allowed_fields]
+    
+    if invalid_fields:
+        invalid_fields_str = '\n'.join(f"- {field!r}" for field in invalid_fields)
+        valid_fields_str = '\n'.join(f"- {field!r}" for field in sorted(allowed_fields))
+        
+        writer.new_error(
+            f"Option name {option_name!r} contains the following invalid {field_level} fields:\n{invalid_fields_str}\n"
+            f"{field_level.capitalize()} fields must be one of the following:\n{valid_fields_str}"
+        )
 
 def write_description(option, writer, indent, option_type):
     description = option['description']
@@ -125,13 +137,7 @@ def write_description(option, writer, indent, option_type):
 def write_option(option, writer, indent='', start_list=False):
     option_name = option['name']
 
-    invalid_option_field = [field for field in option if field not in ALLOWED_OPTION_FIELDS]
-
-    if invalid_option_field:
-        writer.new_error(
-            f"Option name '{option_name}' has invalid option-level field: {invalid_option_field}. "
-            f"Option fields must be one of the following: {sorted(ALLOWED_OPTION_FIELDS)}"
-        )
+    validate_fields(option, option_name, ALLOWED_OPTION_FIELDS, 'option-level', writer)
 
     if 'value' in option:
         value = option['value']
@@ -146,19 +152,13 @@ def write_option(option, writer, indent='', start_list=False):
             'required' if required else 'optional',
         )
 
-        invalid_value_field = [field for field in value if field not in ALLOWED_VALUE_FIELDS]
-
-        if invalid_value_field:
-            writer.new_error(
-                f"Option name '{option_name}' has invalid value-level field: {invalid_value_field}. "
-                f"Value fields must be one of the following: {sorted(ALLOWED_VALUE_FIELDS)}"
-            )
+        validate_fields(value, option_name, ALLOWED_VALUE_FIELDS, 'value-level', writer)
 
         example = value.get('example')
         example_type = type(example)
         if not required:
-            if 'display_default' in value:
-                default = value['display_default']
+            default = value.get('display_default', value.get('default'))
+            if default is not None:
                 default_type = type(default)
                 if default is not None and str(default).lower() != 'none':
                     if default_type is str:
@@ -167,7 +167,7 @@ def write_option(option, writer, indent='', start_list=False):
                         writer.write(' - default: ', 'true' if default else 'false')
                     else:
                         writer.write(' - default: ', repr(default))
-            else:
+            elif 'display_default' not in value or 'default' in value:
                 if example_type is bool:
                     writer.write(' - default: ', 'true' if example else 'false')
                 elif example_type in (int, float):
