@@ -319,8 +319,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         Convert a system.processes row to an active session
         Similar to Postgres _to_active_session
         """
-        # Filter out non-active queries
-        if not row.get('query') or not row.get('statement'):
+        # Only include rows with successfully obfuscated statements
+        if not row.get('statement'):
             return None
 
         # Remove null values and the raw query
