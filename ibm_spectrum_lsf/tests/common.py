@@ -650,6 +650,7 @@ BJOBS_METRICS = [
         "name": "ibm_spectrum_lsf.job.cpu_used",
         "tags": [
             'from_host:ip-11-21-111-198.ec2.internal',
+            'exec_host:ip-11-21-111-198.ec2.internal',
             'full_job_id:173',
             'job_id:173',
             'lsf_cluster_name:test-cluster',
@@ -661,6 +662,7 @@ BJOBS_METRICS = [
         "name": "ibm_spectrum_lsf.job.idle_factor",
         "tags": [
             'from_host:ip-11-21-111-198.ec2.internal',
+            'exec_host:ip-11-21-111-198.ec2.internal',
             'full_job_id:173',
             'job_id:173',
             'lsf_cluster_name:test-cluster',
@@ -672,17 +674,19 @@ BJOBS_METRICS = [
         "name": "ibm_spectrum_lsf.job.mem",
         "tags": [
             'from_host:ip-11-21-111-198.ec2.internal',
+            'exec_host:ip-11-21-111-198.ec2.internal',
             'full_job_id:173',
             'job_id:173',
             'lsf_cluster_name:test-cluster',
             'queue:normal',
         ],
-        "val": -1,
+        "val": 7,
     },
     {
         "name": "ibm_spectrum_lsf.job.percent_complete",
         "tags": [
             'from_host:ip-11-21-111-198.ec2.internal',
+            'exec_host:ip-11-21-111-198.ec2.internal',
             'full_job_id:173',
             'job_id:173',
             'lsf_cluster_name:test-cluster',
@@ -694,6 +698,19 @@ BJOBS_METRICS = [
         "name": "ibm_spectrum_lsf.job.run_time",
         "tags": [
             'from_host:ip-11-21-111-198.ec2.internal',
+            'exec_host:ip-11-21-111-198.ec2.internal',
+            'full_job_id:173',
+            'job_id:173',
+            'lsf_cluster_name:test-cluster',
+            'queue:normal',
+        ],
+        "val": 79,
+    },
+    {
+        "name": "ibm_spectrum_lsf.job.swap",
+        "tags": [
+            'from_host:ip-11-21-111-198.ec2.internal',
+            'exec_host:ip-11-21-111-198.ec2.internal',
             'full_job_id:173',
             'job_id:173',
             'lsf_cluster_name:test-cluster',
@@ -702,20 +719,10 @@ BJOBS_METRICS = [
         "val": 0,
     },
     {
-        "name": "ibm_spectrum_lsf.job.swap",
-        "tags": [
-            'from_host:ip-11-21-111-198.ec2.internal',
-            'full_job_id:173',
-            'job_id:173',
-            'lsf_cluster_name:test-cluster',
-            'queue:normal',
-        ],
-        "val": -1,
-    },
-    {
         "name": "ibm_spectrum_lsf.job.time_left",
         "tags": [
             'from_host:ip-11-21-111-198.ec2.internal',
+            'exec_host:ip-11-21-111-198.ec2.internal',
             'full_job_id:173',
             'job_id:173',
             'lsf_cluster_name:test-cluster',

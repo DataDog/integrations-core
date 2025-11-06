@@ -37,7 +37,7 @@ class LSFClient:
             [
                 'lshosts',
                 '-o',
-                "HOST_NAME:50 type:30 model:30 cpuf: ncpus: maxmem: maxswp: server: nprocs: ncores: nthreads: maxtmp: delimiter='|'",  # noqa: E501
+                "HOST_NAME:80 type:30 model:30 cpuf: ncpus: maxmem: maxswp: server: nprocs: ncores: nthreads: maxtmp: delimiter='|'",  # noqa: E501
             ]
         )
 
@@ -51,7 +51,7 @@ class LSFClient:
 
     def bqueues(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
         return self._run_command(
-            ['bqueues', '-o', "QUEUE_NAME PRIO STATUS MAX JL_U JL_P JL_H NJOBS  PEND RUN SUSP delimiter='|'"]
+            ['bqueues', '-o', "QUEUE_NAME PRIO STATUS MAX JL_U JL_P JL_H NJOBS PEND RUN SUSP delimiter='|'"]
         )
 
     def bjobs(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
@@ -59,6 +59,6 @@ class LSFClient:
             [
                 'bjobs',
                 '-o',
-                "jobid queue from_host:30 exec_host:20 run_time cpu_used mem time_left swap idle_factor %complete delimiter='|'",  # noqa: E501
+                "jobid queue from_host:80 exec_host:80 run_time cpu_used mem time_left swap idle_factor %complete delimiter='|'",  # noqa: E501
             ]
         )

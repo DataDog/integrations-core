@@ -1,4 +1,4 @@
 JOBID|QUEUE|FROM_HOST                    |EXEC_HOST           |RUN_TIME|CPU_USED|MEM|TIME_LEFT|SWAP|IDLE_FACTOR|%COMPLETE
-173|normal|ip-11-21-111-198.ec2.internal |         -          |0 second(s)|-|-|-|-|-|-
+173|normal|ip-11-21-111-198.ec2.internal |ip-11-21-111-198.ec2.internal|79 second(s)|-|7 Mbytes|-|0 Mbytes|-|-
 174|normal|ip-11-21-111-198.ec2.internal |         -          |0 second(s)|-|-|-|-|-|-
 175|normal|ip-11-21-111-198.ec2.internal |         -          |0 second(s)|-|-|-|-|-|-
