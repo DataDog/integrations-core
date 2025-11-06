@@ -718,6 +718,7 @@ plaid/assets/logs/                                                  @DataDog/saa
 /datadog_checks_downloader/                                           @DataDog/agent-integrations
 docs/developer/process/integration-release.md                         @DataDog/agent-integrations
 # As well as the pipelines.
+/.github/chainguard/                                                  @DataDog/agent-integrations
 /.github/workflows/                                                   @DataDog/agent-integrations
 /.github/workflows/resolve-build-deps.yml                             @DataDog/agent-build
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
