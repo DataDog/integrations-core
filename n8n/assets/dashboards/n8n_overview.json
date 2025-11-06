@@ -1,1 +1,1 @@
-Please build an out-of-the-box dashboard for your integration following our best practices here: https://datadoghq.dev/integrations-core/guidelines/dashboards/#best-practices
+{"title":"N8N Overview Dashboard","description":"[[suggested_dashboards]]","widgets":[],"template_variables":[],"layout_type":"ordered","notify_list":[],"reflow_type":"fixed","pause_auto_refresh":false}

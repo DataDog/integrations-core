@@ -794,6 +794,10 @@ coverage:
         target: 75
         flags:
         - kyverno
+      n8n:
+        target: 75
+        flags:
+        - n8n
       nvidia_nim:
         target: 75
         flags:
@@ -1431,6 +1435,11 @@ flags:
     paths:
     - mysql/datadog_checks/mysql
     - mysql/tests
+  n8n:
+    carryforward: true
+    paths:
+    - n8n/datadog_checks/n8n
+    - n8n/tests
   nagios:
     carryforward: true
     paths:

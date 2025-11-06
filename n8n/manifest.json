@@ -8,18 +8,19 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Monitor the health and performance of n8n",
     "title": "n8n",
     "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::AI",
+      "Offering::Integration",
+      "Queried Data Type::Metrics",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
@@ -35,12 +36,12 @@
       },
       "metrics": {
         "prefix": "n8n.",
-        "check": "",
+        "check": "n8n.active.workflow.count",
         "metadata_path": "metadata.csv"
       }
     },
     "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
+        "N8N overview": "assets/dashboards/n8n_overview.json"
     },
     "monitors": {},
     "saved_views": {}
