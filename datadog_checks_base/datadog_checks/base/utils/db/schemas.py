@@ -66,6 +66,7 @@ class SchemaCollector(ABC):
         if self._dbms == 'postgresql':
             # Backwards compatibility for metrics namespacing
             self._dbms = 'postgres'
+        self._collector_id = None
         self._reset()
 
     def _reset(self):
@@ -78,16 +79,12 @@ class SchemaCollector(ABC):
         """
         Collects and submits all applicable schema metadata to the agent.
         This class relies on the owning check to handle scheduling this method.
-
-        This method will enforce non-overlapping invocations and
-        returns False if the previous collection was still in progress when invoked again.
         """
-        if self._collection_started_at is not None:
-            return False
         status = "success"
         try:
             self._collection_started_at = now_ms()
             databases = self._get_databases()
+            self._collector_id = hash(sorted(d["name"] for d in databases))
             for database in databases:
                 database_name = database['name']
                 if not database_name:
@@ -147,6 +144,7 @@ class SchemaCollector(ABC):
             "tags": self._check.tags,
             "cloud_metadata": self._check.cloud_metadata,
             "collection_started_at": self._collection_started_at,
+            "collector_id": self._collector_id,
         }
 
     def maybe_flush(self, is_last_payload):
