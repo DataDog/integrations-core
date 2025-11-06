@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+      - '7.[0-9]+.x'
     paths:
       - .in-toto/*.link
 
