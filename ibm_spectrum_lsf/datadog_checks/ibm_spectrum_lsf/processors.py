@@ -100,18 +100,24 @@ class LSFMetricsProcessor(ABC):
         if len(headers.split(self.delimiter)) != self.expected_columns:
             (
                 self.log.warning(
-                    "Skipping %s metrics; unexpected return value: %s columns %s",
+                    "Skipping %s metrics; unexpected return value: %s, expected %s. Headers %s",
                     self.name,
                     len(headers.split(self.delimiter)),
-                    output_lines,
+                    self.expected_columns,
+                    headers,
                 ),
             )
             return []
 
-        self.log.warning("Processing %s metrics", self.name)
+        self.log.debug("Processing %s metrics", self.name)
         all_metrics = []
         for line in output_lines:
-            line_data = [line.strip() for line in line.split(self.delimiter)]
+            line_data = [val.strip() for val in line.split(self.delimiter)]
+            if len(line_data) != self.expected_columns:
+                self.log.warning(
+                    "Unexpected row length from %s: %s, expected %s", self.name, len(line_data), self.expected_columns
+                )
+                continue
             self.log.trace("Output from command %s: %s", self.name, line_data)
             tags = process_table_tags(tag_mapping, line_data)
             self.log.trace("Tags collected from command %s: %s", self.name, tags)
