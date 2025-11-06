@@ -135,7 +135,7 @@ It respects a few extra [option](#options)-level attributes:
 It also respects a few extra fields under the `value` attribute of each option:
 
 - `display_default` - This is the default value that will be shown in the header of each option, useful if it differs from the `example`.
-  You may set it to `null` explicitly to disable showing this part of the header.
+  This will take precedence over the `default`. You may also set it to `null` explicitly to disable showing this part of the header.
 - `compact_example` - Whether or not to display complex types like arrays in their most compact representation. It defaults to `false`.
 
 ### Usage
