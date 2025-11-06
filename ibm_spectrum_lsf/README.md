@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [IBM Spectrum LSF][1] through the Datadog Agent. 
+This check monitors [IBM Spectrum LSF][1] using the Datadog Agent. 
 
 Include a high level overview of what this integration does:
 - What does your product do (in 1-2 sentences)?
@@ -20,7 +20,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `ibm_spectrum_lsf.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ibm_spectrum_lsf performance data. See the [sample ibm_spectrum_lsf.d/conf.yaml][4] for all available configuration options.
+1. Edit the `ibm_spectrum_lsf.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your `ibm_spectrum_lsf` performance data. See the [sample ibm_spectrum_lsf.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 

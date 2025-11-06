@@ -252,6 +252,8 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
     def copy_filt_func(libname):
         return not any(excl.search(libname) for excl in exclusions)
 
+    min_macos_version = Version(os.environ["MACOSX_DEPLOYMENT_TARGET"])
+
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
         if not wheel_was_built(wheel):
@@ -263,21 +265,19 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
         # Platform independent wheels: move and rename to make platform specific
         wheel_name = WheelName.parse(wheel.name)
         if wheel_name.platform_tag == 'any':
-            dest = str(wheel_name._replace(platform_tag='macosx_10_12_universal2'))
+            dest = str(wheel_name._replace(platform_tag=f'macosx_{min_macos_version.major}_{min_macos_version.minor}_universal2'))
             shutil.move(wheel, Path(built_dir) / dest)
             continue
 
-        # Platform dependent wheels: rename with single arch and verify target macOS version
-        single_arch = os.uname().machine
-        dest = str(wheel_name._replace(platform_tag=wheel_name.platform_tag.replace('universal2', single_arch)))
+        # Platform dependent wheels: prune excluded files, verify target architecture & macOS version
         copied_libs = delocate_wheel(
             str(wheel),
-            os.path.join(built_dir, dest),
+            os.path.join(built_dir, wheel.name),
             copy_filt_func=copy_filt_func,
-            # require_archs=[single_arch],  TODO(regis): address multi-arch confluent_kafka/cimpl.cpython-312-darwin.so
-            require_target_macos_version=Version(os.environ["MACOSX_DEPLOYMENT_TARGET"]),
+            require_archs=[os.uname().machine],
+            require_target_macos_version=min_macos_version,
         )
-        print(f'Repaired wheel to {dest}')
+        print('Repaired wheel')
         if copied_libs:
             print('Libraries copied into the wheel:')
             print('\n'.join(copied_libs))
