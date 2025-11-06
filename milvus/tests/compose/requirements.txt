@@ -1,2 +1,2 @@
 numpy==1.26.4
-pymilvus==2.5.1
+pymilvus==2.5.14
