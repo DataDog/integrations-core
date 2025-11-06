@@ -8,7 +8,7 @@
                 "type": "image",
                 "url": "https://datadog-securitylabs.imgix.net/img/guarddog-2-0-release/logo.png?auto=format",
                 "url_dark_theme": "https://datadog-securitylabs.imgix.net/img/guarddog-2-0-release/logo.png?auto=format",
-                "sizing": "none",
+                "sizing": "contain",
                 "has_background": false,
                 "has_border": false,
                 "vertical_align": "center",
@@ -27,7 +27,7 @@
                 "type": "note",
                 "content": "[GuardDog](https://github.com/DataDog/guarddog) is a CLI tool that allows identifying malicious PyPI and npm packages, Go modules, and GitHub actions. It runs a set of heuristics on the package source code (through Semgrep rules) and on the package metadata.\n\nThis dashboard shows results from GuardDog scans across ecosystems like PyPI, npm, Go modules, and GitHub Actions. It helps spot malicious or suspicious packages based on GuardDog’s rules.\n\nFor more information, see the [Guarddog Integration Documentation](https://docs.datadoghq.com/integrations/guarddog/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
-                "font_size": "14",
+                "font_size": "16",
                 "text_align": "left",
                 "vertical_align": "center",
                 "show_tick": true,
@@ -43,34 +43,31 @@
             }
         },
         {
-            "id": 1298418581715142,
+            "id": 4846026563343400,
             "definition": {
-                "title": "Source Code Rules Overview",
+                "title": "Overview",
                 "background_color": "vivid_blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 8204512867420389,
+                        "id": 2341921399522390,
                         "definition": {
-                            "title": "Total Packages with Shady Links",
+                            "title": "Total scans",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "type": "query_value",
                             "requests": [
                                 {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
+                                    "response_format": "scalar",
                                     "queries": [
                                         {
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*shady-links* $dependency $package_ecosystem $host"
+                                                "query": "source:guarddog $dependency $package_ecosystem $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -82,183 +79,40 @@
                                             "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
                                     "conditional_formats": [
                                         {
-                                            "comparator": ">",
+                                            "comparator": ">=",
                                             "value": 0,
-                                            "palette": "black_on_light_red"
+                                            "palette": "black_on_light_green"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
                                         }
                                     ]
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
                         },
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 3431725130945857,
-                        "definition": {
-                            "title": "Total Packages with Command Overwrite",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*cmd-overwrite* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_yellow"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 729009019132946,
-                        "definition": {
-                            "title": "Total Packages with Serialize Environment",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*serialize-environment* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_yellow"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 6459553349261051,
-                        "definition": {
-                            "title": "Total Packages with Data Exfiltration",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*exfiltrate-sensitive-data* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "black_on_light_red"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
                             "width": 3,
                             "height": 3
                         }
                     },
                     {
-                        "id": 8215490143866865,
+                        "id": 4066771089244267,
                         "definition": {
-                            "title": "Packages over Time with Data Exfiltration",
+                            "title": "Scans over time",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -284,7 +138,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*exfiltrate-sensitive-data* $dependency $package_ecosystem $host"
+                                                "query": "source:guarddog $dependency $package_ecosystem $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -298,7 +152,123 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "green",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4562248146890626,
+                        "definition": {
+                            "title": "Total scans with issues",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @log.result.issues:>0 $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7815640220387549,
+                        "definition": {
+                            "title": "Issues detected over time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Scan Issues",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @log.result.issues:>0 $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "orange",
                                         "order_by": "values",
                                         "line_type": "solid",
                                         "line_width": "normal"
@@ -311,16 +281,203 @@
                             "x": 3,
                             "y": 3,
                             "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5329911375804886,
+                        "definition": {
+                            "title": "Issues rate",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "default_zero(query1) * 100 / (default_zero(query2) * 5 / 3)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @log.result.issues:>0 $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8257542052368501,
+                        "definition": {
+                            "title": "Total scan errors",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @has_errors:yes $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">=",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 3,
                             "height": 3
                         }
                     },
                     {
-                        "id": 3847776209617062,
+                        "id": 3196402488204385,
                         "definition": {
-                            "title": "Packages with Data Exfiltration",
+                            "title": "Errors over time",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "query_table",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Scan Errors",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @has_errors:yes $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "red",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 7,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6873978698212501,
+                        "definition": {
+                            "title": "Scans by package type",
+                            "title_size": "16",
+                            "title_align": "left",
                             "requests": [
                                 {
                                     "queries": [
@@ -328,22 +485,12 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*exfiltrate-sensitive-data* $dependency $package_ecosystem $host"
+                                                "query": "source:guarddog $dependency $package_ecosystem $host"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
-                                                {
-                                                    "facet": "@log.dependency",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                },
                                                 {
                                                     "facet": "@enrichment_details.package_ecosystem",
                                                     "limit": 10,
@@ -351,8 +498,7 @@
                                                         "aggregation": "count",
                                                         "order": "desc",
                                                         "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
+                                                    }
                                                 }
                                             ],
                                             "compute": {
@@ -362,78 +508,15 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "sort": {
-                                        "count": 100,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
+                                    "style": {
+                                        "palette": "datadog16"
                                     },
                                     "formulas": [
                                         {
-                                            "cell_display_mode": "number",
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 6,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3478673548371951,
-                        "definition": {
-                            "title": "Top Packages with Steganography",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*steganography* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@log.dependency",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 10,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -444,81 +527,25 @@
                                     }
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
+                            "type": "sunburst",
+                            "hide_total": false,
+                            "legend": {
+                                "type": "inline"
                             }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 6,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 298844687558776,
-                        "definition": {
-                            "title": "Packages with Silent Process Execution",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:guarddog @enrichment_details.rules_triggered:*silent-process-execution* $dependency $package_ecosystem $host",
-                                        "indexes": [
-                                            "*"
-                                        ],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "log.dependency",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "enrichment_details.package_ecosystem",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "log.result.results",
-                                            "width": "auto"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
                         },
                         "layout": {
                             "x": 0,
                             "y": 10,
-                            "width": 12,
-                            "height": 3
+                            "width": 4,
+                            "height": 4
                         }
                     },
                     {
-                        "id": 2997980867186290,
+                        "id": 4329926380265790,
                         "definition": {
-                            "title": "Packages with Shady Links",
+                            "title": "Distribution by triggered rules",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "query_table",
                             "requests": [
                                 {
                                     "queries": [
@@ -526,24 +553,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*shady-links* $dependency $package_ecosystem $host"
+                                                "query": "source:guarddog $dependency $package_ecosystem $host"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@log.dependency",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                },
-                                                {
-                                                    "facet": "@enrichment_details.package_ecosystem",
+                                                    "facet": "@enrichment_details.rules_triggered",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -560,83 +577,15 @@
                                         }
                                     ],
                                     "response_format": "scalar",
-                                    "sort": {
-                                        "count": 100,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
+                                    "style": {
+                                        "palette": "datadog16"
                                     },
                                     "formulas": [
                                         {
-                                            "cell_display_mode": "number",
                                             "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 13,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4422436258181347,
-                        "definition": {
-                            "title": "Packages with Command Overwrite",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*cmd-overwrite* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@log.dependency",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                },
-                                                {
-                                                    "facet": "@enrichment_details.package_ecosystem",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
                                         }
                                     ],
-                                    "response_format": "scalar",
                                     "sort": {
-                                        "count": 100,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -644,82 +593,25 @@
                                                 "order": "desc"
                                             }
                                         ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "cell_display_mode": "number",
-                                            "formula": "query1"
-                                        }
-                                    ]
+                                    }
                                 }
                             ],
-                            "has_search_bar": "auto"
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
                         },
                         "layout": {
-                            "x": 6,
-                            "y": 13,
-                            "width": 6,
+                            "x": 4,
+                            "y": 10,
+                            "width": 8,
                             "height": 4
                         }
                     },
                     {
-                        "id": 6680773235122080,
+                        "id": 478127293725210,
                         "definition": {
-                            "title": "Packages Downloading Executables",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:guarddog @enrichment_details.rules_triggered:*download-executable* $dependency $package_ecosystem $host",
-                                        "indexes": [
-                                            "*"
-                                        ],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "log.dependency",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "enrichment_details.package_ecosystem",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "log.result.results",
-                                            "width": "auto"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 17,
-                            "width": 12,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 7605757073779358,
-                        "definition": {
-                            "title": "Top Packages with Direct URL Dependencies",
+                            "title": "Top packages scanned",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "toplist",
@@ -730,7 +622,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*direct_url_dependency* $dependency $package_ecosystem $host"
+                                                "query": "source:guarddog $dependency $package_ecosystem $host"
                                             },
                                             "indexes": [
                                                 "*"
@@ -760,7 +652,7 @@
                                         }
                                     ],
                                     "sort": {
-                                        "count": 10,
+                                        "count": 500,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -775,146 +667,23 @@
                                 "display": {
                                     "type": "stacked",
                                     "legend": "automatic"
-                                }
+                                },
+                                "palette": "datadog16"
                             }
                         },
                         "layout": {
                             "x": 0,
-                            "y": 20,
+                            "y": 14,
                             "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5396568247460985,
-                        "definition": {
-                            "title": "Top Packages with Base64 Execution",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*exec-base64* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@log.dependency",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 20,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 2325438935098922,
-                        "definition": {
-                            "title": "Packages with Code Execution",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:guarddog @enrichment_details.rules_triggered:*code-execution* $dependency $package_ecosystem $host",
-                                        "indexes": [
-                                            "*"
-                                        ],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "log.dependency",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "enrichment_details.package_ecosystem",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "log.result.results",
-                                            "width": "auto"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 24,
-                            "width": 12,
                             "height": 3
                         }
                     },
                     {
-                        "id": 5172601156081219,
+                        "id": 4448218344113222,
                         "definition": {
-                            "title": "Top Packages with Install Scripts",
+                            "title": "Distribution by host",
                             "title_size": "16",
                             "title_align": "left",
-                            "type": "toplist",
                             "requests": [
                                 {
                                     "queries": [
@@ -922,14 +691,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*install-script* $dependency $package_ecosystem $host"
+                                                "query": "source:guarddog $dependency $package_ecosystem $host"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@log.dependency",
+                                                    "facet": "host",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -946,13 +715,15 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    },
                                     "formulas": [
                                         {
                                             "formula": "query1"
                                         }
                                     ],
                                     "sort": {
-                                        "count": 10,
                                         "order_by": [
                                             {
                                                 "type": "formula",
@@ -963,292 +734,15 @@
                                     }
                                 }
                             ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
                             }
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 27,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 7401735907569297,
-                        "definition": {
-                            "title": "Packages with Obfuscation",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*obfuscation* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@log.dependency",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                },
-                                                {
-                                                    "facet": "@enrichment_details.package_ecosystem",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 100,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "cell_display_mode": "number",
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
                             "x": 6,
-                            "y": 27,
+                            "y": 14,
                             "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 2703991251052244,
-                        "definition": {
-                            "title": "Packages with DLL Hijacking Risks",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*dll-hijacking* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@log.dependency",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                },
-                                                {
-                                                    "facet": "@enrichment_details.package_ecosystem",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 100,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "cell_display_mode": "number",
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 31,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 7943842680183263,
-                        "definition": {
-                            "title": "Packages with Exec Download",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*exec-download* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@log.dependency",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                },
-                                                {
-                                                    "facet": "@enrichment_details.package_ecosystem",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 100,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "cell_display_mode": "number",
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 31,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8786528853766087,
-                        "definition": {
-                            "title": "Packages with Clipboard Access",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:guarddog @enrichment_details.rules_triggered:*clipboard-access* $dependency $package_ecosystem $host",
-                                        "indexes": [
-                                            "*"
-                                        ],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "log.dependency",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "log.result.results",
-                                            "width": "auto"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 35,
-                            "width": 12,
                             "height": 3
                         }
                     }
@@ -1258,8 +752,7 @@
                 "x": 0,
                 "y": 4,
                 "width": 12,
-                "height": 39,
-                "is_column_break": true
+                "height": 18
             }
         },
         {
@@ -1274,7 +767,7 @@
                     {
                         "id": 1033023599516060,
                         "definition": {
-                            "title": "Total Packages with Release Zero",
+                            "title": "Total packages with release zero",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1313,19 +806,25 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
                         },
                         "layout": {
                             "x": 0,
                             "y": 0,
                             "width": 4,
-                            "height": 3
+                            "height": 2
                         }
                     },
                     {
                         "id": 7459405603911113,
                         "definition": {
-                            "title": "Total Single Python File Packages",
+                            "title": "Total single python file packages",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1364,19 +863,25 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
                         },
                         "layout": {
                             "x": 4,
                             "y": 0,
                             "width": 4,
-                            "height": 3
+                            "height": 2
                         }
                     },
                     {
                         "id": 5767413299253491,
                         "definition": {
-                            "title": "Total Packages with Metadata Mismatch",
+                            "title": "Total packages with metadata mismatch",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1415,19 +920,226 @@
                                 }
                             ],
                             "autoscale": true,
-                            "precision": 2
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
                         },
                         "layout": {
                             "x": 8,
                             "y": 0,
                             "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8489664698803107,
+                        "definition": {
+                            "title": "Packages over time with email domain issues",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Unclaimed Maintainer Email Domain",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Potentially Compromised Email Domain",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*unclaimed_maintainer_email_domain* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*potentially_compromised_email_domain* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5253475120372876,
+                        "definition": {
+                            "title": "Top packages with unclaimed email domain",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*unclaimed_maintainer_email_domain* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3604153337811269,
+                        "definition": {
+                            "title": "Packages with compromised email domain",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:guarddog @enrichment_details.rules_triggered:*potentially_compromised_email_domain* $dependency $package_ecosystem $host",
+                                        "indexes": [
+                                            "*"
+                                        ],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log.dependency",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "enrichment_details.package_ecosystem",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log.result.results.potentially_compromised_email_domain",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 6,
                             "height": 3
                         }
                     },
                     {
                         "id": 5454987862486436,
                         "definition": {
-                            "title": "Packages with Empty Info",
+                            "title": "Packages with empty info",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -1494,7 +1206,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 3,
+                            "y": 8,
                             "width": 6,
                             "height": 4
                         }
@@ -1502,7 +1214,7 @@
                     {
                         "id": 146948115314265,
                         "definition": {
-                            "title": "Packages with Bundled Binary",
+                            "title": "Packages with bundled binary",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -1569,208 +1281,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 3,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 8489664698803107,
-                        "definition": {
-                            "title": "Packages over Time with Email Domain Issues",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Unclaimed Maintainer Email Domain",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Potentially Compromised Email Domain",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*unclaimed_maintainer_email_domain* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        },
-                                        {
-                                            "name": "query2",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*potentially_compromised_email_domain* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 7,
-                            "width": 12,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 5253475120372876,
-                        "definition": {
-                            "title": "Top Packages with Unclaimed Email Domain",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "toplist",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "logs",
-                                            "search": {
-                                                "query": "source:guarddog @enrichment_details.rules_triggered:*unclaimed_maintainer_email_domain* $dependency $package_ecosystem $host"
-                                            },
-                                            "indexes": [
-                                                "*"
-                                            ],
-                                            "group_by": [
-                                                {
-                                                    "facet": "@log.dependency",
-                                                    "limit": 10,
-                                                    "sort": {
-                                                        "aggregation": "count",
-                                                        "order": "desc",
-                                                        "metric": "count"
-                                                    },
-                                                    "should_exclude_missing": true
-                                                }
-                                            ],
-                                            "compute": {
-                                                "aggregation": "count"
-                                            },
-                                            "storage": "hot"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "sort": {
-                                        "count": 10,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ],
-                            "style": {
-                                "display": {
-                                    "type": "stacked",
-                                    "legend": "automatic"
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 10,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 3604153337811269,
-                        "definition": {
-                            "title": "Packages with Compromised Email Domain",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_stream",
-                                        "query_string": "source:guarddog @enrichment_details.rules_triggered:*potentially_compromised_email_domain* $dependency $package_ecosystem $host",
-                                        "indexes": [
-                                            "*"
-                                        ],
-                                        "storage": "hot"
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "timestamp",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "host",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "log.dependency",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "enrichment_details.package_ecosystem",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "log.result.results.potentially_compromised_email_domain",
-                                            "width": "auto"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 10,
+                            "y": 8,
                             "width": 6,
                             "height": 4
                         }
@@ -1778,7 +1289,7 @@
                     {
                         "id": 8720671778381703,
                         "definition": {
-                            "title": "Packages with Typosquatting",
+                            "title": "Packages with typosquatting",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -1845,7 +1356,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 14,
+                            "y": 12,
                             "width": 6,
                             "height": 4
                         }
@@ -1853,7 +1364,7 @@
                     {
                         "id": 146698391861394,
                         "definition": {
-                            "title": "Packages with Deceptive Author",
+                            "title": "Packages with deceptive author",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -1920,7 +1431,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 14,
+                            "y": 12,
                             "width": 6,
                             "height": 4
                         }
@@ -1929,9 +1440,1705 @@
             },
             "layout": {
                 "x": 0,
-                "y": 43,
+                "y": 22,
                 "width": 12,
-                "height": 19
+                "height": 17
+            }
+        },
+        {
+            "id": 1298418581715142,
+            "definition": {
+                "title": "Source Code Rules Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8204512867420389,
+                        "definition": {
+                            "title": "Packages with shady links",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*shady-links* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3431725130945857,
+                        "definition": {
+                            "title": "Packages with command overwrite",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*cmd-overwrite* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 729009019132946,
+                        "definition": {
+                            "title": "Total packages with serialize environment",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*serialize-environment* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_yellow"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6459553349261051,
+                        "definition": {
+                            "title": "Packages with data exfiltration",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*exfiltrate-sensitive-data* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "black_on_light_red"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8215490143866865,
+                        "definition": {
+                            "title": "Packages over time with data exfiltration",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Scans",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*exfiltrate-sensitive-data* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 8,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 3847776209617062,
+                        "definition": {
+                            "title": "Packages with data exfiltration",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*exfiltrate-sensitive-data* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@enrichment_details.package_ecosystem",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7401735907569297,
+                        "definition": {
+                            "title": "Packages with obfuscation",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*obfuscation* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@enrichment_details.package_ecosystem",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5172601156081219,
+                        "definition": {
+                            "title": "Top packages with install scripts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*install-script* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3478673548371951,
+                        "definition": {
+                            "title": "Top packages with steganography",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*steganography* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 8,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 298844687558776,
+                        "definition": {
+                            "title": "Packages with silent process execution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:guarddog @enrichment_details.rules_triggered:*silent-process-execution* $dependency $package_ecosystem $host",
+                                        "indexes": [
+                                            "*"
+                                        ],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log.dependency",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "enrichment_details.package_ecosystem",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log.result.results",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2997980867186290,
+                        "definition": {
+                            "title": "Packages with shady links",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*shady-links* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@enrichment_details.package_ecosystem",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 15,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4422436258181347,
+                        "definition": {
+                            "title": "Packages with command overwrite",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*cmd-overwrite* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@enrichment_details.package_ecosystem",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 15,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7605757073779358,
+                        "definition": {
+                            "title": "Top packages with direct URL dependencies",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*direct_url_dependency* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 19,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5396568247460985,
+                        "definition": {
+                            "title": "Top packages with base64 execution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*exec-base64* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 19,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6680773235122080,
+                        "definition": {
+                            "title": "Packages downloading executables",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:guarddog @enrichment_details.rules_triggered:*download-executable* $dependency $package_ecosystem $host",
+                                        "indexes": [
+                                            "*"
+                                        ],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log.dependency",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "enrichment_details.package_ecosystem",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log.result.results",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 22,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2703991251052244,
+                        "definition": {
+                            "title": "Packages with DLL hijacking risks",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*dll-hijacking* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@enrichment_details.package_ecosystem",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 25,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7943842680183263,
+                        "definition": {
+                            "title": "Packages with exec download",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "logs",
+                                            "search": {
+                                                "query": "source:guarddog @enrichment_details.rules_triggered:*exec-download* $dependency $package_ecosystem $host"
+                                            },
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "group_by": [
+                                                {
+                                                    "facet": "@log.dependency",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                },
+                                                {
+                                                    "facet": "@enrichment_details.package_ecosystem",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc",
+                                                        "metric": "count"
+                                                    },
+                                                    "should_exclude_missing": true
+                                                }
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 25,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2325438935098922,
+                        "definition": {
+                            "title": "Packages with code execution",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:guarddog @enrichment_details.rules_triggered:*code-execution* $dependency $package_ecosystem $host",
+                                        "indexes": [
+                                            "*"
+                                        ],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log.dependency",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "enrichment_details.package_ecosystem",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log.result.results",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 29,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8786528853766087,
+                        "definition": {
+                            "title": "Packages with clipboard access",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:guarddog @enrichment_details.rules_triggered:*clipboard-access* $dependency $package_ecosystem $host",
+                                        "indexes": [
+                                            "*"
+                                        ],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log.dependency",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "log.result.results",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 32,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 39,
+                "width": 12,
+                "height": 36,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 8901352887510255,
+            "definition": {
+                "title": "Datadog Cloud SIEM",
+                "title_align": "center",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4877782158829162,
+                        "definition": {
+                            "type": "note",
+                            "content": "\nDatadog Cloud SIEM analyzes and correlates **Guarddog** events to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security). ",
+                            "background_color": "vivid_blue",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 6316054107590145,
+                        "definition": {
+                            "title": "CRITICALs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#bc303c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:guarddog status:critical"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4746362720740803,
+                        "definition": {
+                            "title": "HIGHs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#d33043",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:guarddog status:high"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1884410462535449,
+                        "definition": {
+                            "title": "Critical Security Signals",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#bc303c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:guarddog status:critical"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 1,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7221033481585038,
+                        "definition": {
+                            "title": "MEDIUMs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#e5a21c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:guarddog status:medium"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7992841911908520,
+                        "definition": {
+                            "title": "LOWs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#ffb52b",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:guarddog status:low"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "custom_links": [],
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 2,
+                            "y": 3,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 6192727176026673,
+                        "definition": {
+                            "title": "High Security Signals",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#d33043",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:guarddog status:high"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 696797512669580,
+                        "definition": {
+                            "title": "Medium Security Signals",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "custom_bg_color": "#e5a21c",
+                                            "palette": "custom_bg",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "security_signals",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@workflow.rule.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:guarddog status:medium"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(query1)"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 10,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [],
+                            "style": {}
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 5,
+                            "width": 6,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 75,
+                "width": 12,
+                "height": 10
             }
         }
     ],
