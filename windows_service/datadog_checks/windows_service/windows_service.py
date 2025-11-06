@@ -343,6 +343,8 @@ class WindowsService(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
             self.log.debug('service state for %s %s', service_name, status)
             self.gauge('windows_service.uptime', service_uptime, tags=tags)
+            # Send 1 for windows_service.state so the user can sum by the windows_service_state tag
+            # to filter services by state. e.g. sum:windows_service.state{*} by windows_service_state
             self.gauge('windows_service.state', 1, tags=tags)
 
         if 'ALL' not in services:
