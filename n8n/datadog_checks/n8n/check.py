@@ -13,7 +13,6 @@ DEFAULT_VERSION_ENDPOINT = '/rest/settings'
 
 
 class N8nCheck(OpenMetricsBaseCheckV2):
-    # TODO  Decide later if we want to use customer prefix or ignore it.
     __NAMESPACE__ = 'n8n'
     DEFAULT_METRIC_LIMIT = 0
 
