@@ -185,6 +185,11 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     if instance.get('obfuscator_options', {}).get('quantize_sql_tables'):
         args['obfuscator_options']['replace_digits'] = True
 
+    # When autodiscovery is enabled, use global_view_db as the main database for DBM jobs
+    # This must happen before building tags so the db: tag reflects the correct database
+    if args.get('database_autodiscovery', {}).get('enabled'):
+        args['dbname'] = args.get('database_autodiscovery', {}).get('global_view_db', 'postgres')
+
     validation_result = ValidationResult()
 
     # Generate and validate tags
@@ -305,10 +310,6 @@ def apply_validated_defaults(args: dict, instance: dict, validation_result: Vali
 
     if args.get('collect_default_database'):
         args['ignore_databases'] = [d for d in args['ignore_databases'] if d != 'postgres']
-
-    # When autodiscovery is enabled, use global_view_db as the main database for DBM jobs
-    if args.get('database_autodiscovery', {}).get('enabled'):
-        args['dbname'] = args.get('database_autodiscovery', {}).get('global_view_db', 'postgres')
 
     apply_cloud_defaults(args, instance, validation_result)
 
