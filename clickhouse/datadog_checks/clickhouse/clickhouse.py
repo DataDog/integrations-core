@@ -8,6 +8,7 @@ from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
 from .statement_samples import ClickhouseStatementSamples
+from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
 
 
@@ -63,8 +64,30 @@ class ClickhouseCheck(AgentCheck):
         )
         self.check_initializations.append(self._query_manager.compile_queries)
 
-        # Initialize statement samples if DBM is enabled
+        # Initialize DBM components if enabled
         self._dbm_enabled = is_affirmative(self.instance.get('dbm', False))
+
+        # Initialize query metrics (from system.query_log - analogous to pg_stat_statements)
+        self._query_metrics_config = self.instance.get('query_metrics', {})
+        if self._dbm_enabled and self._query_metrics_config.get('enabled', True):
+            # Create a simple config object for query metrics
+            class QueryMetricsConfig:
+                def __init__(self, config_dict):
+                    self.enabled = config_dict.get('enabled', True)
+                    self.collection_interval = config_dict.get('collection_interval', 60)
+                    self.run_sync = config_dict.get('run_sync', False)
+                    self.full_statement_text_cache_max_size = config_dict.get(
+                        'full_statement_text_cache_max_size', 10000
+                    )
+                    self.full_statement_text_samples_per_hour_per_query = config_dict.get(
+                        'full_statement_text_samples_per_hour_per_query', 1
+                    )
+
+            self.statement_metrics = ClickhouseStatementMetrics(self, QueryMetricsConfig(self._query_metrics_config))
+        else:
+            self.statement_metrics = None
+
+        # Initialize query samples (from system.processes - analogous to pg_stat_activity)
         self._query_samples_config = self.instance.get('query_samples', {})
         if self._dbm_enabled and self._query_samples_config.get('enabled', True):
             # Create a simple config object for statement samples
@@ -85,7 +108,11 @@ class ClickhouseCheck(AgentCheck):
         self._query_manager.execute()
         self.collect_version()
 
-        # Run statement samples if DBM is enabled
+        # Run query metrics collection if DBM is enabled (from system.query_log)
+        if self.statement_metrics:
+            self.statement_metrics.run_job_loop(self._tags)
+
+        # Run statement samples if DBM is enabled (from system.processes)
         if self.statement_samples:
             self.statement_samples.run_job_loop(self._tags)
 
@@ -183,3 +210,32 @@ class ClickhouseCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._client = client
+
+    def create_dbm_client(self):
+        """
+        Create a separate ClickHouse client for DBM async jobs.
+        This prevents concurrent query errors when multiple jobs run simultaneously.
+        """
+        try:
+            client = clickhouse_connect.get_client(
+                host=self._server,
+                port=self._port,
+                username=self._user,
+                password=self._password,
+                database=self._db,
+                secure=self._tls_verify,
+                connect_timeout=self._connect_timeout,
+                send_receive_timeout=self._read_timeout,
+                client_name=f'datadog-dbm-{self.check_id}',
+                compress=self._compression,
+                ca_cert=self._tls_ca_cert,
+                verify=self._verify,
+                settings={},
+            )
+            return client
+        except Exception as e:
+            error = 'Unable to create DBM client: {}'.format(
+                self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))
+            )
+            self.log.warning(error)
+            raise
