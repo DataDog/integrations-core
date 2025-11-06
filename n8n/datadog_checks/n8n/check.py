@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
+
 from urllib.parse import urljoin, urlparse  # noqa: F401
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
@@ -32,14 +32,13 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         self.server_port = str(self.instance.get('server_port', 5678))
         self.raw_metric_prefix = self.instance.get('raw_metric_prefix', 'n8n')
 
-    
     def get_default_config(self):
         # If raw_metric_prefix is 'n8n', metrics start with 'n8n'
         if self.raw_metric_prefix == 'n8n':
             namespace = 'n8n'
         else:
             namespace = f'n8n.{self.raw_metric_prefix}'
-        
+
         return {'namespace': namespace, 'metrics': [METRIC_MAP]}
 
     @AgentCheck.metadata_entrypoint
@@ -68,7 +67,7 @@ class N8nCheck(OpenMetricsBaseCheckV2):
                 self.log.debug("Malformed N8N Server version format: %s", version)
         else:
             self.log.debug("Could not retrieve version metadata.")
-    
+
     def _check_n8n_health(self):
         endpoint = urljoin(self.openmetrics_endpoint, self._health_endpoint)
         response = self.http.get(endpoint)
@@ -85,14 +84,15 @@ class N8nCheck(OpenMetricsBaseCheckV2):
         endpoint = urljoin(self.openmetrics_endpoint, self._ready_endpoint)
         response = self.http.get(endpoint)
 
-        # Any 4xx or 5xx response from the API endpoint (/healthz/readiness) means the n8n is not ready to accept requests
+        # Any 4xx or 5xx response from the API endpoint (/healthz/readiness)
+        # means the n8n is not ready to accept requests
         if 400 <= response.status_code and response.status_code < 600:
             self.service_check('health.status', AgentCheck.CRITICAL, self.tags)
         if response.status_code == 200:
             self.service_check('health.status', AgentCheck.OK, self.tags)
         else:
-            self.service_check('health.status', AgentCheck.UNKNOWN, self.tags)       
-    
+            self.service_check('health.status', AgentCheck.UNKNOWN, self.tags)
+
     def check(self, instance):
         super().check(instance)
         self._submit_version_metadata()

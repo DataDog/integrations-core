@@ -7,7 +7,7 @@ import copy
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
+from datadog_checks.dev.conditions import CheckEndpoints
 
 from . import common
 
@@ -16,7 +16,7 @@ from . import common
 def dd_environment():
     compose_file = common.COMPOSE_FILE
     conditions = [
-        #CheckDockerLogs(identifier='n8n', patterns=['server running']),
+        # CheckDockerLogs(identifier='n8n', patterns=['server running']),
         CheckEndpoints(common.INSTANCE["openmetrics_endpoint"]),
         CheckEndpoints(f'{common.OPENMETRICS_URL}/healthz', attempts=60, wait=3),
         CheckEndpoints(f'{common.OPENMETRICS_URL}/metrics', attempts=60, wait=3),
@@ -26,7 +26,7 @@ def dd_environment():
             'instances': [common.INSTANCE],
         }
 
+
 @pytest.fixture
 def instance():
     return copy.deepcopy(common.INSTANCE)
-

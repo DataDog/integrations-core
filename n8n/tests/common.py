@@ -91,4 +91,3 @@ E2E_METRICS = [
     'n8n.process.cpu.seconds.total',
     'n8n.version.info',
 ]
-
