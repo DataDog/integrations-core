@@ -6,8 +6,6 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
-from cachetools import TTLCache
-
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
 
@@ -50,6 +48,18 @@ WHERE query NOT LIKE '%system.processes%'
   AND query != ''
 """
 
+# Query to get active connections aggregated by user, database, etc
+# Similar to Postgres PG_ACTIVE_CONNECTIONS_QUERY
+ACTIVE_CONNECTIONS_QUERY = """
+SELECT
+    user,
+    query_kind,
+    count(*) as connections
+FROM system.processes
+WHERE query NOT LIKE '%system.processes%'
+GROUP BY user, query_kind
+"""
+
 # Columns from system.processes which correspond to attributes common to all databases
 # and are therefore stored under other standard keys
 system_processes_sample_exclude_keys = {
@@ -90,6 +100,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         self._tags_no_db = None
         self.tags = None
 
+        # Create a separate client for this DBM job to avoid concurrent query errors
+        self._db_client = None
+
         # Get obfuscator options from config if available
         obfuscate_options = {
             'return_json_metadata': True,
@@ -106,6 +119,12 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         )
 
         self._collection_interval = collection_interval
+
+        # Activity snapshot collection configuration
+        self._activity_coll_enabled = getattr(config, 'activity_enabled', True)
+        self._activity_coll_interval = getattr(config, 'activity_collection_interval', 10)
+        self._activity_max_rows = getattr(config, 'activity_max_rows', 1000)
+        self._time_since_last_activity_event = 0
 
     def _dbtags(self, db, *extra_tags):
         """
@@ -124,6 +143,24 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             t.extend(self._tags_no_db)
         return t
 
+    def _report_check_hist_metrics(self, start_time, row_count, operation):
+        """
+        Report histogram metrics for check operations
+        """
+        elapsed_ms = (time.time() - start_time) * 1000
+        self._check.histogram(
+            "dd.clickhouse.statement_samples.{}.time".format(operation),
+            elapsed_ms,
+            tags=self.tags + self._get_debug_tags(),
+            raw=True,
+        )
+        self._check.histogram(
+            "dd.clickhouse.statement_samples.{}.rows".format(operation),
+            row_count,
+            tags=self.tags + self._get_debug_tags(),
+            raw=True,
+        )
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_active_queries(self):
         """
@@ -133,7 +170,11 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         start_time = time.time()
 
         try:
-            rows = self._check.execute_query_raw(ACTIVE_QUERIES_QUERY)
+            # Use the dedicated client for this job
+            if self._db_client is None:
+                self._db_client = self._check.create_dbm_client()
+            result = self._db_client.query(ACTIVE_QUERIES_QUERY)
+            rows = result.result_rows
 
             self._report_check_hist_metrics(start_time, len(rows), "get_active_queries")
             self._log.debug("Loaded %s rows from system.processes", len(rows))
@@ -141,6 +182,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             return rows
         except Exception as e:
             self._log.exception("Failed to collect active queries: %s", str(e))
+            # Reset client on error to force reconnect
+            self._db_client = None
             self._check.count(
                 "dd.clickhouse.statement_samples.error",
                 1,
@@ -210,9 +253,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             row['query_signature'] = compute_sql_signature(obfuscated_query)
 
         except Exception as e:
-            self._log.warning(
-                "Failed to obfuscate query: %s, query: %s", str(e), row.get('query', '')[:100]
-            )
+            self._log.warning("Failed to obfuscate query: %s, query: %s", str(e), row.get('query', '')[:100])
             # On obfuscation error, we still want to emit the row
             row['statement'] = None
             row['query_signature'] = compute_sql_signature(row['query'])
@@ -236,6 +277,106 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 self._log.debug("Failed to normalize row: %s", e)
 
         return normalized_rows
+
+    def _get_active_connections(self):
+        """
+        Get aggregated active connection counts from system.processes
+        Similar to Postgres _get_active_connections from pg_stat_activity
+        """
+        try:
+            start_time = time.time()
+
+            # Use the dedicated client for this job
+            if self._db_client is None:
+                self._db_client = self._check.create_dbm_client()
+            result = self._db_client.query(ACTIVE_CONNECTIONS_QUERY)
+            rows = result.result_rows
+
+            elapsed_ms = (time.time() - start_time) * 1000
+            self._log.debug("Retrieved %s connection aggregation rows in %.2f ms", len(rows), elapsed_ms)
+
+            # Convert to list of dicts
+            connections = []
+            for row in rows:
+                connections.append(
+                    {
+                        'user': row[0],
+                        'query_kind': row[1],
+                        'connections': row[2],
+                    }
+                )
+
+            return connections
+
+        except Exception as e:
+            self._log.warning("Failed to get active connections: %s", e)
+            # Reset client on error to force reconnect
+            self._db_client = None
+            return []
+
+    def _to_active_session(self, row):
+        """
+        Convert a system.processes row to an active session
+        Similar to Postgres _to_active_session
+        """
+        # Filter out non-active queries
+        if not row.get('query') or not row.get('statement'):
+            return None
+
+        # Remove null values and the raw query
+        active_row = {key: val for key, val in row.items() if val is not None and key != 'query'}
+        return active_row
+
+    def _create_active_sessions(self, rows):
+        """
+        Create active sessions from system.processes rows
+        Similar to Postgres _create_active_sessions
+        """
+        active_sessions_count = 0
+        for row in rows:
+            active_row = self._to_active_session(row)
+            if active_row:
+                active_sessions_count += 1
+                yield active_row
+            if active_sessions_count >= self._activity_max_rows:
+                break
+
+    def _create_activity_event(self, rows, active_connections):
+        """
+        Create a database monitoring activity event
+        Similar to Postgres _create_activity_event
+        """
+        self._time_since_last_activity_event = time.time()
+        active_sessions = []
+
+        for row in self._create_active_sessions(rows):
+            active_sessions.append(row)
+
+        event = {
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "clickhouse",
+            "dbm_type": "activity",
+            "collection_interval": self._activity_coll_interval,
+            "ddtags": self._tags_no_db,
+            "timestamp": time.time() * 1000,
+            "cloud_metadata": getattr(self._check, 'cloud_metadata', {}),
+            'service': getattr(self._config, 'service', None),
+            "clickhouse_activity": active_sessions,
+            "clickhouse_connections": active_connections,
+        }
+        return event
+
+    def _report_activity_event(self):
+        """
+        Check if we should report an activity event based on collection interval
+        Similar to Postgres _report_activity_event
+        """
+        elapsed_s = time.time() - self._time_since_last_activity_event
+        if elapsed_s < self._activity_coll_interval or not self._activity_coll_enabled:
+            return False
+        return True
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_statement_samples(self):
@@ -274,8 +415,11 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 event = self._create_sample_event(row)
 
                 # Log the event payload for debugging
-                self._log.debug("Query sample event payload: ddsource=%s, query_signature=%s",
-                              event.get('ddsource'), query_signature[:50] if query_signature else 'N/A')
+                self._log.debug(
+                    "Query sample event payload: ddsource=%s, query_signature=%s",
+                    event.get('ddsource'),
+                    query_signature[:50] if query_signature else 'N/A',
+                )
 
                 # Submit the event
                 event_json = json.dumps(event, default=default_json_event_encoding)
@@ -297,7 +441,10 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
         self._log.info(
             "Statement sample collection complete: submitted=%s, skipped=%s, errors=%s, elapsed_ms=%.2f",
-            submitted_count, skipped_count, error_count, elapsed_ms
+            submitted_count,
+            skipped_count,
+            error_count,
+            elapsed_ms,
         )
 
         # Report cache size metrics
@@ -310,8 +457,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
     def _create_sample_event(self, row):
         """
-        Create a database monitoring query sample event
+        Create a database monitoring query sample event (plan type)
         Format follows Postgres integration pattern
+        This represents currently executing queries from system.processes
         """
         db = self._check._db
 
@@ -320,7 +468,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "clickhouse",
-            "dbm_type": "plan",  # Using "plan" type like Postgres (even without actual explain plans)
+            "dbm_type": "plan",  # Using "plan" type for query samples
             "ddtags": ",".join(self._dbtags(db)),
             "timestamp": int(time.time() * 1000),
             "db": {
@@ -334,9 +482,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                     "comments": row.get('dd_comments'),
                 },
             },
-            "clickhouse": {
-                k: v for k, v in row.items() if k not in system_processes_sample_exclude_keys
-            },
+            "clickhouse": {k: v for k, v in row.items() if k not in system_processes_sample_exclude_keys},
         }
 
         # Add duration if available (elapsed time in seconds, convert to nanoseconds)
@@ -353,4 +499,50 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         self.tags = [t for t in self._check._tags if not t.startswith('dd.internal')]
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
 
+        # Check if we should collect activity snapshots
+        collect_activity = self._report_activity_event()
+
+        # Always collect statement samples
         self._collect_statement_samples()
+
+        # Collect and submit activity event if it's time
+        if collect_activity:
+            try:
+                start_time = time.time()
+
+                # Get active queries for activity snapshot
+                rows = self._get_active_queries()
+                rows = self._filter_and_normalize_statement_rows(rows)
+
+                # Get active connections aggregation
+                active_connections = self._get_active_connections()
+
+                # Create and submit activity event
+                activity_event = self._create_activity_event(rows, active_connections)
+                self._check.database_monitoring_query_activity(
+                    json.dumps(activity_event, default=default_json_event_encoding)
+                )
+
+                elapsed_ms = (time.time() - start_time) * 1000
+                self._check.histogram(
+                    "dd.clickhouse.collect_activity_snapshot.time",
+                    elapsed_ms,
+                    tags=self.tags + self._get_debug_tags(),
+                    raw=True,
+                )
+
+                self._log.info(
+                    "Activity snapshot collected and submitted: sessions=%s, connections=%s, elapsed_ms=%.2f",
+                    len(activity_event.get('clickhouse_activity', [])),
+                    len(activity_event.get('clickhouse_connections', [])),
+                    elapsed_ms,
+                )
+
+            except Exception as e:
+                self._log.exception("Failed to collect activity snapshot: %s", e)
+                self._check.count(
+                    "dd.clickhouse.statement_samples.error",
+                    1,
+                    tags=self.tags + ["error:collect-activity-snapshot"] + self._get_debug_tags(),
+                    raw=True,
+                )

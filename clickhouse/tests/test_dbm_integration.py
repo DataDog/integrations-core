@@ -9,8 +9,6 @@ import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
 
-from .common import CONFIG
-
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -105,9 +103,9 @@ class TestDBMIntegration:
         check.check(None)
 
         # Verify no DBM metrics are reported
-        assert not aggregator.metrics(
-            'dd.clickhouse.collect_statement_samples.events_submitted.count'
-        ), "No DBM metrics should be reported when DBM is disabled"
+        assert not aggregator.metrics('dd.clickhouse.collect_statement_samples.events_submitted.count'), (
+            "No DBM metrics should be reported when DBM is disabled"
+        )
 
     def test_query_samples_with_activity(self, aggregator, instance, dd_run_check):
         """
@@ -242,7 +240,7 @@ class TestDBMIntegration:
         assert 'ddsource' in event, "Event should have ddsource field"
         assert event['ddsource'] == 'clickhouse', "ddsource should be clickhouse"
         assert 'dbm_type' in event, "Event should have dbm_type field"
-        assert event['dbm_type'] == 'sample', "dbm_type should be sample"
+        assert event['dbm_type'] == 'plan', "dbm_type should be plan"
         assert 'timestamp' in event, "Event should have timestamp field"
         assert 'db' in event, "Event should have db field"
         assert 'clickhouse' in event, "Event should have clickhouse field"
@@ -269,4 +267,3 @@ class TestDBMIntegration:
 
         print("Event structure is valid!")
         print(f"Event keys: {list(event.keys())}")
-
