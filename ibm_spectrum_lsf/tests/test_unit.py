@@ -7,7 +7,7 @@ import logging
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_spectrum_lsf import IbmSpectrumLsfCheck
 
-from .common import ALL_METRICS, CLUSTER_METRICS
+from .common import ALL_METRICS, BJOBS_METRICS, CLUSTER_METRICS
 from .conftest import get_mock_output
 
 
@@ -89,6 +89,23 @@ def test_lsload_extra_output(mock_client, dd_run_check, aggregator, instance, ca
         aggregator.assert_metric(metric["name"], metric["val"], tags=metric["tags"])
 
     assert "Unexpected row length from lsload: 6, expected 13" in caplog.text
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_bjobs_no_output(mock_client, dd_run_check, aggregator, instance, caplog):
+    check = IbmSpectrumLsfCheck('ibm_spectrum_lsf', {}, [instance])
+    check.client = mock_client
+    mock_client.bjobs.return_value = get_mock_output('bjobs_no_jobs')
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    for metric in ALL_METRICS:
+        if metric not in BJOBS_METRICS:
+            aggregator.assert_metric(metric["name"], metric["val"], tags=metric["tags"])
+
+    assert "Skipping bjobs metrics; unexpected return value: 1, expected 11" in caplog.text
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
