@@ -86,18 +86,19 @@ def option_enabled(option):
 
     return option['required']
 
-def validate_fields(fields_dict, option_name, allowed_fields, field_level, writer):
 
+def validate_fields(fields_dict, option_name, allowed_fields, field_level, writer):
     invalid_fields = [field for field in fields_dict if field not in allowed_fields]
-    
+
     if invalid_fields:
         invalid_fields_str = '\n'.join(f"- {field!r}" for field in invalid_fields)
         valid_fields_str = '\n'.join(f"- {field!r}" for field in sorted(allowed_fields))
-        
+
         writer.new_error(
             f"Option name {option_name!r} contains the following invalid {field_level} fields:\n{invalid_fields_str}\n"
             f"{field_level.capitalize()} fields must be one of the following:\n{valid_fields_str}"
         )
+
 
 def write_description(option, writer, indent, option_type):
     description = option['description']
