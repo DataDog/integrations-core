@@ -27,24 +27,14 @@ pipeline:
         - "2025-10-22T15:49:41-0400 [INFO] [entry_service:Summarization:1] 127.0.0.1:50870 (scheme=http,method=POST,path=/summarize,type=application/json,length=227) (status=200,type=text/plain; charset=utf-8,length=407) 5890.581ms (trace=ab27d3de318c77adc1a75e34786fb557,span=29583fecc118996f,sampled=0,service.name=Summarization)"
       grok:
         matchRules: |
-<<<<<<< HEAD
-          general %{_timestamp} \[%{word:level}\] \[%{_component}\] %{_client} \(%{data:request:keyvalue("=","/:")}\) \(%{_response}\) %{_latency} \(%{_tracing}\).*
-        supportRules: |
-          _timestamp %{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
-          _component %{word:component_name}\:%{word:service.name}\:%{integer:service.instance}
-          _client %{ip:client.ip}\:%{integer:client.port}
-          _response status=%{word:response.code},type=%{notSpace:response.type} charset=%{notSpace:response.charset},length=%{number:response.length}
-          _latency %{number:request.latency_ms}ms
-          _tracing trace=%{notSpace:tracing.trace_id},span=%{notSpace:tracing.span_id},sampled=%{integer:tracing.sampled},service.name=%{notSpace:tracing.service.name}
-=======
-          general %{_timestamp} \[%{word:level}\] \[%{_component}\] %{_client} \(%{notSpace:bentoml.request:keyvalue("=","/:")}\) \(%{_response}\) %{_latency} \(%{notSpace:bentoml.tracing:keyvalue}\).*
+          general %{_timestamp} \[%{word:level}\] \[%{_component}\] %{_client} \(%{notSpace:bentoml.request:keyvalue("=","/:")}\) \(%{_response}\) %{_latency} \(%{_tracing}\).*
         supportRules: |
           _timestamp %{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
           _component %{word:bentoml.component_name}\:%{word:bentoml.service.name}\:%{number:bentoml.service.instance}
           _client %{ip:bentoml.client.ip}\:%{number:bentoml.client.port}
           _response status=%{number:bentoml.response.code},type=%{notSpace:bentoml.response.type} charset=%{notSpace:bentoml.response.charset},length=%{number:bentoml.response.length}
           _latency %{number:bentoml.request.latency_ms}ms
->>>>>>> a898581761 (renest components and use different parser for code)
+          _tracing trace=%{notSpace:tracing.trace_id},span=%{notSpace:tracing.span_id},sampled=%{integer:tracing.sampled},service.name=%{notSpace:tracing.service.name}
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
