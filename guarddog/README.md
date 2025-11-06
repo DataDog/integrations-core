@@ -114,6 +114,17 @@ The Guarddog integration does not include any events.
 
 ## Troubleshooting
 
+In case of a **Permission denied** error, run the following command to give the Datadog Agent permission for the Guarddog executable:
+  ```shell
+  chmod o+rx /path/to/guarddog
+  ```
+
+If the issue persists, ensure that the parent directories in the path are accessible to the Datadog Agent. Run the following command to grant permissions to the parent directory:
+  ```shell
+  chmod o+x /path/to/parent_directory
+  ```
+
+
 For any further assistance, contact [Datadog support][3].
 
 [1]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
