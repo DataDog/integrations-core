@@ -527,7 +527,7 @@ instances:
 
     ## Web JMX instance example
   -
-    ## @param is_jmx - boolean - optional - default: true
+    ## @param is_jmx - boolean - optional - default: false
     ## Whether or not this instance is a configuration for a JMX integration.
     ## If `is_jmx` is set to true at the init_config level, this flag is ignored.
     ##
