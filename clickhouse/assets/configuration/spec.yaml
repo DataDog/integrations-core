@@ -118,6 +118,27 @@ files:
           value:
             type: boolean
             example: false
+        - name: activity_enabled
+          description: |
+            Enable collection of database activity snapshots.
+            Activity snapshots capture currently executing queries and active connections.
+          value:
+            type: boolean
+            example: true
+        - name: activity_collection_interval
+          description: |
+            The interval in seconds between activity snapshot collections.
+            Lower values capture more activity data but increase overhead.
+            For fast ClickHouse queries, consider using 1-5 seconds.
+          value:
+            type: number
+            example: 10
+        - name: activity_max_rows
+          description: |
+            The maximum number of active sessions to include in each activity snapshot.
+          value:
+            type: number
+            example: 1000
     - template: instances/db
       overrides:
         custom_queries.value.example:
