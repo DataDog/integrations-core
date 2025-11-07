@@ -1,6 +1,6 @@
 {
     "title": "Shopify - Product Overview",
-    "description": "",
+    "description": "The Shopify Product Overview Dashboard provides an overview of products within your store. It provides insights into product types, status distribution, inventory, and variant details.",
     "widgets": [
         {
             "id": 8506652285430826,
@@ -121,60 +121,6 @@
             }
         },
         {
-            "id": 6613518820826564,
-            "definition": {
-                "title": "Top Product Count by Type",
-                "type": "treemap",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "cardinality",
-                                    "metric": "@id"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@productType",
-                                        "limit": 25,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "cardinality",
-                                            "metric": "@id"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:product -@productType:\"\" $product_name $product_type $product_id $currency"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "style": {
-                            "palette": "datadog16"
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 3,
-                "y": 4,
-                "width": 9,
-                "height": 3
-            }
-        },
-        {
             "id": 4043889896241554,
             "definition": {
                 "title": "Products with Out of Stock Variants",
@@ -213,10 +159,10 @@
                 "precision": 2
             },
             "layout": {
-                "x": 0,
-                "y": 7,
-                "width": 4,
-                "height": 2
+                "x": 3,
+                "y": 4,
+                "width": 3,
+                "height": 3
             }
         },
         {
@@ -258,10 +204,10 @@
                 "precision": 2
             },
             "layout": {
-                "x": 4,
-                "y": 7,
-                "width": 4,
-                "height": 2
+                "x": 6,
+                "y": 4,
+                "width": 3,
+                "height": 3
             }
         },
         {
@@ -303,10 +249,64 @@
                 "precision": 2
             },
             "layout": {
-                "x": 8,
+                "x": 9,
+                "y": 4,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 6613518820826564,
+            "definition": {
+                "title": "Top Product Count by Type",
+                "type": "treemap",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@productType",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:product -@productType:\"\" $product_name $product_type $product_id $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
                 "y": 7,
-                "width": 4,
-                "height": 2
+                "width": 8,
+                "height": 4
             }
         },
         {
@@ -318,11 +318,6 @@
                 "requests": [
                     {
                         "response_format": "scalar",
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
                         "queries": [
                             {
                                 "data_source": "logs",
@@ -354,6 +349,11 @@
                         "style": {
                             "palette": "datadog16"
                         },
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
                         "sort": {
                             "count": 10,
                             "order_by": [
@@ -368,12 +368,12 @@
                 ],
                 "type": "sunburst",
                 "legend": {
-                    "type": "inline"
+                    "type": "table"
                 }
             },
             "layout": {
-                "x": 0,
-                "y": 9,
+                "x": 8,
+                "y": 7,
                 "width": 4,
                 "height": 4
             }
@@ -381,7 +381,7 @@
         {
             "id": 3849686844214096,
             "definition": {
-                "title": "Product Variant Price (Avg)",
+                "title": "Product Variant Pricing Summary",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "query_table",
@@ -483,7 +483,7 @@
                             "order_by": [
                                 {
                                     "type": "formula",
-                                    "index": 2,
+                                    "index": 0,
                                     "order": "desc"
                                 }
                             ]
@@ -491,18 +491,13 @@
                         "formulas": [
                             {
                                 "cell_display_mode": "number",
-                                "alias": "Max Variant Price",
+                                "alias": "Average Max Variant Price",
                                 "formula": "query1"
                             },
                             {
                                 "cell_display_mode": "number",
-                                "alias": "Min Variant Price",
+                                "alias": "Average Min Variant Price",
                                 "formula": "query2"
-                            },
-                            {
-                                "alias": "Average Variant Price",
-                                "cell_display_mode": "bar",
-                                "formula": "(query1 + query2) / 2"
                             }
                         ]
                     }
@@ -510,9 +505,30 @@
                 "has_search_bar": "auto"
             },
             "layout": {
-                "x": 4,
-                "y": 9,
-                "width": 8,
+                "x": 0,
+                "y": 11,
+                "width": 10,
+                "height": 4
+            }
+        },
+        {
+            "id": 4488919335627787,
+            "definition": {
+                "type": "note",
+                "content": "**Note**: The panel `Product Variant Pricing Summary` displays the average min and max variant prices for the product, reflecting changes in price over time.",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "center",
+                "vertical_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 10,
+                "y": 11,
+                "width": 2,
                 "height": 4
             }
         },
@@ -529,9 +545,17 @@
                             "data_source": "logs_stream",
                             "query_string": "source:shopify service:product $product_name $product_type $product_id $currency",
                             "indexes": [],
-                            "storage": "hot"
+                            "storage": "hot",
+                            "sort": {
+                                "column": "timestamp",
+                                "order": "desc"
+                            }
                         },
                         "columns": [
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
                             {
                                 "field": "legacyResourceId",
                                 "width": "auto"
@@ -557,15 +581,15 @@
                                 "width": "auto"
                             },
                             {
+                                "field": "priceRangeV2.maxVariantPrice.currencyCode",
+                                "width": "auto"
+                            },
+                            {
                                 "field": "priceRangeV2.maxVariantPrice.amount",
                                 "width": "auto"
                             },
                             {
                                 "field": "priceRangeV2.minVariantPrice.amount",
-                                "width": "auto"
-                            },
-                            {
-                                "field": "priceRangeV2.maxVariantPrice.currencyCode",
                                 "width": "auto"
                             },
                             {
@@ -583,7 +607,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 13,
+                "y": 15,
                 "width": 12,
                 "height": 5
             }
@@ -617,5 +641,6 @@
     ],
     "layout_type": "ordered",
     "notify_list": [],
-    "reflow_type": "fixed"
+    "reflow_type": "fixed",
+    "pause_auto_refresh": false
 }

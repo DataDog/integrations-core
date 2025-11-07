@@ -222,6 +222,7 @@ tests:
       "presentment_currency" : "INR",
       "confirmed" : true,
       "total_weight" : 600,
+      "current_total_discounts" : "0.00",
       "total_discounts" : "0.00",
       "fulfillments" : [ {
         "updated_at" : "2024-09-20T10:13:23+05:30",
@@ -419,9 +420,12 @@ tests:
       "processed_at" : "2024-08-28T14:48:43+05:30",
       "currency" : "INR",
       "id" : 5030430111111,
+      "current_subtotal_price" : "1000.00",
       "subtotal_price" : "2398.00",
+      "current_total_price" : "1180.00",
       "total_price" : "2829.64",
       "total_line_items_price" : "2398.00",
+      "current_total_tax" : "180.00",
       "total_tax" : "431.64",
       "total_tip_received" : "0.00",
       "financial_status" : "partially_paid",
@@ -840,13 +844,13 @@ tests:
       order_number: 1002
       presentment_currency: "INR"
       processed_at: "2024-08-28T14:48:43+05:30"
-      subtotal_price: "2398.00"
+      subtotal_price: "1000.00"
       taxes_included: false
       total_discounts: "0.00"
       total_line_items_price: "2398.00"
       total_outstanding: "1296.82"
-      total_price: "2829.64"
-      total_tax: "431.64"
+      total_price: "1180.00"
+      total_tax: "180.00"
       total_tip_received: "0.00"
       total_weight: 600
       updated_at: "2024-09-20T10:13:23+05:30"
@@ -1042,6 +1046,7 @@ tests:
         "presentment_currency" : "INR",
         "confirmed" : true,
         "total_weight" : 600,
+        "current_total_discounts" : "0.00",
         "total_discounts" : "0.00",
         "fulfillments" : [ {
           "updated_at" : "2024-09-20T10:13:23+05:30",
@@ -1239,9 +1244,12 @@ tests:
         "processed_at" : "2024-08-28T14:48:43+05:30",
         "currency" : "INR",
         "id" : 5030430111111,
+        "current_subtotal_price" : "1000.00",
         "subtotal_price" : "2398.00",
+        "current_total_price" : "1180.00",
         "total_price" : "2829.64",
         "total_line_items_price" : "2398.00",
+        "current_total_tax" : "180.00",
         "total_tax" : "431.64",
         "total_tip_received" : "0.00",
         "financial_status" : "partially_paid",

@@ -1,6 +1,6 @@
 {
     "title": "Shopify - Order Overview",
-    "description": "",
+    "description": "The Shopify Orders Overview Dashboard provides an overview of orders within your store. It provides insights into order tracking, fulfillments, customers, and product details.",
     "widgets": [
         {
             "id": 3630919149544800,
@@ -91,7 +91,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -143,7 +143,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:shopify service:order @confirmed:true $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order @confirmed:true $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -188,7 +188,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:shopify service:order @refunds.transactions.status:success $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order @refunds.transactions.status:success $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -233,7 +233,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:shopify service:order @buyer_accepts_marketing:true $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order @buyer_accepts_marketing:true $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -278,7 +278,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:shopify service:order @closed_at:* $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order @closed_at:* $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -323,7 +323,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:shopify service:order @cancelled_at:* $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order @cancelled_at:* $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -368,7 +368,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:shopify service:order (@tax_exempt:true OR @tax_included:false) $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order (@tax_exempt:true OR @tax_included:false) $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -417,7 +417,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:shopify service:order @line_items.gift_card:true $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order @line_items.gift_card:true $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -436,6 +436,95 @@
             }
         },
         {
+            "id": 4183443318605663,
+            "definition": {
+                "title": "Order Summary",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:shopify service:order $order_number $customer_name $customer_city $currency",
+                            "indexes": [],
+                            "storage": "hot",
+                            "sort": {
+                                "column": "timestamp",
+                                "order": "desc"
+                            }
+                        },
+                        "columns": [
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "order_number",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "financial_status",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "currency",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "total_price",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "subtotal_price",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "total_tax",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "total_discounts",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "total_tip_received",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 6076451033442339,
+            "definition": {
+                "type": "note",
+                "content": "  **Note**: The panel `Average Order Price by Customer` displays the average order price for each customer, including paid, refunded, and other payment statuses.\n",
+                "background_color": "yellow",
+                "font_size": "16",
+                "text_align": "center",
+                "vertical_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 2,
+                "height": 4
+            }
+        },
+        {
             "id": 4902698799419696,
             "definition": {
                 "title": "Average Order Price by Customer",
@@ -446,37 +535,39 @@
                     {
                         "queries": [
                             {
-                                "data_source": "logs",
                                 "name": "query1",
+                                "data_source": "logs",
+                                "search": {
+                                    "query": "source:shopify service:order -@usr.name:\" \" @usr.name:* $order_number $customer_name $customer_city $currency"
+                                },
                                 "indexes": [
                                     "*"
                                 ],
-                                "compute": {
-                                    "aggregation": "avg",
-                                    "metric": "@total_price"
-                                },
                                 "group_by": [
                                     {
                                         "facet": "@usr.name",
                                         "limit": 25,
                                         "sort": {
-                                            "order": "desc",
                                             "aggregation": "avg",
+                                            "order": "desc",
                                             "metric": "@total_price"
-                                        }
+                                        },
+                                        "should_exclude_missing": true
                                     },
                                     {
                                         "facet": "@currency",
                                         "limit": 25,
                                         "sort": {
-                                            "order": "desc",
                                             "aggregation": "avg",
+                                            "order": "desc",
                                             "metric": "@total_price"
-                                        }
+                                        },
+                                        "should_exclude_missing": true
                                     }
                                 ],
-                                "search": {
-                                    "query": "source:shopify service:order -@usr.name:\" \" $order_id $customer_name $customer_city $currency"
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@total_price"
                                 },
                                 "storage": "hot"
                             }
@@ -507,354 +598,9 @@
                 }
             },
             "layout": {
-                "x": 0,
-                "y": 8,
-                "width": 3,
-                "height": 4
-            }
-        },
-        {
-            "id": 3843387744924516,
-            "definition": {
-                "title": "Order Summary (rounded price)",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "query_table",
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "avg",
-                                    "metric": "@total_price"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@id",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    },
-                                    {
-                                        "facet": "@currency",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
-                                },
-                                "storage": "hot"
-                            },
-                            {
-                                "data_source": "logs",
-                                "name": "query2",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "avg",
-                                    "metric": "@subtotal_price"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@id",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    },
-                                    {
-                                        "facet": "@currency",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
-                                },
-                                "storage": "hot"
-                            },
-                            {
-                                "data_source": "logs",
-                                "name": "query3",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "avg",
-                                    "metric": "@total_discounts"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@id",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    },
-                                    {
-                                        "facet": "@currency",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
-                                },
-                                "storage": "hot"
-                            },
-                            {
-                                "data_source": "logs",
-                                "name": "query4",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "avg",
-                                    "metric": "@total_line_items_price"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@id",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    },
-                                    {
-                                        "facet": "@currency",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
-                                },
-                                "storage": "hot"
-                            },
-                            {
-                                "data_source": "logs",
-                                "name": "query5",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "avg",
-                                    "metric": "@total_tax"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@id",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    },
-                                    {
-                                        "facet": "@currency",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
-                                },
-                                "storage": "hot"
-                            },
-                            {
-                                "data_source": "logs",
-                                "name": "query6",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "avg",
-                                    "metric": "@total_tip_received"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@id",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    },
-                                    {
-                                        "facet": "@currency",
-                                        "limit": 100,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "avg",
-                                            "metric": "@total_price"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "text_formats": [],
-                        "sort": {
-                            "count": 60000,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
-                        },
-                        "formulas": [
-                            {
-                                "cell_display_mode": "bar",
-                                "alias": "Total Price",
-                                "formula": "query1"
-                            },
-                            {
-                                "cell_display_mode": "bar",
-                                "alias": "Sub Total Price",
-                                "formula": "query2"
-                            },
-                            {
-                                "cell_display_mode": "bar",
-                                "alias": "Total Discount",
-                                "formula": "query3"
-                            },
-                            {
-                                "cell_display_mode": "bar",
-                                "alias": "Total Line Item Price",
-                                "formula": "query4"
-                            },
-                            {
-                                "cell_display_mode": "bar",
-                                "alias": "Total Tax",
-                                "formula": "query5"
-                            },
-                            {
-                                "cell_display_mode": "bar",
-                                "alias": "Total Tip Received",
-                                "formula": "query6"
-                            }
-                        ]
-                    }
-                ],
-                "has_search_bar": "auto"
-            },
-            "layout": {
-                "x": 3,
-                "y": 8,
-                "width": 9,
-                "height": 4
-            }
-        },
-        {
-            "id": 7339194611439248,
-            "definition": {
-                "title": "Top Ordered Products",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "toplist",
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "cardinality",
-                                    "metric": "@id"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@line_items.title",
-                                        "limit": 25,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "cardinality",
-                                            "metric": "@id"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "sort": {
-                            "count": 25,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    }
-                }
-            },
-            "layout": {
-                "x": 0,
+                "x": 2,
                 "y": 12,
-                "width": 4,
+                "width": 5,
                 "height": 4
             }
         },
@@ -890,7 +636,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:shopify service:order -@usr.name:\" \" $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order -@usr.name:\" \" $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -921,9 +667,78 @@
                 }
             },
             "layout": {
-                "x": 4,
+                "x": 7,
                 "y": 12,
-                "width": 4,
+                "width": 5,
+                "height": 4
+            }
+        },
+        {
+            "id": 7339194611439248,
+            "definition": {
+                "title": "Top Ordered Products",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "cardinality",
+                                    "metric": "@id"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@line_items.title",
+                                        "limit": 25,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "cardinality",
+                                            "metric": "@id"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:shopify service:order $order_number $customer_name $customer_city $currency"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 25,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 6,
                 "height": 4
             }
         },
@@ -959,7 +774,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -990,9 +805,9 @@
                 }
             },
             "layout": {
-                "x": 8,
-                "y": 12,
-                "width": 4,
+                "x": 6,
+                "y": 16,
+                "width": 6,
                 "height": 4
             }
         },
@@ -1004,11 +819,6 @@
                 "title_align": "left",
                 "requests": [
                     {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
                         "queries": [
                             {
                                 "data_source": "logs",
@@ -1032,12 +842,20 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
                         ],
                         "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
                         "sort": {
                             "count": 500,
                             "order_by": [
@@ -1047,9 +865,6 @@
                                     "order": "desc"
                                 }
                             ]
-                        },
-                        "style": {
-                            "palette": "datadog16"
                         }
                     }
                 ],
@@ -1060,7 +875,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 20,
                 "width": 6,
                 "height": 4
             }
@@ -1073,11 +888,6 @@
                 "title_align": "left",
                 "requests": [
                     {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
                         "queries": [
                             {
                                 "data_source": "logs",
@@ -1101,12 +911,20 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
                         ],
                         "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        },
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
                         "sort": {
                             "count": 500,
                             "order_by": [
@@ -1116,9 +934,6 @@
                                     "order": "desc"
                                 }
                             ]
-                        },
-                        "style": {
-                            "palette": "datadog16"
                         }
                     }
                 ],
@@ -1129,7 +944,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 16,
+                "y": 20,
                 "width": 6,
                 "height": 4
             }
@@ -1166,7 +981,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -1198,7 +1013,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 20,
+                "y": 24,
                 "width": 6,
                 "height": 4
             }
@@ -1236,7 +1051,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -1268,7 +1083,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 20,
+                "y": 24,
                 "width": 6,
                 "height": 4
             }
@@ -1282,11 +1097,6 @@
                 "requests": [
                     {
                         "response_format": "scalar",
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
                         "queries": [
                             {
                                 "data_source": "logs",
@@ -1310,7 +1120,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -1318,6 +1128,11 @@
                         "style": {
                             "palette": "datadog16"
                         },
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
                         "sort": {
                             "count": 10,
                             "order_by": [
@@ -1337,7 +1152,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 24,
+                "y": 28,
                 "width": 6,
                 "height": 4
             }
@@ -1374,7 +1189,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:shopify service:order $order_id $customer_name $customer_city $currency"
+                                    "query": "source:shopify service:order $order_number $customer_name $customer_city $currency"
                                 },
                                 "storage": "hot"
                             }
@@ -1407,7 +1222,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 24,
+                "y": 28,
                 "width": 6,
                 "height": 4
             }
@@ -1423,21 +1238,21 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:shopify service:order $order_id $customer_name $customer_city $currency",
+                            "query_string": "source:shopify service:order $order_number $customer_name $customer_city $currency",
                             "indexes": [],
-                            "storage": "hot"
+                            "storage": "hot",
+                            "sort": {
+                                "column": "timestamp",
+                                "order": "desc"
+                            }
                         },
                         "columns": [
                             {
-                                "field": "@id",
+                                "field": "timestamp",
                                 "width": "auto"
                             },
                             {
-                                "field": "usr.name",
-                                "width": "auto"
-                            },
-                            {
-                                "field": "total_price",
+                                "field": "order_number",
                                 "width": "auto"
                             },
                             {
@@ -1445,7 +1260,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "currency",
+                                "field": "@usr.name",
                                 "width": "auto"
                             },
                             {
@@ -1459,7 +1274,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 28,
+                "y": 32,
                 "width": 12,
                 "height": 4
             }
@@ -1467,8 +1282,8 @@
     ],
     "template_variables": [
         {
-            "name": "order_id",
-            "prefix": "@id",
+            "name": "order_number",
+            "prefix": "@order_number",
             "available_values": [],
             "default": "*"
         },
@@ -1493,5 +1308,6 @@
     ],
     "layout_type": "ordered",
     "notify_list": [],
-    "reflow_type": "fixed"
+    "reflow_type": "fixed",
+    "pause_auto_refresh": false
 }
