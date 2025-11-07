@@ -127,6 +127,24 @@ instances:
         #
         # run_sync: false
 
+        ## @param activity_enabled - boolean - optional - default: true
+        ## Enable collection of database activity snapshots.
+        ## Activity snapshots capture currently executing queries and active connections.
+        #
+        # activity_enabled: true
+
+        ## @param activity_collection_interval - number - optional - default: 10
+        ## The interval in seconds between activity snapshot collections.
+        ## Lower values capture more activity data but increase overhead.
+        ## For fast ClickHouse queries, consider using 1-5 seconds.
+        #
+        # activity_collection_interval: 10
+
+        ## @param activity_max_rows - number - optional - default: 1000
+        ## The maximum number of active sessions to include in each activity snapshot.
+        #
+        # activity_max_rows: 1000
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.
