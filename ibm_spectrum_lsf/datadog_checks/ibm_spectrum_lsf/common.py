@@ -59,3 +59,8 @@ def transform_tag(val: str) -> Optional[str]:
         return None
     else:
         return parsed
+
+
+def transform_error(val: str) -> bool:
+    parsed = val.strip()
+    return not parsed == '-'

@@ -12,6 +12,7 @@ from .client import LSFClient
 from .common import (
     is_affirmative,
     transform_active,
+    transform_error,
     transform_float,
     transform_job_id,
     transform_open,
@@ -328,4 +329,37 @@ class BJobsProcessor(LSFMetricsProcessor):
             LSFMetricMapping('percent_complete', 10, transform_float),
         ]
 
+        return self.parse_table_command(metrics, tags)
+
+
+class GPULoadProcessor(LSFMetricsProcessor):
+    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+        super().__init__(client, logger, base_tags)
+        self.name = 'gpuload'
+        self.expected_columns = 14
+        self.delimiter = None
+        self.prefix = 'server.gpu'
+
+    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+        return self.client.gpuload()
+
+    def process_metrics(self) -> list[LSFMetric]:
+        tags = [
+            LSFTagMapping('lsf_host', 0, transform_tag),
+            LSFTagMapping('gpu_id', 1, transform_tag),
+            LSFTagMapping('gpu_model', 2, transform_tag),
+        ]
+        metrics = [
+            LSFMetricMapping('mode', 3, transform_float),
+            LSFMetricMapping('temperature', 4, transform_float),
+            LSFMetricMapping('ecc', 5, transform_float),
+            LSFMetricMapping('utilization', 6, transform_float),
+            LSFMetricMapping('mem.utilization', 7, transform_float),
+            LSFMetricMapping('power', 8, transform_float),
+            LSFMetricMapping('mem.total', 9, transform_float),
+            LSFMetricMapping('mem.used', 10, transform_float),
+            LSFMetricMapping('pstate', 11, transform_float),
+            LSFMetricMapping('status', 12, transform_status),
+            LSFMetricMapping('error', 13, transform_error),
+        ]
         return self.parse_table_command(metrics, tags)
