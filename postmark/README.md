@@ -6,8 +6,6 @@
 
 To gain insights into Postmark's broadcast and transactional message streams, integrate Postmark with Datadog using [webhooks][2].
 
-**Minimum Agent version:** 7.58.0
-
 ## Setup
 
 Follow the instructions below to configure this integration for your Postmark account.

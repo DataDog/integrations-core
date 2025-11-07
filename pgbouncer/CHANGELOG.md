@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.6.1 / 2025-10-15 / Agent 7.72.0
+
+***Fixed***:
+
+* Always connect to pgbouncer using ClientCursor and simple query protocol. ([#21649](https://github.com/DataDog/integrations-core/pull/21649))
+
 ## 8.6.0 / 2025-10-02
 
 ***Added***:

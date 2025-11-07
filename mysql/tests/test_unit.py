@@ -513,7 +513,7 @@ def test__eliminate_duplicate_rows():
             True,
             False,
             False,
-            {'Source_UUID': 'source-uuid-123', 'Master_UUID': None},
+            [{'Source_UUID': 'source-uuid-123', 'Master_UUID': None}],
             False,
             'server-uuid-456',
             'source-uuid-123',
@@ -524,7 +524,7 @@ def test__eliminate_duplicate_rows():
             True,
             False,
             False,
-            {'Master_UUID': 'master-uuid-789'},
+            [{'Master_UUID': 'master-uuid-789'}],
             False,
             'server-uuid-456',
             'master-uuid-789',
@@ -535,18 +535,18 @@ def test__eliminate_duplicate_rows():
             True,
             False,
             False,
-            {'Source_UUID': None, 'Master_UUID': 'master-uuid-789'},
+            [{'Source_UUID': None, 'Master_UUID': 'master-uuid-789'}],
             False,
             'server-uuid-456',
             None,
             None,
         ),
         # Test case 7: Primary with binlog enabled
-        (True, False, False, {}, True, 'server-uuid-456', 'server-uuid-456', 'primary'),
+        (True, False, False, [], True, 'server-uuid-456', 'server-uuid-456', 'primary'),
         # Test case 8: No replica status and binlog disabled
         (True, False, False, None, False, 'server-uuid-456', None, None),
         # Test case 9: Empty replica status dict
-        (True, False, False, {}, False, 'server-uuid-456', None, None),
+        (True, False, False, [], False, 'server-uuid-456', None, None),
     ],
 )
 def test_set_cluster_tags(

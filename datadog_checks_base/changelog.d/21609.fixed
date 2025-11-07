@@ -1,1 +1,0 @@
-Add `certifi` fallback for missing default CA certificates

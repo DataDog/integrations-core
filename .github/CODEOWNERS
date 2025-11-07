@@ -115,16 +115,18 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /cisco_aci/                                                        @DataDog/ndm-integrations @DataDog/agent-integrations
 /cisco_aci/*.md                                                    @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 /cisco_aci/manifest.json                                           @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
-/cisco_aci/metadata.csv                                            @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
-/cisco_aci/assets/dashboards                                       @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
-/cisco_aci/assets/monitors                                         @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
-/cisco_sdwan/                                                      @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
-/snmp/                                                             @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
+/cisco_sdwan/                                                      @DataDog/ndm-integrations @DataDog/agent-integrations
+/cisco_sdwan/*.md                                                  @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
+/cisco_sdwan/manifest.json                                         @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
+/snmp/                                                             @DataDog/ndm-core @DataDog/agent-integrations
 /snmp/*.md                                                         @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
+/snmp/manifest.json                                                @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/                                                           @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/*.md                                                       @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
+/snmp_*/manifest.json                                              @DataDog/ndm-core @DataDog/agent-integrations @DataDog/documentation
 /network_path/                                                     @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations
 /network_path/*.md                                                 @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
+/network_path/manifest.json                                        @DataDog/network-device-monitoring @DataDog/Networks @DataDog/agent-integrations @DataDog/documentation
 /versa/                                                            @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 
 /datadog_checks_dev/datadog_checks/dev/tooling/commands/meta/snmp/ @DataDog/ndm-core @DataDog/agent-integrations
@@ -319,10 +321,20 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /incident_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
 /incident_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/kandji/                                                             @DataDog/saas-integrations
+/kandji/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/kandji/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/kandji/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /keeper/                                                             @DataDog/saas-integrations
 /keeper/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
 /keeper/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
 /keeper/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
+/kandji/                                                             @DataDog/saas-integrations
+/kandji/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
+/kandji/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
+/kandji/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /lastpass/                                                          @DataDog/saas-integrations
 /lastpass/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
@@ -659,11 +671,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /databricks/*.md                                                     @DataDog/saas-integrations @DataDog/documentation
 /databricks/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
 /databricks/metadata.csv                                             @DataDog/saas-integrations @DataDog/documentation
-
-/trend_micro_cloud_one/                                              @DataDog/saas-integrations
-/trend_micro_cloud_one/*.md                                          @DataDog/saas-integrations @DataDog/documentation
-/trend_micro_cloud_one/manifest.json                                 @DataDog/saas-integrations @DataDog/documentation
-/trend_micro_cloud_one/assets/logs/                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /supply_chain_firewall/                                              @DataDog/saas-integrations @DataDog/agent-integrations
 /supply_chain_firewall/*.md                                          @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation

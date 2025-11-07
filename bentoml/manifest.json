@@ -3,7 +3,7 @@
   "app_uuid": "2163f7af-7c30-4583-ab15-892d980227e9",
   "app_id": "bentoml",
   "owner": "agent-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -42,9 +42,11 @@
       ]
     },
     "dashboards": {
-      "BentoML Placeholder": "assets/dashboards/placeholder.json"
+      "BentoML Overview": "assets/dashboards/bentoml_overview.json"
     },
-    "monitors": {},
+    "monitors": {
+      "BentoML Liveness Monitor": "assets/monitors/bentoml_liveness_monitor.json"
+    },
     "saved_views": {}
   },
   "author": {

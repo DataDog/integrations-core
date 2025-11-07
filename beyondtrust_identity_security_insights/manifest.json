@@ -32,7 +32,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 51341700,
       "source_type_name": "BeyondTrust Identity Security Insights",
       "events": {

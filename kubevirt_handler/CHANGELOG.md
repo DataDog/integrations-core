@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 2.1.0 / 2025-10-02
+## 2.2.0 / 2025-10-31
+
+***Added***:
+
+* Update python classifier to python 3.13 ([#21473](https://github.com/DataDog/integrations-core/pull/21473))
+
+***Fixed***:
+
+* Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
+
+## 2.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

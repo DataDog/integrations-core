@@ -1,0 +1,246 @@
+id: kandji
+metric_id: kandji
+backend_only: false
+facets:
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+pipeline:
+  type: pipeline
+  name: Kandji
+  enabled: true
+  filter:
+    query: source:kandji
+  processors:
+    - type: date-remapper
+      name: Define `detection_datetime,occurred_at` as the official date of the log
+      enabled: true
+      sources:
+        - detection_datetime
+        - occurred_at
+    - type: pipeline
+      name: Parse Audit Logs with Admin Activities
+      enabled: true
+      filter:
+        query: service:audit @target_type:admin
+      processors:
+        - type: string-builder-processor
+          name: Prepare `fullName` string for user
+          enabled: true
+          template: "%{new_state.first_name} %{new_state.last_name}"
+          target: usr.name
+          replaceMissing: true
+        - type: attribute-remapper
+          name: Map `new_state.email` to `usr.email`
+          enabled: true
+          sources:
+            - new_state.email
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Audit Logs with File Detection
+      enabled: true
+      filter:
+        query: service:audit @target_type:file_detection
+      processors:
+        - type: attribute-remapper
+          name: Map `new_state.event.outcome` to `evt.outcome`
+          enabled: true
+          sources:
+            - new_state.event.outcome
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new_state.user.name` to `usr.name`
+          enabled: true
+          sources:
+            - new_state.user.name
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new_state.user.id` to `usr.id`
+          enabled: true
+          sources:
+            - new_state.user.id
+          sourceType: attribute
+          target: usr.id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new_state.file.name` to `file_name`
+          enabled: true
+          sources:
+            - new_state.file.name
+          sourceType: attribute
+          target: file_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `metadata.device.name` to `device_name`
+          enabled: true
+          sources:
+            - metadata.device.name
+          sourceType: attribute
+          target: device_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Audit Logs with Device Details
+      enabled: true
+      filter:
+        query: service:audit @target_type:device
+      processors:
+        - type: attribute-remapper
+          name: Map `new_state.blueprint.name` to `blueprint_name`
+          enabled: true
+          sources:
+            - new_state.blueprint.name
+          sourceType: attribute
+          target: blueprint_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new_state.device.name` to `device_name`
+          enabled: true
+          sources:
+            - new_state.device.name
+          sourceType: attribute
+          target: device_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Audit Logs with Vulnerability
+      enabled: true
+      filter:
+        query: service:audit @target_type:vulnerability
+      processors:
+        - type: attribute-remapper
+          name: Map `new_state.vulnerability.id` to `cve_id`
+          enabled: true
+          sources:
+            - new_state.vulnerability.id
+          sourceType: attribute
+          target: cve_id
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new_state.host.name` to `device_name`
+          enabled: true
+          sources:
+            - new_state.host.name
+          sourceType: attribute
+          target: device_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `new_state.file.name` to `file_name`
+          enabled: true
+          sources:
+            - new_state.file.name
+          sourceType: attribute
+          target: file_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - name: Lookup on `new_state.vulnerability.severity` to `detection_severity`
+          enabled: true
+          source: new_state.vulnerability.severity
+          target: detection_severity
+          lookupTable: |-
+            Critical,critical
+            High,warning
+            Medium,warning
+            Low,info
+            Undefined,info
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `detection_severity` as the official status of the log
+          enabled: true
+          sources:
+            - detection_severity
+    - type: pipeline
+      name: Parse Audit Logs with Blueprint
+      enabled: true
+      filter:
+        query: service:audit @target_type:blueprint
+      processors:
+        - type: attribute-remapper
+          name: Map `new_state.name` to `blueprint_name`
+          enabled: true
+          sources:
+            - new_state.name
+          sourceType: attribute
+          target: blueprint_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: pipeline
+      name: Parse Detection Logs
+      enabled: true
+      filter:
+        query: service:detection
+      processors:
+        - type: message-remapper
+          name: Define `description` as the official message of the log
+          enabled: true
+          sources:
+            - description
+        - name: Lookup on `severity` to `detection_severity`
+          enabled: true
+          source: severity
+          target: detection_severity
+          lookupTable: |-
+            Critical,critical
+            High,warning
+            Medium,warning
+            Low,info
+            Undefined,info
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `detection_severity` as the official status of the log
+          enabled: true
+          sources:
+            - detection_severity
+        - type: attribute-remapper
+          name: Map `name` to `file_name`
+          enabled: true
+          sources:
+            - name
+          sourceType: attribute
+          target: file_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
