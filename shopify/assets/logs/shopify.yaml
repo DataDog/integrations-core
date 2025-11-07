@@ -165,7 +165,7 @@ pipeline:
           target: total_price
           targetType: attribute
           preserveSource: false
-          overrideOnConflict: false
+          overrideOnConflict: true
         - type: attribute-remapper
           name: Map `current_subtotal_price` to `subtotal_price`
           enabled: true
@@ -175,7 +175,7 @@ pipeline:
           target: subtotal_price
           targetType: attribute
           preserveSource: false
-          overrideOnConflict: false
+          overrideOnConflict: true
         - type: attribute-remapper
           name: Map `current_total_tax` to `total_tax`
           enabled: true
@@ -185,7 +185,7 @@ pipeline:
           target: total_tax
           targetType: attribute
           preserveSource: false
-          overrideOnConflict: false
+          overrideOnConflict: true
         - type: attribute-remapper
           name: Map `current_total_discounts` to `total_discounts`
           enabled: true
@@ -195,7 +195,7 @@ pipeline:
           target: total_discounts
           targetType: attribute
           preserveSource: false
-          overrideOnConflict: false
+          overrideOnConflict: true
         - type: string-builder-processor
           name: Define `usr.name` equal to %{customer.first_name} %{customer.last_name}
           enabled: true
