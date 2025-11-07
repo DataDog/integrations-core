@@ -35,7 +35,7 @@ jobs:
       id: octo-sts
       with:
         scope: DataDog/integrations-core
-        policy: upgrade-python-version
+        policy: self.create-pull-requests.schedule
     - name: Upgrade Python version
       id: update
       run: |-

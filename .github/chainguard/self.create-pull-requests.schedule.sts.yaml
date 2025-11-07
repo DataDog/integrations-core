@@ -1,0 +1,41 @@
+# Trust policy for automated workflows that create pull requests
+#
+# This policy is intended for use with the peter-evans/create-pull-request action
+# in any workflow that runs from the protected master branch.
+#
+# Naming convention:
+#   self: Only this repository (DataDog/integrations-core) can use this policy
+#   create-pull-requests: Grants permissions to create pull requests
+#
+# Security model:
+#   - Workflow must run from the protected master branch
+#   - Workflow file must be committed to master
+#   - Works with any event type (schedule, workflow_dispatch, push, etc.)
+#
+# Permissions granted:
+#   - contents: write       - Push commits to branches
+#   - pull_requests: write  - Create pull requests
+#   - workflows: write      - Modify workflow files (enables full automation)
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.create-pull-requests.schedule
+#
+# Recommended for migrating workflows away from static GitHub App credentials stored in secrets.
+
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/integrations-core:ref:refs/heads/master
+
+claim_pattern:
+  ref: refs/heads/master
+  ref_protected: "true"
+  job_workflow_ref: DataDog/integrations-core/.github/workflows/.*@refs/heads/master
+
+permissions:
+  contents: write
+  pull_requests: write
+  workflows: write
+
