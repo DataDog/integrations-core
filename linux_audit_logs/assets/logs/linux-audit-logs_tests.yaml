@@ -295,7 +295,7 @@ tests:
       items: 1
       key: "auditlog"
       msg:
-        result: "failed"
+        res: "failed"
       msg_raw: ""
       pid: 22639
       post_msg_kv: ""
@@ -303,6 +303,7 @@ tests:
       pre_msg_kv: ""
       ses: 24
       sgid: 0
+      status: "error"
       subj: "unconfined"
       success: "no"
       suid: 0
