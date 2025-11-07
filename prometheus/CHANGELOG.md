@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 6.1.1 / 2025-10-31
+
+***Fixed***:
+
+* Fix support of common instance options and fix indentation of `conf.yaml.example` file. ([#21584](https://github.com/DataDog/integrations-core/pull/21584))
+
+## 6.1.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
 ## 6.0.0 / 2025-07-10 / Agent 7.69.0
 
 ***Changed***:

@@ -11,6 +11,8 @@ Out-of-the-box (OOTB) dashboards help you to visualize detailed insights into We
 
 **Disclaimer**: Use of this integration might collect data that includes personal information, is subject to your agreements with Datadog. Cisco is not responsible for the privacy, security, or integrity of any end-user information, including personal data, transmitted through your use of the integration.
 
+**Minimum Agent version:** 7.65.0
+
 ## Setup
 
 ### Installation

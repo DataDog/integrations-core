@@ -662,7 +662,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
         'dd.internal.resource:database_instance:stubbed.hostname',
-        'ddagenthostname:stubbed.hostname',
         'port:13306',
         'tag1:value1',
         'tag2:value2',

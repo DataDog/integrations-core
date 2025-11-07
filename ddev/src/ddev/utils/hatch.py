@@ -93,22 +93,50 @@ def env_show(platform: Platform, integration: Integration, as_json: bool = True)
             ) from error
 
 
-def list_environment_names(
-    platform: Platform, integration: Integration, filters: Collection[EnvironmentFilter], match_all: bool = True
-) -> list[str]:
+def list_environments(
+    platform: Platform,
+    integration: Integration,
+    filters: Collection[EnvironmentFilter] | None = None,
+    match_all: bool = True,
+) -> list[Environment]:
     """
-    List the names of the environments that match the given filters.
+    List the environments that match the given filters.
 
     If `match_all` is True, all filters must match. If False, any filter can match.
     """
     hatch_output = env_show(platform, integration)
-    matching_rule = all if match_all else any
+    env_list = HatchEnvironmentConfiguration.model_validate(hatch_output).root
 
-    return [
-        env.name
-        for env in HatchEnvironmentConfiguration.model_validate(hatch_output).root
-        if matching_rule(filter(env) for filter in filters)
-    ]
+    if not filters:
+        return env_list
+
+    matching_rule = all if match_all else any
+    return [env for env in env_list if matching_rule(filter(env) for filter in filters)]
+
+
+def list_environment_names(
+    platform: Platform,
+    integration: Integration,
+    filters: Collection[EnvironmentFilter] | None = None,
+    match_all: bool = True,
+) -> list[str]:
+    """
+    List the environments that match the given filters.
+
+    If `match_all` is True, all filters must match. If False, any filter can match.
+    """
+    return [env.name for env in list_environments(platform, integration, filters, match_all)]
+
+
+def remove_environment(platform: Platform, integration: Integration, name: str):
+    """Remove the specified hatch environment."""
+    import sys
+
+    with integration.path.as_cwd():
+        try:
+            platform.check_command([sys.executable, '-m', 'hatch', 'env', 'remove', name])
+        except Exception as error:
+            raise HatchCommandError(f'Failed to remove environment {name!r}: {error}') from error
 
 
 def get_hatch_env_vars(*, verbosity: int) -> dict[str, str]:

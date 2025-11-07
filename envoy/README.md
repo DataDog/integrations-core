@@ -17,6 +17,8 @@ Key Benefits:
 - **Real-time insights** into application-layer attacks with traces and logs in one unified view
 - **Edge enforcement** against OWASP API threats, credential stuffing, injection attacks, and more
 
+**Minimum Agent version:** 6.1.0
+
 ## Setup
 
 ### Installation (Metrics)

@@ -172,6 +172,11 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
         # Now fetch latest updates
         PLATFORM.check_command_output(['git', 'fetch', 'origin'])
 
+        # Add a worktree within the repo and one outside of it that should be ignored by ddev
+        # It is not a fast operation so lets do it once per session
+        PLATFORM.check_command_output(['git', 'worktree', 'add', 'wt', 'HEAD'])
+        PLATFORM.check_command_output(['git', 'worktree', 'add', '../wt2', 'HEAD'])
+
     cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
     cloned_repo.reset_branch()
 

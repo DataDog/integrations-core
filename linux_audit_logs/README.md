@@ -21,6 +21,8 @@ This integration collects Linux audit logs and sends them to Datadog for analysi
 * [Log Explorer][4]
 * [Cloud SIEM][5]
 
+**Minimum Agent version:** 7.67.0
+
 ## Setup
 
 ### Installation
@@ -72,7 +74,7 @@ For Linux, run:
 
 1. Give the `dd-agent` user read permission for rotated audit log files:
     ```shell
-    sudo grep -q "^log_group=" /etc/audit/auditd.conf && sudo sed -i 's/^log_group=.*/log_group=dd-agent/' /etc/audit/auditd.conf || echo "log_group=dd-agent" | sudo tee -a /etc/audit/auditd.conf
+    sudo grep -q "^log_group=" /etc/audit/auditd.conf && sudo sed -i 's/^log_group=.*/log_group=dd-agent/' /etc/audit/auditd.conf || echo "log_group = dd-agent" | sudo tee -a /etc/audit/auditd.conf
     ```
 
 2. Restart Audit Daemon:

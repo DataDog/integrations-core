@@ -12,6 +12,12 @@ openstack_controller = "OpenStack Controller"
 pulsar = "Pulsar"
 teamcity = "TeamCity"
 win32_event_log = "Windows Event Log"
+krakend = "KrakenD"
+lustre = "Lustre"
+
+[overrides.metrics-prefix]
+krakend = "krakend.api."
+lustre = "lustre."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -53,9 +59,10 @@ exclude = true
 [overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
 aerospike = ['Apache-2.0']
+# https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/identity/azure-identity/LICENSE
+azure-identity = ['MIT']
 # https://github.com/pyca/cryptography/blob/main/LICENSE
 cryptography = ['Apache-2.0', 'BSD-3-Clause', 'PSF']
-# https://github.com/confluentinc/confluent-kafka-python/blob/master/LICENSE
 # https://github.com/rthalley/dnspython/blob/master/LICENSE
 dnspython = ['ISC']
 # https://github.com/scientific-python/lazy-loader/blob/main/LICENSE.md
@@ -72,8 +79,6 @@ mmh3 = ['CC0-1.0']
 paramiko = ['LGPL-2.1-only']
 # https://github.com/psycopg/psycopg/blob/master/LICENSE.txt
 psycopg = ['LGPL-3.0-only']
-# https://github.com/Legrandin/pycryptodome/blob/master/LICENSE.rst
-pycryptodomex = ['Unlicense', 'BSD-2-Clause']
 # https://github.com/mongodb/mongo-python-driver/blob/master/LICENSE
 pymongo = ['Apache-2.0']
 # https://github.com/requests/requests-kerberos/pull/123
@@ -94,6 +99,8 @@ simplejson = ['MIT']
 supervisor = ['BSD-3-Clause-Modification']
 # https://github.com/prometheus/client_python/issues/1110
 prometheus-client = ['Apache-2.0']
+# https://github.com/GrahamDumpleton/wrapt/blob/develop/LICENSE
+wrapt = ['BSD-3-Clause']
 
 [overrides.dependencies.repo]
 PyYAML = 'https://github.com/yaml/pyyaml'
@@ -104,7 +111,6 @@ lxml = 'https://github.com/lxml/lxml'
 packaging = 'https://github.com/pypa/packaging'
 paramiko = 'https://github.com/paramiko/paramiko'
 protobuf = 'https://github.com/protocolbuffers/protobuf'
-pycryptodomex = 'https://github.com/Legrandin/pycryptodome'
 redis = 'https://github.com/redis/redis-py'
 requests = 'https://github.com/psf/requests'
 requests-toolbelt = 'https://github.com/requests/toolbelt'
@@ -143,7 +149,7 @@ exclude = [
     'tcp_check',
 ]
 unsorted = [
-    'couch', # tests depend on the order for now
+    'couch',   # tests depend on the order for now
     'envoy',
     'ibm_ace',
     'istio',
@@ -152,22 +158,33 @@ unsorted = [
 
 [overrides.dep.updates]
 exclude = [
-    'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
-    'pysmi', # pysnmp dependent on pysmi version 1.2.1
-    'pysnmp',  # Breaking snmp tests
-    'aerospike',  # v8+ breaks agent build.
+    'pyasn1',          # https://github.com/pyasn1/pyasn1/issues/52
+    'pysnmp',          # Breaking snmp tests
+    'aerospike',       # v8+ breaks agent build.
+    'confluent-kafka',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
-    'psycopg', # Pinning psycopg binary to 3.2.7 to align OpenSSL version with the agent until we build wheels ourselves.
     'psutil',
-    'pyvmomi', # 9+ has breaking changes
-    'pymongo', # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
+    'pyvmomi',      # 9+ has breaking changes
+    'pymongo',      # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
     'foundationdb', # 7+ has a breaking changes
 ]
 
 # Dependencies for the downloader that are security-related and should be updated separately from the others
-security_deps = [
-    'in-toto',
-    'tuf',
-    'securesystemslib',
-]
+security_deps = ['in-toto', 'tuf', 'securesystemslib']
+
+
+# Explicitly mark folders as non-integrations. By default, all folders are assumed to be
+# integrations. Previously, only folders with manifest.json were considered integrations,
+# but since November 2025 manifest.json files are being removed, so the default is now
+# to treat all folders as integrations unless explicitly marked here as non-integrations.
+[overrides.is-integration]
+datadog_checks_base = false
+datadog_checks_dependency_provider = false
+datadog_checks_dev = false
+datadog_checks_downloader = false
+datadog_checks_tests_helper = false
+ddev = false
+docs = false
+# This is a directory that exists only in CI but need to include it to avoid tests failing in CI
+trace-captures = false

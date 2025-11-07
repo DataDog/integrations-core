@@ -1,4 +1,4 @@
-# Agent Check: Databricks
+# Databricks Integration
 
 ![Databricks default dashboard][21]
 
@@ -31,7 +31,7 @@ First, [connect a new Databricks workspace](#connect-to-a-new-databricks-workspa
 <div class="alert alert-warning">New workspaces must authenticate using OAuth. Workspaces integrated with a Personal Access Token continue to function and can switch to OAuth at any time. After a workspace starts using OAuth, it cannot revert to a Personal Access Token.</div>
 
 1. In your Databricks account, click on **User Management** in the left menu. Then, under the **Service principals** tab, click **Add service principal**.
-2. Under the **Credentials & secrets** tab, click **Generate secret**. Set **Lifetime (days)** to the maximum value allowed (730), then click **Generate**. Take note of your client ID and client secret. Also take note of your account ID, which can be found by clicking on your profile in the upper-right corner.
+2. Under the **Credentials & secrets** tab, click **Generate secret**. Set **Lifetime (days)** to the maximum value allowed (730), then click **Generate**. Take note of your client ID and client secret. Also take note of your account ID, which can be found by clicking on your profile in the upper-right corner. (You must be in the account console to retrieve the account ID. The ID will not display inside a workspace.)
 3. Click **Workspaces** in the left menu, then select the name of your workspace.
 4. Go to the **Permissions** tab and click **Add permissions**.
 5. Search for the service principal you created and assign it the **Admin** permission.
@@ -105,12 +105,10 @@ For Datadog to access your Databricks cost data in Data Jobs Monitoring or [Clou
 ### Metrics
 #### Model Serving Metrics
 See [metadata.csv][29] for a list of metrics provided by this integration.
-#### Spark Metrics
-See the [Spark integration documentation][8] for a list of Spark metrics collected.
 
 ### Service Checks
 
-See the [Spark integration documentation][9] for the list of service checks collected.
+The Databricks integration does not include any service checks.
  
 ### Events
 
@@ -118,14 +116,11 @@ The Databricks integration does not include any events.
 
 ## Troubleshooting
 
-You can troubleshoot issues yourself by enabling the [Databricks web terminal][18] or by using a [Databricks Notebook][19]. Consult the [Agent Troubleshooting][20] documentation for information on useful troubleshooting steps. 
-
-Need help? Contact [Datadog support][10].
+You can troubleshoot issues yourself by enabling the [Databricks web terminal][18] or by using a [Databricks Notebook][19]. Need help? Contact [Datadog support][10].
 
 [10]: https://docs.datadoghq.com/help/
 [18]: https://docs.databricks.com/en/clusters/web-terminal.html
 [19]: https://docs.databricks.com/en/notebooks/index.html
-[20]: https://docs.datadoghq.com/agent/troubleshooting/
 [21]: https://raw.githubusercontent.com/DataDog/integrations-core/master/databricks/images/databricks_dashboard.png
 [25]: https://www.datadoghq.com/product/data-jobs-monitoring/
 [26]: https://www.datadoghq.com/product/cloud-cost-management/

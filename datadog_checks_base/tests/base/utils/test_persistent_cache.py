@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 
 from datadog_checks.base.checks.base import AgentCheck
-from datadog_checks.base.utils.containers import hash_mutable
+from datadog_checks.base.utils.containers import hash_mutable_stable
 from datadog_checks.base.utils.persistent_cache import config_set_persistent_cache_id
 
 
@@ -40,12 +40,14 @@ def cache_id(check: AgentCheck) -> str:
 
 
 class TestCheck(AgentCheck):
+    __test__ = False
+
     def check(self, instance):
         pass
 
 
 def normalized_hash(value: object) -> str:
-    return str(hash_mutable(value)).replace("-", "")
+    return hash_mutable_stable(value)
 
 
 def test_config_set_caches(cache_id: str):

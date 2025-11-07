@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "43885e54-474b-43a8-bb02-ecfc2037b674",
   "app_id": "fly-io",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

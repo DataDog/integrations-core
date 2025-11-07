@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "15f0ff37-2b36-4165-9606-758271d4a16d",
   "app_id": "redis",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -212,6 +212,7 @@ DATABASE_FILES_METRICS = [
     ('sqlserver.database.files.state', 'sys.database_files', 'state'),
 ]
 DATABASE_STATS_METRICS = [
+    ('sqlserver.database.user_access', 'sys.databases', 'user_access'),
     ('sqlserver.database.state', 'sys.databases', 'state'),
     ('sqlserver.database.is_sync_with_backup', 'sys.databases', 'is_sync_with_backup'),
     ('sqlserver.database.is_in_standby', 'sys.databases', 'is_in_standby'),
