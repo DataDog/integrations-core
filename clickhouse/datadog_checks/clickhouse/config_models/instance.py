@@ -46,6 +46,9 @@ class QuerySamples(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    activity_collection_interval: Optional[float] = None
+    activity_enabled: Optional[bool] = None
+    activity_max_rows: Optional[float] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     run_sync: Optional[bool] = None

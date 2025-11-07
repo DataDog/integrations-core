@@ -125,6 +125,14 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         self._activity_coll_interval = getattr(config, 'activity_collection_interval', 10)
         self._activity_max_rows = getattr(config, 'activity_max_rows', 1000)
         self._time_since_last_activity_event = 0
+        
+        # Debug logging to verify config values
+        self._check.log.info(
+            "Activity config: enabled=%s, interval=%s, max_rows=%s", 
+            self._activity_coll_enabled,
+            self._activity_coll_interval,
+            self._activity_max_rows
+        )
 
     def _dbtags(self, db, *extra_tags):
         """
