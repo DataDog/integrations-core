@@ -109,7 +109,7 @@ def mock_sampler_with_tag_queries():
 
 
 @pytest.fixture
-def mock_sampler_with_tag_by_prefix():
+def mock_sampler_with_tag_by_alias():
     main_wmi_objects = [
         {
             "IOReadBytesPerSec": 20455,

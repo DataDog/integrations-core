@@ -311,6 +311,23 @@ class WinWMICheck(AgentCheck):
 
         return self._wmi_props
 
+    def validate_tag_queries_aliases(self, tag_queries):
+        # type: (List[TagQuery]) -> None
+        """
+        Validate tag_queries configuration to ensure aliases are provided when 'AS' is used.
+        Logs warnings for any invalid configurations.
+        """
+        for tag_query in tag_queries:
+            if len(tag_query) < 4:
+                continue
+            target_property_str = tag_query[3]
+            property, alias = self.parse_alias(target_property_str)
+            # Check if 'AS' was present but alias is empty
+            if (' AS' in target_property_str or ' as' in target_property_str) and alias is None:
+                self.log.warning(
+                    "No alias provided after 'AS' for property: %s in tag_queries. Using property for tag", property
+                )
+
     def parse_alias(self, property):
         # type: (str) -> Tuple[str, Optional[str]]
         """
@@ -321,8 +338,8 @@ class WinWMICheck(AgentCheck):
             property_split = property.split(' AS') if ' AS' in property else property.split(' as')
             property = property_split[0].strip()
             alias = property_split[1].strip()
+            self.log.debug("Parsed alias: {%s} for property: {%s}", alias, property)
             if alias == "":
-                self.log.warning("No alias provided for property: %s", property)
                 alias = None
         else:
             alias = None

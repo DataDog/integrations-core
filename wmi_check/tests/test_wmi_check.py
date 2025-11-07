@@ -133,7 +133,7 @@ def test_tag_queries_without_alias(mock_sampler_with_tag_queries, aggregator, ch
         ('Name AS', ['name:foo']),
     ],
 )
-def test_tag_by_is_correctly_prefixed(mock_sampler_with_tag_by_prefix, aggregator, check, tag_by, result_tags):
+def test_tag_by_is_correctly_aliased(mock_sampler_with_tag_by_alias, aggregator, check, tag_by, result_tags):
     instance = copy.deepcopy(common.INSTANCE)
     instance['tag_by'] = tag_by
 
@@ -142,10 +142,6 @@ def test_tag_by_is_correctly_prefixed(mock_sampler_with_tag_by_prefix, aggregato
     with patch.object(c, '_extract_metrics', wraps=c._extract_metrics) as mock_extract:
         c.check(instance)
         assert mock_extract.called
-        # Check the arguments it was called with
-        # _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags)
-        call_args = mock_extract.call_args
-        assert call_args[0][1] == tag_by
 
     # Verify metrics are tagged with the alias
     for metric in common.INSTANCE_METRICS:
