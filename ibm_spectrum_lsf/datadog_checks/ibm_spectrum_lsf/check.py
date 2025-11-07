@@ -11,6 +11,7 @@ from .processors import (
     BJobsProcessor,
     BQueuesProcessor,
     BSlotsProcessor,
+    GPUHostsProcessor,
     GPULoadProcessor,
     LsClustersProcessor,
     LSHostsProcessor,
@@ -45,6 +46,7 @@ class IbmSpectrumLsfCheck(AgentCheck, ConfigMixin):
             BQueuesProcessor(self.client, self.log, self.tags),
             BSlotsProcessor(self.client, self.log, self.tags),
             GPULoadProcessor(self.client, self.log, self.tags),
+            GPUHostsProcessor(self.client, self.log, self.tags),
         ]
 
     def check(self, _):

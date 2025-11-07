@@ -335,10 +335,10 @@ class BJobsProcessor(LSFMetricsProcessor):
 class GPULoadProcessor(LSFMetricsProcessor):
     def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
-        self.name = 'gpuload'
+        self.name = 'lsload gpu'
         self.expected_columns = 14
         self.delimiter = None
-        self.prefix = 'server.gpu'
+        self.prefix = 'gpu'
 
     def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
         return self.client.gpuload()
@@ -361,5 +361,36 @@ class GPULoadProcessor(LSFMetricsProcessor):
             LSFMetricMapping('pstate', 11, transform_float),
             LSFMetricMapping('status', 12, transform_status),
             LSFMetricMapping('error', 13, transform_error),
+        ]
+        return self.parse_table_command(metrics, tags)
+
+
+class GPUHostsProcessor(LSFMetricsProcessor):
+    def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
+        super().__init__(client, logger, base_tags)
+        self.name = 'bhosts gpu'
+        self.expected_columns = 8
+        self.delimiter = '|'
+        self.prefix = 'server.gpu'
+
+    def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+        return self.client.bhosts_gpu()
+
+    def process_metrics(self) -> list[LSFMetric]:
+        """
+        HOST_NAME|NGPUS|NGPUS_ALLOC|NGPUS_EXCL_ALLOC|NGPUS_SHARED_ALLOC|NGPUS_SHARED_JEXCL_ALLOC|NGPUS_EXCL_AVAIL|NGPUS_SHARED_AVAIL
+        ip-10-11-220-181.ec2.internal|1|0|0|0|0|1|1
+        """
+        tags = [
+            LSFTagMapping('lsf_host', 0, transform_tag),
+        ]
+        metrics = [
+            LSFMetricMapping('num_gpus', 1, transform_float),
+            LSFMetricMapping('num_gpus_alloc', 2, transform_float),
+            LSFMetricMapping('num_gpus_exclusive_alloc', 3, transform_float),
+            LSFMetricMapping('num_gpus_shared_alloc', 4, transform_float),
+            LSFMetricMapping('num_gpus_jexclusive_alloc', 5, transform_float),
+            LSFMetricMapping('num_gpus_exclusive_available', 6, transform_float),
+            LSFMetricMapping('num_gpus_shared_available', 7, transform_float),
         ]
         return self.parse_table_command(metrics, tags)

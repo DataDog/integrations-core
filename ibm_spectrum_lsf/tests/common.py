@@ -890,7 +890,7 @@ BJOBS_METRICS = [
 
 GPULOAD_METRICS = [
     {
-        "name": "ibm_spectrum_lsf.server.gpu.mode",
+        "name": "ibm_spectrum_lsf.gpu.mode",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -900,7 +900,7 @@ GPULOAD_METRICS = [
         "val": 0,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.status",
+        "name": "ibm_spectrum_lsf.gpu.status",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -910,7 +910,7 @@ GPULOAD_METRICS = [
         "val": 1.0,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.ecc",
+        "name": "ibm_spectrum_lsf.gpu.ecc",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -920,7 +920,7 @@ GPULOAD_METRICS = [
         "val": 0,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.power",
+        "name": "ibm_spectrum_lsf.gpu.power",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -930,7 +930,7 @@ GPULOAD_METRICS = [
         "val": 25972.0,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.error",
+        "name": "ibm_spectrum_lsf.gpu.error",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -940,7 +940,7 @@ GPULOAD_METRICS = [
         "val": 0,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.mem.total",
+        "name": "ibm_spectrum_lsf.gpu.mem.total",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -950,7 +950,7 @@ GPULOAD_METRICS = [
         "val": 15,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.mem.used",
+        "name": "ibm_spectrum_lsf.gpu.mem.used",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -960,7 +960,7 @@ GPULOAD_METRICS = [
         "val": 431,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.mem.utilization",
+        "name": "ibm_spectrum_lsf.gpu.mem.utilization",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -970,7 +970,7 @@ GPULOAD_METRICS = [
         "val": 0,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.power",
+        "name": "ibm_spectrum_lsf.gpu.power",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -980,7 +980,7 @@ GPULOAD_METRICS = [
         "val": 25972,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.pstate",
+        "name": "ibm_spectrum_lsf.gpu.pstate",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -990,7 +990,7 @@ GPULOAD_METRICS = [
         "val": 0,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.temperature",
+        "name": "ibm_spectrum_lsf.gpu.temperature",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -1000,7 +1000,7 @@ GPULOAD_METRICS = [
         "val": 26,
     },
     {
-        "name": "ibm_spectrum_lsf.server.gpu.utilization",
+        "name": "ibm_spectrum_lsf.gpu.utilization",
         "tags": [
             'gpu_id:0',
             'gpu_model:TeslaT4',
@@ -1011,10 +1011,70 @@ GPULOAD_METRICS = [
     },
 ]
 
+BHOST_GPU_METRICS = [
+    {
+        "name": "ibm_spectrum_lsf.server.gpu.num_gpus",
+        "tags": [
+            'lsf_cluster_name:test-cluster',
+            'lsf_host:ip-11-21-111-198.ec2.internal',
+        ],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.server.gpu.num_gpus_alloc",
+        "tags": [
+            'lsf_cluster_name:test-cluster',
+            'lsf_host:ip-11-21-111-198.ec2.internal',
+        ],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.server.gpu.num_gpus_exclusive_alloc",
+        "tags": [
+            'lsf_cluster_name:test-cluster',
+            'lsf_host:ip-11-21-111-198.ec2.internal',
+        ],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.server.gpu.num_gpus_exclusive_available",
+        "tags": [
+            'lsf_cluster_name:test-cluster',
+            'lsf_host:ip-11-21-111-198.ec2.internal',
+        ],
+        "val": 1,
+    },
+    {
+        "name": "ibm_spectrum_lsf.server.gpu.num_gpus_jexclusive_alloc",
+        "tags": [
+            'lsf_cluster_name:test-cluster',
+            'lsf_host:ip-11-21-111-198.ec2.internal',
+        ],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.server.gpu.num_gpus_shared_alloc",
+        "tags": [
+            'lsf_cluster_name:test-cluster',
+            'lsf_host:ip-11-21-111-198.ec2.internal',
+        ],
+        "val": 0,
+    },
+    {
+        "name": "ibm_spectrum_lsf.server.gpu.num_gpus_shared_available",
+        "tags": [
+            'lsf_cluster_name:test-cluster',
+            'lsf_host:ip-11-21-111-198.ec2.internal',
+        ],
+        "val": 1,
+    },
+]
+
 ALL_METRICS = (
     LSID_METRICS
     + CLUSTER_METRICS
     + BHOST_METRICS
+    + BHOST_GPU_METRICS
     + BSLOTS_METRICS
     + LHOST_METRICS
     + LSLOAD_METRICS

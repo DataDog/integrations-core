@@ -65,3 +65,12 @@ class LSFClient:
 
     def gpuload(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
         return self._run_command(["lsload", "-gpuload", "-w"])
+
+    def bhosts_gpu(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
+        return self._run_command(
+            [
+                "bhosts",
+                "-o",
+                "HOST_NAME ngpus ngpus_alloc ngpus_excl_alloc ngpus_shared_alloc ngpus_shared_jexcl_alloc ngpus_excl_avail ngpus_shared_avail delimiter='|'",  # noqa: E501
+            ]
+        )

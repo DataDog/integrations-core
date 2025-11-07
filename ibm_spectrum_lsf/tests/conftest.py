@@ -27,6 +27,7 @@ def mock_client():
     client.bqueues.return_value = get_mock_output('bqueues')
     client.bjobs.return_value = get_mock_output('bjobs')
     client.gpuload.return_value = get_mock_output('lsload_gpuload')
+    client.bhosts_gpu.return_value = get_mock_output('bhosts_gpu')
 
     yield client
 
