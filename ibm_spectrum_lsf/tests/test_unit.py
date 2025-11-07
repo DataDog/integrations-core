@@ -88,7 +88,7 @@ def test_lsload_extra_output(mock_client, dd_run_check, aggregator, instance, ca
     for metric in ALL_METRICS:
         aggregator.assert_metric(metric["name"], metric["val"], tags=metric["tags"])
 
-    assert "Unexpected row length from lsload: 6, expected 13" in caplog.text
+    assert "Unexpected row length from lsload: 1, expected 13" in caplog.text
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -105,7 +105,7 @@ def test_bjobs_no_output(mock_client, dd_run_check, aggregator, instance, caplog
         if metric not in BJOBS_METRICS:
             aggregator.assert_metric(metric["name"], metric["val"], tags=metric["tags"])
 
-    assert "Skipping bjobs metrics; unexpected return value: 1, expected 11" in caplog.text
+    assert "Skipping bjobs metrics; unexpected return value: 1, expected 12" in caplog.text
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

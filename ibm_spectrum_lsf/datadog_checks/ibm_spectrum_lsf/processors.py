@@ -123,7 +123,7 @@ class LSFMetricsProcessor(ABC):
             tags = process_table_tags(tag_mapping, line_data)
             self.log.trace("Tags collected from command %s: %s", self.name, tags)
             metrics = process_table_metrics(self.prefix, metric_mapping, line_data, tags + self.base_tags)
-            self.log.trace("metrics collected from command %s: %s", self.name, metrics)
+            self.log.trace("Metrics collected from command %s: %s", self.name, metrics)
 
             all_metrics.extend(metrics)
         return all_metrics
@@ -220,7 +220,7 @@ class LSHostsProcessor(LSFMetricsProcessor):
 class LsLoadProcessor(LSFMetricsProcessor):
     def __init__(self, client: LSFClient, logger: AgentLogger, base_tags: list[str]):
         super().__init__(client, logger, base_tags)
-        self.delimiter = None
+        self.delimiter = '|'
         self.name = 'lsload'
         self.expected_columns = 13
         self.prefix = 'load'
@@ -304,7 +304,7 @@ class BJobsProcessor(LSFMetricsProcessor):
         super().__init__(client, logger, base_tags)
         self.delimiter = '|'
         self.name = 'bjobs'
-        self.expected_columns = 11
+        self.expected_columns = 12
         self.prefix = 'job'
 
     def run_lsf_command(self) -> tuple[Optional[str], Optional[str], Optional[int]]:
@@ -315,18 +315,19 @@ class BJobsProcessor(LSFMetricsProcessor):
             LSFTagMapping('job_id', 0, transform_job_id),
             LSFTagMapping('task_id', 0, transform_task_id),
             LSFTagMapping('full_job_id', 0, transform_tag),
-            LSFTagMapping('queue', 1, transform_tag),
-            LSFTagMapping('from_host', 2, transform_tag),
-            LSFTagMapping('exec_host', 3, transform_tag),
+            LSFTagMapping('status', 1, transform_tag),
+            LSFTagMapping('queue', 2, transform_tag),
+            LSFTagMapping('from_host', 3, transform_tag),
+            LSFTagMapping('exec_host', 4, transform_tag),
         ]
         metrics = [
-            LSFMetricMapping('run_time', 4, transform_float),
-            LSFMetricMapping('cpu_used', 5, transform_float),
-            LSFMetricMapping('mem', 6, transform_float),
-            LSFMetricMapping('time_left', 7, transform_float),
-            LSFMetricMapping('swap', 8, transform_float),
-            LSFMetricMapping('idle_factor', 9, transform_float),
-            LSFMetricMapping('percent_complete', 10, transform_float),
+            LSFMetricMapping('run_time', 5, transform_float),
+            LSFMetricMapping('cpu_used', 6, transform_float),
+            LSFMetricMapping('mem', 7, transform_float),
+            LSFMetricMapping('time_left', 8, transform_float),
+            LSFMetricMapping('swap', 9, transform_float),
+            LSFMetricMapping('idle_factor', 10, transform_float),
+            LSFMetricMapping('percent_complete', 11, transform_float),
         ]
 
         return self.parse_table_command(metrics, tags)

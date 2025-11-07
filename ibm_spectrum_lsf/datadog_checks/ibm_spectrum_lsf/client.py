@@ -59,7 +59,9 @@ class LSFClient:
             [
                 'bjobs',
                 '-o',
-                "jobid queue from_host:80 exec_host:80 run_time cpu_used mem time_left swap idle_factor %complete delimiter='|'",  # noqa: E501
+                "jobid stat queue from_host:80 exec_host:80 run_time cpu_used mem time_left swap idle_factor %complete delimiter='|'",  # noqa: E501
+                "-u",
+                "all",
             ]
         )
 

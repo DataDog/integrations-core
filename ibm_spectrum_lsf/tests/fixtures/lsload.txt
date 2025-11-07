@@ -1,2 +1,2 @@
-HOST_NAME status r15s r1m r15m ut pg io ls it tmp swp mem
-ip-11-21-111-198.ec2.internal ok 0.0 0.0 0.0 0% 0.0 1 1 1 73057.6M 0.0M 15348.0M
+HOST_NAME|status|r15s|r1m|r15m|ut|pg|io|ls|it|tmp|swp|mem
+ip-11-21-111-198.ec2.internal|ok|0.5|0.7|0.6|10%|0.0|15|1|1|37823.2M|0.0M|14807.0M
