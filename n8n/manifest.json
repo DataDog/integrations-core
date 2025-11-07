@@ -15,6 +15,8 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
+      "Category::Metrics",
+      "Category::Log Collection",
       "Offering::Integration",
       "Queried Data Type::Metrics",
       "Queried Data Type::Logs",

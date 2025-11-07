@@ -1,1 +1,9 @@
-{"title":"N8N Overview Dashboard","description":"[[suggested_dashboards]]","widgets":[],"template_variables":[],"layout_type":"ordered","notify_list":[],"reflow_type":"fixed","pause_auto_refresh":false}
+{
+    "title": "N8N Overview Dashboard",
+    "description": "N8N Overview Dashboard",
+    "widgets": [],
+    "template_variables": [],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
