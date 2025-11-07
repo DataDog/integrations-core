@@ -8,7 +8,7 @@
 
 * Fix Ceph version lookup for newer releases of Ceph ([#21279](https://github.com/DataDog/integrations-core/pull/21279))
 
-## 4.2.0 / 2025-10-02
+## 4.2.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

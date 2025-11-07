@@ -28,8 +28,8 @@ validate-log-integrations:
   stage: validate
   needs: []
   image: $VALIDATE_LOG_INTGS
-  only:
-  - schedules
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   variables:
     INTEGRATIONS_CORE_ROOT: $CI_PROJECT_DIR
   script:
@@ -52,8 +52,8 @@ notify-slack:
     - validate-log-integrations
   stage: notify
   image: $NOTIFIER_IMAGE
-  only:
-  - schedules
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
     <<: *slack-cache
   script:
@@ -73,9 +73,9 @@ notify-slack:
 notify-failed-pipeline:
   stage: notify
   image: $NOTIFIER_IMAGE
-  only:
-  - master
-  when: on_failure
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      when: on_failure
   cache:
     <<: *slack-cache
   script:
@@ -89,11 +89,11 @@ notify-failed-pipeline:
 release-auto:
   stage: release
   image: $TAGGER_IMAGE
-  only:
-    - master
-    - /^\d+\.\d+\.x$/
-  except:
-    - schedules
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH =~ /^\d+\.\d+\.x$/
   script:
     - ddev --version
     - ddev config override
@@ -105,22 +105,28 @@ release-auto:
 release-manual:
   stage: release
   image: $TAGGER_IMAGE
-  only:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     # Integration release tags e.g. any_check-X.Y.Z-rc.N
-    - /.*-\d+\.\d+\.\d+(-(rc|pre|alpha|beta)\.\d+)?$/
-  except:
-  - schedules
+    - if: $CI_COMMIT_TAG =~ /.*-\d+\.\d+\.\d+(-(rc|pre|alpha|beta)\.\d+)?$/
+    - if: $CI_COMMIT_BRANCH == 'master'
+      when: manual
   script:
-    # Get tagger info
-    - tagger=$(git for-each-ref refs/tags/$CI_COMMIT_TAG  --format='%(taggername) %(taggeremail)')
-    # The automatic release builder will trigger this job as a side-effect of
-    # tagging releases. To prevent multiple redundant builds we don't trigger
-    # the pipeline unless the tag was applied manually.
     - |
-      if [[ "$tagger" =~ "$TAGGER_NAME <$TAGGER_EMAIL>" ]]; then
-          echo "Skipping, packages have already been built"
-      else
+      if [[ -z "$CI_COMMIT_TAG" ]]; then
           ./.gitlab/tagger/build-packages.sh
+      else
+          # Get tagger info
+          tagger=$(git for-each-ref refs/tags/$CI_COMMIT_TAG  --format='%(taggername) %(taggeremail)')
+          # The automatic release builder will trigger this job as a side-effect of
+          # tagging releases. To prevent multiple redundant builds we don't trigger
+          # the pipeline unless the tag was applied manually.
+          if [[ "$tagger" =~ "$TAGGER_NAME <$TAGGER_EMAIL>" ]]; then
+              echo "Skipping, packages have already been built"
+          else
+              ./.gitlab/tagger/build-packages.sh
+          fi
       fi
   tags: [ "arch:amd64" ]
   needs: []
