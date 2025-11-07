@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "b7eb4f20-be93-4b66-9187-68175f823bba",
   "app_id": "checkpoint-harmony-endpoint",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
