@@ -2419,54 +2419,6 @@
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 3423068772005720,
-                        "definition": {
-                            "title": "raw_connections_chan_size",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "max",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:datadog.network_path.collector.raw_connections_chan_size{$host,$datacenter,$cluster_name} by {cluster_name,datacenter}.weighted()"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "area"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
                         "id": 168908205378734,
                         "definition": {
                             "title": "input_chan_size",
