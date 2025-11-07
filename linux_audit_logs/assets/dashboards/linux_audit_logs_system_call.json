@@ -134,7 +134,7 @@
                                 ],
                                 "group_by": [
                                     {
-                                        "facet": "@result",
+                                        "facet": "@msg.res",
                                         "limit": 10,
                                         "sort": {
                                             "aggregation": "count",
@@ -323,7 +323,7 @@
                                         "should_exclude_missing": true
                                     },
                                     {
-                                        "facet": "@result",
+                                        "facet": "@msg.res",
                                         "limit": 10,
                                         "sort": {
                                             "aggregation": "count",
@@ -403,7 +403,7 @@
                                         "should_exclude_missing": true
                                     },
                                     {
-                                        "facet": "@result",
+                                        "facet": "@msg.res",
                                         "limit": 10,
                                         "sort": {
                                             "aggregation": "count",
@@ -483,7 +483,7 @@
                                         "should_exclude_missing": true
                                     },
                                     {
-                                        "facet": "@result",
+                                        "facet": "@msg.res",
                                         "limit": 10,
                                         "sort": {
                                             "aggregation": "count",
@@ -563,7 +563,7 @@
                                         "should_exclude_missing": true
                                     },
                                     {
-                                        "facet": "@result",
+                                        "facet": "@msg.res",
                                         "limit": 10,
                                         "sort": {
                                             "aggregation": "count",
@@ -643,7 +643,7 @@
                                         "should_exclude_missing": true
                                     },
                                     {
-                                        "facet": "@result",
+                                        "facet": "@msg.res",
                                         "limit": 10,
                                         "sort": {
                                             "aggregation": "count",
@@ -729,7 +729,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "result",
+                                "field": "msg.res",
                                 "width": "auto"
                             },
                             {
@@ -752,7 +752,7 @@
     "template_variables": [
         {
             "name": "Result",
-            "prefix": "@result",
+            "prefix": "@msg.res",
             "available_values": [],
             "default": "*"
         },

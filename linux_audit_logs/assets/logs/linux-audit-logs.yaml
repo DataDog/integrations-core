@@ -253,10 +253,10 @@ pipeline:
       filter:
         query: "@type:SYSCALL"
       processors:
-        - name: Lookup on `success` to `result` Field
+        - name: Lookup on `success` to `msg.res` Field
           enabled: true
           source: success
-          target: result
+          target: msg.res
           lookupTable: |-
             yes,success
             no,failed

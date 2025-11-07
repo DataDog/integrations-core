@@ -294,12 +294,13 @@ tests:
       gid: 0
       items: 1
       key: "auditlog"
+      msg:
+        result: "failed"
       msg_raw: ""
       pid: 22639
       post_msg_kv: ""
       ppid: 21718
       pre_msg_kv: ""
-      result: "failed"
       ses: 24
       sgid: 0
       subj: "unconfined"
@@ -313,6 +314,7 @@ tests:
         id: 0
         name: "root"
     message: "type=SYSCALL msg=audit(1747642001.320:8116): arch=c000003e syscall=192 success=no exit=-61 a0=7ffd2507073f a1=70ad74e0f197 a2=61ca25006a90 a3=ff items=1 ppid=21718 pid=22639 auid=1002 uid=0 gid=0 euid=0 suid=0 fsuid=0 egid=0 sgid=0 fsgid=0 tty=pts5 ses=24 comm=\"ls\" exe=\"/usr/bin/ls\" subj=unconfined key=\"auditlog\"\x1dARCH=x86_64 SYSCALL=lgetxattr AUID=\"devuser\" UID=\"root\" GID=\"root\" EUID=\"root\" SUID=\"root\" FSUID=\"root\" EGID=\"root\" SGID=\"root\" FSGID=\"root\""
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1747642001320
