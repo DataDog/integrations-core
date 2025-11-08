@@ -36,13 +36,15 @@ jobs:
             ddev config override
 
     - name: Define command
+      env:
+        HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
       id: cmd
       run: |
         cmd="ddev -v size status \
         --commit ${{ github.event.workflow_run.head_sha }} \
         --format json"
 
-        if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.event.workflow_run.head_branch }}" = "master" ]; then 
+        if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "$HEAD_BRANCH" = "master" ]; then 
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         fi
 
