@@ -16,6 +16,7 @@ import pymysql
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import (
     TagManager,
@@ -84,7 +85,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError, connect_with_session_variables  # noqa: F401
+from .util import DatabaseConfigurationError, connect_with_session_variables
 from .version_utils import parse_version
 
 try:
@@ -95,12 +96,12 @@ except ImportError:
     PSUTIL_AVAILABLE = False
 
 try:
-    import datadog_agent
+    import datadog_agent # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
 
-class MySql(AgentCheck):
+class MySql(DatabaseCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     REPLICA_SERVICE_CHECK_NAME = 'mysql.replication.replica_running'
@@ -126,7 +127,7 @@ class MySql(AgentCheck):
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
         self.add_core_tags()
-        self.cloud_metadata = self._config.cloud_metadata
+        self._cloud_metadata = self._config.cloud_metadata
 
         # Create a new connection on every check run
         self._conn = None
@@ -195,6 +196,20 @@ class MySql(AgentCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
+
+    @property
+    def tags(self):
+        return self.tag_manager.get_tags()
+
+    @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
+
+    @property
+    def dbms_version(self):
+        if self.version is None:
+            return None
+        return self.version.version + '+' + self.version.build
 
     @property
     def database_identifier(self):
