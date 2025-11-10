@@ -481,7 +481,40 @@ class ClusterMetadataCollector:
         self.log.debug("Collecting schema registry information from %s", self.config._collect_schema_registry)
 
         cluster_id = metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        base_tags = self._get_tags(cluster_id)
 
+        # Collect global Schema Registry configuration
+        try:
+            # Get global compatibility level
+            global_compat = self.check.schema_registry_client.get_global_compatibility()
+            compat_level = global_compat.get('compatibilityLevel', 'UNKNOWN')
+            compat_tags = base_tags + [f'compatibility_level:{compat_level}']
+            self.check.gauge('schema_registry.global_compatibility', 1, tags=compat_tags)
+            self.log.debug("Global compatibility level: %s", compat_level)
+        except Exception as e:
+            self.log.debug("Failed to fetch global compatibility: %s", e)
+
+        # Get global mode configuration
+        try:
+            global_mode = self.check.schema_registry_client.get_global_mode()
+            mode = global_mode.get('mode', 'UNKNOWN')
+            mode_tags = base_tags + [f'mode:{mode}']
+            self.check.gauge('schema_registry.global_mode', 1, tags=mode_tags)
+            self.log.debug("Global mode: %s", mode)
+        except Exception as e:
+            self.log.debug("Failed to fetch global mode: %s", e)
+
+        # Get supported schema types
+        try:
+            schema_types = self.check.schema_registry_client.get_schema_types()
+            self.log.debug("Supported schema types: %s", schema_types)
+            for schema_type in schema_types:
+                type_tags = base_tags + [f'schema_type:{schema_type}']
+                self.check.gauge('schema_registry.supported_types', 1, tags=type_tags)
+        except Exception as e:
+            self.log.debug("Failed to fetch schema types: %s", e)
+
+        # Get all subjects
         try:
             subjects = self.check.schema_registry_client.get_subjects()
         except Exception as e:
@@ -490,27 +523,84 @@ class ClusterMetadataCollector:
 
         self.log.info("Found %s schemas in schema registry", len(subjects))
 
-        # Emit metric for number of schemas
-        self.check.gauge('schema_registry.subjects', len(subjects), tags=self._get_tags(cluster_id))
+        # Emit metric for total number of subjects
+        self.check.gauge('schema_registry.subjects', len(subjects), tags=base_tags)
+
+        # Track statistics across all subjects
+        total_versions = 0
+        subjects_by_type = {}
+        subjects_by_compatibility = {}
+        subjects_with_references = 0
+        subjects_with_metadata = 0
 
         # Get details for each subject
         for subject in subjects:
-            subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
+            subject_tags = base_tags + [f'subject:{subject}']
 
             try:
                 # Get versions for this subject
                 versions = self.check.schema_registry_client.get_versions(subject)
+                total_versions += len(versions)
 
                 # Emit metric for number of versions
                 self.check.gauge('schema_registry.versions', len(versions), tags=subject_tags)
 
-                # Get latest version details
+                # Get latest version details - this contains schema, schemaType, references
                 latest_schema = self.check.schema_registry_client.get_latest_version(subject)
 
                 schema_id = latest_schema.get('id')
                 schema_version = latest_schema.get('version')
                 schema_type = latest_schema.get('schemaType', 'AVRO')
                 schema_content = latest_schema.get('schema', '')
+                
+                # Get references directly from latest_schema response (no additional API call)
+                references = latest_schema.get('references', [])
+                if references:
+                    subjects_with_references += 1
+                    self.log.debug("Subject %s has %d references: %s", subject, len(references), references)
+
+                # Track schema types
+                subjects_by_type[schema_type] = subjects_by_type.get(schema_type, 0) + 1
+
+                # Parse metadata directly from schema_content (no additional API call)
+                metadata_dict = {}
+                try:
+                    schema_obj = json.loads(schema_content)
+                    if isinstance(schema_obj, dict):
+                        # Check for metadata in various common locations
+                        if 'metadata' in schema_obj:
+                            metadata_dict.update(schema_obj['metadata'])
+                        if 'metadata' in schema_obj and 'properties' in schema_obj['metadata']:
+                            metadata_dict.update(schema_obj['metadata']['properties'])
+                        if 'doc' in schema_obj:
+                            metadata_dict['doc'] = schema_obj['doc']
+                        
+                        if metadata_dict:
+                            subjects_with_metadata += 1
+                            self.check.gauge('schema_registry.has_metadata', 1, tags=subject_tags)
+                except (json.JSONDecodeError, TypeError):
+                    self.log.debug("Could not parse schema as JSON for subject %s", subject)
+
+                # Get subject-specific compatibility configuration
+                compat_level = 'UNKNOWN'
+                try:
+                    subject_compat = self.check.schema_registry_client.get_subject_compatibility(subject)
+                    compat_level = subject_compat.get('compatibilityLevel', 'UNKNOWN')
+                    subjects_by_compatibility[compat_level] = subjects_by_compatibility.get(compat_level, 0) + 1
+
+                    # Add compatibility tag to subject metrics
+                    subject_tags.append(f'compatibility:{compat_level}')
+                except Exception as e:
+                    self.log.debug("Failed to get compatibility for subject %s: %s", subject, e)
+
+                # Get subject mode
+                mode = 'UNKNOWN'
+                try:
+                    subject_mode = self.check.schema_registry_client.get_subject_mode(subject)
+                    mode = subject_mode.get('mode', 'UNKNOWN')
+                    subject_tags.append(f'mode:{mode}')
+                except Exception as e:
+                    self.log.debug("Failed to get mode for subject %s: %s", subject, e)
 
                 # Extract topic name and schema type (key/value) from subject
                 # Subjects typically follow patterns: "topic-key", "topic-value"
@@ -524,7 +614,7 @@ class ClusterMetadataCollector:
                     topic_name = subject[:-4]  # Remove '-key'
                     schema_for = 'key'
 
-                # Create event with schema content only in msg_text
+                # Create event with schema content in msg_text (JSON formatted)
                 # All metadata goes into tags for easy querying
                 event_tags = subject_tags + [
                     f'schema_id:{schema_id}',
@@ -532,11 +622,43 @@ class ClusterMetadataCollector:
                     f'schema_type:{schema_type}',
                     f'topic:{topic_name}',
                     f'schema_for:{schema_for}',
+                    f'compatibility_level:{compat_level}',
+                    f'mode:{mode}',
                     'event_type:schema_registry',
                 ]
+                
+                # Add all metadata as tags
+                for key, value in metadata_dict.items():
+                    # Sanitize tag values (remove special characters, limit length)
+                    safe_value = str(value).replace(':', '_').replace('\n', ' ')[:200]
+                    event_tags.append(f"metadata_{key}:{safe_value}")
 
-                # Create cache key that includes version (to detect schema updates)
-                cache_content = f"{schema_id}:{schema_version}:{schema_content}"
+                # Build JSON formatted message with schema and references
+                try:
+                    # Try to parse the schema if it's JSON
+                    schema_obj = json.loads(schema_content)
+                    
+                    # Create a wrapper object with schema and references
+                    event_obj = {
+                        'schema': schema_obj
+                    }
+                    
+                    # Add references if present
+                    if references:
+                        event_obj['references'] = references
+                    
+                    event_message = json.dumps(event_obj, indent=2)
+                except (json.JSONDecodeError, TypeError):
+                    # If not valid JSON, create a simple wrapper
+                    event_obj = {
+                        'schema': schema_content,
+                    }
+                    if references:
+                        event_obj['references'] = references
+                    event_message = json.dumps(event_obj, indent=2)
+
+                # Create cache key that includes version and metadata (to detect updates)
+                cache_content = f"{schema_id}:{schema_version}:{json.dumps(metadata_dict, sort_keys=True)}:{schema_content}"
 
                 # Only emit event if schema changed or 10+ minutes passed
                 if self._should_emit_cached_event(self.SCHEMA_CACHE_KEY, subject, cache_content):
@@ -546,7 +668,7 @@ class ClusterMetadataCollector:
                             'event_type': 'info',
                             'source_type_name': 'kafka',
                             'msg_title': f'{topic_name} ({schema_for}) - Schema v{schema_version}',
-                            'msg_text': schema_content,
+                            'msg_text': event_message,
                             'tags': event_tags,
                             'aggregation_key': f'kafka_schema_{subject}_{schema_version}',
                             'alert_type': 'info',
@@ -555,6 +677,21 @@ class ClusterMetadataCollector:
 
             except Exception as e:
                 self.log.warning("Error getting schema details for %s: %s", subject, e)
+
+        # Emit aggregate metrics
+        self.check.gauge('schema_registry.total_versions', total_versions, tags=base_tags)
+        self.check.gauge('schema_registry.subjects_with_references', subjects_with_references, tags=base_tags)
+        self.check.gauge('schema_registry.subjects_with_metadata', subjects_with_metadata, tags=base_tags)
+
+        # Emit metrics by schema type
+        for schema_type, count in subjects_by_type.items():
+            type_tags = base_tags + [f'schema_type:{schema_type}']
+            self.check.gauge('schema_registry.subjects_by_type', count, tags=type_tags)
+
+        # Emit metrics by compatibility level
+        for compat_level, count in subjects_by_compatibility.items():
+            compat_tags = base_tags + [f'compatibility_level:{compat_level}']
+            self.check.gauge('schema_registry.subjects_by_compatibility', count, tags=compat_tags)
 
     def _truncate_config_for_event(self, config_data, max_configs=50):
         """

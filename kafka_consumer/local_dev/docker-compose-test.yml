@@ -105,6 +105,9 @@ services:
         # Register Notification schema
         curl -X POST -H Content-Type:application/vnd.schemaregistry.v1+json --data '{\"schema\":\"{\\\"type\\\":\\\"record\\\",\\\"name\\\":\\\"Notification\\\",\\\"fields\\\":[{\\\"name\\\":\\\"notification_id\\\",\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"user_id\\\",\\\"type\\\":\\\"int\\\"},{\\\"name\\\":\\\"message\\\",\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"sent_at\\\",\\\"type\\\":\\\"long\\\"}]}\"}' http://schema-registry:8081/subjects/notifications-value/versions
         
+        # Register Product schema with metadata (owner, team, doc)
+        curl -X POST -H Content-Type:application/vnd.schemaregistry.v1+json --data '{\"schema\":\"{\\\"type\\\":\\\"record\\\",\\\"name\\\":\\\"Product\\\",\\\"doc\\\":\\\"Product catalog schema for e-commerce\\\",\\\"metadata\\\":{\\\"owner\\\":\\\"data-platform-team\\\",\\\"team\\\":\\\"backend\\\",\\\"critical\\\":true},\\\"fields\\\":[{\\\"name\\\":\\\"product_id\\\",\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"name\\\",\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"price\\\",\\\"type\\\":\\\"double\\\"},{\\\"name\\\":\\\"category\\\",\\\"type\\\":\\\"string\\\"}]}\"}' http://schema-registry:8081/subjects/products-value/versions
+        
         echo '=== Kafka Initialization Complete! ==='
       "
   

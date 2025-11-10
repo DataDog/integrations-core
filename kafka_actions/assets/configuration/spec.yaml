@@ -1,0 +1,198 @@
+name: Kafka Actions
+files:
+- name: kafka_actions.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: action
+      description: |
+        The action to perform. This check runs once per execution and performs the specified action.
+        Available actions:
+        - retrieve_messages: Retrieve and filter messages from topics, emit as events
+        - produce_message: Produce a message to a topic
+        - manage_topic: Create, update, or delete topics
+        - rebalance_partitions: Trigger partition rebalancing
+      required: true
+      value:
+        type: string
+        example: retrieve_messages
+    
+    - name: kafka_connect_str
+      description: |
+        The Kafka connection string (bootstrap servers).
+      required: true
+      value:
+        type: string
+        example: localhost:9092
+    
+    - name: security_protocol
+      description: |
+        Protocol used to communicate with brokers.
+        Valid values: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+      value:
+        type: string
+        example: PLAINTEXT
+    
+    - name: sasl_mechanism
+      description: |
+        SASL mechanism to use for authentication.
+        Valid values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+      value:
+        type: string
+        example: PLAIN
+    
+    - name: sasl_plain_username
+      description: Username for SASL PLAIN authentication
+      value:
+        type: string
+    
+    - name: sasl_plain_password
+      description: Password for SASL PLAIN authentication
+      value:
+        type: string
+    
+    # ========================================================================
+    # retrieve_messages action configuration
+    # ========================================================================
+    - name: retrieve_messages
+      description: |
+        Configuration for the 'retrieve_messages' action.
+        Retrieves messages from Kafka topics with filtering and emits them as Datadog events.
+      value:
+        type: object
+        properties:
+        - name: topic
+          type: string
+          required: true
+          description: Topic to retrieve messages from
+        - name: partition
+          type: integer
+          description: Specific partition to read from (-1 for all partitions)
+          default: -1
+        - name: start_offset
+          type: integer
+          description: Starting offset to read from (-1 for latest, -2 for earliest)
+          default: -2
+        - name: max_messages_scan
+          type: integer
+          description: Maximum number of messages to scan/evaluate
+          default: 1000
+        - name: max_messages_send
+          type: integer
+          description: Maximum number of matching messages to emit as events
+          default: 100
+        - name: filters
+          type: array
+          description: |
+            jq-style filters to apply to messages.
+            Each filter can match on key, value fields, timestamp, or offset.
+          items:
+            type: object
+            properties:
+            - name: field
+              type: string
+              description: Field path to filter on (e.g., 'value.user_id', 'key', 'timestamp', 'offset')
+              required: true
+            - name: operator
+              type: string
+              description: Comparison operator
+              enum: ['eq', 'ne', 'gt', 'lt', 'gte', 'lte', 'contains', 'regex', 'exists']
+              required: true
+            - name: value
+              type: string
+              description: Value to compare against
+        - name: timeout_ms
+          type: integer
+          description: Timeout for message consumption in milliseconds
+          default: 30000
+    
+    # ========================================================================
+    # produce_message action configuration
+    # ========================================================================
+    - name: produce_message
+      description: |
+        Configuration for the 'produce_message' action.
+        Produces a message to a Kafka topic.
+      value:
+        type: object
+        properties:
+        - name: topic
+          type: string
+          required: true
+          description: Topic to produce to
+        - name: key
+          type: string
+          description: Message key (can be JSON string)
+        - name: value
+          type: string
+          required: true
+          description: Message value (can be JSON string)
+        - name: partition
+          type: integer
+          description: Specific partition to produce to (-1 for automatic)
+          default: -1
+        - name: headers
+          type: object
+          description: Message headers as key-value pairs
+    
+    # ========================================================================
+    # manage_topic action configuration
+    # ========================================================================
+    - name: manage_topic
+      description: |
+        Configuration for the 'manage_topic' action.
+        Creates, updates, or deletes Kafka topics.
+      value:
+        type: object
+        properties:
+        - name: operation
+          type: string
+          required: true
+          enum: ['create', 'update', 'delete']
+          description: Topic management operation
+        - name: topic
+          type: string
+          required: true
+          description: Topic name
+        - name: num_partitions
+          type: integer
+          description: Number of partitions (for create)
+        - name: replication_factor
+          type: integer
+          description: Replication factor (for create)
+        - name: configs
+          type: object
+          description: |
+            Topic configurations (for create/update).
+            Examples: retention.ms, compression.type, cleanup.policy, etc.
+    
+    # ========================================================================
+    # rebalance_partitions action configuration
+    # ========================================================================
+    - name: rebalance_partitions
+      description: |
+        Configuration for the 'rebalance_partitions' action.
+        Triggers partition reassignment across brokers.
+      value:
+        type: object
+        properties:
+        - name: topics
+          type: array
+          description: Topics to rebalance (empty for all)
+          items:
+            type: string
+        - name: brokers
+          type: array
+          description: Target broker IDs for reassignment
+          items:
+            type: integer
+        - name: strategy
+          type: string
+          enum: ['uniform', 'rack-aware', 'custom']
+          description: Rebalancing strategy
+          default: uniform
+    
+    - template: instances/default
