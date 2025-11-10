@@ -1,1 +1,1 @@
-Change auth type from string to enum in spec
+Change the auth_type field from a string to an enum for improved type validation
