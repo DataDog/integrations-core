@@ -14,7 +14,7 @@ files:
         openmetrics_endpoint.display_priority: 1
         openmetrics_endpoint.value.example: http://localhost:5678
         openmetrics_endpoint.description: |
-          Endpoint exposing the n8n's metrics in the OpenMetrics format. For more information refer to:
+          Endpoint exposing the n8n's metrics in the OpenMetrics format. For more information, refer to:
           https://docs.n8n.io/hosting/logging-monitoring/monitoring/ 
           https://docs.n8n.io/hosting/configuration/environment-variables/endpoints/
         raw_metric_prefix.description: |
