@@ -44,6 +44,12 @@
   value:
     example: basic
     type: string
+    enum:
+      - basic
+      - digest
+      - ntlm
+      - kerberos
+      - aws
   description: |
     The type of authentication to use. The available types (and related options) are:
     ```
