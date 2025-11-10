@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import string
+import re
 from typing import Optional
 
 
@@ -14,11 +14,15 @@ def transform_status(status: str) -> int:
 
 
 def transform_float(val: str) -> float:
+    val = val.strip()
     if val == "-":
         return -1
     else:
-        val = val.rstrip(string.ascii_letters + string.punctuation)
-        return float(val)
+        # Remove units from end of strings
+        # sometimes there are trailing Ls to represent a limit reached
+        # ie: 22.00% L
+        float_val = re.sub(r'\D+$', '', val)
+        return float(float_val)
 
 
 def transform_runtime(val: str) -> float:
@@ -64,3 +68,17 @@ def transform_tag(val: str) -> Optional[str]:
 def transform_error(val: str) -> bool:
     parsed = val.strip()
     return not parsed == '-'
+
+
+def transform_time_left(val: str) -> int:
+    val = val.strip().rstrip("L")
+    if val in ("-", "UNLIMITED"):
+        return -1
+
+    # time_left looks like 1:48 L where there are hours and minutes
+    # we will convert to seconds
+    parts = val.split(":")
+    if len(parts) == 2:
+        return int(parts[0]) * 3600 + int(parts[1]) * 60
+    else:
+        return int(val) * 60

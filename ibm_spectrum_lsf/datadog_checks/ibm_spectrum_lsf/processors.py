@@ -20,6 +20,7 @@ from .common import (
     transform_status,
     transform_tag,
     transform_task_id,
+    transform_time_left,
 )
 
 
@@ -324,7 +325,7 @@ class BJobsProcessor(LSFMetricsProcessor):
             LSFMetricMapping('run_time', 5, transform_float),
             LSFMetricMapping('cpu_used', 6, transform_float),
             LSFMetricMapping('mem', 7, transform_float),
-            LSFMetricMapping('time_left', 8, transform_float),
+            LSFMetricMapping('time_left', 8, transform_time_left),
             LSFMetricMapping('swap', 9, transform_float),
             LSFMetricMapping('idle_factor', 10, transform_float),
             LSFMetricMapping('percent_complete', 11, transform_float),

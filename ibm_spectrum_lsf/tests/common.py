@@ -657,7 +657,7 @@ BJOBS_METRICS = [
             'queue:normal',
             'status:RUN',
         ],
-        "val": -1,
+        "val": 42,
     },
     {
         "name": "ibm_spectrum_lsf.job.idle_factor",
@@ -670,7 +670,7 @@ BJOBS_METRICS = [
             'queue:normal',
             'status:RUN',
         ],
-        "val": -1,
+        "val": 0.54,
     },
     {
         "name": "ibm_spectrum_lsf.job.mem",
@@ -696,7 +696,7 @@ BJOBS_METRICS = [
             'queue:normal',
             'status:RUN',
         ],
-        "val": -1,
+        "val": 22,
     },
     {
         "name": "ibm_spectrum_lsf.job.run_time",
@@ -735,7 +735,7 @@ BJOBS_METRICS = [
             'queue:normal',
             'status:RUN',
         ],
-        "val": -1,
+        "val": 60,
     },
     # 174
     {
