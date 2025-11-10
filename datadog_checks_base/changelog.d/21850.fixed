@@ -1,0 +1,1 @@
+Fix YAML configuration parsing to properly handle Unicode characters on Windows systems where the UTF-8 locale is not enabled by default.
