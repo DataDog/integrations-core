@@ -4,12 +4,10 @@ tests:
   sample: "2025-10-22T15:49:41-0400 [INFO] [entry_service:Summarization:1] 127.0.0.1:50870 (scheme=http,method=POST,path=/summarize,type=application/json,length=227) (status=200,type=text/plain; charset=utf-8,length=407) 5890.581ms (trace=ab27d3de318c77adc1a75e34786fb557,span=29583fecc118996f,sampled=0,service.name=Summarization)"
   result:
     custom:
-      level: "INFO"
-      timestamp: 1761162581000
       bentoml:
         client:
           ip: "127.0.0.1"
-          port: 50870
+          port: 50870.0
         component_name: "entry_service"
         request:
           latency_ms: 5890.581
@@ -20,18 +18,20 @@ tests:
           type: "application/json"
         response:
           charset: "utf-8"
-          code: 200
+          code: 200.0
           length: 407.0
           type: "text/plain;"
         service:
-          instance: 1
+          instance: 1.0
           name: "Summarization"
-        tracing:
-          sampled: 0
-          service:
-            name: "Summarization"
-          span_id: "29583fecc118996f"
-          trace_id: "ab27d3de318c77adc1a75e34786fb557"
+      level: "INFO"
+      timestamp: 1761162581000
+      tracing:
+        sampled: 0
+        service:
+          name: "Summarization"
+        span_id: "29583fecc118996f"
+        trace_id: "ab27d3de318c77adc1a75e34786fb557"
     message: "2025-10-22T15:49:41-0400 [INFO] [entry_service:Summarization:1] 127.0.0.1:50870 (scheme=http,method=POST,path=/summarize,type=application/json,length=227) (status=200,type=text/plain; charset=utf-8,length=407) 5890.581ms (trace=ab27d3de318c77adc1a75e34786fb557,span=29583fecc118996f,sampled=0,service.name=Summarization)"
     service: "Summarization"
     status: "info"
