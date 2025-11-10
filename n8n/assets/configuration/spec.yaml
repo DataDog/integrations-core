@@ -29,7 +29,7 @@ files:
         raw_metric_prefix.hidden: false
     - name: server_port
       description: |
-        The port exposing the HTTP Endpoint of the N8N API.
+        The port exposing the HTTP endpoint of the n8n API.
       value:
         display_default: 5678
         type: integer
