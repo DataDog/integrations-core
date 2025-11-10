@@ -75,6 +75,8 @@ services:
     trigger_start: true
 ```
 
+Beginning with Agent version 7.74, the check automatically collects metrics for Windows services.
+
 #### Tags
 
 The check automatically tags the Windows service name to each service check in the `windows_service:<SERVICE>` tag. The `<SERVICE>` name in the tag uses lowercase and special characters are replaced with underscores. See [Getting Started with Tags][12] for more information.

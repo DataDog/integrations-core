@@ -42,6 +42,12 @@ def assert_service_check_and_metrics(aggregator, services):
             value=1,
             count=service.count,
         )
+        aggregator.assert_metric(
+            'windows_service.restarts',
+            tags=service.tags,
+            value=0,
+            count=service.count,
+        )
 
 
 def test_bad_config(check, instance_bad_config):
@@ -323,6 +329,64 @@ def test_name_regex_order(aggregator, check, instance_name_regex_prefix):
         ServiceAssertion('event', -1, count=1),
     ]
     assert_service_check_and_metrics(aggregator, services)
+
+
+def test_service_restart_detection(aggregator, check, instance_basic):
+    """
+    Test that service restarts are detected when the service PID changes between checks.
+    """
+    c = check(instance_basic)
+
+    mock_services = [
+        {
+            'ServiceName': 'EventLog',
+            'DisplayName': 'Windows Event Log',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 1234,
+        },
+        {
+            'ServiceName': 'Dnscache',
+            'DisplayName': 'DNS Client',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 5678,
+        },
+    ]
+
+    with patch('win32service.EnumServicesStatusEx', return_value=mock_services):
+        c.check(instance_basic)
+
+    # On first check, restarts should be 0
+    aggregator.assert_metric(
+        'windows_service.restarts',
+        value=0,
+        tags=['windows_service:EventLog', 'windows_service_state:running', 'service:EventLog', 'optional:tag1'],
+    )
+    aggregator.assert_metric(
+        'windows_service.restarts',
+        value=0,
+        tags=['windows_service:Dnscache', 'windows_service_state:running', 'service:Dnscache', 'optional:tag1'],
+    )
+
+    aggregator.reset()
+
+    # Only change the PID of EventLog
+    mock_services[0]['ProcessId'] = 9999
+
+    with patch('win32service.EnumServicesStatusEx', return_value=mock_services):
+        c.check(instance_basic)
+
+    # On second check, EventLog should have restarts=1
+    aggregator.assert_metric(
+        'windows_service.restarts',
+        value=1,
+        tags=['windows_service:EventLog', 'windows_service_state:running', 'service:EventLog', 'optional:tag1'],
+    )
+    # Dnscache should still have restarts=0
+    aggregator.assert_metric(
+        'windows_service.restarts',
+        value=0,
+        tags=['windows_service:Dnscache', 'windows_service_state:running', 'service:Dnscache', 'optional:tag1'],
+    )
 
 
 @pytest.mark.e2e
