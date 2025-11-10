@@ -232,13 +232,30 @@ jobs:
     runs-on: ubuntu-22.04
     needs:
       - calculate-diff
+      - define-current-commit
     steps:
     - name: Check quality gate
       run: |
         if [ "${{ needs.calculate-diff.outputs.passed }}" = "false" ]; then
           echo "❌ Size Quality Gates Not Passed. Failing the workflow."
+          gh api repos/DataDog/integrations-core/check-runs \
+          -H "Accept: application/vnd.github+json" \
+          -F name='Size Quality Gates' \
+          -F head_sha="${{ needs.define-current-commit.outputs.commit }}" \
+          -F status='completed' \
+          -F conclusion='failure' \
+          -F output.title='Size Quality Gates Not Passed' \
+          -F output.summary='Size Quality Gates Not Passed. Failing the workflow.'
           exit 1
         else
           echo "✅ Size Quality Gates Passed."
+          gh api repos/DataDog/integrations-core/check-runs \
+          -H "Accept: application/vnd.github+json" \
+          -F name='Size Quality Gates' \
+          -F head_sha="${{ needs.define-current-commit.outputs.commit }}" \
+          -F status='completed' \
+          -F conclusion='success' \
+          -F output.title='Size Quality Gates Passed' \
+          -F output.summary='Size Quality Gates Passed. Passing the workflow.'
         fi
           
