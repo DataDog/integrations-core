@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "c3361861-32be-4ed4-a138-d68b85b8d88b",
   "app_id": "oke",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

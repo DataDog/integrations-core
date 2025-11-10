@@ -1,0 +1,4 @@
+Changed how `ddev` discovers integrations in the repository. Subdirectories are now identified as integrations based on the following rules:
+- Only non-hidden directories are considered for integration status; files are ignored.
+- A directory containing a `manifest.json` is always an integration.
+- A directory without a `manifest.json` is now considered an integration by default. To exclude such a directory, set it to `false` in the `.ddev/config.toml` file under the `[overrides.is-integration]` table.

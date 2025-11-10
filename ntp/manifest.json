@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "399b74d9-ece5-4517-ae16-c05cac6911b2",
   "app_id": "ntp",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
