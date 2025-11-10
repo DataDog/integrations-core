@@ -233,6 +233,8 @@ jobs:
     needs:
       - calculate-diff
       - define-current-commit
+    permissions:
+      checks: write
     steps:
     - name: Check quality gate
       run: |
