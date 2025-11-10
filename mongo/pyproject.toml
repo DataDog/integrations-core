@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "cachetools==6.2.0",
+    "cachetools==6.2.1",
     "psutil==6.0.0",
     "pymongo[srv]==4.8.0; python_version >= '3.9'",
 ]
