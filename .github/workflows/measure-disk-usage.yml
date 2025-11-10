@@ -258,4 +258,5 @@ jobs:
           -F output.title='Size Quality Gates Passed' \
           -F output.summary='Size Quality Gates Passed. Passing the workflow.'
         fi
-          
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
