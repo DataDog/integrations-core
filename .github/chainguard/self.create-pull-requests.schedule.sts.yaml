@@ -1,16 +1,18 @@
 # Trust policy for automated workflows that create pull requests
 #
 # This policy is intended for use with the peter-evans/create-pull-request action
-# in any workflow that runs from the protected master branch.
+# in workflows that run on schedule from the protected master branch.
 #
 # Naming convention:
 #   self: Only this repository (DataDog/integrations-core) can use this policy
 #   create-pull-requests: Grants permissions to create pull requests
+#   schedule: Intended for workflows running on schedule (workflow_dispatch is included
+#             to allow manual triggering)
 #
 # Security model:
 #   - Workflow must run from the protected master branch
 #   - Workflow file must be committed to master
-#   - Works with any event type (schedule, workflow_dispatch, push, etc.)
+#   - Supports 'schedule' and 'workflow_dispatch' events only
 #
 # Permissions granted:
 #   - contents: write       - Push commits to branches
@@ -32,7 +34,8 @@ subject: repo:DataDog/integrations-core:ref:refs/heads/master
 claim_pattern:
   ref: refs/heads/master
   ref_protected: "true"
-  job_workflow_ref: DataDog/integrations-core/.github/workflows/.*@refs/heads/master
+  job_workflow_ref: DataDog/integrations-core/.github/workflows/.*\.ya?ml@refs/heads/master
+  event_name: (schedule|workflow_dispatch)
 
 permissions:
   contents: write
