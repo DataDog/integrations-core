@@ -213,10 +213,35 @@ def test_active_queries_query_format():
 
     # Verify query contains necessary clauses
     assert 'system.processes' in ACTIVE_QUERIES_QUERY
+
+    # Original fields
     assert 'query_id' in ACTIVE_QUERIES_QUERY
     assert 'query' in ACTIVE_QUERIES_QUERY
     assert 'elapsed' in ACTIVE_QUERIES_QUERY
     assert 'memory_usage' in ACTIVE_QUERIES_QUERY
+    assert 'read_rows' in ACTIVE_QUERIES_QUERY
+    assert 'read_bytes' in ACTIVE_QUERIES_QUERY
+    assert 'written_rows' in ACTIVE_QUERIES_QUERY
+    assert 'written_bytes' in ACTIVE_QUERIES_QUERY
+
+    # New enhanced fields
+    assert 'peak_memory_usage' in ACTIVE_QUERIES_QUERY
+    assert 'total_rows_approx' in ACTIVE_QUERIES_QUERY
+    assert 'result_rows' in ACTIVE_QUERIES_QUERY
+    assert 'result_bytes' in ACTIVE_QUERIES_QUERY
+    assert 'query_start_time' in ACTIVE_QUERIES_QUERY
+    assert 'query_start_time_microseconds' in ACTIVE_QUERIES_QUERY
+    assert 'client_name' in ACTIVE_QUERIES_QUERY
+    assert 'client_version_major' in ACTIVE_QUERIES_QUERY
+    assert 'client_version_minor' in ACTIVE_QUERIES_QUERY
+    assert 'client_version_patch' in ACTIVE_QUERIES_QUERY
+    assert 'current_database' in ACTIVE_QUERIES_QUERY
+    assert 'thread_ids' in ACTIVE_QUERIES_QUERY
+    assert 'address' in ACTIVE_QUERIES_QUERY
+    assert 'port' in ACTIVE_QUERIES_QUERY
+    assert 'client_hostname' in ACTIVE_QUERIES_QUERY
+    assert 'is_cancelled' in ACTIVE_QUERIES_QUERY
+    assert 'http_user_agent' in ACTIVE_QUERIES_QUERY
 
 
 @mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent')
@@ -259,3 +284,89 @@ def test_dbtags(check_with_dbm):
     assert 'extra:tag' in db_tags
     assert 'test:clickhouse' in db_tags
     assert 'server:localhost' in db_tags
+
+
+def test_normalize_active_query_row_with_all_fields(check_with_dbm):
+    """Test that all new fields are properly normalized"""
+    statement_samples = check_with_dbm.statement_samples
+
+    # Create a mock row with all fields (31 fields total)
+    mock_row = (
+        1.234,  # elapsed
+        'abc-123-def',  # query_id
+        'SELECT * FROM users WHERE id = 1',  # query
+        'default',  # user
+        1000,  # read_rows
+        50000,  # read_bytes
+        0,  # written_rows
+        0,  # written_bytes
+        1048576,  # memory_usage
+        'abc-123-def',  # initial_query_id
+        'default',  # initial_user
+        'Select',  # query_kind
+        1,  # is_initial_query
+        2097152,  # peak_memory_usage (NEW)
+        1000000,  # total_rows_approx (NEW)
+        1000,  # result_rows (NEW)
+        45000,  # result_bytes (NEW)
+        '2025-11-07 10:05:01',  # query_start_time (NEW)
+        '2025-11-07 10:05:01.123456',  # query_start_time_microseconds (NEW)
+        'python-clickhouse-driver',  # client_name (NEW)
+        0,  # client_version_major (NEW)
+        2,  # client_version_minor (NEW)
+        4,  # client_version_patch (NEW)
+        'analytics',  # current_database (NEW)
+        [123, 124, 125],  # thread_ids (NEW)
+        '192.168.1.100',  # address (NEW)
+        54321,  # port (NEW)
+        'app-server-01',  # client_hostname (NEW)
+        0,  # is_cancelled (NEW)
+        'python-requests/2.28.0',  # http_user_agent (NEW)
+    )
+
+    normalized_row = statement_samples._normalize_active_query_row(mock_row)
+
+    # Verify original fields
+    assert normalized_row['elapsed'] == 1.234
+    assert normalized_row['query_id'] == 'abc-123-def'
+    assert normalized_row['user'] == 'default'
+    assert normalized_row['read_rows'] == 1000
+    assert normalized_row['read_bytes'] == 50000
+    assert normalized_row['memory_usage'] == 1048576
+    assert normalized_row['query_kind'] == 'Select'
+    assert normalized_row['is_initial_query'] is True
+
+    # Verify new memory & performance fields
+    assert normalized_row['peak_memory_usage'] == 2097152
+    assert normalized_row['total_rows_approx'] == 1000000
+    assert normalized_row['result_rows'] == 1000
+    assert normalized_row['result_bytes'] == 45000
+
+    # Verify new timing fields
+    assert normalized_row['query_start_time'] == '2025-11-07 10:05:01'
+    assert normalized_row['query_start_time_microseconds'] == '2025-11-07 10:05:01.123456'
+
+    # Verify new client fields
+    assert normalized_row['client_name'] == 'python-clickhouse-driver'
+    assert normalized_row['client_version_major'] == 0
+    assert normalized_row['client_version_minor'] == 2
+    assert normalized_row['client_version_patch'] == 4
+    assert normalized_row['client_hostname'] == 'app-server-01'
+    assert normalized_row['address'] == '192.168.1.100'
+    assert normalized_row['port'] == 54321
+
+    # Verify new database field
+    assert normalized_row['current_database'] == 'analytics'
+
+    # Verify new thread fields
+    assert normalized_row['thread_ids'] == [123, 124, 125]
+
+    # Verify new status fields
+    assert normalized_row['is_cancelled'] is False
+
+    # Verify new HTTP field
+    assert normalized_row['http_user_agent'] == 'python-requests/2.28.0'
+
+    # Verify obfuscation happened (statement should be set)
+    assert 'statement' in normalized_row
+    assert 'query_signature' in normalized_row
