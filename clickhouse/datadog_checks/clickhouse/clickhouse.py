@@ -98,6 +98,10 @@ class ClickhouseCheck(AgentCheck):
                     self.run_sync = config_dict.get('run_sync', False)
                     self.samples_per_hour_per_query = config_dict.get('samples_per_hour_per_query', 15)
                     self.seen_samples_cache_maxsize = config_dict.get('seen_samples_cache_maxsize', 10000)
+                    # Activity snapshot configuration
+                    self.activity_enabled = config_dict.get('activity_enabled', True)
+                    self.activity_collection_interval = config_dict.get('activity_collection_interval', 10)
+                    self.activity_max_rows = config_dict.get('activity_max_rows', 1000)
 
             self.statement_samples = ClickhouseStatementSamples(self, QuerySamplesConfig(self._query_samples_config))
         else:
