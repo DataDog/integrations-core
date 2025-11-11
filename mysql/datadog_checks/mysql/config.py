@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
@@ -170,5 +171,5 @@ class MySQLConfig(object):
 def sanitize(config: dict) -> dict:
     sanitized = copy.deepcopy(config)
     sanitized['password'] = '***' if sanitized.get('password') else None
-    
+
     return sanitized

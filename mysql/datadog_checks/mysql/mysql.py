@@ -18,7 +18,6 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
-from datadog_checks.mysql.health import MySqlHealth
 from datadog_checks.base.utils.db.utils import (
     TagManager,
     default_json_event_encoding,
@@ -30,6 +29,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
+from datadog_checks.mysql.health import MySqlHealth
 
 from .__about__ import __version__
 from .activity import MySQLActivity
@@ -125,7 +125,7 @@ class MySql(AgentCheck):
         self._events_wait_current_enabled = None
         self._group_replication_active = None
         self._replication_role = None
-        self._initialized_at = int(time.time()* 1000)
+        self._initialized_at = int(time.time() * 1000)
         self._config = MySQLConfig(self.instance, init_config)
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
@@ -181,14 +181,10 @@ class MySql(AgentCheck):
                 name=HealthEvent.INITIALIZATION,
                 status=HealthStatus.OK,
                 cooldown_time=60 * 60 * 6,  # 6 hours
-                data={
-                    "initialized_at": self._initialized_at,
-                    "instance": sanitize(self.instance)
-                },
+                data={"initialized_at": self._initialized_at, "instance": sanitize(self.instance)},
             )
         except Exception as e:
             self.log.error("Error submitting health event for initialization: %s", e)
-
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
