@@ -367,6 +367,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         self.log.debug("loaded sql server statement metrics len(rows)=%s", len(rows))
+        if rows:
+            # Log raw plan_handles from SQL Server (before any hex conversion)
+            raw_plan_handles = [_hash_to_hex(row['plan_handle']) if row.get('plan_handle') else None for row in rows]
+            self.log.debug("raw plan_handles from SQL query: %s", raw_plan_handles)
         return rows
 
     def _should_include_query_metrics_row(self, row):
@@ -382,12 +386,19 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 return True
             if not row['database_name'] or str(row['database_name']).lower() != configured_database.lower():
                 # If the row's database name does not match the configured database, exclude the row
+                self.log.debug(
+                    "excluding row due to database mismatch: row_database=%s configured_database=%s plan_handle=%s",
+                    row.get('database_name'),
+                    configured_database,
+                    row.get('plan_handle'),
+                )
                 return False
 
         return True
 
     def _normalize_queries(self, rows):
         normalized_rows = []
+        self.log.debug("normalizing %d query rows", len(rows))
 
         for row in rows:
             if not self._should_include_query_metrics_row(row):
@@ -403,9 +414,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
-                    self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['statement_text']), e)
+                    self.log.warning(
+                        "Failed to obfuscate query=[%s] plan_handle=%s | err=[%s]",
+                        repr(row['statement_text']),
+                        row.get('plan_handle'),
+                        e,
+                    )
                 else:
-                    self.log.debug("Failed to obfuscate query | err=[%s]", e)
+                    self.log.debug("Failed to obfuscate query plan_handle=%s | err=[%s]", row.get('plan_handle'), e)
                 self._check.count(
                     "dd.sqlserver.statements.error",
                     1,
@@ -477,6 +493,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             row['dd_commands'] = metadata.get('commands', None)
 
             normalized_rows.append(row)
+        self.log.debug("normalized %d rows (from %d raw rows)", len(normalized_rows), len(rows))
         return normalized_rows
 
     def _collect_metrics_rows(self, cursor):
@@ -485,7 +502,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         if not rows:
             return []
         metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']
+        rows_before_derivative = len(rows)
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
+        self.log.debug(
+            "computed derivative rows: %d rows with deltas (from %d normalized rows)", len(rows), rows_before_derivative
+        )
         return rows
 
     @staticmethod
@@ -612,6 +633,11 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):
+        self.log.debug(
+            "starting plan collection for %d rows with plan_handles: %s",
+            len(rows),
+            [row['plan_handle'] for row in rows],
+        )
         for row in rows:
             if self.enforce_collection_interval_deadline and time.time() > deadline:
                 self.log.debug("ending plan collection early because check deadline has been exceeded")
@@ -624,6 +650,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if row['is_proc'] or row['is_encrypted']:
                 plan_key = row['plan_handle']
             if self._seen_plans_ratelimiter.acquire(plan_key):
+                self.log.debug("rate limiter acquired for plan_handle=%s plan_key=%s", row['plan_handle'], plan_key)
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
                 obfuscated_plan = None
                 collection_errors = []
@@ -716,3 +743,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     obfuscated_plan_event["db"]["plan"]["raw_signature"] = row['query_plan_hash']
                     yield raw_plan_event
                 yield obfuscated_plan_event
+            else:
+                self.log.debug(
+                    "rate limiter did not acquire for plan_handle=%s plan_key=%s (already collected recently)",
+                    row['plan_handle'],
+                    plan_key,
+                )
