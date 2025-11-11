@@ -55,7 +55,8 @@ instances:
     ## It must be accessible:
     ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
     ## Add a `?usedonly` on the end if you wish to ignore
-    ## unused metrics instead of reporting them as `0`. Can't be used in combination with `openmetrics_endpoint`.
+    ## unused metrics instead of reporting them as `0`. Cannot be used in combination with `openmetrics_endpoint`
+    ## in the same instance.
     ##
     ## Note: see the configuration options specific to this option here,
     ## https://github.com/DataDog/integrations-core/blob/7.33.x/envoy/datadog_checks/envoy/data/conf.yaml.example
