@@ -26,6 +26,7 @@ DISPLAY_NAME_MAPPING = {
 REMOVED_INTEGRATIONS = {
     # name --> display name
     'kaspersky': 'Kaspersky'
+    'trend_micro_cloud_one': 'Trend Micro Cloud One'
 }
 
 
