@@ -1,0 +1,1 @@
+add istio.server.cert_chain_expiry_seconds and istio.server.root_cert_expiry_seconds metrics
