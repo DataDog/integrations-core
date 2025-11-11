@@ -17,6 +17,8 @@ from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
+from datadog_checks.mysql.health import MySqlHealth
 from datadog_checks.base.utils.db.utils import (
     TagManager,
     default_json_event_encoding,
@@ -32,7 +34,7 @@ from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, Co
 from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
-from .config import MySQLConfig
+from .config import MySQLConfig, sanitize
 from .const import (
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -110,6 +112,7 @@ class MySql(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(MySql, self).__init__(name, init_config, instances)
+        self.health = MySqlHealth(self)
         self.qcache_stats = {}
         self.version = None
         self.is_mariadb = None
@@ -122,6 +125,7 @@ class MySql(AgentCheck):
         self._events_wait_current_enabled = None
         self._group_replication_active = None
         self._replication_role = None
+        self._initialized_at = int(time.time()* 1000)
         self._config = MySQLConfig(self.instance, init_config)
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
@@ -166,6 +170,25 @@ class MySql(AgentCheck):
         self._runtime_queries_cached = None
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
+
+        self._submit_initialization_health_event()
+
+    def _submit_initialization_health_event(self):
+        try:
+            # Handle the config validation result after we've set tags so those tags are included in the health event
+            # TODO: validate the config once it is refactored similar to Postgres, and then send the computed config
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.OK,
+                cooldown_time=60 * 60 * 6,  # 6 hours
+                data={
+                    "initialized_at": self._initialized_at,
+                    "instance": sanitize(self.instance)
+                },
+            )
+        except Exception as e:
+            self.log.error("Error submitting health event for initialization: %s", e)
+
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
@@ -352,6 +375,8 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
+        self._submit_initialization_health_event()
+
         if self.instance.get('user'):
             self._log_deprecation('_config_renamed', 'user', 'username')
 
