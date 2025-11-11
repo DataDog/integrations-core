@@ -41,7 +41,24 @@ SELECT
     initial_query_id,
     initial_user,
     query_kind,
-    is_initial_query
+    is_initial_query,
+    peak_memory_usage,
+    total_rows_approx,
+    result_rows,
+    result_bytes,
+    query_start_time,
+    query_start_time_microseconds,
+    client_name,
+    client_version_major,
+    client_version_minor,
+    client_version_patch,
+    current_database,
+    thread_ids,
+    address,
+    port,
+    client_hostname,
+    is_cancelled,
+    http_user_agent
 FROM system.processes
 WHERE query NOT LIKE '%system.processes%'
   AND query NOT LIKE '%system.query_log%'
@@ -54,10 +71,11 @@ ACTIVE_CONNECTIONS_QUERY = """
 SELECT
     user,
     query_kind,
+    current_database,
     count(*) as connections
 FROM system.processes
 WHERE query NOT LIKE '%system.processes%'
-GROUP BY user, query_kind
+GROUP BY user, query_kind, current_database
 """
 
 # Columns from system.processes which correspond to attributes common to all databases
@@ -65,9 +83,10 @@ GROUP BY user, query_kind
 system_processes_sample_exclude_keys = {
     # we process & obfuscate this separately
     'query',
-    # stored separately
+    # stored separately in standard db fields
     'user',
     'query_id',
+    'current_database',  # stored as db.instance
 }
 
 
@@ -125,13 +144,13 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         self._activity_coll_interval = getattr(config, 'activity_collection_interval', 10)
         self._activity_max_rows = getattr(config, 'activity_max_rows', 1000)
         self._time_since_last_activity_event = 0
-        
+
         # Debug logging to verify config values
         self._check.log.info(
-            "Activity config: enabled=%s, interval=%s, max_rows=%s", 
+            "Activity config: enabled=%s, interval=%s, max_rows=%s",
             self._activity_coll_enabled,
             self._activity_coll_interval,
-            self._activity_max_rows
+            self._activity_max_rows,
         )
 
     def _dbtags(self, db, *extra_tags):
@@ -219,9 +238,27 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 initial_user,
                 query_kind,
                 is_initial_query,
+                peak_memory_usage,
+                total_rows_approx,
+                result_rows,
+                result_bytes,
+                query_start_time,
+                query_start_time_microseconds,
+                client_name,
+                client_version_major,
+                client_version_minor,
+                client_version_patch,
+                current_database,
+                thread_ids,
+                address,
+                port,
+                client_hostname,
+                is_cancelled,
+                http_user_agent,
             ) = row
 
             normalized_row = {
+                # Original fields
                 'elapsed': float(elapsed) if elapsed else 0,
                 'query_id': str(query_id),
                 'query': str(query),
@@ -235,6 +272,26 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 'initial_user': str(initial_user) if initial_user else None,
                 'query_kind': str(query_kind) if query_kind else None,
                 'is_initial_query': bool(is_initial_query) if is_initial_query is not None else True,
+                # New fields
+                'peak_memory_usage': int(peak_memory_usage) if peak_memory_usage else 0,
+                'total_rows_approx': int(total_rows_approx) if total_rows_approx else 0,
+                'result_rows': int(result_rows) if result_rows else 0,
+                'result_bytes': int(result_bytes) if result_bytes else 0,
+                'query_start_time': str(query_start_time) if query_start_time else None,
+                'query_start_time_microseconds': str(query_start_time_microseconds)
+                if query_start_time_microseconds
+                else None,
+                'client_name': str(client_name) if client_name else None,
+                'client_version_major': int(client_version_major) if client_version_major else None,
+                'client_version_minor': int(client_version_minor) if client_version_minor else None,
+                'client_version_patch': int(client_version_patch) if client_version_patch else None,
+                'current_database': str(current_database) if current_database else None,
+                'thread_ids': list(thread_ids) if thread_ids else [],
+                'address': str(address) if address else None,
+                'port': int(port) if port else None,
+                'client_hostname': str(client_hostname) if client_hostname else None,
+                'is_cancelled': bool(is_cancelled) if is_cancelled is not None else False,
+                'http_user_agent': str(http_user_agent) if http_user_agent else None,
             }
 
             return self._obfuscate_and_normalize_query(normalized_row)
@@ -310,7 +367,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                     {
                         'user': row[0],
                         'query_kind': row[1],
-                        'connections': row[2],
+                        'current_database': row[2],
+                        'connections': row[3],
                     }
                 )
 
@@ -469,7 +527,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         Format follows Postgres integration pattern
         This represents currently executing queries from system.processes
         """
-        db = self._check._db
+        # Use current_database from the query if available, fallback to check's default db
+        db = row.get('current_database') or self._check._db
 
         event = {
             "host": self._check.reported_hostname,
@@ -520,13 +579,16 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
                 # Get active queries for activity snapshot
                 rows = self._get_active_queries()
+                self._log.info("DEBUG: Retrieved %s raw rows from system.processes", len(rows))
                 rows = self._filter_and_normalize_statement_rows(rows)
+                self._log.info("DEBUG: After filtering/normalization: %s rows", len(rows))
 
                 # Get active connections aggregation
                 active_connections = self._get_active_connections()
 
                 # Create and submit activity event
                 activity_event = self._create_activity_event(rows, active_connections)
+                self._log.info("DEBUG: Activity event has %s sessions", len(activity_event.get('clickhouse_activity', [])))
                 self._check.database_monitoring_query_activity(
                     json.dumps(activity_event, default=default_json_event_encoding)
                 )
