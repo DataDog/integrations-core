@@ -311,8 +311,8 @@ class WinWMICheck(AgentCheck):
         Validate tag_queries configuration to ensure aliases are provided when 'AS' is used.
         return parsed_tag_queries and aliases
         """
-        aliases = [] # type: list[str]
-        parsed_tag_queries = [] # type: list[TagQuery]
+        aliases = []  # type: list[str]
+        parsed_tag_queries = []  # type: list[TagQuery]
         for tag_query in tag_queries:
             if len(tag_query) < 4:
                 continue
