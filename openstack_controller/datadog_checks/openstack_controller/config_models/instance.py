@@ -391,7 +391,7 @@ class InstanceConfig(BaseModel):
     all_projects: Optional[bool] = None
     allow_redirects: Optional[bool] = None
     auth_token: Optional[AuthToken] = None
-    auth_type: Optional[str] = None
+    auth_type: Optional[Literal['basic', 'digest', 'ntlm', 'kerberos', 'aws']] = None
     aws_host: Optional[str] = None
     aws_region: Optional[str] = None
     aws_service: Optional[str] = None
