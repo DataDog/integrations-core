@@ -1,3 +1,7 @@
+## Datadog Agent version [7.72.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7722)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.72.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7721)
 
 * There were no integration updates for this version of the Agent.
@@ -229,6 +233,7 @@
 * TorchServe [4.1.0](https://github.com/DataDog/integrations-core/blob/master/torchserve/CHANGELOG.md)
 * Traefik Mesh [3.1.0](https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/CHANGELOG.md)
 * Traffic Server [3.3.0](https://github.com/DataDog/integrations-core/blob/master/traffic_server/CHANGELOG.md)
+* trend_micro_cloud_one [1.0.0](https://github.com/DataDog/integrations-core/blob/master/trend_micro_cloud_one/CHANGELOG.md)
 * Twemproxy [3.1.0](https://github.com/DataDog/integrations-core/blob/master/twemproxy/CHANGELOG.md)
 * Twistlock [6.1.0](https://github.com/DataDog/integrations-core/blob/master/twistlock/CHANGELOG.md)
 * Varnish [4.1.0](https://github.com/DataDog/integrations-core/blob/master/varnish/CHANGELOG.md)

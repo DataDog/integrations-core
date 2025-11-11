@@ -12,7 +12,7 @@
 
 * Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
 
-## 1.1.0 / 2025-10-31
+## 1.1.0 / 2025-10-31 / Agent 7.71.0
 
 ***Added***:
 
