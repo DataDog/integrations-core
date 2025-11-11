@@ -327,6 +327,10 @@ class SQLServer(DatabaseCheck):
         return agent_host_resolver(self.host)
 
     @property
+    def tags(self):
+        return self.tag_manager.get_tags()
+
+    @property
     def reported_hostname(self):
         # type: () -> str
         if self._config.exclude_hostname:
