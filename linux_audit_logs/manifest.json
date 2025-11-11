@@ -14,27 +14,42 @@
     "media": [
       {
         "caption": "Linux Audit Logs - Overview",
-        "image_url": "images/linux_audit_logs_overview_1.png",
+        "image_url": "images/linux_audit_logs_overview_light_1.png",
         "media_type": "image"
       },
       {
         "caption": "Linux Audit Logs - Overview",
-        "image_url": "images/linux_audit_logs_overview_2.png",
+        "image_url": "images/linux_audit_logs_overview_light_2.png",
         "media_type": "image"
       },
       {
         "caption": "Linux Audit Logs - Overview",
-        "image_url": "images/linux_audit_logs_overview_3.png",
+        "image_url": "images/linux_audit_logs_overview_light_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Linux Audit Logs - Syscall",
+        "image_url": "images/linux_audit_logs_syscall_light.png",
         "media_type": "image"
       },
       {
         "caption": "Linux Audit Logs - Overview",
-        "image_url": "images/linux_audit_logs_overview_4.png",
+        "image_url": "images/linux_audit_logs_overview_dark_1.png",
         "media_type": "image"
       },
       {
-        "caption": "Linux Audit Logs - System Call",
-        "image_url": "images/linux_audit_logs_system_call.png",
+        "caption": "Linux Audit Logs - Overview",
+        "image_url": "images/linux_audit_logs_overview_dark_2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Linux Audit Logs - Overview",
+        "image_url": "images/linux_audit_logs_overview_dark_3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Linux Audit Logs - Syscall",
+        "image_url": "images/linux_audit_logs_syscall_dark.png",
         "media_type": "image"
       }
     ],
