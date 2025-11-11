@@ -198,7 +198,6 @@ class MySql(DatabaseCheck):
         self.set_metadata('flavor', self.version.flavor)
         self.set_metadata('resolved_hostname', self.resolved_hostname)
 
-
     @property
     def tags(self):
         return self.tag_manager.get_tags()
