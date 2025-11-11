@@ -14,7 +14,6 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
-from .config import sanitize
 from datadog_checks.base.utils.db.utils import (
     TagManager,
     default_json_event_encoding,
@@ -57,6 +56,8 @@ from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
 from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handlers
+
+from .config import sanitize
 
 try:
     import datadog_agent
@@ -234,12 +235,11 @@ class SQLServer(AgentCheck):
                 cooldown_time=60 * 60 * 6,  # 6 hours
                 data={
                     "initialized_at": self._initialized_at,
-                    "instance": sanitize(self.instance),                    
+                    "instance": sanitize(self.instance),
                 },
             )
         except Exception as e:
             self.log.error("Error submitting health event for initialization: %s", e)
-
 
     def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
         tags = self.tag_manager.get_tags() + (extra_tags or [])
@@ -845,7 +845,7 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         self._submit_initialization_health_event()
-        
+
         if self.do_check:
             self.load_static_information()
             # configure custom queries for the check
