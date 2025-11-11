@@ -11,6 +11,7 @@ from string import Template
 from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
@@ -50,6 +51,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SQLServerXESessionMetrics,
 )
 from datadog_checks.sqlserver.deadlocks import Deadlocks
+from datadog_checks.sqlserver.health import SqlServerHealth
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
@@ -60,7 +62,7 @@ from datadog_checks.sqlserver.xe_collection.registry import get_xe_session_handl
 from .config import sanitize
 
 try:
-    import datadog_agent
+    import datadog_agent  # type: ignore
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
@@ -119,13 +121,15 @@ if adodbapi is None and pyodbc is None:
 set_default_driver_conf()
 
 
-class SQLServer(AgentCheck):
+class SQLServer(DatabaseCheck):
     __NAMESPACE__ = "sqlserver"
 
     HA_SUPPORTED = True
 
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
+
+        self.health = SqlServerHealth(self)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
