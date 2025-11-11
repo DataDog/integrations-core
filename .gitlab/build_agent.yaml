@@ -7,9 +7,9 @@
     BUCKET_BRANCH: "dev"
     DEPLOY_AGENT: "false"
     INTEGRATIONS_CORE_VERSION: ${CI_COMMIT_REF_NAME}
-    # disable kitchen and e2e tests
+    RUN_E2E_TESTS: "on"
+    # disable kitchen tests
     RUN_KITCHEN_TESTS: "false"
-    RUN_E2E_TESTS: "off"
   stage: build
   trigger:
     project: DataDog/datadog-agent
@@ -20,6 +20,9 @@
 build-agent-auto:
   extends: .build-agent-tpl
   rules:
+    # Do not run on tags
+    - if: $CI_COMMIT_TAG
+      when: never
     # Do not run on release branches
     - if: $CI_COMMIT_BRANCH =~ /^7\.\d+\.x$/
       when: never

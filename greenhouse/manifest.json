@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "7cf95e39-874e-4179-91da-bd142ff391ee",
   "app_id": "greenhouse",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -13,7 +14,12 @@
     "media": [
       {
         "caption": "Greenhouse - Audit Logs",
-        "image_url": "images/greenhouse_audit_logs.png",
+        "image_url": "images/greenhouse_audit_image1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Greenhouse - Audit Logs",
+        "image_url": "images/greenhouse_audit_image2.png",
         "media_type": "image"
       }
     ],

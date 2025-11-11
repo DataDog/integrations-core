@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "a930364f-ac97-4483-92d6-5a982da7b1c0",
   "app_id": "cassandra",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

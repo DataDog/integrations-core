@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "92342b09-db9a-4542-b442-76bb9b7f716e",
   "app_id": "marklogic",
+  "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

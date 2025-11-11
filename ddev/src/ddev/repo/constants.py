@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 CONFIG_DIRECTORY = '.ddev'
 NOT_SHIPPABLE = frozenset(['datadog_checks_dev', 'datadog_checks_tests_helper', 'ddev'])
-NOT_E2E_TESTABLE = frozenset(['datadog_checks_dev', 'datadog_checks_base', 'datadog_checks_tests_helper', 'ddev'])
 FULL_NAMES = {
     'core': 'integrations-core',
     'extras': 'integrations-extras',
@@ -12,4 +11,5 @@ FULL_NAMES = {
 }
 
 # This is automatically maintained
-PYTHON_VERSION = '3.12'
+PYTHON_VERSION = '3.13'
+PYTHON_VERSION_FULL = '3.13.7'

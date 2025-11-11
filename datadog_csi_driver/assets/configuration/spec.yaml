@@ -1,0 +1,24 @@
+name: Datadog CSI Driver
+files:
+- name: datadog_csi_driver.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/openmetrics
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+        - csi-driver
+  - template: init_config
+    options:
+      - template: init_config/openmetrics_legacy
+  - template: instances
+    options:
+      - template: instances/openmetrics_legacy
+        overrides:
+          prometheus_url.value.example: http://%%host%%:5000/metrics

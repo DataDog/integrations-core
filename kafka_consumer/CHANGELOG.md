@@ -2,7 +2,37 @@
 
 <!-- towncrier release notes start -->
 
-## 6.7.0 / 2025-08-07
+## 6.9.1 / 2025-10-31
+
+***Fixed***:
+
+* Correctly support schema registry bytes in Avro & Protobuf messages ([#21632](https://github.com/DataDog/integrations-core/pull/21632))
+
+## 6.9.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump `confluent-kafka` to 2.11.1 ([#21259](https://github.com/DataDog/integrations-core/pull/21259))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+***Fixed***:
+
+* Set ruff formatting rules in pyproject.toml to inherit from the global ones of the repo. ([#21206](https://github.com/DataDog/integrations-core/pull/21206))
+
+## 6.8.0 / 2025-09-05 / Agent 7.71.0
+
+***Added***:
+
+* Update dependencies ([#21217](https://github.com/DataDog/integrations-core/pull/21217))
+
+***Fixed***:
+
+* Improve kafka consumer highwater offset collection time ([#20716](https://github.com/DataDog/integrations-core/pull/20716))
+* Improve check efficiency with many topics or partitions per consumer group when `collect_consumer_group_state` is enabled. ([#21221](https://github.com/DataDog/integrations-core/pull/21221))
+* Fix undercount of contexts for the max_partition_contexts configuration option. ([#21223](https://github.com/DataDog/integrations-core/pull/21223))
+
+## 6.7.0 / 2025-08-07 / Agent 7.70.0
 
 ***Added***:
 

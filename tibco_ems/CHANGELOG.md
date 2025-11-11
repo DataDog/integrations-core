@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 2.1.1 / 2025-08-07
+## 2.2.0 / 2025-10-02 / Agent 7.72.0
+
+***Added***:
+
+* Bump Python to 3.13 ([#21161](https://github.com/DataDog/integrations-core/pull/21161))
+* Bump datadog-checks-base to 37.21.0 ([#21477](https://github.com/DataDog/integrations-core/pull/21477))
+
+## 2.1.2 / 2025-09-05 / Agent 7.71.0
+
+***Fixed***:
+
+* Fix collection of queues with a `none` prefetch value ([#21039](https://github.com/DataDog/integrations-core/pull/21039))
+
+## 2.1.1 / 2025-08-07 / Agent 7.70.0
 
 ***Fixed***:
 

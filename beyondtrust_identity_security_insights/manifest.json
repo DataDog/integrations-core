@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "1ea8fd4a-c95e-460f-a2ec-703d8dccef5e",
   "app_id": "beyondtrust-identity-security-insights",
+  "owner": "saas-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -31,7 +32,7 @@
   },
   "assets": {
     "integration": {
-      "auto_install": false,
+      "auto_install": true,
       "source_type_id": 51341700,
       "source_type_name": "BeyondTrust Identity Security Insights",
       "events": {
@@ -42,7 +43,7 @@
       "BeyondTrust Identity Security Insights - Detections": "assets/dashboards/beyondtrust_identity_security_insights_detections.json"
     },
     "logs": {
-      "source": "beyondtrust-identity-security-insights"
+      "source": "beyond-trust-identity-security-insights"
     }
   },
   "author": {

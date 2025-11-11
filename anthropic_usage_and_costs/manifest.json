@@ -2,15 +2,27 @@
   "manifest_version": "2.0.0",
   "app_uuid": "96f960de-2b87-41ec-8d9a-88fe75e93dc9",
   "app_id": "anthropic-usage-and-costs",
-  "display_on_public_website": false,
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Enable Anthropic customers to monitor token consumption, track spend, and attribute usage directly within Datadog.",
+    "description": "Optimize your Anthropic usage: monitor token consumption, track your costs, and attribute usage.",
     "title": "Anthropic Usage and Costs",
-    "media": [],
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Anthropic Costs Explorer",
+        "image_url": "images/anthropic-costs-explorer-for-overview.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Anthropic Dashboard",
+        "image_url": "images/anthropic-dashboard-for-overview.png"
+      }
+    ],
     "classifier_tags": [
       "Category::AI/ML",
       "Category::Metrics",
@@ -34,13 +46,23 @@
         "prefix": "anthropic.",
         "check": [
           "anthropic.input_tokens",
-          "anthropic.output_tokens"
+          "anthropic.output_tokens",
+          "anthropic.messages.input_tokens",
+          "anthropic.messages.output_tokens"
         ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Anthropic Usage and Costs Overview": "assets/dashboards/anthropic_usage_and_costs_overview.json"
+    },
+    "monitors": {
+      "Anthropic Usage is Approaching Rate Limit": "assets/monitors/anthropic_token_usage_threshold.json",
+      "Anthropic Cache/Hit Ratio Is Abnormally Low": "assets/monitors/anthropic_cache_hit_ratio_anomaly.json",
+      "Anthropic Token Usage Is Abnormally High": "assets/monitors/anthropic_token_usage_anomaly.json"
     }
   },
   "author": {

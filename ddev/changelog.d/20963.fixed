@@ -1,1 +1,0 @@
-Modify the CI matrix generation by spliting jobs in 2 groups: windows and linux tests. This is done to reduce the number of jobs each workflow runs.

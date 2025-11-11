@@ -23,9 +23,11 @@ DISPLAY_NAME_MAPPING = {
     'Mesos': 'Mesos Slave'
 }
 
-DELETED_INTEGRATIONS = [
-    'kaspersky',
-]
+REMOVED_INTEGRATIONS = {
+    # name --> display name
+    'kaspersky': 'Kaspersky',
+    'trend_micro_cloud_one': 'Trend Micro Cloud One',
+}
 
 
 @click.command(
@@ -73,10 +75,12 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
             for entry in CHANGELOG_MANUAL_ENTRIES.get(agent, []):
                 changelog_contents.write(f'{entry}\n')
             for name, ver in version_changes.items():
-                if name in DELETED_INTEGRATIONS:
-                    continue
-                display_name = app.repo.integrations.get(name).display_name
-                display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
+                try:
+                    display_name = app.repo.integrations.get(name).display_name
+                    display_name = DISPLAY_NAME_MAPPING.get(display_name, display_name)
+                # OSError is raised if the integration path does not exist - likely a deleted or migrated integration
+                except OSError:
+                    display_name = REMOVED_INTEGRATIONS.get(name, name)
 
                 breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
                 changelog_url = check_changelog_url.format(name)

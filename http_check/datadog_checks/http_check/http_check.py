@@ -11,13 +11,15 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import requests
+import socks
 from cryptography import x509
 from requests import Response  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
+from datadog_checks.base.utils.http import should_bypass_proxy
 
 from .config import DEFAULT_EXPECTED_CODE, from_instance
-from .utils import get_ca_certs_path
+from .utils import get_ca_certs_path, parse_proxy_url
 
 DEFAULT_EXPIRE_DAYS_WARNING = 14
 DEFAULT_EXPIRE_DAYS_CRITICAL = 7
@@ -397,7 +399,16 @@ class HTTPCheck(AgentCheck):
         server_name = instance.get('ssl_server_name', o.hostname)
         port = o.port or 443
 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
+        proxies = self.http.options.get('proxies', {})
+        if (
+            proxies
+            and (proxy_url := proxies.get("https"))
+            and not should_bypass_proxy(url, self.http.no_proxy_uris or [])
+        ):
+            proxy = parse_proxy_url(proxy_url)
+            sock.set_proxy(**proxy)
+
         sock.settimeout(float(timeout))
         sock.connect((host, port))
 

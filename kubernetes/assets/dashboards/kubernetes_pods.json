@@ -81,8 +81,7 @@
                                         {
                                             "query": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         }
                                     ],
                                     "style": {
@@ -137,8 +136,7 @@
                                             "name": "query1",
                                             "data_source": "metrics",
                                             "query": "sum:kubernetes.pods.running{$scope,$namespace,$cluster,$deployment,$statefulset,$daemonset,$job} by {kube_namespace,kube_deployment}",
-                                            "aggregator": "sum",
-                                            "semantic_mode": "combined"
+                                            "aggregator": "sum"
                                         }
                                     ]
                                 }
@@ -173,8 +171,7 @@
                                             "query": "sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,!pod_phase:running,!pod_phase:succeeded} by {pod_phase,kube_namespace}",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "aggregator": "last",
-                                            "semantic_mode": "combined"
+                                            "aggregator": "last"
                                         }
                                     ],
                                     "formulas": [
@@ -229,8 +226,7 @@
                                         {
                                             "query": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job} by {kube_cluster_name,kube_namespace}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         }
                                     ],
                                     "style": {
@@ -290,8 +286,7 @@
                                             "query": "sum:kubernetes.cpu.usage.total{$scope,$namespace,$deployment,!pod_name:no_pod,$cluster,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "aggregator": "avg",
-                                            "semantic_mode": "combined"
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "formulas": [
@@ -347,8 +342,7 @@
                                         {
                                             "query": "sum:kubernetes.cpu.usage.total{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         }
                                     ],
                                     "style": {
@@ -390,8 +384,7 @@
                                             "query": "sum:kubernetes.memory.usage{$scope,$namespace,$deployment,!pod_name:no_pod,$cluster,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "aggregator": "avg",
-                                            "semantic_mode": "combined"
+                                            "aggregator": "avg"
                                         }
                                     ],
                                     "formulas": [
@@ -447,8 +440,7 @@
                                         {
                                             "query": "sum:kubernetes.memory.usage{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         }
                                     ],
                                     "style": {
@@ -507,8 +499,7 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$statefulset,$daemonset,$job} by {kube_cluster_name,kube_namespace}",
-                                            "aggregator": "max",
-                                            "semantic_mode": "combined"
+                                            "aggregator": "max"
                                         }
                                     ],
                                     "formulas": [
@@ -569,8 +560,7 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,condition:true,$statefulset,$daemonset,$job} by {kube_cluster_name,host,nodepool}",
-                                            "aggregator": "last",
-                                            "semantic_mode": "combined"
+                                            "aggregator": "last"
                                         }
                                     ],
                                     "formulas": [
@@ -626,8 +616,7 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:kubernetes_state.pod.ready{condition:false,$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,!pod_phase:succeeded} by {kube_namespace}",
-                                            "aggregator": "last",
-                                            "semantic_mode": "combined"
+                                            "aggregator": "last"
                                         }
                                     ],
                                     "formulas": [
@@ -688,8 +677,7 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$statefulset,$daemonset,$job} by {kube_runtime_class}",
-                                            "aggregator": "max",
-                                            "semantic_mode": "combined"
+                                            "aggregator": "max"
                                         }
                                     ],
                                     "formulas": [
@@ -759,26 +747,22 @@
                                         {
                                             "query": "sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:failed,$scope,$statefulset,$daemonset,$job}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         },
                                         {
                                             "query": "sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:pending,$scope,$statefulset,$daemonset,$job}",
                                             "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
+                                            "name": "query2"
                                         },
                                         {
                                             "query": "sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:running,$scope,$statefulset,$daemonset,$job}",
                                             "data_source": "metrics",
-                                            "name": "query3",
-                                            "semantic_mode": "combined"
+                                            "name": "query3"
                                         },
                                         {
                                             "query": "sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:succeeded,$scope,$statefulset,$daemonset,$job}",
                                             "data_source": "metrics",
-                                            "name": "query4",
-                                            "semantic_mode": "combined"
+                                            "name": "query4"
                                         }
                                     ],
                                     "style": {
@@ -865,26 +849,22 @@
                                         {
                                             "query": "sum:kubernetes_state.container.ready{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         },
                                         {
                                             "query": "sum:kubernetes_state.container.running{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job}",
                                             "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
+                                            "name": "query2"
                                         },
                                         {
                                             "query": "sum:kubernetes_state.container.terminated{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job}",
                                             "data_source": "metrics",
-                                            "name": "query3",
-                                            "semantic_mode": "combined"
+                                            "name": "query3"
                                         },
                                         {
                                             "query": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job}",
                                             "data_source": "metrics",
-                                            "name": "query4",
-                                            "semantic_mode": "combined"
+                                            "name": "query4"
                                         }
                                     ],
                                     "style": {
@@ -935,8 +915,7 @@
                                         {
                                             "query": "sum:kubernetes.containers.state.terminated{$cluster,$namespace,$deployment,reason:oomkilled,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         }
                                     ],
                                     "style": {
@@ -991,8 +970,7 @@
                                         {
                                             "query": "sum:kubernetes_state.container.status_report.count.waiting{$cluster,$namespace,$deployment,reason:crashloopbackoff,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         }
                                     ],
                                     "style": {
@@ -1049,8 +1027,7 @@
                                         {
                                             "query": "sum:kubernetes_state.container.restarts{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         }
                                     ],
                                     "style": {
@@ -1105,8 +1082,7 @@
                                         {
                                             "query": "sum:kubernetes.cpu.usage.total{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {kube_container_name,container_id}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         }
                                     ],
                                     "style": {
@@ -1161,8 +1137,7 @@
                                         {
                                             "query": "sum:kubernetes.memory.usage{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {kube_container_name,container_id}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         }
                                     ],
                                     "style": {
@@ -1221,14 +1196,12 @@
                                         {
                                             "query": "sum:kubernetes.network.rx_bytes{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         },
                                         {
                                             "query": "sum:kubernetes.network.tx_bytes{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
+                                            "name": "query2"
                                         }
                                     ],
                                     "style": {
@@ -1287,14 +1260,12 @@
                                         {
                                             "query": "sum:kubernetes.network.rx_errors{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
+                                            "name": "query1"
                                         },
                                         {
                                             "query": "sum:kubernetes.network.tx_errors{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                                             "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
+                                            "name": "query2"
                                         }
                                     ],
                                     "style": {

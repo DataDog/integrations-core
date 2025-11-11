@@ -34,6 +34,7 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
+        'agent_host:' + common.get_agent_hostname(),
     ] + [
         'cppm_system_version:5.0.1',
         'cppm_cluster_node_type:Master',

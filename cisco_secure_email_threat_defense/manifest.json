@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "9776e6c8-2031-4dda-98b5-3628b181625b",
   "app_id": "cisco-secure-email-threat-defense",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",

@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from typing import Generator
 
 from ddev.e2e.constants import E2EEnvVars
-from ddev.testing.hatch import get_hatch_env_vars
+from ddev.utils.hatch import get_hatch_env_vars
 from ddev.utils.structures import EnvVars
 
 

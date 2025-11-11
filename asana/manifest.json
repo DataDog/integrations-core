@@ -2,6 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "2287c449-1fb3-4897-8771-8ae5ead3c7ef",
   "app_id": "asana",
+  "owner": "saas-integrations",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
