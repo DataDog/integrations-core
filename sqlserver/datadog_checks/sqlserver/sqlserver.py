@@ -148,7 +148,7 @@ class SQLServer(DatabaseCheck):
         self.do_check = True
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
-        self._initialized_at = time.time()
+        self._initialized_at = int(time.time() * 1000)
 
         self.cloud_metadata = self._config.cloud_metadata
         self.tag_manager = TagManager(normalizer=lambda tag: self.normalize_tag(tag).lower())
