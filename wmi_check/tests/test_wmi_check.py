@@ -148,3 +148,17 @@ def test_tag_by_is_correctly_aliased(mock_sampler_with_tag_by_alias, aggregator,
         aggregator.assert_metric(metric, tags=result_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_tag_queries_is_correctly_parsed(check):
+    instance = copy.deepcopy(common.INSTANCE)
+    instance['tag_queries'] = [
+        ['IDProcess', 'Win32_Process', 'Handle', 'Name AS process_name'],
+        ['IDProcess', 'Win32_Process', 'Handle', 'IDProcess', 'foo'],
+    ]
+    c = check(instance)
+    assert c.parsed_tag_queries == [
+        ['IDProcess', 'Win32_Process', 'Handle', 'Name'],
+        ['IDProcess', 'Win32_Process', 'Handle', 'IDProcess', 'foo'],
+    ]
+    assert c.tag_queries_aliases == ['process_name', 'idprocess']

@@ -22,7 +22,10 @@ class WMICheck(WinWMICheck):
         self.metrics_to_capture = self.instance.get('metrics', [])  # type: List[List[str]]
         self.tag_by = self.instance.get('tag_by', "")  # type: str
         self.tag_queries = self.instance.get('tag_queries', [])  # type: List[TagQuery]
-        self.validate_tag_queries_aliases(self.tag_queries)
+
+        # Parse the tag_queries and validate the aliases
+        self.parsed_tag_queries, self.tag_queries_aliases = self.parse_tag_queries_aliases(self.tag_queries)
+
         custom_tags = self.instance.get('tags', [])  # type: List[str]
         self.constant_tags = self.instance.get('constant_tags', [])  # type: List[str]
         if self.constant_tags:
@@ -30,17 +33,12 @@ class WMICheck(WinWMICheck):
         self.constant_tags.extend(custom_tags)
 
         self.tag_by_properties = ""
-        self.tag_by_aliases = ""
+        self.tag_by_aliases = {}  # type: Dict[str, str]
         for t in self.tag_by.split(','):
             property, alias = self.parse_alias(t)
             self.tag_by_properties += property + ","
-            if alias:
-                self.tag_by_aliases += property + " as " + alias + ","
-            else:
-                self.log.warning("No alias provided after 'AS' for property: %s. Using property for tag", property)
-                self.tag_by_aliases += property + ","
+            self.tag_by_aliases[property.lower()] = alias.lower()
         self.tag_by_properties = self.tag_by_properties.rstrip(',')
-        self.tag_by_aliases = self.tag_by_aliases.rstrip(',')
 
     def check(self, _):
         # type: (Any) -> None
@@ -69,8 +67,15 @@ class WMICheck(WinWMICheck):
 
     def extract_metrics(self, wmi_sampler):
         # type: (WMISampler) -> List[WMIMetric]
-        return self._extract_metrics(wmi_sampler, self.tag_by_aliases, self.tag_queries, self.constant_tags)
+        return self._extract_metrics(
+            wmi_sampler,
+            self.tag_by_properties,
+            self.parsed_tag_queries,
+            self.constant_tags,
+            self.tag_by_aliases,
+            self.tag_queries_aliases,
+        )
 
     def get_wmi_properties(self):
         # type: () -> WMIProperties
-        return self._get_wmi_properties(None, self.metrics_to_capture, self.tag_queries)
+        return self._get_wmi_properties(None, self.metrics_to_capture, self.parsed_tag_queries)

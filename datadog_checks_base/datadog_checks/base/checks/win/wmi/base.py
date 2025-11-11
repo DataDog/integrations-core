@@ -66,7 +66,7 @@ class WinWMICheck(AgentCheck):
             link_source_property = int(wmi_obj[tag_query[0]])
             target_class = tag_query[1]
             link_target_class_property = tag_query[2]
-            target_property, alias = self.parse_alias(tag_query[3])
+            target_property = tag_query[3]
         except IndexError:
             self.log.error(
                 "Wrong `tag_queries` parameter format. Please refer to the configuration file for more information."
@@ -82,7 +82,7 @@ class WinWMICheck(AgentCheck):
             )
             raise
 
-        return target_class, target_property, alias, [{link_target_class_property: link_source_property}]
+        return target_class, target_property, [{link_target_class_property: link_source_property}]
 
     def _raise_on_invalid_tag_query_result(self, sampler, wmi_obj, tag_query):
         # type: (WMISampler, WMIObject, TagQuery) -> None
@@ -110,8 +110,8 @@ class WinWMICheck(AgentCheck):
             )
             raise TypeError
 
-    def _get_tag_query_tag(self, sampler, wmi_obj, tag_query):
-        # type: (WMISampler, WMIObject, TagQuery) -> str
+    def _get_tag_query_tag(self, sampler, wmi_obj, tag_query, alias):
+        # type: (WMISampler, WMIObject, TagQuery, str) -> str
         """
         Design a query based on the given WMIObject to extract a tag.
 
@@ -120,7 +120,7 @@ class WinWMICheck(AgentCheck):
         self.log.debug("`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, tag_query)
 
         # Extract query information
-        target_class, target_property, alias, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
+        target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
 
         # Create a specific sampler
         with WMISampler(
@@ -133,17 +133,14 @@ class WinWMICheck(AgentCheck):
 
             link_value = str(tag_query_sampler[0][target_property]).lower()
 
-        if alias:
-            tag_name = alias.lower()
-        else:
-            tag_name = target_property.lower()
+        tag_name = alias.lower()
         tag = "{tag_name}:{tag_value}".format(tag_name=tag_name, tag_value="_".join(link_value.split()))
 
         self.log.debug("Extracted `tag_queries` tag: '%s'", tag)
         return tag
 
-    def _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags):
-        # type: (WMISampler, str, List[List[str]], List[str]) -> List[WMIMetric]
+    def _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags, tag_by_aliases, tag_queries_aliases):
+        # type: (WMISampler, str, List[List[str]], List[str], Dict[str, str], List[str]) -> List[WMIMetric]
         """
         Extract and tag metrics from the WMISampler.
 
@@ -174,9 +171,9 @@ class WinWMICheck(AgentCheck):
             tags = list(constant_tags) if constant_tags else []
 
             # Tag with `tag_queries` parameter
-            for query in tag_queries:
+            for index, query in enumerate(tag_queries):
                 try:
-                    tags.append(self._get_tag_query_tag(wmi_sampler, wmi_obj, query))
+                    tags.append(self._get_tag_query_tag(wmi_sampler, wmi_obj, query, tag_queries_aliases[index]))
                 except TagQueryUniquenessFailure:
                     continue
 
@@ -197,16 +194,13 @@ class WinWMICheck(AgentCheck):
                     continue
                 # Tag with `tag_by` parameter
                 for t in tag_by.split(','):
-                    t, alias = self.parse_alias(t)
                     if normalized_wmi_property == t:
                         tag_value = str(wmi_value).lower()
                         if tag_queries and tag_value.find("#") > 0:
                             tag_value = tag_value[: tag_value.find("#")]
 
-                        if alias:
-                            tags.append("{name}:{value}".format(name=alias, value=tag_value))
-                        else:
-                            tags.append("{name}:{value}".format(name=t, value=tag_value))
+                        alias = tag_by_aliases.get(t)
+                        tags.append("{name}:{value}".format(name=alias, value=tag_value))
                         continue
 
                 # No metric extraction on 'Name' and properties in tag_by
@@ -311,22 +305,23 @@ class WinWMICheck(AgentCheck):
 
         return self._wmi_props
 
-    def validate_tag_queries_aliases(self, tag_queries):
+    def parse_tag_queries_aliases(self, tag_queries):
         # type: (List[TagQuery]) -> None
         """
         Validate tag_queries configuration to ensure aliases are provided when 'AS' is used.
-        Logs warnings for any invalid configurations.
+        return parsed_tag_queries and aliases
         """
+        aliases = [] # type: list[str]
+        parsed_tag_queries = [] # type: list[TagQuery]
         for tag_query in tag_queries:
             if len(tag_query) < 4:
                 continue
             target_property_str = tag_query[3]
             property, alias = self.parse_alias(target_property_str)
-            # Check if 'AS' was present but alias is empty
-            if (' AS' in target_property_str or ' as' in target_property_str) and alias is None:
-                self.log.warning(
-                    "No alias provided after 'AS' for property: %s in tag_queries. Using property for tag", property
-                )
+            aliases.append(alias)
+            tag_query[3] = property
+            parsed_tag_queries.append(tag_query)
+        return parsed_tag_queries, aliases
 
     def parse_alias(self, property):
         # type: (str) -> Tuple[str, Optional[str]]
@@ -340,9 +335,10 @@ class WinWMICheck(AgentCheck):
             alias = property_split[1].strip()
             self.log.debug("Parsed alias: {%s} for property: {%s}", alias, property)
             if alias == "":
-                alias = None
+                self.log.warning("No alias provided after 'AS' for property: %s. Using property for tag", property)
+                alias = property.lower()
         else:
-            alias = None
+            alias = property.lower()
         return property, alias
 
 
