@@ -274,3 +274,11 @@ class SQLServerConfig:
                 if value is not None:
                     config[key] = value
         return configurable_metrics
+
+def sanitize(config: dict) -> dict:
+    """
+    Sanitize the config to remove sensitive information.
+    """
+    sanitized = copy.deepcopy(config)
+    sanitized['password'] = '***' if sanitized.get('password') else None
+    return sanitized

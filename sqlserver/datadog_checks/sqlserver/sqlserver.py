@@ -13,6 +13,8 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
+from .config import sanitize
 from datadog_checks.base.utils.db.utils import (
     TagManager,
     default_json_event_encoding,
@@ -141,6 +143,8 @@ class SQLServer(AgentCheck):
         self.do_check = True
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
+        self._initialized_at = time.time()
+
         self.cloud_metadata = self._config.cloud_metadata
         self.tag_manager = TagManager(normalizer=lambda tag: self.normalize_tag(tag).lower())
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
@@ -183,6 +187,8 @@ class SQLServer(AgentCheck):
 
         self._schemas = Schemas(self, self._config)
 
+        self._submit_initialization_health_event()
+
     def initialize_xe_session_handlers(self):
         """Initialize the XE session handlers without starting them"""
         # Initialize XE session handlers if not already initialized
@@ -217,6 +223,23 @@ class SQLServer(AgentCheck):
             self.log.warning(
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
+
+    def _submit_initialization_health_event(self):
+        try:
+            # Handle the config validation result after we've set tags so those tags are included in the health event
+            # TODO: Validate the config once it has been refactored
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.OK,
+                cooldown_time=60 * 60 * 6,  # 6 hours
+                data={
+                    "initialized_at": self._initialized_at,
+                    "instance": sanitize(self.instance),                    
+                },
+            )
+        except Exception as e:
+            self.log.error("Error submitting health event for initialization: %s", e)
+
 
     def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
         tags = self.tag_manager.get_tags() + (extra_tags or [])
@@ -821,6 +844,8 @@ class SQLServer(AgentCheck):
             self._check_connections_by_use_db()
 
     def check(self, _):
+        self._submit_initialization_health_event()
+        
         if self.do_check:
             self.load_static_information()
             # configure custom queries for the check
