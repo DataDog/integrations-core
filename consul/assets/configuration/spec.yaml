@@ -77,7 +77,7 @@ files:
     - name: new_leader_checks
       description: |
         Whether to enable new-leader checks from this instance.
-        Note: If this is set on multiple instances or agents in the same cluster,
+        Note: If this is set on multiple instances or Agents in the same cluster,
         you will receive one event per leader change per instance. See
         self_leader_check for a more robust option.
       value:
