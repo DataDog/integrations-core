@@ -87,8 +87,9 @@ def option_enabled(option):
     return option['required']
 
 
-def validate_fields(fields_dict: dict[str, any], option_name: str, allowed_fields: set[str], 
-                    field_level: str, writer: OptionWriter):
+def validate_fields(
+    fields_dict: dict[str, any], option_name: str, allowed_fields: set[str], field_level: str, writer: OptionWriter
+):
     invalid_fields = [field for field in fields_dict if field not in allowed_fields]
 
     if invalid_fields:
