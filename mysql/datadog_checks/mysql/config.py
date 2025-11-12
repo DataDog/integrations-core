@@ -170,6 +170,7 @@ class MySQLConfig(object):
 
 def sanitize(config: dict) -> dict:
     sanitized = copy.deepcopy(config)
+    sanitized['pass'] = '***' if sanitized.get('pass') else None
     sanitized['password'] = '***' if sanitized.get('password') else None
 
     return sanitized
