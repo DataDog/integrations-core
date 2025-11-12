@@ -51,10 +51,11 @@ jobs:
         # fi
 
         cmd="ddev -v size status --commit \"$HEAD_SHA\" --format json"
-
+        echo "Pre-injection"
         if [ "$EVENT_NAME" = "push" ] && [ "$HEAD_BRANCH" = "master" ]; then 
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         fi
+        echo "Post-injection"
         echo "cmd=$cmd" >> $GITHUB_OUTPUT
     
 
