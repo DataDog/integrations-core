@@ -3,12 +3,12 @@ run-name: "Measure Disk Usage [${{ github.event.pull_request.head.sha }}]"
 
 on:
   pull_request:
-    branches:
+    branches: 
       - master
   # workflow_run:
   #   workflows: ['Resolve Dependencies and Build Wheels']
   #   types:
-      # - completed
+      # - completed 
 env:
   PYTHON_VERSION: "3.13"
 
@@ -42,8 +42,8 @@ jobs:
       id: cmd
       env:
         HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        EVENT_NAME: ${{ github.event.pull_request. }}
-        HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        EVENT_NAME: ${{ github.event_name }}
+        HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
       run: |
         if ! [[ $HEAD_BRANCH =~ ^[A-Za-z0-9._/-]+$ ]]; then
             echo "Branch name contains invalid characters. Exiting."
