@@ -1,21 +1,43 @@
 name: Measure Disk Usage
-run-name: "Measure Disk Usage [${{ github.event.workflow_run.head_sha }}]"
+run-name: "Measure Disk Usage [${{ github.event.pull_request.head.sha }}]" # [${{ github.event.workflow_run.head_sha }}]"
 
 on:
-  workflow_run:
-    workflows: ['Resolve Dependencies and Build Wheels']
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: ['Resolve Dependencies and Build Wheels']
+  #   types:
+  #     - completed
+  pull_request:
+    branches:
+      - master
+  merge_group:
+    # Test requested to pass before merging
+    # needs to trigger in merge queues
+    types: [checks_requested]
+
 env:
   PYTHON_VERSION: "3.13"
 
 jobs:
+  define-current-commit:
+    runs-on: ubuntu-22.04
+    outputs:
+      commit: ${{ steps.define.outputs.commit }}
+    steps:
+      - id: define
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "commit=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "commit=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
 
   measure-disk-usage:
     runs-on: ubuntu-22.04
     permissions:
         contents: read
         actions: read
+    needs:
+      - define-current-commit
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
@@ -32,17 +54,16 @@ jobs:
         pip install -e ./ddev
 
     - name: Configure ddev
-      run: |
-            ddev config override
+      run: ddev config override
 
     - name: Define command
       id: cmd
       run: |
         cmd="ddev -v size status \
-        --commit ${{ github.event.workflow_run.head_sha }} \
-        --format json"
+        --commit ${{ needs.define-current-commit.outputs.commit }} \
+        --format json --python ${{ env.PYTHON_VERSION }}"
 
-        if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.event.workflow_run.head_branch }}" = "master" ]; then 
+        if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then # TODO: change to ${{ github.event.workflow_run.event }} ${{ github.event.workflow_run.head_branch }}
           cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
         fi
 
@@ -75,3 +96,169 @@ jobs:
         name: status_compressed.json
         path: status_compressed.json
         if-no-files-found: error        
+
+
+  calculate-diff:
+    runs-on: ubuntu-22.04
+    needs:
+      - measure-disk-usage
+      - define-current-commit
+    permissions:
+      contents: read
+      pull-requests: write
+    outputs:
+      passed: ${{ steps.ddev_size_diff.outputs.passed }}
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install ddev
+      run: |
+        pip install -e ./datadog_checks_dev[cli]
+        pip install -e ./ddev
+
+    - name: Configure ddev
+      run: ddev config override
+
+    - name: Calculate diff
+      id: ddev_size_diff
+      run: |
+        cmd="ddev -v size diff ${{needs.define-current-commit.outputs.commit}} --format json --use-artifacts --python ${{ env.PYTHON_VERSION }} --quality-gate-threshold ${{ vars.QUALITY_GATE_THRESHOLD_PERCENT }}"
+        # if [ "${{ github.event.workflow_run.event }}" = "push" ] && [ "${{ github.ref_name }}" = "master" ]; then 
+        #   cmd="$cmd --to-dd-key ${{ secrets.DD_API_KEY }}"
+        # fi
+
+        set +e
+
+        $cmd --compressed  
+        exit_code_compressed=$?
+
+        $cmd 
+        exit_code_uncompressed=$?
+
+        set -e
+
+        if [ "$exit_code_compressed" -ne 0 ] && [ "$exit_code_compressed" -ne 2 ]; then
+          echo "Error: Compressed command failed with unexpected exit code: $exit_code_compressed"
+          exit "$exit_code_compressed"
+        fi
+
+        if [ "$exit_code_uncompressed" -ne 0 ] && [ "$exit_code_uncompressed" -ne 2 ]; then
+          echo "Error: Uncompressed command failed with unexpected exit code: $exit_code_uncompressed"
+          exit "$exit_code_uncompressed"
+        fi
+
+        if [ "$exit_code_compressed" -eq 2 ] || [ "$exit_code_uncompressed" -eq 2 ]; then
+          echo "Quality gate threshold not passed"
+          echo "passed=false" >> "$GITHUB_OUTPUT"
+        else
+
+          echo "Quality gate passed"
+          echo "passed=true" >> "$GITHUB_OUTPUT"
+        fi
+
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload JSON compressed diff sizes artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: diff_compressed.json
+        path: diff_compressed.json
+        if-no-files-found: warn
+
+    - name: Upload JSON uncompressed diff sizes artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: diff_uncompressed.json
+        path: diff_uncompressed.json
+        if-no-files-found: warn
+
+    - name: Output differences
+      if: github.event_name == 'pull_request'
+      run: |
+        cat diff.html >> $GITHUB_STEP_SUMMARY
+
+    - name: Set PR number
+      id: set_pr_number
+      if: github.event_name == 'pull_request'
+      run: |
+        PR_NUMBER=$(gh pr list \
+            --search ${{ needs.define-current-commit.outputs.commit }} \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Find last comment
+      if: github.event_name == 'pull_request'
+      uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+      id: find_comment
+      with:
+        issue-number: ${{ steps.set_pr_number.outputs.PR_NUMBER }}
+        body-includes: "Size Quality Gates"
+        direction: last
+
+    - name: Delete last comment
+      if: github.event_name == 'pull_request' && steps.find_comment.outputs.comment-id != ''
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      with:
+          script: |
+            const commentId = ${{ steps.find_comment.outputs.comment-id }};
+            await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: commentId,
+              });
+
+    - name: Create comment
+      if: github.event_name == 'pull_request'
+      run: |
+        GITHUB_RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        echo "<br/><a href=\"$GITHUB_RUN_URL\">📋 View detailed breakdown in GitHub Step Summary</a>" >> diff_table.html
+        gh pr comment ${{ steps.set_pr_number.outputs.PR_NUMBER }} --body-file diff_table.html
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  quality-gate-check:
+    runs-on: ubuntu-22.04
+    needs:
+      - calculate-diff
+      - define-current-commit
+    permissions:
+      checks: write
+    steps:
+    - name: Check quality gate
+      run: |
+        # if [ "${{ needs.calculate-diff.outputs.passed }}" = "true" ]; then
+        echo "❌ Size Quality Gates Not Passed. Failing the workflow."
+        gh api repos/DataDog/integrations-core/check-runs \
+        -H "Accept: application/vnd.github+json" \
+        -F name='Size Quality Gates' \
+        -F head_sha="${{ needs.define-current-commit.outputs.commit }}" \
+        -F status='completed' \
+        -F conclusion='failure' \
+        -F output.title='Size Quality Gates Not Passed' \
+        -F output.summary='Size Quality Gates Not Passed. Failing the workflow.'
+        exit 1
+        # else
+        #   echo "✅ Size Quality Gates Passed."
+        #   gh api repos/DataDog/integrations-core/check-runs \
+        #   -H "Accept: application/vnd.github+json" \
+        #   -F name='Size Quality Gates' \
+        #   -F head_sha="${{ needs.define-current-commit.outputs.commit }}" \
+        #   -F status='completed' \
+        #   -F conclusion='success' \
+        #   -F output.title='Size Quality Gates Passed' \
+        #   -F output.summary='Size Quality Gates Passed. Passing the workflow.'
+        # fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

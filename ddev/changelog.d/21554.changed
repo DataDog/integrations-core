@@ -1,0 +1,6 @@
+The ddev size diff command syntax has been updated from `ddev size diff old_commit new_commit` to `ddev size diff new_commit --compare-to old_commit`. The `--compare-to` argument is now optional; if omitted, the command defaults to comparing against the merge base, or the previous commit when on the master branch.
+
+Additionally, several new options have been added:
+- `--use-artifacts`: Calculate sizes directly from GitHub artifacts.
+- `--to-dd-org`, `--to-dd-key`, `--to-dd-site`: Send size metrics to Datadog (site defaults to datadoghq.com).
+- `--quality-gate-threshold`: Set a percentage threshold for size differences, which also generates an HTML report.
