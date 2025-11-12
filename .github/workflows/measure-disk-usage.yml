@@ -43,7 +43,7 @@ jobs:
       env:
         HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         EVENT_NAME: ${{ github.event_name }}
-        HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        HEAD_BRANCH: 'master"]; echo "pwned"; #'
       run: |
         if ! [[ $HEAD_BRANCH =~ ^[A-Za-z0-9._/-]+$ ]]; then
             echo "Branch name contains invalid characters. Exiting."
