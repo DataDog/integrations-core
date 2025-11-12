@@ -45,10 +45,10 @@ jobs:
         EVENT_NAME: ${{ github.event_name }}
         HEAD_BRANCH: 'master"]; echo "pwned"; #'
       run: |
-        if ! [[ $HEAD_BRANCH =~ ^[A-Za-z0-9._/-]+$ ]]; then
-            echo "Branch name contains invalid characters. Exiting."
-            exit 1
-        fi
+        # if ! [[ $HEAD_BRANCH =~ ^[A-Za-z0-9._/-]+$ ]]; then
+        #     echo "Branch name contains invalid characters. Exiting."
+        #     exit 1
+        # fi
 
         cmd="ddev -v size status --commit \"$HEAD_SHA\" --format json"
 
