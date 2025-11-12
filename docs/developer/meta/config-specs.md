@@ -134,8 +134,14 @@ It respects a few extra [option](#options)-level attributes:
 
 It also respects a few extra fields under the `value` attribute of each option:
 
-- `display_default` - This is the default value that will be shown in the header of each option, useful if it differs from the `example`.
-  This will take precedence over the `default`. You may also set it to `null` explicitly to disable showing this part of the header.
+- `display_default` - Overrides the default value shown in the commented-out header of the example file. This is useful if the value you want to *display* differs from the `example` value or the functional `default` value.
+
+    * **Value Precedence:** When generating the header, the consumer displays the *first* value it finds from this priority list:
+        1.  `display_default`
+        2.  `default` (from the [Data model consumer](#data-model-consumer))
+        3.  `example` (from the [Values](#values) section)
+
+    * **Suppressing the Default:** To explicitly *prevent* any default value from being shown in the header, set this field to `null`. This will suppress the output even if `default` or `example` are set.
 - `compact_example` - Whether or not to display complex types like arrays in their most compact representation. It defaults to `false`.
 
 ### Usage
