@@ -1,11 +1,14 @@
 name: Measure Disk Usage
-run-name: "Measure Disk Usage [${{ github.event.workflow_run.head_sha }}]"
+run-name: "Measure Disk Usage [${{ github.event.pull_request.head.sha }}]"
 
 on:
-  workflow_run:
-    workflows: ['Resolve Dependencies and Build Wheels']
-    types:
-      - completed
+  pull_request:
+    branches:
+      - master
+  # workflow_run:
+  #   workflows: ['Resolve Dependencies and Build Wheels']
+  #   types:
+      # - completed
 env:
   PYTHON_VERSION: "3.13"
 
@@ -38,8 +41,8 @@ jobs:
     - name: Define command
       id: cmd
       env:
-        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-        EVENT_NAME: ${{ github.event.workflow_run.event }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        EVENT_NAME: ${{ github.event.pull_request. }}
         HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
       run: |
         if ! [[ $HEAD_BRANCH =~ ^[A-Za-z0-9._/-]+$ ]]; then
