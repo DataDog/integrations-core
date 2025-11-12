@@ -186,7 +186,8 @@
     a label `worker` or a label `pid` with the value of either `23` or `42`.
 
       exclude_metrics_by_labels:
-        worker: true
+        worker: 
+        - true
         pid:
         - '23'
         - '42'
@@ -195,6 +196,9 @@
     additionalProperties:
       anyOf:
       - type: boolean
+      - type: array
+        items:
+          type: boolean
       - type: array
         items:
           type: string
