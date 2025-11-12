@@ -4,10 +4,14 @@
 
 This check monitors [n8n][1] through the Datadog Agent. 
 
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
+Collect n8n metrics including:
+- Cache metrics: Hit and miss statistics.
+- Message event bus metrics: Event-related metrics.
+- Workflow metrics: Can include workflow ID labels.
+- Node metrics: Can include node type labels.
+- Credential metrics: Can include credential type labels.
+- Queue Metrics
+
 
 ## Setup
 
@@ -19,6 +23,12 @@ The n8n check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
+
+The `/metrics` endpoint is disabled by default and must be enabled by setting `N8N_METRICS`=`true`. You can also customize the metric prefix using `N8N_METRICS_PREFIX` (default is `n8n_`).
+
+Note that the `/metrics` endpoint is only available for self-hosted instances and is not available on n8n Cloud.
+
+For the datadog agent to collect metrics, you will need to follow the instructions provided [here][10].
 
 1. Edit the `n8n.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your n8n performance data. See the [sample n8n.d/conf.yaml][4] for all available configuration options.
 
@@ -58,3 +68,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/n8n/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/n8n/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.n8n.io/hosting/configuration/configuration-examples/prometheus/
