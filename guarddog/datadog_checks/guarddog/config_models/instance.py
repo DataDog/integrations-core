@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -39,7 +40,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: float = Field(..., ge=1.0)
-    package_ecosystem: str
+    package_ecosystem: Literal['pypi', 'npm', 'go', 'github_action']
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
 

@@ -23,6 +23,11 @@ files:
       description: "The type of package ecosystem. Supported values: pypi, npm, go and github_action"
       value:
         type: string
+        enum: 
+          - pypi
+          - npm
+          - go
+          - github_action
         example: <PACKAGE_ECOSYSTEM>
     - name: dependency_file_path
       required: true

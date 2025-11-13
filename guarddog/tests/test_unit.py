@@ -87,17 +87,6 @@ def test_instance_check(dd_run_check, aggregator, config, instance):
 
 
 @pytest.mark.unit
-def test_validate_configurations_with_wrong_package_ecosystem(config, instance):
-    check = GuarddogCheck("guarddog", config['init_config'], [instance])
-
-    wrong_package_ecosystem = "test"
-    err_message = f"Invalid Package Ecosystem provided: {wrong_package_ecosystem}"
-    with pytest.raises(ConfigurationError, match=err_message):
-        check.package_ecosystem = wrong_package_ecosystem
-        check.validate_config()
-
-
-@pytest.mark.unit
 def test_validate_configurations_with_empty_dependency_file_path(config, instance):
     check = GuarddogCheck("guarddog", config['init_config'], [instance])
 

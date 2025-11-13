@@ -44,12 +44,7 @@ class GuarddogCheck(AgentCheck):
         }
 
     def validate_config(self) -> None:
-        if self.package_ecosystem not in constants.VALID_ECOSYSTEMS:
-            err_message = f"Invalid Package Ecosystem provided: {self.package_ecosystem}"
-            self.log.error(err_message)
-            raise ConfigurationError(err_message)
-
-        elif not self.path:
+        if not self.path:
             err_message = (
                 "Dependency File Path is required for package ecosystem: "
                 f"{self.package_ecosystem} to run the guarddog scan",
