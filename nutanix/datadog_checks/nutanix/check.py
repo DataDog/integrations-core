@@ -16,6 +16,7 @@ class NutanixCheck(AgentCheck):
         super(NutanixCheck, self).__init__(name, init_config, instances)
 
         self.sampling_interval = self.instance.get("min_collection_interval", 120)
+        self.page_limit = self.instance.get("page_limit", 50)
 
         self.pc_ip = self.instance.get("pc_ip")
         self.pc_port = self.instance.get("pc_port", 9440)
@@ -327,7 +328,7 @@ class NutanixCheck(AgentCheck):
         url = f"{self.base_url}/{endpoint}"
 
         page = 0
-        limit = 50
+        limit = self.page_limit
 
         if not params:
             params = {}
