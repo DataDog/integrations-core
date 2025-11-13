@@ -12,11 +12,10 @@ from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_MET
 class NutanixCheck(AgentCheck):
     __NAMESPACE__ = 'nutanix'
 
-    # Prism v4 API requires 120s sampling interval and time lag for rollup completion
-    STATS_SAMPLING_INTERVAL = 120
-
     def __init__(self, name, init_config, instances):
         super(NutanixCheck, self).__init__(name, init_config, instances)
+
+        self.sampling_interval = self.instance.get("min_collection_interval", 120)
 
         self.pc_ip = self.instance.get("pc_ip")
         self.pc_port = self.instance.get("pc_port", 9440)
@@ -355,7 +354,7 @@ class NutanixCheck(AgentCheck):
             "$startTime": start_time,
             "$endTime": end_time,
             "$statType": "AVG",
-            "$samplingInterval": self.STATS_SAMPLING_INTERVAL,
+            "$samplingInterval": self.sampling_interval,
         }
 
         return self._get_request_data(f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}", params=params)
@@ -370,7 +369,7 @@ class NutanixCheck(AgentCheck):
             "$startTime": start_time,
             "$endTime": end_time,
             "$statType": "AVG",
-            "$samplingInterval": self.STATS_SAMPLING_INTERVAL,
+            "$samplingInterval": self.sampling_interval,
         }
 
         return self._get_request_data(
@@ -390,7 +389,7 @@ class NutanixCheck(AgentCheck):
             "$startTime": start_time,
             "$endTime": end_time,
             "$statType": "AVG",
-            "$samplingInterval": self.STATS_SAMPLING_INTERVAL,
+            "$samplingInterval": self.sampling_interval,
             "$select": "*",
         }
 
@@ -417,12 +416,12 @@ class NutanixCheck(AgentCheck):
         now = datetime.now(timezone.utc)
 
         # Set end time to 120 seconds in the past (to allow rollup completion)
-        end_time = now - timedelta(seconds=self.STATS_SAMPLING_INTERVAL)
+        end_time = now - timedelta(seconds=self.sampling_interval)
 
         # Round end_time down to the nearest minute for consistency
         end_time = end_time.replace(second=0, microsecond=0)
 
         # Start time is 120 seconds (2 minutes) before end_time
-        start_time = end_time - timedelta(seconds=self.STATS_SAMPLING_INTERVAL)
+        start_time = end_time - timedelta(seconds=self.sampling_interval)
 
         return start_time.isoformat(), end_time.isoformat()
