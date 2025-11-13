@@ -308,3 +308,15 @@ instances:
     ## Collects consumer lag metric in seconds. It may result in additional billing charges.
     #
     # data_streams_enabled: false
+
+    ## @param enable_cluster_monitoring - boolean - optional - default: false
+    ## (PREVIEW) Enable cluster monitoring to collect broker, topic, partition, consumer group,
+    ## and schema registry metadata. Events are cached and tagged with kafka_cluster_id.
+    ## May increase resource consumption on large clusters.
+    #
+    # enable_cluster_monitoring: false
+
+    ## @param schema_registry_url - string - optional - default: http://localhost:8081
+    ## Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
+    #
+    # schema_registry_url: http://localhost:8081
