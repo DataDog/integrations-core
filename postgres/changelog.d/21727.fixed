@@ -1,0 +1,1 @@
+Migrate Postgres to new schema collector. This change improves performance with large schemas.
