@@ -19,8 +19,6 @@ OPENMETRICS_URL = f'http://{HOST}:{PORT}'
 INSTANCE = {
     'openmetrics_endpoint': f'{OPENMETRICS_URL}/metrics',
 }
-COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
-
 
 E2E_METADATA = {
     'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock:ro'],
@@ -80,7 +78,16 @@ E2E_METRICS = [
     'n8n.process.resident.memory.bytes',
     'n8n.process.start.time.seconds',
     'n8n.process.virtual.memory.bytes',
+    'n8n.queue.job.active.total',
     'n8n.queue.job.attempts.total',
+    'n8n.queue.job.completed.total',
+    'n8n.queue.job.delayed.total',
+    'n8n.queue.job.dequeued.total',
+    'n8n.queue.job.enqueued.total',
+    'n8n.queue.job.failed.total',
+    'n8n.queue.job.waiting.duration.seconds.count',
+    'n8n.queue.job.waiting.duration.seconds.sum',
+    'n8n.queue.job.waiting.total',
     'n8n.queue.jobs.duration.seconds.count',
     'n8n.queue.jobs.duration.seconds.sum',
     'n8n.queue.jobs.total',

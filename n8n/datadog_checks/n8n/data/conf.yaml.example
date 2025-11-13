@@ -14,7 +14,7 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - required
-    ## Endpoint exposing the n8n's metrics in the OpenMetrics format. For more information refer to:
+    ## Endpoint exposing the n8n's metrics in the OpenMetrics format. For more information, refer to:
     ## https://docs.n8n.io/hosting/logging-monitoring/monitoring/ 
     ## https://docs.n8n.io/hosting/configuration/environment-variables/endpoints/
     #
@@ -22,7 +22,7 @@ instances:
 
     ## @param raw_metric_prefix - string - optional - default: n8n
     ## The prefix prepended to all metrics from n8n.
-    ## If not set, the default prefix will be used.
+    ## If not set, the default prefix is used.
     ## The default prefix is 'n8n'.
     ## If you are using a custom prefix in n8n through N8N_METRICS_PREFIX, you can set it here.
     #
@@ -613,7 +613,7 @@ instances:
     #   - <EXCLUDE_REGEX>
 
     ## @param server_port - integer - optional - default: 5678
-    ## The port exposing the HTTP Endpoint of the N8N API.
+    ## The port exposing the HTTP endpoint of the n8n API.
     #
     # server_port: <SERVER_PORT>
 

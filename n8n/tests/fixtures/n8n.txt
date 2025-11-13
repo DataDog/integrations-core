@@ -256,6 +256,45 @@ n8n_queue_jobs_duration_seconds_bucket{le="+Inf"} 150
 n8n_queue_jobs_duration_seconds_sum 44.8
 n8n_queue_jobs_duration_seconds_count 150
 
+# HELP n8n_queue_job_waiting_total Number of jobs currently waiting in the queue
+# TYPE n8n_queue_job_waiting_total gauge
+n8n_queue_job_waiting_total{queue="default"} 3
+
+# HELP n8n_queue_job_active_total Number of jobs currently being processed
+# TYPE n8n_queue_job_active_total gauge
+n8n_queue_job_active_total{queue="default"} 2
+
+# HELP n8n_queue_job_completed_total Number of jobs completed successfully
+# TYPE n8n_queue_job_completed_total counter
+n8n_queue_job_completed_total{queue="default"} 15892
+
+# HELP n8n_queue_job_failed_total Number of jobs that have failed
+# TYPE n8n_queue_job_failed_total counter
+n8n_queue_job_failed_total{queue="default"} 47
+
+# HELP n8n_queue_job_dequeued_total Number of jobs dequeued (picked up from queue)
+# TYPE n8n_queue_job_dequeued_total counter
+n8n_queue_job_dequeued_total{queue="default"} 15939
+
+# HELP n8n_queue_job_enqueued_total Number of jobs added to the queue
+# TYPE n8n_queue_job_enqueued_total counter
+n8n_queue_job_enqueued_total{queue="default"} 15670
+
+# HELP n8n_queue_job_delayed_total Number of jobs scheduled to run later
+# TYPE n8n_queue_job_delayed_total gauge
+n8n_queue_job_delayed_total{queue="default"} 5
+
+# HELP n8n_queue_job_waiting_duration_seconds Duration jobs spend waiting before being processed
+# TYPE n8n_queue_job_waiting_duration_seconds histogram
+n8n_queue_job_waiting_duration_seconds_bucket{queue="default",le="0.1"} 50
+n8n_queue_job_waiting_duration_seconds_bucket{queue="default",le="1"} 241
+n8n_queue_job_waiting_duration_seconds_bucket{queue="default",le="5"} 820
+n8n_queue_job_waiting_duration_seconds_bucket{queue="default",le="10"} 1105
+n8n_queue_job_waiting_duration_seconds_bucket{queue="default",le="30"} 1240
+n8n_queue_job_waiting_duration_seconds_bucket{queue="default",le="+Inf"} 1253
+n8n_queue_job_waiting_duration_seconds_sum{queue="default"} 450.32
+n8n_queue_job_waiting_duration_seconds_count{queue="default"} 1253
+
 # HELP n8n_api_requests_total Total API requests
 # TYPE n8n_api_requests_total counter
 n8n_api_requests_total{method="GET",endpoint="/workflows"} 240
