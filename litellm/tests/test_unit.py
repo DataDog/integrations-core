@@ -12,7 +12,7 @@ from .common import (
     ENDPOINT_METRICS,
     METRICS,
     OM_MOCKED_INSTANCE,
-    RENAMED_METRICS_1_75,
+    RENAMED_METRICS_V1_75,
     get_fixture_path,
 )
 
@@ -97,7 +97,7 @@ def test_litellm_renamed_metrics(dd_run_check, aggregator, mock_http_response):
     mock_http_response(file_path=get_fixture_path('renamed_metrics.txt'))
     check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
-    for metric in RENAMED_METRICS_1_75:
+    for metric in RENAMED_METRICS_V1_75:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check('litellm.openmetrics.health', ServiceCheck.OK)
