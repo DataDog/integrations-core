@@ -328,15 +328,22 @@ class WinWMICheck(AgentCheck):
         """
         Parse an alias from a string.
         """
-        property = property.strip()
-        if ' AS' in property or ' as' in property:
-            property_split = property.split(' AS') if ' AS' in property else property.split(' as')
+        property = property.strip().lower()
+        if ' as ' in property:
+            # Valid format: property AS alias (with spaces around AS)
+            property_split = property.split(' as ')
             property = property_split[0].strip()
             alias = property_split[1].strip()
             self.log.debug("Parsed alias: {%s} for property: {%s}", alias, property)
             if alias == "":
                 self.log.warning("No alias provided after 'AS' for property: %s. Using property for tag", property)
                 alias = property.lower()
+        elif ' as' in property:
+            # Invalid format: AS found but without proper spacing
+            raise InvalidWMIQuery(
+                "Invalid alias syntax in property '{}'. "
+                "Expected format: 'property AS alias' with spaces around 'AS'".format(property)
+            )
         else:
             alias = property.lower()
         return property, alias

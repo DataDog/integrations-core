@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 from mock import patch
 
+from datadog_checks.base.checks.win.wmi.sampler import CaseInsensitiveDict
 from datadog_checks.wmi_check import WMICheck
 
 
@@ -23,7 +24,15 @@ class MockSampler:
             properties = []
 
         self._wmi_objects = []
-        self._mock_wmi_objects = wmi_objects
+        # Convert regular dicts to CaseInsensitiveDict to match real WMISampler behavior
+        # Must iterate through items to ensure keys are properly lowercased
+        converted_objects = []
+        for obj in wmi_objects:
+            case_insensitive_obj = CaseInsensitiveDict()
+            for key, value in obj.items():
+                case_insensitive_obj[key] = value
+            converted_objects.append(case_insensitive_obj)
+        self._mock_wmi_objects = converted_objects
         self.property_names = properties
         self._filters = []
 
