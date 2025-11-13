@@ -12,6 +12,7 @@ from .common import (
     ENDPOINT_METRICS,
     METRICS,
     OM_MOCKED_INSTANCE,
+    RENAMED_METRICS,
     get_fixture_path,
 )
 
@@ -89,3 +90,14 @@ def test__extract_error_type_not_found():
     check = LitellmCheck('litellm', {}, [{}])
     error_msg = 'no litellm error here'
     assert check._extract_error_type(error_msg) == 'unknown'
+
+
+def test_litellm_renamed_metrics(dd_run_check, aggregator, mock_http_response):
+    # Some metrics were renamed here: https://github.com/BerriAI/litellm/pull/13271
+    mock_http_response(file_path=get_fixture_path('renamed_metrics.txt'))
+    check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
+    dd_run_check(check)
+    for metric in RENAMED_METRICS:
+        aggregator.assert_metric(metric)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_service_check('litellm.openmetrics.health', ServiceCheck.OK)

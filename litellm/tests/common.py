@@ -119,3 +119,9 @@ ENDPOINT_METRICS = [
     'litellm.endpoint.healthy_count',
     'litellm.endpoint.unhealthy_count',
 ]
+
+RENAMED_METRICS = [
+    'litellm.total.tokens.count',
+    'litellm.input_tokens.metric.count',
+    'litellm.output_tokens.metric.count',
+]
