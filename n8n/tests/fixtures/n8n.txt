@@ -241,6 +241,28 @@ n8n_workflow_executions_duration_seconds_bucket{le="+Inf",workflow_id="wf_5d6c8e
 n8n_workflow_executions_duration_seconds_sum{workflow_id="wf_5d6c8e1f"} 12.7
 n8n_workflow_executions_duration_seconds_count{workflow_id="wf_5d6c8e1f"} 49
 
+# HELP n8n_workflow_started_total Total number of workflows started
+# TYPE n8n_workflow_started_total counter
+n8n_workflow_started_total 25634
+n8n_workflow_started_total{workflow_id="12",workflow_name="CRM Sync"} 8142
+n8n_workflow_started_total{workflow_id="25",workflow_name="Webhook Intake"} 14290
+n8n_workflow_started_total{workflow_id="33",workflow_name="Slack Alerts"} 2202
+
+# HELP n8n_workflow_success_total Total number of workflows completed successfully
+# TYPE n8n_workflow_success_total counter
+n8n_workflow_success_total 25209
+n8n_workflow_success_total{workflow_id="12",workflow_name="CRM Sync"} 8059
+n8n_workflow_success_total{workflow_id="25",workflow_name="Webhook Intake"} 14135
+n8n_workflow_success_total{workflow_id="33",workflow_name="Slack Alerts"} 2015
+
+# HELP n8n_workflow_failed_total Total number of workflows that failed
+# TYPE n8n_workflow_failed_total counter
+n8n_workflow_failed_total 425
+n8n_workflow_failed_total{workflow_id="12",workflow_name="CRM Sync"} 83
+n8n_workflow_failed_total{workflow_id="25",workflow_name="Webhook Intake"} 155
+n8n_workflow_failed_total{workflow_id="33",workflow_name="Slack Alerts"} 187
+
+
 # HELP n8n_queue_jobs_total Total number of queue jobs
 # TYPE n8n_queue_jobs_total counter
 n8n_queue_jobs_total{state="waiting"} 3
@@ -364,3 +386,24 @@ n8n_workflow_executions_active 3
 # TYPE n8n_queue_job_attempts_total counter
 n8n_queue_job_attempts_total{result="success"} 435
 n8n_queue_job_attempts_total{result="failed"} 12
+
+# HELP n8n_workflow_started_total Total number of workflows started
+# TYPE n8n_workflow_started_total counter
+n8n_workflow_started_total 25634
+n8n_workflow_started_total{workflow_id="12",workflow_name="CRM Sync"} 8142
+n8n_workflow_started_total{workflow_id="25",workflow_name="Webhook Intake"} 14290
+n8n_workflow_started_total{workflow_id="33",workflow_name="Slack Alerts"} 2202
+
+# HELP n8n_workflow_success_total Total number of workflows completed successfully
+# TYPE n8n_workflow_success_total counter
+n8n_workflow_success_total 25209
+n8n_workflow_success_total{workflow_id="12",workflow_name="CRM Sync"} 8059
+n8n_workflow_success_total{workflow_id="25",workflow_name="Webhook Intake"} 14135
+n8n_workflow_success_total{workflow_id="33",workflow_name="Slack Alerts"} 2015
+
+# HELP n8n_workflow_failed_total Total number of workflows that failed
+# TYPE n8n_workflow_failed_total counter
+n8n_workflow_failed_total 425
+n8n_workflow_failed_total{workflow_id="12",workflow_name="CRM Sync"} 83
+n8n_workflow_failed_total{workflow_id="25",workflow_name="Webhook Intake"} 155
+n8n_workflow_failed_total{workflow_id="33",workflow_name="Slack Alerts"} 187

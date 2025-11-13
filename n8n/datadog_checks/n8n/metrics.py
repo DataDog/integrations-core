@@ -68,6 +68,9 @@ METRIC_MAP = {
     'workflow_executions_active': 'workflow.executions.active',
     'workflow_executions_duration_seconds': 'workflow.executions.duration.seconds',
     'workflow_executions_total': 'workflow.executions.total',
+    'workflow_failed_total': 'workflow.failed.total',
+    'workflow_started_total': 'workflow.started.total',
+    'workflow_success_total': 'workflow.success.total',
     'process_cpu_seconds_total': 'process.cpu.seconds.total',
     'version_info': 'version.info',
 }

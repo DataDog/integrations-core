@@ -71,3 +71,6 @@ n8n.workflow.executions.active,gauge,,,,Number of active workflow executions,0,n
 n8n.workflow.executions.duration.seconds.count,count,,,,The count of workflow execution duration in seconds,0,n8n,,,
 n8n.workflow.executions.duration.seconds.sum,count,,,,The sum of workflow execution duration in seconds,0,n8n,,,
 n8n.workflow.executions.total,count,,,,Total number of workflow executions,0,n8n,,,
+n8n.workflow.failed.total,count,,,,Total number of workflows that failed,0,n8n,,,
+n8n.workflow.started.total,count,,,,Total number of workflows started,0,n8n,,,
+n8n.workflow.success.total,count,,,,Total number of workflows completed successfully,0,n8n,,,

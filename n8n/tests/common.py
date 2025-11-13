@@ -95,6 +95,9 @@ E2E_METRICS = [
     'n8n.workflow.executions.duration.seconds.count',
     'n8n.workflow.executions.duration.seconds.sum',
     'n8n.workflow.executions.total',
+    'n8n.workflow.failed.total',
+    'n8n.workflow.started.total',
+    'n8n.workflow.success.total',
     'n8n.process.cpu.seconds.total',
     'n8n.version.info',
 ]
