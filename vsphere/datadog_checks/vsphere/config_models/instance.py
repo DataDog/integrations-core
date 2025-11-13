@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -104,7 +105,7 @@ class RestApiOptions(BaseModel):
     connect_timeout: Optional[float] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
-    kerberos_auth: Optional[str] = None
+    kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None
     kerberos_force_initiate: Optional[bool] = None
@@ -159,6 +160,7 @@ class InstanceConfig(BaseModel):
     hostname_transform: Optional[str] = None
     include_datastore_cluster_folder_tag: Optional[bool] = None
     include_events: Optional[tuple[IncludeEvent, ...]] = None
+    infrastructure_mode: Optional[str] = None
     max_historical_metrics: Optional[int] = None
     metric_filters: Optional[MetricFilters] = None
     metric_patterns: Optional[MetricPatterns] = None

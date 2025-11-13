@@ -75,6 +75,8 @@ services:
     trigger_start: true
 ```
 
+Beginning with Agent version 7.74, the check automatically collects metrics for Windows services.
+
 #### Tags
 
 The check automatically tags the Windows service name to each service check in the `windows_service:<SERVICE>` tag. The `<SERVICE>` name in the tag uses lowercase and special characters are replaced with underscores. See [Getting Started with Tags][12] for more information.
@@ -85,6 +87,8 @@ Beginning with Agent version 7.40, the check can add a `windows_service_startup_
 
 Beginning with Agent version 7.55, the check can add a `display_name:<DISPLAY_NAME>` tag to each service check to indicate the display name of the service. Set the `collect_display_name_as_tag` option to `true` to include this tag with each service check.
 
+Beginning with Agent version 7.73, the check automatically adds a `windows_service_state:<STATE>` tag to each service check to indicate the state of the service.
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `windows_service` under the **Checks** section.
@@ -93,7 +97,9 @@ Beginning with Agent version 7.55, the check can add a `display_name:<DISPLAY_NA
 
 ### Metrics
 
-The Windows Service check does not include any metrics.
+See [metadata.csv][19] for a list of metrics provided by this integration.
+
+**Note:** Metrics are tagged with the same tags as the service check.
 
 ### Events
 
@@ -139,3 +145,4 @@ If the service is present in the output, permissions are the issue. To give the 
 [16]: https://learn.microsoft.com/en-US/troubleshoot/windows-server/group-policy/configure-group-policies-set-security
 [17]: https://learn.microsoft.com/en-us/windows/win32/services/service-trigger-events
 [18]: /integrations/windows-service?search=windows%20service
+[19]: https://github.com/DataDog/integrations-core/blob/master/windows_service/metadata.csv
