@@ -86,7 +86,7 @@ class NutanixCheck(AgentCheck):
     def _collect_cluster_metrics(self):
         """Collect metrics from all Nutanix clusters."""
         try:
-            clusters = self._get_clusters()
+            clusters = self._list_clusters()
             if not clusters:
                 self.log.warning("No clusters found")
                 return
@@ -111,12 +111,12 @@ class NutanixCheck(AgentCheck):
     def _collect_vm_metrics(self):
         """Collect metrics from all Nutanix vms."""
         try:
-            vms = self._get_vms()
+            vms = self._list_vms()
             if not vms:
                 self.log.warning("No vms found")
                 return
 
-            all_vm_stats_dict = self._get_all_vm_stats()
+            all_vm_stats_dict = self._list_all_vm_stats()
 
             for vm in vms:
                 self._process_vm(vm, all_vm_stats_dict)
@@ -194,7 +194,7 @@ class NutanixCheck(AgentCheck):
         cluster_id = cluster.get("extId", "unknown")
         cluster_tags = self.base_tags + self._extract_cluster_tags(cluster)
 
-        hosts = self._get_hosts_by_cluster(cluster_id)
+        hosts = self._list_hosts_by_cluster(cluster_id)
         for host in hosts:
             host_id = host.get("extId")
             hostname = host.get("hostName")
@@ -370,15 +370,15 @@ class NutanixCheck(AgentCheck):
         data = response.json()
         return data.get("data", {})
 
-    def _get_clusters(self):
+    def _list_clusters(self):
         """Fetch all clusters from Prism Central."""
         return self._get_paginated_request_data("api/clustermgmt/v4.0/config/clusters")
 
-    def _get_vms(self):
+    def _list_vms(self):
         """Fetch all clusters from Prism Central."""
         return self._get_paginated_request_data("api/vmm/v4.0/ahv/config/vms")
 
-    def _get_hosts_by_cluster(self, cluster_id: str):
+    def _list_hosts_by_cluster(self, cluster_id: str):
         """Fetch all hosts/hosts for a specific cluster."""
         return self._get_paginated_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
 
@@ -419,7 +419,7 @@ class NutanixCheck(AgentCheck):
             f"api/clustermgmt/v4.0/stats/clusters/{cluster_id}/hosts/{host_id}", params=params
         )
 
-    def _get_all_vm_stats(self):
+    def _list_all_vm_stats(self):
         """
         Fetch time-series stats for all VMs and return as a dictionary.
 
