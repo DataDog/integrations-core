@@ -35,6 +35,13 @@ instances:
     #
     pc_password: <PC_PASSWORD>
 
+    ## @param page_limit - integer - optional - default: 50
+    ## The maximum number of items to retrieve per page when making paginated API requests.
+    ## This controls the page size for API calls to Prism Central.
+    ## Default is 50. Increase this value to reduce the number of API calls for large environments.
+    #
+    # page_limit: 50
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
@@ -372,11 +379,11 @@ instances:
     #
     # service: <SERVICE>
 
-    ## @param min_collection_interval - number - optional - default: 60
+    ## @param min_collection_interval - number - optional - default: 120
     ## This changes the collection interval of the check. For more information, see:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
-    min_collection_interval: 60
+    min_collection_interval: 120
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## This forces the check to send metrics with no hostname.

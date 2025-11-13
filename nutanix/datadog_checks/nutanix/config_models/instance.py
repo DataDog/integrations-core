@@ -76,6 +76,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     ntlm_domain: Optional[str] = None
+    page_limit: Optional[int] = None
     password: Optional[str] = None
     pc_ip: str
     pc_password: str

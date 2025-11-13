@@ -38,6 +38,15 @@ files:
             display_priority: 2
             value:
               type: string
+          - name: page_limit
+            description: |
+              The maximum number of items to retrieve per page when making paginated API requests.
+              This controls the page size for API calls to Prism Central.
+              Default is 50. Increase this value to reduce the number of API calls for large environments.
+            display_priority: 1
+            value:
+              type: integer
+              example: 50
           - template: instances/http
           - template: instances/default
             overrides:
