@@ -319,6 +319,48 @@ class NutanixCheck(AgentCheck):
 
         return tags
 
+    def _get_paginated_request_data(self, endpoint, params=None):
+        """Make a paginated API request to Prism Central and return the aggregated data field from all the pages."""
+
+        all_items = []
+
+        url = f"{self.base_url}/{endpoint}"
+
+        page = 0
+        limit = 50
+
+        if not params:
+            params = {}
+
+        if not params.get("$page"):
+            params["$page"] = page
+
+        if not params.get("$limit"):
+            params["$limit"] = limit
+
+        while True:
+            response = self.http.get(url, params=params)
+            response.raise_for_status()
+            payload = response.json()
+
+            data = payload.get("data", {})
+            if data:
+                all_items.extend(data)
+
+            links = payload.get("metadata", {}).get("links", [])
+            next_link = next((l.get("href") for l in links if l.get("rel") == "next"), None)
+
+            if not next_link:
+                break
+
+            url = next_link
+
+            # we delete pagination params as they already exist in the return next_link
+            params.pop("$page")
+            params.pop("$limit")
+
+        return all_items
+
     def _get_request_data(self, endpoint, params=None):
         """Make an API request to Prism Central and return the data field."""
         url = f"{self.base_url}/{endpoint}"
@@ -329,15 +371,15 @@ class NutanixCheck(AgentCheck):
 
     def _get_clusters(self):
         """Fetch all clusters from Prism Central."""
-        return self._get_request_data("api/clustermgmt/v4.0/config/clusters")
+        return self._get_paginated_request_data("api/clustermgmt/v4.0/config/clusters")
 
     def _get_vms(self):
         """Fetch all clusters from Prism Central."""
-        return self._get_request_data("api/vmm/v4.0/ahv/config/vms")
+        return self._get_paginated_request_data("api/vmm/v4.0/ahv/config/vms")
 
     def _get_hosts_by_cluster(self, cluster_id: str):
         """Fetch all hosts/hosts for a specific cluster."""
-        return self._get_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
+        return self._get_paginated_request_data(f"api/clustermgmt/v4.0/config/clusters/{cluster_id}/hosts")
 
     def _get_cluster_stats(self, cluster_id: str):
         """
@@ -393,8 +435,7 @@ class NutanixCheck(AgentCheck):
             "$select": "*",
         }
 
-        # TODO: add support for pagination
-        vm_stats_data = self._get_request_data("api/vmm/v4.0/ahv/stats/vms/", params=params)
+        vm_stats_data = self._get_paginated_request_data("api/vmm/v4.0/ahv/stats/vms/", params=params)
 
         # Create dictionary mapping vmExtId -> stats
         all_vm_stats_dict = {}
@@ -415,13 +456,11 @@ class NutanixCheck(AgentCheck):
         """
         now = datetime.now(timezone.utc)
 
-        # Set end time to 120 seconds in the past (to allow rollup completion)
         end_time = now - timedelta(seconds=self.sampling_interval)
 
         # Round end_time down to the nearest minute for consistency
         end_time = end_time.replace(second=0, microsecond=0)
 
-        # Start time is 120 seconds (2 minutes) before end_time
         start_time = end_time - timedelta(seconds=self.sampling_interval)
 
         return start_time.isoformat(), end_time.isoformat()
