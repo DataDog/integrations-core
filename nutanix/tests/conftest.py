@@ -25,6 +25,7 @@ INSTANCE = {
     "pc_username": "admin",
     "pc_password": "secret",
     "tls_verify": False,
+    "page_limit": 2,  # Use limit=2 to match paginated fixtures
 }
 
 AWS_INSTANCE = {
@@ -33,6 +34,7 @@ AWS_INSTANCE = {
     "pc_username": "dd_agent_viewer",
     "pc_password": "DummyP4ssw0rd!",
     "tls_verify": False,
+    "page_limit": 2,  # Use limit=2 to match paginated fixtures
 }
 
 
@@ -53,57 +55,145 @@ def mock_instance():
 
 @pytest.fixture
 def mock_http_get(mocker):
-    def mock_response(url, *args, **kwargs):
+    def mock_response(url, params=None, *args, **kwargs):
+        # Print request details for debugging
+        print("\n" + "=" * 60)
+        print(f"[MOCK REQUEST] URL: {url}")
+        if params:
+            print(f"[MOCK REQUEST] Params: {params}")
+        else:
+            print("[MOCK REQUEST] Params: None")
+        print("=" * 60)
+
         mock_resp = mocker.Mock()
         mock_resp.status_code = 200
         mock_resp.raise_for_status = mocker.Mock()
 
+        # Check if URL has pagination parameters
+        page = None
+        limit = None
+
+        # Extract pagination from params dict
+        if params:
+            page = params.get('$page')
+            limit = params.get('$limit')
+
+        # Extract pagination from URL query string
+        if not page and not limit and '?' in url:
+            from urllib.parse import parse_qs, urlparse
+
+            parsed = urlparse(url)
+            query_params = parse_qs(parsed.query)
+            if '$page' in query_params:
+                page = int(query_params['$page'][0])
+            if '$limit' in query_params:
+                limit = int(query_params['$limit'][0])
+
+        # Print what was extracted
+        print(f"[MOCK EXTRACTED] Page: {page}, Limit: {limit}")
+
         # Health check endpoint
         if '/console' in url:
+            print("[MOCK RESPONSE] Health check endpoint")
             return mock_resp
 
+        # Host stats endpoint - always non-paginated
         if (
             "/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b/hosts/71877eae-8fc1-4aae-8d20-70196dfb2f8d"
             in url
         ):
-            host_stats = load_fixture(
-                "host_stats_0006411c-0286-bc71-9f02-191e334d457b_71877eae-8fc1-4aae-8d20-70196dfb2f8d.json"
-            )
-            mock_resp.json = mocker.Mock(return_value=host_stats)
+            fixture_name = "host_stats_0006411c-0286-bc71-9f02-191e334d457b_71877eae-8fc1-4aae-8d20-70196dfb2f8d.json"
+            print(f"[MOCK LOADING] Fixture: {fixture_name}")
+            response_data = load_fixture(fixture_name)
+            mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
+        # Cluster stats endpoint - always non-paginated
         if "/api/clustermgmt/v4.0/stats/clusters/0006411c-0286-bc71-9f02-191e334d457b" in url:
-            cluster_stats = load_fixture("cluster_stats_0006411c-0286-bc71-9f02-191e334d457b.json")
-            mock_resp.json = mocker.Mock(return_value=cluster_stats)
+            fixture_name = "cluster_stats_0006411c-0286-bc71-9f02-191e334d457b.json"
+            print(f"[MOCK LOADING] Fixture: {fixture_name}")
+            response_data = load_fixture(fixture_name)
+            mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
+        # Hosts endpoint for cluster b6d83094 - always paginated
         if '/api/clustermgmt/v4.0/config/clusters/b6d83094-9404-48de-9c74-ca6bddc3a01d/hosts' in url:
-            clusters_data = load_fixture("hosts_b6d83094-9404-48de-9c74-ca6bddc3a01d.json")
-            mock_resp.json = mocker.Mock(return_value=clusters_data)
+            # Default to page 0, limit 2 if not specified
+            if page is None:
+                page = 0
+            if limit is None:
+                limit = 2
+
+            paginated_fixture = f"hosts_b6d83094-9404-48de-9c74-ca6bddc3a01d_limit{limit}_page{page}.json"
+            print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            response_data = load_fixture(paginated_fixture)
+
+            mock_resp.json = mocker.Mock(return_value=response_data)
             mock_resp.status_code = 400
             return mock_resp
 
+        # Hosts endpoint for cluster 0006411c - always paginated
         if '/api/clustermgmt/v4.0/config/clusters/0006411c-0286-bc71-9f02-191e334d457b/hosts' in url:
-            clusters_data = load_fixture("hosts_0006411c-0286-bc71-9f02-191e334d457b.json")
-            mock_resp.json = mocker.Mock(return_value=clusters_data)
+            # Default to page 0, limit 2 if not specified
+            if page is None:
+                page = 0
+            if limit is None:
+                limit = 2
+
+            paginated_fixture = f"hosts_0006411c-0286-bc71-9f02-191e334d457b_limit{limit}_page{page}.json"
+            print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            response_data = load_fixture(paginated_fixture)
+
+            mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
+        # Clusters endpoint - always paginated
         if '/api/clustermgmt/v4.0/config/clusters' in url:
-            clusters_data = load_fixture("clusters.json")
-            mock_resp.json = mocker.Mock(return_value=clusters_data)
+            # Default to page 0, limit 2 if not specified
+            if page is None:
+                page = 0
+            if limit is None:
+                limit = 2
+
+            paginated_fixture = f"clusters_limit{limit}_page{page}.json"
+            print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            response_data = load_fixture(paginated_fixture)
+
+            mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
-        if 'api/vmm/v4.0/ahv/stats/vms/' in url:
-            all_vm_stats = load_fixture("vms_stats.json")
-            mock_resp.json = mocker.Mock(return_value=all_vm_stats)
+        # VM stats endpoint - always paginated
+        if 'api/vmm/v4.0/ahv/stats/vms' in url:
+            # Default to page 0, limit 2 if not specified
+            if page is None:
+                page = 0
+            if limit is None:
+                limit = 2
+
+            paginated_fixture = f"vms_stats_limit{limit}_page{page}.json"
+            print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            response_data = load_fixture(paginated_fixture)
+
+            mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
+        # VMs config endpoint - always paginated
         if 'api/vmm/v4.0/ahv/config/vms' in url:
-            vms_data = load_fixture("vms.json")
-            mock_resp.json = mocker.Mock(return_value=vms_data)
+            # Default to page 0, limit 2 if not specified
+            if page is None:
+                page = 0
+            if limit is None:
+                limit = 2
+
+            paginated_fixture = f"vms_limit{limit}_page{page}.json"
+            print(f"[MOCK LOADING] Paginated fixture: {paginated_fixture}")
+            response_data = load_fixture(paginated_fixture)
+
+            mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
         # Default response for unmapped URLs - return HTTP error
+        print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
         mock_resp.status_code = 404
         mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
         return mock_resp
