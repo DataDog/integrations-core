@@ -48,7 +48,7 @@ def test_cluster_metrics(dd_run_check, aggregator, mock_instance, mock_http_get)
 
     aggregator.assert_metric("nutanix.cluster.count", value=1, tags=expected_tags)
     aggregator.assert_metric("nutanix.cluster.nbr_nodes", value=1, tags=expected_tags)
-    aggregator.assert_metric("nutanix.cluster.vm.count", value=2, tags=expected_tags)
+    aggregator.assert_metric("nutanix.cluster.vm.count", value=4, tags=expected_tags)
     aggregator.assert_metric("nutanix.cluster.vm.inefficient_count", value=0, tags=expected_tags)
 
 
