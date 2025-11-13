@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
+
 
 class CatalogEndPointFailure(Exception):
     def __init__(self, service_types, interface, region_id):
@@ -37,5 +39,10 @@ class Catalog:
                         )
                         matched_region_id = not self.endpoint_region_id or endpoint_region_id == self.endpoint_region_id
                         if matched_interface and matched_region_id:
-                            return endpoint['url']
+                            url = endpoint['url']
+                            # For identity service, remove version suffix (e.g., /v3) from the end of the URL
+                            # to avoid double-versioning when the caller explicitly appends /v3
+                            if service_type == 'identity':
+                                url = re.sub(r'/v\d+(\.\d+)?/?$', '', url)
+                            return url
         raise CatalogEndPointFailure(service_types, self.endpoint_interface, self.endpoint_region_id)
