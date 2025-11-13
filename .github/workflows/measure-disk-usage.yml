@@ -15,6 +15,7 @@ env:
 jobs:
 
   measure-disk-usage:
+    name: Other Name
     runs-on: ubuntu-22.04
     permissions:
         contents: read
