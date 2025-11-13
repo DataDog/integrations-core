@@ -29,9 +29,11 @@ CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
 
+
 class WheelSizes(TypedDict):
     compressed: int
     uncompressed: int
+
 
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
@@ -174,7 +176,7 @@ def remove_test_files(wheel_path: Path) -> bool:
                     os.remove(Path(root) / f)
 
         print(f'Tests removed from {wheel_path.name}')
-        
+
         dest_dir = wheel_path.parent
         before = {p.resolve() for p in dest_dir.glob("*.whl")}
         # Repack to same directory, regenerating RECORD
@@ -188,8 +190,8 @@ def remove_test_files(wheel_path: Path) -> bool:
         if new_files:
             shutil.move(str(new_files[0]), str(wheel_path))
 
-
     return True
+
 
 @cache
 def _load_excluded_spec() -> pathspec.PathSpec:
@@ -203,6 +205,7 @@ def _load_excluded_spec() -> pathspec.PathSpec:
 
     patterns = config.get("excluded_paths", [])
     return pathspec.PathSpec.from_lines("gitignore", patterns)
+
 
 def is_excluded_from_wheel(path: str | Path) -> bool:
     """
@@ -226,6 +229,7 @@ def add_dependency(dependencies: dict[str, str], wheel: Path) -> None:
     project_version = project_metadata['Version']
     dependencies[project_name] = project_version
     sizes[project_name] = {'version': project_version, **calculate_wheel_sizes(wheel)}
+
 
 def calculate_wheel_sizes(wheel_path: Path) -> WheelSizes:
     compressed_size = wheel_path.stat(follow_symlinks=True).st_size
@@ -295,10 +299,16 @@ def main():
 
         # Fetch or build wheels
         command_args = [
-            str(python_path), '-m', 'pip', 'wheel',
-            '-r', str(MOUNT_DIR / 'requirements.in'),
-            '--wheel-dir', str(staged_wheel_dir),
-            '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
+            str(python_path),
+            '-m',
+            'pip',
+            'wheel',
+            '-r',
+            str(MOUNT_DIR / 'requirements.in'),
+            '--wheel-dir',
+            str(staged_wheel_dir),
+            '--extra-index-url',
+            CUSTOM_EXTERNAL_INDEX,
         ]
 
         check_process(command_args, env=env_vars)
@@ -340,15 +350,12 @@ def main():
             wheel = new_path
             print(f'Moved {wheel.name} to built directory')
 
-        add_dependency(dependencies, sizes wheel)
+        add_dependency(dependencies, sizes, wheel)
 
     # Handle wheels already in the built directory
     for wheel in iter_wheels(built_wheels_dir):
         remove_test_files(wheel)
         add_dependency(dependencies, sizes, wheel)
-
-
-
 
     output_path = MOUNT_DIR / 'sizes.json'
     with output_path.open('w', encoding='utf-8') as fp:
