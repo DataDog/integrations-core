@@ -5,7 +5,7 @@ base-package-features = ["deps", "db", "json"]
 python = ["3.13"]
 os = ["linux"]
 driver = ["FreeTDS", "odbc"]
-version = ["2019", "2022"]
+version = ["2017", "2019", "2022"]
 setup = ["single", "ha"]
 
 # test the compatibility of sqlserver running on non-utc timezone

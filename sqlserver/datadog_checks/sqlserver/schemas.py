@@ -1,450 +1,295 @@
-# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
+from __future__ import annotations
 
-import json
-import time
+import contextlib
+from typing import TYPE_CHECKING, TypedDict
 
-from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
-from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.base.utils.serialization import json
+from datadog_checks.sqlserver.utils import execute_query
+
+if TYPE_CHECKING:
+    from datadog_checks.sqlserver import SQLServer
+
+from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
-    STATIC_INFO_ENGINE_EDITION,
-    STATIC_INFO_MAJOR_VERSION,
-    STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
 )
-from datadog_checks.sqlserver.queries import (
-    COLUMN_QUERY,
-    DB_QUERY,
-    FOREIGN_KEY_QUERY,
-    FOREIGN_KEY_QUERY_PRE_2017,
-    INDEX_QUERY,
-    INDEX_QUERY_PRE_2017,
-    PARTITIONS_QUERY,
-    SCHEMA_QUERY,
-    TABLES_IN_SCHEMA_QUERY,
-)
-from datadog_checks.sqlserver.utils import (
-    convert_to_bool,
-    execute_query,
-    get_list_chunks,
-    is_azure_sql_database,
-    is_collation_case_insensitive,
-)
 
 
-class SubmitData:
-    def __init__(self, submit_data_function, base_event, logger):
-        self._submit_to_agent_queue = submit_data_function
-        self._base_event = base_event
-        self._log = logger
+class DatabaseInfo(TypedDict):
+    name: str
+    id: str
+    collation: str
+    owner: str
 
-        self._columns_count = 0
-        self._total_columns_sent = 0
-        self.db_to_schemas = {}  # dbname : { id : schema }
-        self.db_info = {}  # name to info
 
-    def set_base_event_data(self, hostname, database_instance, tags, cloud_metadata, dbms_version):
-        self._base_event["host"] = hostname
-        self._base_event["database_instance"] = database_instance
-        self._base_event["tags"] = tags
-        self._base_event["cloud_metadata"] = cloud_metadata
-        self._base_event["dbms_version"] = dbms_version
+DB_QUERY = """
+SELECT
+    db.database_id AS id, db.name AS name, db.collation_name AS collation, dp.name AS owner
+FROM
+    sys.databases db LEFT JOIN sys.database_principals dp ON db.owner_sid = dp.sid
+WHERE db.name IN ({});
+"""
 
-    def reset(self):
-        self._total_columns_sent = 0
-        self._columns_count = 0
-        self.db_to_schemas.clear()
-        self.db_info.clear()
+SCHEMA_QUERY = """
+SELECT
+    s.name AS schema_name, s.schema_id AS schema_id, dp.name AS owner_name
+FROM
+    sys.schemas AS s JOIN sys.database_principals dp ON s.principal_id = dp.principal_id
+WHERE s.name NOT IN ('sys', 'information_schema')
+"""
 
-    def store_db_infos(self, db_infos, databases):
-        dbs = set(databases)
-        for db_info in db_infos:
-            case_insensitive = is_collation_case_insensitive(db_info.get('collation'))
-            db_name = db_info['name']
-            db_name_lower = db_name.lower()
-            if db_name not in dbs:
-                if db_name.lower() in dbs and case_insensitive:
-                    db_name = db_name_lower
-                else:
-                    self._log.debug(
-                        "Skipping db {} as it is not in the databases list {} or collation is case sensitive".format(
-                            db_name, dbs
-                        )
-                    )
-                    continue
-            self.db_info[db_name] = db_info
+TABLES_IN_SCHEMA_QUERY = """
+SELECT
+    object_id AS table_id, name AS table_name, schema_id
+FROM
+    sys.tables
+"""
 
-    def store(self, db_name, schema, tables, columns_count):
-        self._columns_count += columns_count
-        schemas = self.db_to_schemas.setdefault(db_name, {})
-        if schema["id"] in schemas:
-            known_tables = schemas[schema["id"]].setdefault("tables", [])
-            known_tables = known_tables.extend(tables)
-        else:
-            schemas[schema["id"]] = schema
-            schemas[schema["id"]]["tables"] = tables
+COLUMN_QUERY = """
+SELECT
+    c.name, t.name as data_type, coalesce(dc.definition, 'None') as "default", c.is_nullable AS nullable
+FROM
+    sys.columns c
+    INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+    LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id
+WHERE c.object_id = schema_tables.table_id
+"""
 
-    def columns_since_last_submit(self):
-        return self._columns_count
+INDEX_QUERY = """
+SELECT
+    i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint,
+    i.is_disabled, STRING_AGG(c.name, ',') AS column_names
+FROM
+    sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id
+    AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+WHERE i.object_id = schema_tables.table_id
+GROUP BY i.object_id, i.name, i.type,
+    i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled
+"""
 
-    def truncate(self, json_event):
-        max_length = 1000
-        if len(json_event) > max_length:
-            return json_event[:max_length] + " ... (truncated)"
-        else:
-            return json_event
+INDEX_QUERY_PRE_2017 = """
+SELECT
+    i.object_id AS id,
+    i.name,
+    i.type,
+    i.is_unique,
+    i.is_primary_key,
+    i.is_unique_constraint,
+    i.is_disabled,
+    STUFF((
+        SELECT ',' + c.name
+        FROM sys.index_columns ic
+        JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+        WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS column_names
+FROM
+    sys.indexes i
+WHERE i.object_id = schema_tables.table_id
+GROUP BY
+    i.object_id,
+    i.name,
+    i.index_id,
+    i.type,
+    i.is_unique,
+    i.is_primary_key,
+    i.is_unique_constraint,
+    i.is_disabled
+"""
 
-    def send_truncated_msg(self, db_name, time_spent):
-        event = {
-            **self._base_event,
-            "metadata": [],
-            "timestamp": time.time() * 1000,
-            "collection_errors": [{"error_type": "truncated", "message": ""}],
-        }
-        db_info = self.db_info[db_name]
-        event["metadata"] = [{**(db_info)}]
-        event["collection_errors"][0]["message"] = (
-            "Truncated after fetching {} columns, elapsed time is {}s, database is {}".format(
-                self._total_columns_sent, time_spent, db_name
-            )
+FOREIGN_KEY_QUERY = """
+SELECT
+    FK.name AS foreign_key_name,
+    OBJECT_NAME(FK.parent_object_id) AS referencing_table,
+    STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column,
+    OBJECT_NAME(FK.referenced_object_id) AS referenced_table,
+    STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column,
+    FK.delete_referential_action_desc AS delete_action,
+    FK.update_referential_action_desc AS update_action
+FROM
+    sys.foreign_keys AS FK
+    JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
+WHERE FK.parent_object_id = schema_tables.table_id
+GROUP BY
+    FK.name,
+    FK.parent_object_id,
+    FK.referenced_object_id,
+    FK.delete_referential_action_desc,
+    FK.update_referential_action_desc
+"""
+
+FOREIGN_KEY_QUERY_PRE_2017 = """
+SELECT
+    FK.parent_object_id AS table_id,
+    FK.name AS foreign_key_name,
+    OBJECT_NAME(FK.parent_object_id) AS referencing_table,
+    STUFF((
+        SELECT ',' + COL_NAME(FKC.parent_object_id, FKC.parent_column_id)
+        FROM sys.foreign_key_columns AS FKC
+        WHERE FKC.constraint_object_id = FK.object_id
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS referencing_column,
+    OBJECT_NAME(FK.referenced_object_id) AS referenced_table,
+    STUFF((
+        SELECT ',' + COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id)
+        FROM sys.foreign_key_columns AS FKC
+        WHERE FKC.constraint_object_id = FK.object_id
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '') AS referenced_column,
+    FK.delete_referential_action_desc AS delete_action,
+    FK.update_referential_action_desc AS update_action
+FROM
+    sys.foreign_keys AS FK
+GROUP BY
+    FK.name,
+    FK.object_id,
+    FK.parent_object_id,
+    FK.referenced_object_id,
+    FK.delete_referential_action_desc,
+    FK.update_referential_action_desc
+"""
+
+PARTITIONS_QUERY = """
+SELECT
+    COUNT(*) AS partition_count
+FROM
+    sys.partitions
+WHERE
+    object_id = schema_tables.table_id
+GROUP BY object_id
+"""
+
+
+# The schema collector sends lists of DatabaseObjects to the agent
+# The format is for backwards compatibility with the current backend
+class DatabaseObject(TypedDict):
+    # Splat of database info
+    description: str
+    name: str
+    id: str
+    encoding: str
+    owner: str
+
+
+class TableObject(TypedDict):
+    id: str
+    name: str
+    columns: list
+    indexes: list
+    foreign_keys: list
+
+
+class SchemaObject(TypedDict):
+    name: str
+    id: str
+    owner: str
+    tables: list[TableObject]
+
+
+class SQLServerDatabaseObject(DatabaseObject):
+    schemas: list[SchemaObject]
+
+
+class SQLServerSchemaCollector(SchemaCollector):
+    _check: SQLServer
+
+    def __init__(self, check: SQLServer):
+        config = SchemaCollectorConfig()
+        config.collection_interval = check._config.schema_config.get(
+            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
-        json_event = json.dumps(event, default=default_json_event_encoding)
-        self._log.debug("Reporting truncation of schema collection: {}".format(self.truncate(json_event)))
-        self._submit_to_agent_queue(json_event)
+        config.max_tables = check._config.schema_config.get('max_tables', 300)
+        super().__init__(check, config)
 
-    def submit(self):
-        if not self.db_to_schemas:
-            return
-        self._total_columns_sent += self._columns_count
-        self._columns_count = 0
-        event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
-        for db, schemas_by_id in self.db_to_schemas.items():
-            db_info = {}
-            db_info = self.db_info[db]
-            event["metadata"] = event["metadata"] + [{**(db_info), "schemas": list(schemas_by_id.values())}]
-        json_event = json.dumps(event, default=default_json_event_encoding)
-        self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
-        self._submit_to_agent_queue(json_event)
-        self.db_to_schemas.clear()
+    @property
+    def kind(self):
+        return "sqlserver_databases"
 
-
-def agent_check_getter(self):
-    return self._check
-
-
-class Schemas(DBMAsyncJob):
-    TABLES_CHUNK_SIZE = 500
-    # Note: in async mode execution time also cannot exceed 2 checks.
-    DEFAULT_MAX_EXECUTION_TIME = 10
-    MAX_COLUMNS_PER_EVENT = 100_000
-
-    def __init__(self, check, config):
-        self._check = check
-        self._log = check.log
-        self.schemas_per_db = {}
-        self._last_schemas_collect_time = None
-        collection_interval = config.schema_config.get('collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
-        self._max_execution_time = min(
-            config.schema_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
-        )
-        super(Schemas, self).__init__(
-            check,
-            run_sync=True,
-            enabled=is_affirmative(config.schema_config.get('enabled', False)),
-            expected_db_exceptions=(),
-            # min collection interval is a desired collection interval for a check as a whole.
-            min_collection_interval=config.min_collection_interval,
-            dbms="sqlserver",
-            rate_limit=1 / float(collection_interval),
-            job_name="schemas",
-            shutdown_callback=self.shut_down,
-        )
-        base_event = {
-            "host": None,
-            "agent_version": datadog_agent.get_version(),
-            "dbms": "sqlserver",
-            "kind": "sqlserver_databases",
-            "collection_interval": collection_interval,
-            "dbms_version": None,
-            "tags": self._check.tag_manager.get_tags(),
-            "cloud_metadata": self._check.cloud_metadata,
-        }
-        self._data_submitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
-
-    def run_job(self):
-        self._collect_schemas_data()
-
-    def shut_down(self):
-        self._data_submitter.submit()
-
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def _fetch_schema_data(self, cursor, start_time, db_name):
-        schemas = self._query_schema_information(cursor)
-        for schema in schemas:
-            tables = self._get_tables(schema, cursor)
-            tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
-            for tables_chunk in tables_chunks:
-                schema_collection_elapsed_time = time.time() - start_time
-                if schema_collection_elapsed_time > self._max_execution_time:
-                    self._data_submitter.submit()
-                    self._data_submitter.send_truncated_msg(db_name, schema_collection_elapsed_time)
-                    raise StopIteration(
-                        """Schema collection took {}s which is longer than allowed limit of {}s,
-                        stopped while collecting for db - {}""".format(
-                            schema_collection_elapsed_time, self._max_execution_time, db_name
-                        )
-                    )
-                columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
-                self._data_submitter.store(db_name, schema, tables_info, columns_count)
-                if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
-                    self._data_submitter.submit()
-        self._data_submitter.submit()
-        return False
-
-    def _fetch_for_databases(self):
-        start_time = time.time()
-        databases = self._check.get_databases()
-        engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+    def _get_databases(self):
+        database_names = self._check.get_databases()
         with self._check.connection.open_managed_default_connection():
             with self._check.connection.get_managed_cursor() as cursor:
-                try:
-                    for db_name in databases:
-                        try:
-                            if not is_azure_sql_database(engine_edition):
-                                cursor.execute(SWITCH_DB_STATEMENT.format(db_name))
-                            self._fetch_schema_data(cursor, start_time, db_name)
-                        except StopIteration as e:
-                            self._log.error(
-                                """While executing fetch schemas for databse {},
-                                   the following exception occured {}""".format(db_name, e)
-                            )
-                            break
-                        except Exception as e:
-                            self._log.error(
-                                """While executing fetch schemas for databse {},
-                                   the following exception occured {}""".format(db_name, e)
-                            )
-                finally:
-                    # Switch DB back to MASTER
-                    if not is_azure_sql_database(engine_edition):
-                        cursor.execute(SWITCH_DB_STATEMENT.format(self._check.connection.DEFAULT_DATABASE))
-
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_schemas_data(self):
-        """Collects database information and schemas and submits to the agent's queue as dictionaries
-        schema dict
-        key/value:
-            "name": str
-            "id": str
-            "owner_name": str
-            "tables" : list of tables dicts
-                table
-                key/value:
-                    "id" : str
-                    "name" : str
-                    columns: list of columns dicts
-                        columns
-                        key/value:
-                            "name": str
-                            "data_type": str
-                            "default": str
-                            "nullable": bool
-                indexes : list of index dicts
-                    index
-                    key/value:
-                        "name": str
-                        "type": str
-                        "is_unique": bool
-                        "is_primary_key": bool
-                        "is_unique_constraint": bool
-                        "is_disabled": bool,
-                        "column_names": str
-                foreign_keys : list of foreign key dicts
-                    foreign_key
-                    key/value:
-                        "foreign_key_name": str
-                        "referencing_table": str
-                        "referencing_column": str
-                        "referenced_table": str
-                        "referenced_column": str
-                        "delete_action": str
-                        "update_action": str
-                partitions: partition dict
-                    partition
-                    key/value:
-                        "partition_count": int
-        """
-        self._data_submitter.reset()
-        self._data_submitter.set_base_event_data(
-            self._check.reported_hostname,
-            self._check.database_identifier,
-            self._check.tag_manager.get_tags(),
-            self._check.cloud_metadata,
-            "{},{}".format(
-                self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-                self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            ),
-        )
-
-        databases = self._check.get_databases()
-        db_infos = self._query_db_information(databases)
-        self._data_submitter.store_db_infos(db_infos, databases)
-        self._fetch_for_databases()
-        self._data_submitter.submit()
-        self._log.debug("Finished collect_schemas_data")
-
-    def _query_db_information(self, db_names):
-        with self._check.connection.open_managed_default_connection():
-            with self._check.connection.get_managed_cursor() as cursor:
-                db_names_formatted = ",".join(["'{}'".format(t) for t in db_names])
+                db_names_formatted = ",".join(["'{}'".format(t) for t in database_names])
                 return execute_query(DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True)
 
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_tables(self, schema, cursor):
-        """returns a list of tables for schema with their names and empty column array
-        list of table dicts
-        "id": str
-        "name": str
-        "columns": []
-        """
-        tables_info = execute_query(TABLES_IN_SCHEMA_QUERY, cursor, convert_results_to_str=True, parameter=schema["id"])
-        for t in tables_info:
-            t.setdefault("columns", [])
-        return tables_info
+    @contextlib.contextmanager
+    def _get_cursor(self, database_name):
+        with self._check.connection.open_managed_default_connection():
+            with self._check.connection.get_managed_cursor() as cursor:
+                cursor.execute(SWITCH_DB_STATEMENT.format(database_name))
 
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _query_schema_information(self, cursor):
-        """returns a list of schema dicts
-        schema
-        dict:
-            "name": str
-            "id": str
-            "owner_name": str
-        """
-        return execute_query(SCHEMA_QUERY, cursor, convert_results_to_str=True)
+                schemas_query = SCHEMA_QUERY
+                tables_query = TABLES_IN_SCHEMA_QUERY
+                columns_query = COLUMN_QUERY
+                indexes_query = INDEX_QUERY
+                constraints_query = FOREIGN_KEY_QUERY
+                partitions_query = PARTITIONS_QUERY
 
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _get_tables_data(self, table_list, schema, cursor):
-        """returns extracted column numbers and a list of tables
-        "tables" : list of tables dicts
-        table
-        key/value:
-            "id" : str
-            "name" : str
-            columns: list of columns dicts
-                columns
-                key/value:
-                    "name": str
-                    "data_type": str
-                    "default": str
-                    "nullable": bool
-            indexes : list of index dicts
-                index
-                key/value:
-                    "name": str
-                    "type": str
-                    "is_unique": bool
-                    "is_primary_key": bool
-                    "is_unique_constraint": bool
-                    "is_disabled": bool,
-                    "column_names": str
-            foreign_keys : list of foreign key dicts
-                foreign_key
-                key/value:
-                    "foreign_key_name": str
-                    "referencing_table": str
-                    "referencing_column": str
-                    "referenced_table": str
-                    "referenced_column": str
-                    "delete_action": str
-                    "update_action": str
-            partitions: partition dict
-                partition
-                key/value:
-                    "partition_count": int
-        """
-        if len(table_list) == 0:
-            return
-        name_to_id = {}
-        id_to_table_data = {}
-        table_ids_object = ",".join(["OBJECT_NAME({})".format(t.get("id")) for t in table_list])
-        table_ids = ",".join(["{}".format(t.get("id")) for t in table_list])
-        for t in table_list:
-            name_to_id[t["name"]] = t["id"]
-            id_to_table_data[t["id"]] = t
-        total_columns_number = self._populate_with_columns_data(
-            table_ids_object, name_to_id, id_to_table_data, schema, cursor
-        )
-        self._populate_with_partitions_data(table_ids, id_to_table_data, cursor)
-        self._populate_with_foreign_keys_data(table_ids, id_to_table_data, cursor)
-        self._populate_with_index_data(table_ids, id_to_table_data, cursor)
-        return total_columns_number, list(id_to_table_data.values())
+                limit = int(self._config.max_tables or 1_000_000)
 
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def _populate_with_columns_data(self, table_ids, name_to_id, id_to_table_data, schema, cursor):
-        cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
-        data = cursor.fetchall()
-        # AS default - cannot be used in sqlserver query as this word is reserved
-        columns = [
-            "default" if str(i[0]).lower() == "column_default" else str(i[0]).lower() for i in cursor.description
+                # Note that we INNER JOIN tables to omit schemas with no tables
+                # This is a simple way to omit the system tables like db_blah
+                query = f"""
+                    WITH
+                    schemas AS (
+                        {schemas_query}
+                    ),
+                    tables AS (
+                        {tables_query}
+                    ),
+                    schema_tables AS (
+                        SELECT TOP {limit} schemas.schema_name, schemas.schema_id, schemas.owner_name,
+                        tables.table_id, tables.table_name
+                        FROM schemas
+                        INNER JOIN tables ON schemas.schema_id = tables.schema_id
+                        ORDER BY schemas.schema_name, tables.table_name
+                    )
+
+                    SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
+                        schema_tables.table_name
+                        , json_query(({columns_query} FOR JSON PATH), '$') as columns
+                        , json_query(({indexes_query} FOR JSON PATH), '$') as indexes
+                        , json_query(({constraints_query} FOR JSON PATH), '$') as foreign_keys
+                        , ({partitions_query}) as partition_count
+                    FROM schema_tables
+                    ;
+                """
+                # print(query)
+                cursor.execute(query)
+                yield cursor
+
+    def _get_next(self, cursor):
+        return cursor.fetchone_dict()
+
+    def _get_all(self, cursor):
+        return cursor.fetchall_dict()
+
+    def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
+        object = super()._map_row(database, cursor_row)
+        # Map the cursor row to the expected schema, and strip out None values
+        object["schemas"] = [
+            {
+                "name": cursor_row.get("schema_name"),
+                "id": cursor_row.get("schema_id"),
+                "owner_name": cursor_row.get("owner_name"),
+                "tables": [
+                    {
+                        k: v
+                        for k, v in {
+                            "id": cursor_row.get("table_id"),
+                            "name": cursor_row.get("table_name"),
+                            "columns": json.loads(cursor_row.get("columns") or "[]"),
+                            "indexes": json.loads(cursor_row.get("indexes") or "[]"),
+                            "foreign_keys": json.loads(cursor_row.get("foreign_keys") or "[]"),
+                            "partitions": {"partition_count": cursor_row.get("partition_count")},
+                        }.items()
+                        if v is not None
+                    }
+                ]
+                if cursor_row.get("table_name") is not None
+                else [],
+            }
         ]
-        rows = [dict(zip(columns, [str(item) for item in row])) for row in data]
-        for row in rows:
-            table_name = str(row.get("table_name"))
-            table_id = name_to_id.get(table_name)
-            row.pop("table_name", None)
-            if "nullable" in row:
-                if row["nullable"].lower() == "no" or row["nullable"].lower() == "false":
-                    row["nullable"] = False
-                else:
-                    row["nullable"] = True
-            id_to_table_data.get(table_id)["columns"] = id_to_table_data.get(table_id).get("columns", []) + [row]
-        return len(data)
-
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def _populate_with_partitions_data(self, table_ids, table_id_to_table_data, cursor):
-        rows = execute_query(PARTITIONS_QUERY.format(table_ids), cursor)
-        for row in rows:
-            table_id = row.pop("id", None)
-            table_id_str = str(table_id)
-            table_id_to_table_data[table_id_str]["partitions"] = row
-
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def _populate_with_index_data(self, table_ids, table_id_to_table_data, cursor):
-        index_query = INDEX_QUERY
-        if self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) <= 2016:
-            index_query = INDEX_QUERY_PRE_2017
-        rows = execute_query(index_query.format(table_ids), cursor)
-        for row in rows:
-            table_id = row.pop("id", None)
-            table_id_str = str(table_id)
-            if "is_unique" in row:
-                row["is_unique"] = convert_to_bool(row["is_unique"])
-            if "is_primary_key" in row:
-                row["is_primary_key"] = convert_to_bool(row["is_primary_key"])
-            if "is_disabled" in row:
-                row["is_disabled"] = convert_to_bool(row["is_disabled"])
-            if "is_unique_constraint" in row:
-                row["is_unique_constraint"] = convert_to_bool(row["is_unique_constraint"])
-            table_id_to_table_data[table_id_str].setdefault("indexes", [])
-            table_id_to_table_data[table_id_str]["indexes"].append(row)
-
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _populate_with_foreign_keys_data(self, table_ids, table_id_to_table_data, cursor):
-        foreign_key_query = FOREIGN_KEY_QUERY
-        if self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION) <= 2016:
-            foreign_key_query = FOREIGN_KEY_QUERY_PRE_2017
-        rows = execute_query(foreign_key_query.format(table_ids), cursor)
-        for row in rows:
-            table_id = row.pop("table_id", None)
-            table_id_str = str(table_id)
-            table_id_to_table_data.get(table_id_str).setdefault("foreign_keys", [])
-            table_id_to_table_data.get(table_id_str)["foreign_keys"].append(row)
+        return object
