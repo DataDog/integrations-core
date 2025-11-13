@@ -40,3 +40,6 @@ dev-mode-dirs = ["."]
 
 [tool.ruff]
 extend = "../pyproject.toml"
+
+[tool.ddev]
+something = true
