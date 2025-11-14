@@ -225,7 +225,7 @@ def main():
             str(python_path),
             '-m',
             'pip',
-            '-v',
+            '-vvv',
             'wheel',
             # '--config-settings',
             # f'--build-backend={MOUNT_DIR / "scripts" / "build_backend.py"}',
