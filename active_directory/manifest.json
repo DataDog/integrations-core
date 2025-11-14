@@ -39,7 +39,8 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "DFSRs.exe"
+        "DFSRs.exe",
+        "dfsr.exe"
       ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
