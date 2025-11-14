@@ -185,6 +185,11 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
     if instance.get('obfuscator_options', {}).get('quantize_sql_tables'):
         args['obfuscator_options']['replace_digits'] = True
 
+    # When autodiscovery is enabled, use global_view_db as the main database for DBM jobs
+    # This must happen before building tags so the db: tag reflects the correct database
+    if args.get('database_autodiscovery', {}).get('enabled'):
+        args['dbname'] = args.get('database_autodiscovery', {}).get('global_view_db', 'postgres')
+
     validation_result = ValidationResult()
 
     # Generate and validate tags
