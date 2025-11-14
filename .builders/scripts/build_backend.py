@@ -1,13 +1,43 @@
-# import inspect
-# import shutil
-# import sys
-# import tomllib
-# import zipfile
-# from functools import cache
-# from pathlib import Path
+# scripts/build_backend.py
 
-# import pathspec
-# from setuptools import build_meta as _orig
+import inspect
+import shutil
+import sys
+import tomllib
+import zipfile
+from functools import cache
+from pathlib import Path
+
+import pathspec
+from hatchling.builders.hooks.plugin.interface import BuildHookInterface
+from setuptools import build_meta as _orig
+
+
+class RemoveTestsHook(BuildHookInterface):
+    """
+    A custom build hook to remove test directories and files
+    from the list of files destined for the wheel.
+    """
+
+    def finalize(self, version: str, artifacts: list[str], directory: str):
+        """
+        Runs before the wheel is generated. Filters the 'artifacts' list in place.
+        """
+        files_to_keep = []
+        removed_count = 0
+
+        # Iterate over all files scheduled for inclusion
+        for artifact in artifacts:
+            if is_excluded_from_wheel(artifact):
+                print(f"Excluding file via finalize: {artifact}")
+                removed_count += 1
+                continue
+
+            files_to_keep.append(artifact)
+
+        # Replace the original artifacts list with the filtered list
+        artifacts[:] = files_to_keep
+        print(f"INFO: Removed {removed_count} files/directories using finalize.")
 
 
 # def remove_test_files(wheel_path: Path) -> None:
@@ -35,34 +65,34 @@
 #     print(f"Removed {removed_count} files from {wheel_path.name}")
 
 
-# def is_excluded_from_wheel(path: str | Path) -> bool:
-#     """
-#     Return True if `path` (file or directory) should be excluded per files_to_remove.toml.
-#     Matches:
-#       - type annotation files: **/*.pyi, **/py.typed
-#       - test directories listed with a trailing '/'
-#     """
-#     spec = _load_excluded_spec()
-#     rel = Path(path).as_posix()
+def is_excluded_from_wheel(path: str | Path) -> bool:
+    """
+    Return True if `path` (file or directory) should be excluded per files_to_remove.toml.
+    Matches:
+      - type annotation files: **/*.pyi, **/py.typed
+      - test directories listed with a trailing '/'
+    """
+    spec = _load_excluded_spec()
+    rel = Path(path).as_posix()
 
-#     if spec.match_file(rel) or spec.match_file(rel + "/"):
-#         return True
+    if spec.match_file(rel) or spec.match_file(rel + "/"):
+        return True
 
-#     return False
+    return False
 
 
-# @cache
-# def _load_excluded_spec() -> pathspec.PathSpec:
-#     """
-#     Load excluded paths from files_to_remove.toml and compile them
-#     with .gitignore-style semantics.
-#     """
-#     config_path = Path(__file__).parent / "files_to_remove.toml"
-#     with open(config_path, "rb") as f:
-#         config = tomllib.load(f)
+@cache
+def _load_excluded_spec() -> pathspec.PathSpec:
+    """
+    Load excluded paths from files_to_remove.toml and compile them
+    with .gitignore-style semantics.
+    """
+    config_path = Path(__file__).parent / "files_to_remove.toml"
+    with open(config_path, "rb") as f:
+        config = tomllib.load(f)
 
-#     patterns = config.get("excluded_paths", [])
-#     return pathspec.PathSpec.from_lines("gitignore", patterns)
+    patterns = config.get("excluded_paths", [])
+    return pathspec.PathSpec.from_lines("gitignore", patterns)
 
 
 # def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
