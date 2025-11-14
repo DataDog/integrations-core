@@ -1,6 +1,6 @@
 {
     "title": "Shopify - Event Overview",
-    "description": "",
+    "description": "The Shopify Event Overview Dashboard provides an overview of event logs, offering insights into events, type, and action distribution.",
     "widgets": [
         {
             "id": 2362748552655712,
