@@ -19,7 +19,7 @@ CUSTOM_TAGS = ['optional:tag1']
 CHECK_TAGS = CUSTOM_TAGS + ['instance:http://{}:{}'.format(HOST, PORT)]
 BUCKET_NAME = 'cb_bucket'
 INDEX_STATS_TAGS = CHECK_TAGS + [
-    'bucket:cb_bucket',
+    'bucket:gamesim-sample',
     'collection:default',
     'index_name:gamesim_primary',
     'scope:default',
@@ -34,6 +34,9 @@ USER = 'Administrator'
 PASSWORD = 'password'
 
 COUCHBASE_MAJOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[0])
+COUCHBASE_MINOR_VERSION = int(os.getenv('COUCHBASE_VERSION').split(".")[1])
+COUCHBASE_SYNCGW_MAJOR_VERSION = int(os.getenv('COUCHBASE_SYNCGW_VERSION').split(".")[0])
+COUCHBASE_SYNCGW_MINOR_VERSION = int(os.getenv('COUCHBASE_SYNCGW_VERSION').split(".")[1])
 
 DEFAULT_INSTANCE = {'server': URL, 'user': USER, 'password': PASSWORD, 'timeout': 1, 'tags': CUSTOM_TAGS}
 
@@ -57,6 +60,7 @@ SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.cache.chan_cache_tombstone_revs",
     "couchbase.sync_gateway.cache.high_seq_cached",
     "couchbase.sync_gateway.cache.high_seq_stable",
+    "couchbase.sync_gateway.cache.non_mobile_ignored_count",
     "couchbase.sync_gateway.cache.num_active_channels",
     "couchbase.sync_gateway.cache.num_skipped_seqs",
     "couchbase.sync_gateway.cache.pending_seq_len",
@@ -64,6 +68,7 @@ SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.cache.rev_cache_hits",
     "couchbase.sync_gateway.cache.rev_cache_misses",
     "couchbase.sync_gateway.cache.skipped_seq_len",
+    "couchbase.sync_gateway.cache.view_queries",
     "couchbase.sync_gateway.cbl_replication_pull.attachment_pull_bytes",
     "couchbase.sync_gateway.cbl_replication_pull.attachment_pull_count",
     "couchbase.sync_gateway.cbl_replication_pull.max_pending",
@@ -71,6 +76,7 @@ SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_active_one_shot",
     "couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_caught_up",
     "couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_since_zero",
+    "couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_total_caught_up",
     "couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_total_continuous",
     "couchbase.sync_gateway.cbl_replication_pull.num_pull_repl_total_one_shot",
     "couchbase.sync_gateway.cbl_replication_pull.num_replications_active",
@@ -84,10 +90,9 @@ SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.cbl_replication_push.doc_push_count",
     "couchbase.sync_gateway.cbl_replication_push.propose_change_count",
     "couchbase.sync_gateway.cbl_replication_push.propose_change_time",
-    "couchbase.sync_gateway.cbl_replication_push.sync_function_count",
-    "couchbase.sync_gateway.cbl_replication_push.sync_function_time",
     "couchbase.sync_gateway.cbl_replication_push.write_processing_time",
-    "couchbase.sync_gateway.database.abandoned_seqs",
+    "couchbase.sync_gateway.database.compaction_attachment_start_time",
+    "couchbase.sync_gateway.database.compaction_tombstone_start_time",
     "couchbase.sync_gateway.database.conflict_write_count",
     "couchbase.sync_gateway.database.crc32c_match_count",
     "couchbase.sync_gateway.database.dcp_caching_count",
@@ -99,6 +104,7 @@ SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.database.doc_writes_bytes_blip",
     "couchbase.sync_gateway.database.doc_writes_xattr_bytes",
     "couchbase.sync_gateway.database.high_seq_feed",
+    "couchbase.sync_gateway.database.num_attachments_compacted",
     "couchbase.sync_gateway.database.num_doc_reads_blip",
     "couchbase.sync_gateway.database.num_doc_reads_rest",
     "couchbase.sync_gateway.database.num_doc_writes",
@@ -110,6 +116,10 @@ SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.database.sequence_incr_count",
     "couchbase.sync_gateway.database.sequence_released_count",
     "couchbase.sync_gateway.database.sequence_reserved_count",
+    "couchbase.sync_gateway.database.sync_function_count",
+    "couchbase.sync_gateway.database.sync_function_exception_count",
+    "couchbase.sync_gateway.database.sync_function_time",
+    "couchbase.sync_gateway.database.warn_channel_name_size_count",
     "couchbase.sync_gateway.database.warn_channels_per_doc_count",
     "couchbase.sync_gateway.database.warn_grants_per_doc_count",
     "couchbase.sync_gateway.database.warn_xattr_size_count",
@@ -140,8 +150,49 @@ SYNC_GATEWAY_METRICS = [
     "couchbase.sync_gateway.shared_bucket_import.import_partitions",
     "couchbase.sync_gateway.shared_bucket_import.import_processing_time",
     "couchbase.sync_gateway.system_memory_total",
+    "couchbase.sync_gateway.uptime",
     "couchbase.sync_gateway.warn_count",
 ]
+
+if COUCHBASE_SYNCGW_MAJOR_VERSION == 3 and COUCHBASE_SYNCGW_MINOR_VERSION >= 3:
+    SYNC_GATEWAY_METRICS.extend(
+        [
+            "couchbase.sync_gateway.assertion_fail_count",
+            "couchbase.sync_gateway.cache.current_skipped_seq_count",
+            "couchbase.sync_gateway.cache.revision_cache_num_items",
+            "couchbase.sync_gateway.cache.revision_cache_total_memory",
+            "couchbase.sync_gateway.cache.skipped_seq_cap",
+            "couchbase.sync_gateway.cache.skipped_sequence_skip_list_nodes",
+            "couchbase.sync_gateway.cbl_replication_pull.norev_send_count",
+            "couchbase.sync_gateway.cbl_replication_pull.replacement_rev_send_count",
+            "couchbase.sync_gateway.cbl_replication_pull.rev_error_count",
+            "couchbase.sync_gateway.cbl_replication_push.doc_push_error_count",
+            "couchbase.sync_gateway.cbl_replication_push.write_throttled_count",
+            "couchbase.sync_gateway.cbl_replication_push.write_throttled_time",
+            "couchbase.sync_gateway.database.corrupt_sequence_count",
+            "couchbase.sync_gateway.database.last_sequence_assigned_value",
+            "couchbase.sync_gateway.database.last_sequence_reserved_value",
+            "couchbase.sync_gateway.database.num_docs_post_filter_public_all_docs",
+            "couchbase.sync_gateway.database.num_docs_pre_filter_public_all_docs",
+            "couchbase.sync_gateway.database.num_doc_writes_rejected",
+            "couchbase.sync_gateway.database.num_public_all_docs_requests",
+            "couchbase.sync_gateway.database.num_public_rest_requests",
+            "couchbase.sync_gateway.database.num_replications_rejected_limit",
+            "couchbase.sync_gateway.database.public_rest_bytes_read",
+            "couchbase.sync_gateway.database.public_rest_bytes_written",
+            "couchbase.sync_gateway.database.replication_bytes_received",
+            "couchbase.sync_gateway.database.replication_bytes_sent",
+            "couchbase.sync_gateway.database.resync_num_changed",
+            "couchbase.sync_gateway.database.resync_num_processed",
+            "couchbase.sync_gateway.database.total_init_fatal_errors",
+            "couchbase.sync_gateway.database.total_online_fatal_errors",
+            "couchbase.sync_gateway.database.total_sync_time",
+            "couchbase.sync_gateway.idle_kv_ops",
+            "couchbase.sync_gateway.idle_query_ops",
+            "couchbase.sync_gateway.node_cpu_percent_utilization",
+            "couchbase.sync_gateway.shared_bucket_import.import_feed_processed_count",
+        ]
+    )
 
 INDEX_STATS_INDEXER_METRICS = [
     'couchbase.indexer.indexer_state',

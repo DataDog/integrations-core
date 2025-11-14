@@ -119,6 +119,7 @@ def _increase_txid(cur):
     else:
         query = 'select txid_current();'
     cur.execute(query)
+    assert cur.fetchone() is not None
 
 
 def test_initialization_tags(integration_check, pg_instance):
@@ -485,7 +486,7 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
 
     check.run()
 
-    app = 'test_backend_transaction_age'
+    app = f'test_backend_transaction_age_{time.time()}'
     conn1 = _get_conn(pg_instance, application_name=app)
     cur = conn1.cursor()
 
@@ -498,8 +499,6 @@ def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     cur.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;')
     # Force assignement of a txid and keep the transaction opened
     _increase_txid(cur)
-    # Make sure to fetch the result to make sure we start the timer after the transaction started
-    cur.fetchall()
     start_transaction_time = time.time()
 
     aggregator.reset()

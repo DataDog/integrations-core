@@ -2,108 +2,119 @@
 
 ## Overview
 
-Barracuda Secure Edge is a unified Secure Access Service Edge (SASE) platform that includes Next-Generation Firewall (NGFW), zero trust, and secure Software-Defined Wide Area Network (SD-WAN) capabilities. This integration allows you to collect and analyze logs from your [barracuda_secure_edge][4] deployment to monitor security events, network traffic, and system activity.
+Barracuda SecureEdge is a unified Secure Access Service Edge (SASE) platform that includes Next-Generation Firewall (NGFW), zero trust, and secure Software-Defined Wide Area Network (SD-WAN) capabilities. This integration collects and analyzes logs from your [Barracuda SecureEdge][1] deployment to monitor security events, network traffic, and system activity.
 
 ## Setup
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` with:
+
+### Installation
+
+The Barracuda SecureEdge check is included in the [Datadog Agent][2] package.
+
+### Prerequisites
+
+1. A syslog server that can receive logs from the Barracuda SecureEdge instance.
+
+2. Configure syslog streaming through the Barracuda SecureEdge Manager. Follow the [configuration instructions][3]. When configuring syslog streaming, you can select different log sources. When enabled, each log source will generate one or more log files in your syslog server under `/var/phion/logs` by default. If your syslog server stores the logs in a different directory, note down this directory as it will be necessary during the configuration step. By default, the Barracuda SecureEdge integration supports the following log files:
+
+    ```
+    box_Auth_access.log
+    box_Event_eventS.log
+    box_Event_operative.log
+    box_Config_admin.log
+    box_Config_changes.log
+    box_Config_sync.log
+    box_Control_admin.log
+    box_Control_AuthService.log
+    box_Firewall.log
+    box_Firewall_Activity.log
+    box_Network_dhcp.log
+    box_Network_activation.log
+    box_System_mgmaccess.log
+    box_SSH_sshd.log
+    box_SSH_config.log
+    srv_CSC_VPN.log
+    srv_CSC_VPN_sslvpn.log
+    ```
+
+    If you want to extend the log files ingested by the integration, see the **Add Extra Log Sources** section for instructions on how to add them.
+
+3. Ensure there is an instance of the Datadog Agent running on your syslog server/container and that it has access to the logs directory.
+
+
+### Configuration
+Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:
 
     ```yaml
       logs_enabled: true
     ```
-2. Add this configuration block to your `secure_edge.d/conf.yaml` file to start collecting your SecureEdge logs:
 
-    ```yaml
-      logs:
-        - type: file
-          path:  /var/log/log_type.log
-          source: barracuda_secure_edge
-          service: <SERVICE_NAME>
-          tags:
-            - log_component:tag_component_name
-        - type: file
-          path: /var/logs/other_log_type.log
-          source: barracuda_secure_edge
-          service: <SERVICE_NAME>
-          tags:
-            - log_component:other_tag_component_name
-    ```
+#### Running On A Host
 
-    Change the `path` and `service` parameter values for your environment. Define multiple file sources in the configuration file as shown above. For each of the file sources, pre-defined tag needs to be added to those logs as follows:
+If your syslog server is deployed on a host (not containerized), rename the `conf.d/secure_edge.d/conf.yaml.example` found in the root of your Agent's configuration directory to `conf.yaml`. See the [example configuration][4] for the contents of this file. Replace the `<SERVICE>` value in each log source with the `service` that best suits your environment.
+
+The path to the log files is the default path where Barracuda SecureEdge streams logs to. If your syslog server stores the logs in a different directory, update those values in the `conf.yaml` file.
+
+Once the file has been renamed and updated, [restart the Agent][5].
+
+#### Running In A Container
+If your syslog server is deployed in a container, see the [Autodiscovery Integration Templates][6] for guidance on applying these instructions. It is important that each of the log sources has the same tags attached as shown in the example configuration file.
+
+
+#### Add Extra Log Sources
+If you want to collect logs from any log file that is not supported by the integration, follow these instructions to add them to the log files tracked by the integration.
+
+1. Add a new file log source to the `conf.yaml` file, pod annotations, or container labels:
 
     ```
-    - box_Auth_access -> log_component:auth
-    - box_Event_eventS, box_Event_operative -> log_component:system
-    - box_Config_admin, box_Config_changes, box_Config_sync, box_Control_admin, box_Control_AuthService -> log_component:admin
-    - box_Firewall, box_Firewall_Activity -> log_component:firewall
-    - box_Network_dhcp -> log_component:dhcp
-    - box_Network_activation -> log_component:network
-    - box_System_mgmaccess -> log_component:access
-    - box_SSH_sshd, box_SSH_config -> log_component:ssh
-    - srv_CSC_VPN, srv_CSC_VPN_sslvpn -> log_component:vpn   
+      - type: file
+        path: /var/phion/logs/<new-log-file>.log
+        service: <SERVICE>
+        source: barracuda_secure_edge
+        tags:
+          - log_component:<NEW_TAG>
     ```
 
-3. [Restart the Agent][3].
+    It is important to keep the `source` as `barracuda_secure_edge` and to assign a new tag to this log source.
 
-### Installation
+2. [Restart the Agent][5].
 
-The barracuda_secure_edge check is included in the [Datadog Agent][2] package.
-
-### Prerequisites
-
-1. Administrative access to Barracuda Secure Edge installed on your server.
-2. The Datadog Agent installed and running (on a server or container that can receive syslog messages).
-3. Network Access between the firewall and the Datadog Agent (usually port 514, but may be a custom value).
-4. Syslog support enabled in the Datadog Agent (with a TCP or UDP  listener configured).
+3. You can also add a new [log pipeline][7] to your Datadog account with the filter query `source:barracuda_secure_edge log_component:<NEW_TAG>` if you want to further parse the contents of this log.
 
 ### Validation
 
-1. Confirm the Datadog Agent is listening on the correct port (`514` in the following examples):
-
-    `sudo netstat -tunlp | grep 514`
-
-    If using TCP and UDP listeners, use the following command:
-
-    `sudo lsof -i :514`
-
-2. Confirm logs are reaching the Agent from the correct log source:
-
-    `tail -f /var/phion/logs/*.log`
-
-    **Note**: If the file doesn't exist, verify that syslog logs are being written by your configuration.
-
-3. Use the tcpdump command to confirm network traffic on the Datadog Agent host:
-
-    `sudo tcpdump -i any port 514`
-
-After running this command, you should see traffic from the Secure Edge IP address. If you don't see any such traffic, check the firewall rules between Secure Edge and the Datadog Agent. Confirm the correct protocol (UDP or TCP) is being used on both sides.
-4. Check the Datadog [Live Tail][5] for logs from the source and service you defined in the `conf.yaml` file.
-5. After following these steps, you can create a test log on the firewall by triggering an event.
-6. Check for tags or facets to use for better filtering based on the required data.
+After configuration, you can see your logs in the Datadog [Live Tail][8]. Filter for logs received where `source` is `barracuda_secure_edge`.
 
 ## Data Collected
 
 ### Metrics
 
-The Barracuda_Secure_Edge integration does not include any metrics.
+The Barracuda SecureEdge integration does not include any metrics.
 
 ### Logs
-The Barracuda Secure Edge integration collects logs containing the following types of information:
-- **Security Events**: Firewall actions (allow/deny), rule matches, and security policy violations
-- **Network Traffic**: Source and destination IPs/ports, protocols, and network interfaces
-- **Authentication**: User login attempts, successes, and failures
-- **VPN Activity**: VPN connection events and status
-- **System Events**: Device status, configuration changes, and system health
+The Barracuda SecureEdge integration collects logs containing the following types of information:
+
+- **Security Events**: Security-related events including event database operations, alarms, and security policy processing.
+- **Network Traffic and Firewall Activity**: Detailed firewall rule processing with allow/deny/block decisions, connection tracking, protocol information, source/destination IPs and ports, and NAT translations.
+- **Authentication and Access**: User login attempts and sessions (successful and failed), authentication service operations (LDAP, RADIUS, certificate validation), SSH access attempts, management access connections, and session lifecycle tracking.
+- **VPN Activity**: VPN service operations including SSL-VPN, L2TP, and PPTP connection events, configuration, and status.
+- **Configuration Management**: Configuration commits, changes, and synchronization operations performed by administrators and automated processes.
+- **System and Network Services**: Device operational events, SSH daemon operations, DHCP service activity, network subsystem activation and initialization, firewall service startup/shutdown, and system health indicators.
 
 ### Events
-The Barracuda Secure Edge integration does not include any events.
+
+The Barracuda SecureEdge integration does not include any events.
 
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][1].
+Need help? Contact [Datadog support][9].
 
-[1]: https://docs.datadoghq.com/help/
-[2]: /account/settings/agent/latest
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[4]: https://www.barracuda.com/products/network-protection/secureedge
-[5]: /logs/livetail
+[1]: https://www.barracuda.com/products/network-protection/secureedge
+[2]: https://app.datadoghq.com/account/settings/agent/latest
+[3]: https://campus.barracuda.com/product/secureedge/doc/99617087/how-to-configure-syslog-streaming-in-secureedge/
+[4]: https://github.com/DataDog/integrations-core/blob/master/barracuda_secure_edge/datadog_checks/barracuda_secure_edge/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/containers/kubernetes/integrations/?tab=annotations
+[7]: https://docs.datadoghq.com/logs/log_configuration/pipelines/?tab=source
+[8]: https://app.datadoghq.com/logs/livetail
+[9]: https://docs.datadoghq.com/help/

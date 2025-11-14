@@ -17,3 +17,7 @@ ENDPOINT_METRICS = {
     "/livez": "endpoint_livez",
     "/readyz": "endpoint_readyz",
 }
+
+LABEL_RENAME_MAP = {
+    "endpoint": "bentoml_endpoint",
+}

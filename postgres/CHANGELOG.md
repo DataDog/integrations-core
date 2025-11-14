@@ -2,7 +2,22 @@
 
 <!-- towncrier release notes start -->
 
-## 23.1.2 / 2025-10-07
+## 23.2.0 / 2025-10-31
+
+***Added***:
+
+* Add additional context to the database_identifier configuration description. ([#21575](https://github.com/DataDog/integrations-core/pull/21575))
+* Resend Postgres initialization event every six hours to avoid event expiration ([#21702](https://github.com/DataDog/integrations-core/pull/21702))
+* Bump base version for Postgres integration with fix for missed collection event ([#21776](https://github.com/DataDog/integrations-core/pull/21776))
+
+***Fixed***:
+
+* Improved Postgres spec documentation for query samples, explain plans, and AWS instance_endpoint ([#21682](https://github.com/DataDog/integrations-core/pull/21682))
+* Fixes an issue querying table and index relation metrics on the public schema ([#21686](https://github.com/DataDog/integrations-core/pull/21686))
+* Fix logic for only_custom_queries configuration option. ([#21708](https://github.com/DataDog/integrations-core/pull/21708))
+* Fix handling health event tags in Postgres to allow for additional tags as an argument. ([#21764](https://github.com/DataDog/integrations-core/pull/21764))
+
+## 23.1.2 / 2025-10-07 / Agent 7.72.0
 
 ***Fixed***:
 
