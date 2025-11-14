@@ -85,6 +85,7 @@ app_controller_counters = [
     'redis.request.count',
     'app.k8s.request.count',
     'app.sync.count',
+    'app.sync.duration.seconds.count',
     'cluster.events.count',
     'kubectl.exec.count',
     'workqueue.adds.count',
