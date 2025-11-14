@@ -1,25 +1,37 @@
 from __future__ import annotations
 
 import argparse
+import email
 import json
 import os
+import re
+import shutil
 import subprocess
 import sys
+import time
+import tomllib
+from functools import cache
+from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TypedDict
 from zipfile import ZipFile
 
+import pathspec
+import urllib3
 from dotenv import dotenv_values
-from utils import extract_metadata, normalize_project_name
+from utils import iter_wheels
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
+UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
+
 
 class WheelSizes(TypedDict):
     compressed: int
     uncompressed: int
+
 
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
@@ -62,6 +74,83 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
     return process
 
 
+def extract_metadata(wheel: Path) -> email.Message:
+    with ZipFile(str(wheel)) as zip_archive:
+        for path in zip_archive.namelist():
+            root = path.split('/', 1)[0]
+            if root.endswith('.dist-info'):
+                dist_info_dir = root
+                break
+        else:
+            message = f'Could not find the `.dist-info` directory in wheel: {wheel.name}'
+            raise RuntimeError(message)
+
+        try:
+            with zip_archive.open(f'{dist_info_dir}/METADATA') as zip_file:
+                metadata_file_contents = zip_file.read().decode('utf-8')
+        except KeyError:
+            message = f'Could not find a `METADATA` file in the `{dist_info_dir}` directory'
+            raise RuntimeError(message) from None
+
+    return email.message_from_string(metadata_file_contents)
+
+
+def normalize_project_name(name: str) -> str:
+    # https://peps.python.org/pep-0503/#normalized-names
+    return UNNORMALIZED_PROJECT_NAME_CHARS.sub('-', name).lower()
+
+
+@cache
+def get_wheel_hashes(project) -> dict[str, str]:
+    retry_wait = 2
+    while True:
+        try:
+            response = urllib3.request(
+                'GET',
+                f'https://pypi.org/simple/{project}',
+                headers={"Accept": "application/vnd.pypi.simple.v1+json"},
+            )
+        except urllib3.exceptions.HTTPError as e:
+            err_msg = f'Failed to fetch hashes for `{project}`: {e}'
+        else:
+            if response.status == 200:
+                break
+
+            err_msg = f'Failed to fetch hashes for `{project}`, status code: {response.status}'
+
+        print(err_msg)
+        print(f'Retrying in {retry_wait} seconds')
+        time.sleep(retry_wait)
+        retry_wait *= 2
+        continue
+
+    data = response.json()
+    return {
+        file['filename']: file['hashes']['sha256']
+        for file in data['files']
+        if file['filename'].endswith('.whl') and 'sha256' in file['hashes']
+    }
+
+
+def wheel_was_built(wheel: Path) -> bool:
+    project_metadata = extract_metadata(wheel)
+    project_name = normalize_project_name(project_metadata['Name'])
+    wheel_hashes = get_wheel_hashes(project_name)
+    if wheel.name not in wheel_hashes:
+        return True
+
+    file_hash = sha256(wheel.read_bytes()).hexdigest()
+    return file_hash != wheel_hashes[wheel.name]
+
+
+def add_dependency(dependencies: dict[str, str], sizes: dict[str, WheelSizes], wheel: Path) -> None:
+    project_metadata = extract_metadata(wheel)
+    project_name = normalize_project_name(project_metadata['Name'])
+    project_version = project_metadata['Version']
+    dependencies[project_name] = project_version
+    sizes[project_name] = {'version': project_version, **calculate_wheel_sizes(wheel)}
+
+
 def calculate_wheel_sizes(wheel_path: Path) -> WheelSizes:
     compressed_size = wheel_path.stat(follow_symlinks=True).st_size
     with ZipFile(wheel_path) as zf:
@@ -92,6 +181,13 @@ def main():
 
     with TemporaryDirectory() as d:
         staged_wheel_dir = Path(d).resolve()
+        staged_built_wheels_dir = staged_wheel_dir / 'built'
+        staged_external_wheels_dir = staged_wheel_dir / 'external'
+
+        # Create the directories
+        staged_built_wheels_dir.mkdir(parents=True, exist_ok=True)
+        staged_external_wheels_dir.mkdir(parents=True, exist_ok=True)
+
         env_vars = dict(os.environ)
         env_vars['PATH'] = f'{python_path.parent}{os.pathsep}{env_vars["PATH"]}'
         env_vars['PIP_WHEEL_DIR'] = str(staged_wheel_dir)
@@ -121,26 +217,36 @@ def main():
         if constraints_file := env_vars.get('PIP_CONSTRAINT'):
             env_vars['PIP_CONSTRAINT'] = path_to_uri(constraints_file)
 
+        print("--------------------------------")
+        print("Building wheels")
+        print("--------------------------------")
         # Fetch or build wheels
         command_args = [
             str(python_path),
             '-m',
             'pip',
+            '-vvv',
             'wheel',
+            # '--config-settings',
+            # f'--build-backend={MOUNT_DIR / "scripts" / "build_backend.py"}',
             '-r',
             str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir',
             str(staged_wheel_dir),
-            # Temporarily removing extra index urls. See below.
-            # '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
+            # '--extra-index-url',
+            # CUSTOM_EXTERNAL_INDEX,
         ]
-        # Temporarily disable extra index urls. There are broken wheels in the gcloud bucket
-        # while working on removing tests from them. Adding extra indices causes undefined behavior
-        # and can pull a broken image, preventing the building from running.
-        # if args.use_built_index:
-        #     command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
 
         check_process(command_args, env=env_vars)
+        print("--------------------------------")
+        print("Finished building wheels")
+        print("--------------------------------")
+        # Classify wheels
+        for wheel in iter_wheels(staged_wheel_dir):
+            if wheel_was_built(wheel):
+                shutil.move(wheel, staged_built_wheels_dir)
+            else:
+                shutil.move(wheel, staged_external_wheels_dir)
 
         # Repair wheels
         check_process(
@@ -148,8 +254,10 @@ def main():
                 sys.executable,
                 '-u',
                 str(MOUNT_DIR / 'scripts' / 'repair_wheels.py'),
-                '--source-dir',
-                str(staged_wheel_dir),
+                '--source-built-dir',
+                str(staged_built_wheels_dir),
+                '--source-external-dir',
+                str(staged_external_wheels_dir),
                 '--built-dir',
                 str(built_wheels_dir),
                 '--external-dir',
@@ -166,8 +274,6 @@ def main():
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
             dependencies[project_name] = project_version
-
-
             sizes[project_name] = {'version': project_version, **calculate_wheel_sizes(wheel)}
 
     output_path = MOUNT_DIR / 'sizes.json'

@@ -116,6 +116,13 @@ version = "0.0.0"
 [tool.hatch.build]
 dev-mode-dirs = ["."]
 
+[tool.hatch.build.targets.wheel.hooks]
+remove-tests = "build_backend:RemoveTestsHook" 
+
+
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "pathspec", "tomli", "cache"]
+backend-path = ["scripts"] 
 build-backend = "hatchling.build"
+
+
