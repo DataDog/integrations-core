@@ -39,6 +39,10 @@
         "check": "iis.uptime",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "w3wp.exe",
+        "iissvcs"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },

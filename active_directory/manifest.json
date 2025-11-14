@@ -38,6 +38,11 @@
         "check": "active_directory.dra.inbound.objects.persec",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "lsass.exe",
+        "dfssvc.exe",
+        "DFSRs.exe"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },

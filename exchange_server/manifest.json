@@ -39,6 +39,11 @@
         "check": "exchange.processor.cpu_user",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "EdgeTransport.exe",
+        "MSExchangeTransport.exe",
+        "MSExchangeMailboxReplication.exe"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
