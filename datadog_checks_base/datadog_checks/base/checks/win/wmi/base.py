@@ -337,7 +337,7 @@ class WinWMICheck(AgentCheck):
             self.log.debug("Parsed alias: {%s} for property: {%s}", alias, property)
             if alias == "":
                 self.log.warning("No alias provided after 'AS' for property: %s. Using property for tag", property)
-                alias = property.lower()
+                alias = property
         elif ' as' in property:
             # Invalid format: AS found but without proper spacing
             raise InvalidWMIQuery(
@@ -345,7 +345,7 @@ class WinWMICheck(AgentCheck):
                 "Expected format: 'property AS alias' with spaces around 'AS'".format(property)
             )
         else:
-            alias = property.lower()
+            alias = property
         return property, alias
 
 
