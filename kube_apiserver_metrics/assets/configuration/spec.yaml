@@ -60,7 +60,7 @@ files:
       enabled: true
       value:
         example: tls_only
-        default: false
+        default: true
         anyOf:
         - type: boolean
         - type: string
