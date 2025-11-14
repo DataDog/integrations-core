@@ -1,16 +1,13 @@
 # scripts/build_backend.py
+print("--- CUSTOM BACKEND MODULE LOADED ---", flush=True)
 
-import inspect
-import shutil
-import sys
+
 import tomllib
-import zipfile
 from functools import cache
 from pathlib import Path
 
 import pathspec
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
-from setuptools import build_meta as _orig
 
 
 class RemoveTestsHook(BuildHookInterface):
