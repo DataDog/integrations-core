@@ -102,6 +102,15 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
         if f in instance:
             args[f] = instance[f]
 
+    # Build database_autodiscovery config first, as we may need it for dbname defaulting
+    database_autodiscovery_config = {
+        **dict_defaults.instance_database_autodiscovery().model_dump(),
+        **(instance.get('database_autodiscovery', {})),
+    }
+
+    if 'dbname' not in instance and database_autodiscovery_config.get('enabled'):
+        args['dbname'] = database_autodiscovery_config.get('global_view_db')
+
     # Set values for args that have deprecated fallbacks, are not supported by the spec model
     # or have other complexities
     # If you change a literal value here, make sure to update spec.yaml
@@ -119,10 +128,7 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
                 **dict_defaults.instance_database_identifier().model_dump(),
                 **(instance.get('database_identifier', {})),
             },
-            "database_autodiscovery": {
-                **dict_defaults.instance_database_autodiscovery().model_dump(),
-                **(instance.get('database_autodiscovery', {})),
-            },
+            "database_autodiscovery": database_autodiscovery_config,
             "query_metrics": {
                 **dict_defaults.instance_query_metrics().model_dump(),
                 **{
@@ -385,6 +391,31 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
             'The `empty_default_hostname` option has no effect in the Postgres check. '
             'Use the `exclude_hostname` option instead.'
         )
+
+    # Validate dbname is not excluded when using autodiscovery
+    if config.database_autodiscovery.enabled and config.dbname:
+        import re
+
+        for exclude_pattern in config.database_autodiscovery.exclude:
+            try:
+                if re.search(exclude_pattern, config.dbname, re.IGNORECASE):
+                    # Check if user explicitly set dbname
+                    if 'dbname' in instance:
+                        validation_result.add_error(
+                            f'The configured dbname "{config.dbname}" matches the autodiscovery '
+                            f'exclude pattern "{exclude_pattern}". Either remove dbname from '
+                            f'configuration or adjust the exclude patterns.'
+                        )
+                    else:
+                        # Auto-defaulted dbname conflicts - suggest setting global_view_db
+                        validation_result.add_error(
+                            f'The default dbname "{config.dbname}" is excluded by autodiscovery pattern '
+                            f'"{exclude_pattern}". Set database_autodiscovery.global_view_db to a '
+                            f'non-excluded database.'
+                        )
+                    break
+            except re.error:
+                validation_result.add_warning(f'Invalid regex pattern in autodiscovery exclude: {exclude_pattern}')
 
     # If the user provided config explicitly enables these features, we add a warning if dbm is not enabled
     dbm_required = ['query_activity', 'query_samples', 'query_metrics', 'collect_settings', 'collect_schemas']
