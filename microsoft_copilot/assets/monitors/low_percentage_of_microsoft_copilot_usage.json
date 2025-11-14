@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "created_at": "2025-09-24",
+  "last_updated_at": "2025-09-24",
+  "title": "Low Percentage of Active Microsoft 365 Copilot Users",
+  "description": "Alert when the number of active Microsoft 365 Copilot user falls below threshold.",
+  "definition": {
+	"id": 214236636,
+	"name": "Low percentage of active Microsoft 365 Copilot users for previous week",
+	"type": "query alert",
+	"query": "avg(last_1w):(avg:microsoft_copilot.anyapp.users.active{*} / avg:microsoft_copilot.anyapp.users.enabled{*}) * 100 < 50",
+	"message": "The percentage of active Microsoft 365 Copilot users has {{#is_alert}}dropped below threshold{{/is_alert}}{{#is_alert_recovery}}recovered and is over threshold{{/is_alert_recovery}} for the previous week.\\n\\n@email@example.com",
+	"tags": [
+		"source:microsoft-copilot",
+		"service:user-detail-report"
+	],
+	"options": {
+		"thresholds": {
+			"critical": 50
+		},
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": false,
+		"require_full_window": true,
+		"new_host_delay": 300
+	},
+	"priority": null
+  },
+  "tags": [
+    "integration:microsoft-copilot"
+  ]
+}
