@@ -295,6 +295,7 @@ class SQLServerConfig:
             if instance.get('custom_queries', []) == []:
                 self.log.warning("only_custom_queries is enabled but no custom queries are defined")
 
+
 def sanitize(config: dict) -> dict:
     """
     Sanitize the config to remove sensitive information.

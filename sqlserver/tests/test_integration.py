@@ -518,7 +518,6 @@ def test_only_custom_queries(aggregator, dd_run_check, instance_docker):
     instance_tags = check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
-        "ddagenthostname:{}".format("stubbed.hostname"),
         "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
         "sqlserver_servername:{}".format(check.static_info_cache.get(STATIC_INFO_SERVERNAME)),
     ]
