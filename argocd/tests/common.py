@@ -209,6 +209,7 @@ E2E_NOT_EXPOSED_METRICS = [
     'argocd.app_controller.app.sync.count',
     'argocd.app_controller.cluster.events.count',
     'argocd.app_controller.kubectl.exec.count',
+    'argocd.app_controller.app.sync.duration.seconds.count',
     'argocd.app_controller.app.info',
     'argocd.app_controller.app.reconcile.bucket',
     'argocd.app_controller.app.reconcile.count',
