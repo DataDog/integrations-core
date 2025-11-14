@@ -393,26 +393,21 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
         )
 
     # Validate dbname is not excluded when using autodiscovery
-    if config.database_autodiscovery.enabled and config.dbname:
+    # Only validate when dbname was NOT explicitly set by the user (auto-defaulted)
+    # If user explicitly set dbname, they may intentionally want to connect to an excluded database
+    # for global operations while excluding it from per-database metric collection
+    if config.database_autodiscovery.enabled and config.dbname and 'dbname' not in instance:
         import re
 
         for exclude_pattern in config.database_autodiscovery.exclude:
             try:
                 if re.search(exclude_pattern, config.dbname, re.IGNORECASE):
-                    # Check if user explicitly set dbname
-                    if 'dbname' in instance:
-                        validation_result.add_error(
-                            f'The configured dbname "{config.dbname}" matches the autodiscovery '
-                            f'exclude pattern "{exclude_pattern}". Either remove dbname from '
-                            f'configuration or adjust the exclude patterns.'
-                        )
-                    else:
-                        # Auto-defaulted dbname conflicts - suggest setting global_view_db
-                        validation_result.add_error(
-                            f'The default dbname "{config.dbname}" is excluded by autodiscovery pattern '
-                            f'"{exclude_pattern}". Set database_autodiscovery.global_view_db to a '
-                            f'non-excluded database.'
-                        )
+                    # Auto-defaulted dbname conflicts - suggest setting global_view_db
+                    validation_result.add_error(
+                        f'The default dbname "{config.dbname}" is excluded by autodiscovery pattern '
+                        f'"{exclude_pattern}". Set database_autodiscovery.global_view_db to a '
+                        f'non-excluded database.'
+                    )
                     break
             except re.error:
                 validation_result.add_warning(f'Invalid regex pattern in autodiscovery exclude: {exclude_pattern}')
