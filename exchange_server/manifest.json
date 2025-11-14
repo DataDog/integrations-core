@@ -42,7 +42,7 @@
       "process_signatures": [
         "EdgeTransport.exe",
         "MSExchangeTransport.exe",
-        "MSExchangeMailboxReplication.exe"
+        "Microsoft.Exchange.ServiceHost.exe"
       ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"

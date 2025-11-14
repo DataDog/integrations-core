@@ -39,8 +39,6 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "lsass.exe",
-        "dfssvc.exe",
         "DFSRs.exe"
       ],
       "service_checks": {

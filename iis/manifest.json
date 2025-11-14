@@ -40,7 +40,6 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "w3wp.exe",
         "iissvcs"
       ],
       "service_checks": {
