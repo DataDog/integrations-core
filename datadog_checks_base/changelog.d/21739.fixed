@@ -1,0 +1,1 @@
+Replace PROTOCOL_TLS by PROTOCOL_TLS_CLIENT when creating the SSLContext
