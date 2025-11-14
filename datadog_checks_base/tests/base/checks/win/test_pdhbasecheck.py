@@ -10,7 +10,7 @@ from datadog_checks.dev.testing import requires_windows
 try:
     from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
-    from datadog_checks.checks.win.winpdh_base import PDHBaseCheck
+    from datadog_checks.base.checks.win.winpdh_base import PDHBaseCheck
 except ImportError:
     pass
 
