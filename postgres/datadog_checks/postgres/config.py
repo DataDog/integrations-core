@@ -399,9 +399,11 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
     if config.database_autodiscovery.enabled and config.dbname and 'dbname' not in instance:
         import re
 
-        for exclude_pattern in config.database_autodiscovery.exclude:
+        # Guard against None - exclude could be explicitly set to null to remove default exclusions
+        for exclude_pattern in config.database_autodiscovery.exclude or ():
             try:
-                if re.search(exclude_pattern, config.dbname, re.IGNORECASE):
+                # Note: Match is case-sensitive to match the behavior of the base Discovery Filter class
+                if re.search(exclude_pattern, config.dbname):
                     # Auto-defaulted dbname conflicts - suggest setting global_view_db
                     validation_result.add_error(
                         f'The default dbname "{config.dbname}" is excluded by autodiscovery pattern '

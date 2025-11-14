@@ -490,8 +490,7 @@ def test_autodiscovery_with_non_excluded_global_view_db_succeeds(mock_check):
     assert config.dbname == 'production'
 
 
-def test_autodiscovery_case_insensitive_exclude_matching(mock_check):
-    # Exclude patterns should be case-insensitive
+def test_autodiscovery_case_sensitive_exclude_matching(mock_check):
     instance = {
         'host': 'localhost',
         'port': 5432,
@@ -506,8 +505,9 @@ def test_autodiscovery_case_insensitive_exclude_matching(mock_check):
     mock_check.instance = instance
     mock_check.init_config = {}
     config, result = build_config(check=mock_check)
-    assert not result.valid
-    assert any('is excluded by autodiscovery pattern' in str(e) for e in result.errors)
+    # Should be valid - case-sensitive matching means POSTGRES != postgres
+    assert result.valid
+    assert config.dbname == 'POSTGRES'
 
 
 def test_autodiscovery_invalid_regex_pattern_warns(mock_check):
@@ -528,3 +528,21 @@ def test_autodiscovery_invalid_regex_pattern_warns(mock_check):
     config, result = build_config(check=mock_check)
     # Should have a warning about invalid regex
     assert any('Invalid regex pattern' in w for w in result.warnings)
+
+
+def test_autodiscovery_exclude_none_does_not_error(mock_check):
+    instance = {
+        'host': 'localhost',
+        'port': 5432,
+        'username': 'testuser',
+        'password': 'testpass',
+        'database_autodiscovery': {
+            'enabled': True,
+            'global_view_db': 'main',
+        },
+    }
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.dbname == 'main'
