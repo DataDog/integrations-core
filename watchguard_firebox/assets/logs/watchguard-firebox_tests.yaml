@@ -115,7 +115,7 @@ tests:
       - "source:LOGS_SOURCE"
       timestamp: 1744104397000
   - 
-    sample: "<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37) test: msg_id=\"3000-0160\" DDOS against server 10.0.1.34 detected."
+    sample: "<142>Apr  2 18:47:10 WatchGuard-Firebox TEST (2025-04-08T09:26:37) test: msg_id=\"3000-0160\" DDOS against server 10.10.10.10 detected. (ddos_attack_dest_dos)"
     result:
       custom:
         attack_type: "DDOS"
@@ -130,7 +130,7 @@ tests:
           hostname: "WatchGuard-Firebox"
           prival: 142
         timestamp: 1744104397000
-      message: "DDOS against server 10.0.1.34 detected."
+      message: "DDOS against server 10.10.10.10 detected. (ddos_attack_dest_dos)"
       service: "firewall"
       tags:
       - "source:LOGS_SOURCE"

@@ -296,26 +296,25 @@ pipeline:
           enabled: true
           source: message
           samples:
-            - SYN flood attack against 10.10.10.10 from 10.10.10.10 detected.
-              500 SYN packets dropped since last alarm.
+            - UDP flood attack against 10.10.10.10 from 10.10.10.10 detected.
+              500 UDP flood packets dropped since last alarm. (udp_flood_dos)
             - IPv4 source route attack from 10.10.10.10 detected.
             - IP scan attack against 10.10.10.10 from 10.10.10.10 detected.
-            - "DDOS against server 10.10.10.10 detected. "
+            - DDOS against server 10.10.10.10 detected. (ddos_attack_dest_dos)
             - DDOS from client 10.10.10.10 detected.
           grok:
             supportRules: ""
-            matchRules: >
+            matchRules: >-
               parse_rule_30000152_to_30000159_30000162_to_30000166
               %{regex(".*(?= attack)"):attack_type} attack (against
               %{ip:network.destination.ip} )?from %{ip:network.client.ip}
               detected.( %{integer:drop_packet_count} %{regex(".*(?=
-              packets)"):drop_packet_type} packets dropped since last alarm.)?
+              packets)"):drop_packet_type} packets dropped since last alarm.)?(
+              (%{notSpace}))?
 
+              parse_rule_30000161 %{regex(".*(?= from)"):attack_type} from client %{ip:network.client.ip} detected.( (%{notSpace}))?
 
-              parse_rule_30000161 %{regex(".*(?= from)"):attack_type} from client %{ip:network.client.ip} detected.
-
-
-              parse_rule_30000160 %{regex(".*(?= against)"):attack_type} against server %{ip:network.destination.ip} detected.
+              parse_rule_30000160 %{regex(".*(?= against)"):attack_type} against server %{ip:network.destination.ip} detected.( (%{notSpace}))?
     - type: pipeline
       name: Processing of firewall alarm events
       enabled: true
