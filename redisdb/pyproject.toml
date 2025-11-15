@@ -36,7 +36,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "redis==6.2.0",
+    "redis==7.0.1",
 ]
 
 [project.urls]
