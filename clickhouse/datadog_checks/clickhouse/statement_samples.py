@@ -27,6 +27,8 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 # Query to get currently running/active queries from system.processes
 # This is the ClickHouse equivalent of Postgres pg_stat_activity
+# Note: result_rows, result_bytes, query_start_time, query_start_time_microseconds
+# don't exist in ClickHouse (as of 24.11), so they're excluded
 ACTIVE_QUERIES_QUERY = """
 SELECT
     elapsed,
@@ -44,10 +46,6 @@ SELECT
     is_initial_query,
     peak_memory_usage,
     total_rows_approx,
-    result_rows,
-    result_bytes,
-    query_start_time,
-    query_start_time_microseconds,
     client_name,
     client_version_major,
     client_version_minor,
@@ -240,10 +238,6 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 is_initial_query,
                 peak_memory_usage,
                 total_rows_approx,
-                result_rows,
-                result_bytes,
-                query_start_time,
-                query_start_time_microseconds,
                 client_name,
                 client_version_major,
                 client_version_minor,
@@ -275,12 +269,6 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 # New fields
                 'peak_memory_usage': int(peak_memory_usage) if peak_memory_usage else 0,
                 'total_rows_approx': int(total_rows_approx) if total_rows_approx else 0,
-                'result_rows': int(result_rows) if result_rows else 0,
-                'result_bytes': int(result_bytes) if result_bytes else 0,
-                'query_start_time': str(query_start_time) if query_start_time else None,
-                'query_start_time_microseconds': str(query_start_time_microseconds)
-                if query_start_time_microseconds
-                else None,
                 'client_name': str(client_name) if client_name else None,
                 'client_version_major': int(client_version_major) if client_version_major else None,
                 'client_version_minor': int(client_version_minor) if client_version_minor else None,

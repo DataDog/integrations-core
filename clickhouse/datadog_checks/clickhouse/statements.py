@@ -155,6 +155,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             # Prepare metrics payload wrapper
             payload_wrapper = {
                 'host': self._check.reported_hostname,
+                'database_instance': self._check.database_identifier,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._metrics_collection_interval,
                 'tags': self._tags_no_db,
@@ -166,6 +167,14 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             payloads = self._get_query_metrics_payloads(payload_wrapper, rows)
 
             for payload in payloads:
+                payload_data = json.loads(payload)
+                num_rows = len(payload_data.get('clickhouse_rows', []))
+                self._log.info(
+                    "Submitting query metrics payload: %d bytes, %d rows, database_instance=%s",
+                    len(payload),
+                    num_rows,
+                    payload_data.get('database_instance', 'MISSING')
+                )
                 self._check.database_monitoring_query_metrics(payload)
 
         except Exception:
@@ -325,7 +334,16 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
         }
 
         # Compute derivative rows (calculate deltas since last collection)
+        rows_before = len(rows)
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key, execution_indicators=['calls'])
+        rows_after = len(rows)
+
+        self._log.info(
+            "Query metrics: loaded=%d rows, after_derivative=%d rows (filtered=%d)",
+            rows_before,
+            rows_after,
+            rows_before - rows_after
+        )
 
         self._check.gauge(
             'dd.clickhouse.queries.query_rows_raw',
