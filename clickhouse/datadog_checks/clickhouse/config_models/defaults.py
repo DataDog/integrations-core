@@ -16,6 +16,10 @@ def instance_db():
     return 'default'
 
 
+def instance_dbm():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 

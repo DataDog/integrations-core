@@ -41,6 +41,21 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class QuerySamples(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    activity_collection_interval: Optional[float] = None
+    activity_enabled: Optional[bool] = None
+    activity_max_rows: Optional[float] = None
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    run_sync: Optional[bool] = None
+    samples_per_hour_per_query: Optional[float] = None
+    seen_samples_cache_maxsize: Optional[float] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -51,6 +66,7 @@ class InstanceConfig(BaseModel):
     connect_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     db: Optional[str] = None
+    dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
@@ -58,8 +74,9 @@ class InstanceConfig(BaseModel):
     only_custom_queries: Optional[bool] = None
     password: Optional[str] = None
     port: Optional[int] = None
+    query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None
-    server: str
+    server: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None

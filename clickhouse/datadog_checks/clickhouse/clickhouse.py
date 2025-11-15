@@ -7,6 +7,8 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
+from .statement_samples import ClickhouseStatementSamples
+from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
 
 
@@ -29,6 +31,10 @@ class ClickhouseCheck(AgentCheck):
         self._tls_ca_cert = self.instance.get('tls_ca_cert', None)
         self._verify = self.instance.get('verify', True)
         self._tags = self.instance.get('tags', [])
+
+        # DBM-related properties
+        self._resolved_hostname = None
+        self._database_identifier = None
 
         # Add global tags
         self._tags.append('server:{}'.format(self._server))
@@ -58,10 +64,61 @@ class ClickhouseCheck(AgentCheck):
         )
         self.check_initializations.append(self._query_manager.compile_queries)
 
+        # Initialize DBM components if enabled
+        self._dbm_enabled = is_affirmative(self.instance.get('dbm', False))
+
+        # Initialize query metrics (from system.query_log - analogous to pg_stat_statements)
+        self._query_metrics_config = self.instance.get('query_metrics', {})
+        if self._dbm_enabled and self._query_metrics_config.get('enabled', True):
+            # Create a simple config object for query metrics
+            class QueryMetricsConfig:
+                def __init__(self, config_dict):
+                    self.enabled = config_dict.get('enabled', True)
+                    self.collection_interval = config_dict.get('collection_interval', 60)
+                    self.run_sync = config_dict.get('run_sync', False)
+                    self.full_statement_text_cache_max_size = config_dict.get(
+                        'full_statement_text_cache_max_size', 10000
+                    )
+                    self.full_statement_text_samples_per_hour_per_query = config_dict.get(
+                        'full_statement_text_samples_per_hour_per_query', 1
+                    )
+
+            self.statement_metrics = ClickhouseStatementMetrics(self, QueryMetricsConfig(self._query_metrics_config))
+        else:
+            self.statement_metrics = None
+
+        # Initialize query samples (from system.processes - analogous to pg_stat_activity)
+        self._query_samples_config = self.instance.get('query_samples', {})
+        if self._dbm_enabled and self._query_samples_config.get('enabled', True):
+            # Create a simple config object for statement samples
+            class QuerySamplesConfig:
+                def __init__(self, config_dict):
+                    self.enabled = config_dict.get('enabled', True)
+                    self.collection_interval = config_dict.get('collection_interval', 10)
+                    self.run_sync = config_dict.get('run_sync', False)
+                    self.samples_per_hour_per_query = config_dict.get('samples_per_hour_per_query', 15)
+                    self.seen_samples_cache_maxsize = config_dict.get('seen_samples_cache_maxsize', 10000)
+                    # Activity snapshot configuration
+                    self.activity_enabled = config_dict.get('activity_enabled', True)
+                    self.activity_collection_interval = config_dict.get('activity_collection_interval', 10)
+                    self.activity_max_rows = config_dict.get('activity_max_rows', 1000)
+
+            self.statement_samples = ClickhouseStatementSamples(self, QuerySamplesConfig(self._query_samples_config))
+        else:
+            self.statement_samples = None
+
     def check(self, _):
         self.connect()
         self._query_manager.execute()
         self.collect_version()
+
+        # Run query metrics collection if DBM is enabled (from system.query_log)
+        if self.statement_metrics:
+            self.statement_metrics.run_job_loop(self._tags)
+
+        # Run statement samples if DBM is enabled (from system.processes)
+        if self.statement_samples:
+            self.statement_samples.run_job_loop(self._tags)
 
     @AgentCheck.metadata_entrypoint
     def collect_version(self):
@@ -74,6 +131,29 @@ class ClickhouseCheck(AgentCheck):
 
     def execute_query_raw(self, query):
         return self._client.query(query).result_rows
+
+    def _get_debug_tags(self):
+        """Return debug tags for metrics"""
+        return ['server:{}'.format(self._server)]
+
+    @property
+    def reported_hostname(self):
+        """
+        Get the hostname to be reported in metrics and events.
+        """
+        if self._resolved_hostname is None:
+            self._resolved_hostname = self._server
+        return self._resolved_hostname
+
+    @property
+    def database_identifier(self):
+        """
+        Get a unique identifier for this database instance.
+        """
+        if self._database_identifier is None:
+            # Create a unique identifier based on server, port, and database name
+            self._database_identifier = "{}:{}:{}".format(self._server, self._port, self._db)
+        return self._database_identifier
 
     def validate_config(self):
         if not self._server:
@@ -132,3 +212,32 @@ class ClickhouseCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._client = client
+
+    def create_dbm_client(self):
+        """
+        Create a separate ClickHouse client for DBM async jobs.
+        This prevents concurrent query errors when multiple jobs run simultaneously.
+        """
+        try:
+            client = clickhouse_connect.get_client(
+                host=self._server,
+                port=self._port,
+                username=self._user,
+                password=self._password,
+                database=self._db,
+                secure=self._tls_verify,
+                connect_timeout=self._connect_timeout,
+                send_receive_timeout=self._read_timeout,
+                client_name=f'datadog-dbm-{self.check_id}',
+                compress=self._compression,
+                ca_cert=self._tls_ca_cert,
+                verify=self._verify,
+                settings={},
+            )
+            return client
+        except Exception as e:
+            error = 'Unable to create DBM client: {}'.format(
+                self._error_sanitizer.clean(self._error_sanitizer.scrub(str(e)))
+            )
+            self.log.warning(error)
+            raise
