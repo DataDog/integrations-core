@@ -27,7 +27,7 @@ To configure this check for an Agent running on a host:
 
 1. To start collecting your ClickHouse performance data, edit the `clickhouse.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
-*Note*: This integration uses the official `clickhouse-connect` client to connect over HTTP.
+_Note_: This integration uses the official `clickhouse-connect` client to connect over HTTP.
 
 2. [Restart the Agent][5].
 
@@ -42,14 +42,14 @@ To configure this check for an Agent running on a host:
 2. Add the log files you are interested in to your `clickhouse.d/conf.yaml` file to start collecting your ClickHouse logs:
 
    ```yaml
-     logs:
-       - type: file
-         path: /var/log/clickhouse-server/clickhouse-server.log
-         source: clickhouse
-         service: "<SERVICE_NAME>"
+   logs:
+     - type: file
+       path: /var/log/clickhouse-server/clickhouse-server.log
+       source: clickhouse
+       service: "<SERVICE_NAME>"
    ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
+   Change the `path` and `service` parameter values and configure them for your environment. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
 
@@ -62,18 +62,18 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 #### Metric collection
 
-| Parameter            | Value                                                      |
-|----------------------|------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `clickhouse`                                                   |
-| `<INIT_CONFIG>`      | blank or `{}`                                              |
-| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "port": "%%port%%", "username": "<USER>", "password": "<PASSWORD>"}`       |
+| Parameter            | Value                                                                                        |
+| -------------------- | -------------------------------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `clickhouse`                                                                                 |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                |
+| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "port": "%%port%%", "username": "<USER>", "password": "<PASSWORD>"}` |
 
 ##### Log collection
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][6].
 
-| Parameter      | Value                                     |
-|----------------|-------------------------------------------|
+| Parameter      | Value                                                   |
+| -------------- | ------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "clickhouse", "service": "<SERVICE_NAME>"}` |
 
 <!-- xxz tab xxx -->
@@ -100,7 +100,6 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 ## Troubleshooting
 
 Need help? Contact [Datadog support][10].
-
 
 [1]: https://clickhouse.yandex
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
