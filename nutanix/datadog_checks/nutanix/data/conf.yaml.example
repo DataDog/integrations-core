@@ -42,6 +42,26 @@ instances:
     #
     # page_limit: 50
 
+    ## @param pc_max_retries - integer - optional - default: 3
+    ## The maximum number of retry attempts for API requests when rate limited by Prism Central API.
+    ## Set to 0 to disable retries. Default is 3.
+    #
+    # pc_max_retries: 3
+
+    ## @param pc_base_backoff_seconds - number - optional - default: 1
+    ## The initial backoff duration in seconds when retrying rate-limited requests.
+    ## The actual backoff time uses exponential backoff: base * (2 ^ attempt) + jitter.
+    ## Default is 1 second.
+    #
+    # pc_base_backoff_seconds: 1
+
+    ## @param pc_max_backoff_seconds - number - optional - default: 30
+    ## The maximum backoff duration in seconds when retrying rate-limited requests.
+    ## This caps the exponential backoff calculation to prevent excessive wait times.
+    ## Default is 30 seconds.
+    #
+    # pc_max_backoff_seconds: 30
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

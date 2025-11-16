@@ -1,12 +1,95 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import random
+import time
 from datetime import datetime, timedelta, timezone
+from functools import wraps
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.nutanix.metrics import CLUSTER_STATS_METRICS, HOST_STATS_METRICS, VM_STATS_METRICS
+
+
+def retry_on_rate_limit(method):
+    """Decorator to retry API requests when rate limited with exponential backoff."""
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        max_retries = self.instance.get('pc_max_retries', 3)
+        base_backoff = self.instance.get('pc_base_backoff_seconds', 1)
+        max_backoff = self.instance.get('pc_max_backoff_seconds', 30)
+
+        last_exception = None
+        # Use max(1, max_retries) to ensure at least one attempt even when max_retries is 0
+        for attempt in range(max(1, max_retries)):
+            try:
+                response = method(self, *args, **kwargs)
+
+                # Check if it's an HTTP response with status code
+                if hasattr(response, 'status_code'):
+                    if response.status_code == 429:
+                        if max_retries > 0 and attempt < max_retries - 1:
+                            # Calculate backoff with exponential increase and jitter
+                            backoff = min(base_backoff * (2**attempt) + random.random(), max_backoff)
+                            self.log.warning(
+                                "Rate limited by Nutanix API (attempt %d/%d), backing off for %.2f seconds",
+                                attempt + 1,
+                                max_retries,
+                                backoff,
+                            )
+                            # Report retry metrics
+                            self.gauge("api.retry.count", 1, tags=self.base_tags)
+                            self.gauge("api.retry.backoff_seconds", backoff, tags=self.base_tags)
+                            time.sleep(backoff)
+                            continue
+                        else:
+                            self.log.error("Max retries exceeded for Nutanix API request after rate limiting")
+                            self.gauge("api.retry.exhausted", 1, tags=self.base_tags)
+                            response.raise_for_status()  # This will raise HTTPError for 429
+
+                    # For successful responses or non-429 errors, return/raise immediately
+                    response.raise_for_status()
+
+                # Reset retry count metric on success
+                if attempt > 0:
+                    self.gauge("api.retry.count", 0, tags=self.base_tags)
+
+                return response
+
+            except HTTPError as e:
+                last_exception = e
+                # Only retry on 429, re-raise other HTTP errors immediately
+                if hasattr(e, 'response') and e.response is not None and e.response.status_code == 429:
+                    if max_retries > 0 and attempt < max_retries - 1:
+                        # Calculate backoff with exponential increase and jitter
+                        backoff = min(base_backoff * (2**attempt) + random.random(), max_backoff)
+                        self.log.warning(
+                            "Rate limited by Nutanix API (attempt %d/%d), backing off for %.2f seconds",
+                            attempt + 1,
+                            max_retries,
+                            backoff,
+                        )
+                        # Report retry metrics
+                        self.gauge("api.retry.count", 1, tags=self.base_tags)
+                        self.gauge("api.retry.backoff_seconds", backoff, tags=self.base_tags)
+                        time.sleep(backoff)
+                        continue
+                    else:
+                        self.log.error("Max retries exceeded for Nutanix API request after rate limiting")
+                        self.gauge("api.retry.exhausted", 1, tags=self.base_tags)
+                raise
+            except Exception:
+                # For non-HTTP errors, raise immediately without retry
+                raise
+
+        # This should not be reached, but just in case
+        if last_exception:
+            raise last_exception
+        raise Exception(f"Failed to complete request after {max_retries} retries")
+
+    return wrapper
 
 
 class NutanixCheck(AgentCheck):
@@ -67,7 +150,7 @@ class NutanixCheck(AgentCheck):
 
     def _check_health(self):
         try:
-            response = self.http.get(self.health_check_url)
+            response = self._make_request_with_retry(self.health_check_url, method='get')
             response.raise_for_status()
             self.gauge("health.up", 1, tags=self.base_tags)
             self.log.debug("Health check passed for Prism Central at %s:%s", self.pc_ip, self.pc_port)
@@ -320,6 +403,22 @@ class NutanixCheck(AgentCheck):
 
         return tags
 
+    @retry_on_rate_limit
+    def _make_request_with_retry(self, url, method='get', **kwargs):
+        """Make an HTTP request with retry logic for rate limiting.
+
+        Args:
+            url: The URL to make the request to
+            method: The HTTP method to use (get, post, put, delete, etc.)
+            **kwargs: Additional arguments to pass to the request method (params, json, data, etc.)
+
+        Returns:
+            The response object from the request
+        """
+        http_method = getattr(self.http, method.lower())
+        response = http_method(url, **kwargs)
+        return response
+
     def _get_paginated_request_data(self, endpoint, params=None):
         """Make a paginated API request to Prism Central and return the aggregated data field from all the pages."""
 
@@ -340,8 +439,7 @@ class NutanixCheck(AgentCheck):
             params["$limit"] = limit
 
         while True:
-            response = self.http.get(url, params=params)
-            response.raise_for_status()
+            response = self._make_request_with_retry(url, method='get', params=params)
             payload = response.json()
 
             data = payload.get("data", {})
@@ -365,7 +463,7 @@ class NutanixCheck(AgentCheck):
     def _get_request_data(self, endpoint, params=None):
         """Make an API request to Prism Central and return the data field."""
         url = f"{self.base_url}/{endpoint}"
-        response = self.http.get(url, params=params)
+        response = self._make_request_with_retry(url, method='get', params=params)
         response.raise_for_status()
         data = response.json()
         return data.get("data", {})

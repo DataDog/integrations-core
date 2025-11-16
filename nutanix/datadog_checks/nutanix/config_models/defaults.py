@@ -48,6 +48,18 @@ def instance_page_limit():
     return 50
 
 
+def instance_pc_base_backoff_seconds():
+    return 1
+
+
+def instance_pc_max_backoff_seconds():
+    return 30
+
+
+def instance_pc_max_retries():
+    return 3
+
+
 def instance_pc_port():
     return 9440
 

@@ -78,7 +78,10 @@ class InstanceConfig(BaseModel):
     ntlm_domain: Optional[str] = None
     page_limit: Optional[int] = None
     password: Optional[str] = None
+    pc_base_backoff_seconds: Optional[float] = None
     pc_ip: str
+    pc_max_backoff_seconds: Optional[float] = None
+    pc_max_retries: Optional[int] = None
     pc_password: str
     pc_port: Optional[int] = None
     pc_username: str

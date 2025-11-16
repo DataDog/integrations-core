@@ -47,6 +47,29 @@ files:
             value:
               type: integer
               example: 50
+          - name: pc_max_retries
+            description: |
+              The maximum number of retry attempts for API requests when rate limited by Prism Central API.
+              Set to 0 to disable retries. Default is 3.
+            value:
+              type: integer
+              example: 3
+          - name: pc_base_backoff_seconds
+            description: |
+              The initial backoff duration in seconds when retrying rate-limited requests.
+              The actual backoff time uses exponential backoff: base * (2 ^ attempt) + jitter.
+              Default is 1 second.
+            value:
+              type: number
+              example: 1
+          - name: pc_max_backoff_seconds
+            description: |
+              The maximum backoff duration in seconds when retrying rate-limited requests.
+              This caps the exponential backoff calculation to prevent excessive wait times.
+              Default is 30 seconds.
+            value:
+              type: number
+              example: 30
           - template: instances/http
           - template: instances/default
             overrides:
