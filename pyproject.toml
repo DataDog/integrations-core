@@ -122,6 +122,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 exclude = [
-  "ddtrace/appsec/_iast/_taint_tracking/_vendor/pybind11/pybind11/py.typed",
-  "ddtrace/py.typed"
+  "**/ddtrace/appsec/_iast/_taint_tracking/_vendor/pybind11/pybind11/py.typed",
+  "**/ddtrace/py.typed"
 ]
