@@ -116,13 +116,14 @@ def load_base_check(check_name, dependencies, errors):
 
     if not found_base:
         errors.append('Missing the required base check dependency `datadog-checks-base` in project.dependencies')
-    
+
     if dependency_errors:
         dependency_errors_str = ', '.join(f'`{error}`' for error in dependency_errors)
         errors.append(
             f'Found third-party dependencies in project.dependencies: {dependency_errors_str}. '
             '\n     - Third-party dependencies belong in project.optional-dependencies'
         )
+
 
 def load_base_check_legacy(req_file, dependencies, errors, check_name=None):
     for line in stream_file_lines(req_file):
@@ -139,7 +140,7 @@ def load_base_check_legacy(req_file, dependencies, errors, check_name=None):
             return
 
     # no `CHECKS_BASE_REQ` found in setup.py file ..
-    errors.append(f'Missing base check dependency `CHECKS_BASE_REQ`')
+    errors.append('Missing base check dependency `CHECKS_BASE_REQ`')
 
 
 def read_check_dependencies(check=None):
@@ -191,7 +192,7 @@ def read_check_base_dependencies(check=None):
             load_base_check_legacy(req_file, dependencies, errors, check_name)
             if errors:
                 file_name = req_file
-    
+
         if errors:
             errors_str = '\n'.join(f'  - {error}' for error in errors)
             error_msg = [f'\n{file_name} has the following errors:\n{errors_str}']
