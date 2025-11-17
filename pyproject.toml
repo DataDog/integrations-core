@@ -122,7 +122,7 @@ remove-tests = "build_backend:RemoveTestsHook"
 
 [build-system]
 requires = ["hatchling", "pathspec", "tomli", "cache"]
-backend-path = ["scripts"] 
+backend-path = [".builders/scripts"] 
 build-backend = "hatchling.build"
 
 
