@@ -139,6 +139,85 @@ files:
           value:
             type: number
             example: 1000
+    - name: database_instance_collection_interval
+      hidden: true
+      description: |
+        Set the database instance collection interval (in seconds). The database instance collection sends
+        basic information about the database instance along with a signal that it still exists.
+        This collection does not involve any additional queries to the database.
+      value:
+        type: number
+        default: 300
+    - name: aws
+      description: |
+        This block defines the configuration for AWS RDS and Aurora instances.
+
+        Complete this section if you have installed the Datadog AWS Integration to enrich instances
+        with ClickHouse integration telemetry.
+      options:
+        - name: instance_endpoint
+          description: |
+            Equal to the Endpoint.Address of the instance the agent is connecting to.
+            This value is optional if the value of `server` is already configured to the instance endpoint.
+
+            For more information on instance endpoints,
+            see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+          value:
+            type: string
+            example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+    - name: gcp
+      description: |
+        This block defines the configuration for Google Cloud SQL instances.
+
+        Complete this section if you have installed the Datadog GCP Integration to enrich instances
+        with ClickHouse integration telemetry.
+      options:
+        - name: project_id
+          description: |
+            Equal to the GCP resource's project ID.
+
+            For more information on project IDs,
+            see the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+          value:
+            type: string
+            example: foo-project
+        - name: instance_id
+          description: |
+            Equal to the GCP resource's instance ID.
+
+            For more information on instance IDs,
+            see the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+          value:
+            type: string
+            example: foo-database
+    - name: azure
+      description: |
+        This block defines the configuration for Azure Database for ClickHouse.
+
+        Complete this section if you have installed the Datadog Azure Integration to enrich instances
+        with ClickHouse integration telemetry.
+      options:
+        - name: deployment_type
+          description: |
+            Equal to the deployment type for the managed database.
+
+            For Azure, this is typically 'flexible_server' or 'single_server'.
+          value:
+            type: string
+            example: flexible_server
+        - name: fully_qualified_domain_name
+          description: |
+            Equal to the fully qualified domain name of the Azure database.
+
+            This value is optional if the value of `server` is already configured to the fully qualified domain name.
+          value:
+            type: string
+            example: my-clickhouse.database.windows.net
+        - name: database_name
+          description: |
+            The database name for the Azure instance.
+          value:
+            type: string
     - template: instances/db
       overrides:
         custom_queries.value.example:
