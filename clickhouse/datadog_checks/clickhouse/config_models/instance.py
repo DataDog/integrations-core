@@ -20,6 +20,24 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class Aws(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    instance_endpoint: Optional[str] = None
+
+
+class Azure(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    database_name: Optional[str] = None
+    deployment_type: Optional[str] = None
+    fully_qualified_domain_name: Optional[str] = None
+
+
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -30,6 +48,15 @@ class CustomQuery(BaseModel):
     metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+
+
+class Gcp(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    instance_id: Optional[str] = None
+    project_id: Optional[str] = None
 
 
 class MetricPatterns(BaseModel):
@@ -62,13 +89,17 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    aws: Optional[Aws] = None
+    azure: Optional[Azure] = None
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database_instance_collection_interval: Optional[float] = None
     db: Optional[str] = None
     dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    gcp: Optional[Gcp] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     only_custom_queries: Optional[bool] = None
