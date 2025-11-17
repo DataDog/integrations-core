@@ -173,7 +173,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
                     "Submitting query metrics payload: %d bytes, %d rows, database_instance=%s",
                     len(payload),
                     num_rows,
-                    payload_data.get('database_instance', 'MISSING')
+                    payload_data.get('database_instance', 'MISSING'),
                 )
                 self._check.database_monitoring_query_metrics(payload)
 
@@ -342,7 +342,7 @@ class ClickhouseStatementMetrics(DBMAsyncJob):
             "Query metrics: loaded=%d rows, after_derivative=%d rows (filtered=%d)",
             rows_before,
             rows_after,
-            rows_before - rows_after
+            rows_before - rows_after,
         )
 
         self._check.gauge(

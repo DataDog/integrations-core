@@ -145,6 +145,71 @@ instances:
         #
         # activity_max_rows: 1000
 
+    ## This block defines the configuration for AWS RDS and Aurora instances.
+    ##
+    ## Complete this section if you have installed the Datadog AWS Integration to enrich instances
+    ## with ClickHouse integration telemetry.
+    #
+    # aws:
+
+        ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to.
+        ## This value is optional if the value of `server` is already configured to the instance endpoint.
+        ##
+        ## For more information on instance endpoints,
+        ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
+        #
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+    ## This block defines the configuration for Google Cloud SQL instances.
+    ##
+    ## Complete this section if you have installed the Datadog GCP Integration to enrich instances
+    ## with ClickHouse integration telemetry.
+    #
+    # gcp:
+
+        ## @param project_id - string - optional - default: foo-project
+        ## Equal to the GCP resource's project ID.
+        ##
+        ## For more information on project IDs,
+        ## see the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
+        #
+        # project_id: foo-project
+
+        ## @param instance_id - string - optional - default: foo-database
+        ## Equal to the GCP resource's instance ID.
+        ##
+        ## For more information on instance IDs,
+        ## see the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
+        #
+        # instance_id: foo-database
+
+    ## This block defines the configuration for Azure Database for ClickHouse.
+    ##
+    ## Complete this section if you have installed the Datadog Azure Integration to enrich instances
+    ## with ClickHouse integration telemetry.
+    #
+    # azure:
+
+        ## @param deployment_type - string - optional - default: flexible_server
+        ## Equal to the deployment type for the managed database.
+        ##
+        ## For Azure, this is typically 'flexible_server' or 'single_server'.
+        #
+        # deployment_type: flexible_server
+
+        ## @param fully_qualified_domain_name - string - optional - default: my-clickhouse.database.windows.net
+        ## Equal to the fully qualified domain name of the Azure database.
+        ##
+        ## This value is optional if the value of `server` is already configured to the fully qualified domain name.
+        #
+        # fully_qualified_domain_name: my-clickhouse.database.windows.net
+
+        ## @param database_name - string - optional
+        ## The database name for the Azure instance.
+        #
+        # database_name: <DATABASE_NAME>
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.
