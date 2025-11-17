@@ -172,7 +172,7 @@ pipeline:
           target: ocsf.metadata.product.name
           replaceMissing: false
         - type: schema-processor
-          name: OCSF Processor for HTTP Activity [4002]
+          name: Apply OCSF schema for 4002
           enabled: true
           mappers:
             - type: schema-category-mapper
