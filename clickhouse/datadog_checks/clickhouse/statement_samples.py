@@ -576,7 +576,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
                 # Create and submit activity event
                 activity_event = self._create_activity_event(rows, active_connections)
-                self._log.info("DEBUG: Activity event has %s sessions", len(activity_event.get('clickhouse_activity', [])))
+                self._log.info(
+                    "DEBUG: Activity event has %s sessions", len(activity_event.get('clickhouse_activity', []))
+                )
                 self._check.database_monitoring_query_activity(
                     json.dumps(activity_event, default=default_json_event_encoding)
                 )
