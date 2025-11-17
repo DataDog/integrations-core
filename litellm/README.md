@@ -16,45 +16,45 @@ Key metrics such as request/response counts, latency, error rates, token usage, 
 
 ## Setup
 
-You can configure this integration either as a standalone integration or as an agent check:
+You can configure this integration either as a standalone integration via LLM Observability, or as an agent check:
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "LLM Observability" xxx -->
 Get end-to-end visibility into your LLM application using LiteLLM.
 
-See the [LiteLLM integration docs][12] for details on how to get started with LLM Observability for LiteLLM.
+When you [run your LLM application with the LLM Observability SDK][12], LiteLLM and other integrations are enabled by default, so no further configuration is required. See [Automatic Instrumentation for LLM Observability][13] for details on automatic tracing provided by the LiteLLM integration.
 <!-- xxz tab xxx -->
 
 <!-- xxx tab "Agent Check: LiteLLM" xxx -->
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
-#### Installation
+### Installation
 
 Starting from Agent 7.68.0, the LiteLLM check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
-#### Configuration
+### Configuration
 
 This integration collects metrics through the Prometheus endpoint exposed by the LiteLLM Proxy. This feature is only available for enterprise users of LiteLLM. By default, the metrics are exposed on the `/metrics` endpoint. If connecting locally, the default port is 4000. For more information, see the [LiteLLM Prometheus documentation][10].
 
 Note: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `litellm.auth.failed_requests.count` metric might only be exposed after an authentication failed request has occurred.
 
-##### Host-based
+#### Host-based
 
 1. Edit the `litellm.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your LiteLLM performance data. See the [sample litellm.d/conf.yaml][4] for all available configuration options. Example config:
 
-```yaml
-init_config:
+    ```yaml
+    init_config:
 
-instances:
-  - openmetrics_endpoint: http://localhost:4000/metrics
-    # If authorization is required to access the endpoint, use the settings below.
-    # headers:
-    #  Authorization: Bearer sk-1234
-```
+    instances:
+      - openmetrics_endpoint: http://localhost:4000/metrics
+        # If authorization is required to access the endpoint, use the settings below.
+        # headers:
+        #  Authorization: Bearer sk-1234
+    ```
 
 2. [Restart the Agent][5].
 
-##### Kubernetes-based
+#### Kubernetes-based
 
 For LiteLLM Proxy running on Kubernetes, configuration can be easily done via pod annotations. See the example below:
 
@@ -85,11 +85,11 @@ spec:
 
 For more information and alternative ways to configure the check in Kubernetes-based environments, see the [Kubernetes Integration Setup documentation][3].
 
-##### Logs
+#### Logs
 
 LiteLLM can send logs to Datadog through its callback system. You can configure various logging settings in LiteLLM to customize log formatting and delivery to Datadog for ingestion. For detailed configuration options and setup instructions, refer to the [LiteLLM Logging Documentation][11].
 
-#### Validation
+### Validation
 
 Run the Agent's status subcommand ([see documentation][6]) and look for `litellm` under the Checks section.
 
@@ -126,4 +126,5 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.litellm.ai/docs/proxy/prometheus
 [11]: https://docs.litellm.ai/docs/proxy/logging
-[12]: https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation?tab=python#litellm
+[12]: https://docs.datadoghq.com/llm_observability/quickstart/
+[13]: https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation?tab=python#litellm
