@@ -339,7 +339,7 @@ pipeline:
           schema:
             schemaType: ocsf
             version: 1.5.0
-            clasName: HTTP Activity
-            clasUid: 4002
+            className: HTTP Activity
+            classUid: 4002
             extensions: []
             profiles: []
