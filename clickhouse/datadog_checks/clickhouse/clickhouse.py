@@ -1,15 +1,26 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+from time import time
+
 import clickhouse_connect
+from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.db.utils import default_json_event_encoding
 
 from . import queries
+from .__about__ import __version__
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .utils import ErrorSanitizer
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 
 class ClickhouseCheck(AgentCheck):
@@ -35,6 +46,44 @@ class ClickhouseCheck(AgentCheck):
         # DBM-related properties
         self._resolved_hostname = None
         self._database_identifier = None
+        self._agent_hostname = None
+
+        # Cloud metadata configuration
+        self._cloud_metadata = {}
+
+        # AWS cloud metadata
+        aws_config = self.instance.get('aws', {})
+        if aws_config.get('instance_endpoint'):
+            self._cloud_metadata['aws'] = {'instance_endpoint': aws_config['instance_endpoint']}
+
+        # GCP cloud metadata
+        gcp_config = self.instance.get('gcp', {})
+        if gcp_config.get('project_id') and gcp_config.get('instance_id'):
+            self._cloud_metadata['gcp'] = {
+                'project_id': gcp_config['project_id'],
+                'instance_id': gcp_config['instance_id'],
+            }
+
+        # Azure cloud metadata
+        azure_config = self.instance.get('azure', {})
+        if azure_config.get('deployment_type') and azure_config.get('fully_qualified_domain_name'):
+            self._cloud_metadata['azure'] = {
+                'deployment_type': azure_config['deployment_type'],
+                'fully_qualified_domain_name': azure_config['fully_qualified_domain_name'],
+            }
+            if azure_config.get('database_name'):
+                self._cloud_metadata['azure']['database_name'] = azure_config['database_name']
+
+        # Database instance metadata collection interval
+        self._database_instance_collection_interval = float(
+            self.instance.get('database_instance_collection_interval', 300)
+        )
+
+        # _database_instance_emitted: limit the collection and transmission of the database instance metadata
+        self._database_instance_emitted = TTLCache(
+            maxsize=1,
+            ttl=self._database_instance_collection_interval,
+        )
 
         # Add global tags
         self._tags.append('server:{}'.format(self._server))
@@ -107,10 +156,52 @@ class ClickhouseCheck(AgentCheck):
         else:
             self.statement_samples = None
 
+    def _send_database_instance_metadata(self):
+        """Send database instance metadata to the metadata intake."""
+        if self.database_identifier not in self._database_instance_emitted:
+            # Get the version for the metadata
+            version = None
+            try:
+                version_result = list(self.execute_query_raw('SELECT version()'))[0][0]
+                version = version_result
+            except Exception as e:
+                self.log.debug("Unable to fetch version for metadata: %s", e)
+                version = "unknown"
+
+            event = {
+                "host": self.reported_hostname,
+                "port": self._port,
+                "database_instance": self.database_identifier,
+                "database_hostname": self.reported_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "ddagenthostname": self.agent_hostname,
+                "dbms": "clickhouse",
+                "kind": "database_instance",
+                "collection_interval": self._database_instance_collection_interval,
+                "dbms_version": version,
+                "integration_version": __version__,
+                "tags": [t for t in self._tags if not t.startswith('db:')],
+                "timestamp": time() * 1000,
+                "metadata": {
+                    "dbm": self._dbm_enabled,
+                    "connection_host": self._server,
+                },
+            }
+
+            # Add cloud metadata if available
+            if self._cloud_metadata:
+                event["cloud_metadata"] = self._cloud_metadata
+
+            self._database_instance_emitted[self.database_identifier] = event
+            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+
     def check(self, _):
         self.connect()
         self._query_manager.execute()
         self.collect_version()
+
+        # Send database instance metadata
+        self._send_database_instance_metadata()
 
         # Run query metrics collection if DBM is enabled (from system.query_log)
         if self.statement_metrics:
@@ -144,6 +235,13 @@ class ClickhouseCheck(AgentCheck):
         if self._resolved_hostname is None:
             self._resolved_hostname = self._server
         return self._resolved_hostname
+
+    @property
+    def agent_hostname(self):
+        """Get the agent hostname."""
+        if self._agent_hostname is None:
+            self._agent_hostname = datadog_agent.get_hostname()
+        return self._agent_hostname
 
     @property
     def database_identifier(self):
