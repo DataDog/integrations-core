@@ -318,7 +318,7 @@ pipeline:
             - type: schema-remapper
               name: Map `duration` to `ocsf.duration`
               sources:
-                - http.os.family
+                - duration
               target: ocsf.duration
               preserveSource: true
               overrideOnConflict: true
@@ -337,9 +337,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
           schema:
-            schema_type: ocsf
+            schemaType: ocsf
             version: 1.5.0
-            class_name: HTTP Activity
-            class_uid: 4002
+            clasName: HTTP Activity
+            clasUid: 4002
             extensions: []
             profiles: []
