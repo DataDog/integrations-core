@@ -1,0 +1,1 @@
+Fixed a bug where excluding "postgres" database when configuring autodiscovery would still fallback to "postgres" if `dbname` wasn't also configured
