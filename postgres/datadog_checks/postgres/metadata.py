@@ -70,7 +70,7 @@ PG_EXTENSION_LOADER_QUERY = {
     'plpgsql': "DO $$ BEGIN PERFORM 1; END$$;",
     'pgcrypto': "SELECT armor('foo');",
     'hstore': "SELECT 'a=>1'::hstore;",
-    'pg_stat_statements': "SELECT FROM pg_stat_statements LIMIT 1;",
+    'pg_stat_statements': "SELECT 1 FROM pg_stat_statements LIMIT 1;",
 }
 
 DATABASE_INFORMATION_QUERY = """
