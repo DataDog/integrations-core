@@ -244,7 +244,6 @@ jobs:
       env:
         # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
-        DD_PROFILING_STACK_V2_ENABLED: "false" # Workaround for ddtrace hangs with Python 3.13. #incident-43814
       run: |
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
@@ -355,7 +354,6 @@ jobs:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
         # TODO: SQL Server on Windows crashes when tracing is enabled with error File Windows fatal exception: access violation
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && '1' || '0' }}"
-        DD_PROFILING_STACK_V2_ENABLED: "false"  # Workaround for ddtrace hangs with Python 3.13. #incident-43814
       run: |
         # '-- all' is passed for e2e tests if pytest args are provided
         # This is done to avoid ddev from interpreting the arguments as environments
