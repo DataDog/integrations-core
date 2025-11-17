@@ -97,20 +97,32 @@ def load_dependency_data_from_requirements(req_file, dependencies, errors, check
 def load_base_check(check_name, dependencies, errors):
     project_data = load_project_file_cached(check_name)
     check_dependencies = project_data['project'].get('dependencies', [])
+    dependency_errors = []
+    found_base = False
+
     for check_dependency in check_dependencies:
         try:
             req = Requirement(check_dependency)
         except InvalidRequirement as e:
-            errors.append(f'File `{check_name}/pyproject.toml` has an invalid dependency: `{check_dependency}`\n{e}')
+            errors.append(f'There is an invalid dependency: `{check_dependency}`\n{e}')
             continue
 
         name = normalize_project_name(req.name)
         if name == 'datadog-checks-base':
             dependencies[check_name] = get_normalized_dependency(req)
-            break
-    else:
-        errors.append(f'File `{check_name}/pyproject.toml` is missing the base check dependency `datadog-checks-base`')
+            found_base = True
+        else:
+            dependency_errors.append(name)
 
+    if not found_base:
+        errors.append('Missing the required base check dependency `datadog-checks-base` in project.dependencies')
+    
+    if dependency_errors:
+        dependency_errors_str = ', '.join(f'`{error}`' for error in dependency_errors)
+        errors.append(
+            f'Found third-party dependencies in project.dependencies: {dependency_errors_str}. '
+            '\n     - Third-party dependencies belong in project.optional-dependencies'
+        )
 
 def load_base_check_legacy(req_file, dependencies, errors, check_name=None):
     for line in stream_file_lines(req_file):
@@ -120,14 +132,14 @@ def load_base_check_legacy(req_file, dependencies, errors, check_name=None):
                 dep = line.split(' = ')[1]
                 req = Requirement(dep.strip("'\""))
             except (IndexError, InvalidRequirement) as e:
-                errors.append(f'File `{req_file}` has an invalid base check dependency: `{line}`\n{e}')
+                errors.append(f'Has an invalid base check dependency: `{line}`\n{e}')
                 return
 
             dependencies[check_name] = get_normalized_dependency(req)
             return
 
     # no `CHECKS_BASE_REQ` found in setup.py file ..
-    errors.append(f'File `{req_file}` missing base check dependency `CHECKS_BASE_REQ`')
+    errors.append(f'Missing base check dependency `CHECKS_BASE_REQ`')
 
 
 def read_check_dependencies(check=None):
@@ -157,6 +169,7 @@ def read_check_base_dependencies(check=None):
     root = get_root()
     dependencies = {}
     errors = []
+    error_msg = []
 
     if isinstance(check, list):
         checks = sorted(check)
@@ -171,11 +184,19 @@ def read_check_base_dependencies(check=None):
 
         if has_project_file(check_name):
             load_base_check(check_name, dependencies, errors)
+            if errors:
+                file_name = f"{check_name}/pyproject.toml"
         else:
             req_file = os.path.join(root, check_name, 'setup.py')
             load_base_check_legacy(req_file, dependencies, errors, check_name)
+            if errors:
+                file_name = req_file
+    
+        if errors:
+            errors_str = '\n'.join(f'  - {error}' for error in errors)
+            error_msg = [f'\n{file_name} has the following errors:\n{errors_str}']
 
-    return dependencies, errors
+    return dependencies, error_msg
 
 
 def update_check_dependencies_at(path, dependencies):
