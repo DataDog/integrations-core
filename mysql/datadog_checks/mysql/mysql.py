@@ -130,7 +130,7 @@ class MySql(DatabaseCheck):
         self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
         self.add_core_tags()
-        self.cloud_metadata = self._config.cloud_metadata
+        self._cloud_metadata = self._config.cloud_metadata
 
         # Create a new connection on every check run
         self._conn = None
@@ -218,6 +218,10 @@ class MySql(DatabaseCheck):
             else:
                 self._resolved_hostname = self.resolve_db_host()
         return self._resolved_hostname
+    
+    @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
 
     @property
     def database_identifier(self):

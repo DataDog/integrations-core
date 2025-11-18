@@ -150,7 +150,7 @@ class SQLServer(DatabaseCheck):
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
         self._initialized_at = int(time.time() * 1000)
 
-        self.cloud_metadata = self._config.cloud_metadata
+        self._cloud_metadata = self._config.cloud_metadata
         self.tag_manager = TagManager(normalizer=lambda tag: self.normalize_tag(tag).lower())
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
 
@@ -330,6 +330,10 @@ class SQLServer(DatabaseCheck):
     def tags(self):
         return self.tag_manager.get_tags()
 
+    @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
+        
     @property
     def reported_hostname(self):
         # type: () -> str
