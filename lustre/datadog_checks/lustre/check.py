@@ -191,7 +191,7 @@ class LustreCheck(AgentCheck):
                     self.log.error('Could not parse device info: %s', device_line)
                     continue
                 devices.append(dict(zip(DEVICE_ATTR_NAMES, device_attr)))
-        if devices == []:
+        if not devices:
             self.log.error("No devices detected.")
             return
         self.devices = devices
