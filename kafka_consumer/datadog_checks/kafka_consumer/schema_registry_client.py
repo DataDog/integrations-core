@@ -8,6 +8,38 @@ class SchemaRegistryClient:
         self.config = config
         self.log = log
         self.http = http
+        self._configure_http_client()
+
+    def _configure_http_client(self):
+        """Configure the HTTP client with authentication and TLS settings."""
+        # Configure basic authentication if username/password provided
+        if self.config._schema_registry_username and self.config._schema_registry_password:
+            self.log.debug("Configuring Schema Registry with Basic Authentication")
+            self.http.options['auth'] = (
+                self.config._schema_registry_username,
+                self.config._schema_registry_password,
+            )
+        
+        # Configure TLS verification
+        if not self.config._schema_registry_tls_verify:
+            self.log.debug("Schema Registry TLS verification is disabled")
+            self.http.options['verify'] = False
+        elif self.config._schema_registry_tls_ca_cert:
+            self.log.debug("Using custom CA certificate for Schema Registry")
+            self.http.options['verify'] = self.config._schema_registry_tls_ca_cert
+        else:
+            self.http.options['verify'] = True
+        
+        # Configure client certificate authentication if provided
+        if self.config._schema_registry_tls_cert and self.config._schema_registry_tls_key:
+            self.log.debug("Configuring Schema Registry with client certificate authentication")
+            self.http.options['cert'] = (
+                self.config._schema_registry_tls_cert,
+                self.config._schema_registry_tls_key,
+            )
+        elif self.config._schema_registry_tls_cert:
+            # If only cert is provided without key
+            self.http.options['cert'] = self.config._schema_registry_tls_cert
 
     def get_subjects(self):
         """Fetch all subjects from the Schema Registry."""

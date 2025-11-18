@@ -85,6 +85,14 @@ class KafkaConfig:
 
         self._cluster_monitoring_enabled = is_affirmative(instance.get('enable_cluster_monitoring', False))
         self._collect_schema_registry = instance.get('schema_registry_url')
+        
+        # Schema Registry authentication
+        self._schema_registry_username = instance.get('schema_registry_username')
+        self._schema_registry_password = instance.get('schema_registry_password')
+        self._schema_registry_tls_verify = is_affirmative(instance.get('schema_registry_tls_verify', True))
+        self._schema_registry_tls_cert = instance.get('schema_registry_tls_cert')
+        self._schema_registry_tls_key = instance.get('schema_registry_tls_key')
+        self._schema_registry_tls_ca_cert = instance.get('schema_registry_tls_ca_cert')
 
     def validate_config(self):
         if not self._kafka_connect_str:
