@@ -2,6 +2,7 @@
     "manifest_version": "2.0.0",
     "app_uuid": "f8919d56-bbcb-4526-8561-3f3c271878b4",
     "app_id": "obsidian-security",
+    "owner": "saas-integrations",
     "display_on_public_website": false,
     "tile": {
         "overview": "README.md#Overview",
