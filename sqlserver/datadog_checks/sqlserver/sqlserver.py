@@ -53,7 +53,6 @@ from datadog_checks.sqlserver.database_metrics import (
 from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.health import SqlServerHealth
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
-from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
@@ -141,16 +140,16 @@ class SQLServer(DatabaseCheck):
         self._agent_hostname = None
         self._database_hostname = None
         self._database_identifier = None
-        self.connection = None
+        self._connection = None
         self.failed_connections = {}
         self.instance_metrics = []
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
 
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
+        self._cloud_metadata = self._config.cloud_metadata
         self._initialized_at = int(time.time() * 1000)
 
-        self.cloud_metadata = self._config.cloud_metadata
         self.tag_manager = TagManager(normalizer=lambda tag: self.normalize_tag(tag).lower())
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
 
@@ -189,9 +188,7 @@ class SQLServer(DatabaseCheck):
         self._query_manager = None
         self._database_metrics = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
-
-        self._schemas = Schemas(self, self._config)
-
+        
         self._submit_initialization_health_event()
 
     def initialize_xe_session_handlers(self):
@@ -206,7 +203,6 @@ class SQLServer(DatabaseCheck):
         self.procedure_metrics.cancel()
         self.activity.cancel()
         self.sql_metadata.cancel()
-        self._schemas.cancel()
         self.deadlocks.cancel()
 
         # Cancel all XE session handlers
@@ -348,6 +344,10 @@ class SQLServer(DatabaseCheck):
         return self._resolved_hostname
 
     @property
+    def tags(self):
+        return self.tag_manager.get_tags()
+
+    @property
     def database_identifier(self):
         # type: () -> str
         if self._database_identifier is None:
@@ -387,6 +387,17 @@ class SQLServer(DatabaseCheck):
         if self._database_hostname is None:
             self._database_hostname = self.resolve_db_host()
         return self._database_hostname
+
+    @property
+    def cloud_metadata(self):
+        return self._cloud_metadata
+
+    @property
+    def dbms_version(self):
+        return "{},{}".format(
+            self.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+        )
 
     def load_static_information(self):
         engine_edition_reloaded = False
@@ -485,9 +496,15 @@ class SQLServer(DatabaseCheck):
             self._agent_hostname = datadog_agent.get_hostname()
         return self._agent_hostname
 
+    @property
+    def connection(self):
+        if self._connection is None:
+            self.initialize_connection()
+        return self._connection
+
     def initialize_connection(self):
         # Initialize the connection object once
-        self.connection = Connection(
+        self._connection = Connection(
             init_config=self.init_config,
             instance_config=self.instance,
             service_check_handler=self.handle_service_check,
@@ -876,7 +893,6 @@ class SQLServer(DatabaseCheck):
                 self.procedure_metrics.run_job_loop(self.tag_manager.get_tags())
                 self.activity.run_job_loop(self.tag_manager.get_tags())
                 self.sql_metadata.run_job_loop(self.tag_manager.get_tags())
-                self._schemas.run_job_loop(self.tag_manager.get_tags())
                 self.deadlocks.run_job_loop(self.tag_manager.get_tags())
 
                 # Run XE session handlers
@@ -1111,10 +1127,7 @@ class SQLServer(DatabaseCheck):
                 "dbms": "sqlserver",
                 "kind": "database_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
-                "dbms_version": "{},{}".format(
-                    self.static_info_cache.get(STATIC_INFO_VERSION, ""),
-                    self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-                ),
+                "dbms_version": self.dbms_version,
                 "integration_version": __version__,
                 "tags": self.tag_manager.get_tags(),
                 "timestamp": time.time() * 1000,

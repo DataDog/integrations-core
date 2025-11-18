@@ -24,7 +24,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
 )
 from datadog_checks.sqlserver.metrics import SqlFractionMetric
-from datadog_checks.sqlserver.schemas import Schemas, SubmitData
+from datadog_checks.sqlserver.schemas_old import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
