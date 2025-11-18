@@ -1,0 +1,1 @@
+Fix device discovery for older versions of Lustre (<2.15.5)
