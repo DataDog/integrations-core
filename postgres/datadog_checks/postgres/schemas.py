@@ -186,11 +186,21 @@ FROM   pg_catalog.pg_database db
 """
 
 
+class PostgresSchemaCollectorConfig(SchemaCollectorConfig):
+    max_tables: int
+    exclude_databases: list[str]
+    include_databases: list[str]
+    exclude_schemas: list[str]
+    include_schemas: list[str]
+    exclude_tables: list[str]
+    include_tables: list[str]
+    max_columns: int
+
 class PostgresSchemaCollector(SchemaCollector):
     _check: PostgreSql
 
     def __init__(self, check: PostgreSql):
-        config = SchemaCollectorConfig()
+        config = PostgresSchemaCollectorConfig()
         config.collection_interval = check._config.collect_schemas.collection_interval
         config.max_tables = check._config.collect_schemas.max_tables
         config.exclude_databases = check._config.collect_schemas.exclude_databases
