@@ -57,5 +57,5 @@ Kandji does not include any events.
 
 Need help? Contact [Datadog support][2].
 
-[1]: https://www.kandji.io/login/
+[1]: https://www.kandji.io/
 [2]: https://docs.datadoghq.com/help/

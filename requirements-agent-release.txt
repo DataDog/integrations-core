@@ -32,7 +32,7 @@ datadog-ceph==4.2.1; sys_platform != 'win32'
 datadog-cert-manager==6.1.1
 datadog-checkpoint-harmony-endpoint==1.0.0
 datadog-checkpoint-quantum-firewall==1.1.0
-datadog-checks-base==37.23.0
+datadog-checks-base==37.24.0
 datadog-checks-dependency-provider==3.1.0
 datadog-checks-downloader==8.1.0
 datadog-cilium==6.1.1
@@ -52,7 +52,7 @@ datadog-couch==9.1.1
 datadog-couchbase==6.2.0
 datadog-crio==5.1.1
 datadog-datadog-cluster-agent==6.2.1
-datadog-datadog-csi-driver==1.1.0; sys_platform != 'win32'
+datadog-datadog-csi-driver==1.2.0; sys_platform != 'win32'
 datadog-dcgm==4.1.1
 datadog-delinea-privilege-manager==1.1.0
 datadog-delinea-secret-server==1.2.0

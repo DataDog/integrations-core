@@ -1,1 +1,0 @@
-Fix validate models error reporting which would not report an invalid schema in the config spec and just fail

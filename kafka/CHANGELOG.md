@@ -8,7 +8,7 @@
 
 * Add kafka_cluster_id tag to Kafka cluster metrics ([#21687](https://github.com/DataDog/integrations-core/pull/21687))
 
-## 4.1.0 / 2025-10-02
+## 4.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

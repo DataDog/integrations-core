@@ -246,6 +246,21 @@ class WindowsService(AgentCheck):
     }
     UNKNOWN_LITERAL = "unknown"
 
+    def __init__(self, name, init_config, instances):
+        super().__init__(name, init_config, instances)
+        self._service_pid_cache: dict[str, int] = {}
+
+    def _get_service_restarts(self, service_name: str, current_pid: int) -> int:
+        if current_pid == 0:
+            return 0
+        prev_pid = self._service_pid_cache.get(service_name, None)
+        restarts = 0
+        if prev_pid is not None and prev_pid != current_pid:
+            restarts = 1
+        # only store the last running pid for the service
+        self._service_pid_cache[service_name] = current_pid
+        return restarts
+
     def check(self, instance):
         services = instance.get('services', [])
         custom_tags = instance.get('tags', [])
@@ -318,6 +333,8 @@ class WindowsService(AgentCheck):
             if service_pid != 0:
                 service_uptime = _get_process_uptime_from_cache(service_pid, process_cache)
 
+            service_restarts = self._get_service_restarts(service_name, service_pid)
+
             status = self.STATE_TO_STATUS.get(state, self.UNKNOWN)
             state_string = self.STATE_TO_STRING.get(state, self.UNKNOWN_LITERAL)
 
@@ -343,6 +360,10 @@ class WindowsService(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
             self.log.debug('service state for %s %s', service_name, status)
             self.gauge('windows_service.uptime', service_uptime, tags=tags)
+            # Send 1 for windows_service.state so the user can sum by the windows_service_state tag
+            # to filter services by state. e.g. sum:windows_service.state{*} by windows_service_state
+            self.gauge('windows_service.state', 1, tags=tags)
+            self.count('windows_service.restarts', service_restarts, tags=tags)
 
         if 'ALL' not in services:
             for service in services_unseen:
@@ -365,3 +386,6 @@ class WindowsService(AgentCheck):
 
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
                 self.log.debug('service state for %s %s', service, status)
+                self.gauge('windows_service.uptime', 0, tags=tags)
+                self.gauge('windows_service.state', 1, tags=tags)
+                self.count('windows_service.restarts', 0, tags=tags)

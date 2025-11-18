@@ -13,7 +13,7 @@
 * Add allowed values list on kerberos_auth field ([#20879](https://github.com/DataDog/integrations-core/pull/20879))
 * Handle AttributeError when Qemu Agent is not available ([#21399](https://github.com/DataDog/integrations-core/pull/21399))
 
-## 2.1.0 / 2025-10-02
+## 2.1.0 / 2025-10-02 / Agent 7.72.0
 
 ***Added***:
 

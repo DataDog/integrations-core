@@ -1,1 +1,0 @@
-Improve error message when Kind or other dependencies are missing; fix read_text signature for Python 3.12 mypy compatibility
