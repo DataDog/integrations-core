@@ -1,123 +1,122 @@
-# scripts/build_backend.py
-print("--- CUSTOM BACKEND MODULE LOADED ---", flush=True)
+# datadog_hatch_wrapper/build.py
+from __future__ import annotations
 
-
-import tomllib
-from functools import cache
+import os
+import shutil
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Optional
 
-import pathspec
-from hatchling.builders.hooks.plugin.interface import BuildHookInterface
+
+# PEP 517 functions
+def get_requires_for_build_wheel(config_settings=None):
+    # We need hatchling (the real backend) + wheel tools for repacking + pathspec/tomllib
+    return ["hatchling", "wheel", "pathspec"]
 
 
-class RemoveTestsHook(BuildHookInterface):
+def prepare_metadata_for_build_wheel(metadata_directory, config_settings=None):
+    # delegate to hatchling if available
+    try:
+        from hatchling.build import prepare_metadata_for_build_wheel as _pmd
+    except Exception:
+        raise
+    return _pmd(metadata_directory, config_settings=config_settings)
+
+
+def build_wheel(
+    wheel_directory: str, config_settings: Optional[dict] = None, metadata_directory: Optional[str] = None
+) -> str:
     """
-    A custom build hook to remove test directories and files
-    from the list of files destined for the wheel.
+    Build the wheel using hatchling into a temporary directory, post-process it (remove tests),
+    then move the final wheel into `wheel_directory` and return the filename.
     """
 
-    def finalize(self, version: str, artifacts: list[str], directory: str):
-        """
-        Runs before the wheel is generated. Filters the 'artifacts' list in place.
-        """
-        files_to_keep = []
-        removed_count = 0
+    from wheel.cli.pack import pack
+    from wheel.cli.unpack import unpack
 
-        # Iterate over all files scheduled for inclusion
-        for artifact in artifacts:
-            if is_excluded_from_wheel(artifact):
-                print(f"Excluding file via finalize: {artifact}")
-                removed_count += 1
-                continue
+    # 1) use hatchling to build wheel(s) into a temp dir
+    tmpd = TemporaryDirectory()
+    tmp_path = Path(tmpd.name)
+    try:
+        # call hatchling's build_wheel; its signature matches PEP 517:
+        from hatchling.build import build_wheel as hatch_build_wheel
 
-            files_to_keep.append(artifact)
+        hatch_build_wheel(str(tmp_path), config_settings=config_settings)
+    except Exception:
+        tmpd.cleanup()
+        raise
 
-        # Replace the original artifacts list with the filtered list
-        artifacts[:] = files_to_keep
-        print(f"INFO: Removed {removed_count} files/directories using finalize.")
+    # 2) find the built wheel
+    wheels = list(tmp_path.glob("*.whl"))
+    if not wheels:
+        tmpd.cleanup()
+        raise RuntimeError("hatchling did not produce a wheel")
 
+    # If there is more than one, choose the one you expect (or iterate)
+    wheel_path = wheels[0]
 
-# def remove_test_files(wheel_path: Path) -> None:
-#     """
-#     Remove excluded files and directories from a built wheel.
-#     Prints the number of files removed.
-#     """
-#     tmp_wheel = wheel_path.with_suffix(".tmp.whl")
-#     removed_count = 0
+    # 3) strip tests using same logic as in your PR:
+    #    - check against files_to_remove.toml or a spec
+    def _load_excluded_spec():
+        import tomllib
 
-#     with (
-#         zipfile.ZipFile(wheel_path, "r") as zin,
-#         zipfile.ZipFile(tmp_wheel, "w", compression=zipfile.ZIP_DEFLATED) as zout,
-#     ):
-#         for info in zin.infolist():
-#             rel = info.filename
-#             if is_excluded_from_wheel(rel):
-#                 removed_count += 1
-#                 continue  # skip excluded file or directory
+        import pathspec
 
-#             data = zin.read(rel)
-#             zout.writestr(info, data)
+        cfg = Path(__file__).parent / "files_to_remove.toml"
+        with cfg.open("rb") as f:
+            data = tomllib.load(f)
+        patterns = data.get("excluded_paths", [])
+        return pathspec.PathSpec.from_lines("gitignore", patterns)
 
-#     shutil.move(tmp_wheel, wheel_path)
-#     print(f"Removed {removed_count} files from {wheel_path.name}")
+    def _is_excluded(member: str) -> bool:
+        spec = _load_excluded_spec()
+        rel = Path(member).as_posix()
+        return spec.match_file(rel) or spec.match_file(rel + "/")
 
+    # quick check: does wheel contain excluded entries?
+    from zipfile import ZipFile
 
-def is_excluded_from_wheel(path: str | Path) -> bool:
-    """
-    Return True if `path` (file or directory) should be excluded per files_to_remove.toml.
-    Matches:
-      - type annotation files: **/*.pyi, **/py.typed
-      - test directories listed with a trailing '/'
-    """
-    spec = _load_excluded_spec()
-    rel = Path(path).as_posix()
+    with ZipFile(wheel_path, "r") as zf:
+        if not any(_is_excluded(name) for name in zf.namelist()):
+            # nothing to do; just move the wheel to final dir
+            final = Path(wheel_directory) / wheel_path.name
+            shutil.move(str(wheel_path), str(final))
+            tmpd.cleanup()
+            return final.name
 
-    if spec.match_file(rel) or spec.match_file(rel + "/"):
-        return True
+    # Unpack, remove excluded files/directories, repack
+    tmp_unpack = TemporaryDirectory()
+    try:
+        unpack(wheel_path, dest=tmp_unpack)
+        unpacked_dir = next(Path(tmp_unpack.name).iterdir())
 
-    return False
+        # walk bottom-up and remove excluded files/folders
+        for root, dirs, files in os.walk(unpacked_dir, topdown=False):
+            rootp = Path(root)
+            for d in list(dirs):
+                full_dir = rootp / d
+                rel = full_dir.relative_to(unpacked_dir).as_posix()
+                if _is_excluded(rel):
+                    shutil.rmtree(full_dir)
+                    dirs.remove(d)
+            for f in files:
+                rel = (rootp / f).relative_to(unpacked_dir).as_posix()
+                if _is_excluded(rel):
+                    (rootp / f).unlink()
 
+        # repack into wheel_directory (pack writes a new wheel file)
+        pack(unpacked_dir, dest_dir=wheel_directory)
 
-@cache
-def _load_excluded_spec() -> pathspec.PathSpec:
-    """
-    Load excluded paths from files_to_remove.toml and compile them
-    with .gitignore-style semantics.
-    """
-    config_path = Path(__file__).parent / "files_to_remove.toml"
-    with open(config_path, "rb") as f:
-        config = tomllib.load(f)
-
-    patterns = config.get("excluded_paths", [])
-    return pathspec.PathSpec.from_lines("gitignore", patterns)
-
-
-# def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
-#     """Intercept wheel building to strip test files."""
-#     wheel_file = _orig.build_wheel(wheel_directory, config_settings, metadata_directory)
-
-#     # Post-process the wheel to remove tests
-#     wheel_path = Path(wheel_directory) / wheel_file
-#     remove_test_files(wheel_path)
-
-#     return wheel_file
-
-
-# # Proxy all other PEP 517 hooks
-# # prepare_metadata_for_build_wheel = _orig.prepare_metadata_for_build_wheel
-# # build_sdist = _orig.build_sdist
-# # (better do by iterating over _orig methods instead)
-# print("-> Inspecting _orig methods")
-# for name, func in inspect.getmembers(_orig, inspect.isfunction):
-#     # Only copy methods if they haven't been defined in the current module
-#     # (i.e., don't overwrite your custom build_wheel)
-#     print("Name: ", name, "Func: ", func, "Is in globals: ", name in globals())
-#     if name not in globals():
-#         globals()[name] = func
-#         print("Added to globals: ", name)
-
-# # for name in dir(_orig):
-# #     # Check if the attribute name is a PEP 517 hook and not one we defined/overrode
-# #     if name.startswith('build_') or 'requires_for' in name:
-# #         if name not in globals():
-# #             setattr(sys.modules[__name__], name, getattr(_orig, name))
+        # pack puts a new wheel file in wheel_directory; pick the freshest one
+        # and return its filename
+        final_wheels = sorted(Path(wheel_directory).glob("*.whl"), key=lambda p: p.stat().st_mtime, reverse=True)
+        if not final_wheels:
+            raise RuntimeError("Failed to repack wheel")
+        final = final_wheels[0]
+        return final.name
+    finally:
+        tmpd.cleanup()
+        try:
+            tmp_unpack and shutil.rmtree(tmp_unpack.name)
+        except Exception:
+            pass

@@ -117,11 +117,7 @@ version = "0.0.0"
 dev-mode-dirs = ["."]
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["hatchling", "scripts"]   
+build-backend = "scripts.build_backend"
 
-[tool.hatch.build.targets.wheel]
-exclude = [
-  "**/ddtrace/appsec/_iast/_taint_tracking/_vendor/pybind11/pybind11/py.typed",
-  "**/ddtrace/py.typed"
-]
+
