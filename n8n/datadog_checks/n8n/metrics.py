@@ -52,7 +52,7 @@ METRIC_MAP = {
     'process_max_fds': 'process.max.fds',
     'process_open_fds': 'process.open.fds',
     'process_resident_memory_bytes': 'process.resident.memory.bytes',
-    'process_start_time_seconds':  {
+    'process_start_time_seconds': {
         'name': 'process.uptime.seconds',
         'type': 'time_elapsed',
     },
