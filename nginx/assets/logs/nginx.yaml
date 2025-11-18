@@ -231,6 +231,24 @@ pipeline:
               targets:
                 name: ocsf.severity_id
                 id: ocsf.severity_id
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@http.status_code:[200 TO 399]"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@http.status_code:[400 TO 599]"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "*"
+                  name: Unknown
+                  id: 99
+              targets:
+                name: ocsf.status_id
+                id: ocsf.status_id
             - type: schema-remapper
               name: Map `host` to `ocsf.dst_endpoint.ip`
               sources:
@@ -309,10 +327,10 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `http.status_category` to `ocsf.status`
+              name: Map `http.status_code` to `ocsf.status_code`
               sources:
                 - http.status_category
-              target: ocsf.status
+              target: ocsf.status_code
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
