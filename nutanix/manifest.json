@@ -40,9 +40,8 @@
         "metadata_path": "metadata.csv"
       },
       "process_signatures": [
-        "ntnx_privileged_cmd",
-        "/home/nutanix/bin/",
-        "/home/nutanix/bin/prism_monitor",
+        "minerva_cvm_gateway",
+        "prism_monitor",
       ]
     },
     "dashboards": {
