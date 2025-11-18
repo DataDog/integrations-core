@@ -7,8 +7,8 @@ from typing import ChainMap
 
 import mock
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
+
 from datadog_checks.lustre import LustreCheck
 from datadog_checks.lustre.constants import (
     CURATED_PARAMS,
@@ -653,3 +653,26 @@ def test_sanitize_command(bin_path, should_pass):
         # Should raise ValueError
         with pytest.raises(ValueError):
             _sanitize_command(bin_path)
+
+
+@pytest.mark.parametrize(
+    ['yaml_fixture', 'non_yaml_fixture', "device_num"],
+    [
+        pytest.param('', '', 0, id='no devices'),
+        pytest.param('client_dl_yaml.txt', '', 5, id='devices from yaml'),
+        pytest.param('', 'client_dl.txt', 5, id='devices without yaml'),
+    ],
+)
+def test_device_discovery(mock_lustre_commands, yaml_fixture, non_yaml_fixture, device_num):
+    """Devices should be discovered regardless of Lustre version"""
+    mapping = {
+        'lctl get_param -ny version': 'all_version.txt',
+        'lctl dl -y': yaml_fixture,
+        'lctl dl': non_yaml_fixture,
+        'lfs changelog': 'test_changelog',
+    }
+
+    with mock_lustre_commands(mapping):
+        check = LustreCheck('lustre', {}, [{}])
+
+    assert len(check.devices) == device_num

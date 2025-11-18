@@ -1,0 +1,5 @@
+  0 UP mgc MGC10.0.0.119@tcp 64453093-9977-37b4-7ee5-25e1992aee99 6
+  1 UP lov lustre-clilov-ffff94496d311000 a2529230-0de8-fcd0-3821-6f3ca9354eb5 5
+  2 UP lmv lustre-clilmv-ffff94496d311000 a2529230-0de8-fcd0-3821-6f3ca9354eb5 6
+  3 UP mdc lustre-MDT0000-mdc-ffff94496d311000 a2529230-0de8-fcd0-3821-6f3ca9354eb5 6
+  4 UP osc lustre-OST0001-osc-ffff94496d311000 a2529230-0de8-fcd0-3821-6f3ca9354eb5 6
