@@ -85,7 +85,7 @@ class KafkaConfig:
 
         self._cluster_monitoring_enabled = is_affirmative(instance.get('enable_cluster_monitoring', False))
         self._collect_schema_registry = instance.get('schema_registry_url')
-        
+
         # Schema Registry authentication
         self._schema_registry_username = instance.get('schema_registry_username')
         self._schema_registry_password = instance.get('schema_registry_password')

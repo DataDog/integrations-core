@@ -19,7 +19,7 @@ class SchemaRegistryClient:
                 self.config._schema_registry_username,
                 self.config._schema_registry_password,
             )
-        
+
         # Configure TLS verification
         if not self.config._schema_registry_tls_verify:
             self.log.debug("Schema Registry TLS verification is disabled")
@@ -29,7 +29,7 @@ class SchemaRegistryClient:
             self.http.options['verify'] = self.config._schema_registry_tls_ca_cert
         else:
             self.http.options['verify'] = True
-        
+
         # Configure client certificate authentication if provided
         if self.config._schema_registry_tls_cert and self.config._schema_registry_tls_key:
             self.log.debug("Configuring Schema Registry with client certificate authentication")
