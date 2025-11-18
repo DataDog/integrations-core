@@ -57,9 +57,9 @@
       "auto_install": true
     },
     "dashboards": {
-      "vsphere-overview": "assets/dashboards/vsphere_overview.json",
       "VMware vSphere TKG - Overview": "assets/dashboards/vmware_vsphere_tkg_-_overview.json",
-      "VMware vSphere - Property Metrics": "assets/dashboards/vmware_vsphere-_property_metrics.json"
+      "VMware vSphere - Property Metrics": "assets/dashboards/vmware_vsphere_-_property_metrics.json",
+      "VMware vSphere - Overview": "assets/dashboards/vmware_vsphere_-_overview.json"
     }
   }
 }
