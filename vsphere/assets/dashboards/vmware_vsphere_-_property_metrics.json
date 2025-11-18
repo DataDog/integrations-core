@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "View important configuration properties about your vSphere resources, such as VM network information, host connection state, and cluster DRS status.\n\nTo utilize this dashboard, enable the parameter `collect_property_metrics` in your datadog vSphere [configuration](https://github.com/DataDog/integrations-core/blob/7.48.x/vsphere/datadog_checks/vsphere/data/conf.yaml.example#L291). (cloned)",
+    "description": "View important configuration properties about your vSphere resources, such as VM network information, host connection state, and cluster DRS status.\n\nTo utilize this dashboard, enable the parameter `collect_property_metrics` in your datadog vSphere [configuration](https://github.com/DataDog/integrations-core/blob/7.48.x/vsphere/datadog_checks/vsphere/data/conf.yaml.example#L291).",
     "layout_type": "ordered",
     "template_variables": [
         {
